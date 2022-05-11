@@ -9,7 +9,7 @@ export const PageStyle = styled.div`
         font-weight: 900;
         font-size: 5em;
         margin: 0;
-        color: white;
+        color: #eee;
         line-height: 1.2;
         letter-spacing: -2px;
     }
@@ -23,7 +23,7 @@ export const PageStyle = styled.div`
 
     & > a {
         margin: 0;
-        color: white;
+        color: #eee;
         text-decoration: none;
     }
 `

@@ -59,7 +59,6 @@ function Intro() {
             <Sketches />
             <a
                 href="https://github.com/isaac-mason/sketches"
-                style={{ color: 'white' }}
             >
                 Github
             </a>
@@ -82,7 +81,7 @@ function Sketches() {
                                     backgroundColor:
                                         sketchName === routeName
                                             ? 'salmon'
-                                            : 'white',
+                                            : '#eee',
                                 }}
                             />
                         </TooltipTrigger>
