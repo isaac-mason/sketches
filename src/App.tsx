@@ -34,7 +34,7 @@ const Page = styled(PageStyle)`
     }
 `
 
-const defaultName = 'Lesson01'
+const defaultName = 'JourneyLesson01'
 const visibleComponents = sketches
 const DefaultComponent = visibleComponents[defaultName].Component
 
