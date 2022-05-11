@@ -7,16 +7,16 @@ export const PageStyle = styled.div`
 
     & > h1 {
         font-weight: 900;
-        font-size: 8em;
+        font-size: 5em;
         margin: 0;
         color: white;
-        line-height: 0.59em;
+        line-height: 1.2;
         letter-spacing: -2px;
     }
 
     @media only screen and (max-width: 1000px) {
         & > h1 {
-            font-size: 5em;
+            font-size: 3em;
             letter-spacing: -1px;
         }
     }
