@@ -59,7 +59,7 @@ export const GlobalStyle = createGlobalStyle`
     overscroll-behavior-y: none;
     font-family: 'Poppins', sans-serif;
     color: black;
-    background: #333;
+    background: #222;
   }
 `
 

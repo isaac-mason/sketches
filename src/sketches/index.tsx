@@ -1,8 +1,8 @@
 import { lazy } from 'react'
 
 export const sketchList = [
-    'JourneyLesson01',
-    'JourneyLesson02',
+    'Home',
+    'JourneyLesson03',
 ] as const
 
 export type Sketch = typeof sketchList[number]
