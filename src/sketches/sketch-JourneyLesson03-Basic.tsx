@@ -12,10 +12,10 @@ const App = () => {
 
 export default () => (
     <>
-        <h1>Journey Lesson 03</h1>
+        <h1>03 - Basic</h1>
         <Canvas camera={{ position: [3, 3, 3] }}>
             <App />
-            <OrbitControls autoRotate />
+            <OrbitControls />
         </Canvas>
     </>
 )

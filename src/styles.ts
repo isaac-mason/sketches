@@ -78,6 +78,7 @@ export const TooltipContent = styled.div`
     visibility: hidden;
     color: transparent;
     background-color: transparent;
+    white-space: nowrap;
 `
 
 export const TooltipContainer = styled.div`

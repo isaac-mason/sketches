@@ -1,0 +1,74 @@
+import { Environment, OrbitControls } from '@react-three/drei'
+import { Canvas } from '@react-three/fiber'
+import { Box, Flex } from '@react-three/flex'
+
+const padding = 1
+const color = '#ff8888'
+
+const Item = ({
+    color,
+    children,
+}: {
+    color: string
+    children: JSX.Element
+}) => (
+    <Box padding={padding} centerAnchor>
+        <mesh>
+            <meshStandardMaterial color={color} wireframe />
+            {children}
+        </mesh>
+    </Box>
+)
+
+const App = () => {
+    return (
+        <>
+            <Environment preset="sunset" />
+            <Flex
+                width={6}
+                height={6}
+                centerAnchor
+                flexDirection="row"
+                flexWrap="wrap"
+            >
+                <Item color={color}>
+                    <sphereBufferGeometry args={[0.6]} />
+                </Item>
+                <Item color={color}>
+                    <boxBufferGeometry args={[1, 1, 1]} />
+                </Item>
+                <Item color={color}>
+                    <coneGeometry args={[0.7, 1, 5, 5]} />
+                </Item>
+                <Item color={color}>
+                    <torusKnotBufferGeometry args={[0.4, 0.1]} />
+                </Item>
+                <Item color={color}>
+                    <ringGeometry args={[0.3, 0.7]} />
+                </Item>
+                <Item color={color}>
+                    <dodecahedronBufferGeometry args={[0.7]} />
+                </Item>
+                <Item color={color}>
+                    <octahedronBufferGeometry args={[0.7]} />
+                </Item>
+                <Item color={color}>
+                    <tetrahedronBufferGeometry args={[0.7]} />
+                </Item>
+                <Item color={color}>
+                    <icosahedronBufferGeometry args={[0.7]} />
+                </Item>
+            </Flex>
+        </>
+    )
+}
+
+export default () => (
+    <>
+        <h1>09 - Geometries</h1>
+        <Canvas camera={{ position: [0, 0, 10], fov: 60 }}>
+            <App />
+            <OrbitControls />
+        </Canvas>
+    </>
+)

@@ -8,7 +8,7 @@ import {
 } from 'react-router-dom'
 import styled from 'styled-components'
 
-import { isSketch, sketches, sketchList } from './sketches'
+import { isSketchRoute, sketches, sketchList } from './sketches'
 import {
     GlobalStyle,
     PageStyle,
@@ -42,7 +42,7 @@ const RoutedComponent = () => {
     const {
         params: { name: routeName },
     } = useMatch('/sketch/:name') || { params: { name: defaultName } }
-    const sketchName = isSketch(routeName) ? routeName : defaultName
+    const sketchName = isSketchRoute(routeName) ? routeName : defaultName
     const { Component } = visibleComponents[sketchName]
     return <Component />
 }
@@ -72,20 +72,20 @@ function Sketches() {
     } = useMatch('/sketch/:name') || { params: { name: defaultName } }
     return (
         <SketchPanel>
-            {sketchList.map((sketchName, key) => (
-                <Link key={key} to={`/sketch/${sketchName}`} title={sketchName}>
+            {sketchList.map((sketch, key) => (
+                <Link key={sketch.route} to={`/sketch/${sketch.route}`} title={sketch.title}>
                     <TooltipContainer>
                         <TooltipTrigger>
                             <Spot
                                 style={{
                                     backgroundColor:
-                                        sketchName === routeName
+                                        sketch.route === routeName
                                             ? 'salmon'
                                             : '#eee',
                                 }}
                             />
                         </TooltipTrigger>
-                        <TooltipContent>{sketchName}</TooltipContent>
+                        <TooltipContent>{sketch.title}</TooltipContent>
                     </TooltipContainer>
                 </Link>
             ))}
