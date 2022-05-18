@@ -7,6 +7,7 @@ export const sketchList = [
     { title: 'Journey Lesson 6 - Animations', route: 'JourneyLesson06-Animations' },
     { title: 'Journey Lesson 7 - Cameras', route: 'JourneyLesson07-Cameras' },
     { title: 'Journey Lesson 9 - Geometries', route: 'JourneyLesson09-Geometries' },
+    { title: 'Journey Lesson 11 - Textures', route: 'JourneyLesson11-Textures' },
 ] as const
 
 export type Sketch = typeof sketchList[number]
@@ -15,7 +16,7 @@ export const isSketchRoute = (v?: string): v is Sketch['route'] => sketchList.so
 
 export const sketches = sketchList.reduce((o, sketch) => {
     o[sketch.route] = {
-        Component: lazy(() => import(`./sketch-${sketch.route}.tsx`)),
+        Component: lazy(() => import(`./sketch-${sketch.route}/index.tsx`)),
     }
     return o
 }, {} as Record<Sketch['route'], { Component: React.LazyExoticComponent<React.ComponentType> }>)
