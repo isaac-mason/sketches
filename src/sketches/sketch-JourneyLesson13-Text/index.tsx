@@ -1,10 +1,4 @@
-import {
-    Text,
-    OrbitControls,
-    Float,
-    CameraShake,
-    Billboard,
-} from '@react-three/drei'
+import { Text, Float, Billboard } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
 import NotoEmojiRegular from './NotoEmoji-Regular.ttf'
 
@@ -12,7 +6,7 @@ const Balloons = () => {
     return (
         <>
             {Array.from({ length: 10 }).map((_, idx) => (
-                <Float floatIntensity={5} rotationIntensity={2}>
+                <Float floatIntensity={1} rotationIntensity={2}>
                     <Text
                         key={idx}
                         fontSize={2}
@@ -33,13 +27,13 @@ const Tadas = () => {
     return (
         <>
             {Array.from({ length: 10 }).map((_, idx) => (
-                <Float floatIntensity={5} rotationIntensity={2}>
+                <Float floatIntensity={1} rotationIntensity={2}>
                     <Text
                         key={idx}
                         fontSize={2}
                         font={NotoEmojiRegular}
                         scale={0.5}
-                        position={[-5, 0, -idx * 2]}
+                        position={[-2.5, 0, -idx * 2]}
                     >
                         🎉
                         <meshNormalMaterial />
@@ -54,13 +48,13 @@ const Confettis = () => {
     return (
         <>
             {Array.from({ length: 10 }).map((_, idx) => (
-                <Float floatIntensity={5} rotationIntensity={2}>
+                <Float floatIntensity={1} rotationIntensity={2}>
                     <Text
                         key={idx}
                         fontSize={2}
                         font={NotoEmojiRegular}
                         scale={0.5}
-                        position={[5, 0, -idx * 2]}
+                        position={[2.5, 0, -idx * 2]}
                     >
                         🎊
                         <meshNormalMaterial />
