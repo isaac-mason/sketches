@@ -1,13 +1,8 @@
 import { OrbitControls, useTexture } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
-import { useEffect } from 'react'
+import * as THREE from 'three'
 import doorImage from './textures/door/color.jpg'
 import minecraftImage from './textures/minecraft.png'
-
-import * as THREE from 'three'
-
-// todo - https://threejs-journey.com/lessons/11#
-// up to ~24m
 
 const App = () => {
     const doorTexture = useTexture(doorImage)
