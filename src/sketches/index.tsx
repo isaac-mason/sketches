@@ -9,6 +9,7 @@ export const sketchList = [
     { title: 'Journey Lesson 9 - Geometries', route: 'JourneyLesson09-Geometries' },
     { title: 'Journey Lesson 11 - Textures', route: 'JourneyLesson11-Textures' },
     { title: 'Journey Lesson 12 - Materials', route: 'JourneyLesson12-Materials' },
+    { title: 'Journey Lesson 13 - Text', route: 'JourneyLesson13-Text' },
 ] as const
 
 export type Sketch = typeof sketchList[number]
