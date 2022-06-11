@@ -6,9 +6,8 @@ const Balloons = () => {
     return (
         <>
             {Array.from({ length: 10 }).map((_, idx) => (
-                <Float floatIntensity={1} rotationIntensity={2}>
+                <Float key={idx} floatIntensity={1} rotationIntensity={2}>
                     <Text
-                        key={idx}
                         fontSize={2}
                         font={NotoEmojiRegular}
                         scale={0.5}
@@ -27,9 +26,8 @@ const Tadas = () => {
     return (
         <>
             {Array.from({ length: 10 }).map((_, idx) => (
-                <Float floatIntensity={1} rotationIntensity={2}>
+                <Float key={idx} floatIntensity={1} rotationIntensity={2}>
                     <Text
-                        key={idx}
                         fontSize={2}
                         font={NotoEmojiRegular}
                         scale={0.5}
@@ -48,9 +46,8 @@ const Confettis = () => {
     return (
         <>
             {Array.from({ length: 10 }).map((_, idx) => (
-                <Float floatIntensity={1} rotationIntensity={2}>
+                <Float key={idx} floatIntensity={1} rotationIntensity={2}>
                     <Text
-                        key={idx}
                         fontSize={2}
                         font={NotoEmojiRegular}
                         scale={0.5}

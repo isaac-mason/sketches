@@ -23,7 +23,12 @@ const Item = ({
 const App = () => {
     return (
         <>
-            <Environment preset="sunset" />
+            <directionalLight
+                    intensity={0.5}
+                    position={[-3, 0, 5]}
+                    lookAt={() => [0, 0, 0]}
+                />
+                <ambientLight intensity={0.5} />
             <Flex
                 width={6}
                 height={6}
