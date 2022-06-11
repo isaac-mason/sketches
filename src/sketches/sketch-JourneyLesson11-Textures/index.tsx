@@ -17,11 +17,11 @@ const App = () => {
 
     return (
         <>
-            <mesh position={[-3, 0, 0]}>
+            <mesh position={[-2.5, 0, 0]}>
                 <boxBufferGeometry args={[3, 3, 3]} />
                 <meshBasicMaterial map={doorTexture} />
             </mesh>
-            <mesh position={[2, 0, 0]}>
+            <mesh position={[2.5, 0, 0]}>
                 <boxBufferGeometry args={[3, 3, 3]} />
                 <meshBasicMaterial map={minecraftTexture} />
             </mesh>
