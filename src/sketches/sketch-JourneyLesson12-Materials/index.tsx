@@ -128,7 +128,7 @@ const Door = (props: { position: Vector3 }) => {
         material.aoMapIntensity = 2
 
         material.displacementMap = doorHeight
-        material.displacementScale = 0.05
+        material.displacementScale = 0.2
 
         material.normalMap = doorNormal
 
