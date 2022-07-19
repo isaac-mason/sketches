@@ -3,21 +3,25 @@ import { Canvas } from '@react-three/fiber'
 import { useRef } from 'react'
 import * as THREE from 'three'
 
+const floatProps = {
+    floatIntensity: 2
+}
+
 const Shapes = () => (
     <>
-        <Float>
+        <Float {...floatProps}>
             <mesh position={[-2, 2, 0]} castShadow receiveShadow>
                 <boxBufferGeometry args={[1, 1, 1]} />
                 <meshStandardMaterial />
             </mesh>
         </Float>
-        <Float>
+        <Float {...floatProps}>
             <mesh position={[0, 2, 0]} castShadow receiveShadow>
                 <sphereBufferGeometry args={[0.7]} />
                 <meshStandardMaterial />
             </mesh>
         </Float>
-        <Float>
+        <Float {...floatProps}>
             <mesh position={[2, 2, 0]} castShadow receiveShadow>
                 <torusKnotBufferGeometry args={[0.5, 0.2, 64, 64]} />
                 <meshStandardMaterial />
