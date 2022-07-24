@@ -1,8 +1,8 @@
-import { PresentationControls, useTexture } from '@react-three/drei'
+import { OrbitControls, useHelper, useTexture } from '@react-three/drei'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
-import { Fog, PointLight } from 'three'
+import { Fog, PointLight, PointLightHelper, Vector2 } from 'three'
 import bricksAmbientOcclusionImage from './textures/bricks/ambientOcclusion.jpg'
 import bricksColorImage from './textures/bricks/color.jpg'
 import bricksNormalImage from './textures/bricks/normal.jpg'
@@ -22,6 +22,9 @@ import grassRoughnessImage from './textures/grass/roughness.jpg'
 const BACKGROUND_COLOR = 0x262837
 
 const House = (props: JSX.IntrinsicElements['group']) => {
+    const lightRef = useRef()
+    useHelper(lightRef, PointLightHelper, 0.1)
+
     const bricksColor = useTexture(bricksColorImage)
     const bricksAmbientOcclusion = useTexture(bricksAmbientOcclusionImage)
     const bricksNormal = useTexture(bricksNormalImage)
@@ -43,15 +46,19 @@ const House = (props: JSX.IntrinsicElements['group']) => {
                     <boxBufferGeometry args={[4, 2.5, 4]}>
                         <bufferAttribute attach="uv2" />
                     </boxBufferGeometry>
-                    <meshStandardMaterial /* color={0xac8e82} */
+                    <meshStandardMaterial
                         map={bricksColor}
                         aoMap={bricksAmbientOcclusion}
                         normalMap={bricksNormal}
+                        normalMap-encoding={THREE.LinearEncoding}
+                        normalScale={new Vector2(0.01, 0.01)}
                         roughnessMap={bricksRoughness}
                     />
                 </mesh>
                 {/* Roof */}
                 <mesh
+                    castShadow
+                    receiveShadow
                     position={[0, 2.5 + 0.5, 0]}
                     rotation={[0, Math.PI / 4, 0]}
                 >
@@ -78,10 +85,11 @@ const House = (props: JSX.IntrinsicElements['group']) => {
                 </mesh>
                 {/* Door light */}
                 <pointLight
-                    position={[0, 2.2, 2.7]}
+                    ref={lightRef}
+                    position={[0, 2, 2.3]}
                     color={0xff7d67}
                     intensity={1}
-                    distance={7}
+                    distance={12}
                     castShadow
                     shadow-mapSize-width={256}
                     shadow-mapSize-height={256}
@@ -95,7 +103,7 @@ const House = (props: JSX.IntrinsicElements['group']) => {
 const Bush = (props: JSX.IntrinsicElements['group']) => {
     return (
         <group {...props}>
-            <mesh castShadow>
+            <mesh receiveShadow castShadow>
                 <sphereBufferGeometry args={[1, 16, 16]} />
                 <meshStandardMaterial color={0x89c854} />
             </mesh>
@@ -116,6 +124,7 @@ const Grave = (props: JSX.IntrinsicElements['group']) => {
 
 const Ghost = (props: { color: string; offset: number }) => {
     const ref = useRef<PointLight>(null!)
+    useHelper(ref, PointLightHelper)
 
     useFrame(({ clock: { elapsedTime } }) => {
         const ghostAngle = elapsedTime * 0.5
@@ -125,7 +134,7 @@ const Ghost = (props: { color: string; offset: number }) => {
         ref.current.position.z =
             Math.sin(ghostAngle + props.offset) *
             (7 + Math.sin(elapsedTime * 2) * 2)
-        ref.current.position.y = Math.sin(ghostAngle * 3) + 1
+        ref.current.position.y = Math.sin(ghostAngle * 2) - 0.5
     })
 
     return (
@@ -137,7 +146,7 @@ const Ghost = (props: { color: string; offset: number }) => {
             castShadow
             shadow-mapSize-width={256}
             shadow-mapSize-height={256}
-            shadow-camera-far={7}
+            shadow-camera-far={4}
         />
     )
 }
@@ -148,33 +157,29 @@ const Grass = () => {
     const normal = useTexture(grassNormalImage)
     const roughness = useTexture(grassRoughnessImage)
 
-    color.repeat.set(12, 12)
-    ambientOcclusion.repeat.set(12, 12)
-    normal.repeat.set(12, 12)
-    roughness.repeat.set(12, 12)
-
-    color.wrapS = THREE.RepeatWrapping
-    color.wrapT = THREE.RepeatWrapping
-
-    ambientOcclusion.wrapS = THREE.RepeatWrapping
-    ambientOcclusion.wrapT = THREE.RepeatWrapping
-
-    normal.wrapS = THREE.RepeatWrapping
-    normal.wrapT = THREE.RepeatWrapping
-
-    roughness.wrapS = THREE.RepeatWrapping
-    roughness.wrapT = THREE.RepeatWrapping
-
     return (
         <mesh rotation={[-Math.PI * 0.5, 0, 0]} receiveShadow>
             <planeBufferGeometry args={[50, 50]}>
                 <bufferAttribute attach="uv2" />
             </planeBufferGeometry>
             <meshStandardMaterial
-                aoMap={ambientOcclusion}
                 map={color}
+                map-repeat={[20, 20]}
+                map-wrapS={THREE.RepeatWrapping}
+                map-wrapT={THREE.RepeatWrapping}
+                aoMap={ambientOcclusion}
+                aoMap-repeat={[20, 20]}
+                aoMap-wrapS={THREE.RepeatWrapping}
+                aoMap-wrapT={THREE.RepeatWrapping}
                 normalMap={normal}
+                normalMap-repeat={[20, 20]}
+                normalMap-wrapS={THREE.RepeatWrapping}
+                normalMap-wrapT={THREE.RepeatWrapping}
+                normalMap-encoding={THREE.LinearEncoding}
                 roughnessMap={roughness}
+                roughnessMap-repeat={[20, 20]}
+                roughnessMap-wrapS={THREE.RepeatWrapping}
+                roughnessMap-wrapT={THREE.RepeatWrapping}
             />
         </mesh>
     )
@@ -183,13 +188,7 @@ const Grass = () => {
 const Lights = () => {
     return (
         <>
-            <ambientLight color={0xb5b5ff} intensity={0.12} />
-            <directionalLight
-                color={0xb5b5ff}
-                intensity={0.12}
-                position={[5, 2, 5]}
-                lookAt={() => [0, 0, 0]}
-            />
+            <ambientLight color={0xb5b5ff} intensity={0.2} />
         </>
     )
 }
@@ -257,9 +256,8 @@ export default () => (
             camera={{ position: [6, 6, 12], fov: 50 }}
             shadows={{ type: THREE.PCFSoftShadowMap }}
         >
-            <PresentationControls snap>
-                <App />
-            </PresentationControls>
+            <OrbitControls />
+            <App />
         </Canvas>
     </>
 )
