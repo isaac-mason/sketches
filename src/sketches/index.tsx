@@ -15,6 +15,7 @@ export const sketchList = [
     { title: 'Journey Lesson 17 - Haunted House', route: 'JourneyLesson17-HauntedHouse' },
     { title: 'Journey Lesson 18.1 - Particles', route: 'JourneyLesson18-1-Particles' },
     { title: 'Journey Lesson 18.2 - Particles', route: 'JourneyLesson18-2-Particles' },
+    { title: 'Journey Lesson 19 - Galaxy Generator', route: 'JourneyLesson19-GalaxyGenerator' },
 ] as const
 
 export type Sketch = typeof sketchList[number]
