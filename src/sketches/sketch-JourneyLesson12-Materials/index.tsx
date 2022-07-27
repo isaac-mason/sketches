@@ -175,7 +175,7 @@ export default () => {
 
     return (
         <>
-            <h1>12 - Materials</h1>
+            <h1>Journey 12 - Materials</h1>
             <Canvas camera={{ position: [0, 0, 10], fov: 40 }}>
                 <Boxes position={[-2.5, 0, 0]} />
                 <Door position={[2.5, -0.5, 0]} />

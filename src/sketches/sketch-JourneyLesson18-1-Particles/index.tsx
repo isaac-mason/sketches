@@ -30,7 +30,7 @@ const App = () => {
 
 export default () => (
     <>
-        <h1>18.1 - Particles</h1>
+        <h1>Journey 18.1 - Particles</h1>
         <Canvas camera={{ position: [3, 3, 3] }}>
             <App />
             <OrbitControls />

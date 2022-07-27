@@ -38,7 +38,6 @@ const App = () => {
         const positions = bufferGeometry.attributes.position
             .array as Float32Array
 
-        console.log(positions)
         for (let i = 0; i < COUNT * 3; i += 3) {
             const x = positions[i] + 7.5
             positions[i + 1] = Math.sin(elapsedTime + x)
@@ -65,7 +64,7 @@ const App = () => {
 
 export default () => (
     <>
-        <h1>18.2 - Particles</h1>
+        <h1>Journey 18.2 - Particles</h1>
         <Canvas camera={{ position: [3, 5, 7] }}>
             <App />
             <OrbitControls target={[0, -2, 0]}/>

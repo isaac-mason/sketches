@@ -64,7 +64,7 @@ const Confettis = () => {
 
 export default () => (
     <>
-        <h1>13 - Text</h1>
+        <h1>Journey 13 - Text</h1>
         <Canvas camera={{ position: [0, 2, 5] }}>
             <Float>
                 <Billboard follow>

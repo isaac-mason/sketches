@@ -12,7 +12,7 @@ const App = () => {
 
 export default () => (
     <>
-        <h1>Journey 03 - Basic</h1>
+        <h1>Shaders From Scratch 1 - Basic</h1>
         <Canvas camera={{ position: [3, 3, 3] }}>
             <App />
             <OrbitControls />

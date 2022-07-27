@@ -251,7 +251,7 @@ const App = () => {
 
 export default () => (
     <>
-        <h1 style={{ zIndex: 1 }}>17 - Haunted House</h1>
+        <h1 style={{ zIndex: 1 }}>Journey 17 - Haunted House</h1>
         <Canvas
             camera={{ position: [6, 6, 12], fov: 50 }}
             shadows={{ type: THREE.PCFSoftShadowMap }}

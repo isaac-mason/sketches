@@ -31,7 +31,7 @@ const App = () => {
 
 export default () => (
     <>
-        <h1>11 - Textures</h1>
+        <h1>Journey 11 - Textures</h1>
         <Canvas camera={{ position: [0, 0, 10], fov: 60 }}>
             <App />
             <OrbitControls />

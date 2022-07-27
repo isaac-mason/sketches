@@ -87,7 +87,7 @@ const App = () => {
 
 export default () => (
     <>
-        <h1>19 - Galaxy Generator</h1>
+        <h1>Journey 19 - Galaxy Generator</h1>
         <Canvas camera={{ position: [0, 15, 8] }}>
             <App />
             <OrbitControls target={[0, -2, 0]} />

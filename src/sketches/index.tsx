@@ -2,6 +2,7 @@ import { lazy } from 'react'
 
 export const sketchList = [
     { title: 'Home', route: 'Home' },
+    { title: 'Shaders From Scratch 1 - Basic', route: 'GLSLShadersFromScratch01-Basic' },
     { title: 'Journey Lesson 3 - Basic', route: 'JourneyLesson03-Basic' },
     { title: 'Journey Lesson 5 - Transforms', route: 'JourneyLesson05-Transforms' },
     { title: 'Journey Lesson 6 - Animations', route: 'JourneyLesson06-Animations' },

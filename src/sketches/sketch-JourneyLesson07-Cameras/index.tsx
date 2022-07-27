@@ -21,7 +21,7 @@ const App = () => {
 
 export default () => (
     <>
-        <h1>07 - Cameras</h1>
+        <h1>Journey 07 - Cameras</h1>
         <Canvas>
             <App />
         </Canvas>
