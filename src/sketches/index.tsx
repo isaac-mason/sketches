@@ -15,6 +15,18 @@ export const sketchList = [
         title: 'Shaders From Scratch 3 - Attributes',
         route: 'GLSLShadersFromScratch03-Attributes',
     },
+    {
+        title: 'Shaders From Scratch 4 - Textures',
+        route: 'GLSLShadersFromScratch04-Textures',
+    },
+    {
+        title: 'Shaders From Scratch 5 - Alpha',
+        route: 'GLSLShadersFromScratch05-Alpha',
+    },
+    {
+        title: 'Shaders From Scratch 6 - Addressing',
+        route: 'GLSLShadersFromScratch06-Addressing',
+    },
     /* Three.js Journey */
     {
         title: 'Journey Lesson 3 - Basic',
