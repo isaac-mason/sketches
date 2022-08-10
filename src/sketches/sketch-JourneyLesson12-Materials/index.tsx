@@ -20,27 +20,16 @@ import doorRoughnessImage from './textures/door/roughness.jpg'
 import environmentMapNxImage from './textures/environmentMaps/0/nx.jpg'
 import environmentMapNyImage from './textures/environmentMaps/0/ny.jpg'
 import environmentMapNzImage from './textures/environmentMaps/0/nz.jpg'
-import {
-    default as environmentMapPxImage,
-    default as environmentMapPyImage,
-    default as environmentMapPzImage,
-} from './textures/environmentMaps/0/pz.jpg'
+import environmentMapPxImage from './textures/environmentMaps/0/px.jpg'
+import environmentMapPyImage from './textures/environmentMaps/0/py.jpg'
+import environmentMapPzImage from './textures/environmentMaps/0/pz.jpg'
+
 import matCapImage from './textures/matcaps/8.png'
 
 const padding = 1
 
 const Boxes = (props: { position: Vector3 }) => {
     const matcapTexture = useTexture(matCapImage)
-
-    const meshNormalMaterial = useData(() => {
-        return new MeshNormalMaterial()
-    })
-
-    const meshMatCapMaterial = useData(() => {
-        const texture = new MeshMatcapMaterial()
-        texture.matcap = matcapTexture
-        return texture
-    })
 
     return (
         <Flex
@@ -56,10 +45,7 @@ const Boxes = (props: { position: Vector3 }) => {
                 <Float>
                     <mesh>
                         <boxBufferGeometry args={[1, 1, 1]} />
-                        <primitive
-                            object={meshNormalMaterial}
-                            attach="material"
-                        />
+                        <meshNormalMaterial />
                     </mesh>
                 </Float>
             </Box>
@@ -67,10 +53,7 @@ const Boxes = (props: { position: Vector3 }) => {
                 <Float>
                     <mesh>
                         <boxBufferGeometry args={[1, 1, 1]} />
-                        <primitive
-                            object={meshMatCapMaterial}
-                            attach="material"
-                        />
+                        <meshMatcapMaterial matcap={matcapTexture} />
                     </mesh>
                 </Float>
             </Box>
@@ -154,7 +137,23 @@ const Door = (props: { position: Vector3 }) => {
     return (
         <>
             <Float floatIntensity={5} position={props.position}>
-                <primitive object={plane} />
+                <mesh>
+                    <meshStandardMaterial
+                        map={doorColor}
+                        aoMap={doorAmbientOcclusion}
+                        aoMapIntensity={2}
+                        displacementMap={doorHeight}
+                        displacementScale={0.2}
+                        normalMap={doorNormal}
+                        metalnessMap={doorMetalness}
+                        roughnessMap={doorRoughness}
+                        transparent
+                        alphaMap={doorAlpha}
+                    />
+                    <planeBufferGeometry args={[4, 4, 100, 100]}>
+                        <bufferAttribute attach="uv2" />
+                    </planeBufferGeometry>
+                </mesh>
             </Float>
         </>
     )
@@ -181,11 +180,12 @@ export default () => {
                 <Door position={[2.5, -0.5, 0]} />
 
                 <directionalLight
-                    intensity={0.1}
+                    intensity={0.3}
                     position={[-3, 0, 5]}
                     lookAt={() => [0, 0, 0]}
                 />
-                <ambientLight intensity={0.1} />
+                <ambientLight intensity={0.5} />
+
                 <Environment>
                     <primitive object={cubeTexture} attach="background" />
                 </Environment>

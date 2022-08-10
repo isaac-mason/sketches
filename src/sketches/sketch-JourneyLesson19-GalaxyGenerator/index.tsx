@@ -19,8 +19,8 @@ const App = () => {
         spin: 0.6,
         randomness: 0.8,
         randomnessPower: 3,
-        insideColor: '#480d0d',
-        outsideColor: '#06040d',
+        insideColor: '#834141',
+        outsideColor: '#28195c',
     })
 
     const bufferGeometry = useData(() => {

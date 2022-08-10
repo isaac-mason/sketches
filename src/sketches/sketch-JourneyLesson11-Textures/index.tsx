@@ -6,24 +6,27 @@ import minecraftImage from './textures/minecraft.png'
 
 const App = () => {
     const doorTexture = useTexture(doorImage)
-    doorTexture.wrapS = THREE.MirroredRepeatWrapping
-    doorTexture.wrapT = THREE.MirroredRepeatWrapping
-    doorTexture.offset.x = -0.2
-    doorTexture.offset.y = 0.5
-    doorTexture.rotation = Math.PI / 4
-
     const minecraftTexture = useTexture(minecraftImage)
-    minecraftTexture.magFilter = THREE.NearestFilter
 
     return (
         <>
             <mesh position={[-2.5, 0, 0]}>
                 <boxBufferGeometry args={[3, 3, 3]} />
-                <meshBasicMaterial map={doorTexture} />
+                <meshBasicMaterial
+                    map={doorTexture}
+                    map-wrapS={THREE.MirroredRepeatWrapping}
+                    map-wrapT={THREE.MirroredRepeatWrapping}
+                    map-offset-x={-0.2}
+                    map-offset-y={0.5}
+                    map-rotation={Math.PI / 4}
+                />
             </mesh>
             <mesh position={[2.5, 0, 0]}>
                 <boxBufferGeometry args={[3, 3, 3]} />
-                <meshBasicMaterial map={minecraftTexture} />
+                <meshBasicMaterial
+                    map={minecraftTexture}
+                    map-magFilter={THREE.NearestFilter}
+                />
             </mesh>
         </>
     )

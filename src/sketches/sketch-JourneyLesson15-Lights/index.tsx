@@ -1,5 +1,5 @@
 import { Float, OrbitControls, Text } from '@react-three/drei'
-import { Canvas, useThree } from '@react-three/fiber'
+import { Canvas } from '@react-three/fiber'
 import { Box, Flex } from '@react-three/flex'
 import { MagicMirror } from '../../components/MagicMirror'
 
@@ -69,7 +69,6 @@ const HemisphereLight = () => {
 }
 
 const App = () => {
-    const s = useThree()
     return (
         <>
             <Flex

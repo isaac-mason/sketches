@@ -1,8 +1,7 @@
 import { OrbitControls, useHelper, useTexture } from '@react-three/drei'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { useEffect, useRef } from 'react'
+import { Canvas, useFrame } from '@react-three/fiber'
+import { useRef } from 'react'
 import * as THREE from 'three'
-import { Fog, PointLight, PointLightHelper, Vector2 } from 'three'
 import bricksAmbientOcclusionImage from './textures/bricks/ambientOcclusion.jpg'
 import bricksColorImage from './textures/bricks/color.jpg'
 import bricksNormalImage from './textures/bricks/normal.jpg'
@@ -22,8 +21,8 @@ import grassRoughnessImage from './textures/grass/roughness.jpg'
 const BACKGROUND_COLOR = 0x262837
 
 const House = (props: JSX.IntrinsicElements['group']) => {
-    const lightRef = useRef()
-    useHelper(lightRef, PointLightHelper, 0.1)
+    const lightRef = useRef<THREE.PointLight>(null!)
+    useHelper(lightRef, THREE.PointLightHelper)
 
     const bricksColor = useTexture(bricksColorImage)
     const bricksAmbientOcclusion = useTexture(bricksAmbientOcclusionImage)
@@ -51,7 +50,7 @@ const House = (props: JSX.IntrinsicElements['group']) => {
                         aoMap={bricksAmbientOcclusion}
                         normalMap={bricksNormal}
                         normalMap-encoding={THREE.LinearEncoding}
-                        normalScale={new Vector2(0.01, 0.01)}
+                        normalScale={new THREE.Vector2(0.01, 0.01)}
                         roughnessMap={bricksRoughness}
                     />
                 </mesh>
@@ -88,7 +87,7 @@ const House = (props: JSX.IntrinsicElements['group']) => {
                     ref={lightRef}
                     position={[0, 2, 2.3]}
                     color={0xff7d67}
-                    intensity={1}
+                    intensity={2}
                     distance={12}
                     castShadow
                     shadow-mapSize-width={256}
@@ -123,8 +122,8 @@ const Grave = (props: JSX.IntrinsicElements['group']) => {
 }
 
 const Ghost = (props: { color: string; offset: number }) => {
-    const ref = useRef<PointLight>(null!)
-    useHelper(ref, PointLightHelper)
+    const ref = useRef<THREE.PointLight>(null!)
+    useHelper(ref, THREE.PointLightHelper)
 
     useFrame(({ clock: { elapsedTime } }) => {
         const ghostAngle = elapsedTime * 0.5
@@ -200,15 +199,11 @@ const ghosts = [
 ]
 
 const App = () => {
-    const { gl, scene } = useThree()
-
-    useEffect(() => {
-        scene.fog = new Fog(BACKGROUND_COLOR, 12, 24)
-        gl.setClearColor(BACKGROUND_COLOR)
-    })
-
     return (
         <>
+            <color attach="background" args={[BACKGROUND_COLOR]} />
+            <fog attach="fog" args={[BACKGROUND_COLOR, 12, 24]} />
+
             <Lights />
             <Grass />
             <House />

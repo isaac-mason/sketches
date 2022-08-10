@@ -44,10 +44,14 @@ const RoutedComponent = () => {
     } = useMatch('/sketch/:name') || { params: { name: defaultName } }
     const sketchName = isSketchRoute(routeName) ? routeName : defaultName
     const { Component } = visibleComponents[sketchName]
-    return <Component />
+    return (
+        <Suspense fallback={null}>
+            <Component />
+        </Suspense>
+    )
 }
 
-function Intro() {
+function App() {
     return (
         <Page>
             <Suspense fallback={null}>
@@ -57,11 +61,7 @@ function Intro() {
                 </Routes>
             </Suspense>
             <Sketches />
-            <a
-                href="https://github.com/isaac-mason/sketches"
-            >
-                Github
-            </a>
+            <a href="https://github.com/isaac-mason/sketches">Github</a>
         </Page>
     )
 }
@@ -70,10 +70,15 @@ function Sketches() {
     const {
         params: { name: routeName },
     } = useMatch('/sketch/:name') || { params: { name: defaultName } }
+
     return (
         <SketchPanel>
             {sketchList.map((sketch, key) => (
-                <Link key={sketch.route} to={`/sketch/${sketch.route}`} title={sketch.title}>
+                <Link
+                    key={sketch.route}
+                    to={`/sketch/${sketch.route}`}
+                    title={sketch.title}
+                >
                     <TooltipContainer>
                         <TooltipTrigger>
                             <Spot
@@ -93,11 +98,11 @@ function Sketches() {
     )
 }
 
-export default function App() {
+export default function () {
     return (
         <Router>
             <GlobalStyle />
-            <Intro />
+            <App />
         </Router>
     )
 }

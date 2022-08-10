@@ -1,6 +1,7 @@
-import { Environment, OrbitControls } from '@react-three/drei'
+import { OrbitControls } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
 import { Box, Flex } from '@react-three/flex'
+import * as THREE from 'three'
 
 const padding = 1
 const color = '#ff8888'
@@ -24,11 +25,11 @@ const App = () => {
     return (
         <>
             <directionalLight
-                    intensity={0.5}
-                    position={[-3, 0, 5]}
-                    lookAt={() => [0, 0, 0]}
-                />
-                <ambientLight intensity={0.5} />
+                intensity={0.5}
+                position={[-3, 0, 5]}
+                lookAt={() => [0, 0, 0]}
+            />
+            <ambientLight intensity={0.5} />
             <Flex
                 width={6}
                 height={6}
@@ -71,7 +72,10 @@ const App = () => {
 export default () => (
     <>
         <h1>Journey 09 - Geometries</h1>
-        <Canvas camera={{ position: [0, 0, 10], fov: 60 }}>
+        <Canvas
+            camera={{ position: [0, 0, 10], fov: 60 }}
+            gl={{ outputEncoding: THREE.sRGBEncoding }}
+        >
             <App />
             <OrbitControls />
         </Canvas>

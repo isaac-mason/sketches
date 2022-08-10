@@ -2,6 +2,7 @@ import { Float, OrbitControls, Stats, useHelper } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
 import { useRef } from 'react'
 import * as THREE from 'three'
+import { DirectionalLight, PointLight, SpotLight } from 'three'
 
 const floatProps = {
     floatIntensity: 2
@@ -38,9 +39,9 @@ const Ground = () => (
 )
 
 const Lights = () => {
-    const directionalLight = useRef()
-    const spotLight = useRef()
-    const pointLight = useRef()
+    const directionalLight = useRef<DirectionalLight>(null!)
+    const spotLight = useRef<SpotLight>(null!)
+    const pointLight = useRef<PointLight>(null!)
 
     useHelper(directionalLight, THREE.DirectionalLightHelper, 1, 'hotpink')
     useHelper(spotLight, THREE.SpotLightHelper, 'blue')
