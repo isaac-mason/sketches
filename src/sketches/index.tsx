@@ -2,10 +2,20 @@ import { lazy } from 'react'
 
 export const sketchList = [
     { title: 'Home', route: 'Home' },
+    /* GLSL Shaders From Scratch */
     {
-        title: 'Shaders From Scratch 1 - Basic',
-        route: 'GLSLShadersFromScratch01-Basic',
+        title: 'Shaders From Scratch 1 - Varyings',
+        route: 'GLSLShadersFromScratch01-Varyings',
     },
+    {
+        title: 'Shaders From Scratch 2 - Uniforms',
+        route: 'GLSLShadersFromScratch02-Uniforms',
+    },
+    {
+        title: 'Shaders From Scratch 3 - Attributes',
+        route: 'GLSLShadersFromScratch03-Attributes',
+    },
+    /* Three.js Journey */
     {
         title: 'Journey Lesson 3 - Basic',
         route: 'JourneyLesson03-Basic',
