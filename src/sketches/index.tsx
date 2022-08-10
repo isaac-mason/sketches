@@ -62,6 +62,10 @@ export const sketchList = [
         title: 'Journey Lesson 19 - Galaxy Generator',
         route: 'JourneyLesson19-GalaxyGenerator',
     },
+    {
+        title: 'Journey Lesson 27 - Shaders',
+        route: 'JourneyLesson27-Shaders',
+    },
 ] as const
 
 export type Sketch = typeof sketchList[number]
