@@ -1,8 +1,8 @@
-import { OrbitControls } from "@react-three/drei"
-import { Canvas, useFrame } from "@react-three/fiber"
-import { useControls } from "leva"
-import { useRef } from "react"
-import * as THREE from "three"
+import { OrbitControls } from '@react-three/drei'
+import { Canvas, useFrame } from '@react-three/fiber'
+import { useControls } from 'leva'
+import { useRef } from 'react'
+import * as THREE from 'three'
 
 const noiseFn = /* glsl */ `
 // Classic Perlin 3D Noise 
@@ -173,10 +173,10 @@ const App = () => {
             value: 0.75,
         },
         uWavesLowColor: {
-            value: "#186691",
+            value: '#186691',
         },
         uWavesHighColor: {
-            value: "#9bd8ff",
+            value: '#9bd8ff',
         },
         uWavesColorOffset: {
             value: 0.6,
@@ -215,7 +215,7 @@ const App = () => {
                 uSmallWavesFrequency,
                 uSmallWavesSpeed,
                 uSmallIterations,
-            ].join("-")}
+            ].join('-')}
         >
             <shaderMaterial
                 vertexShader={vertexShader}

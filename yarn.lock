@@ -1528,6 +1528,11 @@ string.prototype.codepointat@^0.2.1:
   resolved "https://registry.yarnpkg.com/string.prototype.codepointat/-/string.prototype.codepointat-0.2.1.tgz#004ad44c8afc727527b108cd462b4d971cd469bc"
   integrity sha512-2cBVCj6I4IOvEnjgO/hWqXjqBGsY+zwPmHl12Srk9IXSZ56Jwwmy+66XO5Iut/oQVR7t5ihYdLB0GMa4alEUcg==
 
+styled-breakpoints@^11.1.1:
+  version "11.1.1"
+  resolved "https://registry.yarnpkg.com/styled-breakpoints/-/styled-breakpoints-11.1.1.tgz#d25831bc25c090cf8e51a39f10efc45a26b210be"
+  integrity sha512-KUpoMNPoNji5zyB/AyrY+KO/eHj87smfGMOgrAM8cH/fN2wtEW9tnwzPlQimxMyma0Y849XUnChbJBk2zws9Ig==
+
 styled-components@^5.3.5:
   version "5.3.5"
   resolved "https://registry.yarnpkg.com/styled-components/-/styled-components-5.3.5.tgz#a750a398d01f1ca73af16a241dec3da6deae5ec4"

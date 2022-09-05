@@ -1,3 +1,4 @@
+import { Leva } from 'leva'
 import { Suspense } from 'react'
 import {
     HashRouter as Router,
@@ -6,32 +7,110 @@ import {
     Routes,
     useMatch,
 } from 'react-router-dom'
+import { up } from 'styled-breakpoints'
 import styled from 'styled-components'
+import { GlobalStyle } from './global-styles'
 
 import { isSketchRoute, sketches, sketchList } from './sketches'
-import {
-    GlobalStyle,
-    PageStyle,
-    TooltipContent,
-    TooltipContainer,
-    TooltipTrigger,
-} from './styles'
 
-const Page = styled(PageStyle)`
+const Page = styled.div`
     padding: 0px;
+
+    position: relative;
+    width: 100%;
+    height: 100vh;
 
     & > h1 {
         position: absolute;
-        top: 70px;
-        left: 60px;
+        top: 20px;
+        left: 20px;
+
+        font-weight: 900;
+        font-size: 2em;
+        margin: 0;
+        color: #eee;
+        line-height: 1.2;
+        letter-spacing: -2px;
+
+        ${up('md')} {
+            top: 70px;
+            left: 60px;
+
+            font-size: 4em;
+        }
+
+        ${up('lg')} {
+            font-size: 5em;
+        }
     }
 
     & > a {
         position: absolute;
-        bottom: 60px;
-        right: 60px;
+        bottom: 20px;
+        right: 20px;
         font-size: 1.2em;
+
+        ${up('md')} {
+            bottom: 60px;
+            right: 60px;
+        }
     }
+
+    & > a {
+        margin: 0;
+        color: #eee;
+        text-decoration: none;
+    }
+`
+
+const TooltipTrigger = styled.div`
+    cursor: pointer;
+`
+
+const TooltipContent = styled.div`
+    position: absolute;
+    top: calc(100% - 60px);
+    left: 30px;
+
+    z-index: 999;
+    border-radius: 0.2em;
+    transition: visibility 0.2s, color 0.2s, background-color 0.2s, width 0.2s,
+        padding 0.2s ease-in-out;
+    visibility: hidden;
+    color: transparent;
+    background-color: transparent;
+    white-space: nowrap;
+`
+
+const TooltipContainer = styled.div`
+    display: inline-block;
+    position: relative;
+    & ${TooltipTrigger}:hover + ${TooltipContent} {
+        visibility: visible;
+        color: #eee;
+        background-color: #111;
+        padding: 10px;
+    }
+`
+
+const SketchPanel = styled.div`
+    position: absolute;
+    max-width: 250px;
+    bottom: 10px;
+    left: 10px;
+
+    ${up('md')} {
+        bottom: 50px;
+        left: 50px;
+    }
+`
+
+const Spot = styled.div`
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin: 8px;
 `
 
 const defaultName = 'Home'
@@ -54,6 +133,7 @@ const RoutedComponent = () => {
 function App() {
     return (
         <Page>
+            <Leva collapsed />
             <Suspense fallback={null}>
                 <Routes>
                     <Route path="/*" element={<DefaultComponent />} />
@@ -106,18 +186,3 @@ export default function () {
         </Router>
     )
 }
-
-const SketchPanel = styled.div`
-    position: absolute;
-    bottom: 50px;
-    left: 50px;
-    max-width: 250px;
-`
-
-const Spot = styled.div`
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    margin: 8px;
-`
