@@ -1,17 +1,8 @@
-import { OrbitControls } from '@react-three/drei'
-import { Canvas } from '@react-three/fiber'
+import { OrbitControls } from "@react-three/drei"
+import { Canvas, useFrame } from "@react-three/fiber"
+import { useRef } from "react"
 
-const vertexShader = /* glsl */ `
-varying vec2 vUv;
-
-void main()
-{
-    gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
-    vUv = uv;
-}
-`
-
-const fragmentShader = /* glsl */ `
+const cnoise = /* glsl */ `
 //	Classic Perlin 2D Noise 
 //	by Stefan Gustavson
 //
@@ -57,8 +48,24 @@ float cnoise(vec2 P)
     float n_xy = mix(n_x.x, n_x.y, fade_xy.y);
     return 2.3 * n_xy;
 }
+`
+
+const vertexShader = /* glsl */ `
+varying vec2 vUv;
+
+void main()
+{
+    gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
+    vUv = uv;
+}
+`
+
+const fragmentShader = /* glsl */ `
+${cnoise}
 
 precision mediump float;
+
+uniform float uTime;
 
 varying vec2 vUv;
 
@@ -68,7 +75,7 @@ void main()
     
     vec3 uvColor = vec3(vUv.x, vUv.y, 1.0);
 
-    float strength = step(0.9, sin(cnoise(vUv * 10.0) * 20.0));
+    float strength = step(0.9, sin(cnoise(vUv * 10.0 + uTime) * 20.0));
 
     vec3 mixedColor = mix(blackColor, uvColor, strength);
 
@@ -78,13 +85,20 @@ void main()
 `
 
 const App = () => {
+    const uTime = useRef({ value: 0 })
+
+    useFrame(({ clock: { elapsedTime } }) => {
+        uTime.current.value = elapsedTime
+    })
+
     return (
         <mesh>
             <shaderMaterial
                 vertexShader={vertexShader}
                 fragmentShader={fragmentShader}
+                uniforms={{ uTime: uTime.current }}
             />
-            <boxGeometry args={[2, 2, 2]} />
+            <planeGeometry args={[2, 2]} />
         </mesh>
     )
 }
@@ -92,7 +106,7 @@ const App = () => {
 export default () => (
     <>
         <h1>Journey 27 - Shaders</h1>
-        <Canvas camera={{ position: [3, 3, 3] }}>
+        <Canvas camera={{ position: [0, 0, 3] }}>
             <App />
             <OrbitControls />
         </Canvas>
