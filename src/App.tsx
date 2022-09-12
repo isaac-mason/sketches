@@ -8,10 +8,30 @@ import {
     useMatch,
 } from 'react-router-dom'
 import { up } from 'styled-breakpoints'
-import styled from 'styled-components'
+import styled, { keyframes } from 'styled-components'
 import { GlobalStyle } from './global-styles'
-
 import { isSketchRoute, sketches, sketchList } from './sketches'
+
+const LoaderKeyframes = keyframes`
+from {
+    transform: rotate(0deg);
+}
+to {
+    transform: rotate(360deg);
+}
+`
+
+const Loader = styled.div`
+    position: fixed;
+    left: calc(50% - 25px);
+    top: calc(50vh - 50px);
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(0, 0, 0, 0);
+    border-top: 3px solid #fff;
+    border-radius: 50%;
+    animation: ${LoaderKeyframes} 1s ease infinite;   
+`
 
 const Page = styled.div`
     padding: 0px;
@@ -28,11 +48,10 @@ const Page = styled.div`
         font-weight: 900;
         font-size: 2em;
         margin: 0;
-        padding-right: 0.5em;
+        padding-right: 0.2em;
         color: #eee;
         line-height: 1.2;
         letter-spacing: -2px;
-        
 
         ${up('md')} {
             top: 70px;
@@ -126,9 +145,11 @@ const RoutedComponent = () => {
     const sketchName = isSketchRoute(routeName) ? routeName : defaultName
     const { Component } = visibleComponents[sketchName]
     return (
-        <Suspense fallback={null}>
-            <Component />
-        </Suspense>
+        <>
+            <Suspense fallback={<Loader />}>
+                <Component />
+            </Suspense>
+        </>
     )
 }
 
@@ -136,12 +157,10 @@ function App() {
     return (
         <Page>
             <Leva collapsed />
-            <Suspense fallback={null}>
-                <Routes>
-                    <Route path="/*" element={<DefaultComponent />} />
-                    <Route path="/sketch/:name" element={<RoutedComponent />} />
-                </Routes>
-            </Suspense>
+            <Routes>
+                <Route path="/*" element={<DefaultComponent />} />
+                <Route path="/sketch/:name" element={<RoutedComponent />} />
+            </Routes>
             <Sketches />
             <a href="https://github.com/isaac-mason/sketches">Github</a>
         </Page>
@@ -155,7 +174,7 @@ function Sketches() {
 
     return (
         <SketchPanel>
-            {sketchList.map((sketch, key) => (
+            {sketchList.map((sketch) => (
                 <Link
                     key={sketch.route}
                     to={`/sketch/${sketch.route}`}
