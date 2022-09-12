@@ -92,6 +92,10 @@ export const sketchList = [
         title: 'Journey Lesson 28 - Raging Sea',
         route: 'JourneyLesson28-RagingSea',
     },
+    {
+        title: 'Journey Lesson 29 - Animated Galaxy',
+        route: 'JourneyLesson29-AnimatedGalaxy',
+    },
 ] as const
 
 export type Sketch = typeof sketchList[number]

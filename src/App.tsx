@@ -28,9 +28,11 @@ const Page = styled.div`
         font-weight: 900;
         font-size: 2em;
         margin: 0;
+        padding-right: 0.5em;
         color: #eee;
         line-height: 1.2;
         letter-spacing: -2px;
+        
 
         ${up('md')} {
             top: 70px;

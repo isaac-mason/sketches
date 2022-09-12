@@ -1,12 +1,11 @@
-import { OrbitControls, useTexture } from '@react-three/drei'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { OrbitControls } from '@react-three/drei'
+import { Canvas } from '@react-three/fiber'
 import { useControls } from 'leva'
 import {
     AdditiveBlending,
     BufferAttribute,
     BufferGeometry,
-    Color,
-    Points,
+    Color
 } from 'three'
 import { useData } from '../../hooks/use-data'
 
@@ -72,16 +71,18 @@ const App = () => {
     })
 
     return (
-        <points>
-            <pointsMaterial
-                size={parameters.size}
-                sizeAttenuation={true}
-                vertexColors
-                blending={AdditiveBlending}
-                depthWrite={false}
-            />
-            <primitive attach="geometry" object={bufferGeometry} />
-        </points>
+        <>
+            <points>
+                <pointsMaterial
+                    size={parameters.size}
+                    sizeAttenuation={true}
+                    vertexColors
+                    blending={AdditiveBlending}
+                    depthWrite={false}
+                />
+                <primitive attach="geometry" object={bufferGeometry} />
+            </points>
+        </>
     )
 }
 
