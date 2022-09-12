@@ -1,7 +1,7 @@
 import { OrbitControls } from '@react-three/drei'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useControls } from 'leva'
-import { useEffect, useMemo, useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import { BufferGeometry, Color, BufferAttribute, AdditiveBlending } from 'three'
 
 const vertexShader = /* glsl */ `
@@ -67,7 +67,7 @@ const App = () => {
         randomnessPower,
         insideColor: insideColorHex,
         outsideColor: outsideColorHex,
-    } = useControls({
+    } = useControls('journey-29-animated-galaxy', {
         count: 200000,
         size: 20,
         sizeAttenuation: 1,

@@ -10,7 +10,7 @@ import {
 import { useData } from '../../hooks/use-data'
 
 const App = () => {
-    const parameters = useControls({
+    const parameters = useControls('journey-19-galaxy-generator', {
         branches: 8,
         count: 200000,
         radius: 8,

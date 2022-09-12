@@ -160,7 +160,7 @@ const App = () => {
         uSmallWavesFrequency,
         uSmallWavesSpeed,
         uSmallIterations,
-    } = useControls({
+    } = useControls('journey-28-raging-sea', {
         uWavesElevation: {
             value: 0.2,
             min: 0,
