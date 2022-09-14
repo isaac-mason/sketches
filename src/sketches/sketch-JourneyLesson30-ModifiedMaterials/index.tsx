@@ -1,6 +1,6 @@
 import { OrbitControls, useGLTF, useTexture } from '@react-three/drei'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { GLTF } from 'three-stdlib'
 import colorImage from './color.jpg'
@@ -125,6 +125,12 @@ const Wall = (props: JSX.IntrinsicElements['mesh']) => (
 )
 
 const App = () => {
+    const directionalLight = useRef<THREE.DirectionalLight>(null!)
+    
+    useEffect(() => {
+        directionalLight.current.lookAt(0, 0, 0)
+    }, [])
+
     return (
         <>
             <LeePerrySmith />
@@ -133,13 +139,13 @@ const App = () => {
 
             <ambientLight intensity={0.1} />
             <directionalLight
+                ref={directionalLight}
                 intensity={1}
                 position={[5, 1, 2]}
                 shadow-normalBias={0.05}
                 shadow-camera-far={15}
                 shadow-mapSize={[1024, 1024]}
                 castShadow
-                lookAt={() => [0, 0, 0]}
             />
         </>
     )

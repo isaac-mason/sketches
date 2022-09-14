@@ -1,6 +1,6 @@
 import { Float, OrbitControls, Stats, useHelper } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { DirectionalLight, PointLight, SpotLight } from 'three'
 
@@ -47,6 +47,11 @@ const Lights = () => {
     useHelper(spotLight, THREE.SpotLightHelper, 'blue')
     useHelper(pointLight, THREE.PointLightHelper, 0.5, 'green')
 
+    useEffect(() => {
+        directionalLight.current.lookAt(0, 0, 0)
+        spotLight.current.lookAt(0, 0, 0)
+    })
+
     return (
         <>
             <ambientLight intensity={0.1} />
@@ -56,7 +61,6 @@ const Lights = () => {
                 intensity={0.3}
                 color={0xffffff}
                 position={[0, 3, 1]}
-                lookAt={() => [0, 0, 0]}
                 shadow-camera-top={4}
                 shadow-camera-right={4}
                 shadow-camera-bottom={-4}
@@ -69,7 +73,6 @@ const Lights = () => {
                 args={[0xffffff, 0.3, 10, Math.PI * 0.3]}
                 castShadow
                 position={[-3, 4, 2]}
-                lookAt={() => [0, 0, 0]}
                 shadow-camera-near={2}
                 shadow-camera-far={10}
                 shadow-camera-top={8}

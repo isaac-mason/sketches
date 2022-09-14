@@ -1,5 +1,6 @@
 import { Text, Float, Billboard } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
+import { useRef, useEffect } from 'react'
 import NotoEmojiRegular from './NotoEmoji-Regular.ttf'
 
 const Balloons = () => {
@@ -62,25 +63,26 @@ const Confettis = () => {
     )
 }
 
-export default () => (
-    <>
-        <h1>Journey 13 - Text</h1>
-        <Canvas camera={{ position: [0, 2, 5] }}>
-            <Float>
-                <Billboard follow>
-                    <Text
-                        fontSize={0.5}
-                        position={[0, -2, 0]}
-                        lookAt={() => [0, 2, 5]}
-                    >
-                        Yeeeew!
-                    </Text>
-                </Billboard>
-            </Float>
+export default () => {
+    return (
+        <>
+            <h1>Journey 13 - Text</h1>
+            <Canvas camera={{ position: [0, 2, 5] }}>
+                <Float>
+                    <Billboard follow>
+                        <Text
+                            fontSize={0.5}
+                            position={[0, -2, 0]}
+                        >
+                            Yeeeew!
+                        </Text>
+                    </Billboard>
+                </Float>
 
-            <Tadas />
-            <Balloons />
-            <Confettis />
-        </Canvas>
-    </>
-)
+                <Tadas />
+                <Balloons />
+                <Confettis />
+            </Canvas>
+        </>
+    )
+}

@@ -1,6 +1,7 @@
 import { OrbitControls } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
 import { Box, Flex } from '@react-three/flex'
+import { useRef, useEffect } from 'react'
 import * as THREE from 'three'
 
 const padding = 1
@@ -22,12 +23,18 @@ const Item = ({
 )
 
 const App = () => {
+    const directionalLight = useRef<THREE.DirectionalLight>(null!)
+
+    useEffect(() => {
+        directionalLight.current.lookAt(0, 0, 0)
+    }, [])
+    
     return (
         <>
             <directionalLight
+                ref={directionalLight}
                 intensity={0.5}
                 position={[-3, 0, 5]}
-                lookAt={() => [0, 0, 0]}
             />
             <ambientLight intensity={0.5} />
             <Flex

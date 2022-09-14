@@ -7,6 +7,7 @@ import {
 } from '@react-three/drei'
 import { Canvas, Vector3 } from '@react-three/fiber'
 import { Box, Flex } from '@react-three/flex'
+import { useRef, useEffect } from 'react'
 import * as THREE from 'three'
 import { MeshMatcapMaterial, MeshNormalMaterial } from 'three'
 import { useData } from '../../hooks/use-data'
@@ -159,6 +160,25 @@ const Door = (props: { position: Vector3 }) => {
     )
 }
 
+const Lights = () => {
+    const directionalLight = useRef<THREE.DirectionalLight>(null!)
+
+    useEffect(() => {
+        directionalLight.current.lookAt(0, 0, 0)
+    }, [])
+    
+    return (
+        <>
+            <directionalLight
+                ref={directionalLight}
+                intensity={0.3}
+                position={[-3, 0, 5]}
+            />
+            <ambientLight intensity={0.5} />
+        </>
+    )
+}
+
 export default () => {
     const cubeTexture = useCubeTexture(
         [
@@ -179,12 +199,7 @@ export default () => {
                 <Boxes position={[-2.5, 0, 0]} />
                 <Door position={[2.5, -0.5, 0]} />
 
-                <directionalLight
-                    intensity={0.3}
-                    position={[-3, 0, 5]}
-                    lookAt={() => [0, 0, 0]}
-                />
-                <ambientLight intensity={0.5} />
+                <Lights />
 
                 <Environment>
                     <primitive object={cubeTexture} attach="background" />

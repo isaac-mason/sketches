@@ -1,6 +1,7 @@
 import { Float, OrbitControls, Text } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
 import { Box, Flex } from '@react-three/flex'
+import { useRef, useEffect } from 'react'
 import { MagicMirror } from '../../components/MagicMirror'
 
 const MIRROR_SIZE = [3, 3] as [number, number]
@@ -39,14 +40,20 @@ const AmbientLight = () => {
 }
 
 const DirectionalLight = () => {
+    const directionalLight = useRef<THREE.DirectionalLight>(null!)
+
+    useEffect(() => {
+        directionalLight.current.lookAt(0, 0, 0)
+    }, [])
+
     return (
         <group>
             <MagicMirror fov={50} size={MIRROR_SIZE}>
                 <Scene />
                 <ambientLight intensity={0.05} />
                 <directionalLight
+                    ref={directionalLight}
                     position={[-3, 1, 2]}
-                    lookAt={() => [0, 0, 0]}
                     intensity={0.5}
                     color={0xff9999}
                 />

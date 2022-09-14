@@ -1,5 +1,6 @@
 import { CameraShake } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
+import { useEffect, useRef } from 'react'
 import { PCFSoftShadowMap } from 'three'
 
 const Cube = () => (
@@ -16,25 +17,33 @@ const Ground = () => (
     </mesh>
 )
 
-const Lights = () => (
-    <>
-        <ambientLight intensity={0.5} />
-        <directionalLight
-            intensity={1}
-            position={[3, 2, 3]}
-            lookAt={() => [0, 0, 0]}
-            castShadow
-            shadow-camera-near={2}
-            shadow-camera-far={10}
-            shadow-camera-top={8}
-            shadow-camera-right={8}
-            shadow-camera-bottom={-8}
-            shadow-camera-left={-8}
-            shadow-mapSize-height={2048}
-            shadow-mapSize-width={2048}
-        />
-    </>
-)
+const Lights = () => {
+    const directionalLight = useRef<THREE.DirectionalLight>(null!)
+
+    useEffect(() => {
+        directionalLight.current.lookAt(0, 0, 0)
+    }, [])
+
+    return (
+        <>
+            <ambientLight intensity={0.5} />
+            <directionalLight
+                ref={directionalLight}
+                intensity={1}
+                position={[3, 2, 3]}
+                castShadow
+                shadow-camera-near={2}
+                shadow-camera-far={10}
+                shadow-camera-top={8}
+                shadow-camera-right={8}
+                shadow-camera-bottom={-8}
+                shadow-camera-left={-8}
+                shadow-mapSize-height={2048}
+                shadow-mapSize-width={2048}
+            />
+        </>
+    )
+}
 
 const App = () => {
     return (
@@ -50,7 +59,10 @@ const App = () => {
 export default () => (
     <>
         <h1>Journey 07 - Cameras</h1>
-        <Canvas camera={{ position: [0, 1, 5], fov: 50 }} shadows={{ type: PCFSoftShadowMap }}>
+        <Canvas
+            camera={{ position: [0, 1, 5], fov: 50 }}
+            shadows={{ type: PCFSoftShadowMap }}
+        >
             <App />
         </Canvas>
     </>
