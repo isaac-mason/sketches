@@ -67,7 +67,7 @@ export default () => (
         <h1>Journey 18.2 - Particles</h1>
         <Canvas camera={{ position: [3, 5, 7] }}>
             <App />
-            <OrbitControls target={[0, -2, 0]}/>
+            <OrbitControls target={[0, -2, 0]} />
         </Canvas>
     </>
 )

@@ -5,7 +5,7 @@ import * as THREE from 'three'
 import { DirectionalLight, PointLight, SpotLight } from 'three'
 
 const floatProps = {
-    floatIntensity: 2
+    floatIntensity: 2,
 }
 
 const Shapes = () => (
@@ -50,7 +50,7 @@ const Lights = () => {
     useEffect(() => {
         directionalLight.current.lookAt(0, 0, 0)
         spotLight.current.lookAt(0, 0, 0)
-    })
+    }, [])
 
     return (
         <>

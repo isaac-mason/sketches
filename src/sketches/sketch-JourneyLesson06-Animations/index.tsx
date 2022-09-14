@@ -12,6 +12,7 @@ const App = () => {
         mesh.position.y = Math.sin(time)
         mesh.position.x = Math.cos(time)
     })
+
     return (
         <mesh ref={ref as never}>
             <meshBasicMaterial color="#ff8888" />

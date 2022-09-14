@@ -1,12 +1,7 @@
 import { OrbitControls } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
 import { useControls } from 'leva'
-import {
-    AdditiveBlending,
-    BufferAttribute,
-    BufferGeometry,
-    Color
-} from 'three'
+import { AdditiveBlending, BufferAttribute, BufferGeometry, Color } from 'three'
 import { useData } from '../../hooks/use-data'
 
 const App = () => {
@@ -31,7 +26,7 @@ const App = () => {
         const insideColor = new Color(parameters.insideColor)
         const outsideColor = new Color(parameters.outsideColor)
 
-        const mixedColor = new Color();
+        const mixedColor = new Color()
 
         for (let i = 0; i < parameters.count; i++) {
             const i3 = i * 3
@@ -42,14 +37,20 @@ const App = () => {
                 ((i % parameters.branches) / parameters.branches) * Math.PI * 2
 
             const randomX =
-                Math.pow(Math.random() * parameters.randomness, parameters.randomnessPower) *
-                (Math.random() - 0.5 > 0 ? 1 : -1)
+                Math.pow(
+                    Math.random() * parameters.randomness,
+                    parameters.randomnessPower
+                ) * (Math.random() - 0.5 > 0 ? 1 : -1)
             const randomY =
-                Math.pow(Math.random() * parameters.randomness, parameters.randomnessPower) *
-                (Math.random() - 0.5 > 0 ? 1 : -1)
+                Math.pow(
+                    Math.random() * parameters.randomness,
+                    parameters.randomnessPower
+                ) * (Math.random() - 0.5 > 0 ? 1 : -1)
             const randomZ =
-                Math.pow(Math.random() * parameters.randomness, parameters.randomnessPower) *
-                (Math.random() - 0.5 > 0 ? 1 : -1)
+                Math.pow(
+                    Math.random() * parameters.randomness,
+                    parameters.randomnessPower
+                ) * (Math.random() - 0.5 > 0 ? 1 : -1)
 
             positions[i3] = randomX + Math.cos(branchAngle + spinAngle) * radius
             positions[i3 + 1] = randomY
@@ -58,7 +59,7 @@ const App = () => {
 
             mixedColor.copy(insideColor)
             mixedColor.lerp(outsideColor, radius / parameters.radius)
-        
+
             colors[i3] = mixedColor.r
             colors[i3 + 1] = mixedColor.g
             colors[i3 + 2] = mixedColor.b

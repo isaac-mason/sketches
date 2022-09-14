@@ -7,13 +7,7 @@ import * as THREE from 'three'
 const padding = 1
 const color = '#ff8888'
 
-const Item = ({
-    color,
-    children,
-}: {
-    color: string
-    children: JSX.Element
-}) => (
+const Item = ({ children }: { children: JSX.Element }) => (
     <Box padding={padding} centerAnchor>
         <mesh>
             <meshStandardMaterial color={color} wireframe />
@@ -28,7 +22,7 @@ const App = () => {
     useEffect(() => {
         directionalLight.current.lookAt(0, 0, 0)
     }, [])
-    
+
     return (
         <>
             <directionalLight
@@ -44,31 +38,31 @@ const App = () => {
                 flexDirection="row"
                 flexWrap="wrap"
             >
-                <Item color={color}>
+                <Item>
                     <sphereBufferGeometry args={[0.6]} />
                 </Item>
-                <Item color={color}>
+                <Item>
                     <boxBufferGeometry args={[1, 1, 1]} />
                 </Item>
-                <Item color={color}>
+                <Item>
                     <coneGeometry args={[0.7, 1, 5, 5]} />
                 </Item>
-                <Item color={color}>
+                <Item>
                     <torusKnotBufferGeometry args={[0.4, 0.1]} />
                 </Item>
-                <Item color={color}>
+                <Item>
                     <ringGeometry args={[0.3, 0.7]} />
                 </Item>
-                <Item color={color}>
+                <Item>
                     <dodecahedronBufferGeometry args={[0.7]} />
                 </Item>
-                <Item color={color}>
+                <Item>
                     <octahedronBufferGeometry args={[0.7]} />
                 </Item>
-                <Item color={color}>
+                <Item>
                     <tetrahedronBufferGeometry args={[0.7]} />
                 </Item>
-                <Item color={color}>
+                <Item>
                     <icosahedronBufferGeometry args={[0.7]} />
                 </Item>
             </Flex>

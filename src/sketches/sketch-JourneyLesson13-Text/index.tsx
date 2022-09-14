@@ -70,10 +70,7 @@ export default () => {
             <Canvas camera={{ position: [0, 2, 5] }}>
                 <Float>
                     <Billboard follow>
-                        <Text
-                            fontSize={0.5}
-                            position={[0, -2, 0]}
-                        >
+                        <Text fontSize={0.5} position={[0, -2, 0]}>
                             Yeeeew!
                         </Text>
                     </Billboard>

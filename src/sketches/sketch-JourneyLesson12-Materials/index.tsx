@@ -166,7 +166,7 @@ const Lights = () => {
     useEffect(() => {
         directionalLight.current.lookAt(0, 0, 0)
     }, [])
-    
+
     return (
         <>
             <directionalLight

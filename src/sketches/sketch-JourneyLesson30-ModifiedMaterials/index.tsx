@@ -126,7 +126,7 @@ const Wall = (props: JSX.IntrinsicElements['mesh']) => (
 
 const App = () => {
     const directionalLight = useRef<THREE.DirectionalLight>(null!)
-    
+
     useEffect(() => {
         directionalLight.current.lookAt(0, 0, 0)
     }, [])
