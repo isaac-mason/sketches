@@ -119,10 +119,6 @@ export const GlobalStyle = createGlobalStyle`
     overflow: hidden;
   }
 
-  #root {
-    overflow: auto;
-  }
-
   body {
     position: fixed;
     overflow: hidden;
