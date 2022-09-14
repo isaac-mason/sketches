@@ -53,7 +53,7 @@ const App = () => {
 
 export default () => (
     <>
-        <h1 style={{ zIndex: 1 }}>SFS 03 - Attributes</h1>
+        <h1>SFS 03 - Attributes</h1>
         <Canvas>
             <App />
             <OrthographicCamera

@@ -1,5 +1,5 @@
 import { Leva } from 'leva'
-import { Suspense } from 'react'
+import { KeyboardEvent, Suspense, useEffect, useState } from 'react'
 import {
     HashRouter as Router,
     Link,
@@ -8,30 +8,55 @@ import {
     useMatch,
 } from 'react-router-dom'
 import { Loader } from './Loader'
-import { isSketchRoute, sketches, sketchList } from './sketches'
+import { isSketchRoute, Sketch, sketchComponents, sketchList } from './sketches'
 import {
-    Dot,
     GlobalStyle,
+    HideH1GlobalStyle,
+    Menu,
+    MenuContainer,
+    MenuItem,
+    MenuItemImage,
+    MenuItemTitle,
+    MenuToggle,
     Page,
     SketchPanel,
-    TooltipContainer,
-    TooltipContent,
-    TooltipTrigger,
 } from './styles'
 
 const defaultSketch = 'Home'
-const DefaultComponent = sketches[defaultSketch].Component
+const DefaultComponent = sketchComponents[defaultSketch].Component
 
 const RoutedComponent = () => {
     const {
         params: { name: routeName },
     } = useMatch('/sketch/:name') || { params: { name: defaultSketch } }
     const sketchName = isSketchRoute(routeName) ? routeName : defaultSketch
-    const { Component } = sketches[sketchName]
+    const { Component } = sketchComponents[sketchName]
     return <Component />
 }
 
+const modes = ['default', 'screenshot'] as const
+
 function App() {
+    const [mode, setMode] = useState<typeof modes[number]>('default')
+
+    useEffect(() => {
+        const handler = (e: WindowEventMap['keyup']): void => {
+            if (e.key === '?') {
+                const currentIndex = modes.findIndex((m) => m === mode)
+                console.log(currentIndex)
+                const nextModeIndex = (currentIndex + 1) % modes.length
+                console.log(nextModeIndex)
+                setMode(modes[nextModeIndex])
+            }
+        }
+
+        window.addEventListener('keyup', handler)
+
+        return () => {
+            window.removeEventListener('keyup', handler)
+        }
+    }, [mode])
+
     return (
         <Page>
             <Leva collapsed />
@@ -41,41 +66,61 @@ function App() {
                     <Route path="/sketch/:name" element={<RoutedComponent />} />
                 </Routes>
             </Suspense>
-            <Sketches />
-            <a href="https://github.com/isaac-mason/sketches">Github</a>
+            {mode !== 'screenshot' ? (
+                <>
+                    <Sketches /> 
+                    <a href="https://github.com/isaac-mason/sketches">Github</a>
+                </>
+            ) : undefined}
+            {mode === 'screenshot' ? (
+                <HideH1GlobalStyle />
+            ) : undefined}
         </Page>
     )
 }
 
 function Sketches() {
     const {
-        params: { name: routeName },
+        params: { name: currentRouteName },
     } = useMatch('/sketch/:name') || { params: { name: defaultSketch } }
 
+    const [open, setOpen] = useState(false)
+
     return (
-        <SketchPanel>
-            {sketchList.map((sketch) => (
-                <Link
-                    key={sketch.route}
-                    to={`/sketch/${sketch.route}`}
-                    title={sketch.title}
+        <>
+            <SketchPanel>
+                <MenuToggle
+                    className="material-symbols-outlined"
+                    onClick={() => setOpen((v) => !v)}
                 >
-                    <TooltipContainer>
-                        <TooltipTrigger>
-                            <Dot
-                                style={{
-                                    backgroundColor:
-                                        sketch.route === routeName
-                                            ? 'salmon'
-                                            : '#eee',
-                                }}
-                            />
-                        </TooltipTrigger>
-                        <TooltipContent>{sketch.title}</TooltipContent>
-                    </TooltipContainer>
-                </Link>
-            ))}
-        </SketchPanel>
+                    menu
+                </MenuToggle>
+            </SketchPanel>
+            <MenuContainer
+                id="menu-container"
+                open={open}
+                onClick={() => setOpen(false)}
+            >
+                <Menu id="menu" open={open}>
+                    {sketchList.map((sketch) => (
+                        <MenuItem
+                            key={sketch.route}
+                            to={`/sketch/${sketch.route}`}
+                            title={sketch.title}
+                            className={sketch.route === currentRouteName ? 'active' : ''}
+                        >
+                            {(sketch as Sketch).cover ? (
+                                <MenuItemImage
+                                    src={sketch.cover}
+                                    alt={sketch.title}
+                                />
+                            ) : undefined}
+                            <MenuItemTitle>{sketch.title}</MenuItemTitle>
+                        </MenuItem>
+                    ))}
+                </Menu>
+            </MenuContainer>
+        </>
     )
 }
 

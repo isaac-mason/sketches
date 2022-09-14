@@ -153,7 +153,7 @@ const App = () => {
 
 export default () => (
     <>
-        <h1 style={{ zIndex: 1 }}>Journey 30 - Modified Materials</h1>
+        <h1>Journey 30 - Modified Materials</h1>
         <Canvas
             gl={{ antialias: true }}
             camera={{ position: [3, 2, 11] }}

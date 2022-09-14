@@ -186,7 +186,7 @@ const App = () => {
 
 export default () => (
     <>
-        <h1 style={{ zIndex: 1 }}>Journey 29 - Animated Galaxy</h1>
+        <h1>Journey 29 - Animated Galaxy</h1>
         <Canvas camera={{ position: [2, 2, 2] }}>
             <App />
             <OrbitControls />

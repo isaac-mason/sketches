@@ -45,7 +45,7 @@ const App = () => {
 
 export default () => (
     <>
-        <h1 style={{ zIndex: 1 }}>SFS 02 - Uniforms</h1>
+        <h1>SFS 02 - Uniforms</h1>
         <Canvas>
             <App />
             <OrthographicCamera
