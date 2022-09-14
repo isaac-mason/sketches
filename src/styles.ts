@@ -9,20 +9,21 @@ export const Page = styled.div`
     height: 100%;
     padding: 0px;
 
-
     & > h1 {
         position: absolute;
         z-index: 1;
         top: 20px;
         left: 20px;
-
-        font-weight: 900;
-        font-size: 2em;
+        
         margin: 0;
         padding-right: 0.2em;
-        color: #eee;
+        
+        font-size: 2em;
+        font-weight: 900;
         line-height: 1.2;
         letter-spacing: -2px;
+        
+        color: #eee;
 
         ${up('md')} {
             top: 70px;
@@ -50,10 +51,6 @@ export const Page = styled.div`
             right: 60px;
         }
     }
-
-    canvas {
-        position: relative;
-    }
 `
 
 export const SketchPanel = styled.div`
@@ -76,23 +73,16 @@ export const GlobalStyle = createGlobalStyle`
   html,
   body,
   #root {
+    height: 100%;
     width: 100%;
     margin: 0;
     padding: 0;
     user-select: none;
+    background: #222;
   }
 
   html {
-    height: 100%;
     position: fixed;
-  }
-
-  body {
-    height: 100%;
-  }
-
-  #root {
-    height: 100%;
   }
 
   #gl {
@@ -101,12 +91,10 @@ export const GlobalStyle = createGlobalStyle`
   }
 
   body {
-    position: fixed;
     overflow: hidden;
     overscroll-behavior-y: none;
     font-family: 'Poppins', sans-serif;
     color: black;
-    background: #222;
   }
 `
 
