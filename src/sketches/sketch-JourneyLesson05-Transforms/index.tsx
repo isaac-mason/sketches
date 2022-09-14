@@ -1,6 +1,7 @@
 import { TransformControls } from '@react-three/drei'
-import { Canvas, extend } from '@react-three/fiber'
+import { extend } from '@react-three/fiber'
 import { AxesHelper } from 'three'
+import { Canvas } from '../Canvas'
 
 extend(AxesHelper)
 

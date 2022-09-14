@@ -5,12 +5,13 @@ import {
     useCubeTexture,
     useTexture,
 } from '@react-three/drei'
-import { Canvas, Vector3 } from '@react-three/fiber'
+import { Vector3 } from '@react-three/fiber'
 import { Box, Flex } from '@react-three/flex'
 import { useRef, useEffect } from 'react'
 import * as THREE from 'three'
 import { MeshMatcapMaterial, MeshNormalMaterial } from 'three'
 import { useData } from '../../hooks/use-data'
+import { Canvas } from '../Canvas'
 import doorAlphaImage from './textures/door/alpha.jpg'
 import doorAmbientOcclusionImage from './textures/door/ambientOcclusion.jpg'
 import doorColorImage from './textures/door/color.jpg'

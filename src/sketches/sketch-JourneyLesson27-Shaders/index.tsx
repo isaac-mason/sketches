@@ -1,6 +1,7 @@
 import { OrbitControls } from '@react-three/drei'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
+import { Canvas } from '../Canvas'
 
 const cnoise = /* glsl */ `
 //	Classic Perlin 2D Noise 

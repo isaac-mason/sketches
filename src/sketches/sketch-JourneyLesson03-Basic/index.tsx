@@ -1,5 +1,5 @@
 import { OrbitControls } from '@react-three/drei'
-import { Canvas } from '@react-three/fiber'
+import { Canvas } from '../Canvas'
 
 const App = () => {
     return (

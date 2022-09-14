@@ -1,8 +1,9 @@
 import { OrbitControls } from '@react-three/drei'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { useFrame, useThree } from '@react-three/fiber'
 import { useControls } from 'leva'
 import { useMemo, useRef } from 'react'
 import { BufferGeometry, Color, BufferAttribute, AdditiveBlending } from 'three'
+import { Canvas } from '../Canvas'
 
 const vertexShader = /* glsl */ `
 uniform float uTime;

@@ -1,8 +1,8 @@
 import { OrbitControls } from '@react-three/drei'
-import { Canvas } from '@react-three/fiber'
 import { useControls } from 'leva'
 import { AdditiveBlending, BufferAttribute, BufferGeometry, Color } from 'three'
 import { useData } from '../../hooks/use-data'
+import { Canvas } from '../Canvas'
 
 const App = () => {
     const parameters = useControls('journey-19-galaxy-generator', {

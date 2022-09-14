@@ -1,8 +1,8 @@
 import { Float, OrbitControls, Text } from '@react-three/drei'
-import { Canvas } from '@react-three/fiber'
 import { Box, Flex } from '@react-three/flex'
 import { useRef, useEffect } from 'react'
 import { MagicMirror } from '../../components/MagicMirror'
+import { Canvas } from '../Canvas'
 
 const MIRROR_SIZE = [3, 3] as [number, number]
 

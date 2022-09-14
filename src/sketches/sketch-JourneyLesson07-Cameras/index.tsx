@@ -1,7 +1,7 @@
 import { CameraShake } from '@react-three/drei'
-import { Canvas } from '@react-three/fiber'
 import { useEffect, useRef } from 'react'
 import { PCFSoftShadowMap } from 'three'
+import { Canvas } from '../Canvas'
 
 const Cube = () => (
     <mesh position={[0, -0.5, 0]} receiveShadow castShadow>

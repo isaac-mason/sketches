@@ -1,7 +1,8 @@
 import { Html } from '@react-three/drei'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { useFrame } from '@react-three/fiber'
 import { Ref, RefObject, useRef } from 'react'
 import { Group } from 'three'
+import { Canvas } from '../Canvas'
 
 const App = () => {
     const group = useRef(null) as RefObject<Group>

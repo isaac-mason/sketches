@@ -1,6 +1,6 @@
 import { OrbitControls, useTexture } from '@react-three/drei'
-import { Canvas } from '@react-three/fiber'
 import * as THREE from 'three'
+import { Canvas } from '../Canvas'
 import doorImage from './textures/door/color.jpg'
 import minecraftImage from './textures/minecraft.png'
 

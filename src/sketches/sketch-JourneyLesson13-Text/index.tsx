@@ -1,6 +1,5 @@
-import { Text, Float, Billboard } from '@react-three/drei'
-import { Canvas } from '@react-three/fiber'
-import { useRef, useEffect } from 'react'
+import { Billboard, Float, Text } from '@react-three/drei'
+import { Canvas } from '../Canvas'
 import NotoEmojiRegular from './NotoEmoji-Regular.ttf'
 
 const Balloons = () => {

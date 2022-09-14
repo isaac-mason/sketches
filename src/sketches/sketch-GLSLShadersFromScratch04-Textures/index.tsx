@@ -1,6 +1,6 @@
 import { OrthographicCamera, useTexture } from '@react-three/drei'
-import { Canvas } from '@react-three/fiber'
 import { Vector4 } from 'three'
+import { Canvas } from '../Canvas'
 import dogImage from './dog.jpeg'
 
 const vertexShader = /* glsl */ `

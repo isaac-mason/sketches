@@ -4,9 +4,11 @@ import styled, { createGlobalStyle } from 'styled-components'
 
 export const Page = styled.div`
     position: relative;
+    z-index: 0;
     width: 100%;
-    height: 100vh;
+    height: 100%;
     padding: 0px;
+
 
     & > h1 {
         position: absolute;
@@ -36,7 +38,7 @@ export const Page = styled.div`
 
     & > a {
         position: absolute;
-        bottom: 70px;
+        bottom: 20px;
         right: 20px;
         font-size: 1.2em;
         margin: 0;
@@ -57,7 +59,7 @@ export const Page = styled.div`
 export const SketchPanel = styled.div`
     position: absolute;
     max-width: 250px;
-    bottom: 70px;
+    bottom: 10px;
     left: 10px;
 
     ${up('md')} {
@@ -75,16 +77,27 @@ export const GlobalStyle = createGlobalStyle`
   body,
   #root {
     width: 100%;
-    height: 100%;
     margin: 0;
     padding: 0;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
     user-select: none;
-    overflow: hidden;
+  }
+
+  html {
+    height: 100%;
+    position: fixed;
+  }
+
+  body {
+    height: 100%;
+  }
+
+  #root {
+    height: 100%;
+  }
+
+  #gl {
+    position: relative;
+    z-index: 0;
   }
 
   body {
@@ -151,7 +164,7 @@ export const MenuContainer = styled.div<{ open: boolean }>`
     top: 0;
     left: 0;
     width: 100%;
-    height: 100vh;
+    height: 100%;
     transition: background, 0.25s ease;
 
     background: ${(props) =>
@@ -169,7 +182,7 @@ export const Menu = styled.div<{ open: boolean }>`
     background-color: #111;
     
     width: 300px;
-    height: 100vh;
+    height: 100%;
     gap: 0.5em;
     padding: 1em;
     
