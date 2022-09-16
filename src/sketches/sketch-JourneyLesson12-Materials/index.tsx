@@ -7,10 +7,8 @@ import {
 } from '@react-three/drei'
 import { Vector3 } from '@react-three/fiber'
 import { Box, Flex } from '@react-three/flex'
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useLayoutEffect } from 'react'
 import * as THREE from 'three'
-import { MeshMatcapMaterial, MeshNormalMaterial } from 'three'
-import { useData } from '../../hooks/use-data'
 import { Canvas } from '../Canvas'
 import doorAlphaImage from './textures/door/alpha.jpg'
 import doorAmbientOcclusionImage from './textures/door/ambientOcclusion.jpg'
@@ -46,7 +44,7 @@ const Boxes = (props: { position: Vector3 }) => {
             <Box padding={padding} centerAnchor>
                 <Float>
                     <mesh>
-                        <boxBufferGeometry args={[1, 1, 1]} />
+                        <boxGeometry args={[1, 1, 1]} />
                         <meshNormalMaterial />
                     </mesh>
                 </Float>
@@ -54,7 +52,7 @@ const Boxes = (props: { position: Vector3 }) => {
             <Box padding={padding} centerAnchor>
                 <Float>
                     <mesh>
-                        <boxBufferGeometry args={[1, 1, 1]} />
+                        <boxGeometry args={[1, 1, 1]} />
                         <meshMatcapMaterial matcap={matcapTexture} />
                     </mesh>
                 </Float>
@@ -62,7 +60,7 @@ const Boxes = (props: { position: Vector3 }) => {
             <Box padding={padding} centerAnchor>
                 <Float>
                     <mesh>
-                        <boxBufferGeometry args={[1, 1, 1]} />
+                        <boxGeometry args={[1, 1, 1]} />
                         <meshLambertMaterial color={0x4444ff} />
                     </mesh>
                 </Float>
@@ -70,7 +68,7 @@ const Boxes = (props: { position: Vector3 }) => {
             <Box padding={padding} centerAnchor>
                 <Float>
                     <mesh>
-                        <boxBufferGeometry args={[1, 1, 1]} />
+                        <boxGeometry args={[1, 1, 1]} />
                         <meshPhongMaterial
                             shininess={10}
                             specular={0x0000ff}
@@ -82,7 +80,7 @@ const Boxes = (props: { position: Vector3 }) => {
             <Box padding={padding} centerAnchor>
                 <Float>
                     <mesh>
-                        <boxBufferGeometry args={[1, 1, 1]} />
+                        <boxGeometry args={[1, 1, 1]} />
                         <meshStandardMaterial
                             metalness={0.45}
                             roughness={0.65}
@@ -96,65 +94,41 @@ const Boxes = (props: { position: Vector3 }) => {
 }
 
 const Door = (props: { position: Vector3 }) => {
-    const doorAlpha = useTexture(doorAlphaImage)
-    const doorAmbientOcclusion = useTexture(doorAmbientOcclusionImage)
-    const doorColor = useTexture(doorColorImage)
-    const doorHeight = useTexture(doorHeightImage)
-    const doorMetalness = useTexture(doorMetalnessImage)
-    const doorNormal = useTexture(doorNormalImage)
-    const doorRoughness = useTexture(doorRoughnessImage)
-
-    const plane = useData(() => {
-        const material = new THREE.MeshStandardMaterial()
-
-        material.map = doorColor
-
-        material.aoMap = doorAmbientOcclusion
-        material.aoMapIntensity = 2
-
-        material.displacementMap = doorHeight
-        material.displacementScale = 0.2
-
-        material.normalMap = doorNormal
-
-        material.metalnessMap = doorMetalness
-        material.roughnessMap = doorRoughness
-
-        material.transparent = true
-        material.alphaMap = doorAlpha
-
-        const mesh = new THREE.Mesh(
-            new THREE.PlaneBufferGeometry(4, 4, 100, 100),
-            material
-        )
-
-        mesh.geometry.setAttribute(
-            'uv2',
-            new THREE.BufferAttribute(mesh.geometry.attributes.uv.array, 2)
-        )
-
-        return mesh
+    const doorTextureProps = useTexture({
+        map: doorColorImage,
+        alphaMap: doorAlphaImage,
+        aoMap: doorAmbientOcclusionImage,
+        displacementMap: doorHeightImage,
+        metalnessMap: doorMetalnessImage,
+        roughnessMap: doorRoughnessImage,
+        normalMap: doorNormalImage,
     })
+
+    const planeGeometryRef = useRef<THREE.PlaneGeometry>(null)
+    
+    useLayoutEffect(() => {
+            if (planeGeometryRef.current) {
+                planeGeometryRef.current.setAttribute(
+                    'uv2',
+                    new THREE.BufferAttribute(
+                        planeGeometryRef.current.attributes.uv.array,
+                        2
+                    )
+                )
+            }
+        }, [])
 
     return (
         <>
             <Float floatIntensity={5} position={props.position}>
                 <mesh>
+                    <planeGeometry ref={planeGeometryRef} args={[4, 4, 100, 100]} />
                     <meshStandardMaterial
-                        map={doorColor}
-                        aoMap={doorAmbientOcclusion}
-                        aoMapIntensity={2}
-                        displacementMap={doorHeight}
-                        displacementScale={0.2}
-                        normalMap={doorNormal}
-                        metalnessMap={doorMetalness}
-                        roughnessMap={doorRoughness}
+                        {...doorTextureProps}
                         transparent
-                        alphaMap={doorAlpha}
+                        aoMapIntensity={1.2}
+                        displacementScale={0.2}
                     />
-                    <planeBufferGeometry args={[4, 4, 100, 100]}>
-                        <bufferAttribute attach="uv2" />
-                    </planeBufferGeometry>
                 </mesh>
             </Float>
         </>
