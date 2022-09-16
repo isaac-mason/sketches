@@ -1,7 +1,9 @@
 import { OrbitControls, useHelper, useTexture } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
-import { useRef } from 'react'
+import { useControls } from 'leva'
+import { useLayoutEffect, useRef } from 'react'
 import * as THREE from 'three'
+import { BufferAttribute } from 'three'
 import { Canvas } from '../Canvas'
 import bricksAmbientOcclusionImage from './textures/bricks/ambientOcclusion.jpg'
 import bricksColorImage from './textures/bricks/color.jpg'
@@ -19,42 +21,73 @@ import grassColorImage from './textures/grass/color.jpg'
 import grassNormalImage from './textures/grass/normal.jpg'
 import grassRoughnessImage from './textures/grass/roughness.jpg'
 
+const CONTROLS_FOLDER = 'journey-17-haunted-house'
+
 const BACKGROUND_COLOR = 0x262837
 
 const House = (props: JSX.IntrinsicElements['group']) => {
+    const { debug } = useControls(CONTROLS_FOLDER, {
+        debug: false,
+    })
+
     const lightRef = useRef<THREE.PointLight>(null!)
-    useHelper(lightRef, THREE.PointLightHelper)
+    useHelper(debug ? lightRef : undefined, THREE.PointLightHelper, 0.1)
 
-    const bricksColor = useTexture(bricksColorImage)
-    const bricksAmbientOcclusion = useTexture(bricksAmbientOcclusionImage)
-    const bricksNormal = useTexture(bricksNormalImage)
-    const bricksRoughness = useTexture(bricksRoughnessImage)
+    const bricksTextureProps = useTexture({
+        map: bricksColorImage,
+        aoMap: bricksAmbientOcclusionImage,
+        normalMap: bricksNormalImage,
+        roughnessMap: bricksRoughnessImage,
+    })
 
-    const doorColor = useTexture(doorColorImage)
-    const doorAlpha = useTexture(doorAlphaImage)
-    const doorAmbientOcclusion = useTexture(doorAmbientOcclusionImage)
-    const doorHeight = useTexture(doorHeightImage)
-    const doorNormal = useTexture(doorNormalImage)
-    const doorMetalness = useTexture(doorMetalnessImage)
-    const doorRoughness = useTexture(doorRoughnessImage)
+    const doorTextureProps = useTexture({
+        map: doorColorImage,
+        alphaMap: doorAlphaImage,
+        normalMap: doorNormalImage,
+        metalnessMap: doorMetalnessImage,
+        roughnessMap: doorRoughnessImage,
+        displacementMap: doorHeightImage,
+        aoMap: doorAmbientOcclusionImage,
+    })
+
+    const wallsBoxGeometryRef = useRef<THREE.BoxGeometry>(null)
+    const doorPlaneGeometryRef = useRef<THREE.PlaneGeometry>(null)
+
+    useLayoutEffect(() => {
+        if (wallsBoxGeometryRef.current) {
+            wallsBoxGeometryRef.current.setAttribute(
+                'uv2',
+                new BufferAttribute(
+                    wallsBoxGeometryRef.current.attributes.uv.array,
+                    2
+                )
+            )
+        }
+
+        if (doorPlaneGeometryRef.current) {
+            doorPlaneGeometryRef.current.setAttribute(
+                'uv2',
+                new BufferAttribute(
+                    doorPlaneGeometryRef.current.attributes.uv.array,
+                    2
+                )
+            )
+        }
+    }, [])
 
     return (
         <>
             <group {...props}>
                 {/* Walls */}
                 <mesh position={[0, 1.25, 0]} castShadow receiveShadow>
-                    <boxBufferGeometry args={[4, 2.5, 4]}>
-                        <bufferAttribute attach="uv2" />
-                    </boxBufferGeometry>
+                    <boxGeometry ref={wallsBoxGeometryRef} args={[4, 2.5, 4]} />
                     <meshStandardMaterial
-                        map={bricksColor}
-                        aoMap={bricksAmbientOcclusion}
-                        normalMap={bricksNormal}
+                        {...bricksTextureProps}
                         normalMap-encoding={THREE.LinearEncoding}
                         normalScale={new THREE.Vector2(0.01, 0.01)}
-                        roughnessMap={bricksRoughness}
                     />
                 </mesh>
+
                 {/* Roof */}
                 <mesh
                     castShadow
@@ -62,52 +95,49 @@ const House = (props: JSX.IntrinsicElements['group']) => {
                     position={[0, 2.5 + 0.5, 0]}
                     rotation={[0, Math.PI / 4, 0]}
                 >
-                    <coneBufferGeometry args={[3.5, 1, 4]} />
+                    <coneGeometry args={[3.5, 1, 4]} />
                     <meshStandardMaterial color={0xb35f45} />
                 </mesh>
+
                 {/* Door */}
                 <mesh position={[0, 1, 2.001]}>
-                    <planeBufferGeometry args={[2.2, 2.2, 100, 100]}>
-                        <bufferAttribute attach="uv2" />
-                    </planeBufferGeometry>
+                    <planeGeometry
+                        ref={doorPlaneGeometryRef}
+                        args={[2.2, 2.2, 100, 100]}
+                    />
                     <meshStandardMaterial
                         transparent
-                        map={doorColor}
-                        alphaMap={doorAlpha}
-                        aoMap={doorAmbientOcclusion}
+                        {...doorTextureProps}
                         aoMapIntensity={2}
-                        displacementMap={doorHeight}
                         displacementScale={0.2}
-                        normalMap={doorNormal}
-                        metalnessMap={doorMetalness}
-                        roughnessMap={doorRoughness}
+                        normalScale={new THREE.Vector2(0.2, 0.2)}
                     />
                 </mesh>
+
                 {/* Door light */}
                 <pointLight
                     ref={lightRef}
                     position={[0, 2, 2.3]}
                     color={0xff7d67}
-                    intensity={2}
+                    intensity={1}
                     distance={12}
                     castShadow
                     shadow-mapSize-width={256}
                     shadow-mapSize-height={256}
-                    shadow-camera-far={7}
+                    shadow-camera-near={0.01}
+                    shadow-camera-far={10}
                 />
             </group>
         </>
     )
 }
 
-const Bush = (props: JSX.IntrinsicElements['group']) => {
+const Bush = (props: JSX.IntrinsicElements['mesh']) => {
     return (
-        <group {...props}>
-            <mesh receiveShadow castShadow>
-                <sphereBufferGeometry args={[1, 16, 16]} />
-                <meshStandardMaterial color={0x89c854} />
-            </mesh>
-        </group>
+        <mesh {...props} receiveShadow castShadow>
+            <sphereGeometry args={[1, 16, 16]} />
+            <meshStandardMaterial color={0x89c854} />
+        </mesh>
     )
 }
 
@@ -115,7 +145,7 @@ const Grave = (props: JSX.IntrinsicElements['group']) => {
     return (
         <group {...props}>
             <mesh position={[0, 0.3, 1]} receiveShadow castShadow>
-                <boxBufferGeometry args={[0.6, 0.8, 0.2]} />
+                <boxGeometry args={[0.6, 0.8, 0.2]} />
                 <meshStandardMaterial color={0xb2b6b1} />
             </mesh>
         </group>
@@ -123,23 +153,28 @@ const Grave = (props: JSX.IntrinsicElements['group']) => {
 }
 
 const Ghost = (props: { color: string; offset: number }) => {
-    const ref = useRef<THREE.PointLight>(null!)
-    useHelper(ref, THREE.PointLightHelper)
+    const { debug } = useControls(CONTROLS_FOLDER, {
+        debug: false,
+    })
+
+    const pointLightRef = useRef<THREE.PointLight>(null!)
+
+    useHelper(debug ? pointLightRef : undefined, THREE.PointLightHelper)
 
     useFrame(({ clock: { elapsedTime } }) => {
         const ghostAngle = elapsedTime * 0.5
-        ref.current.position.x =
+        pointLightRef.current.position.x =
             Math.cos(ghostAngle + props.offset) *
             (7 + Math.sin(elapsedTime * 2) * 2)
-        ref.current.position.z =
+        pointLightRef.current.position.z =
             Math.sin(ghostAngle + props.offset) *
             (7 + Math.sin(elapsedTime * 2) * 2)
-        ref.current.position.y = Math.sin(ghostAngle * 2) - 0.5
+        pointLightRef.current.position.y = Math.sin(ghostAngle * 2) - 0.5
     })
 
     return (
         <pointLight
-            ref={ref as never}
+            ref={pointLightRef as never}
             color={props.color}
             intensity={2}
             distance={4}
@@ -152,44 +187,47 @@ const Ghost = (props: { color: string; offset: number }) => {
 }
 
 const Grass = () => {
-    const color = useTexture(grassColorImage)
-    const ambientOcclusion = useTexture(grassAmbientOcclusionImage)
-    const normal = useTexture(grassNormalImage)
-    const roughness = useTexture(grassRoughnessImage)
+    const planeGeometryRef = useRef<THREE.PlaneGeometry>(null)
+
+    const grassTextureProps = useTexture({
+        map: grassColorImage,
+        aoMap: grassAmbientOcclusionImage,
+        normalMap: grassNormalImage,
+        roughnessMap: grassRoughnessImage,
+    })
+
+    useLayoutEffect(() => {
+        if (planeGeometryRef.current) {
+            planeGeometryRef.current.setAttribute(
+                'uv2',
+                new BufferAttribute(
+                    planeGeometryRef.current.attributes.uv.array,
+                    2
+                )
+            )
+        }
+    }, [])
 
     return (
         <mesh rotation={[-Math.PI * 0.5, 0, 0]} receiveShadow>
-            <planeBufferGeometry args={[50, 50]}>
-                <bufferAttribute attach="uv2" />
-            </planeBufferGeometry>
+            <planeGeometry ref={planeGeometryRef} args={[50, 50]} />
             <meshStandardMaterial
-                map={color}
+                {...grassTextureProps}
                 map-repeat={[20, 20]}
                 map-wrapS={THREE.RepeatWrapping}
                 map-wrapT={THREE.RepeatWrapping}
-                aoMap={ambientOcclusion}
                 aoMap-repeat={[20, 20]}
                 aoMap-wrapS={THREE.RepeatWrapping}
                 aoMap-wrapT={THREE.RepeatWrapping}
-                normalMap={normal}
                 normalMap-repeat={[20, 20]}
                 normalMap-wrapS={THREE.RepeatWrapping}
                 normalMap-wrapT={THREE.RepeatWrapping}
                 normalMap-encoding={THREE.LinearEncoding}
-                roughnessMap={roughness}
                 roughnessMap-repeat={[20, 20]}
                 roughnessMap-wrapS={THREE.RepeatWrapping}
                 roughnessMap-wrapT={THREE.RepeatWrapping}
             />
         </mesh>
-    )
-}
-
-const Lights = () => {
-    return (
-        <>
-            <ambientLight color={0xb5b5ff} intensity={0.2} />
-        </>
     )
 }
 
@@ -205,7 +243,8 @@ const App = () => {
             <color attach="background" args={[BACKGROUND_COLOR]} />
             <fog attach="fog" args={[BACKGROUND_COLOR, 12, 24]} />
 
-            <Lights />
+            <ambientLight color={0xb5b5ff} intensity={0.2} />
+
             <Grass />
             <House />
 
@@ -252,8 +291,8 @@ export default () => (
             camera={{ position: [6, 6, 12], fov: 50 }}
             shadows={{ type: THREE.PCFSoftShadowMap }}
         >
-            <OrbitControls />
             <App />
+            <OrbitControls />
         </Canvas>
     </>
 )
