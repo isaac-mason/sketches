@@ -53,18 +53,6 @@ export const Page = styled.div`
     }
 `
 
-export const SketchPanel = styled.div`
-    position: absolute;
-    max-width: 250px;
-    bottom: 10px;
-    left: 10px;
-
-    ${up('md')} {
-        bottom: 50px;
-        left: 50px;
-    }
-`
-
 export const GlobalStyle = createGlobalStyle`
   * {
     box-sizing: border-box;
@@ -133,6 +121,15 @@ const ResetButton = styled.button`
 `
 
 export const MenuToggle = styled(ResetButton)`
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+
+    ${up('md')} {
+        bottom: 50px;
+        left: 50px;
+    }
+
     color: #fff;
     font-size: 2em;
     cursor: pointer;

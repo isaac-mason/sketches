@@ -1,8 +1,7 @@
 import { Leva } from 'leva'
-import { KeyboardEvent, Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import {
     HashRouter as Router,
-    Link,
     Route,
     Routes,
     useMatch,
@@ -19,7 +18,6 @@ import {
     MenuItemTitle,
     MenuToggle,
     Page,
-    SketchPanel,
 } from './styles'
 
 const defaultSketch = 'Home'
@@ -37,16 +35,18 @@ const RoutedComponent = () => {
 const modes = ['default', 'screenshot'] as const
 
 function App() {
-    const [mode, setMode] = useState<typeof modes[number]>('default')
+    const [displayMode, setDisplayMode] = useState<typeof modes[number]>('default')
+
+    const [menuOpen, setMenuOpen] = useState(false)
 
     useEffect(() => {
         const handler = (e: WindowEventMap['keyup']): void => {
             if (e.key === '?') {
-                const currentIndex = modes.findIndex((m) => m === mode)
-                console.log(currentIndex)
+                const currentIndex = modes.findIndex((m) => m === displayMode)
                 const nextModeIndex = (currentIndex + 1) % modes.length
-                console.log(nextModeIndex)
-                setMode(modes[nextModeIndex])
+                setDisplayMode(modes[nextModeIndex])
+            } else if (e.key === 'Escape') {
+                setMenuOpen(false)
             }
         }
 
@@ -55,53 +55,36 @@ function App() {
         return () => {
             window.removeEventListener('keyup', handler)
         }
-    }, [mode])
+    }, [displayMode])
+
+    const {
+        params: { name: currentRouteName },
+    } = useMatch('/sketch/:name') || { params: { name: defaultSketch } }
 
     return (
         <Page>
             <Leva collapsed />
+
             <Suspense fallback={<Loader />}>
                 <Routes>
                     <Route path="/*" element={<DefaultComponent />} />
                     <Route path="/sketch/:name" element={<RoutedComponent />} />
                 </Routes>
             </Suspense>
-            {mode !== 'screenshot' ? (
-                <>
-                    <Sketches /> 
-                    <a href="https://github.com/isaac-mason/sketches">Github</a>
-                </>
-            ) : undefined}
-            {mode === 'screenshot' ? (
-                <HideH1GlobalStyle />
-            ) : undefined}
-        </Page>
-    )
-}
 
-function Sketches() {
-    const {
-        params: { name: currentRouteName },
-    } = useMatch('/sketch/:name') || { params: { name: defaultSketch } }
-
-    const [open, setOpen] = useState(false)
-
-    return (
-        <>
-            <SketchPanel>
-                <MenuToggle
-                    className="material-symbols-outlined"
-                    onClick={() => setOpen((v) => !v)}
-                >
-                    menu
-                </MenuToggle>
-            </SketchPanel>
+            <MenuToggle
+                className="material-symbols-outlined"
+                onClick={() => setMenuOpen((v) => !v)}
+            >
+                menu
+            </MenuToggle>
+            
             <MenuContainer
                 id="menu-container"
-                open={open}
-                onClick={() => setOpen(false)}
+                open={menuOpen}
+                onClick={() => setMenuOpen(false)}
             >
-                <Menu id="menu" open={open}>
+                <Menu id="menu" open={menuOpen}>
                     {sketchList.map((sketch) => (
                         <MenuItem
                             key={sketch.route}
@@ -120,7 +103,17 @@ function Sketches() {
                     ))}
                 </Menu>
             </MenuContainer>
-        </>
+
+            {displayMode !== 'screenshot' ? (
+                <>
+                    <a href={`https://github.com/isaac-mason/sketches/tree/main/src/sketches/sketch-${currentRouteName}`}>Github</a>
+                </>
+            ) : undefined}
+
+            {displayMode === 'screenshot' ? (
+                <HideH1GlobalStyle />
+            ) : undefined}
+        </Page>
     )
 }
 
