@@ -36,8 +36,11 @@ const modes = ['default', 'screenshot'] as const
 
 function App() {
     const [displayMode, setDisplayMode] = useState<typeof modes[number]>('default')
-
     const [menuOpen, setMenuOpen] = useState(false)
+
+    const {
+        params: { name: currentRouteName },
+    } = useMatch('/sketch/:name') || { params: { name: defaultSketch } }
 
     useEffect(() => {
         const handler = (e: WindowEventMap['keyup']): void => {
@@ -55,11 +58,7 @@ function App() {
         return () => {
             window.removeEventListener('keyup', handler)
         }
-    }, [displayMode])
-
-    const {
-        params: { name: currentRouteName },
-    } = useMatch('/sketch/:name') || { params: { name: defaultSketch } }
+    }, [displayMode])    
 
     return (
         <Page>
