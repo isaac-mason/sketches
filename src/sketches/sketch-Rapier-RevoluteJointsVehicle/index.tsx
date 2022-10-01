@@ -75,6 +75,7 @@ const Wheel = React.forwardRef(
         ]
 
         const axleToWheelJoint = useRevoluteJoint(
+            // todo - steerable = false causing tilt to the lft
             steerable ? axleRigidBodyRef : chassisRigidBody,
             wheelRigidBodyRef,
             [
@@ -157,8 +158,8 @@ const Vehicle = (props: JSX.IntrinsicElements['group']) => {
             wheelJointRaw.setContactsEnabled(false)
         })
 
-        backWheels.forEach((axle) => {
-            const axleJoint = axle.current!.axleToBodyJoint
+        backWheels.forEach((wheel) => {
+            const axleJoint = wheel.current!.axleToBodyJoint
             axleJoint.configureMotorPosition(0, WHEEL_STIFFNESS, 0)
         })
     }, [])
