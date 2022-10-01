@@ -155,8 +155,8 @@ const sketches = [
         cover: JourneyLesson30Cover,
     },
     {
-        title: 'Rapier - Arcade Car',
-        route: 'Rapier-ArcadeCar',
+        title: 'Rapier - Revolute Joints Vehicle',
+        route: 'Rapier-RevoluteJointsVehicle',
     },
 ] as const
 
