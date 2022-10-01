@@ -123,6 +123,10 @@ const Wheel = React.forwardRef(
 
 const Vehicle = (props: JSX.IntrinsicElements['group']) => {
     const camera = useThree((state) => state.camera)
+    const currentCameraPosition = useRef(new Vector3(30, 30, 0))
+    const currentCameraLookAt = useRef(new Vector3())
+
+    const chassisBodyRef = useRef<RigidBodyApi>(null!)
 
     const topLeftWheelRef = useRef<WheelRef>(null)
     const topRightWheelRef = useRef<WheelRef>(null)
@@ -138,13 +142,8 @@ const Vehicle = (props: JSX.IntrinsicElements['group']) => {
     const frontWheels = [topLeftWheelRef, topRightWheelRef]
     const backWheels = [bottomLeftWheelRef, bottomRightWheelRef]
 
-    const chassisBodyRef = useRef<RigidBodyApi>(null!)
-
-    const steeringAngle = useRef(0)
     const controls = useControls()
-
-    const currentCameraPosition = useRef(new Vector3(30, 30, 0))
-    const currentCameraLookAt = useRef(new Vector3())
+    const steeringAngle = useRef(0)
 
     useEffect(() => {
         wheels.forEach((wheel) => {
