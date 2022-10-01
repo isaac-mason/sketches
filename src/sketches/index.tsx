@@ -154,6 +154,10 @@ const sketches = [
         route: 'JourneyLesson30-ModifiedMaterials',
         cover: JourneyLesson30Cover,
     },
+    {
+        title: 'Rapier - Arcade Car',
+        route: 'Rapier-ArcadeCar',
+    },
 ] as const
 
 export const sketchList: readonly Sketch[] = sketches
