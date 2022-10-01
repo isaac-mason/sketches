@@ -1,6 +1,5 @@
 import { useFrame, useThree } from '@react-three/fiber'
 import {
-    BallCollider,
     CuboidCollider,
     CylinderCollider,
     Debug,
@@ -9,7 +8,6 @@ import {
     RigidBody,
     RigidBodyApi,
     RigidBodyApiRef,
-    useFixedJoint,
     useRapier,
     useRevoluteJoint,
     Vector3Array,
@@ -25,6 +23,12 @@ import { useControls } from './use-controls'
 // interesting - https://twitter.com/KenneyNL/status/1107783904784715788?ref_src=twsrc%5Etfw%7Ctwcamp%5Etweetembed%7Ctwterm%5E1107783904784715788%7Ctwgr%5Eb6167c2fe2dd2a357cdcb3e3ca6bee5f326a34d1%7Ctwcon%5Es1_&ref_url=https%3A%2F%2Fwww.reddit.com%2Fr%2Fgodot%2Fcomments%2Fla2jxa%2Fsimple_3d_car_physics_using_rigidbody_and%2F
 // wip - copying - shttps://threlte.xyz/rapier/basic-vehicle-controller
 
+const addVector3Arrays = (a: Vector3Array, b: Vector3Array): Vector3Array => [
+    a[0] + b[0],
+    a[1] + b[1],
+    a[2] + b[2],
+]
+
 const RAPIER_UPDATE_PRIORITY = -50
 
 const WHEEL_STIFFNESS = 100000
@@ -32,8 +36,9 @@ const WHEEL_STIFFNESS = 100000
 type WheelProps = {
     chassisRigidBody: RigidBodyApiRef
     position: Vector3Array
-    chassisToAxleAnchor: Vector3Array
+    chassisAnchor: Vector3Array
     side: 'left' | 'right'
+    steerable?: boolean
 }
 
 type WheelRef = {
@@ -45,7 +50,13 @@ type WheelRef = {
 
 const Wheel = React.forwardRef(
     (
-        { position, chassisToAxleAnchor, side, chassisRigidBody }: WheelProps,
+        {
+            position,
+            chassisAnchor,
+            side,
+            chassisRigidBody,
+            steerable = false,
+        }: WheelProps,
         ref: Ref<WheelRef | null>
     ) => {
         const axleRigidBodyRef = useRef<RigidBodyApi>(null)
@@ -54,14 +65,22 @@ const Wheel = React.forwardRef(
         const axleToBodyJoint = useRevoluteJoint(
             chassisRigidBody,
             axleRigidBodyRef,
-            [chassisToAxleAnchor, [0, 0, 0], [0, 1, 0]]
+            [chassisAnchor, [0, 0, 0], [0, 1, 0]]
         )
 
+        const axleOffset: Vector3Array = [
+            0.2 * (side === 'left' ? 1 : -1),
+            0,
+            0,
+        ]
+
         const axleToWheelJoint = useRevoluteJoint(
-            axleRigidBodyRef,
+            steerable ? axleRigidBodyRef : chassisRigidBody,
             wheelRigidBodyRef,
             [
-                [0.2 * (side === 'left' ? 1 : -1), 0, 0],
+                steerable
+                    ? axleOffset
+                    : addVector3Arrays(chassisAnchor, axleOffset),
                 [0, 0, 0],
                 [1, 0, 0],
             ]
@@ -151,10 +170,10 @@ const Vehicle = (props: JSX.IntrinsicElements['group']) => {
         let right = 0
 
         if (controls.current.forward) {
-            forward += 10000 * delta
+            forward += 6000 * delta
         }
         if (controls.current.backward) {
-            forward -= 10000 * delta
+            forward -= 6000 * delta
         }
 
         if (controls.current.left) {
@@ -178,7 +197,7 @@ const Vehicle = (props: JSX.IntrinsicElements['group']) => {
         // acceleration
         backWheels.forEach((wheel) => {
             const axleToWheelJoint = wheel.current!.axleToWheelJoint
-            axleToWheelJoint.configureMotorVelocity(forward, 100)
+            axleToWheelJoint.configureMotorVelocity(forward, 50)
         })
     }, RAPIER_UPDATE_PRIORITY + 1)
 
@@ -225,29 +244,31 @@ const Vehicle = (props: JSX.IntrinsicElements['group']) => {
                 ref={topLeftWheelRef}
                 chassisRigidBody={chassisBodyRef}
                 side="left"
-                position={[0.8, -0.1, 1.2]}
-                chassisToAxleAnchor={[0.8, -0.1, 1.2]}
+                position={[0.75, -0.2, 1.2]}
+                chassisAnchor={[0.75, -0.2, 1.2]}
+                steerable
             />
             <Wheel
                 ref={topRightWheelRef}
                 chassisRigidBody={chassisBodyRef}
                 side="right"
-                position={[-0.8, -0.1, 1.2]}
-                chassisToAxleAnchor={[-0.8, -0.1, 1.2]}
+                position={[-0.75, -0.2, 1.2]}
+                chassisAnchor={[-0.75, -0.2, 1.2]}
+                steerable
             />
             <Wheel
                 ref={bottomLeftWheelRef}
                 chassisRigidBody={chassisBodyRef}
                 side="left"
-                position={[0.8, -0.1, -1.2]}
-                chassisToAxleAnchor={[0.8, -0.1, -1.2]}
+                position={[0.75, -0.2, -1.2]}
+                chassisAnchor={[0.75, -0.2, -1.2]}
             />
             <Wheel
                 ref={bottomRightWheelRef}
                 chassisRigidBody={chassisBodyRef}
                 side="right"
-                position={[-0.8, -0.1, -1.2]}
-                chassisToAxleAnchor={[-0.8, -0.1, -1.2]}
+                position={[-0.75, -0.2, -1.2]}
+                chassisAnchor={[-0.75, -0.2, -1.2]}
             />
         </group>
     )
@@ -294,12 +315,11 @@ const App = () => {
             world.maxVelocityFrictionIterations
         const originalMaxVelocityIterations = world.maxVelocityIterations
 
-        world.maxStabilizationIterations *= 100
-        world.maxVelocityFrictionIterations *= 100
-        world.maxVelocityIterations *= 100
+        world.maxStabilizationIterations *= 200
+        world.maxVelocityFrictionIterations *= 200
+        world.maxVelocityIterations *= 200
 
         return () => {
-            if (!world) return
             world.maxStabilizationIterations =
                 originalMaxStabilizationIterations
             world.maxVelocityFrictionIterations =
