@@ -23,14 +23,16 @@ import JourneyLesson27Cover from './covers/JourneyLesson27.png'
 import JourneyLesson28Cover from './covers/JourneyLesson28.png'
 import JourneyLesson29Cover from './covers/JourneyLesson29.png'
 import JourneyLesson30Cover from './covers/JourneyLesson30.png'
+import RapierRevoluteJointVehicleCover from './covers/RapierRevoluteJointVehicle.png'
 
 export type Sketch = {
     title: string
     route: string
     cover?: string
+    hidden?: boolean
 }
 
-const sketches = [
+const sketchList = [
     { title: 'Home', route: 'Home' },
     /* GLSL Shaders From Scratch */
     {
@@ -154,9 +156,18 @@ const sketches = [
         route: 'JourneyLesson30-ModifiedMaterials',
         cover: JourneyLesson30Cover,
     },
+    {
+        title: 'Rapier - Revolute Joint Vehicle',
+        route: 'Rapier-RevoluteJointVehicle',
+        cover: RapierRevoluteJointVehicleCover,
+    },
 ] as const
 
-export const sketchList: readonly Sketch[] = sketches
+export const sketches: readonly Sketch[] = sketchList
+
+export const visibleSketches: readonly Sketch[] = sketches.filter(
+    (sketch) => sketch.hidden === undefined || sketch.hidden === false
+)
 
 export const isSketchRoute = (v?: string): v is Sketch['route'] =>
     sketchList.some((s) => s.route === v)

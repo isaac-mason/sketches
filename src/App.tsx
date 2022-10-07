@@ -7,7 +7,7 @@ import {
     useMatch,
 } from 'react-router-dom'
 import { Loader } from './Loader'
-import { isSketchRoute, Sketch, sketchComponents, sketchList } from './sketches'
+import { isSketchRoute, Sketch, sketchComponents, sketches, visibleSketches } from './sketches'
 import {
     GlobalStyle,
     HideH1GlobalStyle,
@@ -84,7 +84,7 @@ function App() {
                 onClick={() => setMenuOpen(false)}
             >
                 <Menu id="menu" open={menuOpen}>
-                    {sketchList.map((sketch) => (
+                    {visibleSketches.map((sketch) => (
                         <MenuItem
                             key={sketch.route}
                             to={`/sketch/${sketch.route}`}
