@@ -4,17 +4,20 @@ import {
     CuboidCollider,
     CylinderCollider,
     Debug,
-    Physics, RigidBody,
+    Physics,
+    RigidBody,
     RigidBodyApi,
     RigidBodyProps,
     useRapier,
-    Vector3Array
+    Vector3Array,
 } from '@react-three/rapier'
 import { useControls as useLevaControls } from 'leva'
 import React, {
-    createContext, useContext,
-    useEffect, useRef,
-    useState
+    createContext,
+    useContext,
+    useEffect,
+    useRef,
+    useState,
 } from 'react'
 import styled from 'styled-components'
 import { Vector3, Vector3Tuple } from 'three'
@@ -451,7 +454,7 @@ const RapierConfiguration = () => {
 
         return () => {
             if (!world) return
-            
+
             world.maxStabilizationIterations =
                 originalMaxStabilizationIterations
             world.maxVelocityFrictionIterations =
@@ -474,7 +477,6 @@ export default () => {
                 <Physics
                     gravity={[0, -9.81, 0]}
                     updatePriority={RAPIER_UPDATE_PRIORITY}
-                    
                 >
                     <RevoluteJointVehicle position={[0, 3, 0]}>
                         <RevoluteJointVehicleChassis>
