@@ -1,29 +1,29 @@
 import { lazy } from 'react'
-import GLSLShadersFromScratch01Cover from './covers/GLSLShadersFromScratch01-Varyings.png'
-import GLSLShadersFromScratch02Cover from './covers/GLSLShadersFromScratch02-Uniforms.png'
-import GLSLShadersFromScratch03Cover from './covers/GLSLShadersFromScratch03-Attributes.png'
-import GLSLShadersFromScratch04Cover from './covers/GLSLShadersFromScratch04-Textures.png'
-import GLSLShadersFromScratch05Cover from './covers/GLSLShadersFromScratch05-Alpha.png'
-import GLSLShadersFromScratch06Cover from './covers/GLSLShadersFromScratch06.png'
-import JourneyLesson03Cover from './covers/JourneyLesson03.png'
-import JourneyLesson05Cover from './covers/JourneyLesson05.png'
-import JourneyLesson06Cover from './covers/JourneyLesson06.png'
-import JourneyLesson07Cover from './covers/JourneyLesson07.png'
-import JourneyLesson09Cover from './covers/JourneyLesson09.png'
-import JourneyLesson11Cover from './covers/JourneyLesson11.png'
-import JourneyLesson12Cover from './covers/JourneyLesson12.png'
-import JourneyLesson13Cover from './covers/JourneyLesson13.png'
-import JourneyLesson15Cover from './covers/JourneyLesson15.png'
-import JourneyLesson16Cover from './covers/JourneyLesson16.png'
-import JourneyLesson17Cover from './covers/JourneyLesson17.png'
-import JourneyLesson18_1Cover from './covers/JourneyLesson18_1.png'
-import JourneyLesson18_2Cover from './covers/JourneyLesson18_2.png'
-import JourneyLesson19Cover from './covers/JourneyLesson19.png'
-import JourneyLesson27Cover from './covers/JourneyLesson27.png'
-import JourneyLesson28Cover from './covers/JourneyLesson28.png'
-import JourneyLesson29Cover from './covers/JourneyLesson29.png'
-import JourneyLesson30Cover from './covers/JourneyLesson30.png'
-import RapierRevoluteJointVehicleCover from './covers/RapierRevoluteJointVehicle.png'
+import GLSLShadersFromScratch01Cover from './sketch-GLSLShadersFromScratch01-Varyings/cover.png'
+import GLSLShadersFromScratch02Cover from './sketch-GLSLShadersFromScratch02-Uniforms/cover.png'
+import GLSLShadersFromScratch03Cover from './sketch-GLSLShadersFromScratch03-Attributes/cover.png'
+import GLSLShadersFromScratch04Cover from './sketch-GLSLShadersFromScratch04-Textures/cover.png'
+import GLSLShadersFromScratch05Cover from './sketch-GLSLShadersFromScratch05-Alpha/cover.png'
+import GLSLShadersFromScratch06Cover from './sketch-GLSLShadersFromScratch06-Addressing/cover.png'
+import JourneyLesson03Cover from './sketch-JourneyLesson03-Basic/cover.png'
+import JourneyLesson05Cover from './sketch-JourneyLesson05-Transforms/cover.png'
+import JourneyLesson06Cover from './sketch-JourneyLesson06-Animations/cover.png'
+import JourneyLesson07Cover from './sketch-JourneyLesson07-Cameras/cover.png'
+import JourneyLesson09Cover from './sketch-JourneyLesson09-Geometries/cover.png'
+import JourneyLesson11Cover from './sketch-JourneyLesson11-Textures/cover.png'
+import JourneyLesson12Cover from './sketch-JourneyLesson12-Materials/cover.png'
+import JourneyLesson13Cover from './sketch-JourneyLesson13-Text/cover.png'
+import JourneyLesson15Cover from './sketch-JourneyLesson15-Lights/cover.png'
+import JourneyLesson16Cover from './sketch-JourneyLesson16-Shadows/cover.png'
+import JourneyLesson17Cover from './sketch-JourneyLesson17-HauntedHouse/cover.png'
+import JourneyLesson18_1Cover from './sketch-JourneyLesson18-1-Particles/cover.png'
+import JourneyLesson18_2Cover from './sketch-JourneyLesson18-2-Particles/cover.png'
+import JourneyLesson19Cover from './sketch-JourneyLesson19-GalaxyGenerator/cover.png'
+import JourneyLesson27Cover from './sketch-JourneyLesson27-Shaders/cover.png'
+import JourneyLesson28Cover from './sketch-JourneyLesson28-RagingSea/cover.png'
+import JourneyLesson29Cover from './sketch-JourneyLesson29-AnimatedGalaxy/cover.png'
+import JourneyLesson30Cover from './sketch-JourneyLesson30-ModifiedMaterials/cover.png'
+import RapierRevoluteJointVehicleCover from './sketch-Rapier-RevoluteJointVehicle/cover.png'
 
 export type Sketch = {
     title: string
@@ -156,6 +156,7 @@ const sketchList = [
         route: 'JourneyLesson30-ModifiedMaterials',
         cover: JourneyLesson30Cover,
     },
+    /* Rapier */
     {
         title: 'Rapier - Revolute Joint Vehicle',
         route: 'Rapier-RevoluteJointVehicle',
