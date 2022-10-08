@@ -332,7 +332,7 @@ const RevoluteJointVehicleWheel = ({
         }
     }, [wheelRigidBody, axleRigidBody, vehicleContext.chassisRigidBody])
 
-    const axleOffset: Vector3Array = [0.2 * (side === 'left' ? 1 : -1), 0, 0]
+    const axleOffset: Vector3Array = [0.2 * (side === 'left' ? -1 : 1), 0, 0]
 
     return (
         <>
@@ -489,7 +489,7 @@ export default () => {
 
                         {/* top left wheel */}
                         <RevoluteJointVehicleWheel
-                            anchor={[0.75, -0.4, 1.2]}
+                            anchor={[-0.75, -0.4, 1.2]}
                             side="left"
                             steered
                         >
@@ -498,7 +498,7 @@ export default () => {
 
                         {/* top right wheel */}
                         <RevoluteJointVehicleWheel
-                            anchor={[-0.75, -0.4, 1.2]}
+                            anchor={[0.75, -0.4, 1.2]}
                             side="right"
                             steered
                         >
@@ -507,7 +507,7 @@ export default () => {
 
                         {/* back left wheel */}
                         <RevoluteJointVehicleWheel
-                            anchor={[0.75, -0.4, -1.2]}
+                            anchor={[-0.75, -0.4, -1.2]}
                             side="left"
                             torque
                         >
@@ -516,7 +516,7 @@ export default () => {
 
                         {/* back right wheel */}
                         <RevoluteJointVehicleWheel
-                            anchor={[-0.75, -0.4, -1.2]}
+                            anchor={[0.75, -0.4, -1.2]}
                             side="right"
                             torque
                         >
