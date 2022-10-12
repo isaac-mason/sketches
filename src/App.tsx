@@ -149,6 +149,14 @@ const App = () => {
                 displayMode={displayMode}
             />
 
+            {displayMode === 'default' ? (
+                <a
+                    href={`https://github.com/isaac-mason/sketches/tree/main/src/sketches/sketch-${currentRoute}`}
+                >
+                    GitHub
+                </a>
+            ) : undefined}
+
             {displayMode === 'debug' ? (
                 <DebugTunnel.In>
                     <Perf position="bottom-right" />
@@ -157,15 +165,7 @@ const App = () => {
 
             {displayMode === 'screenshot' ? (
                 <HideH1GlobalStyle />
-            ) : (
-                <>
-                    <a
-                        href={`https://github.com/isaac-mason/sketches/tree/main/src/sketches/sketch-${currentRoute}`}
-                    >
-                        GitHub
-                    </a>
-                </>
-            )}
+            ) : undefined}
         </Page>
     )
 }
