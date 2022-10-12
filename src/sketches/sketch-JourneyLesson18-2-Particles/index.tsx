@@ -1,8 +1,7 @@
 import { OrbitControls, useTexture } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
-import { useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import { BufferAttribute, BufferGeometry, Points } from 'three'
-import { useData } from '../../hooks/use-data'
 import { Canvas } from '../Canvas'
 import particleTextureImage from './particle.png'
 
@@ -13,7 +12,7 @@ const App = () => {
 
     const particleTexture = useTexture(particleTextureImage)
 
-    const bufferGeometry = useData(() => {
+    const bufferGeometry = useMemo(() => {
         const geo = new BufferGeometry()
 
         const positions = new Float32Array(COUNT * 3)
@@ -33,7 +32,7 @@ const App = () => {
         geo.setAttribute('color', new BufferAttribute(positions, 3))
 
         return geo
-    })
+    }, [])
 
     useFrame(({ clock: { elapsedTime } }) => {
         const positions = bufferGeometry.attributes.position

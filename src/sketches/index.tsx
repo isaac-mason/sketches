@@ -23,8 +23,8 @@ import JourneyLesson27Cover from './sketch-JourneyLesson27-Shaders/cover.png'
 import JourneyLesson28Cover from './sketch-JourneyLesson28-RagingSea/cover.png'
 import JourneyLesson29Cover from './sketch-JourneyLesson29-AnimatedGalaxy/cover.png'
 import JourneyLesson30Cover from './sketch-JourneyLesson30-ModifiedMaterials/cover.png'
-import RapierRaycastingCover from './sketch-Rapier-Raycasting/cover.png'
 import RapierRevoluteJointVehicleCover from './sketch-Rapier-RevoluteJointVehicle/cover.png'
+import RapierRaycastingCover from './sketch-Rapier-Raycasting/cover.png'
 
 export type Sketch = {
     title: string

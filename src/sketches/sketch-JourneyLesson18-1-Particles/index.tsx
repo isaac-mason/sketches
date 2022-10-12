@@ -1,10 +1,10 @@
 import { OrbitControls } from '@react-three/drei'
+import { useMemo } from 'react'
 import { BufferAttribute, BufferGeometry } from 'three'
-import { useData } from '../../hooks/use-data'
 import { Canvas } from '../Canvas'
 
 const App = () => {
-    const bufferGeometry = useData(() => {
+    const bufferGeometry = useMemo(() => {
         const geo = new BufferGeometry();
 
         const count = 1500;
@@ -19,7 +19,8 @@ const App = () => {
         geo.setAttribute("position", new BufferAttribute(positions, 3))
 
         return geo
-    })
+    }, [])
+
     return (
         <points>
             <pointsMaterial size={0.05} sizeAttenuation={true} color="#ff8888" />

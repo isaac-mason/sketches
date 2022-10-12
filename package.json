@@ -13,12 +13,14 @@
     "@react-three/flex": "^1.0.0",
     "@react-three/rapier": "^0.7.6",
     "leva": "^0.9.25",
+    "r3f-perf": "^6.5.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-router-dom": "^6.3.0",
     "styled-breakpoints": "^11.1.1",
     "styled-components": "^5.3.5",
-    "three": "^0.143.0"
+    "three": "^0.143.0",
+    "tunnel-rat": "^0.1.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.0",

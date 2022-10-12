@@ -1,7 +1,7 @@
 import { OrbitControls, useHelper, useTexture } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { useControls } from 'leva'
-import { useLayoutEffect, useRef } from 'react'
+import { useLayoutEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { BufferAttribute } from 'three'
 import { Canvas } from '../Canvas'
@@ -238,6 +238,30 @@ const ghosts = [
 ]
 
 const App = () => {
+    const graves = useMemo(() => {
+        return Array.from({ length: 50 })
+            .fill(0)
+            .map(() => {
+                const angle = Math.random() * Math.PI * 2
+                const radius = 3 + Math.random() * 10
+                const x = Math.sin(angle) * radius
+                const z = Math.cos(angle) * radius
+                const position = [x, 0, z] as [number, number, number]
+                const rotation = [
+                    0,
+                    (Math.random() - 0.5) * 0.4,
+                    (Math.random() - 0.5) * 0.4,
+                ] as [number, number, number]
+
+                return {
+                    angle,
+                    radius,
+                    position,
+                    rotation,
+                }
+            })
+    }, [])
+
     return (
         <>
             <color attach="background" args={[BACKGROUND_COLOR]} />
@@ -262,24 +286,13 @@ const App = () => {
             ))}
 
             {/* graves */}
-            {Array.from({ length: 50 }).map((_, idx) => {
-                const angle = Math.random() * Math.PI * 2
-                const radius = 3 + Math.random() * 10
-                const x = Math.sin(angle) * radius
-                const z = Math.cos(angle) * radius
-
-                return (
-                    <Grave
-                        key={idx}
-                        position={[x, 0, z]}
-                        rotation={[
-                            0,
-                            (Math.random() - 0.5) * 0.4,
-                            (Math.random() - 0.5) * 0.4,
-                        ]}
-                    />
-                )
-            })}
+            {graves.map((grave, idx) => (
+                <Grave
+                    key={idx}
+                    position={grave.position}
+                    rotation={grave.rotation}
+                />
+            ))}
         </>
     )
 }

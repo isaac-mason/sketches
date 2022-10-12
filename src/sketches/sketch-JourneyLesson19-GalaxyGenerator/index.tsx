@@ -1,7 +1,7 @@
 import { OrbitControls } from '@react-three/drei'
 import { useControls } from 'leva'
+import { useMemo } from 'react'
 import { AdditiveBlending, BufferAttribute, BufferGeometry, Color } from 'three'
-import { useData } from '../../hooks/use-data'
 import { Canvas } from '../Canvas'
 
 const App = () => {
@@ -17,7 +17,7 @@ const App = () => {
         outsideColor: '#28195c',
     })
 
-    const bufferGeometry = useData(() => {
+    const bufferGeometry = useMemo(() => {
         const geo = new BufferGeometry()
 
         const positions = new Float32Array(parameters.count * 3)
@@ -69,7 +69,7 @@ const App = () => {
         geo.setAttribute('color', new BufferAttribute(colors, 3))
 
         return geo
-    })
+    }, [])
 
     return (
         <>
