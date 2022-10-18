@@ -166,17 +166,20 @@ const Ghost = (props: { color: string; offset: number }) => {
         pointLightRef.current.position.x =
             Math.cos(ghostAngle + props.offset) *
             (7 + Math.sin(elapsedTime * 2) * 2)
+
         pointLightRef.current.position.z =
             Math.sin(ghostAngle + props.offset) *
             (7 + Math.sin(elapsedTime * 2) * 2)
-        pointLightRef.current.position.y = Math.sin(ghostAngle * 2) - 0.5
+
+        pointLightRef.current.position.y = Math.sin(ghostAngle * 2) + 1
+
+        pointLightRef.current.intensity = (Math.sin(ghostAngle) + 1) * 1.2
     })
 
     return (
         <pointLight
             ref={pointLightRef as never}
             color={props.color}
-            intensity={2}
             distance={4}
             castShadow
             shadow-mapSize-width={256}
@@ -232,9 +235,9 @@ const Grass = () => {
 }
 
 const ghosts = [
-    { color: '#ff0000', offset: 0 },
-    { color: '#00ff00', offset: 1.7 },
-    { color: '#0000ff', offset: 3.4 },
+    { color: '#ff0000', offset: (Math.PI * 2) / 3 },
+    { color: '#00ff00', offset: ((Math.PI * 2) / 3) * 2 },
+    { color: '#0000ff', offset: Math.PI * 2 },
 ]
 
 const App = () => {
