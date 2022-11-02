@@ -168,6 +168,11 @@ const sketchList = [
         route: 'Rapier-Raycasting',
         cover: RapierRaycastingCover,
     },
+    {
+        title: 'Rapier - Raycast Vehicle',
+        route: 'Rapier-RaycastVehicle',
+        hidden: true,
+    },
 ] as const
 
 export const sketches: readonly Sketch[] = sketchList

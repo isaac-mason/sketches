@@ -1,29 +1,21 @@
 import Rapier from '@dimforge/rapier3d-compat'
 import { Line, OrbitControls, PerspectiveCamera } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
-import {
-    Debug,
-    Physics,
-    RigidBody,
-    RigidBodyApi,
-    RigidBodyApiRef,
-    useRapier,
-} from '@react-three/rapier'
+import { Debug, Physics, RigidBody, useRapier } from '@react-three/rapier'
 import { useControls as useLevaControls } from 'leva'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { Group } from 'three'
 import { Line2 } from 'three-stdlib'
 import { Canvas } from '../Canvas'
 
-const useRapierUserData = (ref: RigidBodyApiRef, value: unknown) => {
-    useEffect(() => {
-        if (!ref.current) return
-        ref.current.raw().userData = value
-    })
-}
+const Shapes = {
+    TORUS: 'TORUS',
+    CUBE: 'CUBE',
+    CYLINDER: 'CYLINDER',
+} as const
 
 type ShapeRapierUserData = {
-    shape: 'torus' | 'cube' | 'cylinder'
+    shape: typeof Shapes[keyof typeof Shapes]
 }
 
 const Scene = () => {
@@ -36,20 +28,10 @@ const Scene = () => {
         ShapeRapierUserData['shape'] | null
     >(null)
 
-    const torusRigidBodyRef = useRef<RigidBodyApi>(null)
-    useRapierUserData(torusRigidBodyRef, { shape: 'torus' })
-
-    const cubeRigidBodyRef = useRef<RigidBodyApi>(null)
-    useRapierUserData(cubeRigidBodyRef, { shape: 'cube' })
-
-    const cylinderRigidBodyRef = useRef<RigidBodyApi>(null)
-    useRapierUserData(cylinderRigidBodyRef, { shape: 'cylinder' })
-
     useFrame(({ clock: { elapsedTime } }, delta) => {
         const laser = laserRef.current
         const line = lineRef.current
-        const torus = torusRigidBodyRef.current
-        if (!laser || !line || !torus) return
+        if (!laser || !line) return
 
         laser.position.set(-2, Math.sin(elapsedTime * 1.2) * 2, 0)
         line.position.copy(laser.position)
@@ -73,7 +55,7 @@ const Scene = () => {
             const rigidBody = raycastResult.collider.parent()
             if (!rigidBody) return
 
-            const shape = (rigidBody.userData as ShapeRapierUserData).shape
+            const shape = (rigidBody.userData as ShapeRapierUserData)?.shape
             if (raycastHit !== shape) {
                 setRaycastHit(shape)
             }
@@ -111,46 +93,46 @@ const Scene = () => {
             />
 
             <RigidBody
-                ref={cubeRigidBodyRef}
                 colliders="cuboid"
                 type="fixed"
                 position={[1, 1.5, 0]}
                 rotation={[Math.PI / 4, 0, 0]}
+                userData={{ shape: Shapes.CUBE } as ShapeRapierUserData}
             >
                 <mesh>
                     <boxGeometry args={[1, 1, 1]} />
                     <meshStandardMaterial
-                        color={raycastHit === 'cube' ? 'red' : '#666'}
+                        color={raycastHit === Shapes.CUBE ? 'red' : '#666'}
                     />
                 </mesh>
             </RigidBody>
 
             <RigidBody
-                ref={torusRigidBodyRef}
                 colliders="trimesh"
                 type="fixed"
                 position={[2.5, 0, 0]}
                 rotation={[0, -Math.PI / 3, 0]}
+                userData={{ shape: Shapes.TORUS } as ShapeRapierUserData}
             >
                 <mesh>
                     <torusGeometry args={[0.6, 0.25, 64, 64]} />
                     <meshStandardMaterial
-                        color={raycastHit === 'torus' ? 'red' : '#666'}
+                        color={raycastHit === Shapes.TORUS ? 'red' : '#666'}
                     />
                 </mesh>
             </RigidBody>
 
             <RigidBody
-                ref={cylinderRigidBodyRef}
                 colliders="hull"
                 type="fixed"
                 position={[1, -1.5, 0]}
                 rotation={[-Math.PI / 4, 0, -Math.PI / 3]}
+                userData={{ shape: Shapes.CYLINDER } as ShapeRapierUserData}
             >
                 <mesh>
                     <cylinderGeometry args={[0.5, 0.5, 1, 64]} />
                     <meshStandardMaterial
-                        color={raycastHit === 'cylinder' ? 'red' : '#666'}
+                        color={raycastHit === Shapes.CYLINDER ? 'red' : '#666'}
                     />
                 </mesh>
             </RigidBody>
