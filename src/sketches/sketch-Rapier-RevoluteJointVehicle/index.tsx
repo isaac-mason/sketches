@@ -114,23 +114,23 @@ const RevoluteJointVehicle = ({
 
     const controls = useControls()
 
-    useFrame((_, delta) => {
-        // read input
+    useFrame(() => {
+        // input
         let forward = 0
         let right = 0
 
         if (controls.current.forward) {
-            forward += 5000 * delta
+            forward += 50
         }
         if (controls.current.backward) {
-            forward -= 5000 * delta
+            forward -= 50
         }
 
         if (controls.current.left) {
-            right -= 20
+            right -= 15
         }
         if (controls.current.right) {
-            right += 20
+            right += 15
         }
 
         // wake wheels if input
@@ -187,6 +187,27 @@ const RevoluteJointVehicle = ({
         camera.lookAt(currentCameraLookAt.current)
     }, AFTER_RAPIER_UPDATE)
 
+    const registerChassis = (chassis: RigidBodyApi) =>
+        setChassisRigidBody(chassis)
+
+    const unregisterChassis = () => setChassisRigidBody(undefined)
+
+    const registerWheel = (wheel: RevoluteJointVehicleWheelInfo) => {
+        setWheels((v) => [...v, wheel])
+        if (wheel.torque) {
+            setTorqueWheels((v) => [...v, wheel])
+        }
+        if (wheel.steered) {
+            setSteeredWheels((v) => [...v, wheel])
+        }
+    }
+
+    const unregisterWheel = (wheel: RevoluteJointVehicleWheelInfo) => {
+        setWheels((v) => v.filter((w) => w !== wheel))
+        setTorqueWheels((v) => v.filter((w) => w !== wheel))
+        setSteeredWheels((v) => v.filter((w) => w !== wheel))
+    }
+
     return (
         <>
             <revoluteJointVehicleContext.Provider
@@ -195,22 +216,10 @@ const RevoluteJointVehicle = ({
                     wheels,
                     steeredWheels,
                     torqueWheels,
-                    registerChassis: (chassis) => setChassisRigidBody(chassis),
-                    unregisterChassis: () => setChassisRigidBody(undefined),
-                    registerWheel: (wheel) => {
-                        setWheels((v) => [...v, wheel])
-                        if (wheel.torque) {
-                            setTorqueWheels((v) => [...v, wheel])
-                        }
-                        if (wheel.steered) {
-                            setSteeredWheels((v) => [...v, wheel])
-                        }
-                    },
-                    unregisterWheel: (wheel) => {
-                        setWheels((v) => v.filter((w) => w !== wheel))
-                        setTorqueWheels((v) => v.filter((w) => w !== wheel))
-                        setSteeredWheels((v) => v.filter((w) => w !== wheel))
-                    },
+                    registerChassis,
+                    unregisterChassis,
+                    registerWheel,
+                    unregisterWheel,
                 }}
             >
                 <group {...groupProps}>{children}</group>
