@@ -10,14 +10,20 @@ import {
     useRapier,
 } from '@react-three/rapier'
 import { RigidBodyApi } from '@react-three/rapier/dist/declarations/src/types'
-import { useControls as useLevaControls } from 'leva'
+import { useControls as useLeva } from 'leva'
+import { NumberInput } from 'leva/dist/declarations/src/components/Number/number-types'
 import { useRef } from 'react'
 import styled from 'styled-components'
-import { ArrowHelper, Quaternion, Vector3 } from 'three'
+import { ArrowHelper, Group, Mesh, Object3D, Quaternion, Vector3 } from 'three'
 import { Canvas } from '../Canvas'
 import { useControls } from './use-controls'
 
-const LEVA_KEY = 'rapier-raycast-vehicle'
+const useLevaControls = () => {
+    return useLeva('rapier-raycast-vehicle', {
+        debug: false,
+        orbitControls: false,
+    })
+}
 
 const Controls = styled.div`
     position: absolute;
@@ -34,6 +40,8 @@ const Controls = styled.div`
 const RAPIER_UPDATE_PRIORITY = -50
 const BEFORE_RAPIER_UPDATE = RAPIER_UPDATE_PRIORITY + 1
 const AFTER_RAPIER_UPDATE = RAPIER_UPDATE_PRIORITY - 1
+
+const directions = [new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1)]
 
 const getVelocityAtWorldPoint = (
     rigidBody: Rapier.RigidBody,
@@ -77,18 +85,35 @@ const vectorToWorldFrame = (
     )
 }
 
-type RevoluteJointVehicleProps = RigidBodyProps
+type RevoluteJointVehicleProps = RigidBodyProps & {
+    indexRightAxis?: number
+    indexForwardAxis?: number
+    indexUpAxis?: number
+}
 
 type WheelState = {
     suspensionLength: number
     suspensionRelativeVelocity: number
     suspensionForce: number
     clippedInvContactDotSuspension: number
-    directionWorld: Vector3
+
     inContactWithGround: boolean
     hitNormalWorld: Vector3
-    chassisConnectionPointWorld: Vector3
+    
+    directionWorld: Vector3
     axleWorld: Vector3
+    chassisConnectionPointWorld: Vector3
+    
+    sideImpulse: number
+    forwardImpulse: number
+    
+    forwardWS: Vector3
+    axle: Vector3
+
+    worldTransform: Object3D
+
+    steering: number
+    rotation: number
 }
 
 const wheel = {
@@ -130,11 +155,12 @@ const bottomRightWheelPosition = wheelPositions[3]
 
 const RaycastVehicle = ({
     children,
+    indexRightAxis = 2,
+    indexForwardAxis = 0,
+    indexUpAxis = 1,
     ...groupProps
 }: RevoluteJointVehicleProps) => {
-    const { orbitControls } = useLevaControls(LEVA_KEY, {
-        orbitControls: false,
-    })
+    const { orbitControls, debug } = useLevaControls()
     const rapier = useRapier()
 
     const camera = useThree((state) => state.camera)
@@ -144,7 +170,7 @@ const RaycastVehicle = ({
     const wheelStates = useRef<WheelState[]>(
         Array.from({ length: 4 })
             .fill(0)
-            .map(() => ({
+            .map((_, idx) => ({
                 suspensionLength: 0,
                 suspensionForce: 0,
                 suspensionRelativeVelocity: 0,
@@ -154,13 +180,20 @@ const RaycastVehicle = ({
                 hitNormalWorld: new Vector3(),
                 chassisConnectionPointWorld: new Vector3(),
                 axleWorld: new Vector3(),
+                sideImpulse: 0,
+                forwardImpulse: 0,
+                forwardWS: new Vector3(),
+                axle: new Vector3(),
+                worldTransform: new Object3D(),
+                steering: 0,
+                rotation: 0,
             }))
     )
 
-    const topLeftWheelArrowHelper = useRef<ArrowHelper>(null!)
-    const topRightWheelArrowHelper = useRef<ArrowHelper>(null!)
-    const bottomLeftWheelArrowHelper = useRef<ArrowHelper>(null!)
-    const bottomRightWheelArrowHelper = useRef<ArrowHelper>(null!)
+    const topLeftWheelArrowHelper = useRef<ArrowHelper>(null)
+    const topRightWheelArrowHelper = useRef<ArrowHelper>(null)
+    const bottomLeftWheelArrowHelper = useRef<ArrowHelper>(null)
+    const bottomRightWheelArrowHelper = useRef<ArrowHelper>(null)
 
     const wheelRaycastArrowHelpers = [
         topLeftWheelArrowHelper,
@@ -169,57 +202,76 @@ const RaycastVehicle = ({
         bottomRightWheelArrowHelper,
     ]
 
+    const topLeftWheelObject = useRef<Group>(null!)
+    const topRightWheelObject = useRef<Group>(null!)
+    const bottomLeftWheelObject = useRef<Group>(null!)
+    const bottomRightWheelObject = useRef<Group>(null!)
+
+    const wheelObjects = [
+        topLeftWheelObject,
+        topRightWheelObject,
+        bottomLeftWheelObject,
+        bottomRightWheelObject,
+    ]
+
     const chassisRigidBody = useRef<RigidBodyApi>(null!)
     const chassisCollider = useRef<Rapier.Collider[]>(null!)
 
     const controls = useControls()
 
-    useFrame((_, delta) => {
+    const updateWheelTransform = (wheelPosition: Vector3, wheelState: WheelState, wheelObject: Group) => {
+        const up = new Vector3()
+        const right = new Vector3()
+        const fwd = new Vector3()
+
+        // update wheel transform world
+        const chassisBody = chassisRigidBody.current.raw()
+        wheelState.chassisConnectionPointWorld = pointToWorldFrame(
+            chassisBody,
+            wheelPosition
+        )
+        wheelState.directionWorld = vectorToWorldFrame(
+            chassisBody,
+            wheel.directionLocal
+        )
+        wheelState.axleWorld = vectorToWorldFrame(chassisBody, wheel.axleLocal)
+
+        
+        up.copy(wheel.directionLocal).multiplyScalar(-1)
+        right.copy(wheel.axleLocal)
+        fwd.copy(up).cross(right)
+        fwd.normalize()
+        right.normalize()
+
+        // Rotate around steering over the wheelAxle
+        const steering = wheelState.steering
+        const steeringOrn = new Quaternion()
+        steeringOrn.setFromAxisAngle(up, steering)
+
+        const rotatingOrn = new Quaternion()
+        rotatingOrn.setFromAxisAngle(right, wheelState.rotation)
+
+        // World rotation of the wheel
+        const q = wheelState.worldTransform.quaternion
+        q.copy(chassisRigidBody.current.rotation()).multiply(steeringOrn)
+        q.multiply(rotatingOrn)
+
+        q.normalize()
+
+        // world position of the wheel
+        const p = wheelState.worldTransform.position
+        p.copy(wheelState.directionWorld)
+        p.multiplyScalar(wheelState.suspensionLength)
+        p.add(wheelState.chassisConnectionPointWorld)
+
+        wheelObject.position.copy(wheelState.worldTransform.position)
+        wheelObject.quaternion.copy(wheelState.worldTransform.quaternion)
+    }
+
+    const updateWheelSuspension = (wheelPosition: Vector3, wheelState: WheelState, wheelRaycastArrowHelper: ArrowHelper | null) => {
         const world = rapier.world.raw()
 
-        // read input
-        let forward = 0
-        let right = 0
-
-        if (controls.current.forward) {
-            forward += 5000 * delta
-        }
-        if (controls.current.backward) {
-            forward -= 5000 * delta
-        }
-
-        if (controls.current.left) {
-            right -= 20
-        }
-        if (controls.current.right) {
-            right += 20
-        }
-
-        // get current speed
-        // ...
-
-        for (let i = 0; i < wheelPositions.length; i++) {
-            const wheelPosition = wheelPositions[i]
-            const wheelRaycastArrowHelper = wheelRaycastArrowHelpers[i]
-            const wheelState = wheelStates.current[i]
-
-            // reset wheel states
-            wheelState.inContactWithGround = false
-            
-            // update wheel transform
-            const chassisBody = chassisRigidBody.current.raw()
-            wheelState.chassisConnectionPointWorld = pointToWorldFrame(
-                chassisBody,
-                wheelPosition
-            )
-            wheelState.directionWorld = vectorToWorldFrame(
-                chassisBody,
-                wheel.directionLocal
-            )
-            wheelState.axleWorld = vectorToWorldFrame(chassisBody, wheel.axleLocal)
-
-            // simulate wheel suspension
-            const origin = chassisRigidBody.current
+        const origin = chassisRigidBody.current
                 .translation()
                 .add(wheelPosition)
 
@@ -291,9 +343,9 @@ const RaycastVehicle = ({
             }
 
             // update arrow helper
-            wheelRaycastArrowHelper.current.setDirection(direction)
-            wheelRaycastArrowHelper.current.setLength(maxToi)
-            wheelRaycastArrowHelper.current.setLength(
+            wheelRaycastArrowHelper?.setDirection(direction)
+            wheelRaycastArrowHelper?.setLength(maxToi)
+            wheelRaycastArrowHelper?.setLength(
                 wheelState.suspensionLength
             )
 
@@ -328,31 +380,99 @@ const RaycastVehicle = ({
                 }
 
             }
+    }
+
+    const applyWheelSuspensionForce = (delta: number, wheelState: WheelState) => {
+        const impulse = new Vector3()
+        const relpos = new Vector3()
+
+        let suspensionForce = wheelState.suspensionForce
+        if (suspensionForce > wheel.maxSuspensionForce) {
+            suspensionForce = wheel.maxSuspensionForce
+        }
+
+        impulse
+            .copy(wheelState.hitNormalWorld)
+            .multiplyScalar(suspensionForce * delta)
+
+        relpos
+            .copy(wheelState.hitNormalWorld)
+            .sub(chassisRigidBody.current.translation())
+
+        chassisRigidBody.current.applyImpulseAtPoint(impulse, relpos)
+    }
+
+    const updateFriction = () => {
+        
+
+        
+        const surfNormalWS_scaled_proj = new Vector3()
+
+        let numberOfWheelsOnGround = 0
+
+        for (let i = 0; i < wheelPositions.length; i++) {
+            const wheelPosition = wheelPositions[i]
+            const wheelRaycastArrowHelper = wheelRaycastArrowHelpers[i]
+            const wheelState = wheelStates.current[i]
+
+            wheelState.sideImpulse = 0
+            wheelState.forwardImpulse = 0
+
+            if (wheelState.inContactWithGround) {
+                numberOfWheelsOnGround++;
+
+        
+                // get world axle
+                // vectorToWorldFrame(wheelState.worldTransform, directions[indexRightAxis])
+            }
+        }
+    }
+
+    useFrame((_, delta) => {
+        const world = rapier.world.raw()
+
+        // read input
+        let forward = 0
+        let right = 0
+
+        if (controls.current.forward) {
+            forward += 5000 * delta
+        }
+        if (controls.current.backward) {
+            forward -= 5000 * delta
+        }
+
+        if (controls.current.left) {
+            right -= 20
+        }
+        if (controls.current.right) {
+            right += 20
+        }
+
+        // get current speed
+        // ...
+
+        for (let i = 0; i < wheelPositions.length; i++) {
+            const wheelPosition = wheelPositions[i]
+            const wheelRaycastArrowHelper = wheelRaycastArrowHelpers[i]
+            const wheelState = wheelStates.current[i]
+            const wheelObject = wheelObjects[i].current
+
+            // reset wheel states
+            wheelState.inContactWithGround = false
+        
+            // update wheel transform
+            updateWheelTransform(wheelPosition, wheelState, wheelObject)
+
+            // simulate wheel suspension
+            updateWheelSuspension(wheelPosition, wheelState, wheelRaycastArrowHelper.current)
 
             // apply suspension force
-            const impulse = new Vector3()
-            const relpos = new Vector3()
-
-            let suspensionForce = wheelState.suspensionForce
-            if (suspensionForce > wheel.maxSuspensionForce) {
-                suspensionForce = wheel.maxSuspensionForce
-            }
-
-            impulse
-                .copy(wheelState.hitNormalWorld)
-                .multiplyScalar(suspensionForce * delta)
-
-            relpos
-                .copy(wheelState.hitNormalWorld)
-                .sub(chassisRigidBody.current.translation())
-
-            chassisRigidBody.current.applyImpulseAtPoint(impulse, relpos)
-
-            
+            applyWheelSuspensionForce(delta, wheelState)
         }
 
         // update friction
-        // ...
+        updateFriction()
 
         // update wheel rotation
         // ...
@@ -386,6 +506,7 @@ const RaycastVehicle = ({
     return (
         <>
             <RigidBody {...groupProps} colliders={false} ref={chassisRigidBody}>
+                {/* chassis */}
                 <mesh>
                     <boxGeometry args={[1, 0.8, 1.5]} />
                     <meshStandardMaterial color="#888" />
@@ -394,23 +515,59 @@ const RaycastVehicle = ({
                 <CuboidCollider ref={chassisCollider} args={[0.5, 0.4, 0.75]} />
 
                 {/* wheel raycast arrow helpers */}
-                <arrowHelper
-                    ref={topLeftWheelArrowHelper}
-                    position={topLeftWheelPosition}
-                />
-                <arrowHelper
-                    ref={topRightWheelArrowHelper}
-                    position={topRightWheelPosition}
-                />
-                <arrowHelper
-                    ref={bottomLeftWheelArrowHelper}
-                    position={bottomLeftWheelPosition}
-                />
-                <arrowHelper
-                    ref={bottomRightWheelArrowHelper}
-                    position={bottomRightWheelPosition}
-                />
+                {debug && (
+                    <>
+                        <arrowHelper
+                            ref={topLeftWheelArrowHelper}
+                            position={topLeftWheelPosition}
+                        />
+                        <arrowHelper
+                            ref={topRightWheelArrowHelper}
+                            position={topRightWheelPosition}
+                        />
+                        <arrowHelper
+                            ref={bottomLeftWheelArrowHelper}
+                            position={bottomLeftWheelPosition}
+                        />
+                        <arrowHelper
+                            ref={bottomRightWheelArrowHelper}
+                            position={bottomRightWheelPosition}
+                        />  
+                    </>
+                )}
             </RigidBody>
+
+            {/* top left wheel */}
+            <group ref={topLeftWheelObject}>
+                <mesh rotation-z={-Math.PI / 2}>
+                    <cylinderGeometry args={[0.5, 0.5, 0.3, 16]} />
+                    <meshStandardMaterial color="#888" />
+                </mesh>
+            </group>
+
+            {/* top right wheel */}
+            <group ref={topRightWheelObject}>
+                <mesh rotation-z={-Math.PI / 2}>
+                    <cylinderGeometry args={[0.5, 0.5, 0.3, 16]} />
+                    <meshStandardMaterial color="#888" />
+                </mesh>
+            </group>
+
+            {/* bottom left wheel */}
+            <group ref={bottomLeftWheelObject}>
+                <mesh rotation-z={-Math.PI / 2}>
+                    <cylinderGeometry args={[0.5, 0.5, 0.3, 16]} />
+                    <meshStandardMaterial color="#888" />
+                </mesh>
+            </group>
+
+            {/* bottom right wheel */}
+            <group ref={bottomRightWheelObject}>
+                <mesh rotation-z={-Math.PI / 2}>
+                    <cylinderGeometry args={[0.5, 0.5, 0.3, 16]} />
+                    <meshStandardMaterial color="#888" />
+                </mesh>
+            </group>
         </>
     )
 }
@@ -441,10 +598,8 @@ const Scene = () => (
 )
 
 export default () => {
-    const { debug, orbitControls } = useLevaControls(LEVA_KEY, {
-        debug: false,
-        orbitControls: false,
-    })
+    const { debug, orbitControls } = useLevaControls()
+
     return (
         <>
             <h1>Rapier - Raycast Vehicle</h1>
