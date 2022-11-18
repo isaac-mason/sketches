@@ -41,7 +41,11 @@ const RAPIER_UPDATE_PRIORITY = -50
 const BEFORE_RAPIER_UPDATE = RAPIER_UPDATE_PRIORITY + 1
 const AFTER_RAPIER_UPDATE = RAPIER_UPDATE_PRIORITY - 1
 
-const directions = [new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1)]
+const directions = [
+    new Vector3(1, 0, 0),
+    new Vector3(0, 1, 0),
+    new Vector3(0, 0, 1),
+]
 
 const getVelocityAtWorldPoint = (
     rigidBody: Rapier.RigidBody,
@@ -68,9 +72,7 @@ const pointToWorldFrame = (
     const result = new Vector3().copy(localPoint)
     result
         .applyQuaternion(
-            new Quaternion().copy(
-                rigidBody.rotation() as Quaternion
-            )
+            new Quaternion().copy(rigidBody.rotation() as Quaternion)
         )
         .add(rigidBody.translation() as Vector3)
     return result
@@ -99,14 +101,14 @@ type WheelState = {
 
     inContactWithGround: boolean
     hitNormalWorld: Vector3
-    
+
     directionWorld: Vector3
     axleWorld: Vector3
     chassisConnectionPointWorld: Vector3
-    
+
     sideImpulse: number
     forwardImpulse: number
-    
+
     forwardWS: Vector3
     axle: Vector3
 
@@ -219,7 +221,11 @@ const RaycastVehicle = ({
 
     const controls = useControls()
 
-    const updateWheelTransform = (wheelPosition: Vector3, wheelState: WheelState, wheelObject: Group) => {
+    const updateWheelTransform = (
+        wheelPosition: Vector3,
+        wheelState: WheelState,
+        wheelObject: Group
+    ) => {
         const up = new Vector3()
         const right = new Vector3()
         const fwd = new Vector3()
@@ -236,7 +242,6 @@ const RaycastVehicle = ({
         )
         wheelState.axleWorld = vectorToWorldFrame(chassisBody, wheel.axleLocal)
 
-        
         up.copy(wheel.directionLocal).multiplyScalar(-1)
         right.copy(wheel.axleLocal)
         fwd.copy(up).cross(right)
@@ -268,121 +273,122 @@ const RaycastVehicle = ({
         wheelObject.quaternion.copy(wheelState.worldTransform.quaternion)
     }
 
-    const updateWheelSuspension = (wheelPosition: Vector3, wheelState: WheelState, wheelRaycastArrowHelper: ArrowHelper | null) => {
+    const updateWheelSuspension = (
+        wheelPosition: Vector3,
+        wheelState: WheelState,
+        wheelRaycastArrowHelper: ArrowHelper | null
+    ) => {
         const world = rapier.world.raw()
 
-        const origin = chassisRigidBody.current
-                .translation()
-                .add(wheelPosition)
+        const origin = chassisRigidBody.current.translation().add(wheelPosition)
 
-            const direction = new Vector3(0, -1, 0).applyQuaternion(
-                chassisRigidBody.current.rotation()
-            )
+        const direction = new Vector3(0, -1, 0).applyQuaternion(
+            chassisRigidBody.current.rotation()
+        )
 
-            const maxToi = wheel.radius + wheel.suspensionRestLength
-            const ray = world.castRayAndGetNormal(
-                new Rapier.Ray(origin, direction),
-                maxToi,
-                false,
-                undefined,
-                undefined,
-                undefined,
-                chassisRigidBody.current.raw()
-            )
+        const maxToi = wheel.radius + wheel.suspensionRestLength
+        const ray = world.castRayAndGetNormal(
+            new Rapier.Ray(origin, direction),
+            maxToi,
+            false,
+            undefined,
+            undefined,
+            undefined,
+            chassisRigidBody.current.raw()
+        )
 
-            // if hit
-            if (ray && ray.collider) {
-                // update wheel state
-                wheelState.inContactWithGround = true
+        // if hit
+        if (ray && ray.collider) {
+            // update wheel state
+            wheelState.inContactWithGround = true
+            wheelState.hitNormalWorld
+                .copy(chassisRigidBody.current.translation())
+                .add(ray.normal as Vector3)
+
+            // compute suspension length
+            const hitDistance = ray.toi
+            wheelState.suspensionLength = hitDistance - wheel.radius
+
+            // clamp on max suspension travel
+            if (wheelState.suspensionLength < minSuspensionLength) {
+                wheelState.suspensionLength = minSuspensionLength
+            }
+            if (wheelState.suspensionLength > maxSuspensionLength) {
+                wheelState.suspensionLength = maxSuspensionLength
+            }
+
+            const denominator = new Vector3()
+                .copy(wheelState.hitNormalWorld)
+                .dot(wheelState.directionWorld)
+
+            const chassisVelocityAtContactPoint = getVelocityAtWorldPoint(
+                chassisRigidBody.current.raw(),
                 wheelState.hitNormalWorld
-                    .copy(chassisRigidBody.current.translation())
-                    .add(ray.normal as Vector3)
+            )
 
-                // compute suspension length
-                const hitDistance = ray.toi
-                wheelState.suspensionLength = hitDistance - wheel.radius
+            const projVel = wheelState.hitNormalWorld.dot(
+                chassisVelocityAtContactPoint
+            )
 
-                // clamp on max suspension travel
-                if (wheelState.suspensionLength < minSuspensionLength) {
-                    wheelState.suspensionLength = minSuspensionLength
-                }
-                if (wheelState.suspensionLength > maxSuspensionLength) {
-                    wheelState.suspensionLength = maxSuspensionLength
-                }
-
-                const denominator = new Vector3()
-                    .copy(wheelState.hitNormalWorld)
-                    .dot(wheelState.directionWorld)
-
-                const chassisVelocityAtContactPoint = getVelocityAtWorldPoint(
-                    chassisRigidBody.current.raw(),
-                    wheelState.hitNormalWorld
-                )
-
-                const projVel = wheelState.hitNormalWorld.dot(
-                    chassisVelocityAtContactPoint
-                )
-
-                if (denominator >= -0.1) {
-                    wheelState.suspensionRelativeVelocity = 0
-                    wheelState.clippedInvContactDotSuspension = 1 / 0.1
-                } else {
-                    const inv = -1 / denominator
-                    wheelState.suspensionRelativeVelocity = projVel * inv
-                    wheelState.clippedInvContactDotSuspension = inv
-                }
-            } else {
-                // put wheel info as in rest position
-                wheelState.suspensionLength =
-                    wheel.suspensionRestLength + 0 * wheel.maxSuspensionTravel
+            if (denominator >= -0.1) {
                 wheelState.suspensionRelativeVelocity = 0
-                wheelState.hitNormalWorld
-                    .copy(wheelState.directionWorld)
-                    .multiplyScalar(-1)
-                wheelState.clippedInvContactDotSuspension = 1.0
+                wheelState.clippedInvContactDotSuspension = 1 / 0.1
+            } else {
+                const inv = -1 / denominator
+                wheelState.suspensionRelativeVelocity = projVel * inv
+                wheelState.clippedInvContactDotSuspension = inv
             }
+        } else {
+            // put wheel info as in rest position
+            wheelState.suspensionLength =
+                wheel.suspensionRestLength + 0 * wheel.maxSuspensionTravel
+            wheelState.suspensionRelativeVelocity = 0
+            wheelState.hitNormalWorld
+                .copy(wheelState.directionWorld)
+                .multiplyScalar(-1)
+            wheelState.clippedInvContactDotSuspension = 1.0
+        }
 
-            // update arrow helper
-            wheelRaycastArrowHelper?.setDirection(direction)
-            wheelRaycastArrowHelper?.setLength(maxToi)
-            wheelRaycastArrowHelper?.setLength(
-                wheelState.suspensionLength
-            )
+        // update arrow helper
+        wheelRaycastArrowHelper?.setDirection(direction)
+        wheelRaycastArrowHelper?.setLength(maxToi)
+        wheelRaycastArrowHelper?.setLength(wheelState.suspensionLength)
 
-            // calculate suspension force
-            wheelState.suspensionForce = 0
+        // calculate suspension force
+        wheelState.suspensionForce = 0
 
-            if (wheelState.inContactWithGround) {
-                // spring
-                const suspensionLength = wheel.suspensionRestLength
-                const currentLength = wheelState.suspensionLength
-                const lengthDifference = suspensionLength - currentLength
+        if (wheelState.inContactWithGround) {
+            // spring
+            const suspensionLength = wheel.suspensionRestLength
+            const currentLength = wheelState.suspensionLength
+            const lengthDifference = suspensionLength - currentLength
 
-                let force =
-                    wheel.suspensionStiffness *
-                    lengthDifference *
-                    wheelState.clippedInvContactDotSuspension
+            let force =
+                wheel.suspensionStiffness *
+                lengthDifference *
+                wheelState.clippedInvContactDotSuspension
 
-                // damper
-                const projectedRelativeVelocity =
-                    wheelState.suspensionRelativeVelocity
-                const suspensionDamping =
-                    projectedRelativeVelocity < 0
-                        ? wheel.dampingCompression
-                        : wheel.dampingRelaxation
-                force -= suspensionDamping * projectedRelativeVelocity
+            // damper
+            const projectedRelativeVelocity =
+                wheelState.suspensionRelativeVelocity
+            const suspensionDamping =
+                projectedRelativeVelocity < 0
+                    ? wheel.dampingCompression
+                    : wheel.dampingRelaxation
+            force -= suspensionDamping * projectedRelativeVelocity
 
-                wheelState.suspensionForce =
-                    force * chassisRigidBody.current.mass()
+            wheelState.suspensionForce = force * chassisRigidBody.current.mass()
 
-                if (wheelState.suspensionForce < 0) {
-                    wheelState.suspensionForce = 0
-                }
-
+            if (wheelState.suspensionForce < 0) {
+                wheelState.suspensionForce = 0
             }
+        }
     }
 
-    const applyWheelSuspensionForce = (delta: number, wheelState: WheelState) => {
+    const applyWheelSuspensionForce = (
+        delta: number,
+        wheelState: WheelState
+    ) => {
         const impulse = new Vector3()
         const relpos = new Vector3()
 
@@ -403,9 +409,6 @@ const RaycastVehicle = ({
     }
 
     const updateFriction = () => {
-        
-
-        
         const surfNormalWS_scaled_proj = new Vector3()
 
         let numberOfWheelsOnGround = 0
@@ -419,9 +422,8 @@ const RaycastVehicle = ({
             wheelState.forwardImpulse = 0
 
             if (wheelState.inContactWithGround) {
-                numberOfWheelsOnGround++;
+                numberOfWheelsOnGround++
 
-        
                 // get world axle
                 // vectorToWorldFrame(wheelState.worldTransform, directions[indexRightAxis])
             }
@@ -460,12 +462,16 @@ const RaycastVehicle = ({
 
             // reset wheel states
             wheelState.inContactWithGround = false
-        
+
             // update wheel transform
             updateWheelTransform(wheelPosition, wheelState, wheelObject)
 
             // simulate wheel suspension
-            updateWheelSuspension(wheelPosition, wheelState, wheelRaycastArrowHelper.current)
+            updateWheelSuspension(
+                wheelPosition,
+                wheelState,
+                wheelRaycastArrowHelper.current
+            )
 
             // apply suspension force
             applyWheelSuspensionForce(delta, wheelState)
@@ -532,7 +538,7 @@ const RaycastVehicle = ({
                         <arrowHelper
                             ref={bottomRightWheelArrowHelper}
                             position={bottomRightWheelPosition}
-                        />  
+                        />
                     </>
                 )}
             </RigidBody>
