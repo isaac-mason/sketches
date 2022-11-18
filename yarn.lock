@@ -670,10 +670,10 @@
     "@react-pdf/yoga" "^2.0.4"
     react-merge-refs "^1.1.0"
 
-"@react-three/rapier@^0.9.0":
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/@react-three/rapier/-/rapier-0.9.0.tgz#d2bdc97e5047ef52f0f73607c8388a8c589aaf5e"
-  integrity sha512-FElAWzPwyKdx+9zJT/TE1w1yLhY6IgTlYoXtcO4hNDoIvyErxexldp2kp+fiFQGtiL1CxJsHxeEyTXomXZ2MlA==
+"@react-three/rapier@^0.10.0":
+  version "0.10.0"
+  resolved "https://registry.yarnpkg.com/@react-three/rapier/-/rapier-0.10.0.tgz#387c9c415d9bcba41cc49acaeae3cd33c2c8803d"
+  integrity sha512-yNgbZU5PewRA0PrWkrSl8d1hKKXUYvxc4zwnpDm9a5i2VE3AYI8mVPyulYvgeqSEtDZZprpvohwAf79IHrtasA==
   dependencies:
     "@dimforge/rapier3d-compat" "0.9.0"
     three-stdlib "^2.15.0"
