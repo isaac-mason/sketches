@@ -59,8 +59,13 @@ export default () => (
             <OrthographicCamera
                 makeDefault
                 manual
-                args={[0, 1, 1, 0, 0.1, 1000]}
-                position={[0, 0, 1]}
+                top={1}
+                bottom={0}
+                left={0}
+                right={1}
+                near={0.1}
+                far={1000}
+                position={[0, 0, 0.5]}
             />
         </Canvas>
     </>
