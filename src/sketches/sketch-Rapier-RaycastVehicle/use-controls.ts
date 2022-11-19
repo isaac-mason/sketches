@@ -10,6 +10,7 @@ const keyControlMap = {
     d: 'right',
     s: 'backward',
     w: 'forward',
+    Space: 'brake',
 } as const
 
 type KeyCode = keyof typeof keyControlMap
@@ -50,6 +51,7 @@ export const useControls = () => {
         forward: false,
         left: false,
         right: false,
+        brake: false,
     })
 
     useKeyControls(controls, keyControlMap)
