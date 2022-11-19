@@ -12,7 +12,7 @@ import {
 import { RigidBodyApi } from '@react-three/rapier/dist/declarations/src/types'
 import { useControls as useLeva } from 'leva'
 import { NumberInput } from 'leva/dist/declarations/src/components/Number/number-types'
-import { useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import styled from 'styled-components'
 import {
     ArrowHelper,
@@ -24,10 +24,21 @@ import {
     Vector3,
 } from 'three'
 import { Canvas } from '../Canvas'
+import {
+    pointToWorldFrame,
+    vectorToWorldFrame,
+    getVehicleAxisWorld,
+    getVelocityAtWorldPoint,
+    calcRollingFriction,
+    vectorToLocalFrame,
+    resolveSingleBilateralConstraint,
+} from './utils'
 import { useControls } from './use-controls'
 
-const useLevaControls = () => {
-    return useLeva('rapier-raycast-vehicle', {
+const LEVA_KEY = 'rapier-raycast-vehicle'
+
+const useCommonLevaControls = () => {
+    return useLeva(LEVA_KEY, {
         debug: false,
         orbitControls: false,
     })
@@ -54,296 +65,6 @@ const directions = [
     new Vector3(0, 1, 0),
     new Vector3(0, 0, 1),
 ]
-
-const getVelocityAtWorldPoint = (
-    rigidBody: Rapier.RigidBody,
-    worldPoint: Vector3,
-    target = new Vector3()
-): Vector3 => {
-    const r = target
-
-    const position = new Vector3().copy(rigidBody.translation() as Vector3)
-    const angvel = new Vector3().copy(rigidBody.angvel() as Vector3)
-    const linvel = new Vector3().copy(rigidBody.linvel() as Vector3)
-
-    r.subVectors(worldPoint, position)
-    r.crossVectors(angvel, r)
-    r.add(linvel)
-
-    const result = linvel.add(new Vector3().copy(r).cross(angvel))
-    return result
-}
-
-const pointToWorldFrame = (
-    rigidBody: Rapier.RigidBody,
-    localPoint: Vector3
-): Vector3 => {
-    const result = new Vector3().copy(localPoint)
-    result
-        .applyQuaternion(
-            new Quaternion().copy(rigidBody.rotation() as Quaternion)
-        )
-        .add(rigidBody.translation() as Vector3)
-    return result
-}
-
-const vectorToLocalFrame = (
-    rigidBody: Rapier.RigidBody,
-    worldVector: Vector3
-): Vector3 => {
-    return new Vector3()
-        .copy(worldVector)
-        .applyQuaternion(
-            new Quaternion()
-                .copy(rigidBody.rotation() as Quaternion)
-                .conjugate()
-        )
-}
-
-const vectorToWorldFrame = (
-    rigidBody: Rapier.RigidBody | Object3D,
-    localVector: Vector3,
-    target = new Vector3()
-): Vector3 => {
-    return target
-        .copy(localVector)
-        .applyQuaternion(
-            new Quaternion().copy(
-                rigidBody instanceof Object3D
-                    ? rigidBody.quaternion
-                    : (rigidBody.rotation() as Quaternion)
-            )
-        )
-}
-
-// get one of the wheel axes, world-oriented
-const getVehicleAxisWorld = (
-    chassisBody: Rapier.RigidBody,
-    axisIndex: number,
-    result = new Vector3()
-): void => {
-    result.set(
-        axisIndex === 0 ? 1 : 0,
-        axisIndex === 1 ? 1 : 0,
-        axisIndex === 2 ? 1 : 0
-    )
-    vectorToWorldFrame(chassisBody, result, result)
-}
-
-// bilateral constraint between two dynamic objects
-const resolveSingleBilateral_vel1 = new Vector3()
-const resolveSingleBilateral_vel2 = new Vector3()
-const resolveSingleBilateral_vel = new Vector3()
-
-function resolveSingleBilateral(
-    body1: Rapier.RigidBody,
-    pos1: Vector3,
-    body2: Rapier.RigidBody,
-    pos2: Vector3,
-    normal: Vector3
-): number {
-    const normalLenSqr = normal.lengthSq()
-    if (normalLenSqr > 1.1) {
-        return 0 // no impulse
-    }
-
-    const vel1 = resolveSingleBilateral_vel1
-    const vel2 = resolveSingleBilateral_vel2
-    const vel = resolveSingleBilateral_vel
-
-    vel1.copy(getVelocityAtWorldPoint(body1, pos1))
-    vel2.copy(getVelocityAtWorldPoint(body2, pos2))
-
-    vel.subVectors(vel1, vel2)
-
-    const rel_vel = normal.dot(vel)
-
-    const contactDamping = 0.2
-    const massTerm = 1 / (body1.mass() + body2.mass())
-    const impulse = -contactDamping * rel_vel * massTerm
-
-    return impulse
-}
-
-// set Matrix3 rotation from quaternion
-const setMatrix3RotationFromQuaternion = (m: Matrix3, q: Quaternion): void => {
-    const x = q.x
-    const y = q.y
-    const z = q.z
-    const w = q.w
-    const x2 = x + x
-    const y2 = y + y
-    const z2 = z + z
-    const xx = x * x2
-    const xy = x * y2
-    const xz = x * z2
-    const yy = y * y2
-    const yz = y * z2
-    const zz = z * z2
-    const wx = w * x2
-    const wy = w * y2
-    const wz = w * z2
-    const e = m.elements
-
-    e[3 * 0 + 0] = 1 - (yy + zz)
-    e[3 * 0 + 1] = xy - wz
-    e[3 * 0 + 2] = xz + wy
-
-    e[3 * 1 + 0] = xy + wz
-    e[3 * 1 + 1] = 1 - (xx + zz)
-    e[3 * 1 + 2] = yz - wx
-
-    e[3 * 2 + 0] = xz - wy
-    e[3 * 2 + 1] = yz + wx
-    e[3 * 2 + 2] = 1 - (xx + yy)
-}
-
-// scale matrix3 columns of by vector3
-const scaleMatrix3ByVector3 = (m: Matrix3, vector: Vector3): void => {
-    const e = m.elements
-    for (let i = 0; i !== 3; i++) {
-        e[3 * i + 0] = vector.x * e[3 * i + 0]
-        e[3 * i + 1] = vector.y * e[3 * i + 1]
-        e[3 * i + 2] = vector.z * e[3 * i + 2]
-    }
-}
-
-//Matrix-Vector multiplication
-const matrixVectorMultiplication = (
-    m: Matrix3,
-    v: Vector3,
-    target: Vector3
-): Vector3 => {
-    const e = m.elements
-
-    const x = v.x
-    const y = v.y
-    const z = v.z
-
-    target.x = e[0] * x + e[1] * y + e[2] * z
-    target.y = e[3] * x + e[4] * y + e[5] * z
-    target.z = e[6] * x + e[7] * y + e[8] * z
-
-    return target
-}
-
-// calculate inertia world
-const calculateInertiaWorld_uiw_m1 = new Matrix3()
-const calculateInertiaWorld_uiw_m2 = new Matrix3()
-const calculateInertiaWorld_uiw_m3 = new Matrix3()
-
-const calculateInvInertiaWorld = (
-    rigidBody: Rapier.RigidBody,
-    invInertia: Vector3
-): Matrix3 => {
-    // const inertiaWorld = new Vector3()
-    const invInertiaWorld = new Matrix3()
-
-    const m1 = calculateInertiaWorld_uiw_m1
-    const m2 = calculateInertiaWorld_uiw_m2
-    const m3 = calculateInertiaWorld_uiw_m3
-
-    setMatrix3RotationFromQuaternion(m1, rigidBody.rotation() as Quaternion)
-    m2.copy(m1).transpose()
-    scaleMatrix3ByVector3(m1, invInertia)
-    invInertiaWorld.copy(m1).multiply(m2)
-
-    return invInertiaWorld
-}
-
-// calculate inertia for an aabb
-const calculateAABBInertia = (halfExtents: Vector3, mass: number): Vector3 => {
-    const e = halfExtents
-    return new Vector3(
-        (1.0 / 12.0) * mass * (2 * e.y * 2 * e.y + 2 * e.z * 2 * e.z),
-        (1.0 / 12.0) * mass * (2 * e.x * 2 * e.x + 2 * e.z * 2 * e.z),
-        (1.0 / 12.0) * mass * (2 * e.y * 2 * e.y + 2 * e.x * 2 * e.x)
-    )
-}
-
-// compute impulse denominator
-const computeImpulseDenominator_r0 = new Vector3()
-const computeImpulseDenominator_c0 = new Vector3()
-const computeImpulseDenominator_vec = new Vector3()
-const computeImpulseDenominator_m = new Vector3()
-function computeImpulseDenominator(
-    body: Rapier.RigidBody,
-    halfExtents: Vector3,
-    pos: Vector3,
-    normal: Vector3
-): number {
-    const r0 = computeImpulseDenominator_r0
-    const c0 = computeImpulseDenominator_c0
-    const vec = computeImpulseDenominator_vec
-    const m = computeImpulseDenominator_m
-
-    r0.subVectors(pos, body.translation() as Vector3)
-    c0.crossVectors(r0, normal)
-
-    const inertia = calculateAABBInertia(halfExtents, body.mass())
-    const invInertiaWorld = calculateInvInertiaWorld(body, inertia)
-
-    matrixVectorMultiplication(invInertiaWorld, c0, m)
-    vec.crossVectors(m, r0)
-
-    return body.mass() + normal.dot(vec)
-}
-
-// calculate rolling friction
-const calcRollingFriction_vel1 = new Vector3()
-const calcRollingFriction_vel2 = new Vector3()
-const calcRollingFriction_vel = new Vector3()
-
-function calcRollingFriction(
-    body0: Rapier.RigidBody,
-    body1: Rapier.RigidBody,
-    frictionPosWorld: Vector3,
-    frictionDirectionWorld: Vector3,
-    maxImpulse: number
-): number {
-    let j1 = 0
-    const contactPosWorld = frictionPosWorld
-
-    const vel1 = calcRollingFriction_vel1
-    const vel2 = calcRollingFriction_vel2
-    const vel = calcRollingFriction_vel
-
-    vel1.copy(getVelocityAtWorldPoint(body0, contactPosWorld))
-    vel2.copy(getVelocityAtWorldPoint(body1, contactPosWorld))
-    vel.subVectors(vel1, vel2)
-
-    const vrel = frictionDirectionWorld.dot(vel)
-
-    // hack: hard-coding incorrect half extents for estimated inertia
-    const todoHalfExtents = new Vector3(1, 1, 1)
-
-    const denom0 = computeImpulseDenominator(
-        body0,
-        todoHalfExtents,
-        frictionPosWorld,
-        frictionDirectionWorld
-    )
-    const denom1 = computeImpulseDenominator(
-        body1,
-        todoHalfExtents,
-        frictionPosWorld,
-        frictionDirectionWorld
-    )
-    const relaxation = 1
-    const jacDiagABInv = relaxation / (denom0 + denom1)
-
-    // calculate j that moves us to zero relative velocity
-    j1 = -vrel * jacDiagABInv
-
-    if (maxImpulse < j1) {
-        j1 = maxImpulse
-    }
-    if (j1 < -maxImpulse) {
-        j1 = -maxImpulse
-    }
-
-    return j1
-}
 
 type RevoluteJointVehicleProps = RigidBodyProps & {
     indexRightAxis?: number
@@ -393,48 +114,6 @@ type WheelState = {
     sliding: boolean
 }
 
-const wheel = {
-    radius: 0.5,
-
-    directionLocal: new Vector3(0, -1, 0),
-    axleLocal: new Vector3(0, 0, 1),
-
-    suspensionStiffness: 30,
-    suspensionRestLength: 0.3,
-    maxSuspensionForce: 100000,
-    maxSuspensionTravel: 0.3,
-
-    sideFrictionStiffness: 1,
-    frictionSlip: 1.4,
-    dampingRelaxation: 2.3,
-    dampingCompression: 4.4,
-
-    rollInfluence: 0.01,
-
-    customSlidingRotationalSpeed: -30,
-    useCustomSlidingRotationalSpeed: true,
-
-    forwardAcceleration: 1,
-    sideAcceleration: 1,
-}
-
-const minSuspensionLength =
-    wheel.suspensionRestLength - wheel.maxSuspensionTravel
-const maxSuspensionLength =
-    wheel.suspensionRestLength + wheel.maxSuspensionTravel
-
-const topLeftWheelPosition = new Vector3(-0.75, -0.2, 1.2)
-const topRightWheelPosition = new Vector3(0.75, -0.2, 1.2)
-const bottomLeftWheelPosition = new Vector3(-0.75, -0.2, -1.2)
-const bottomRightWheelPosition = new Vector3(0.75, -0.2, -1.2)
-
-const wheelPositions: Vector3[] = [
-    topLeftWheelPosition,
-    topRightWheelPosition,
-    bottomLeftWheelPosition,
-    bottomRightWheelPosition,
-]
-
 const RaycastVehicle = ({
     children,
     indexRightAxis = 2,
@@ -442,7 +121,89 @@ const RaycastVehicle = ({
     indexUpAxis = 1,
     ...groupProps
 }: RevoluteJointVehicleProps) => {
-    const { orbitControls, debug } = useLevaControls()
+    const { orbitControls, debug } = useCommonLevaControls()
+
+    const {
+        directionLocal: directionLocalArray,
+        axleLocal: axleLocalArray,
+        topLeftWheelPosition: topLeftWheelPositionArray,
+        topRightWheelPosition: topRightWheelPositionArray,
+        bottomLeftWheelPosition: bottomLeftWheelPositionArray,
+        bottomRightWheelPosition: bottomRightWheelPositionArray,
+        ...wheelOptions
+    } = useLeva(`${LEVA_KEY}-wheel-options`, {
+        radius: 0.5,
+
+        directionLocal: [0, -1, 0],
+        axleLocal: [0, 0, 1],
+
+        suspensionStiffness: 30,
+        suspensionRestLength: 0.3,
+        maxSuspensionForce: 100000,
+        maxSuspensionTravel: 0.3,
+
+        sideFrictionStiffness: 1,
+        frictionSlip: 1.4,
+        dampingRelaxation: 2.3,
+        dampingCompression: 4.4,
+
+        rollInfluence: 0.01,
+
+        customSlidingRotationalSpeed: -30,
+        useCustomSlidingRotationalSpeed: true,
+
+        forwardAcceleration: 1,
+        sideAcceleration: 1,
+
+        topLeftWheelPosition: [-0.75, -0.2, 1.2],
+        topRightWheelPosition: [0.75, -0.2, 1.2],
+        bottomLeftWheelPosition: [-0.75, -0.2, -1.2],
+        bottomRightWheelPosition: [0.75, -0.2, -1.2],
+    })
+
+    const directionLocal = useMemo(
+        () => new Vector3(...directionLocalArray),
+        [directionLocalArray]
+    )
+    const axleLocal = useMemo(
+        () => new Vector3(...axleLocalArray),
+        [axleLocalArray]
+    )
+    const topLeftWheelPosition = useMemo(
+        () => new Vector3(...topLeftWheelPositionArray),
+        [topLeftWheelPositionArray]
+    )
+    const topRightWheelPosition = useMemo(
+        () => new Vector3(...topRightWheelPositionArray),
+        [topRightWheelPositionArray]
+    )
+    const bottomLeftWheelPosition = useMemo(
+        () => new Vector3(...bottomLeftWheelPositionArray),
+        [bottomLeftWheelPositionArray]
+    )
+    const bottomRightWheelPosition = useMemo(
+        () => new Vector3(...bottomRightWheelPositionArray),
+        [bottomRightWheelPositionArray]
+    )
+
+    const wheel = {
+        ...wheelOptions,
+        directionLocal,
+        axleLocal,
+        minSuspensionLength:
+            wheelOptions.suspensionRestLength -
+            wheelOptions.maxSuspensionTravel,
+        maxSuspensionLength:
+            wheelOptions.suspensionRestLength +
+            wheelOptions.maxSuspensionTravel,
+    }
+
+    const wheelPositions: Vector3[] = [
+        topLeftWheelPosition,
+        topRightWheelPosition,
+        bottomLeftWheelPosition,
+        bottomRightWheelPosition,
+    ]
 
     const rapier = useRapier()
 
@@ -568,17 +329,20 @@ const RaycastVehicle = ({
 
             // update wheel transform world
             const chassisBody = chassisRigidBody.current.raw()
-            wheelState.chassisConnectionPointWorld = pointToWorldFrame(
+            pointToWorldFrame(
                 chassisBody,
-                wheelPosition
+                wheelPosition,
+                wheelState.chassisConnectionPointWorld
             )
-            wheelState.directionWorld = vectorToWorldFrame(
+            vectorToWorldFrame(
                 chassisBody,
-                wheel.directionLocal
+                wheel.directionLocal,
+                wheelState.directionWorld
             )
-            wheelState.axleWorld = vectorToWorldFrame(
+            vectorToWorldFrame(
                 chassisBody,
-                wheel.axleLocal
+                wheel.axleLocal,
+                wheelState.axleWorld
             )
 
             up.copy(wheel.directionLocal).multiplyScalar(-1)
@@ -671,11 +435,11 @@ const RaycastVehicle = ({
                 wheelState.suspensionLength = hitDistance - wheel.radius
 
                 // clamp on max suspension travel
-                if (wheelState.suspensionLength < minSuspensionLength) {
-                    wheelState.suspensionLength = minSuspensionLength
+                if (wheelState.suspensionLength < wheel.minSuspensionLength) {
+                    wheelState.suspensionLength = wheel.minSuspensionLength
                 }
-                if (wheelState.suspensionLength > maxSuspensionLength) {
-                    wheelState.suspensionLength = maxSuspensionLength
+                if (wheelState.suspensionLength > wheel.maxSuspensionLength) {
+                    wheelState.suspensionLength = wheel.maxSuspensionLength
                 }
 
                 const denominator = new Vector3()
@@ -795,7 +559,7 @@ const RaycastVehicle = ({
                 wheelState.forwardWS.copy(surfNormalWS).cross(wheelState.axle)
                 wheelState.forwardWS.normalize()
 
-                wheelState.sideImpulse = resolveSingleBilateral(
+                wheelState.sideImpulse = resolveSingleBilateralConstraint(
                     chassisRigidBody.current.raw(),
                     wheelState.hitNormalWorld,
                     wheelState.groundRigidBody,
@@ -1154,7 +918,7 @@ const Scene = () => (
 )
 
 export default () => {
-    const { debug, orbitControls } = useLevaControls()
+    const { debug, orbitControls } = useCommonLevaControls()
 
     return (
         <>

@@ -5,7 +5,7 @@ import React, {
     useEffect,
     useImperativeHandle,
     useRef,
-    useState
+    useState,
 } from 'react'
 import { HashRouter as Router, Route, Routes, useMatch } from 'react-router-dom'
 import { DebugTunnel } from './DebugTunnel'
@@ -14,7 +14,7 @@ import {
     isSketchRoute,
     Sketch,
     sketchComponents,
-    visibleSketches
+    visibleSketches,
 } from './sketches'
 import {
     GlobalStyle,
@@ -25,7 +25,7 @@ import {
     MenuItemImage,
     MenuItemTitle,
     MenuToggle,
-    Page
+    Page,
 } from './styles'
 
 const defaultSketch = 'Home'
@@ -108,6 +108,7 @@ const Navigation = React.forwardRef<NavigationRef, NavigationProps>(
 
 const App = () => {
     const [displayMode, setDisplayMode] = useState<DisplayMode>('default')
+    const [smallScreen, setSmallScreen] = useState(false)
     const navigationRef = useRef<NavigationRef>(null)
 
     const {
@@ -132,9 +133,36 @@ const App = () => {
         }
     }, [displayMode])
 
+    useEffect(() => {
+        const media = window.matchMedia('(max-width: 500px)')
+
+        if (media.matches !== smallScreen) {
+            setSmallScreen(media.matches)
+        }
+
+        const listener = () => {
+            setSmallScreen(media.matches)
+        }
+
+        window.addEventListener('resize', listener)
+        return () => window.removeEventListener('resize', listener)
+    }, [smallScreen])
+
     return (
         <Page>
-            <Leva collapsed />
+            <Leva
+                collapsed
+                theme={
+                    smallScreen
+                        ? {}
+                        : {
+                              sizes: {
+                                  rootWidth: '450px',
+                                  controlWidth: '160px',
+                              },
+                          }
+                }
+            />
 
             <Suspense fallback={<Loader />}>
                 <Routes>
@@ -163,9 +191,7 @@ const App = () => {
                 </DebugTunnel.In>
             ) : undefined}
 
-            {displayMode === 'screenshot' ? (
-                <HideH1GlobalStyle />
-            ) : undefined}
+            {displayMode === 'screenshot' ? <HideH1GlobalStyle /> : undefined}
         </Page>
     )
 }
