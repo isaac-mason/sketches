@@ -1,4 +1,6 @@
 import { OrthographicCamera } from '@react-three/drei'
+import { useThree } from '@react-three/fiber'
+import { useEffect } from 'react'
 import { Canvas } from '../Canvas'
 
 const vertexShader = /* glsl */ `
@@ -21,6 +23,10 @@ void main() {
 `
 
 const App = () => {
+    const three = useThree()
+    useEffect(() => {
+        console.log(three)
+    }, [])
     return (
         <mesh position={[0.5, 0.5, 0]}>
             <shaderMaterial
@@ -40,8 +46,13 @@ export default () => (
             <OrthographicCamera
                 makeDefault
                 manual
-                args={[0, 1, 1, 0, 0.1, 1000]}
-                position={[0, 0, 1]}
+                top={1}
+                bottom={0}
+                left={0}
+                right={1}
+                near={0.1}
+                far={1000}
+                position={[0, 0, 0.5]}
             />
         </Canvas>
     </>
