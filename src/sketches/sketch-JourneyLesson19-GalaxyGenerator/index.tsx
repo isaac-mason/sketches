@@ -69,7 +69,7 @@ const App = () => {
         geo.setAttribute('color', new BufferAttribute(colors, 3))
 
         return geo
-    }, [])
+    }, [parameters])
 
     return (
         <>
