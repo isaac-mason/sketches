@@ -66,14 +66,14 @@ type RevoluteJointVehicleWheelInfo = {
     wheelJoint: Rapier.RevoluteImpulseJoint
 
     /**
-     * Axle rigid body, if the wheel is steered
+     * Axle rigid body, or null if the wheel is not steered
      */
-    axleRigidBody?: RigidBodyApi
+    axleRigidBody: RigidBodyApi | null
 
     /**
-     * The joint from the wheel axle to the chassis, or undefined if the wheel is not steered
+     * The joint from the wheel axle to the chassis, or null if the wheel is not steered
      */
-    axleToChassisJoint?: Rapier.RevoluteImpulseJoint
+    axleToChassisJoint: Rapier.RevoluteImpulseJoint | null
 }
 
 type RevoluteJointVehicleContext = {
@@ -269,18 +269,16 @@ const RevoluteJointVehicleWheel = ({
     torque = false,
     ...rigidBodyProps
 }: RevoluteJointVehicleWheelProps) => {
-    const rapierContext = useRapier()
+    const { world, rapier } = useRapier()
     const vehicleContext = useContext(revoluteJointVehicleContext)
 
-    const [wheelRigidBody, setWheelRigidBody] = useState<RigidBodyApi | null>()
-    const [axleRigidBody, setAxleRigidBody] = useState<RigidBodyApi | null>()
+    const wheelRigidBody = useRef<RigidBodyApi | null>(null)
+    const axleRigidBody = useRef<RigidBodyApi | null>(null)
 
     useEffect(() => {
-        if (!wheelRigidBody || !vehicleContext.chassisRigidBody) {
+        if (!wheelRigidBody.current || !vehicleContext.chassisRigidBody) {
             return
         }
-
-        const { world, rapier } = rapierContext
 
         // wheel joint - to axle if steered, otherwise to chassis
         const wheelJoint = world.createImpulseJoint(
@@ -293,18 +291,17 @@ const RevoluteJointVehicleWheel = ({
             ),
             world.getRigidBody(
                 steered
-                    ? axleRigidBody!.handle
+                    ? axleRigidBody.current!.handle
                     : vehicleContext.chassisRigidBody!.handle
             )!,
-            world.getRigidBody(wheelRigidBody.handle)!
+            world.getRigidBody(wheelRigidBody.current.handle)!
         ) as Rapier.RevoluteImpulseJoint
 
         wheelJoint.setContactsEnabled(false)
         wheelJoint.configureMotorModel(Rapier.MotorModel.AccelerationBased)
 
         // axle joint, if wheel is steered
-        let axleToChassisJoint: Rapier.RevoluteImpulseJoint | undefined =
-            undefined
+        let axleToChassisJoint: Rapier.RevoluteImpulseJoint | null = null
         if (steered) {
             axleToChassisJoint = world.createImpulseJoint(
                 rapier.JointData.revolute(
@@ -313,7 +310,7 @@ const RevoluteJointVehicleWheel = ({
                     vectorArrayToVector3([0, 1, 0])
                 ),
                 world.getRigidBody(vehicleContext.chassisRigidBody!.handle)!,
-                world.getRigidBody(axleRigidBody!.handle)!
+                world.getRigidBody(axleRigidBody.current!.handle)!
             ) as Rapier.RevoluteImpulseJoint
 
             axleToChassisJoint.setContactsEnabled(false)
@@ -323,10 +320,10 @@ const RevoluteJointVehicleWheel = ({
         const wheel: RevoluteJointVehicleWheelInfo = {
             steered,
             torque,
-            wheelRigidBody,
+            wheelRigidBody: wheelRigidBody.current,
             wheelJoint,
-            axleRigidBody: axleRigidBody ?? undefined,
-            axleToChassisJoint: axleToChassisJoint ?? undefined,
+            axleRigidBody: axleRigidBody.current,
+            axleToChassisJoint,
         }
 
         vehicleContext.registerWheel(wheel)
@@ -348,7 +345,7 @@ const RevoluteJointVehicleWheel = ({
             {/* wheel rigid body */}
             <RigidBody
                 {...rigidBodyProps}
-                ref={setWheelRigidBody}
+                ref={wheelRigidBody}
                 colliders={false}
                 position={
                     !steered ? anchor : addVector3Arrays(anchor, axleOffset)
@@ -361,7 +358,7 @@ const RevoluteJointVehicleWheel = ({
             {/* wheel axle */}
             {steered ? (
                 <RigidBody
-                    ref={setAxleRigidBody}
+                    ref={axleRigidBody}
                     colliders={false}
                     position={addVector3Arrays(anchor, axleOffset)}
                 >
