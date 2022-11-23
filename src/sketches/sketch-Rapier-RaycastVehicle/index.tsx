@@ -85,6 +85,7 @@ type WheelState = {
     clippedInvContactDotSuspension: number
 
     inContactWithGround: boolean
+    hitPointWorld: Vector3
     hitNormalWorld: Vector3
 
     directionWorld: Vector3
@@ -113,6 +114,33 @@ type WheelState = {
 
     sliding: boolean
 }
+
+const updateWheelTransform_up = new Vector3()
+const updateWheelTransform_right = new Vector3()
+const updateWheelTransform_fwd = new Vector3()
+
+const updateCurrentSpeed_chassisVelocity = new Vector3()
+const updateCurrentSpeed_forwardWorld = new Vector3()
+
+const updateWheelSuspension_direction = new Vector3()
+const updateWheelSuspension_denominator = new Vector3()
+const updateWheelSuspension_chassisVelocityAtContactPoint = new Vector3()
+
+const applyWheelSuspensionForce_impulse = new Vector3()
+const applyWheelSuspensionForce_relpos = new Vector3()
+
+const updateFriction_surfNormalWS_scaled_proj = new Vector3()
+const updateFriction_rel_pos = new Vector3()
+const updateFriction_impulse = new Vector3()
+const updateFriction_rel_pos2 = new Vector3()
+const updateFriction_sideImp = new Vector3()
+
+const updateWheelRotation_hitNormalWorldScaledWithProj = new Vector3()
+const updateWheelRotation_fwd = new Vector3()
+const updateWheelRotation_vel = new Vector3()
+
+const camera_idealOffset = new Vector3()
+const camera_idealLookAt = new Vector3()
 
 const RaycastVehicle = ({
     children,
@@ -219,7 +247,7 @@ const RaycastVehicle = ({
     const wheelStates = useRef<WheelState[]>(
         Array.from({ length: 4 })
             .fill(0)
-            .map((_, idx) => ({
+            .map(() => ({
                 suspensionLength: 0,
                 suspensionForce: 0,
                 suspensionRelativeVelocity: 0,
@@ -227,6 +255,7 @@ const RaycastVehicle = ({
                 directionWorld: new Vector3(),
                 inContactWithGround: false,
                 hitNormalWorld: new Vector3(),
+                hitPointWorld: new Vector3(),
                 chassisConnectionPointWorld: new Vector3(),
                 axleWorld: new Vector3(),
                 sideImpulse: 0,
@@ -294,17 +323,17 @@ const RaycastVehicle = ({
         let steering = 0
 
         if (controls.current.forward) {
-            engineForce += 10
+            engineForce += 30
         }
         if (controls.current.backward) {
-            engineForce -= 10
+            engineForce -= 30
         }
 
         if (controls.current.left) {
-            steering -= 10
+            steering += 0.5
         }
         if (controls.current.right) {
-            steering += 10
+            steering -= 0.5
         }
 
         const brakeForce = controls.current.brake ? 1000000 : 0
@@ -323,9 +352,9 @@ const RaycastVehicle = ({
             const wheelState = wheelStates.current[i]
             const wheelObject = wheelObjects[i].current
 
-            const up = new Vector3()
-            const right = new Vector3()
-            const fwd = new Vector3()
+            const up = updateWheelTransform_up
+            const right = updateWheelTransform_right
+            const fwd = updateWheelTransform_fwd
 
             // update wheel transform world
             const chassisBody = chassisRigidBody.current.raw()
@@ -347,7 +376,7 @@ const RaycastVehicle = ({
 
             up.copy(wheel.directionLocal).multiplyScalar(-1)
             right.copy(wheel.axleLocal)
-            fwd.copy(up).cross(right)
+            fwd.crossVectors(up, right)
             fwd.normalize()
             right.normalize()
 
@@ -361,7 +390,10 @@ const RaycastVehicle = ({
 
             // World rotation of the wheel
             const q = wheelState.worldTransform.quaternion
-            q.copy(chassisRigidBody.current.rotation()).multiply(steeringOrn)
+            q.multiplyQuaternions(
+                chassisRigidBody.current.rotation(),
+                steeringOrn
+            )
             q.multiply(rotatingOrn)
 
             q.normalize()
@@ -379,12 +411,14 @@ const RaycastVehicle = ({
 
     const updateCurrentSpeed = () => {
         const chassis = chassisRigidBody.current.raw()
-        const chassisVelocity = new Vector3().copy(chassis.linvel() as Vector3)
+        const chassisVelocity = updateCurrentSpeed_chassisVelocity.copy(
+            chassis.linvel() as Vector3
+        )
 
         vehicleState.current.currentVehicleSpeedKmHour =
             3.6 * chassisVelocity.length()
 
-        const forwardWorld = new Vector3()
+        const forwardWorld = updateCurrentSpeed_forwardWorld
         getVehicleAxisWorld(chassis, indexForwardAxis, forwardWorld)
 
         if (forwardWorld.dot(chassisVelocity) < 0) {
@@ -404,13 +438,14 @@ const RaycastVehicle = ({
                 .translation()
                 .add(wheelPosition)
 
-            const direction = new Vector3(0, -1, 0).applyQuaternion(
-                chassisRigidBody.current.rotation()
-            )
+            const direction = updateWheelSuspension_direction
+                .set(0, -1, 0)
+                .applyQuaternion(chassisRigidBody.current.rotation())
 
             const maxToi = wheel.radius + wheel.suspensionRestLength
-            const ray = world.castRayAndGetNormal(
-                new Rapier.Ray(origin, direction),
+            const ray = new Rapier.Ray(origin, direction)
+            const rayColliderIntersection = world.castRayAndGetNormal(
+                ray,
                 maxToi,
                 false,
                 undefined,
@@ -420,18 +455,23 @@ const RaycastVehicle = ({
             )
 
             // if hit
-            if (ray && ray.collider) {
+            if (rayColliderIntersection && rayColliderIntersection.collider) {
                 // store ground rigid body
-                wheelState.groundRigidBody = ray.collider.parent()
+                wheelState.groundRigidBody =
+                    rayColliderIntersection.collider.parent()
 
                 // update wheel state
                 wheelState.inContactWithGround = true
                 wheelState.hitNormalWorld
                     .copy(chassisRigidBody.current.translation())
-                    .add(ray.normal as Vector3)
+                    .add(rayColliderIntersection.normal as Vector3)
+
+                wheelState.hitNormalWorld.copy(
+                    ray.pointAt(rayColliderIntersection.toi) as Vector3
+                )
 
                 // compute suspension length
-                const hitDistance = ray.toi
+                const hitDistance = rayColliderIntersection.toi
                 wheelState.suspensionLength = hitDistance - wheel.radius
 
                 // clamp on max suspension travel
@@ -442,13 +482,14 @@ const RaycastVehicle = ({
                     wheelState.suspensionLength = wheel.maxSuspensionLength
                 }
 
-                const denominator = new Vector3()
+                const denominator = updateWheelSuspension_denominator
                     .copy(wheelState.hitNormalWorld)
                     .dot(wheelState.directionWorld)
 
                 const chassisVelocityAtContactPoint = getVelocityAtWorldPoint(
                     chassisRigidBody.current.raw(),
-                    wheelState.hitNormalWorld
+                    wheelState.hitPointWorld,
+                    updateWheelSuspension_chassisVelocityAtContactPoint
                 )
 
                 const projVel = wheelState.hitNormalWorld.dot(
@@ -516,8 +557,8 @@ const RaycastVehicle = ({
         for (let i = 0; i < wheelPositions.length; i++) {
             const wheelState = wheelStates.current[i]
 
-            const impulse = new Vector3()
-            const relpos = new Vector3()
+            const impulse = applyWheelSuspensionForce_impulse.set(0, 0, 0)
+            const relpos = applyWheelSuspensionForce_relpos.set(0, 0, 0)
 
             let suspensionForce = wheelState.suspensionForce
             if (suspensionForce > wheel.maxSuspensionForce) {
@@ -528,16 +569,21 @@ const RaycastVehicle = ({
                 .copy(wheelState.hitNormalWorld)
                 .multiplyScalar(suspensionForce * delta)
 
-            relpos
-                .copy(wheelState.hitNormalWorld)
-                .sub(chassisRigidBody.current.translation())
+            // relpos
+            //     .copy(wheelState.hitPointWorld)
+            //     .sub(chassisRigidBody.current.translation())
 
-            chassisRigidBody.current.applyImpulseAtPoint(impulse, relpos)
+            chassisRigidBody.current.applyImpulseAtPoint(
+                impulse,
+                wheelState.hitPointWorld,
+                true
+            )
         }
     }
 
     const updateFriction = (delta: number) => {
-        const surfNormalWS_scaled_proj = new Vector3()
+        const surfNormalWS_scaled_proj =
+            updateFriction_surfNormalWS_scaled_proj.set(0, 0, 0)
 
         for (let i = 0; i < wheelPositions.length; i++) {
             const wheelState = wheelStates.current[i]
@@ -546,24 +592,27 @@ const RaycastVehicle = ({
             wheelState.forwardImpulse = 0
 
             if (wheelState.inContactWithGround && wheelState.groundRigidBody) {
+                const axle = wheelState.axle
+                const wheelTrans = wheelState.worldTransform
+                const forwardWS = wheelState.forwardWS
+
                 // get world axle
-                wheelState.axle.copy(directions[indexRightAxis])
-                vectorToWorldFrame(wheelState.worldTransform, wheelState.axle)
+                vectorToWorldFrame(wheelTrans, directions[indexRightAxis], axle)
 
                 const surfNormalWS = wheelState.hitNormalWorld
-                const proj = wheelState.axle.dot(surfNormalWS)
+                const proj = axle.dot(surfNormalWS)
                 surfNormalWS_scaled_proj.copy(surfNormalWS).multiplyScalar(proj)
-                wheelState.axle.sub(surfNormalWS_scaled_proj)
-                wheelState.axle.normalize()
+                axle.sub(surfNormalWS_scaled_proj)
+                axle.normalize()
 
-                wheelState.forwardWS.copy(surfNormalWS).cross(wheelState.axle)
-                wheelState.forwardWS.normalize()
+                forwardWS.crossVectors(surfNormalWS, axle)
+                forwardWS.normalize()
 
                 wheelState.sideImpulse = resolveSingleBilateralConstraint(
                     chassisRigidBody.current.raw(),
-                    wheelState.hitNormalWorld,
+                    wheelState.hitPointWorld,
                     wheelState.groundRigidBody,
-                    wheelState.hitNormalWorld,
+                    wheelState.hitPointWorld,
                     wheelState.axle
                 )
 
@@ -592,7 +641,7 @@ const RaycastVehicle = ({
                 rollingFriction = calcRollingFriction(
                     chassisRigidBody.current.raw(),
                     wheelState.groundRigidBody,
-                    wheelState.hitNormalWorld,
+                    wheelState.hitPointWorld,
                     wheelState.forwardWS,
                     maxImpulse
                 )
@@ -629,7 +678,7 @@ const RaycastVehicle = ({
 
                 wheelState.sliding = false
                 if (impulseSquared > maximpSquared) {
-                    wheelState.sliding = true
+                    vehicleState.current.sliding = true
                     wheelState.sliding = true
 
                     const factor = maximp / Math.sqrt(impulseSquared)
@@ -652,26 +701,88 @@ const RaycastVehicle = ({
             }
         }
 
+        // // apply the impulses
+        // for (let i = 0; i < wheelPositions.length; i++) {
+        //     const wheelState = wheelStates.current[i]
+
+        //     const rel_pos = updateFriction_rel_pos.subVectors(
+        //         wheelState.hitPointWorld,
+        //         chassisRigidBody.current.translation()
+        //     )
+
+        //     // rapier applyimpulse is using world coord for the position
+        //     if (wheelState.forwardImpulse !== 0) {
+        //         const impulse = updateFriction_impulse
+        //             .copy(wheelState.forwardWS)
+        //             .multiplyScalar(wheelState.forwardImpulse)
+
+        //         console.log(wheelState.forwardWS)
+
+        //         chassisRigidBody.current.applyImpulseAtPoint(
+        //             impulse,
+        //             rel_pos,
+        //             true
+        //         )
+        //     }
+
+        //     if (wheelState.sideImpulse !== 0) {
+        //         const groundObject = wheelState.groundRigidBody!
+
+        //         const rel_pos2 = updateFriction_rel_pos2.subVectors(
+        //             wheelState.hitPointWorld,
+        //             groundObject.translation() as Vector3
+        //         )
+
+        //         const sideImp = updateFriction_sideImp
+        //             .copy(wheelState.axle)
+        //             .multiplyScalar(wheelState.sideImpulse)
+
+        //         // Scale the relative position in the up direction with rollInfluence.
+        //         // If rollInfluence is 1, the impulse will be applied on the hitPoint (easy to roll over), if it is zero it will be applied in the same plane as the center of mass (not easy to roll over).
+        //         vectorToLocalFrame(
+        //             chassisRigidBody.current.raw(),
+        //             rel_pos,
+        //             rel_pos
+        //         )
+
+        //         rel_pos['xyz'[indexUpAxis] as 'x' | 'y' | 'z'] *=
+        //             wheel.rollInfluence
+
+        //         vectorToWorldFrame(
+        //             chassisRigidBody.current.raw(),
+        //             rel_pos,
+        //             rel_pos
+        //         )
+
+        //         chassisRigidBody.current
+        //             .raw()
+        //             .applyImpulseAtPoint(sideImp, rel_pos, true)
+
+        //         // apply friction impulse on the ground
+        //         sideImp.multiplyScalar(-1)
+        //         groundObject.applyImpulseAtPoint(sideImp, rel_pos2, true)
+        //     }
+        // }
+
         // apply the impulses
         for (let i = 0; i < wheelPositions.length; i++) {
-            const wheelPosition = wheelPositions[i]
-            const wheelRaycastArrowHelper = wheelRaycastArrowHelpers[i]
             const wheelState = wheelStates.current[i]
 
-            const rel_pos = new Vector3().subVectors(
-                wheelState.hitNormalWorld,
-                chassisRigidBody.current.translation()
+            const world_pos = updateFriction_rel_pos.copy(
+                wheelState.hitPointWorld
             )
 
             // rapier applyimpulse is using world coord for the position
             if (wheelState.forwardImpulse !== 0) {
-                const impulse = new Vector3()
+                const impulse = updateFriction_impulse
                     .copy(wheelState.forwardWS)
                     .multiplyScalar(wheelState.forwardImpulse)
 
+                console.log(wheelState.forwardWS)
+
                 chassisRigidBody.current.applyImpulseAtPoint(
                     impulse,
-                    rel_pos,
+                    world_pos,
                     true
                 )
             }
@@ -679,45 +790,47 @@ const RaycastVehicle = ({
             if (wheelState.sideImpulse !== 0) {
                 const groundObject = wheelState.groundRigidBody!
 
-                const rel_pos2 = new Vector3().subVectors(
-                    wheelState.hitNormalWorld,
-                    groundObject.translation() as Vector3
+                const world_pos2 = updateFriction_rel_pos2.copy(
+                    wheelState.hitPointWorld
                 )
 
-                const sideImp = new Vector3()
+                const sideImp = updateFriction_sideImp
                     .copy(wheelState.axle)
                     .multiplyScalar(wheelState.sideImpulse)
 
                 // Scale the relative position in the up direction with rollInfluence.
                 // If rollInfluence is 1, the impulse will be applied on the hitPoint (easy to roll over), if it is zero it will be applied in the same plane as the center of mass (not easy to roll over).
-                const localFrame = vectorToLocalFrame(
+                vectorToLocalFrame(
                     chassisRigidBody.current.raw(),
-                    rel_pos
+                    world_pos,
+                    world_pos
                 )
 
-                localFrame['xyz'[indexUpAxis] as 'x' | 'y' | 'z'] *=
+                world_pos['xyz'[indexUpAxis] as 'x' | 'y' | 'z'] *=
                     wheel.rollInfluence
 
-                const worldFrame = vectorToWorldFrame(
+                vectorToWorldFrame(
                     chassisRigidBody.current.raw(),
-                    localFrame
+                    world_pos,
+                    world_pos
                 )
 
                 chassisRigidBody.current
                     .raw()
-                    .applyImpulseAtPoint(sideImp, worldFrame, true)
+                    .applyImpulseAtPoint(sideImp, world_pos, true)
 
-                //apply friction impulse on the ground
+                // apply friction impulse on the ground
                 sideImp.multiplyScalar(-1)
-                groundObject.applyImpulseAtPoint(sideImp, rel_pos2, true)
+                groundObject.applyImpulseAtPoint(sideImp, world_pos2, true)
             }
         }
     }
 
     const updateWheelRotation = (delta: number) => {
-        const hitNormalWorldScaledWithProj = new Vector3()
-        const fwd = new Vector3()
-        const vel = new Vector3()
+        const hitNormalWorldScaledWithProj =
+            updateWheelRotation_hitNormalWorldScaledWithProj.set(0, 0, 0)
+        const fwd = updateWheelRotation_fwd.set(0, 0, 0)
+        const vel = updateWheelRotation_vel.set(0, 0, 0)
 
         for (let i = 0; i < wheelPositions.length; i++) {
             const wheelState = wheelStates.current[i]
@@ -805,14 +918,14 @@ const RaycastVehicle = ({
 
         const t = 1.0 - Math.pow(0.01, delta)
 
-        const idealOffset = new Vector3(0, 5, -10)
+        const idealOffset = camera_idealOffset.set(0, 5, -10)
         idealOffset.applyQuaternion(chassisRigidBody.current.rotation())
         idealOffset.add(chassisRigidBody.current.translation())
         if (idealOffset.y < 0) {
             idealOffset.y = 0
         }
 
-        const idealLookAt = new Vector3(0, 1, 0)
+        const idealLookAt = camera_idealLookAt.set(0, 1, 0)
         idealLookAt.applyQuaternion(chassisRigidBody.current.rotation())
         idealLookAt.add(chassisRigidBody.current.translation())
 
