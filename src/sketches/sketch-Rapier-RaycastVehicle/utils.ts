@@ -1,6 +1,10 @@
 import { Matrix3, Object3D, Quaternion, Vector3 } from 'three'
 import Rapier from '@dimforge/rapier3d-compat'
 
+const getVelocityAtWorldPoint_position = new Vector3()
+const getVelocityAtWorldPoint_angvel = new Vector3()
+const getVelocityAtWorldPoint_linvel = new Vector3()
+
 export const getVelocityAtWorldPoint = (
     rigidBody: Rapier.RigidBody,
     worldPoint: Vector3,
@@ -8,16 +12,22 @@ export const getVelocityAtWorldPoint = (
 ): Vector3 => {
     const r = target
 
-    const position = new Vector3().copy(rigidBody.translation() as Vector3)
-    const angvel = new Vector3().copy(rigidBody.angvel() as Vector3)
-    const linvel = new Vector3().copy(rigidBody.linvel() as Vector3)
+    const position = getVelocityAtWorldPoint_position.copy(
+        rigidBody.translation() as Vector3
+    )
+    const angvel = getVelocityAtWorldPoint_angvel.copy(
+        rigidBody.angvel() as Vector3
+    )
+    const linvel = getVelocityAtWorldPoint_linvel.copy(
+        rigidBody.linvel() as Vector3
+    )
 
     r.subVectors(worldPoint, position)
     r.crossVectors(angvel, r)
     r.add(linvel)
 
-    const result = linvel.add(new Vector3().copy(r).cross(angvel))
-    return result
+    // const result = linvel.add(new Vector3().copy(r).cross(angvel))
+    return r
 }
 
 export const pointToWorldFrame = (
@@ -103,8 +113,8 @@ export const resolveSingleBilateralConstraint = (
     const vel2 = resolveSingleBilateralConstraint_vel2
     const vel = resolveSingleBilateralConstraint_vel
 
-    vel1.copy(getVelocityAtWorldPoint(body1, pos1))
-    vel2.copy(getVelocityAtWorldPoint(body2, pos2))
+    getVelocityAtWorldPoint(body1, pos1, vel1)
+    getVelocityAtWorldPoint(body2, pos2, vel2)
 
     vel.subVectors(vel1, vel2)
 
@@ -118,7 +128,10 @@ export const resolveSingleBilateralConstraint = (
 }
 
 // set Matrix3 rotation from quaternion
-export const setMatrix3RotationFromQuaternion = (m: Matrix3, q: Quaternion): void => {
+export const setMatrix3RotationFromQuaternion = (
+    m: Matrix3,
+    q: Quaternion
+): void => {
     const x = q.x
     const y = q.y
     const z = q.z
@@ -169,7 +182,6 @@ export const matrixVectorMultiplication = (
     return target
 }
 
-
 // scale matrix3 columns of by vector3
 const scaleMatrix3ByVector3 = (m: Matrix3, vector: Vector3): void => {
     const e = m.elements
@@ -181,7 +193,10 @@ const scaleMatrix3ByVector3 = (m: Matrix3, vector: Vector3): void => {
 }
 
 // calculate inertia for an aabb
-export const calculateAABBInertia = (halfExtents: Vector3, mass: number): Vector3 => {
+export const calculateAABBInertia = (
+    halfExtents: Vector3,
+    mass: number
+): Vector3 => {
     const e = halfExtents
     return new Vector3(
         (1.0 / 12.0) * mass * (2 * e.y * 2 * e.y + 2 * e.z * 2 * e.z),
@@ -225,7 +240,7 @@ export const computeImpulseDenominator = (
     halfExtents: Vector3,
     pos: Vector3,
     normal: Vector3
-): number  => {
+): number => {
     const r0 = computeImpulseDenominator_r0
     const c0 = computeImpulseDenominator_c0
     const vec = computeImpulseDenominator_vec
@@ -269,7 +284,7 @@ export const calcRollingFriction = (
     const vrel = frictionDirectionWorld.dot(vel)
 
     // hack: hard-coding incorrect half extents for estimated inertia
-    const todoHalfExtents = new Vector3(1, 1, 1)
+    const todoHalfExtents = new Vector3(2, 0.5, 1)
 
     const denom0 = computeImpulseDenominator(
         body0,

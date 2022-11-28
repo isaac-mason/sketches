@@ -899,11 +899,12 @@ const Scene = () => (
         </RigidBody>
 
         {/* ground */}
-        <RigidBody type="fixed" friction={2} position-y={-2}>
+        <RigidBody type="fixed" friction={2} position-y={-5} colliders={false}>
             <mesh>
-                <boxGeometry args={[150, 2, 150]} />
+                <boxGeometry args={[300, 9, 300]} />
                 <meshStandardMaterial color="#ccc" />
             </mesh>
+            <CuboidCollider args={[150, 5, 150]} />x    
         </RigidBody>
         <gridHelper args={[150, 15]} position-y={-0.99} />
 
