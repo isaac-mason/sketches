@@ -10,7 +10,7 @@ const keyControlMap = {
     d: 'right',
     s: 'backward',
     w: 'forward',
-    Space: 'brake',
+    " ": 'brake',
 } as const
 
 type KeyCode = keyof typeof keyControlMap

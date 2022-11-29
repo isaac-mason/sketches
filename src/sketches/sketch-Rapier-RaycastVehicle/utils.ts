@@ -5,12 +5,42 @@ const getVelocityAtWorldPoint_position = new Vector3()
 const getVelocityAtWorldPoint_angvel = new Vector3()
 const getVelocityAtWorldPoint_linvel = new Vector3()
 
+// Multiply a quaternion by a vector
+export const multiplyQuaternionByVector = (
+    q: Quaternion,
+    v: Vector3,
+    target = new Vector3()
+): Vector3 => {
+    const x = v.x
+    const y = v.y
+    const z = v.z
+    const qx = q.x
+    const qy = q.y
+    const qz = q.z
+    const qw = q.w
+
+    // q*v
+    const ix = qw * x + qy * z - qz * y
+
+    const iy = qw * y + qz * x - qx * z
+    const iz = qw * z + qx * y - qy * x
+    const iw = -qx * x - qy * y - qz * z
+
+    target.x = ix * qw + iw * -qx + iy * -qz - iz * -qy
+    target.y = iy * qw + iw * -qy + iz * -qx - ix * -qz
+    target.z = iz * qw + iw * -qz + ix * -qy - iy * -qx
+
+    return target
+}
+
+const getVelocityAtWorldPoint_r = new Vector3()
+
 export const getVelocityAtWorldPoint = (
     rigidBody: Rapier.RigidBody,
     worldPoint: Vector3,
     target = new Vector3()
 ): Vector3 => {
-    const r = target
+    const r = getVelocityAtWorldPoint_r.set(0, 0, 0)
 
     const position = getVelocityAtWorldPoint_position.copy(
         rigidBody.translation() as Vector3
@@ -23,59 +53,69 @@ export const getVelocityAtWorldPoint = (
     )
 
     r.subVectors(worldPoint, position)
-    r.crossVectors(angvel, r)
-    r.add(linvel)
+    target.crossVectors(angvel, r)
+    target.addVectors(linvel, target)
 
-    // const result = linvel.add(new Vector3().copy(r).cross(angvel))
-    return r
+    return target
 }
 
+const pointToWorldFrame_quaternion = new Quaternion()
+
 export const pointToWorldFrame = (
-    rigidBody: Rapier.RigidBody,
+    object: Rapier.RigidBody | Object3D,
     localPoint: Vector3,
     target = new Vector3()
 ): Vector3 => {
     target.copy(localPoint)
-    target
-        .applyQuaternion(
-            new Quaternion().copy(rigidBody.rotation() as Quaternion)
-        )
-        .add(rigidBody.translation() as Vector3)
-    return target
+
+    const quaternion = pointToWorldFrame_quaternion.copy(
+        object instanceof Object3D
+            ? object.quaternion
+            : (object.rotation() as Quaternion)
+    )
+
+    const position =
+        object instanceof Object3D
+            ? object.position
+            : (object.translation() as Vector3)
+
+    return multiplyQuaternionByVector(quaternion, localPoint, target).add(
+        position
+    )
 }
+
+const vectorToLocalFrame_quaternion = new Quaternion()
 
 export const vectorToLocalFrame = (
     object: Rapier.RigidBody | Object3D,
     worldVector: Vector3,
     target = new Vector3()
 ): Vector3 => {
-    return target
-        .copy(worldVector)
-        .applyQuaternion(
-            new Quaternion()
-                .copy(
-                    object instanceof Object3D
-                        ? object.quaternion
-                        : (object.rotation() as Quaternion)
-                )
-                .conjugate()
-        )
+    const quaternion = vectorToLocalFrame_quaternion.copy(
+        object instanceof Object3D
+            ? object.quaternion
+            : (object.rotation() as Quaternion)
+    )
+
+    quaternion.conjugate()
+
+    return multiplyQuaternionByVector(quaternion, worldVector, target)
 }
+
+const vectorToWorldFrame_quaternion = new Quaternion()
 
 export const vectorToWorldFrame = (
     object: Rapier.RigidBody | Object3D,
     localVector: Vector3,
     target = new Vector3()
 ): Vector3 => {
-    return target
-        .copy(localVector)
-        .applyQuaternion(
-            new Quaternion().copy(
-                object instanceof Object3D
-                    ? object.quaternion
-                    : (object.rotation() as Quaternion)
-            )
-        )
+    const quaternion = vectorToWorldFrame_quaternion.copy(
+        object instanceof Object3D
+            ? object.quaternion
+            : (object.rotation() as Quaternion)
+    )
+
+    return multiplyQuaternionByVector(quaternion, localVector, target)
 }
 
 // get one of the wheel axes, world-oriented
@@ -105,9 +145,9 @@ export const resolveSingleBilateralConstraint = (
     normal: Vector3
 ): number => {
     const normalLenSqr = normal.lengthSq()
-    if (normalLenSqr > 1.1) {
-        return 0 // no impulse
-    }
+        if (normalLenSqr > 1.1) {
+            return 0 // no impulse
+        }
 
     const vel1 = resolveSingleBilateralConstraint_vel1
     const vel2 = resolveSingleBilateralConstraint_vel2
@@ -237,9 +277,9 @@ const computeImpulseDenominator_m = new Vector3()
 
 export const computeImpulseDenominator = (
     body: Rapier.RigidBody,
-    halfExtents: Vector3,
     pos: Vector3,
-    normal: Vector3
+    normal: Vector3,
+    halfExtents: Vector3,
 ): number => {
     const r0 = computeImpulseDenominator_r0
     const c0 = computeImpulseDenominator_c0
@@ -277,8 +317,8 @@ export const calcRollingFriction = (
     const vel2 = calcRollingFriction_vel2
     const vel = calcRollingFriction_vel
 
-    vel1.copy(getVelocityAtWorldPoint(body0, contactPosWorld))
-    vel2.copy(getVelocityAtWorldPoint(body1, contactPosWorld))
+    getVelocityAtWorldPoint(body0, contactPosWorld, vel1)
+    getVelocityAtWorldPoint(body1, contactPosWorld, vel2)
     vel.subVectors(vel1, vel2)
 
     const vrel = frictionDirectionWorld.dot(vel)
@@ -288,15 +328,15 @@ export const calcRollingFriction = (
 
     const denom0 = computeImpulseDenominator(
         body0,
-        todoHalfExtents,
         frictionPosWorld,
-        frictionDirectionWorld
+        frictionDirectionWorld,
+        todoHalfExtents,
     )
     const denom1 = computeImpulseDenominator(
         body1,
-        todoHalfExtents,
         frictionPosWorld,
-        frictionDirectionWorld
+        frictionDirectionWorld,
+        todoHalfExtents,
     )
     const relaxation = 1
     const jacDiagABInv = relaxation / (denom0 + denom1)

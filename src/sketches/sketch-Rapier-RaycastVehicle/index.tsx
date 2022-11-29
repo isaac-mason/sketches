@@ -11,30 +11,20 @@ import {
 } from '@react-three/rapier'
 import { RigidBodyApi } from '@react-three/rapier/dist/declarations/src/types'
 import { useControls as useLeva } from 'leva'
-import { NumberInput } from 'leva/dist/declarations/src/components/Number/number-types'
 import { useMemo, useRef } from 'react'
 import styled from 'styled-components'
-import {
-    ArrowHelper,
-    Euler,
-    Group,
-    Matrix3,
-    Mesh,
-    Object3D,
-    Quaternion,
-    Vector3,
-} from 'three'
+import { ArrowHelper, Group, Object3D, Quaternion, Vector3 } from 'three'
 import { Canvas } from '../Canvas'
+import { useControls } from './use-controls'
 import {
-    pointToWorldFrame,
-    vectorToWorldFrame,
+    calcRollingFriction,
     getVehicleAxisWorld,
     getVelocityAtWorldPoint,
-    calcRollingFriction,
-    vectorToLocalFrame,
+    pointToWorldFrame,
     resolveSingleBilateralConstraint,
+    vectorToLocalFrame,
+    vectorToWorldFrame,
 } from './utils'
-import { useControls } from './use-controls'
 
 const LEVA_KEY = 'rapier-raycast-vehicle'
 
@@ -112,11 +102,12 @@ type WheelState = {
 const updateWheelTransform_up = new Vector3()
 const updateWheelTransform_right = new Vector3()
 const updateWheelTransform_fwd = new Vector3()
+const updateWheelTransform_steeringOrn = new Quaternion()
+const updateWheelTransform_rotatingOrn = new Quaternion()
 
 const updateCurrentSpeed_chassisVelocity = new Vector3()
 const updateCurrentSpeed_forwardWorld = new Vector3()
 
-const updateWheelSuspension_target = new Vector3()
 const updateWheelSuspension_denominator = new Vector3()
 const updateWheelSuspension_chassisVelocityAtContactPoint = new Vector3()
 
@@ -177,6 +168,10 @@ const RaycastVehicle = ({
         chassisConnectionPointLocalTopRight: [-1, 0, 1],
         chassisConnectionPointLocalBottomLeft: [1, 0, -1],
         chassisConnectionPointLocalBottomRight: [1, 0, 1],
+
+        maxForce: 10,
+        maxSteer: 0.5,
+        maxBrake: 1000000,
     })
 
     const directionLocal = useMemo(
@@ -309,30 +304,42 @@ const RaycastVehicle = ({
         }
     }
 
-    const updateStatesFromControls = () => {
-        const maxForce = 100
-        const maxSteer = 0.5
-        const maxBrake = 1000000
+    const updateWheelTransformWorld = (wheelState: WheelState) => {
+        // update wheel transform world
+        const chassisBody = chassisRigidBody.current.raw()
+        pointToWorldFrame(
+            chassisBody,
+            wheelState.chassisConnectionPointLocal,
+            wheelState.chassisConnectionPointWorld
+        )
+        vectorToWorldFrame(
+            chassisBody,
+            wheel.directionLocal,
+            wheelState.directionWorld
+        )
+        vectorToWorldFrame(chassisBody, wheel.axleLocal, wheelState.axleWorld)
+    }
 
+    const updateStatesFromControls = () => {
         let engineForce = 0
         let steering = 0
 
         // read input
         if (controls.current.forward) {
-            engineForce -= maxForce
+            engineForce -= wheelOptions.maxForce
         }
         if (controls.current.backward) {
-            engineForce += maxForce
+            engineForce += wheelOptions.maxForce
         }
 
         if (controls.current.left) {
-            steering += maxSteer
+            steering += wheelOptions.maxSteer
         }
         if (controls.current.right) {
-            steering -= maxSteer
+            steering -= wheelOptions.maxSteer
         }
 
-        const brakeForce = controls.current.brake ? maxBrake : 0
+        const brakeForce = controls.current.brake ? wheelOptions.maxBrake : 0
 
         for (let i = 0; i < wheelStates.current.length; i++) {
             const wheelState = wheelStates.current[i]
@@ -343,9 +350,10 @@ const RaycastVehicle = ({
         wheelStates.current[0].steering = steering
         wheelStates.current[1].steering = steering
 
-        // rwd
-        wheelStates.current[2].engineForce = engineForce
-        wheelStates.current[3].engineForce = engineForce
+        // all wheel drive
+        wheelStates.current.forEach((w) => {
+            w.engineForce = engineForce
+        })
     }
 
     const updateWheelTransform = () => {
@@ -357,23 +365,7 @@ const RaycastVehicle = ({
             const right = updateWheelTransform_right
             const fwd = updateWheelTransform_fwd
 
-            // update wheel transform world
-            const chassisBody = chassisRigidBody.current.raw()
-            pointToWorldFrame(
-                chassisBody,
-                wheelState.chassisConnectionPointLocal,
-                wheelState.chassisConnectionPointWorld
-            )
-            vectorToWorldFrame(
-                chassisBody,
-                wheel.directionLocal,
-                wheelState.directionWorld
-            )
-            vectorToWorldFrame(
-                chassisBody,
-                wheel.axleLocal,
-                wheelState.axleWorld
-            )
+            updateWheelTransformWorld(wheelState)
 
             up.copy(wheel.directionLocal).multiplyScalar(-1)
             right.copy(wheel.axleLocal)
@@ -383,10 +375,10 @@ const RaycastVehicle = ({
 
             // Rotate around steering over the wheelAxle
             const steering = wheelState.steering
-            const steeringOrn = new Quaternion()
+            const steeringOrn = updateWheelTransform_steeringOrn
             steeringOrn.setFromAxisAngle(up, steering)
 
-            const rotatingOrn = new Quaternion()
+            const rotatingOrn = updateWheelTransform_rotatingOrn
             rotatingOrn.setFromAxisAngle(right, wheelState.rotation)
 
             // World rotation of the wheel
@@ -428,25 +420,22 @@ const RaycastVehicle = ({
     }
 
     const updateWheelSuspension = () => {
+        const world = rapier.world.raw()
+
         for (let i = 0; i < wheelStates.current.length; i++) {
             const wheelRaycastArrowHelper = wheelRaycastArrowHelpers[i].current
             const wheelState = wheelStates.current[i]
 
-            const world = rapier.world.raw()
+            updateWheelTransformWorld(wheelState)
 
             const rayLength = wheel.radius + wheel.suspensionRestLength
 
-            const rayVector =
+            const direction =
                 wheelState.directionWorld.multiplyScalar(rayLength)
 
-            const source = wheelState.chassisConnectionPointWorld
+            const origin = wheelState.chassisConnectionPointWorld
 
-            const target = updateWheelSuspension_target.addVectors(
-                source,
-                rayVector
-            )
-
-            const ray = new Rapier.Ray(source, target)
+            const ray = new Rapier.Ray(origin, direction)
             const rayColliderIntersection = world.castRayAndGetNormal(
                 ray,
                 rayLength,
@@ -465,10 +454,13 @@ const RaycastVehicle = ({
 
                 // update wheel state
                 wheelState.inContactWithGround = true
-                wheelState.hitNormalWorld
-                    .copy(chassisRigidBody.current.translation())
-                    .add(rayColliderIntersection.normal as Vector3)
 
+                // store hit normal
+                wheelState.hitNormalWorld.copy(
+                    rayColliderIntersection.normal as Vector3
+                )
+
+                // store hit point
                 wheelState.hitPointWorld.copy(
                     ray.pointAt(rayColliderIntersection.toi) as Vector3
                 )
@@ -521,8 +513,8 @@ const RaycastVehicle = ({
             // update arrow helper
             if (wheelRaycastArrowHelper) {
                 wheelRaycastArrowHelper.setColor('red')
-                wheelRaycastArrowHelper.position.copy(source)
-                wheelRaycastArrowHelper.setDirection(target)
+                wheelRaycastArrowHelper.position.copy(origin)
+                wheelRaycastArrowHelper.setDirection(direction)
                 wheelRaycastArrowHelper.setLength(wheelState.suspensionLength)
             }
 
@@ -531,9 +523,9 @@ const RaycastVehicle = ({
 
             if (wheelState.inContactWithGround) {
                 // spring
-                const suspensionLength = wheel.suspensionRestLength
+                const suspensionRestLength = wheel.suspensionRestLength
                 const currentLength = wheelState.suspensionLength
-                const lengthDifference = suspensionLength - currentLength
+                const lengthDifference = suspensionRestLength - currentLength
 
                 let force =
                     wheel.suspensionStiffness *
@@ -564,7 +556,6 @@ const RaycastVehicle = ({
             const wheelState = wheelStates.current[i]
 
             const impulse = applyWheelSuspensionForce_impulse
-            const worldpos = wheelState.hitPointWorld
 
             let suspensionForce = wheelState.suspensionForce
             if (suspensionForce > wheel.maxSuspensionForce) {
@@ -575,9 +566,11 @@ const RaycastVehicle = ({
                 .copy(wheelState.hitNormalWorld)
                 .multiplyScalar(suspensionForce * delta)
 
+            const worldPos = wheelState.hitPointWorld
+
             chassisRigidBody.current.applyImpulseAtPoint(
                 impulse,
-                worldpos,
+                worldPos,
                 true
             )
         }
@@ -635,6 +628,7 @@ const RaycastVehicle = ({
 
             if (wheelState.groundRigidBody) {
                 const defaultRollingFrictionImpulse = 0
+
                 const maxImpulse = wheelState.brakeForce
                     ? wheelState.brakeForce
                     : defaultRollingFrictionImpulse
@@ -892,19 +886,19 @@ const Scene = () => (
     <>
         {/* ramp */}
         <RigidBody type="fixed">
-            <mesh rotation-x={-0.2} position={[0, -1, 15]}>
-                <boxGeometry args={[5, 1, 5]} />
+            <mesh rotation-x={-0.4} position={[0, -1, 15]}>
+                <boxGeometry args={[10, 1, 10]} />
                 <meshStandardMaterial color="#888" />
             </mesh>
         </RigidBody>
 
         {/* ground */}
-        <RigidBody type="fixed" friction={2} position-y={-5} colliders={false}>
+        <RigidBody type="fixed" position-y={-5} colliders={false}>
             <mesh>
                 <boxGeometry args={[300, 9, 300]} />
                 <meshStandardMaterial color="#ccc" />
             </mesh>
-            <CuboidCollider args={[150, 5, 150]} />x    
+            <CuboidCollider args={[150, 5, 150]} />x
         </RigidBody>
         <gridHelper args={[150, 15]} position-y={-0.99} />
 
