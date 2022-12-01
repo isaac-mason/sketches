@@ -142,12 +142,13 @@ export const resolveSingleBilateralConstraint = (
     pos1: Vector3,
     body2: Rapier.RigidBody,
     pos2: Vector3,
-    normal: Vector3
+    normal: Vector3,
+    idx: number
 ): number => {
     const normalLenSqr = normal.lengthSq()
-        if (normalLenSqr > 1.1) {
-            return 0 // no impulse
-        }
+    if (normalLenSqr > 1.1) {
+        return 0 // no impulse
+    }
 
     const vel1 = resolveSingleBilateralConstraint_vel1
     const vel2 = resolveSingleBilateralConstraint_vel2
@@ -160,10 +161,22 @@ export const resolveSingleBilateralConstraint = (
 
     const rel_vel = normal.dot(vel)
 
+    
     const contactDamping = 0.2
-    const massTerm = 1 / (body1.mass() + body2.mass())
-    const impulse = -contactDamping * rel_vel * massTerm
 
+    const body1Mass = body1.mass()
+    const body1InvMass = body1Mass > 0 ? 1.0 / body1Mass : 0
+
+    const body2Mass = body2.mass()
+    const body2InvMass = body2Mass > 0 ? 1.0 / body2Mass : 0
+
+    const massTerm = 1 / (body1InvMass + body2InvMass)
+    const impulse = -contactDamping * rel_vel * massTerm
+    
+    if (idx === 0) {
+    console.log(rel_vel)
+    }
+    
     return impulse
 }
 
@@ -279,7 +292,7 @@ export const computeImpulseDenominator = (
     body: Rapier.RigidBody,
     pos: Vector3,
     normal: Vector3,
-    halfExtents: Vector3,
+    halfExtents: Vector3
 ): number => {
     const r0 = computeImpulseDenominator_r0
     const c0 = computeImpulseDenominator_c0
@@ -330,13 +343,13 @@ export const calcRollingFriction = (
         body0,
         frictionPosWorld,
         frictionDirectionWorld,
-        todoHalfExtents,
+        todoHalfExtents
     )
     const denom1 = computeImpulseDenominator(
         body1,
         frictionPosWorld,
         frictionDirectionWorld,
-        todoHalfExtents,
+        todoHalfExtents
     )
     const relaxation = 1
     const jacDiagABInv = relaxation / (denom0 + denom1)

@@ -10,6 +10,10 @@ const keyControlMap = {
     d: 'right',
     s: 'backward',
     w: 'forward',
+    A: 'left',
+    D: 'right',
+    S: 'backward',
+    W: 'forward',
     " ": 'brake',
 } as const
 

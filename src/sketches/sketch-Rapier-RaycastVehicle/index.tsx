@@ -221,10 +221,6 @@ const RaycastVehicle = ({
 
     const rapier = useRapier()
 
-    const camera = useThree((state) => state.camera)
-    const currentCameraPosition = useRef(new Vector3(15, 15, 0))
-    const currentCameraLookAt = useRef(new Vector3())
-
     const vehicleState = useRef<VehicleState>({
         sliding: false,
         currentVehicleSpeedKmHour: 0,
@@ -291,19 +287,6 @@ const RaycastVehicle = ({
 
     const controls = useControls()
 
-    const resetStates = () => {
-        // reset vehicle state
-        vehicleState.current.sliding = false
-
-        // reset wheel states
-        for (let i = 0; i < wheelStates.current.length; i++) {
-            const wheelState = wheelStates.current[i]
-
-            wheelState.inContactWithGround = false
-            wheelState.groundRigidBody = null
-        }
-    }
-
     const updateWheelTransformWorld = (wheelState: WheelState) => {
         // update wheel transform world
         const chassisBody = chassisRigidBody.current.raw()
@@ -318,6 +301,19 @@ const RaycastVehicle = ({
             wheelState.directionWorld
         )
         vectorToWorldFrame(chassisBody, wheel.axleLocal, wheelState.axleWorld)
+    }
+
+    const resetStates = () => {
+        // reset vehicle state
+        vehicleState.current.sliding = false
+
+        // reset wheel states
+        for (let i = 0; i < wheelStates.current.length; i++) {
+            const wheelState = wheelStates.current[i]
+
+            wheelState.inContactWithGround = false
+            wheelState.groundRigidBody = null
+        }
     }
 
     const updateStatesFromControls = () => {
@@ -387,7 +383,7 @@ const RaycastVehicle = ({
                 chassisRigidBody.current.rotation(),
                 steeringOrn
             )
-            q.multiply(rotatingOrn)
+            q.multiplyQuaternions(q, rotatingOrn)
 
             q.normalize()
 
@@ -566,11 +562,9 @@ const RaycastVehicle = ({
                 .copy(wheelState.hitNormalWorld)
                 .multiplyScalar(suspensionForce * delta)
 
-            const worldPos = wheelState.hitPointWorld
-
             chassisRigidBody.current.applyImpulseAtPoint(
                 impulse,
-                worldPos,
+                wheelState.hitPointWorld,
                 true
             )
         }
@@ -587,16 +581,17 @@ const RaycastVehicle = ({
 
             if (wheelState.inContactWithGround && wheelState.groundRigidBody) {
                 const axle = wheelState.axle
-                const wheelTrans = wheelState.worldTransform
+                const wheelWorldTransform = wheelState.worldTransform
                 const forwardWS = wheelState.forwardWS
 
                 // get world axle
-                vectorToWorldFrame(wheelTrans, directions[indexRightAxis], axle)
-
+                vectorToWorldFrame(wheelWorldTransform, directions[indexRightAxis], axle)
+                
                 const surfNormalWS = wheelState.hitNormalWorld
                 const proj = axle.dot(surfNormalWS)
+
                 surfNormalWS_scaled_proj.copy(surfNormalWS).multiplyScalar(proj)
-                axle.sub(surfNormalWS_scaled_proj)
+                axle.subVectors(axle, surfNormalWS_scaled_proj)
                 axle.normalize()
 
                 forwardWS.crossVectors(surfNormalWS, axle)
@@ -607,10 +602,11 @@ const RaycastVehicle = ({
                     wheelState.hitPointWorld,
                     wheelState.groundRigidBody,
                     wheelState.hitPointWorld,
-                    wheelState.axle
+                    axle,
+                    i
                 )
 
-                wheelState.sideImpulse *= wheel.sideFrictionStiffness
+                // wheelState.sideImpulse *= 1 //wheel.sideFrictionStiffness
             }
         }
 
@@ -633,6 +629,7 @@ const RaycastVehicle = ({
                     ? wheelState.brakeForce
                     : defaultRollingFrictionImpulse
 
+                // brake
                 rollingFriction = calcRollingFriction(
                     chassisRigidBody.current.raw(),
                     wheelState.groundRigidBody,
@@ -641,6 +638,7 @@ const RaycastVehicle = ({
                     maxImpulse
                 )
 
+                // acceleration
                 rollingFriction += wheelState.engineForce * delta
 
                 const factor = maxImpulse / rollingFriction
@@ -652,11 +650,11 @@ const RaycastVehicle = ({
             wheelState.skidInfo = 1
 
             if (wheelState.groundRigidBody) {
-                const maximp =
+                const maxImp =
                     wheelState.suspensionForce * delta * wheel.frictionSlip
-                const maximpSide = maximp
+                const maxImpSide = maxImp
 
-                const maximpSquared = maximp * maximpSide
+                const maxImpSquared = maxImp * maxImpSide
 
                 wheelState.forwardImpulse = rollingFriction
 
@@ -670,17 +668,18 @@ const RaycastVehicle = ({
                 const impulseSquared = x * x + y * y
 
                 wheelState.sliding = false
-                if (impulseSquared > maximpSquared) {
+                if (impulseSquared > maxImpSquared) {
                     vehicleState.current.sliding = true
                     wheelState.sliding = true
 
-                    const factor = maximp / Math.sqrt(impulseSquared)
+                    const factor = maxImp / Math.sqrt(impulseSquared)
 
                     wheelState.skidInfo *= factor
                 }
             }
         }
 
+        
         if (vehicleState.current.sliding) {
             for (let i = 0; i < wheelStates.current.length; i++) {
                 const wheelState = wheelStates.current[i]
@@ -698,7 +697,7 @@ const RaycastVehicle = ({
         for (let i = 0; i < wheelStates.current.length; i++) {
             const wheelState = wheelStates.current[i]
 
-            const world_pos = wheelState.hitPointWorld
+            const worldPos = new Vector3().copy(wheelState.hitPointWorld)
 
             if (wheelState.forwardImpulse !== 0) {
                 const impulse = updateFriction_impulse
@@ -707,13 +706,14 @@ const RaycastVehicle = ({
 
                 chassisRigidBody.current.applyImpulseAtPoint(
                     impulse,
-                    world_pos,
+                    worldPos,
                     true
                 )
             }
 
             if (wheelState.sideImpulse !== 0) {
-                const groundObject = wheelState.groundRigidBody!
+                const chassisBody = chassisRigidBody.current.raw()
+                const groundBody = wheelState.groundRigidBody!
 
                 const world_pos2 = wheelState.hitPointWorld
 
@@ -725,27 +725,25 @@ const RaycastVehicle = ({
                 // If rollInfluence is 1, the impulse will be applied on the hitPoint (easy to roll over), if it is zero it will be applied in the same plane as the center of mass (not easy to roll over).
                 vectorToLocalFrame(
                     chassisRigidBody.current.raw(),
-                    world_pos,
-                    world_pos
+                    worldPos,
+                    worldPos
                 )
 
-                world_pos['xyz'[indexUpAxis] as 'x' | 'y' | 'z'] *=
+                worldPos['xyz'[indexUpAxis] as 'x' | 'y' | 'z'] *=
                     wheel.rollInfluence
 
                 vectorToWorldFrame(
                     chassisRigidBody.current.raw(),
-                    world_pos,
-                    world_pos
+                    worldPos,
+                    worldPos
                 )
 
-                chassisRigidBody.current
-                    .raw()
-                    .applyImpulseAtPoint(sideImp, world_pos, true)
+                chassisBody.applyImpulseAtPoint(sideImp, worldPos, true)
 
                 // apply friction impulse on the ground
                 sideImp.multiplyScalar(-1)
 
-                groundObject.applyImpulseAtPoint(sideImp, world_pos2, true)
+                groundBody.applyImpulseAtPoint(sideImp, world_pos2, true)
             }
         }
     }
@@ -842,10 +840,10 @@ const RaycastVehicle = ({
             </RigidBody>
 
             {/* wheel raycast arrow helpers */}
-            <arrowHelper ref={wheelArrowHelperTopLeft} />
+            {/* <arrowHelper ref={wheelArrowHelperTopLeft} />
             <arrowHelper ref={wheelArrowHelperTopRight} />
             <arrowHelper ref={wheelArrowHelperBottomLeft} />
-            <arrowHelper ref={wheelArrowHelperBottomRight} />
+            <arrowHelper ref={wheelArrowHelperBottomRight} /> */}
 
             {/* top left wheel */}
             <group ref={topLeftWheelObject}>
@@ -921,13 +919,6 @@ export default () => {
 
                     <Scene />
                     <Debug />
-
-                    <Box args={[0.1, 0.1, 10]} position={[0, 5, 0]}>
-                        <meshBasicMaterial color="red" />
-                    </Box>
-                    <Box args={[1, 1, 1]} position={[0, 5, 5]}>
-                        <meshBasicMaterial color="yellow" />
-                    </Box>
 
                     <OrbitControls />
                 </Physics>
