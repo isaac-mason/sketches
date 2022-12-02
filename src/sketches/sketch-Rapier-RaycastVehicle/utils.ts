@@ -173,10 +173,6 @@ export const resolveSingleBilateralConstraint = (
     const massTerm = 1 / (body1InvMass + body2InvMass)
     const impulse = -contactDamping * rel_vel * massTerm
     
-    if (idx === 0) {
-    console.log(rel_vel)
-    }
-    
     return impulse
 }
 
