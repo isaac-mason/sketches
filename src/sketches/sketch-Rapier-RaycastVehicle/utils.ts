@@ -313,11 +313,12 @@ const calcRollingFriction_vel2 = new Vector3()
 const calcRollingFriction_vel = new Vector3()
 
 export const calcRollingFriction = (
+    chassisHalfExtents: Vector3,
     body0: Rapier.RigidBody,
     body1: Rapier.RigidBody,
     frictionPosWorld: Vector3,
     frictionDirectionWorld: Vector3,
-    maxImpulse: number
+    maxImpulse: number,
 ): number => {
     let j1 = 0
     const contactPosWorld = frictionPosWorld
@@ -332,21 +333,20 @@ export const calcRollingFriction = (
 
     const vrel = frictionDirectionWorld.dot(vel)
 
-    // hack: hard-coding incorrect half extents for estimated inertia
-    const todoHalfExtents = new Vector3(2, 0.5, 1)
-
     const denom0 = computeImpulseDenominator(
         body0,
         frictionPosWorld,
         frictionDirectionWorld,
-        todoHalfExtents
+        chassisHalfExtents
     )
     const denom1 = computeImpulseDenominator(
         body1,
         frictionPosWorld,
         frictionDirectionWorld,
-        todoHalfExtents
+        chassisHalfExtents
     )
+    console.log(denom0)
+
     const relaxation = 1
     const jacDiagABInv = relaxation / (denom0 + denom1)
 
@@ -360,5 +360,6 @@ export const calcRollingFriction = (
         j1 = -maxImpulse
     }
 
+    // console.log(j1)
     return j1
 }

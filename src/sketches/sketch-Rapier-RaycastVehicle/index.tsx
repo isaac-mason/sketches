@@ -40,6 +40,7 @@ const Controls = styled.div`
     text-shadow: 2px 2px black;
 `
 
+const CHASSIS_CUBOID_HALF_EXTENTS = new Vector3(2, 0.5, 1)
 const RAPIER_UPDATE_PRIORITY = -50
 const BEFORE_RAPIER_UPDATE = RAPIER_UPDATE_PRIORITY + 1
 const AFTER_RAPIER_UPDATE = RAPIER_UPDATE_PRIORITY - 1
@@ -171,7 +172,7 @@ const RaycastVehicle = ({
         chassisConnectionPointLocalBottomLeft: [1, 0, -1],
         chassisConnectionPointLocalBottomRight: [1, 0, 1],
 
-        maxForce: 200,
+        maxForce: 500,
         maxSteer: 0.5,
         maxBrake: 1000000,
     })
@@ -347,10 +348,14 @@ const RaycastVehicle = ({
         wheelStates.current[0].steering = steering
         wheelStates.current[1].steering = steering
 
+        // apply engine force to back wheels
+        wheelStates.current[2].engineForce = engineForce
+        wheelStates.current[3].engineForce = engineForce
+        
         // all wheel drive
-        wheelStates.current.forEach((w) => {
-            w.engineForce = engineForce
-        })
+        // wheelStates.current.forEach((w) => {
+        //     w.engineForce = engineForce
+        // })
     }
 
     const updateWheelTransform = () => {
@@ -653,6 +658,7 @@ const RaycastVehicle = ({
 
                 // brake
                 rollingFriction = calcRollingFriction(
+                    CHASSIS_CUBOID_HALF_EXTENTS,
                     chassisRigidBody.current.raw(),
                     wheelState.groundRigidBody,
                     wheelState.hitPointWorld,
@@ -890,7 +896,14 @@ const RaycastVehicle = ({
                     <meshStandardMaterial color="#888" />
                 </mesh>
 
-                <CuboidCollider ref={chassisCollider} args={[2, 0.5, 1]} />
+                <CuboidCollider
+                    ref={chassisCollider}
+                    args={[
+                        CHASSIS_CUBOID_HALF_EXTENTS.x,
+                        CHASSIS_CUBOID_HALF_EXTENTS.y,
+                        CHASSIS_CUBOID_HALF_EXTENTS.z,
+                    ]}
+                />
             </RigidBody>
 
             {/* wheel raycast arrow helpers */}
@@ -979,7 +992,10 @@ export default () => {
                     updatePriority={RAPIER_UPDATE_PRIORITY}
                     timeStep="vary"
                 >
-                    <RaycastVehicle position={[0, 3, 0]} rotation={[0, Math.PI / 2, 0]}></RaycastVehicle>
+                    <RaycastVehicle
+                        position={[0, 3, 0]}
+                        rotation={[0, Math.PI / 2, 0]}
+                    ></RaycastVehicle>
 
                     <Scene />
                     <Debug />
