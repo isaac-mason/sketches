@@ -42,6 +42,7 @@ const Controls = styled.div`
 
 const RAPIER_UPDATE_PRIORITY = -50
 const BEFORE_RAPIER_UPDATE = RAPIER_UPDATE_PRIORITY + 1
+const AFTER_RAPIER_UPDATE = RAPIER_UPDATE_PRIORITY - 1
 
 const directions = [
     new Vector3(1, 0, 0),
@@ -170,7 +171,7 @@ const RaycastVehicle = ({
         chassisConnectionPointLocalBottomLeft: [1, 0, -1],
         chassisConnectionPointLocalBottomRight: [1, 0, 1],
 
-        maxForce: 10,
+        maxForce: 200,
         maxSteer: 0.5,
         maxBrake: 1000000,
     })
@@ -279,6 +280,10 @@ const RaycastVehicle = ({
 
     const chassisRigidBody = useRef<RigidBodyApi>(null!)
     const chassisCollider = useRef<Rapier.Collider[]>(null!)
+
+    const camera = useThree((state) => state.camera)
+    const currentCameraPosition = useRef(new Vector3(15, 15, 0))
+    const currentCameraLookAt = useRef(new Vector3())
 
     const controls = useControls()
 
@@ -463,9 +468,11 @@ const RaycastVehicle = ({
                 wheelState.suspensionLength = hitDistance - wheel.radius
 
                 // clamp on max suspension travel
-                const minSuspensionLength = wheel.suspensionRestLength - wheel.maxSuspensionTravel
-                const maxSuspensionLength = wheel.suspensionRestLength + wheel.maxSuspensionTravel
-                
+                const minSuspensionLength =
+                    wheel.suspensionRestLength - wheel.maxSuspensionTravel
+                const maxSuspensionLength =
+                    wheel.suspensionRestLength + wheel.maxSuspensionTravel
+
                 if (wheelState.suspensionLength < minSuspensionLength) {
                     wheelState.suspensionLength = minSuspensionLength
                 }
@@ -473,7 +480,7 @@ const RaycastVehicle = ({
                     wheelState.suspensionLength = maxSuspensionLength
 
                     wheelState.groundRigidBody = null
-                    wheelState.inContactWithGround = false 
+                    wheelState.inContactWithGround = false
                     wheelState.hitNormalWorld.set(0, 0, 0)
                     wheelState.hitPointWorld.set(0, 0, 0)
                 }
@@ -515,9 +522,13 @@ const RaycastVehicle = ({
             if (wheelRaycastArrowHelper) {
                 wheelRaycastArrowHelper.setColor('red')
                 wheelRaycastArrowHelper.position.copy(origin)
-                wheelRaycastArrowHelper.setDirection(new Vector3().copy(direction).normalize())
+                wheelRaycastArrowHelper.setDirection(
+                    new Vector3().copy(direction).normalize()
+                )
                 wheelRaycastArrowHelper.setLength(
-                    wheelState.chassisConnectionPointWorld.distanceTo(wheelState.hitPointWorld),
+                    wheelState.chassisConnectionPointWorld.distanceTo(
+                        wheelState.hitPointWorld
+                    )
                 )
             }
 
@@ -828,15 +839,42 @@ const RaycastVehicle = ({
     }
 
     useFrame((_, delta) => {
+        const clampedDelta = Math.min(delta, 1 / 30)
         resetStates()
         updateStatesFromControls()
         updateWheelTransform()
         updateCurrentSpeed()
         updateWheelSuspension()
-        applyWheelSuspensionForce(delta)
-        updateFriction(delta)
-        updateWheelRotation(delta)
+        applyWheelSuspensionForce(clampedDelta)
+        updateFriction(clampedDelta)
+        updateWheelRotation(clampedDelta)
     }, BEFORE_RAPIER_UPDATE)
+
+    useFrame((_, delta) => {
+        const chassis = chassisRigidBody.current
+        if (!chassis) {
+            return
+        }
+
+        const t = 1.0 - Math.pow(0.01, delta)
+
+        const idealOffset = new Vector3(10, 5, 0)
+        idealOffset.applyQuaternion(chassis.rotation())
+        idealOffset.add(chassis.translation())
+        if (idealOffset.y < 0) {
+            idealOffset.y = 0
+        }
+
+        const idealLookAt = new Vector3(0, 1, 0)
+        idealLookAt.applyQuaternion(chassis.rotation())
+        idealLookAt.add(chassis.translation())
+
+        currentCameraPosition.current.lerp(idealOffset, t)
+        currentCameraLookAt.current.lerp(idealLookAt, t)
+
+        camera.position.copy(currentCameraPosition.current)
+        camera.lookAt(currentCameraLookAt.current)
+    }, AFTER_RAPIER_UPDATE)
 
     return (
         <>
@@ -844,7 +882,7 @@ const RaycastVehicle = ({
                 {...groupProps}
                 colliders={false}
                 ref={chassisRigidBody}
-                mass={3}
+                mass={150}
             >
                 {/* chassis */}
                 <mesh>
@@ -898,9 +936,19 @@ const RaycastVehicle = ({
 
 const Scene = () => (
     <>
+        {/* boxes */}
+        {Array.from({ length: 6 }).map((_, idx) => (
+            <RigidBody key={idx} colliders="cuboid" mass={0.2}>
+                <mesh position={[0, 2 + idx * 4.1, 25]}>
+                    <boxGeometry args={[2, 1, 2]} />
+                    <meshNormalMaterial />
+                </mesh>
+            </RigidBody>
+        ))}
+
         {/* ramp */}
         <RigidBody type="fixed">
-            <mesh rotation-x={-0.5} position={[0, -1, 15]}>
+            <mesh rotation-x={-0.3} position={[0, -1, 15]}>
                 <boxGeometry args={[10, 1, 10]} />
                 <meshStandardMaterial color="#888" />
             </mesh>
@@ -931,12 +979,10 @@ export default () => {
                     updatePriority={RAPIER_UPDATE_PRIORITY}
                     timeStep="vary"
                 >
-                    <RaycastVehicle position={[0, 3, 0]}></RaycastVehicle>
+                    <RaycastVehicle position={[0, 3, 0]} rotation={[0, Math.PI / 2, 0]}></RaycastVehicle>
 
                     <Scene />
                     <Debug />
-
-                    <OrbitControls />
                 </Physics>
             </Canvas>
             <Controls>use wasd to drive</Controls>
