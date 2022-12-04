@@ -98,7 +98,7 @@ export type WheelState = {
 }
 
 export type WheelDebug = {
-    raycastArrowHelper: ArrowHelper
+    suspensionArrowHelper: ArrowHelper
 }
 
 export type WheelOptions = {
@@ -142,7 +142,7 @@ export class RapierRaycastVehicle {
     state: VehicleState
 
     chassisRigidBody: Rapier.RigidBody
-    
+
     chassisHalfExtents: Vector3
 
     indexRightAxis: number
@@ -173,10 +173,10 @@ export class RapierRaycastVehicle {
     }
 
     addWheel(options: WheelOptions): number {
-        const wheel = {
+        const wheel: Wheel = {
             options,
             debug: {
-                raycastArrowHelper: new ArrowHelper(),
+                suspensionArrowHelper: new ArrowHelper(),
             },
             state: {
                 suspensionLength: 0,
@@ -334,7 +334,7 @@ export class RapierRaycastVehicle {
         for (let i = 0; i < this.wheels.length; i++) {
             const wheel = this.wheels[i]
             const wheelState = wheel.state
-            const wheelRaycastArrowHelper = wheel.debug.raycastArrowHelper
+            const wheelRaycastArrowHelper = wheel.debug.suspensionArrowHelper
 
             this.updateWheelTransformWorld(wheel)
 

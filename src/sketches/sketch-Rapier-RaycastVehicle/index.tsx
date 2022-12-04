@@ -12,9 +12,9 @@ import { useControls as useLeva } from 'leva'
 import { RefObject, useEffect, useMemo, useRef } from 'react'
 import styled from 'styled-components'
 import { Group, Object3D, Vector3 } from 'three'
-import tunnel from 'tunnel-rat'
 import { Canvas } from '../Canvas'
 import { RapierRaycastVehicle, WheelOptions } from './rapier-raycast-vehicle'
+import { SpeedTextTunnel } from './speed-text-tunnel'
 import { useControls } from './use-controls'
 
 const LEVA_KEY = 'rapier-raycast-vehicle'
@@ -48,8 +48,6 @@ const SpeedTextDiv = styled.div`
     text-shadow: 2px 2px black;
     z-index: 1;
 `
-
-const SpeedTextTunnel = tunnel()
 
 type RaycastVehicleProps = RigidBodyProps & {
     indexRightAxis?: number
@@ -215,14 +213,14 @@ const RaycastVehicle = ({
             vehicle.current.addWheel(options)
 
             const raycastArrowHelper =
-                vehicle.current.wheels[i].debug.raycastArrowHelper
+                vehicle.current.wheels[i].debug.suspensionArrowHelper
             scene.add(raycastArrowHelper)
         }
 
         return () => {
             for (let i = 0; i < wheels.length; i++) {
                 const raycastArrowHelper =
-                    vehicle.current!.wheels[i].debug.raycastArrowHelper
+                    vehicle.current!.wheels[i].debug.suspensionArrowHelper
                 scene.remove(raycastArrowHelper)
             }
         }
