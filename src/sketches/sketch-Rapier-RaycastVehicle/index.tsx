@@ -1,5 +1,4 @@
 import Rapier from '@dimforge/rapier3d-compat'
-import { Box, OrbitControls } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
 import {
     CuboidCollider,
@@ -51,7 +50,7 @@ const directions = [
     new Vector3(0, 0, 1),
 ]
 
-type RevoluteJointVehicleProps = RigidBodyProps & {
+type RaycastVehicleProps = RigidBodyProps & {
     indexRightAxis?: number
     indexForwardAxis?: number
     indexUpAxis?: number
@@ -113,12 +112,16 @@ const updateCurrentSpeed_forwardWorld = new Vector3()
 const updateWheelSuspension_denominator = new Vector3()
 const updateWheelSuspension_chassisVelocityAtContactPoint = new Vector3()
 const updateWheelSuspension_direction = new Vector3()
+const updateWheelSuspension_wheelRaycastArrowHelperDirection = new Vector3()
 
 const applyWheelSuspensionForce_impulse = new Vector3()
+const applyWheelSuspensionForce_rollInfluenceAdjustedWorldPos = new Vector3()
 
 const updateFriction_surfNormalWS_scaled_proj = new Vector3()
 const updateFriction_impulse = new Vector3()
 const updateFriction_sideImp = new Vector3()
+const updateFriction_worldPos = new Vector3()
+const updateFriction_relPos = new Vector3()
 
 const updateWheelRotation_hitNormalWorldScaledWithProj = new Vector3()
 const updateWheelRotation_fwd = new Vector3()
@@ -130,7 +133,7 @@ const RaycastVehicle = ({
     indexForwardAxis = 0,
     indexUpAxis = 1,
     ...groupProps
-}: RevoluteJointVehicleProps) => {
+}: RaycastVehicleProps) => {
     const {
         directionLocal: directionLocalArray,
         axleLocal: axleLocalArray,
@@ -410,7 +413,7 @@ const RaycastVehicle = ({
         const forwardWorld = updateCurrentSpeed_forwardWorld
         getVehicleAxisWorld(chassis, indexForwardAxis, forwardWorld)
 
-        if (forwardWorld.dot(chassisVelocity) < 0) {
+        if (forwardWorld.dot(chassisVelocity) > 0) {
             vehicleState.current.currentVehicleSpeedKmHour *= -1
         }
     }
@@ -522,7 +525,9 @@ const RaycastVehicle = ({
                 wheelRaycastArrowHelper.setColor('red')
                 wheelRaycastArrowHelper.position.copy(origin)
                 wheelRaycastArrowHelper.setDirection(
-                    new Vector3().copy(direction).normalize()
+                    updateWheelSuspension_wheelRaycastArrowHelperDirection
+                        .copy(direction)
+                        .normalize()
                 )
                 wheelRaycastArrowHelper.setLength(wheelState.suspensionLength)
             }
@@ -714,7 +719,12 @@ const RaycastVehicle = ({
         for (let i = 0; i < wheelStates.current.length; i++) {
             const wheelState = wheelStates.current[i]
 
-            const worldPos = wheelState.hitPointWorld
+            const worldPos = updateFriction_worldPos.copy(
+                wheelState.hitPointWorld
+            )
+
+            const relPos = updateFriction_relPos.copy(worldPos)
+            relPos.sub(chassisRigidBody.current.translation())
 
             if (wheelState.forwardImpulse !== 0) {
                 const impulse = updateFriction_impulse
@@ -738,25 +748,37 @@ const RaycastVehicle = ({
                     .copy(wheelState.axle)
                     .multiplyScalar(wheelState.sideImpulse)
 
+                const rollInfluenceAdjustedWorldPos =
+                    applyWheelSuspensionForce_rollInfluenceAdjustedWorldPos
+
                 // Scale the relative position in the up direction with rollInfluence.
                 // If rollInfluence is 1, the impulse will be applied on the hitPoint (easy to roll over), if it is zero it will be applied in the same plane as the center of mass (not easy to roll over).
                 vectorToLocalFrame(
                     chassisRigidBody.current.raw(),
-                    worldPos,
-                    worldPos
+                    relPos,
+                    rollInfluenceAdjustedWorldPos
                 )
 
-                // todo -
-                // worldPos['xyz'[indexUpAxis] as 'x' | 'y' | 'z'] *=
-                //     wheel.rollInfluence
+                rollInfluenceAdjustedWorldPos[
+                    'xyz'[indexUpAxis] as 'x' | 'y' | 'z'
+                ] *= wheel.rollInfluence
 
                 vectorToWorldFrame(
                     chassisRigidBody.current.raw(),
-                    worldPos,
-                    worldPos
+                    rollInfluenceAdjustedWorldPos,
+                    rollInfluenceAdjustedWorldPos
                 )
 
-                chassisBody.applyImpulseAtPoint(sideImp, worldPos, true)
+                // back to world pos
+                rollInfluenceAdjustedWorldPos.add(
+                    chassisRigidBody.current.translation()
+                )
+
+                chassisBody.applyImpulseAtPoint(
+                    sideImp,
+                    rollInfluenceAdjustedWorldPos,
+                    true
+                )
 
                 // apply friction impulse on the ground
                 sideImp.multiplyScalar(-1)
