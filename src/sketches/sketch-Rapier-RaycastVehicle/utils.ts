@@ -145,7 +145,6 @@ export const resolveSingleBilateralConstraint = (
     body2: Rapier.RigidBody,
     pos2: Vector3,
     normal: Vector3,
-    idx: number
 ): number => {
     const normalLenSqr = normal.lengthSq()
     if (normalLenSqr > 1.1) {

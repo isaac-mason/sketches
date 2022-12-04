@@ -1,5 +1,5 @@
 import Rapier from '@dimforge/rapier3d-compat'
-import { Vector3, Object3D, Quaternion } from 'three'
+import { Vector3, Object3D, Quaternion, ArrowHelper } from 'three'
 import {
     calcRollingFriction,
     getVehicleAxisWorld,
@@ -21,6 +21,7 @@ const updateWheelTransform_right = new Vector3()
 const updateWheelTransform_fwd = new Vector3()
 const updateWheelTransform_steeringOrn = new Quaternion()
 const updateWheelTransform_rotatingOrn = new Quaternion()
+const updateWheelTransform_chassisRigidBodyQuaternion = new Quaternion()
 
 const updateCurrentSpeed_chassisVelocity = new Vector3()
 const updateCurrentSpeed_forwardWorld = new Vector3()
@@ -43,13 +44,13 @@ const updateWheelRotation_hitNormalWorldScaledWithProj = new Vector3()
 const updateWheelRotation_fwd = new Vector3()
 const updateWheelRotation_vel = new Vector3()
 
-type VehicleState = {
+export type VehicleState = {
     sliding: boolean
 
     currentVehicleSpeedKmHour: number
 }
 
-type RaycastVehicleOptions = {
+export type RaycastVehicleOptions = {
     world: Rapier.World
     indexRightAxis?: number
     indexForwardAxis?: number
@@ -58,7 +59,7 @@ type RaycastVehicleOptions = {
     chassisRigidBody: Rapier.RigidBody
 }
 
-type WheelState = {
+export type WheelState = {
     suspensionLength: number
     suspensionRelativeVelocity: number
     suspensionForce: number
@@ -96,7 +97,11 @@ type WheelState = {
     sliding: boolean
 }
 
-type WheelOptions = {
+export type WheelDebug = {
+    raycastArrowHelper: ArrowHelper
+}
+
+export type WheelOptions = {
     radius: number
 
     directionLocal: Vector3
@@ -121,18 +126,15 @@ type WheelOptions = {
     sideAcceleration: number
 
     chassisConnectionPointLocal: Vector3
-
-    maxForce: number
-    maxSteer: number
-    maxBrake: number
 }
 
-type Wheel = {
+export type Wheel = {
     state: WheelState
     options: WheelOptions
+    debug: WheelDebug
 }
 
-export class RaycastVehicle {
+export class RapierRaycastVehicle {
     world: Rapier.World
 
     wheels: Wheel[] = []
@@ -155,8 +157,10 @@ export class RaycastVehicle {
         indexUpAxis = 1,
     }: RaycastVehicleOptions) {
         this.world = world
+
         this.chassisRigidBody = chassisRigidBody
         this.chassisHalfExtents = chassisHalfExtents
+
         this.vehicleState = {
             sliding: false,
             currentVehicleSpeedKmHour: 0,
@@ -167,9 +171,12 @@ export class RaycastVehicle {
         this.indexUpAxis = indexUpAxis
     }
 
-    addWheel(options: WheelOptions): void {
+    addWheel(options: WheelOptions): number {
         const wheel = {
             options,
+            debug: {
+                raycastArrowHelper: new ArrowHelper(),
+            },
             state: {
                 suspensionLength: 0,
                 suspensionForce: 0,
@@ -198,6 +205,8 @@ export class RaycastVehicle {
             },
         }
         this.wheels.push(wheel)
+
+        return this.wheels.length - 1
     }
 
     applyEngineForce(force: number, wheelIndex: number): void {
@@ -212,18 +221,14 @@ export class RaycastVehicle {
         this.wheels[wheelIndex].state.brakeForce = brake
     }
 
-    // todo - controls in user-land
-    // todo - updateWheelTransform update wheelObject three mesh in user-land
-
     update(delta: number): void {
-        const clampedDelta = Math.min(delta, 1 / 60)
         this.resetStates()
         this.updateWheelTransform()
         this.updateCurrentSpeed()
         this.updateWheelSuspension()
-        this.applyWheelSuspensionForce(clampedDelta)
-        this.updateFriction(clampedDelta)
-        this.updateWheelRotation(clampedDelta)
+        this.applyWheelSuspensionForce(delta)
+        this.updateFriction(delta)
+        this.updateWheelRotation(delta)
     }
 
     private resetStates(): void {
@@ -289,7 +294,9 @@ export class RaycastVehicle {
             // World rotation of the wheel
             const q = wheelState.worldTransform.quaternion
             q.multiplyQuaternions(
-                this.chassisRigidBody.rotation() as Quaternion,
+                updateWheelTransform_chassisRigidBodyQuaternion.copy(
+                    this.chassisRigidBody.rotation() as Quaternion
+                ),
                 steeringOrn
             )
             q.multiplyQuaternions(q, rotatingOrn)
@@ -300,10 +307,6 @@ export class RaycastVehicle {
             p.copy(wheelState.directionWorld)
             p.multiplyScalar(wheelState.suspensionLength)
             p.add(wheelState.chassisConnectionPointWorld)
-
-            // todo - do in user-land
-            // wheelObject.position.copy(p)
-            // wheelObject.quaternion.copy(q)
         }
     }
 
@@ -328,9 +331,9 @@ export class RaycastVehicle {
         const world = this.world
 
         for (let i = 0; i < this.wheels.length; i++) {
-            // const wheelRaycastArrowHelper = wheelRaycastArrowHelpers[i].current
             const wheel = this.wheels[i]
             const wheelState = wheel.state
+            const wheelRaycastArrowHelper = wheel.debug.raycastArrowHelper
 
             this.updateWheelTransformWorld(wheel)
 
@@ -432,16 +435,14 @@ export class RaycastVehicle {
             }
 
             // update arrow helper
-            // if (wheelRaycastArrowHelper) {
-            //     wheelRaycastArrowHelper.setColor('red')
-            //     wheelRaycastArrowHelper.position.copy(origin)
-            //     wheelRaycastArrowHelper.setDirection(
-            //         updateWheelSuspension_wheelRaycastArrowHelperDirection
-            //             .copy(direction)
-            //             .normalize()
-            //     )
-            //     wheelRaycastArrowHelper.setLength(wheelState.suspensionLength)
-            // }
+            wheelRaycastArrowHelper.setColor('red')
+            wheelRaycastArrowHelper.position.copy(origin)
+            wheelRaycastArrowHelper.setDirection(
+                updateWheelSuspension_wheelRaycastArrowHelperDirection
+                    .copy(direction)
+                    .normalize()
+            )
+            wheelRaycastArrowHelper.setLength(wheelState.suspensionLength)
 
             // calculate suspension force
             wheelState.suspensionForce = 0
@@ -522,6 +523,11 @@ export class RaycastVehicle {
                     axle
                 )
 
+                // console.log(wheelWorldTransform.quaternion.x, wheelWorldTransform.quaternion.y, wheelWorldTransform.quaternion.z, wheelWorldTransform.quaternion.w)
+                // console.log(directions[this.indexRightAxis].x, directions[this.indexRightAxis].y, directions[this.indexRightAxis].z)
+                // console.log(axle.x, axle.y, axle.z)
+                // console.log('---')
+
                 const surfNormalWS = wheelState.hitNormalWorld
                 const proj = axle.dot(surfNormalWS)
 
@@ -537,8 +543,7 @@ export class RaycastVehicle {
                     wheelState.hitPointWorld,
                     wheelState.groundRigidBody,
                     wheelState.hitPointWorld,
-                    axle,
-                    i
+                    axle
                 )
 
                 wheelState.sideImpulse *= wheel.options.sideFrictionStiffness
