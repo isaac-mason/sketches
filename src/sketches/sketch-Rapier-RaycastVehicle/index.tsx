@@ -75,10 +75,10 @@ const Game = () => {
         let steering = 0
 
         if (controls.current.forward) {
-            engineForce -= maxForce
+            engineForce += maxForce
         }
         if (controls.current.backward) {
-            engineForce += maxForce
+            engineForce -= maxForce
         }
 
         if (controls.current.left) {
@@ -133,7 +133,7 @@ const Game = () => {
 
         const t = 1.0 - Math.pow(0.01, delta)
 
-        const idealOffset = new Vector3(10, 5, 0)
+        const idealOffset = new Vector3(-10, 5, 0)
         idealOffset.applyQuaternion(chassis.current.rotation())
         idealOffset.add(chassis.current.translation())
         if (idealOffset.y < 0) {
@@ -161,7 +161,7 @@ const Game = () => {
             <RaycastVehicle
                 ref={raycastVehicle}
                 position={[0, 3, 0]}
-                rotation={[0, Math.PI / 2, 0]}
+                rotation={[0, -Math.PI / 2, 0]}
             />
 
             {/* boxes */}

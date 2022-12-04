@@ -120,7 +120,7 @@ export const RaycastVehicle = forwardRef<
             options: {
                 ...commonWheelOptions,
                 chassisConnectionPointLocal: new Vector3(
-                    vehicleFront,
+                    vehicleBack,
                     vehicleHeight,
                     vehicleWidth * 0.5
                 ),
@@ -131,7 +131,7 @@ export const RaycastVehicle = forwardRef<
             options: {
                 ...commonWheelOptions,
                 chassisConnectionPointLocal: new Vector3(
-                    vehicleFront,
+                    vehicleBack,
                     vehicleHeight,
                     vehicleWidth * -0.5
                 ),
@@ -142,7 +142,7 @@ export const RaycastVehicle = forwardRef<
             options: {
                 ...commonWheelOptions,
                 chassisConnectionPointLocal: new Vector3(
-                    vehicleBack,
+                    vehicleFront,
                     vehicleHeight,
                     vehicleWidth * 0.5
                 ),
@@ -153,7 +153,7 @@ export const RaycastVehicle = forwardRef<
             options: {
                 ...commonWheelOptions,
                 chassisConnectionPointLocal: new Vector3(
-                    vehicleBack,
+                    vehicleFront,
                     vehicleHeight,
                     vehicleWidth * -0.5
                 ),
@@ -214,7 +214,7 @@ export const RaycastVehicle = forwardRef<
                 ref={chassisRigidBody}
                 mass={150}
             >
-                <Chassis position={[0.2, -0.25, 0]} rotation-y={-Math.PI / 2} />
+                <Chassis position={[-0.2, -0.25, 0]} rotation-y={Math.PI / 2} />
 
                 <CuboidCollider
                     args={[
