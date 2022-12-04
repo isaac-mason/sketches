@@ -150,7 +150,7 @@ const RaycastVehicle = ({
         axleLocal: [0, 0, 1],
 
         suspensionStiffness: 30,
-        suspensionRestLength: 0.3, // todo - 0.3
+        suspensionRestLength: 0.3,
         maxSuspensionForce: 100000,
         maxSuspensionTravel: 0.3,
 
@@ -174,7 +174,7 @@ const RaycastVehicle = ({
 
         maxForce: 500,
         maxSteer: 0.5,
-        maxBrake: 1000000,
+        maxBrake: 10,
     })
 
     const directionLocal = useMemo(
@@ -351,11 +351,6 @@ const RaycastVehicle = ({
         // apply engine force to back wheels
         wheelStates.current[2].engineForce = engineForce
         wheelStates.current[3].engineForce = engineForce
-        
-        // all wheel drive
-        // wheelStates.current.forEach((w) => {
-        //     w.engineForce = engineForce
-        // })
     }
 
     const updateWheelTransform = () => {
@@ -390,7 +385,6 @@ const RaycastVehicle = ({
                 steeringOrn
             )
             q.multiplyQuaternions(q, rotatingOrn)
-
             q.normalize()
 
             // world position of the wheel
@@ -530,11 +524,7 @@ const RaycastVehicle = ({
                 wheelRaycastArrowHelper.setDirection(
                     new Vector3().copy(direction).normalize()
                 )
-                wheelRaycastArrowHelper.setLength(
-                    wheelState.chassisConnectionPointWorld.distanceTo(
-                        wheelState.hitPointWorld
-                    )
-                )
+                wheelRaycastArrowHelper.setLength(wheelState.suspensionLength)
             }
 
             // calculate suspension force
@@ -633,7 +623,7 @@ const RaycastVehicle = ({
                     i
                 )
 
-                // wheelState.sideImpulse *= 1 //wheel.sideFrictionStiffness
+                wheelState.sideImpulse *= wheel.sideFrictionStiffness
             }
         }
 
@@ -845,7 +835,7 @@ const RaycastVehicle = ({
     }
 
     useFrame((_, delta) => {
-        const clampedDelta = Math.min(delta, 1 / 30)
+        const clampedDelta = Math.min(delta, 1 / 60)
         resetStates()
         updateStatesFromControls()
         updateWheelTransform()
@@ -947,41 +937,6 @@ const RaycastVehicle = ({
     )
 }
 
-const Scene = () => (
-    <>
-        {/* boxes */}
-        {Array.from({ length: 6 }).map((_, idx) => (
-            <RigidBody key={idx} colliders="cuboid" mass={0.2}>
-                <mesh position={[0, 2 + idx * 4.1, 25]}>
-                    <boxGeometry args={[2, 1, 2]} />
-                    <meshNormalMaterial />
-                </mesh>
-            </RigidBody>
-        ))}
-
-        {/* ramp */}
-        <RigidBody type="fixed">
-            <mesh rotation-x={-0.3} position={[0, -1, 15]}>
-                <boxGeometry args={[10, 1, 10]} />
-                <meshStandardMaterial color="#888" />
-            </mesh>
-        </RigidBody>
-
-        {/* ground */}
-        <RigidBody type="fixed" position-y={-5} colliders="cuboid">
-            <mesh>
-                <boxGeometry args={[300, 10, 300]} />
-                <meshStandardMaterial color="#ccc" />
-            </mesh>
-        </RigidBody>
-        <gridHelper args={[150, 15]} position-y={0.01} />
-
-        {/* lights */}
-        <ambientLight intensity={1} />
-        <pointLight intensity={0.5} position={[0, 5, 5]} />
-    </>
-)
-
 export default () => {
     return (
         <>
@@ -990,14 +945,44 @@ export default () => {
                 <Physics
                     gravity={[0, -9.81, 0]}
                     updatePriority={RAPIER_UPDATE_PRIORITY}
-                    timeStep="vary"
+                    timeStep={'vary'}
                 >
                     <RaycastVehicle
                         position={[0, 3, 0]}
                         rotation={[0, Math.PI / 2, 0]}
-                    ></RaycastVehicle>
+                    />
 
-                    <Scene />
+                    {/* boxes */}
+                    {Array.from({ length: 6 }).map((_, idx) => (
+                        <RigidBody key={idx} colliders="cuboid" mass={10}>
+                            <mesh position={[0, 2 + idx * 4.1, 25]}>
+                                <boxGeometry args={[2, 1, 2]} />
+                                <meshNormalMaterial />
+                            </mesh>
+                        </RigidBody>
+                    ))}
+
+                    {/* ramp */}
+                    <RigidBody type="fixed">
+                        <mesh rotation-x={-0.3} position={[0, -1, 15]}>
+                            <boxGeometry args={[10, 1, 10]} />
+                            <meshStandardMaterial color="#888" />
+                        </mesh>
+                    </RigidBody>
+
+                    {/* ground */}
+                    <RigidBody type="fixed" position-y={-5} colliders="cuboid">
+                        <mesh>
+                            <boxGeometry args={[300, 10, 300]} />
+                            <meshStandardMaterial color="#ccc" />
+                        </mesh>
+                    </RigidBody>
+                    <gridHelper args={[150, 15]} position-y={0.01} />
+
+                    {/* lights */}
+                    <ambientLight intensity={1} />
+                    <pointLight intensity={0.5} position={[0, 5, 5]} />
+
                     <Debug />
                 </Physics>
             </Canvas>

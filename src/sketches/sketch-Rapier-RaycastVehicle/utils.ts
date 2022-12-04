@@ -5,6 +5,8 @@ const getVelocityAtWorldPoint_position = new Vector3()
 const getVelocityAtWorldPoint_angvel = new Vector3()
 const getVelocityAtWorldPoint_linvel = new Vector3()
 
+const calculateInv = (mass: number) => mass > 0 ? 1.0 / mass : 0
+
 // Multiply a quaternion by a vector
 export const multiplyQuaternionByVector = (
     q: Quaternion,
@@ -161,18 +163,14 @@ export const resolveSingleBilateralConstraint = (
 
     const rel_vel = normal.dot(vel)
 
-    
     const contactDamping = 0.2
 
-    const body1Mass = body1.mass()
-    const body1InvMass = body1Mass > 0 ? 1.0 / body1Mass : 0
-
-    const body2Mass = body2.mass()
-    const body2InvMass = body2Mass > 0 ? 1.0 / body2Mass : 0
+    const body1InvMass = calculateInv(body1.mass())
+    const body2InvMass = calculateInv(body2.mass())
 
     const massTerm = 1 / (body1InvMass + body2InvMass)
     const impulse = -contactDamping * rel_vel * massTerm
-    
+
     return impulse
 }
 
@@ -244,10 +242,11 @@ const scaleMatrix3ByVector3 = (m: Matrix3, vector: Vector3): void => {
 // calculate inertia for an aabb
 export const calculateAABBInertia = (
     halfExtents: Vector3,
-    mass: number
+    mass: number,
+    target = new Vector3()
 ): Vector3 => {
     const e = halfExtents
-    return new Vector3(
+    return target.set(
         (1.0 / 12.0) * mass * (2 * e.y * 2 * e.y + 2 * e.z * 2 * e.z),
         (1.0 / 12.0) * mass * (2 * e.x * 2 * e.x + 2 * e.z * 2 * e.z),
         (1.0 / 12.0) * mass * (2 * e.y * 2 * e.y + 2 * e.x * 2 * e.x)
@@ -261,10 +260,11 @@ const calculateInertiaWorld_uiw_m3 = new Matrix3()
 
 export const calculateInvInertiaWorld = (
     rigidBody: Rapier.RigidBody,
-    invInertia: Vector3
+    invInertia: Vector3,
+    target = new Matrix3()
 ): Matrix3 => {
-    // const inertiaWorld = new Vector3()
-    const invInertiaWorld = new Matrix3()
+    const I = invInertia
+    const invInertiaWorld = target
 
     const m1 = calculateInertiaWorld_uiw_m1
     const m2 = calculateInertiaWorld_uiw_m2
@@ -272,8 +272,9 @@ export const calculateInvInertiaWorld = (
 
     setMatrix3RotationFromQuaternion(m1, rigidBody.rotation() as Quaternion)
     m2.copy(m1).transpose()
-    scaleMatrix3ByVector3(m1, invInertia)
-    invInertiaWorld.copy(m1).multiply(m2)
+
+    scaleMatrix3ByVector3(m1, I)
+    invInertiaWorld.multiplyMatrices(m1, m2)
 
     return invInertiaWorld
 }
@@ -283,6 +284,9 @@ const computeImpulseDenominator_r0 = new Vector3()
 const computeImpulseDenominator_c0 = new Vector3()
 const computeImpulseDenominator_vec = new Vector3()
 const computeImpulseDenominator_m = new Vector3()
+const computeImpulseDenominator_localInertia = new Vector3()
+const computeImpulseDenominator_invIntertia = new Vector3()
+const computeImpulseDenominator_invInertiaWorld = new Matrix3()
 
 export const computeImpulseDenominator = (
     body: Rapier.RigidBody,
@@ -295,16 +299,31 @@ export const computeImpulseDenominator = (
     const vec = computeImpulseDenominator_vec
     const m = computeImpulseDenominator_m
 
+    const localInertia = computeImpulseDenominator_localInertia
+    calculateAABBInertia(
+        halfExtents,
+        body.mass(),
+        computeImpulseDenominator_localInertia
+    )
+
+    const invIntertia = computeImpulseDenominator_invIntertia.set(
+        calculateInv(localInertia.x),
+        calculateInv(localInertia.y),
+        calculateInv(localInertia.z)
+    )
+
+    const invInertiaWorld = computeImpulseDenominator_invInertiaWorld
+    calculateInvInertiaWorld(body, invIntertia, invInertiaWorld)
+
     r0.subVectors(pos, body.translation() as Vector3)
     c0.crossVectors(r0, normal)
-
-    const inertia = calculateAABBInertia(halfExtents, body.mass())
-    const invInertiaWorld = calculateInvInertiaWorld(body, inertia)
 
     matrixVectorMultiplication(invInertiaWorld, c0, m)
     vec.crossVectors(m, r0)
 
-    return body.mass() + normal.dot(vec)
+    const invMass = calculateInv(body.mass())
+
+    return invMass + normal.dot(vec)
 }
 
 // calculate rolling friction
@@ -318,7 +337,7 @@ export const calcRollingFriction = (
     body1: Rapier.RigidBody,
     frictionPosWorld: Vector3,
     frictionDirectionWorld: Vector3,
-    maxImpulse: number,
+    maxImpulse: number
 ): number => {
     let j1 = 0
     const contactPosWorld = frictionPosWorld
@@ -345,7 +364,6 @@ export const calcRollingFriction = (
         frictionDirectionWorld,
         chassisHalfExtents
     )
-    console.log(denom0)
 
     const relaxation = 1
     const jacDiagABInv = relaxation / (denom0 + denom1)
@@ -360,6 +378,5 @@ export const calcRollingFriction = (
         j1 = -maxImpulse
     }
 
-    // console.log(j1)
     return j1
 }
