@@ -24,7 +24,7 @@ import { Chassis } from '../models/chassis'
 import { Wheel } from '../models/wheel'
 import { LEVA_KEY } from '../util/leva-key'
 
-const CHASSIS_CUBOID_HALF_EXTENTS = new Vector3(2.35, 0.6, 1)
+const CHASSIS_CUBOID_HALF_EXTENTS = new Vector3(2.35, 0.55, 1)
 
 export type RaycastVehicleWheel = {
     options: WheelOptions
@@ -119,28 +119,44 @@ export const RaycastVehicle = forwardRef<
             object: topLeftWheelObject,
             options: {
                 ...commonWheelOptions,
-                chassisConnectionPointLocal: new Vector3(vehicleFront, vehicleHeight, vehicleWidth * 0.5)
+                chassisConnectionPointLocal: new Vector3(
+                    vehicleFront,
+                    vehicleHeight,
+                    vehicleWidth * 0.5
+                ),
             },
         },
         {
             object: topRightWheelObject,
             options: {
                 ...commonWheelOptions,
-                chassisConnectionPointLocal: new Vector3(vehicleFront, vehicleHeight, vehicleWidth * -0.5)
+                chassisConnectionPointLocal: new Vector3(
+                    vehicleFront,
+                    vehicleHeight,
+                    vehicleWidth * -0.5
+                ),
             },
         },
         {
             object: bottomLeftWheelObject,
             options: {
                 ...commonWheelOptions,
-                chassisConnectionPointLocal: new Vector3(vehicleBack, vehicleHeight, vehicleWidth * 0.5)
+                chassisConnectionPointLocal: new Vector3(
+                    vehicleBack,
+                    vehicleHeight,
+                    vehicleWidth * 0.5
+                ),
             },
         },
         {
             object: bottomRightWheelObject,
             options: {
                 ...commonWheelOptions,
-                chassisConnectionPointLocal: new Vector3(vehicleBack, vehicleHeight, vehicleWidth * -0.5)
+                chassisConnectionPointLocal: new Vector3(
+                    vehicleBack,
+                    vehicleHeight,
+                    vehicleWidth * -0.5
+                ),
             },
         },
     ]
@@ -198,7 +214,7 @@ export const RaycastVehicle = forwardRef<
                 ref={chassisRigidBody}
                 mass={150}
             >
-                <Chassis />
+                <Chassis position={[0.2, -0.25, 0]} rotation-y={-Math.PI / 2} />
 
                 <CuboidCollider
                     args={[

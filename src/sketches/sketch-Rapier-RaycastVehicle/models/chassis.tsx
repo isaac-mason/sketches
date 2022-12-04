@@ -1,5 +1,5 @@
 import { useGLTF } from '@react-three/drei'
-import { forwardRef, useRef } from 'react'
+import { forwardRef, RefObject, useImperativeHandle, useRef } from 'react'
 import { Mesh, MeshStandardMaterial, BoxBufferGeometry, Group } from 'three'
 import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import chassisDracoUrl from '../assets/chassis-draco.glb?url'
@@ -41,21 +41,39 @@ interface ChassisGLTF extends GLTF {
 
 type MaterialMesh = Mesh<BoxBufferGeometry, MeshStandardMaterial>
 
-export const Chassis = forwardRef<Group, JSX.IntrinsicElements['group']>(
+export type ChassisRef = {
+    glass: RefObject<MaterialMesh>
+    brake: RefObject<MaterialMesh>
+    wheel: RefObject<Group>
+    needle: RefObject<MaterialMesh>
+    chassis_1: RefObject<MaterialMesh>
+    group: RefObject<Group>
+}
+export const Chassis = forwardRef<ChassisRef, JSX.IntrinsicElements['group']>(
     ({ children, ...props }, ref) => {
         const { nodes: n, materials: m } = useGLTF(
             chassisDracoUrl
         ) as ChassisGLTF
 
+        const group = useRef<Group>(null!)
         const glass = useRef<MaterialMesh>(null!)
         const brake = useRef<MaterialMesh>(null!)
         const wheel = useRef<Group>(null)
         const needle = useRef<MaterialMesh>(null!)
         const chassis_1 = useRef<MaterialMesh>(null!)
 
+        useImperativeHandle(ref, () => ({
+            group,
+            glass,
+            brake,
+            wheel,
+            needle,
+            chassis_1,
+        }))
+
         return (
-            <group ref={ref} dispose={null}>
-                <group position={[0.2, -0.2, 0]} rotation-y={-Math.PI / 2}>
+            <group {...props} ref={group} dispose={null}>
+                <group>
                     <mesh
                         ref={chassis_1}
                         castShadow
