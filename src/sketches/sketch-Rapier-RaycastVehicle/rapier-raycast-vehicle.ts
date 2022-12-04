@@ -139,9 +139,10 @@ export class RapierRaycastVehicle {
 
     wheels: Wheel[] = []
 
-    vehicleState: VehicleState
+    state: VehicleState
 
     chassisRigidBody: Rapier.RigidBody
+    
     chassisHalfExtents: Vector3
 
     indexRightAxis: number
@@ -161,7 +162,7 @@ export class RapierRaycastVehicle {
         this.chassisRigidBody = chassisRigidBody
         this.chassisHalfExtents = chassisHalfExtents
 
-        this.vehicleState = {
+        this.state = {
             sliding: false,
             currentVehicleSpeedKmHour: 0,
         }
@@ -233,7 +234,7 @@ export class RapierRaycastVehicle {
 
     private resetStates(): void {
         // reset vehicle state
-        this.vehicleState.sliding = false
+        this.state.sliding = false
 
         // reset wheel states
         for (let i = 0; i < this.wheels.length; i++) {
@@ -316,14 +317,14 @@ export class RapierRaycastVehicle {
             chassis.linvel() as Vector3
         )
 
-        this.vehicleState.currentVehicleSpeedKmHour =
+        this.state.currentVehicleSpeedKmHour =
             3.6 * chassisVelocity.length()
 
         const forwardWorld = updateCurrentSpeed_forwardWorld
         getVehicleAxisWorld(chassis, this.indexForwardAxis, forwardWorld)
 
         if (forwardWorld.dot(chassisVelocity) > 0) {
-            this.vehicleState.currentVehicleSpeedKmHour *= -1
+            this.state.currentVehicleSpeedKmHour *= -1
         }
     }
 
@@ -523,11 +524,6 @@ export class RapierRaycastVehicle {
                     axle
                 )
 
-                // console.log(wheelWorldTransform.quaternion.x, wheelWorldTransform.quaternion.y, wheelWorldTransform.quaternion.z, wheelWorldTransform.quaternion.w)
-                // console.log(directions[this.indexRightAxis].x, directions[this.indexRightAxis].y, directions[this.indexRightAxis].z)
-                // console.log(axle.x, axle.y, axle.z)
-                // console.log('---')
-
                 const surfNormalWS = wheelState.hitNormalWorld
                 const proj = axle.dot(surfNormalWS)
 
@@ -553,7 +549,7 @@ export class RapierRaycastVehicle {
         const sideFactor = 1
         const fwdFactor = 0.5
 
-        this.vehicleState.sliding = false
+        this.state.sliding = false
 
         for (let i = 0; i < this.wheels.length; i++) {
             const wheel = this.wheels[i]
@@ -613,7 +609,7 @@ export class RapierRaycastVehicle {
 
                 wheelState.sliding = false
                 if (impulseSquared > maxImpSquared) {
-                    this.vehicleState.sliding = true
+                    this.state.sliding = true
                     wheelState.sliding = true
 
                     const factor = maxImp / Math.sqrt(impulseSquared)
@@ -623,7 +619,7 @@ export class RapierRaycastVehicle {
             }
         }
 
-        if (this.vehicleState.sliding) {
+        if (this.state.sliding) {
             for (let i = 0; i < this.wheels.length; i++) {
                 const wheel = this.wheels[i]
                 const wheelState = wheel.state

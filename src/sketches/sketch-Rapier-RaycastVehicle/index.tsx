@@ -12,6 +12,7 @@ import { useControls as useLeva } from 'leva'
 import { RefObject, useEffect, useMemo, useRef } from 'react'
 import styled from 'styled-components'
 import { Group, Object3D, Vector3 } from 'three'
+import tunnel from 'tunnel-rat'
 import { Canvas } from '../Canvas'
 import { RapierRaycastVehicle, WheelOptions } from './rapier-raycast-vehicle'
 import { useControls } from './use-controls'
@@ -34,6 +35,21 @@ const CHASSIS_CUBOID_HALF_EXTENTS = new Vector3(2, 0.5, 1)
 const RAPIER_UPDATE_PRIORITY = -50
 const BEFORE_RAPIER_UPDATE = RAPIER_UPDATE_PRIORITY + 1
 const AFTER_RAPIER_UPDATE = RAPIER_UPDATE_PRIORITY - 1
+
+const SpeedTextDiv = styled.div`
+    position: absolute;
+    bottom: 2em;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 2em;
+    color: white;
+    font-family: monospace;
+    text-shadow: 2px 2px black;
+    z-index: 1;
+`
+
+const SpeedTextTunnel = tunnel()
 
 type RaycastVehicleProps = RigidBodyProps & {
     indexRightAxis?: number
@@ -58,13 +74,13 @@ const RaycastVehicle = ({
     const controls = useControls()
 
     const vehicle = useRef<RapierRaycastVehicle | null>(null)
-
+    const chassisRigidBody = useRef<RigidBodyApi>(null!)
     const topLeftWheelObject = useRef<Group>(null!)
     const topRightWheelObject = useRef<Group>(null!)
     const bottomLeftWheelObject = useRef<Group>(null!)
     const bottomRightWheelObject = useRef<Group>(null!)
 
-    const chassisRigidBody = useRef<RigidBodyApi>(null!)
+    const currentSpeedTextDiv = useRef<HTMLDivElement>(null)
 
     const {
         maxForce,
@@ -198,13 +214,15 @@ const RaycastVehicle = ({
             const options = wheels[i].options
             vehicle.current.addWheel(options)
 
-            const raycastArrowHelper = vehicle.current.wheels[i].debug.raycastArrowHelper
+            const raycastArrowHelper =
+                vehicle.current.wheels[i].debug.raycastArrowHelper
             scene.add(raycastArrowHelper)
         }
 
         return () => {
             for (let i = 0; i < wheels.length; i++) {
-                const raycastArrowHelper = vehicle.current!.wheels[i].debug.raycastArrowHelper
+                const raycastArrowHelper =
+                    vehicle.current!.wheels[i].debug.raycastArrowHelper
                 scene.remove(raycastArrowHelper)
             }
         }
@@ -268,6 +286,11 @@ const RaycastVehicle = ({
             wheelObject.position.copy(wheelState.worldTransform.position)
             wheelObject.quaternion.copy(wheelState.worldTransform.quaternion)
         }
+
+        // update current speed text
+        if (currentSpeedTextDiv.current) {
+            currentSpeedTextDiv.current.innerText = `${vehicle.current.state.currentVehicleSpeedKmHour.toFixed()} km/h`
+        }
     }, BEFORE_RAPIER_UPDATE)
 
     useFrame((_, delta) => {
@@ -298,6 +321,9 @@ const RaycastVehicle = ({
 
     return (
         <>
+            <SpeedTextTunnel.In>
+                <SpeedTextDiv ref={currentSpeedTextDiv} />
+            </SpeedTextTunnel.In>
             <RigidBody
                 {...groupProps}
                 colliders={false}
@@ -353,6 +379,9 @@ export default () => {
     return (
         <>
             <h1>Rapier - Raycast Vehicle</h1>
+
+            <SpeedTextTunnel.Out />
+
             <Canvas camera={{ fov: 60, position: [0, 30, -20] }}>
                 <Physics
                     gravity={[0, -9.81, 0]}
