@@ -329,8 +329,6 @@ export class RapierRaycastVehicle {
     }
 
     private updateWheelSuspension(): void {
-        const world = this.world
-
         for (let i = 0; i < this.wheels.length; i++) {
             const wheel = this.wheels[i]
             const wheelState = wheel.state
@@ -348,7 +346,7 @@ export class RapierRaycastVehicle {
                 .normalize()
 
             const ray = new Rapier.Ray(origin, direction)
-            const rayColliderIntersection = world.castRayAndGetNormal(
+            const rayColliderIntersection = this.world.castRayAndGetNormal(
                 ray,
                 rayLength,
                 false,

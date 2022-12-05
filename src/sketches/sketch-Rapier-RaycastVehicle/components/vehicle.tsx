@@ -31,17 +31,17 @@ export type RaycastVehicleWheel = {
     object: RefObject<Object3D>
 }
 
-export type RaycastVehicleProps = RigidBodyProps
+export type VehicleProps = RigidBodyProps
 
-export type RaycastVehicleRef = {
+export type VehicleRef = {
     chassisRigidBody: RefObject<RigidBodyApi>
     rapierRaycastVehicle: RefObject<RapierRaycastVehicle>
     wheels: RaycastVehicleWheel[]
 }
 
-export const RaycastVehicle = forwardRef<
-    RaycastVehicleRef,
-    RaycastVehicleProps
+export const Vehicle = forwardRef<
+    VehicleRef,
+    VehicleProps
 >(({ children, ...groupProps }, ref) => {
     const rapier = useRapier()
     const scene = useThree((state) => state.scene)

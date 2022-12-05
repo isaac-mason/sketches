@@ -1,6 +1,18 @@
-import { useGLTF } from '@react-three/drei'
-import { forwardRef, RefObject, useImperativeHandle, useRef } from 'react'
-import { Mesh, MeshStandardMaterial, BoxBufferGeometry, Group } from 'three'
+import { Box, useGLTF } from '@react-three/drei'
+import {
+    forwardRef,
+    RefObject,
+    useImperativeHandle,
+    useRef,
+    useState,
+} from 'react'
+import {
+    Mesh,
+    MeshStandardMaterial,
+    BoxBufferGeometry,
+    Group,
+    Object3D,
+} from 'three'
 import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import chassisDracoUrl from '../assets/chassis-draco.glb?url'
 
@@ -61,6 +73,17 @@ export const Chassis = forwardRef<ChassisRef, JSX.IntrinsicElements['group']>(
         const wheel = useRef<Group>(null)
         const needle = useRef<MaterialMesh>(null!)
         const chassis_1 = useRef<MaterialMesh>(null!)
+
+        const [leftHeadlightsTarget] = useState(() => {
+            const object = new Object3D()
+            object.position.set(0.8, 0.5, 4)
+            return object
+        })
+        const [rightHeadlightsTarget] = useState(() => {
+            const object = new Object3D()
+            object.position.set(-0.8, 0.5, 4)
+            return object
+        })
 
         useImperativeHandle(ref, () => ({
             group,

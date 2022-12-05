@@ -677,6 +677,16 @@
     "@react-pdf/yoga" "^2.0.4"
     react-merge-refs "^1.1.0"
 
+"@react-three/postprocessing@^2.7.0":
+  version "2.7.0"
+  resolved "https://registry.yarnpkg.com/@react-three/postprocessing/-/postprocessing-2.7.0.tgz#bae6be248bdb43cbab3d125b23ba5b0de4d934d2"
+  integrity sha512-lJfV8GYp+L1SlGRcl8QPUg9QMdO+8ojW2kfaEc/MuvoI4rX3TRhVd3qFjjF++0bBmzt8LeQpDHCOHFAaT3MNYA==
+  dependencies:
+    postprocessing "^6.29.0"
+    react-merge-refs "^1.1.0"
+    screen-space-reflections "2.5.0"
+    three-stdlib "^2.8.11"
+
 "@react-three/rapier@^0.10.0":
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/@react-three/rapier/-/rapier-0.10.0.tgz#387c9c415d9bcba41cc49acaeae3cd33c2c8803d"
@@ -3091,6 +3101,11 @@ postcss@^8.4.13:
     picocolors "^1.0.0"
     source-map-js "^1.0.2"
 
+postprocessing@^6.29.0:
+  version "6.29.1"
+  resolved "https://registry.yarnpkg.com/postprocessing/-/postprocessing-6.29.1.tgz#169b48cca498a52d3ee4b8960645b089cc7f64b3"
+  integrity sha512-w+XoL2Z7YpVDsHbIeg6sldMMmDqZS4Hul1FDq3TjOeXZ0Wnp0Qy1EvR7QmYJxyWBux1cKQx/k3XO7LxfvPsZyg==
+
 potpack@^1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/potpack/-/potpack-1.0.2.tgz#23b99e64eb74f5741ffe7656b5b5c4ddce8dfc14"
@@ -3372,6 +3387,11 @@ scheduler@^0.23.0:
   integrity sha512-CtuThmgHNg7zIZWAXi3AsyIzA3n4xx7aNyjwC2VJldO2LMVDhFK+63xGqq6CsJH4rTAt6/M+N4GhZiDYPx9eUw==
   dependencies:
     loose-envify "^1.1.0"
+
+screen-space-reflections@2.5.0:
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/screen-space-reflections/-/screen-space-reflections-2.5.0.tgz#2a6ea982da96f9c35f34a361b2555439f9fbb1f6"
+  integrity sha512-fWSDMhJS0xwD3LTxRRch7Lb9NzxsR66sCmtDmAA7i+OGnghUrBBsrha85ng7StnCBaLq/BKmZ97dLxWd1XgWdQ==
 
 seek-bzip@^1.0.5:
   version "1.0.6"
@@ -3716,6 +3736,23 @@ three-stdlib@^2.18.1:
   version "2.20.2"
   resolved "https://registry.yarnpkg.com/three-stdlib/-/three-stdlib-2.20.2.tgz#91ad61710db11666b2edba6649f62e21b8d8ea8f"
   integrity sha512-e7QyYf9oKBtnWL8AYcDUuNG11s+aWZjExJ/zvXx63Ng2V93m2kS2EmfLt90QmouWjfmamegXx9g6qULjuAlhEg==
+  dependencies:
+    "@babel/runtime" "^7.16.7"
+    "@types/offscreencanvas" "^2019.6.4"
+    "@webgpu/glslang" "^0.0.15"
+    chevrotain "^10.1.2"
+    draco3d "^1.4.1"
+    fflate "^0.6.9"
+    ktx-parse "^0.4.5"
+    mmd-parser "^1.0.4"
+    opentype.js "^1.3.3"
+    potpack "^1.0.1"
+    zstddec "^0.0.2"
+
+three-stdlib@^2.8.11:
+  version "2.20.3"
+  resolved "https://registry.yarnpkg.com/three-stdlib/-/three-stdlib-2.20.3.tgz#4310032013f33540edcbc14dbcfa22d9d38eaace"
+  integrity sha512-XYZaXesGBkTQCnBp4N5WySDMNi+5AJC25DRL/XWFtmsS1uCGPLHVMGTNdbGdJlOn3RgOrjzoLQYhW+UMorHXWg==
   dependencies:
     "@babel/runtime" "^7.16.7"
     "@types/offscreencanvas" "^2019.6.4"
