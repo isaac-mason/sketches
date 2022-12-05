@@ -1,16 +1,15 @@
-import {
-    ContactShadows,
-    Environment,
-    Lightformer,
-    OrbitControls,
-    Reflector,
-    Stars,
-} from '@react-three/drei'
+import { Environment, OrbitControls, Stars } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
-import { CuboidCollider, CylinderCollider, Debug, Physics, RigidBody } from '@react-three/rapier'
+import {
+    CuboidCollider,
+    CylinderCollider,
+    Debug,
+    Physics,
+    RigidBody,
+} from '@react-three/rapier'
 import { useControls as useLeva } from 'leva'
 import { useEffect, useRef, useState } from 'react'
-import { MeshStandardMaterial, Object3D, Vector3 } from 'three'
+import { Object3D, Vector3 } from 'three'
 import { Canvas } from '../Canvas'
 import { ControlsText } from './components/controls-text'
 import { SpeedText } from './components/speed-text'
@@ -275,7 +274,11 @@ const Game = () => {
                         type="fixed"
                         mass={10}
                         rotation={[0, 0, Math.PI / 2]}
-                        position={[idx % 2 === 0 ? -0.8 : 0.8, -0.42, idx * 1.5]}
+                        position={[
+                            idx % 2 === 0 ? -0.8 : 0.8,
+                            -0.42,
+                            idx * 1.5,
+                        ]}
                     >
                         <CylinderCollider args={[1, 0.5]} />
                         <mesh>
@@ -306,12 +309,12 @@ const Game = () => {
 
             <hemisphereLight intensity={0.25} />
             <ambientLight intensity={0.1} />
-            <Environment preset='night' />
-            
+            <Environment preset="night" />
+
             <Stars />
 
             {gameState.displayMode === 'editor' && <OrbitControls />}
-            
+
             {debug ? <Debug /> : null}
         </>
     )
