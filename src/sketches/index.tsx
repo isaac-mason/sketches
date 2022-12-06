@@ -25,6 +25,7 @@ import JourneyLesson29Cover from './sketch-JourneyLesson29-AnimatedGalaxy/cover.
 import JourneyLesson30Cover from './sketch-JourneyLesson30-ModifiedMaterials/cover.png'
 import RapierRevoluteJointVehicleCover from './sketch-Rapier-RevoluteJointVehicle/cover.png'
 import RapierRaycastingCover from './sketch-Rapier-Raycasting/cover.png'
+import RapierRaycastVehicleCover from './sketch-Rapier-RaycastVehicle/cover.png'
 
 export type Sketch = {
     title: string
@@ -171,7 +172,7 @@ const sketchList = [
     {
         title: 'Rapier - Raycast Vehicle',
         route: 'Rapier-RaycastVehicle',
-        hidden: true,
+        cover: RapierRaycastVehicleCover,
     },
 ] as const
 

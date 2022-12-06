@@ -9,81 +9,32 @@ import {
 } from '@react-three/rapier'
 import { useControls as useLeva } from 'leva'
 import { useEffect, useRef, useState } from 'react'
-import { Object3D, Vector3 } from 'three'
+import { Vector3 } from 'three'
 import { Canvas } from '../Canvas'
 import { ControlsText } from './components/controls-text'
+import { LampPost } from './components/lamp-post'
 import { SpeedText } from './components/speed-text'
 import { SpeedTextTunnel } from './components/speed-text-tunnel'
-import { Vehicle, VehicleRef } from './components/vehicle'
+import { TrafficCone } from './components/traffic-cone'
+import {
+    BRAKE_LIGHTS_OFF_COLOR,
+    BRAKE_LIGHTS_ON_COLOR,
+    Vehicle,
+    VehicleRef,
+} from './components/vehicle'
 import {
     GameStateProvider,
     useGameState,
     useGameStateDispatch,
 } from './game-state'
 import { useControls } from './hooks/use-controls'
+import { usePageActive } from './hooks/use-page-active'
 import { LEVA_KEY } from './util/leva-key'
 import {
     AFTER_RAPIER_UPDATE,
     BEFORE_RAPIER_UPDATE,
     RAPIER_UPDATE_PRIORITY,
 } from './util/rapier'
-
-const LampPost = (props: JSX.IntrinsicElements['group']) => {
-    const [target] = useState(() => {
-        const object = new Object3D()
-        object.position.set(-4, 0, 0)
-        return object
-    })
-
-    return (
-        <group {...props}>
-            <RigidBody colliders="cuboid" type="fixed">
-                <mesh position={[0, 5, 0]} castShadow receiveShadow>
-                    <cylinderGeometry args={[0.1, 0.1, 10, 32]} />
-                    <meshStandardMaterial color="#000" />
-                </mesh>
-            </RigidBody>
-            <mesh position={[-0.4, 10, 0]} castShadow receiveShadow>
-                <boxGeometry args={[1.2, 0.2, 0.5]} />
-                <meshStandardMaterial color="#000" />
-            </mesh>
-            <mesh position={[-0.6, 9.89, 0]} rotation-x={Math.PI / 2}>
-                <planeGeometry args={[0.4, 0.2]} />
-                <meshStandardMaterial color="#fff" />
-            </mesh>
-            <primitive object={target} />
-            <spotLight
-                position={[-0.6, 10, 0]}
-                target={target}
-                intensity={1}
-                angle={1}
-                penumbra={1}
-                castShadow
-            />
-        </group>
-    )
-}
-
-const TrafficCone = (props: JSX.IntrinsicElements['group']) => {
-    return (
-        <group {...props}>
-            <RigidBody colliders="cuboid">
-                <mesh position-y={-0.5} castShadow receiveShadow>
-                    <boxGeometry args={[0.8, 0.1, 0.8]} />
-                    <meshStandardMaterial color="orange" />
-                </mesh>
-                <mesh castShadow receiveShadow>
-                    <cylinderGeometry args={[0.1, 0.3, 1, 32]} />
-                    <meshStandardMaterial color="orange" />
-                </mesh>
-                <mesh position-y={-0.1} castShadow receiveShadow>
-                    <cylinderGeometry args={[0.215, 0.235, 0.1, 32]} />
-                    <meshStandardMaterial color="white" />
-                </mesh>
-            </RigidBody>
-        </group>
-    )
-}
 
 const Game = () => {
     const raycastVehicle = useRef<VehicleRef>(null)
@@ -190,6 +141,15 @@ const Game = () => {
             ).toFixed()
             currentSpeedTextDiv.current.innerText = `${km} km/h`
         }
+
+        // update brake lights
+        const brakeLights =
+            raycastVehicle.current.chassis.current?.brake.current
+
+        if (brakeLights) {
+            brakeLights.material.color =
+                brakeForce > 0 ? BRAKE_LIGHTS_ON_COLOR : BRAKE_LIGHTS_OFF_COLOR
+        }
     }, BEFORE_RAPIER_UPDATE)
 
     useFrame((_, delta) => {
@@ -200,11 +160,11 @@ const Game = () => {
 
         const t = 1.0 - Math.pow(0.01, delta)
 
-        const idealOffset = new Vector3(-10, 5, 0)
+        const idealOffset = new Vector3(-10, 3, 0)
         idealOffset.applyQuaternion(chassis.current.rotation())
         idealOffset.add(chassis.current.translation())
         if (idealOffset.y < 0) {
-            idealOffset.y = 0
+            idealOffset.y = 0.5
         }
 
         const idealLookAt = new Vector3(0, 1, 0)
@@ -251,19 +211,10 @@ const Game = () => {
             <RigidBody type="fixed">
                 <mesh rotation-x={-0.3} position={[0, -1, 30]}>
                     <boxGeometry args={[10, 1, 10]} />
-                    <meshStandardMaterial color="#888" />
+                    <meshStandardMaterial color="orange" />
                 </mesh>
             </RigidBody>
 
-            {/* boxes */}
-            {Array.from({ length: 6 }).map((_, idx) => (
-                <RigidBody key={idx} colliders="cuboid" mass={10}>
-                    <mesh position={[0, 2 + idx * 4.1, 40]}>
-                        <boxGeometry args={[2, 1, 2]} />
-                        <meshStandardMaterial color="orange" />
-                    </mesh>
-                </RigidBody>
-            ))}
 
             {/* bumps */}
             <group position={[0, 0, 50]}>
@@ -283,17 +234,33 @@ const Game = () => {
                         <CylinderCollider args={[1, 0.5]} />
                         <mesh>
                             <cylinderBufferGeometry args={[0.5, 0.5, 2]} />
-                            <meshStandardMaterial color="#ccc" />
+                            <meshStandardMaterial color="orange" />
                         </mesh>
                     </RigidBody>
                 ))}
             </group>
 
+            {/* boxes */}
+            {Array.from({ length: 6 }).map((_, idx) => (
+                <RigidBody key={idx} colliders="cuboid" mass={10} friction={1}>
+                    <mesh position={[0, 2 + idx * 4.1, 70]}>
+                        <boxGeometry args={[2, 1, 2]} />
+                        <meshStandardMaterial color="orange" />
+                    </mesh>
+                </RigidBody>
+            ))}
+
             {/* ground */}
-            <RigidBody type="fixed" position-y={-5} colliders={false}>
-                <CuboidCollider args={[150, 5, 150]} />
+            <RigidBody
+                type="fixed"
+                position-z={75}
+                position-y={-5}
+                colliders={false}
+                friction={1}
+            >
+                <CuboidCollider args={[120, 5, 120]} />
                 <mesh receiveShadow>
-                    <boxGeometry args={[300, 10, 300]} />
+                    <boxGeometry args={[240, 10, 240]} />
                     <meshStandardMaterial color="#303030" />
                 </mesh>
             </RigidBody>
@@ -321,6 +288,8 @@ const Game = () => {
 }
 
 export default () => {
+    const pageActive = usePageActive()
+
     return (
         <>
             <h1>Rapier - Raycast Vehicle</h1>
@@ -333,6 +302,7 @@ export default () => {
                         gravity={[0, -9.81, 0]}
                         updatePriority={RAPIER_UPDATE_PRIORITY}
                         timeStep="vary"
+                        paused={!pageActive}
                     >
                         <Game />
                     </Physics>
@@ -341,7 +311,7 @@ export default () => {
 
             <SpeedTextTunnel.Out />
 
-            <ControlsText>use wasd to drive</ControlsText>
+            <ControlsText>use wasd to drive, space to break</ControlsText>
         </>
     )
 }

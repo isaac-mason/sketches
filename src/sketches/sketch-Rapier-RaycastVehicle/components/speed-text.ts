@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled from 'styled-components'
 
 export const SpeedText = styled.div`
     position: absolute;
@@ -10,5 +10,4 @@ export const SpeedText = styled.div`
     color: white;
     font-family: monospace;
     text-shadow: 2px 2px black;
-    z-index: 1;
 `

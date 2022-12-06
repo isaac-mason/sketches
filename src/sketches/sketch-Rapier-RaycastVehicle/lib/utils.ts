@@ -255,7 +255,6 @@ export const calculateAABBInertia = (
 // calculate inertia world
 const calculateInertiaWorld_uiw_m1 = new Matrix3()
 const calculateInertiaWorld_uiw_m2 = new Matrix3()
-const calculateInertiaWorld_uiw_m3 = new Matrix3()
 
 export const calculateInvInertiaWorld = (
     rigidBody: Rapier.RigidBody,
@@ -267,7 +266,6 @@ export const calculateInvInertiaWorld = (
 
     const m1 = calculateInertiaWorld_uiw_m1
     const m2 = calculateInertiaWorld_uiw_m2
-    const m3 = calculateInertiaWorld_uiw_m3
 
     setMatrix3RotationFromQuaternion(m1, rigidBody.rotation() as Quaternion)
     m2.copy(m1).transpose()

@@ -1,4 +1,3 @@
-import { Box } from '@react-three/drei'
 import { useThree } from '@react-three/fiber'
 import {
     CuboidCollider,
@@ -17,14 +16,17 @@ import {
     useRef,
     useState,
 } from 'react'
-import { Group, Object3D, Vector3 } from 'three'
+import { Color, Group, Object3D, Vector3 } from 'three'
 import {
     RapierRaycastVehicle,
     WheelOptions,
 } from '../lib/rapier-raycast-vehicle'
-import { Chassis } from '../models/chassis'
+import { Chassis, ChassisRef } from '../models/chassis'
 import { Wheel } from '../models/wheel'
 import { LEVA_KEY } from '../util/leva-key'
+
+export const BRAKE_LIGHTS_ON_COLOR = new Color(0xff3333)
+export const BRAKE_LIGHTS_OFF_COLOR = new Color(0x333333)
 
 const CHASSIS_CUBOID_HALF_EXTENTS = new Vector3(2.35, 0.55, 1)
 
@@ -38,6 +40,7 @@ export type VehicleProps = RigidBodyProps
 export type VehicleRef = {
     chassisRigidBody: RefObject<RigidBodyApi>
     rapierRaycastVehicle: RefObject<RapierRaycastVehicle>
+    chassis: RefObject<ChassisRef>
     wheels: RaycastVehicleWheel[]
 }
 
@@ -46,8 +49,9 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(
         const rapier = useRapier()
         const scene = useThree((state) => state.scene)
 
-        const vehicle = useRef<RapierRaycastVehicle>(null!)
-        const chassisRigidBody = useRef<RigidBodyApi>(null!)
+        const vehicleRef = useRef<RapierRaycastVehicle>(null!)
+        const chassisRef = useRef<ChassisRef>(null!)
+        const chassisRigidBodyRef = useRef<RigidBodyApi>(null!)
 
         const topLeftWheelObject = useRef<Group>(null!)
         const topRightWheelObject = useRef<Group>(null!)
@@ -162,15 +166,16 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(
         ]
 
         useImperativeHandle(ref, () => ({
-            chassisRigidBody: chassisRigidBody,
-            rapierRaycastVehicle: vehicle,
+            chassisRigidBody: chassisRigidBodyRef,
+            rapierRaycastVehicle: vehicleRef,
+            chassis: chassisRef,
             wheels,
         }))
 
         useEffect(() => {
-            vehicle.current = new RapierRaycastVehicle({
+            vehicleRef.current = new RapierRaycastVehicle({
                 world: rapier.world.raw(),
-                chassisRigidBody: chassisRigidBody.current.raw(),
+                chassisRigidBody: chassisRigidBodyRef.current.raw(),
                 chassisHalfExtents: CHASSIS_CUBOID_HALF_EXTENTS,
                 indexRightAxis,
                 indexForwardAxis,
@@ -179,25 +184,13 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(
 
             for (let i = 0; i < wheels.length; i++) {
                 const options = wheels[i].options
-                vehicle.current.addWheel(options)
-
-                const raycastArrowHelper =
-                    vehicle.current.wheels[i].debug.suspensionArrowHelper
-                scene.add(raycastArrowHelper)
+                vehicleRef.current.addWheel(options)
             }
 
-            vehicle.current = vehicle.current
-
-            return () => {
-                for (let i = 0; i < wheels.length; i++) {
-                    const raycastArrowHelper =
-                        vehicle.current!.wheels[i].debug.suspensionArrowHelper
-                    scene.remove(raycastArrowHelper)
-                }
-            }
+            vehicleRef.current = vehicleRef.current
         }, [
-            chassisRigidBody,
-            vehicle,
+            chassisRigidBodyRef,
+            vehicleRef,
             indexRightAxis,
             indexForwardAxis,
             indexUpAxis,
@@ -208,12 +201,12 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(
 
         const [leftHeadlightTarget] = useState(() => {
             const object = new Object3D()
-            object.position.set(10, 0, -0.8);
+            object.position.set(10, 0, -0.7)
             return object
         })
         const [rightHeadlightTarget] = useState(() => {
             const object = new Object3D()
-            object.position.set(10, 0, 0.8);
+            object.position.set(10, 0, 0.7)
             return object
         })
 
@@ -222,16 +215,12 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(
                 <RigidBody
                     {...groupProps}
                     colliders={false}
-                    ref={chassisRigidBody}
+                    ref={chassisRigidBodyRef}
                     mass={150}
                 >
                     <primitive object={leftHeadlightTarget} />
                     <spotLight
-                        position={[
-                            2.5,
-                            0.4,
-                            -0.8
-                        ]}
+                        position={[2.5, -0.2, -0.7]}
                         target={leftHeadlightTarget}
                         angle={0.4}
                         distance={50}
@@ -241,11 +230,7 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(
 
                     <primitive object={rightHeadlightTarget} />
                     <spotLight
-                        position={[
-                            2.5,
-                            0.4,
-                            0.8,
-                        ]}
+                        position={[2.5, -0.2, 0.7]}
                         target={rightHeadlightTarget}
                         angle={0.4}
                         distance={50}
@@ -254,6 +239,7 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(
                     />
 
                     <Chassis
+                        ref={chassisRef}
                         position={[-0.2, -0.25, 0]}
                         rotation-y={Math.PI / 2}
                     />

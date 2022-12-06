@@ -16,34 +16,6 @@ const directions = [
     new Vector3(0, 0, 1),
 ]
 
-const updateWheelTransform_up = new Vector3()
-const updateWheelTransform_right = new Vector3()
-const updateWheelTransform_fwd = new Vector3()
-const updateWheelTransform_steeringOrn = new Quaternion()
-const updateWheelTransform_rotatingOrn = new Quaternion()
-const updateWheelTransform_chassisRigidBodyQuaternion = new Quaternion()
-
-const updateCurrentSpeed_chassisVelocity = new Vector3()
-const updateCurrentSpeed_forwardWorld = new Vector3()
-
-const updateWheelSuspension_denominator = new Vector3()
-const updateWheelSuspension_chassisVelocityAtContactPoint = new Vector3()
-const updateWheelSuspension_direction = new Vector3()
-const updateWheelSuspension_wheelRaycastArrowHelperDirection = new Vector3()
-
-const applyWheelSuspensionForce_impulse = new Vector3()
-const applyWheelSuspensionForce_rollInfluenceAdjustedWorldPos = new Vector3()
-
-const updateFriction_surfNormalWS_scaled_proj = new Vector3()
-const updateFriction_impulse = new Vector3()
-const updateFriction_sideImp = new Vector3()
-const updateFriction_worldPos = new Vector3()
-const updateFriction_relPos = new Vector3()
-
-const updateWheelRotation_hitNormalWorldScaledWithProj = new Vector3()
-const updateWheelRotation_fwd = new Vector3()
-const updateWheelRotation_vel = new Vector3()
-
 export type VehicleState = {
     sliding: boolean
 
@@ -99,6 +71,7 @@ export type WheelState = {
 
 export type WheelDebug = {
     suspensionArrowHelper: ArrowHelper
+    wheelRaycastArrowHelper: ArrowHelper
 }
 
 export type WheelOptions = {
@@ -135,11 +108,14 @@ export type Wheel = {
 }
 
 export class RapierRaycastVehicle {
-    world: Rapier.World
-
     wheels: Wheel[] = []
 
-    state: VehicleState
+    state: VehicleState = {
+        sliding: false,
+        currentVehicleSpeedKmHour: 0,
+    }
+
+    world: Rapier.World
 
     chassisRigidBody: Rapier.RigidBody
 
@@ -148,6 +124,34 @@ export class RapierRaycastVehicle {
     indexRightAxis: number
     indexForwardAxis: number
     indexUpAxis: number
+
+    private updateWheelTransform_up = new Vector3()
+    private updateWheelTransform_right = new Vector3()
+    private updateWheelTransform_fwd = new Vector3()
+    private updateWheelTransform_steeringOrn = new Quaternion()
+    private updateWheelTransform_rotatingOrn = new Quaternion()
+    private updateWheelTransform_chassisRigidBodyQuaternion = new Quaternion()
+
+    private updateCurrentSpeed_chassisVelocity = new Vector3()
+    private updateCurrentSpeed_forwardWorld = new Vector3()
+
+    private updateWheelSuspension_denominator = new Vector3()
+    private updateWheelSuspension_chassisVelocityAtContactPoint = new Vector3()
+    private updateWheelSuspension_direction = new Vector3()
+    private updateWheelSuspension_wheelRaycastArrowHelperDirection = new Vector3()
+
+    private applyWheelSuspensionForce_impulse = new Vector3()
+    private applyWheelSuspensionForce_rollInfluenceAdjustedWorldPos = new Vector3()
+
+    private updateFriction_surfNormalWS_scaled_proj = new Vector3()
+    private updateFriction_impulse = new Vector3()
+    private updateFriction_sideImp = new Vector3()
+    private updateFriction_worldPos = new Vector3()
+    private updateFriction_relPos = new Vector3()
+
+    private updateWheelRotation_hitNormalWorldScaledWithProj = new Vector3()
+    private updateWheelRotation_fwd = new Vector3()
+    private updateWheelRotation_vel = new Vector3()
 
     constructor({
         world,
@@ -162,11 +166,6 @@ export class RapierRaycastVehicle {
         this.chassisRigidBody = chassisRigidBody
         this.chassisHalfExtents = chassisHalfExtents
 
-        this.state = {
-            sliding: false,
-            currentVehicleSpeedKmHour: 0,
-        }
-
         this.indexRightAxis = indexRightAxis
         this.indexForwardAxis = indexForwardAxis
         this.indexUpAxis = indexUpAxis
@@ -177,6 +176,7 @@ export class RapierRaycastVehicle {
             options,
             debug: {
                 suspensionArrowHelper: new ArrowHelper(),
+                wheelRaycastArrowHelper: new ArrowHelper(),
             },
             state: {
                 suspensionLength: 0,
@@ -238,10 +238,10 @@ export class RapierRaycastVehicle {
 
         // reset wheel states
         for (let i = 0; i < this.wheels.length; i++) {
-            const wheelState = this.wheels[i].state
+            const wheel = this.wheels[i]
 
-            wheelState.inContactWithGround = false
-            wheelState.groundRigidBody = null
+            wheel.state.inContactWithGround = false
+            wheel.state.groundRigidBody = null
         }
     }
 
@@ -270,11 +270,10 @@ export class RapierRaycastVehicle {
     private updateWheelTransform(): void {
         for (let i = 0; i < this.wheels.length; i++) {
             const wheel = this.wheels[i]
-            const wheelState = wheel.state
 
-            const up = updateWheelTransform_up
-            const right = updateWheelTransform_right
-            const fwd = updateWheelTransform_fwd
+            const up = this.updateWheelTransform_up
+            const right = this.updateWheelTransform_right
+            const fwd = this.updateWheelTransform_fwd
 
             this.updateWheelTransformWorld(wheel)
 
@@ -285,17 +284,17 @@ export class RapierRaycastVehicle {
             right.normalize()
 
             // Rotate around steering over the wheelAxle
-            const steering = wheelState.steering
-            const steeringOrn = updateWheelTransform_steeringOrn
+            const steering = wheel.state.steering
+            const steeringOrn = this.updateWheelTransform_steeringOrn
             steeringOrn.setFromAxisAngle(up, steering)
 
-            const rotatingOrn = updateWheelTransform_rotatingOrn
-            rotatingOrn.setFromAxisAngle(right, wheelState.rotation)
+            const rotatingOrn = this.updateWheelTransform_rotatingOrn
+            rotatingOrn.setFromAxisAngle(right, wheel.state.rotation)
 
             // World rotation of the wheel
-            const q = wheelState.worldTransform.quaternion
+            const q = wheel.state.worldTransform.quaternion
             q.multiplyQuaternions(
-                updateWheelTransform_chassisRigidBodyQuaternion.copy(
+                this.updateWheelTransform_chassisRigidBodyQuaternion.copy(
                     this.chassisRigidBody.rotation() as Quaternion
                 ),
                 steeringOrn
@@ -304,23 +303,23 @@ export class RapierRaycastVehicle {
             q.normalize()
 
             // world position of the wheel
-            const p = wheelState.worldTransform.position
-            p.copy(wheelState.directionWorld)
-            p.multiplyScalar(wheelState.suspensionLength)
-            p.add(wheelState.chassisConnectionPointWorld)
+            const p = wheel.state.worldTransform.position
+            p.copy(wheel.state.directionWorld)
+            p.multiplyScalar(wheel.state.suspensionLength)
+            p.add(wheel.state.chassisConnectionPointWorld)
         }
     }
 
     private updateCurrentSpeed(): void {
         const chassis = this.chassisRigidBody
-        const chassisVelocity = updateCurrentSpeed_chassisVelocity.copy(
+        const chassisVelocity = this.updateCurrentSpeed_chassisVelocity.copy(
             chassis.linvel() as Vector3
         )
 
         this.state.currentVehicleSpeedKmHour =
             3.6 * chassisVelocity.length()
 
-        const forwardWorld = updateCurrentSpeed_forwardWorld
+        const forwardWorld = this.updateCurrentSpeed_forwardWorld
         getVehicleAxisWorld(chassis, this.indexForwardAxis, forwardWorld)
 
         if (forwardWorld.dot(chassisVelocity) > 0) {
@@ -331,18 +330,16 @@ export class RapierRaycastVehicle {
     private updateWheelSuspension(): void {
         for (let i = 0; i < this.wheels.length; i++) {
             const wheel = this.wheels[i]
-            const wheelState = wheel.state
-            const wheelRaycastArrowHelper = wheel.debug.suspensionArrowHelper
 
             this.updateWheelTransformWorld(wheel)
 
             const rayLength =
                 wheel.options.radius + wheel.options.suspensionRestLength
 
-            const origin = wheelState.chassisConnectionPointWorld
+            const origin = wheel.state.chassisConnectionPointWorld
 
-            const direction = updateWheelSuspension_direction
-                .copy(wheelState.directionWorld)
+            const direction = this.updateWheelSuspension_direction
+                .copy(wheel.state.directionWorld)
                 .normalize()
 
             const ray = new Rapier.Ray(origin, direction)
@@ -359,25 +356,25 @@ export class RapierRaycastVehicle {
             // if hit
             if (rayColliderIntersection && rayColliderIntersection.collider) {
                 // store ground rigid body
-                wheelState.groundRigidBody =
+                wheel.state.groundRigidBody =
                     rayColliderIntersection.collider.parent()
 
                 // update wheel state
-                wheelState.inContactWithGround = true
+                wheel.state.inContactWithGround = true
 
                 // store hit normal
-                wheelState.hitNormalWorld.copy(
+                wheel.state.hitNormalWorld.copy(
                     rayColliderIntersection.normal as Vector3
                 )
 
                 // store hit point
-                wheelState.hitPointWorld.copy(
+                wheel.state.hitPointWorld.copy(
                     ray.pointAt(rayColliderIntersection.toi) as Vector3
                 )
 
                 // compute suspension length
                 const hitDistance = rayColliderIntersection.toi
-                wheelState.suspensionLength = hitDistance - wheel.options.radius
+                wheel.state.suspensionLength = hitDistance - wheel.options.radius
 
                 // clamp on max suspension travel
                 const minSuspensionLength =
@@ -387,90 +384,93 @@ export class RapierRaycastVehicle {
                     wheel.options.suspensionRestLength +
                     wheel.options.maxSuspensionTravel
 
-                if (wheelState.suspensionLength < minSuspensionLength) {
-                    wheelState.suspensionLength = minSuspensionLength
+                if (wheel.state.suspensionLength < minSuspensionLength) {
+                    wheel.state.suspensionLength = minSuspensionLength
                 }
-                if (wheelState.suspensionLength > maxSuspensionLength) {
-                    wheelState.suspensionLength = maxSuspensionLength
+                if (wheel.state.suspensionLength > maxSuspensionLength) {
+                    wheel.state.suspensionLength = maxSuspensionLength
 
-                    wheelState.groundRigidBody = null
-                    wheelState.inContactWithGround = false
-                    wheelState.hitNormalWorld.set(0, 0, 0)
-                    wheelState.hitPointWorld.set(0, 0, 0)
+                    wheel.state.groundRigidBody = null
+                    wheel.state.inContactWithGround = false
+                    wheel.state.hitNormalWorld.set(0, 0, 0)
+                    wheel.state.hitPointWorld.set(0, 0, 0)
                 }
 
-                const denominator = updateWheelSuspension_denominator
-                    .copy(wheelState.hitNormalWorld)
-                    .dot(wheelState.directionWorld)
+                const denominator = this.updateWheelSuspension_denominator
+                    .copy(wheel.state.hitNormalWorld)
+                    .dot(wheel.state.directionWorld)
 
                 const chassisVelocityAtContactPoint = getVelocityAtWorldPoint(
                     this.chassisRigidBody,
-                    wheelState.hitPointWorld,
-                    updateWheelSuspension_chassisVelocityAtContactPoint
+                    wheel.state.hitPointWorld,
+                    this.updateWheelSuspension_chassisVelocityAtContactPoint
                 )
 
-                const projVel = wheelState.hitNormalWorld.dot(
+                const projVel = wheel.state.hitNormalWorld.dot(
                     chassisVelocityAtContactPoint
                 )
 
                 if (denominator >= -0.1) {
-                    wheelState.suspensionRelativeVelocity = 0
-                    wheelState.clippedInvContactDotSuspension = 1 / 0.1
+                    wheel.state.suspensionRelativeVelocity = 0
+                    wheel.state.clippedInvContactDotSuspension = 1 / 0.1
                 } else {
                     const inv = -1 / denominator
-                    wheelState.suspensionRelativeVelocity = projVel * inv
-                    wheelState.clippedInvContactDotSuspension = inv
+                    wheel.state.suspensionRelativeVelocity = projVel * inv
+                    wheel.state.clippedInvContactDotSuspension = inv
                 }
             } else {
                 // put wheel info as in rest position
-                wheelState.suspensionLength =
+                wheel.state.suspensionLength =
                     wheel.options.suspensionRestLength +
                     0 * wheel.options.maxSuspensionTravel
-                wheelState.suspensionRelativeVelocity = 0
-                wheelState.hitNormalWorld
-                    .copy(wheelState.directionWorld)
+                wheel.state.suspensionRelativeVelocity = 0
+                wheel.state.hitNormalWorld
+                    .copy(wheel.state.directionWorld)
                     .multiplyScalar(-1)
-                wheelState.clippedInvContactDotSuspension = 1.0
+                wheel.state.clippedInvContactDotSuspension = 1.0
             }
 
-            // update arrow helper
-            wheelRaycastArrowHelper.setColor('red')
-            wheelRaycastArrowHelper.position.copy(origin)
-            wheelRaycastArrowHelper.setDirection(
-                updateWheelSuspension_wheelRaycastArrowHelperDirection
-                    .copy(direction)
-                    .normalize()
-            )
-            wheelRaycastArrowHelper.setLength(wheelState.suspensionLength)
+            // update debug arrow helpers
+            const debugWheelDirection = this.updateWheelSuspension_wheelRaycastArrowHelperDirection
+                .copy(direction)
+                .normalize()
+
+            wheel.debug.suspensionArrowHelper.position.copy(origin)
+            wheel.debug.suspensionArrowHelper.setDirection(debugWheelDirection)
+            wheel.debug.suspensionArrowHelper.setLength(wheel.state.suspensionLength)
+
+            wheel.debug.wheelRaycastArrowHelper.position.copy(origin)
+            wheel.debug.wheelRaycastArrowHelper.setDirection(direction)
+            wheel.debug.wheelRaycastArrowHelper.setLength(rayLength)
 
             // calculate suspension force
-            wheelState.suspensionForce = 0
+            wheel.state.suspensionForce = 0
 
-            if (wheelState.inContactWithGround) {
+            if (wheel.state.inContactWithGround) {
                 // spring
                 const suspensionRestLength = wheel.options.suspensionRestLength
-                const currentLength = wheelState.suspensionLength
+                const currentLength = wheel.state.suspensionLength
                 const lengthDifference = suspensionRestLength - currentLength
 
                 let force =
                     wheel.options.suspensionStiffness *
                     lengthDifference *
-                    wheelState.clippedInvContactDotSuspension
+                    wheel.state.clippedInvContactDotSuspension
 
                 // damper
                 const projectedRelativeVelocity =
-                    wheelState.suspensionRelativeVelocity
+                    wheel.state.suspensionRelativeVelocity
                 const suspensionDamping =
                     projectedRelativeVelocity < 0
                         ? wheel.options.dampingCompression
                         : wheel.options.dampingRelaxation
                 force -= suspensionDamping * projectedRelativeVelocity
 
-                wheelState.suspensionForce =
+                wheel.state.suspensionForce =
                     force * this.chassisRigidBody.mass()
 
-                if (wheelState.suspensionForce < 0) {
-                    wheelState.suspensionForce = 0
+                if (wheel.state.suspensionForce < 0) {
+                    wheel.state.suspensionForce = 0
                 }
             }
         }
@@ -479,41 +479,39 @@ export class RapierRaycastVehicle {
     private applyWheelSuspensionForce(delta: number): void {
         for (let i = 0; i < this.wheels.length; i++) {
             const wheel = this.wheels[i]
-            const wheelState = wheel.state
 
-            const impulse = applyWheelSuspensionForce_impulse
+            const impulse = this.applyWheelSuspensionForce_impulse
 
-            let suspensionForce = wheelState.suspensionForce
+            let suspensionForce = wheel.state.suspensionForce
             if (suspensionForce > wheel.options.maxSuspensionForce) {
                 suspensionForce = wheel.options.maxSuspensionForce
             }
 
             impulse
-                .copy(wheelState.hitNormalWorld)
+                .copy(wheel.state.hitNormalWorld)
                 .multiplyScalar(suspensionForce * delta)
 
             this.chassisRigidBody.applyImpulseAtPoint(
                 impulse,
-                wheelState.hitPointWorld,
+                wheel.state.hitPointWorld,
                 true
             )
         }
     }
 
     private updateFriction(delta: number): void {
-        const surfNormalWS_scaled_proj = updateFriction_surfNormalWS_scaled_proj
+        const surfNormalWS_scaled_proj = this.updateFriction_surfNormalWS_scaled_proj
 
         for (let i = 0; i < this.wheels.length; i++) {
             const wheel = this.wheels[i]
-            const wheelState = wheel.state
 
-            wheelState.sideImpulse = 0
-            wheelState.forwardImpulse = 0
+            wheel.state.sideImpulse = 0
+            wheel.state.forwardImpulse = 0
 
-            if (wheelState.inContactWithGround && wheelState.groundRigidBody) {
-                const axle = wheelState.axle
-                const wheelWorldTransform = wheelState.worldTransform
-                const forwardWS = wheelState.forwardWS
+            if (wheel.state.inContactWithGround && wheel.state.groundRigidBody) {
+                const axle = wheel.state.axle
+                const wheelWorldTransform = wheel.state.worldTransform
+                const forwardWS = wheel.state.forwardWS
 
                 // get world axle
                 vectorToWorldFrame(
@@ -522,7 +520,7 @@ export class RapierRaycastVehicle {
                     axle
                 )
 
-                const surfNormalWS = wheelState.hitNormalWorld
+                const surfNormalWS = wheel.state.hitNormalWorld
                 const proj = axle.dot(surfNormalWS)
 
                 surfNormalWS_scaled_proj.copy(surfNormalWS).multiplyScalar(proj)
@@ -532,15 +530,15 @@ export class RapierRaycastVehicle {
                 forwardWS.crossVectors(surfNormalWS, axle)
                 forwardWS.normalize()
 
-                wheelState.sideImpulse = resolveSingleBilateralConstraint(
+                wheel.state.sideImpulse = resolveSingleBilateralConstraint(
                     this.chassisRigidBody,
-                    wheelState.hitPointWorld,
-                    wheelState.groundRigidBody,
-                    wheelState.hitPointWorld,
+                    wheel.state.hitPointWorld,
+                    wheel.state.groundRigidBody,
+                    wheel.state.hitPointWorld,
                     axle
                 )
 
-                wheelState.sideImpulse *= wheel.options.sideFrictionStiffness
+                wheel.state.sideImpulse *= wheel.options.sideFrictionStiffness
             }
         }
 
@@ -551,68 +549,67 @@ export class RapierRaycastVehicle {
 
         for (let i = 0; i < this.wheels.length; i++) {
             const wheel = this.wheels[i]
-            const wheelState = wheel.state
 
             let rollingFriction = 0
 
-            wheelState.slipInfo = 1
+            wheel.state.slipInfo = 1
 
-            if (wheelState.groundRigidBody) {
+            if (wheel.state.groundRigidBody) {
                 const defaultRollingFrictionImpulse = 0
 
-                const maxImpulse = wheelState.brakeForce
-                    ? wheelState.brakeForce
+                const maxImpulse = wheel.state.brakeForce
+                    ? wheel.state.brakeForce
                     : defaultRollingFrictionImpulse
 
                 // brake
                 rollingFriction = calcRollingFriction(
                     this.chassisHalfExtents,
                     this.chassisRigidBody,
-                    wheelState.groundRigidBody,
-                    wheelState.hitPointWorld,
-                    wheelState.forwardWS,
+                    wheel.state.groundRigidBody,
+                    wheel.state.hitPointWorld,
+                    wheel.state.forwardWS,
                     maxImpulse
                 )
 
                 // acceleration
-                rollingFriction += wheelState.engineForce * delta
+                rollingFriction += wheel.state.engineForce * delta
 
                 const factor = maxImpulse / rollingFriction
-                wheelState.slipInfo *= factor
+                wheel.state.slipInfo *= factor
             }
 
             // switch between active rolling (throttle), braking and non-active rolling friction (nthrottle/break)
-            wheelState.forwardImpulse = 0
-            wheelState.skidInfo = 1
+            wheel.state.forwardImpulse = 0
+            wheel.state.skidInfo = 1
 
-            if (wheelState.groundRigidBody) {
+            if (wheel.state.groundRigidBody) {
                 const maxImp =
-                    wheelState.suspensionForce *
+                    wheel.state.suspensionForce *
                     delta *
                     wheel.options.frictionSlip
                 const maxImpSide = maxImp
 
                 const maxImpSquared = maxImp * maxImpSide
 
-                wheelState.forwardImpulse = rollingFriction
+                wheel.state.forwardImpulse = rollingFriction
 
                 const x =
-                    (wheelState.forwardImpulse * fwdFactor) /
+                    (wheel.state.forwardImpulse * fwdFactor) /
                     wheel.options.forwardAcceleration
                 const y =
-                    (wheelState.sideImpulse * sideFactor) /
+                    (wheel.state.sideImpulse * sideFactor) /
                     wheel.options.sideAcceleration
 
                 const impulseSquared = x * x + y * y
 
-                wheelState.sliding = false
+                wheel.state.sliding = false
                 if (impulseSquared > maxImpSquared) {
                     this.state.sliding = true
-                    wheelState.sliding = true
+                    wheel.state.sliding = true
 
                     const factor = maxImp / Math.sqrt(impulseSquared)
 
-                    wheelState.skidInfo *= factor
+                    wheel.state.skidInfo *= factor
                 }
             }
         }
@@ -620,12 +617,11 @@ export class RapierRaycastVehicle {
         if (this.state.sliding) {
             for (let i = 0; i < this.wheels.length; i++) {
                 const wheel = this.wheels[i]
-                const wheelState = wheel.state
 
-                if (wheelState.sideImpulse !== 0) {
-                    if (wheelState.skidInfo < 1) {
-                        wheelState.forwardImpulse *= wheelState.skidInfo
-                        wheelState.sideImpulse *= wheelState.skidInfo
+                if (wheel.state.sideImpulse !== 0) {
+                    if (wheel.state.skidInfo < 1) {
+                        wheel.state.forwardImpulse *= wheel.state.skidInfo
+                        wheel.state.sideImpulse *= wheel.state.skidInfo
                     }
                 }
             }
@@ -634,19 +630,18 @@ export class RapierRaycastVehicle {
         // apply the impulses
         for (let i = 0; i < this.wheels.length; i++) {
             const wheel = this.wheels[i]
-            const wheelState = wheel.state
 
-            const worldPos = updateFriction_worldPos.copy(
-                wheelState.hitPointWorld
+            const worldPos = this.updateFriction_worldPos.copy(
+                wheel.state.hitPointWorld
             )
 
-            const relPos = updateFriction_relPos.copy(worldPos)
+            const relPos = this.updateFriction_relPos.copy(worldPos)
             relPos.sub(this.chassisRigidBody.translation() as Vector3)
 
-            if (wheelState.forwardImpulse !== 0) {
-                const impulse = updateFriction_impulse
-                    .copy(wheelState.forwardWS)
-                    .multiplyScalar(wheelState.forwardImpulse)
+            if (wheel.state.forwardImpulse !== 0) {
+                const impulse = this.updateFriction_impulse
+                    .copy(wheel.state.forwardWS)
+                    .multiplyScalar(wheel.state.forwardImpulse)
 
                 this.chassisRigidBody.applyImpulseAtPoint(
                     impulse,
@@ -655,18 +650,18 @@ export class RapierRaycastVehicle {
                 )
             }
 
-            if (wheelState.sideImpulse !== 0) {
+            if (wheel.state.sideImpulse !== 0) {
                 const chassisBody = this.chassisRigidBody
-                const groundBody = wheelState.groundRigidBody!
+                const groundBody = wheel.state.groundRigidBody!
 
-                const world_pos2 = wheelState.hitPointWorld
+                const world_pos2 = wheel.state.hitPointWorld
 
-                const sideImp = updateFriction_sideImp
-                    .copy(wheelState.axle)
-                    .multiplyScalar(wheelState.sideImpulse)
+                const sideImp = this.updateFriction_sideImp
+                    .copy(wheel.state.axle)
+                    .multiplyScalar(wheel.state.sideImpulse)
 
                 const rollInfluenceAdjustedWorldPos =
-                    applyWheelSuspensionForce_rollInfluenceAdjustedWorldPos
+                this.applyWheelSuspensionForce_rollInfluenceAdjustedWorldPos
 
                 // Scale the relative position in the up direction with rollInfluence.
                 // If rollInfluence is 1, the impulse will be applied on the hitPoint (easy to roll over), if it is zero it will be applied in the same plane as the center of mass (not easy to roll over).
@@ -707,17 +702,16 @@ export class RapierRaycastVehicle {
 
     private updateWheelRotation(delta: number): void {
         const hitNormalWorldScaledWithProj =
-            updateWheelRotation_hitNormalWorldScaledWithProj.set(0, 0, 0)
-        const fwd = updateWheelRotation_fwd.set(0, 0, 0)
-        const vel = updateWheelRotation_vel.set(0, 0, 0)
+            this.updateWheelRotation_hitNormalWorldScaledWithProj.set(0, 0, 0)
+        const fwd = this.updateWheelRotation_fwd.set(0, 0, 0)
+        const vel = this.updateWheelRotation_vel.set(0, 0, 0)
 
         for (let i = 0; i < this.wheels.length; i++) {
             const wheel = this.wheels[i]
-            const wheelState = wheel.state
 
             getVelocityAtWorldPoint(
                 this.chassisRigidBody,
-                wheelState.chassisConnectionPointWorld,
+                wheel.state.chassisConnectionPointWorld,
                 vel
             )
 
@@ -729,49 +723,49 @@ export class RapierRaycastVehicle {
                     break
             }
 
-            if (wheelState.inContactWithGround) {
+            if (wheel.state.inContactWithGround) {
                 getVehicleAxisWorld(
                     this.chassisRigidBody,
                     this.indexForwardAxis,
                     fwd
                 )
 
-                const proj = fwd.dot(wheelState.hitNormalWorld)
+                const proj = fwd.dot(wheel.state.hitNormalWorld)
 
                 hitNormalWorldScaledWithProj
-                    .copy(wheelState.hitNormalWorld)
+                    .copy(wheel.state.hitNormalWorld)
                     .multiplyScalar(proj)
 
                 fwd.subVectors(fwd, hitNormalWorldScaledWithProj)
 
                 const proj2 = fwd.dot(vel)
 
-                wheelState.deltaRotation =
+                wheel.state.deltaRotation =
                     (m * proj2 * delta) / wheel.options.radius
             }
 
             if (
-                (wheelState.sliding || !wheelState.inContactWithGround) &&
-                wheelState.engineForce !== 0 &&
+                (wheel.state.sliding || !wheel.state.inContactWithGround) &&
+                wheel.state.engineForce !== 0 &&
                 wheel.options.useCustomSlidingRotationalSpeed
             ) {
                 // Apply custom rotation when accelerating and sliding
-                wheelState.deltaRotation =
-                    (wheelState.engineForce > 0 ? 1 : -1) *
+                wheel.state.deltaRotation =
+                    (wheel.state.engineForce > 0 ? 1 : -1) *
                     wheel.options.customSlidingRotationalSpeed *
                     delta
             }
 
             // Lock wheels
             if (
-                Math.abs(wheelState.brakeForce) >
-                Math.abs(wheelState.engineForce)
+                Math.abs(wheel.state.brakeForce) >
+                Math.abs(wheel.state.engineForce)
             ) {
-                wheelState.deltaRotation = 0
+                wheel.state.deltaRotation = 0
             }
 
-            wheelState.rotation += wheelState.deltaRotation // Use the old value
-            wheelState.deltaRotation *= 0.99 // damping of rotation when not in contact
+            wheel.state.rotation += wheel.state.deltaRotation // Use the old value
+            wheel.state.deltaRotation *= 0.99 // damping of rotation when not in contact
         }
     }
 }
