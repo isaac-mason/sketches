@@ -1,10 +1,6 @@
 import { Matrix3, Object3D, Quaternion, Vector3 } from 'three'
 import Rapier from '@dimforge/rapier3d-compat'
 
-const getVelocityAtWorldPoint_position = new Vector3()
-const getVelocityAtWorldPoint_angvel = new Vector3()
-const getVelocityAtWorldPoint_linvel = new Vector3()
-
 const calculateInv = (mass: number) => mass > 0 ? 1.0 / mass : 0
 
 // Multiply a quaternion by a vector
@@ -36,6 +32,9 @@ export const multiplyQuaternionByVector = (
 }
 
 const getVelocityAtWorldPoint_r = new Vector3()
+const getVelocityAtWorldPoint_position = new Vector3()
+const getVelocityAtWorldPoint_angvel = new Vector3()
+const getVelocityAtWorldPoint_linvel = new Vector3()
 
 export const getVelocityAtWorldPoint = (
     rigidBody: Rapier.RigidBody,
@@ -282,7 +281,7 @@ const computeImpulseDenominator_c0 = new Vector3()
 const computeImpulseDenominator_vec = new Vector3()
 const computeImpulseDenominator_m = new Vector3()
 const computeImpulseDenominator_localInertia = new Vector3()
-const computeImpulseDenominator_invIntertia = new Vector3()
+const computeImpulseDenominator_invInertia = new Vector3()
 const computeImpulseDenominator_invInertiaWorld = new Matrix3()
 
 export const computeImpulseDenominator = (
@@ -303,7 +302,7 @@ export const computeImpulseDenominator = (
         computeImpulseDenominator_localInertia
     )
 
-    const invIntertia = computeImpulseDenominator_invIntertia.set(
+    const invIntertia = computeImpulseDenominator_invInertia.set(
         calculateInv(localInertia.x),
         calculateInv(localInertia.y),
         calculateInv(localInertia.z)
@@ -327,6 +326,7 @@ export const computeImpulseDenominator = (
 const calcRollingFriction_vel1 = new Vector3()
 const calcRollingFriction_vel2 = new Vector3()
 const calcRollingFriction_vel = new Vector3()
+const calcRollingFriction_groundHalfExtents = new Vector3(1, 1, 1)
 
 export const calcRollingFriction = (
     chassisHalfExtents: Vector3,
@@ -355,11 +355,14 @@ export const calcRollingFriction = (
         frictionDirectionWorld,
         chassisHalfExtents
     )
+
     const denom1 = computeImpulseDenominator(
         body1,
         frictionPosWorld,
         frictionDirectionWorld,
-        chassisHalfExtents
+        // hack: use aabb half extents of 1,1,1 for ground rigid bodies
+        // todo: better way of getting inertia for ground rigid bodies
+        calcRollingFriction_groundHalfExtents.set(1, 1, 1)
     )
 
     const relaxation = 1
