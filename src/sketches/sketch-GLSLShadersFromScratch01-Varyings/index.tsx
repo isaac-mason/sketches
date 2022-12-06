@@ -23,10 +23,6 @@ void main() {
 `
 
 const App = () => {
-    const three = useThree()
-    useEffect(() => {
-        console.log(three)
-    }, [])
     return (
         <mesh position={[0.5, 0.5, 0]}>
             <shaderMaterial

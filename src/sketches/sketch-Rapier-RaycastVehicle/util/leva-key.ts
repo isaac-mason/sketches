@@ -1,0 +1,1 @@
+export const LEVA_KEY = 'rapier-raycast-vehicle'

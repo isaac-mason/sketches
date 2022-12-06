@@ -235,6 +235,11 @@ const WheelColliderAndMesh: React.FC = () => (
             <meshStandardMaterial color="#666" />
         </mesh>
 
+        <mesh rotation-z={Math.PI / 2}>
+            <cylinderGeometry args={[0.301, 0.301, 0.3, 8]} />
+            <meshStandardMaterial color="#000" wireframe />
+        </mesh>
+
         <CylinderCollider
             mass={1}
             friction={1.5}
@@ -448,25 +453,9 @@ const RapierConfiguration = () => {
 
         if (!world) return
 
-        const originalMaxStabilizationIterations =
-            world.maxStabilizationIterations
-        const originalMaxVelocityFrictionIterations =
-            world.maxVelocityFrictionIterations
-        const originalMaxVelocityIterations = world.maxVelocityIterations
-
-        world.maxStabilizationIterations *= 100
-        world.maxVelocityFrictionIterations *= 100
-        world.maxVelocityIterations *= 100
-
-        return () => {
-            if (!world) return
-
-            world.maxStabilizationIterations =
-                originalMaxStabilizationIterations
-            world.maxVelocityFrictionIterations =
-                originalMaxVelocityFrictionIterations
-            world.maxVelocityIterations = originalMaxVelocityIterations
-        }
+        world.maxStabilizationIterations = 100
+        world.maxVelocityFrictionIterations = 100
+        world.maxVelocityIterations = 100
     }, [])
 
     return null
