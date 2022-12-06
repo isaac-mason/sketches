@@ -361,7 +361,7 @@ export const calcRollingFriction = (
         frictionPosWorld,
         frictionDirectionWorld,
         // hack: use aabb half extents of 1,1,1 for ground rigid bodies
-        // todo: better way of getting inertia for ground rigid bodies
+        // todo: better way of getting inertia for rigid bodies
         calcRollingFriction_groundHalfExtents.set(1, 1, 1)
     )
 
