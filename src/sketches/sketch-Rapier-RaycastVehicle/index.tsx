@@ -29,12 +29,12 @@ import {
 } from './game-state'
 import { useControls } from './hooks/use-controls'
 import { usePageActive } from './hooks/use-page-active'
-import { LEVA_KEY } from './util/leva-key'
+import { LEVA_KEY } from './constants'
 import {
     AFTER_RAPIER_UPDATE,
     BEFORE_RAPIER_UPDATE,
     RAPIER_UPDATE_PRIORITY,
-} from './util/rapier'
+} from './constants'
 
 const Game = () => {
     const raycastVehicle = useRef<VehicleRef>(null)

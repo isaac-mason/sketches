@@ -21,9 +21,9 @@ import {
     RapierRaycastVehicle,
     WheelOptions,
 } from '../lib/rapier-raycast-vehicle'
-import { Chassis, ChassisRef } from '../models/chassis'
-import { Wheel } from '../models/wheel'
-import { LEVA_KEY } from '../util/leva-key'
+import { Chassis, ChassisRef } from './chassis'
+import { Wheel } from './wheel'
+import { LEVA_KEY } from '../constants'
 
 export const BRAKE_LIGHTS_ON_COLOR = new Color(0xff3333)
 export const BRAKE_LIGHTS_OFF_COLOR = new Color(0x333333)
@@ -47,7 +47,6 @@ export type VehicleRef = {
 export const Vehicle = forwardRef<VehicleRef, VehicleProps>(
     ({ children, ...groupProps }, ref) => {
         const rapier = useRapier()
-        const scene = useThree((state) => state.scene)
 
         const vehicleRef = useRef<RapierRaycastVehicle>(null!)
         const chassisRef = useRef<ChassisRef>(null!)
