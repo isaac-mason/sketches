@@ -215,7 +215,6 @@ const Game = () => {
                 </mesh>
             </RigidBody>
 
-
             {/* bumps */}
             <group position={[0, 0, 50]}>
                 {Array.from({ length: 6 }).map((_, idx) => (
