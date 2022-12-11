@@ -362,7 +362,7 @@ export const calcRollingFriction = (
         body1,
         frictionPosWorld,
         frictionDirectionWorld,
-        // hack: use aabb of box with half extents of 1,1,1 to calculate inertia for ground rigid body
+        // hack: use aabb of box with half extents of 1,1,1 to estimate inertia for ground rigid body
         // todo: get inertia from rapier rigid body - bindings might need updating?
         calcRollingFriction_groundHalfExtents.set(1, 1, 1)
     )
