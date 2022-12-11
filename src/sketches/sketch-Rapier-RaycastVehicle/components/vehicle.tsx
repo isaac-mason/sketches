@@ -1,4 +1,3 @@
-import { useThree } from '@react-three/fiber'
 import {
     CuboidCollider,
     RigidBody,

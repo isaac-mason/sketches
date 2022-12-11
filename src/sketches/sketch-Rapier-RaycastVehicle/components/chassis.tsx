@@ -61,6 +61,7 @@ export type ChassisRef = {
     chassis_1: RefObject<MaterialMesh>
     group: RefObject<Group>
 }
+
 export const Chassis = forwardRef<ChassisRef, JSX.IntrinsicElements['group']>(
     ({ children, ...props }, ref) => {
         const { nodes: n, materials: m } = useGLTF(
