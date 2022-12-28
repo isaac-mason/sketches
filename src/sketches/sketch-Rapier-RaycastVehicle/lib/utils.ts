@@ -191,52 +191,22 @@ export const matrixVectorMultiplication = (
     return target
 }
 
-// calculate inertia for an aabb
-export const calculateAABBInertia = (
-    halfExtents: Vector3,
-    mass: number,
-    target = new Vector3()
-): Vector3 => {
-    const e = halfExtents
-    return target.set(
-        (1.0 / 12.0) * mass * (2 * e.y * 2 * e.y + 2 * e.z * 2 * e.z),
-        (1.0 / 12.0) * mass * (2 * e.x * 2 * e.x + 2 * e.z * 2 * e.z),
-        (1.0 / 12.0) * mass * (2 * e.y * 2 * e.y + 2 * e.x * 2 * e.x)
-    )
-}
-
 // compute impulse denominator
 const computeImpulseDenominator_r0 = new Vector3()
 const computeImpulseDenominator_c0 = new Vector3()
 const computeImpulseDenominator_vec = new Vector3()
 const computeImpulseDenominator_m = new Vector3()
-const computeImpulseDenominator_localInertia = new Vector3()
-const computeImpulseDenominator_invInertia = new Vector3()
 const computeImpulseDenominator_invInertiaWorld = new Matrix3()
 
 export const computeImpulseDenominator = (
     body: Rapier.RigidBody,
     pos: Vector3,
     normal: Vector3,
-    halfExtents: Vector3
 ): number => {
     const r0 = computeImpulseDenominator_r0
     const c0 = computeImpulseDenominator_c0
     const vec = computeImpulseDenominator_vec
     const m = computeImpulseDenominator_m
-
-    const localInertia = computeImpulseDenominator_localInertia.set(0, 0, 0)
-    calculateAABBInertia(
-        halfExtents,
-        body.mass(),
-        computeImpulseDenominator_localInertia
-    )
-
-    const invIntertia = computeImpulseDenominator_invInertia.set(
-        calculateInv(localInertia.x),
-        calculateInv(localInertia.y),
-        calculateInv(localInertia.z)
-    )
 
     const bodyMassProperties = body.massProperties()
     const rapierInvInertiaWorld = bodyMassProperties.worldInvInertiaSqrt(body.rotation())
@@ -263,10 +233,8 @@ export const computeImpulseDenominator = (
 const calcRollingFriction_vel1 = new Vector3()
 const calcRollingFriction_vel2 = new Vector3()
 const calcRollingFriction_vel = new Vector3()
-const calcRollingFriction_groundHalfExtents = new Vector3(1, 1, 1)
 
 export const calcRollingFriction = (
-    chassisHalfExtents: Vector3,
     body0: Rapier.RigidBody,
     body1: Rapier.RigidBody,
     frictionPosWorld: Vector3,
@@ -290,18 +258,12 @@ export const calcRollingFriction = (
         body0,
         frictionPosWorld,
         frictionDirectionWorld,
-        // hack: use chassis half extents to estimate inertia for chasssi rigid body
-        // todo: get inertia from rapier rigid body - bindings might need updating?
-        chassisHalfExtents
     )
 
     const denom1 = computeImpulseDenominator(
         body1,
         frictionPosWorld,
         frictionDirectionWorld,
-        // hack: use aabb of box with half extents of 1,1,1 to estimate inertia for ground rigid body
-        // todo: get inertia from rapier rigid body - bindings might need updating?
-        calcRollingFriction_groundHalfExtents.set(1, 1, 1)
     )
 
     const relaxation = 1

@@ -9,7 +9,7 @@ import {
 } from '@react-three/rapier'
 import { useControls as useLeva } from 'leva'
 import { useEffect, useRef } from 'react'
-import { Vector3 } from 'three'
+import { Quaternion, Vector3 } from 'three'
 import { Canvas } from '../Canvas'
 import { ControlsText } from './components/controls-text'
 import { LampPost } from './components/lamp-post'
