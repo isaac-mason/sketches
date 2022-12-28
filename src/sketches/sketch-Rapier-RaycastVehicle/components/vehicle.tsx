@@ -174,7 +174,6 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(
             vehicleRef.current = new RapierRaycastVehicle({
                 world: rapier.world.raw(),
                 chassisRigidBody: chassisRigidBodyRef.current.raw(),
-                chassisHalfExtents: CHASSIS_CUBOID_HALF_EXTENTS,
                 indexRightAxis,
                 indexForwardAxis,
                 indexUpAxis,

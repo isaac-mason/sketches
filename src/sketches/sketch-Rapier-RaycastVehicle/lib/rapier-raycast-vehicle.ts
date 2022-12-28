@@ -27,7 +27,6 @@ export type RaycastVehicleOptions = {
     indexRightAxis?: number
     indexForwardAxis?: number
     indexUpAxis?: number
-    chassisHalfExtents: Vector3
     chassisRigidBody: Rapier.RigidBody
 }
 
@@ -119,8 +118,6 @@ export class RapierRaycastVehicle {
 
     chassisRigidBody: Rapier.RigidBody
 
-    chassisHalfExtents: Vector3
-
     indexRightAxis: number
     indexForwardAxis: number
     indexUpAxis: number
@@ -156,16 +153,12 @@ export class RapierRaycastVehicle {
     constructor({
         world,
         chassisRigidBody,
-        chassisHalfExtents = new Vector3(1, 1, 1),
         indexRightAxis = 2,
         indexForwardAxis = 0,
         indexUpAxis = 1,
     }: RaycastVehicleOptions) {
         this.world = world
-
         this.chassisRigidBody = chassisRigidBody
-        this.chassisHalfExtents = chassisHalfExtents
-
         this.indexRightAxis = indexRightAxis
         this.indexForwardAxis = indexForwardAxis
         this.indexUpAxis = indexUpAxis
@@ -563,7 +556,6 @@ export class RapierRaycastVehicle {
 
                 // brake
                 rollingFriction = calcRollingFriction(
-                    this.chassisHalfExtents,
                     this.chassisRigidBody,
                     wheel.state.groundRigidBody,
                     wheel.state.hitPointWorld,
