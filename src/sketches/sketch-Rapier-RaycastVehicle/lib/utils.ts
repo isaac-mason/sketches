@@ -172,42 +172,6 @@ export const resolveSingleBilateralConstraint = (
     return impulse
 }
 
-// set Matrix3 rotation from quaternion
-export const setMatrix3RotationFromQuaternion = (
-    m: Matrix3,
-    q: Quaternion
-): void => {
-    const x = q.x
-    const y = q.y
-    const z = q.z
-    const w = q.w
-    const x2 = x + x
-    const y2 = y + y
-    const z2 = z + z
-    const xx = x * x2
-    const xy = x * y2
-    const xz = x * z2
-    const yy = y * y2
-    const yz = y * z2
-    const zz = z * z2
-    const wx = w * x2
-    const wy = w * y2
-    const wz = w * z2
-    const e = m.elements
-
-    e[3 * 0 + 0] = 1 - (yy + zz)
-    e[3 * 0 + 1] = xy - wz
-    e[3 * 0 + 2] = xz + wy
-
-    e[3 * 1 + 0] = xy + wz
-    e[3 * 1 + 1] = 1 - (xx + zz)
-    e[3 * 1 + 2] = yz - wx
-
-    e[3 * 2 + 0] = xz - wy
-    e[3 * 2 + 1] = yz + wx
-    e[3 * 2 + 2] = 1 - (xx + yy)
-}
-
 // matrix-vector multiplication
 export const matrixVectorMultiplication = (
     m: Matrix3,
@@ -227,16 +191,6 @@ export const matrixVectorMultiplication = (
     return target
 }
 
-// scale matrix3 columns of by vector3
-const scaleMatrix3ByVector3 = (m: Matrix3, vector: Vector3): void => {
-    const e = m.elements
-    for (let i = 0; i !== 3; i++) {
-        e[3 * i + 0] = vector.x * e[3 * i + 0]
-        e[3 * i + 1] = vector.y * e[3 * i + 1]
-        e[3 * i + 2] = vector.z * e[3 * i + 2]
-    }
-}
-
 // calculate inertia for an aabb
 export const calculateAABBInertia = (
     halfExtents: Vector3,
@@ -249,30 +203,6 @@ export const calculateAABBInertia = (
         (1.0 / 12.0) * mass * (2 * e.x * 2 * e.x + 2 * e.z * 2 * e.z),
         (1.0 / 12.0) * mass * (2 * e.y * 2 * e.y + 2 * e.x * 2 * e.x)
     )
-}
-
-// calculate inertia world
-const calculateInertiaWorld_uiw_m1 = new Matrix3()
-const calculateInertiaWorld_uiw_m2 = new Matrix3()
-
-export const calculateInvInertiaWorld = (
-    rigidBody: Rapier.RigidBody,
-    invInertia: Vector3,
-    target = new Matrix3()
-): Matrix3 => {
-    const I = invInertia
-    const invInertiaWorld = target
-
-    const m1 = calculateInertiaWorld_uiw_m1
-    const m2 = calculateInertiaWorld_uiw_m2
-
-    setMatrix3RotationFromQuaternion(m1, rigidBody.rotation() as Quaternion)
-    m2.copy(m1).transpose()
-
-    scaleMatrix3ByVector3(m1, I)
-    invInertiaWorld.multiplyMatrices(m1, m2)
-
-    return invInertiaWorld
 }
 
 // compute impulse denominator
@@ -295,7 +225,7 @@ export const computeImpulseDenominator = (
     const vec = computeImpulseDenominator_vec
     const m = computeImpulseDenominator_m
 
-    const localInertia = computeImpulseDenominator_localInertia
+    const localInertia = computeImpulseDenominator_localInertia.set(0, 0, 0)
     calculateAABBInertia(
         halfExtents,
         body.mass(),
@@ -308,10 +238,17 @@ export const computeImpulseDenominator = (
         calculateInv(localInertia.z)
     )
 
-    const invInertiaWorld = computeImpulseDenominator_invInertiaWorld
-    calculateInvInertiaWorld(body, invIntertia, invInertiaWorld)
+    const bodyMassProperties = body.massProperties()
+    const rapierInvInertiaWorld = bodyMassProperties.worldInvInertiaSqrt(body.rotation())
+    const invInertiaWorld = computeImpulseDenominator_invInertiaWorld.set(
+        rapierInvInertiaWorld.m11, rapierInvInertiaWorld.m12, rapierInvInertiaWorld.m13,
+        rapierInvInertiaWorld.m23, rapierInvInertiaWorld.m22, rapierInvInertiaWorld.m23,
+        rapierInvInertiaWorld.m33, rapierInvInertiaWorld.m12, rapierInvInertiaWorld.m33
+    )
+    bodyMassProperties.free()
 
-    r0.subVectors(pos, body.translation() as Vector3)
+    const position = body.translation()
+    r0.subVectors(pos, position as Vector3)
     c0.crossVectors(r0, normal)
 
     matrixVectorMultiplication(invInertiaWorld, c0, m)
