@@ -10,6 +10,8 @@ import {
 import { useControls as useLeva } from 'leva'
 import { useEffect, useRef } from 'react'
 import { Vector3 } from 'three'
+import { useLoadingAssets } from '../../hooks/use-loading-assets'
+import { useTabVisible } from '../../hooks/use-tab-visible'
 import { Canvas } from '../Canvas'
 import { ControlsText } from './components/controls-text'
 import { LampPost } from './components/lamp-post'
@@ -34,7 +36,6 @@ import {
     useGameStateDispatch,
 } from './game-state'
 import { useControls } from './hooks/use-controls'
-import { usePageActive } from './hooks/use-page-active'
 
 const Game = () => {
     const raycastVehicle = useRef<VehicleRef>(null)
@@ -199,13 +200,13 @@ const Game = () => {
             <LampPost position={[10, 0, 100]} />
 
             {/* traffic cones */}
-            <TrafficCone position={[4, 0, 6]} />
-            <TrafficCone position={[2, 0, 8]} />
-            <TrafficCone position={[4, 0, 10]} />
+            <TrafficCone position={[4, 0.2, 6]} />
+            <TrafficCone position={[2, 0.2, 8]} />
+            <TrafficCone position={[4, 0.2, 10]} />
 
-            <TrafficCone position={[-4, 0, 16]} />
-            <TrafficCone position={[-2, 0, 18]} />
-            <TrafficCone position={[-4, 0, 20]} />
+            <TrafficCone position={[-4, 0.2, 16]} />
+            <TrafficCone position={[-2, 0.2, 18]} />
+            <TrafficCone position={[-4, 0.2, 20]} />
 
             {/* ramp */}
             <RigidBody type="fixed">
@@ -242,7 +243,7 @@ const Game = () => {
             {/* boxes */}
             {Array.from({ length: 6 }).map((_, idx) => (
                 <RigidBody key={idx} colliders="cuboid" mass={10} friction={1}>
-                    <mesh position={[0, 2 + idx * 4.1, 70]}>
+                    <mesh position={[0, 2 + idx * 2.5, 70]}>
                         <boxGeometry args={[2, 1, 2]} />
                         <meshStandardMaterial color="orange" />
                     </mesh>
@@ -287,7 +288,8 @@ const Game = () => {
 }
 
 export default () => {
-    const pageActive = usePageActive()
+    const loading = useLoadingAssets()
+    const tabVisible = useTabVisible()
 
     return (
         <>
@@ -301,7 +303,7 @@ export default () => {
                         gravity={[0, -9.81, 0]}
                         updatePriority={RAPIER_UPDATE_PRIORITY}
                         timeStep="vary"
-                        paused={!pageActive}
+                        paused={!tabVisible || loading}
                     >
                         <Game />
                     </Physics>

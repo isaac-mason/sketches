@@ -23,9 +23,10 @@ import JourneyLesson27Cover from './sketch-JourneyLesson27-Shaders/cover.png'
 import JourneyLesson28Cover from './sketch-JourneyLesson28-RagingSea/cover.png'
 import JourneyLesson29Cover from './sketch-JourneyLesson29-AnimatedGalaxy/cover.png'
 import JourneyLesson30Cover from './sketch-JourneyLesson30-ModifiedMaterials/cover.png'
-import RapierRevoluteJointVehicleCover from './sketch-Rapier-RevoluteJointVehicle/cover.png'
+import RapierKinematicCharacterControllerCover from './sketch-Rapier-KinematicCharacterController/cover.png'
 import RapierRaycastingCover from './sketch-Rapier-Raycasting/cover.png'
 import RapierRaycastVehicleCover from './sketch-Rapier-RaycastVehicle/cover.png'
+import RapierRevoluteJointVehicleCover from './sketch-Rapier-RevoluteJointVehicle/cover.png'
 
 export type Sketch = {
     title: string
@@ -173,6 +174,11 @@ const sketchList = [
         title: 'Rapier - Raycast Vehicle',
         route: 'Rapier-RaycastVehicle',
         cover: RapierRaycastVehicleCover,
+    },
+    {
+        title: 'Rapier - Kinematic Character Controller',
+        route: 'Rapier-KinematicCharacterController',
+        cover: RapierKinematicCharacterControllerCover,
     },
 ] as const
 
