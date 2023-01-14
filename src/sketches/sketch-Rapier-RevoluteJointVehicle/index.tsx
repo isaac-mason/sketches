@@ -18,7 +18,7 @@ import {
 import { useControls } from 'leva'
 import React, { createRef, RefObject, useEffect, useMemo, useRef } from 'react'
 import styled from 'styled-components'
-import { Vector3, Vector3Tuple } from 'three'
+import { Vector3, Vector3Tuple, Vector4Tuple } from 'three'
 import { useTabVisible } from '../../hooks/use-tab-visible'
 import { Canvas } from '../Canvas'
 
@@ -53,9 +53,9 @@ type FixedJointProps = {
     body: RigidBodyApiRef
     wheel: RigidBodyApiRef
     body1Anchor: Vector3Tuple
-    body1LocalFrame: Vector3Tuple
+    body1LocalFrame: Vector4Tuple
     body2Anchor: Vector3Tuple
-    body2LocalFrame: Vector3Tuple
+    body2LocalFrame: Vector4Tuple
 }
 
 const FixedJoint = ({
@@ -313,9 +313,9 @@ const RevoluteJointVehicle = () => {
                                 body={chassisRef}
                                 wheel={axleRefs.current[i]}
                                 body1Anchor={wheel.axlePosition}
-                                body1LocalFrame={[0, 0, 0]}
+                                body1LocalFrame={[0, 0, 0, 1]}
                                 body2Anchor={[0, 0, 0]}
-                                body2LocalFrame={[0, 0, 0]}
+                                body2LocalFrame={[0, 0, 0, 1]}
                             />
                         ) : (
                             <SteeredJoint
