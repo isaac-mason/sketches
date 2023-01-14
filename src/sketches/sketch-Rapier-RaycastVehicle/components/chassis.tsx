@@ -75,17 +75,6 @@ export const Chassis = forwardRef<ChassisRef, JSX.IntrinsicElements['group']>(
         const needle = useRef<MaterialMesh>(null!)
         const chassis_1 = useRef<MaterialMesh>(null!)
 
-        const [leftHeadlightsTarget] = useState(() => {
-            const object = new Object3D()
-            object.position.set(0.8, 0.5, 4)
-            return object
-        })
-        const [rightHeadlightsTarget] = useState(() => {
-            const object = new Object3D()
-            object.position.set(-0.8, 0.5, 4)
-            return object
-        })
-
         useImperativeHandle(ref, () => ({
             group,
             glass,
