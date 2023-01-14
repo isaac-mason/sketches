@@ -708,7 +708,7 @@
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.7.0.tgz#9a06f4f137ee84d7df0460c1fdb1135ffa6c50fd"
   integrity sha512-ONhaKPIufzzrlNbqtWFFd+jlnemX6lJAgq9ZeiZtS7I1PIf/la7CW4m83rTXRnVnsMbW2k56pGYu7AUFJD9Pow==
 
-"@stitches/react@1.2.8", "@stitches/react@^1.2.6":
+"@stitches/react@1.2.8", "@stitches/react@^1.2.8":
   version "1.2.8"
   resolved "https://registry.yarnpkg.com/@stitches/react/-/react-1.2.8.tgz#954f8008be8d9c65c4e58efa0937f32388ce3a38"
   integrity sha512-9g9dWI4gsSVe8bNLlb+lMkBYsnIKCZTmvqvDG+Avnn69XfmHZKiaMrx7cgTaddq7aTPPmXiTsbFcUy0xgI4+wA==
@@ -3154,14 +3154,14 @@ queue-microtask@^1.2.2:
   resolved "https://registry.yarnpkg.com/queue-microtask/-/queue-microtask-1.2.3.tgz#4929228bbc724dfac43e0efb058caf7b6cfb6243"
   integrity sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==
 
-r3f-perf@^6.5.0:
-  version "6.5.0"
-  resolved "https://registry.yarnpkg.com/r3f-perf/-/r3f-perf-6.5.0.tgz#9ed6ac3cf45d0f2d514a97f02fa40f8a9813e0b5"
-  integrity sha512-6hT9V5ihOOv2g/zyOpMGviiqxW9SKFX6AMfcAMnFz3S74M5WNjfAWx4D54Cd89O+5hrcj5Pa69/piGZEKmWPeg==
+r3f-perf@^6.6.3:
+  version "6.6.3"
+  resolved "https://registry.yarnpkg.com/r3f-perf/-/r3f-perf-6.6.3.tgz#cf4f3d7038b7902bb5cae9d1564f5bd3530d163d"
+  integrity sha512-qP/bNKpVDG5eZC0eBx/a8p6Y1Y9ZoxySYFyqVwcR/ci9DtDd4hFEahNgWvN8nIRD2t5BQ0wsxkJ5RXDssICC8w==
   dependencies:
     "@radix-ui/react-icons" "^1.0.3"
-    "@stitches/react" "^1.2.6"
-    zustand "^3.7.1"
+    "@stitches/react" "^1.2.8"
+    zustand "^4.1.5"
 
 react-colorful@^5.5.1:
   version "5.6.1"
@@ -3995,9 +3995,9 @@ zustand@^3.5.13, zustand@^3.6.9, zustand@^3.7.1:
   resolved "https://registry.yarnpkg.com/zustand/-/zustand-3.7.2.tgz#7b44c4f4a5bfd7a8296a3957b13e1c346f42514d"
   integrity sha512-PIJDIZKtokhof+9+60cpockVOq05sJzHCriyvaLBmEJixseQ1a5Kdov6fWZfWOu5SK9c+FhH1jU0tntLxRJYMA==
 
-zustand@^4.1.0:
-  version "4.1.4"
-  resolved "https://registry.yarnpkg.com/zustand/-/zustand-4.1.4.tgz#b0286da4cc9edd35e91c96414fa54bfa4652a54d"
-  integrity sha512-k2jVOlWo8p4R83mQ+/uyB8ILPO2PCJOf+QVjcL+1PbMCk1w5OoPYpAIxy9zd93FSfmJqoH6lGdwzzjwqJIRU5A==
+zustand@^4.1.0, zustand@^4.1.5:
+  version "4.3.1"
+  resolved "https://registry.yarnpkg.com/zustand/-/zustand-4.3.1.tgz#76c47ef713c43763953f7a9e518f89efd898e3bb"
+  integrity sha512-EVyo/eLlOTcJm/X5M00rwtbYFXwRVTaRteSvhtbTZUCQFJkNfIyHPiJ6Ke68MSWzcKHpPzvqNH4gC2ZS/sbNqw==
   dependencies:
     use-sync-external-store "1.2.0"
