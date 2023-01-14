@@ -21,7 +21,7 @@ const Scene = () => (
             </mesh>
         </Float>
         <mesh rotation={[-(Math.PI / 2), 0, 0]} position={[0, -2, 0]}>
-            <planeBufferGeometry args={[6, 6]} />
+            <planeGeometry args={[6, 6]} />
             <meshStandardMaterial color="white" />
         </mesh>
     </>

@@ -39,31 +39,31 @@ const App = () => {
                 flexWrap="wrap"
             >
                 <Item>
-                    <sphereBufferGeometry args={[0.6]} />
+                    <sphereGeometry args={[0.6]} />
                 </Item>
                 <Item>
-                    <boxBufferGeometry args={[1, 1, 1]} />
+                    <boxGeometry args={[1, 1, 1]} />
                 </Item>
                 <Item>
                     <coneGeometry args={[0.7, 1, 5, 5]} />
                 </Item>
                 <Item>
-                    <torusKnotBufferGeometry args={[0.4, 0.1]} />
+                    <torusKnotGeometry args={[0.4, 0.1]} />
                 </Item>
                 <Item>
                     <ringGeometry args={[0.3, 0.7]} />
                 </Item>
                 <Item>
-                    <dodecahedronBufferGeometry args={[0.7]} />
+                    <dodecahedronGeometry args={[0.7]} />
                 </Item>
                 <Item>
-                    <octahedronBufferGeometry args={[0.7]} />
+                    <octahedronGeometry args={[0.7]} />
                 </Item>
                 <Item>
-                    <tetrahedronBufferGeometry args={[0.7]} />
+                    <tetrahedronGeometry args={[0.7]} />
                 </Item>
                 <Item>
-                    <icosahedronBufferGeometry args={[0.7]} />
+                    <icosahedronGeometry args={[0.7]} />
                 </Item>
             </Flex>
         </>

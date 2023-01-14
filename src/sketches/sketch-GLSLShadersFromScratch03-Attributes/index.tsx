@@ -41,12 +41,12 @@ const App = () => {
                 vertexShader={vertexShader}
                 fragmentShader={fragmentShader}
             />
-            <planeBufferGeometry args={[1, 1]}>
+            <planeGeometry args={[1, 1]}>
                 <float32BufferAttribute
                     attach="attributes-myColors"
                     args={[colorFloats, 3]}
                 />
-            </planeBufferGeometry>
+            </planeGeometry>
         </mesh>
     )
 }
