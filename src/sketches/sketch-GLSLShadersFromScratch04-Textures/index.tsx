@@ -51,7 +51,7 @@ const App = () => {
                     tint: { value: new Vector4(1, 0.7, 0.7) },
                 }}
             />
-            <planeBufferGeometry args={[1, 1]} />
+            <planeGeometry args={[1, 1]} />
         </mesh>
     )
 }

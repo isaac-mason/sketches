@@ -12,19 +12,19 @@ const Shapes = () => (
     <>
         <Float {...floatProps}>
             <mesh position={[-2, 2, 0]} castShadow receiveShadow>
-                <boxBufferGeometry args={[1, 1, 1]} />
+                <boxGeometry args={[1, 1, 1]} />
                 <meshStandardMaterial />
             </mesh>
         </Float>
         <Float {...floatProps}>
             <mesh position={[0, 2, 0]} castShadow receiveShadow>
-                <sphereBufferGeometry args={[0.7]} />
+                <sphereGeometry args={[0.7]} />
                 <meshStandardMaterial />
             </mesh>
         </Float>
         <Float {...floatProps}>
             <mesh position={[2, 2, 0]} castShadow receiveShadow>
-                <torusKnotBufferGeometry args={[0.5, 0.2, 64, 64]} />
+                <torusKnotGeometry args={[0.5, 0.2, 64, 64]} />
                 <meshStandardMaterial />
             </mesh>
         </Float>
@@ -33,7 +33,7 @@ const Shapes = () => (
 
 const Ground = () => (
     <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
-        <planeBufferGeometry args={[10, 10]} />
+        <planeGeometry args={[10, 10]} />
         <meshStandardMaterial color="white" />
     </mesh>
 )

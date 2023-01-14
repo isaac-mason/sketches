@@ -11,7 +11,7 @@ const App = () => {
     return (
         <>
             <mesh position={[-2.5, 0, 0]}>
-                <boxBufferGeometry args={[3, 3, 3]} />
+                <boxGeometry args={[3, 3, 3]} />
                 <meshBasicMaterial
                     map={doorTexture}
                     map-wrapS={THREE.MirroredRepeatWrapping}
@@ -22,7 +22,7 @@ const App = () => {
                 />
             </mesh>
             <mesh position={[2.5, 0, 0]}>
-                <boxBufferGeometry args={[3, 3, 3]} />
+                <boxGeometry args={[3, 3, 3]} />
                 <meshBasicMaterial
                     map={minecraftTexture}
                     map-magFilter={THREE.NearestFilter}

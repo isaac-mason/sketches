@@ -5,14 +5,14 @@ import { Canvas } from '../Canvas'
 
 const Cube = () => (
     <mesh position={[0, -0.5, 0]} receiveShadow castShadow>
-        <boxBufferGeometry args={[1, 1, 1]} />
+        <boxGeometry args={[1, 1, 1]} />
         <meshStandardMaterial color="#ff8888" />
     </mesh>
 )
 
 const Ground = () => (
     <mesh position={[0, -1, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <planeBufferGeometry args={[100, 100]} />
+        <planeGeometry args={[100, 100]} />
         <meshStandardMaterial color="white" />
     </mesh>
 )

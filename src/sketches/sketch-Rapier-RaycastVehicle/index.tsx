@@ -233,7 +233,7 @@ const Game = () => {
                     >
                         <CylinderCollider args={[1, 0.5]} />
                         <mesh>
-                            <cylinderBufferGeometry args={[0.5, 0.5, 2]} />
+                            <cylinderGeometry args={[0.5, 0.5, 2]} />
                             <meshStandardMaterial color="orange" />
                         </mesh>
                     </RigidBody>

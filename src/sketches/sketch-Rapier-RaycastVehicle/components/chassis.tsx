@@ -9,7 +9,7 @@ import {
 import {
     Mesh,
     MeshStandardMaterial,
-    BoxBufferGeometry,
+    BoxGeometry,
     Group,
     Object3D,
 } from 'three'
@@ -51,7 +51,7 @@ interface ChassisGLTF extends GLTF {
     }
 }
 
-type MaterialMesh = Mesh<BoxBufferGeometry, MeshStandardMaterial>
+type MaterialMesh = Mesh<BoxGeometry, MeshStandardMaterial>
 
 export type ChassisRef = {
     glass: RefObject<MaterialMesh>
