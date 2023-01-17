@@ -773,10 +773,10 @@
     suspend-react "^0.0.8"
     zustand "^3.7.1"
 
-"@react-three/flex@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@react-three/flex/-/flex-1.0.0.tgz#53bcdd5b0ad712e865ffd6a088eca10c13294416"
-  integrity sha512-6Ti01VYdzMiBJv2pDowiOFt9N/AiuGFiLlnzbBHnuuM7FV+yjicy1OTkHHPxiL1Dda6mp84i7eLYhWCAMs5sTw==
+"@react-three/flex@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@react-three/flex/-/flex-1.0.1.tgz#c388539919a1ed8de5f7d9187aa53c1dfa8184f0"
+  integrity sha512-m1zcuE0BWyUP6ASX09SGYZWHkyMS9GVcP4WGXjdSdxWi228D0p8hti9nHlnv+fpZvQO8v+Qz4EXmrf302mEzXQ==
   dependencies:
     "@react-pdf/yoga" "^2.0.4"
     react-merge-refs "^1.1.0"
