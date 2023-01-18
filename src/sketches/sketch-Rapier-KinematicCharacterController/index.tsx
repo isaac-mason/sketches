@@ -22,7 +22,7 @@ import * as THREE from 'three'
 import { Group, PerspectiveCamera, Vector3 } from 'three'
 import { clamp } from 'three/src/math/MathUtils'
 import { useLoadingAssets } from '../../hooks/use-loading-assets'
-import { useTabVisible } from '../../hooks/use-tab-visible'
+import { usePageVisible } from '../../hooks/use-page-visible'
 import { Canvas } from '../Canvas'
 import { GameLevel, Shield, Sword } from './models'
 
@@ -399,14 +399,14 @@ const ControlsText = styled.div`
 
 export default () => {
     const loading = useLoadingAssets()
-    const tabVisible = useTabVisible()
+    const visible = usePageVisible()
 
     return (
         <>
             <h1>Rapier - Kinematic Character Controller</h1>
 
             <Canvas>
-                <Physics timeStep="vary" paused={!tabVisible || loading}>
+                <Physics timeStep="vary" paused={!visible || loading}>
                     <Scene />
                 </Physics>
             </Canvas>

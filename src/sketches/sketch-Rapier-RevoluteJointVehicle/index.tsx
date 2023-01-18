@@ -19,7 +19,7 @@ import { useControls } from 'leva'
 import React, { createRef, RefObject, useEffect, useMemo, useRef } from 'react'
 import styled from 'styled-components'
 import { Vector3, Vector3Tuple, Vector4Tuple } from 'three'
-import { useTabVisible } from '../../hooks/use-tab-visible'
+import { usePageVisible } from '../../hooks/use-page-visible'
 import { Canvas } from '../Canvas'
 
 const LEVA_KEY = 'rapier-revolute-joint-vehicle'
@@ -449,7 +449,7 @@ const ControlsText = styled.div`
 `
 
 export default () => {
-    const tabVisible = useTabVisible()
+    const visible = usePageVisible()
 
     const { debug } = useControls(`${LEVA_KEY}-debug`, {
         debug: false,
@@ -463,7 +463,7 @@ export default () => {
                 <Physics
                     updatePriority={RAPIER_UPDATE_PRIORITY}
                     timeStep="vary"
-                    paused={!tabVisible}
+                    paused={!visible}
                 >
                     <KeyboardControls map={CONTROLS_MAP}>
                         <RevoluteJointVehicle />

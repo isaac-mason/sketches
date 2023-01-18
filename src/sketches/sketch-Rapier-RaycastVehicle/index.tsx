@@ -12,7 +12,7 @@ import { useControls as useLeva } from 'leva'
 import { useEffect, useRef } from 'react'
 import { Vector3 } from 'three'
 import { useLoadingAssets } from '../../hooks/use-loading-assets'
-import { useTabVisible } from '../../hooks/use-tab-visible'
+import { usePageVisible } from '../../hooks/use-page-visible'
 import { Canvas } from '../Canvas'
 import { ControlsText } from './components/controls-text'
 import { LampPost } from './components/lamp-post'
@@ -289,7 +289,7 @@ const Game = () => {
 
 export default () => {
     const loading = useLoadingAssets()
-    const tabVisible = useTabVisible()
+    const visible = usePageVisible()
 
     return (
         <>
@@ -303,7 +303,7 @@ export default () => {
                         gravity={[0, -9.81, 0]}
                         updatePriority={RAPIER_UPDATE_PRIORITY}
                         timeStep="vary"
-                        paused={!tabVisible || loading}
+                        paused={!visible || loading}
                     >
                         <Game />
                     </Physics>

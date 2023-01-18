@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 const VISIBILITY_CHANGE_EVENT = 'visibilitychange'
 const VISIBLE_STATE = 'visible'
 
-export const useTabVisible = () => {
+export const usePageVisible = () => {
     const [visible, setVisible] = useState(true)
 
     useEffect(() => {
