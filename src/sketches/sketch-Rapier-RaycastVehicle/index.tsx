@@ -6,6 +6,7 @@ import {
     Debug,
     Physics,
     RigidBody,
+    useBeforePhysicsStep,
 } from '@react-three/rapier'
 import { useControls as useLeva } from 'leva'
 import { useEffect, useRef } from 'react'
@@ -76,7 +77,7 @@ const Game = () => {
         }
     }, [])
 
-    useFrame((_, delta) => {
+    useBeforePhysicsStep((world) => {
         if (
             !raycastVehicle.current ||
             !raycastVehicle.current.rapierRaycastVehicle.current
@@ -122,8 +123,7 @@ const Game = () => {
         vehicle.applyEngineForce(engineForce, 3)
 
         // update the vehicle
-        const clampedDelta = Math.min(delta, 1 / 60)
-        vehicle.update(clampedDelta)
+        vehicle.update(world.raw().timestep)
 
         // update the wheels
         for (let i = 0; i < vehicle.wheels.length; i++) {
@@ -151,7 +151,7 @@ const Game = () => {
             brakeLights.material.color =
                 brakeForce > 0 ? BRAKE_LIGHTS_ON_COLOR : BRAKE_LIGHTS_OFF_COLOR
         }
-    }, BEFORE_RAPIER_UPDATE)
+    })
 
     useFrame((_, delta) => {
         if (gameState.displayMode !== 'drive') return
