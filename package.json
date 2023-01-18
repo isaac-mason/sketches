@@ -12,7 +12,7 @@
     "@react-three/fiber": "^8.10.0",
     "@react-three/flex": "^1.0.1",
     "@react-three/postprocessing": "^2.7.0",
-    "@react-three/rapier": "^0.12.1",
+    "@react-three/rapier": "^0.12.2",
     "leva": "^0.9.25",
     "r3f-perf": "^6.6.3",
     "react": "^18.0.0",
