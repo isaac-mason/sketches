@@ -371,8 +371,13 @@ const Scene = () => {
         <>
             {/* spheres */}
             {Array.from({ length: nSpheres }).map((_, idx) => (
-                <RigidBody key={idx} colliders="ball" mass={0.1}>
-                    <mesh position={spherePositions[idx]} castShadow>
+                <RigidBody
+                    key={idx}
+                    colliders="ball"
+                    mass={0.1}
+                    position={spherePositions[idx]}
+                >
+                    <mesh castShadow>
                         <sphereGeometry args={sphereArgs[idx]} />
                         <meshStandardMaterial color="orange" />
                     </mesh>
@@ -381,14 +386,13 @@ const Scene = () => {
 
             {/* boxes */}
             {Array.from({ length: 6 }).map((_, idx) => (
-                <RigidBody key={idx} colliders="cuboid" mass={0.2}>
-                    <mesh
-                        position={[
-                            -28,
-                            0.5 + idx * 2.2,
-                            Math.floor(idx / 2) - 1,
-                        ]}
-                    >
+                <RigidBody
+                    key={idx}
+                    colliders="cuboid"
+                    mass={0.2}
+                    position={[-28, 0.5 + idx * 2.2, Math.floor(idx / 2) - 1]}
+                >
+                    <mesh>
                         <boxGeometry args={[1, 2, 1]} />
                         <meshStandardMaterial color="orange" />
                     </mesh>
@@ -462,7 +466,6 @@ export default () => {
             <Canvas camera={{ fov: 60, position: [30, 30, 0] }} shadows>
                 <Physics
                     updatePriority={RAPIER_UPDATE_PRIORITY}
-                    timeStep="vary"
                     paused={!visible}
                 >
                     <KeyboardControls map={CONTROLS_MAP}>
@@ -476,6 +479,7 @@ export default () => {
                     <RapierConfiguration />
                 </Physics>
             </Canvas>
+
             <ControlsText>use wasd to drive</ControlsText>
         </>
     )
