@@ -9,7 +9,7 @@ import {
     useBeforePhysicsStep,
 } from '@react-three/rapier'
 import { useControls as useLeva } from 'leva'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Vector3 } from 'three'
 import { useLoadingAssets } from '../../hooks/use-loading-assets'
 import { usePageVisible } from '../../hooks/use-page-visible'
@@ -31,11 +31,6 @@ import {
     LEVA_KEY,
     RAPIER_UPDATE_PRIORITY,
 } from './constants'
-import {
-    GameStateProvider,
-    useGameState,
-    useGameStateDispatch,
-} from './game-state'
 import { useControls } from './hooks/use-controls'
 
 const Game = () => {
@@ -48,8 +43,12 @@ const Game = () => {
 
     const controls = useControls()
 
-    const gameState = useGameState()
-    const { setDisplayMode } = useGameStateDispatch()
+    const { cameraMode } = useLeva(`${LEVA_KEY}-camera`, {
+        cameraMode: {
+            value: 'drive',
+            options: ['drive', 'orbit']
+        }
+    }) 
 
     const { maxForce, maxSteer, maxBrake } = useLeva(`${LEVA_KEY}-controls`, {
         maxForce: 500,
@@ -60,22 +59,6 @@ const Game = () => {
     const { debug } = useLeva(`${LEVA_KEY}-physics`, {
         debug: false,
     })
-
-    useEffect(() => {
-        const handler = (event: KeyboardEvent) => {
-            if (['p', 'P'].includes(event.key)) {
-                setDisplayMode('drive')
-            } else if (['o', 'O'].includes(event.key)) {
-                setDisplayMode('editor')
-            }
-        }
-
-        document.addEventListener('keyup', handler)
-
-        return () => {
-            document.removeEventListener('keyup', handler)
-        }
-    }, [])
 
     useBeforePhysicsStep((world) => {
         if (
@@ -154,7 +137,7 @@ const Game = () => {
     })
 
     useFrame((_, delta) => {
-        if (gameState.displayMode !== 'drive') return
+        if (cameraMode !== 'drive') return
 
         const chassis = raycastVehicle.current?.chassisRigidBody
         if (!chassis?.current) return
@@ -280,7 +263,7 @@ const Game = () => {
 
             <Stars />
 
-            {gameState.displayMode === 'editor' && <OrbitControls />}
+            {cameraMode === 'orbit' && <OrbitControls />}
 
             {debug ? <Debug /> : null}
         </>
@@ -298,16 +281,14 @@ export default () => {
             <Canvas camera={{ fov: 60, position: [0, 30, -20] }} shadows>
                 <color attach="background" args={['#000']} />
 
-                <GameStateProvider>
-                    <Physics
-                        gravity={[0, -9.81, 0]}
-                        updatePriority={RAPIER_UPDATE_PRIORITY}
-                        timeStep="vary"
-                        paused={!visible || loading}
-                    >
-                        <Game />
-                    </Physics>
-                </GameStateProvider>
+                <Physics
+                    gravity={[0, -9.81, 0]}
+                    updatePriority={RAPIER_UPDATE_PRIORITY}
+                    timeStep="vary"
+                    paused={!visible || loading}
+                >
+                    <Game />
+                </Physics>
             </Canvas>
 
             <SpeedTextTunnel.Out />
