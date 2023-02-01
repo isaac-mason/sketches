@@ -9,7 +9,7 @@ import {
     useBeforePhysicsStep,
 } from '@react-three/rapier'
 import { useControls as useLeva } from 'leva'
-import { useEffect, useRef, useState } from 'react'
+import { useRef } from 'react'
 import { Vector3 } from 'three'
 import { useLoadingAssets } from '../../hooks/use-loading-assets'
 import { usePageVisible } from '../../hooks/use-page-visible'
@@ -27,7 +27,6 @@ import {
 } from './components/vehicle'
 import {
     AFTER_RAPIER_UPDATE,
-    BEFORE_RAPIER_UPDATE,
     LEVA_KEY,
     RAPIER_UPDATE_PRIORITY,
 } from './constants'
@@ -46,9 +45,9 @@ const Game = () => {
     const { cameraMode } = useLeva(`${LEVA_KEY}-camera`, {
         cameraMode: {
             value: 'drive',
-            options: ['drive', 'orbit']
-        }
-    }) 
+            options: ['drive', 'orbit'],
+        },
+    })
 
     const { maxForce, maxSteer, maxBrake } = useLeva(`${LEVA_KEY}-controls`, {
         maxForce: 500,
