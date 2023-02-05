@@ -15,17 +15,17 @@ import { Mesh, Quaternion, Raycaster, Vector3 } from 'three'
 import { usePageVisible } from '../../hooks/use-page-visible'
 import { Canvas } from '../Canvas'
 
-const LEVA_KEY = 'rapier-mouse-pick'
+const LEVA_KEY = 'rapier-pointer-constraint'
 
 type DraggableUserData = {
     draggable: boolean
 }
 
-type MousePickControlsProps = {
+type PointerConstraintControlsProps = {
     target: Vector3Tuple
 }
 
-const MousePickControls = ({ target }: MousePickControlsProps) => {
+const PointerConstraintControls = ({ target }: PointerConstraintControlsProps) => {
     const { pointerRigidBodyVisible, movementPlaneVisible } = useControls(
         `${LEVA_KEY}-movement-plane`,
         {
@@ -203,11 +203,11 @@ export default () => {
 
     return (
         <>
-            <h1 style={{ pointerEvents: 'none' }}>Rapier - Mouse Pick</h1>
+            <h1 style={{ pointerEvents: 'none' }}>Rapier - Pointer Constraint</h1>
 
             <Canvas camera={{ position: [4, 4, 4] }} shadows>
                 <Physics paused={!visible}>
-                    <MousePickControls target={[0, 1, 0]} />
+                    <PointerConstraintControls target={[0, 1, 0]} />
 
                     <Cube position={[0, 5, 0]} />
                     <Floor />
