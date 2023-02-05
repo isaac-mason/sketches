@@ -152,6 +152,7 @@ const App = () => {
         <Page>
             <Leva
                 collapsed
+                hidden={displayMode === 'screenshot'}
                 theme={
                     smallScreen
                         ? {}

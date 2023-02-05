@@ -23,11 +23,13 @@ import JourneyLesson27Cover from './sketch-JourneyLesson27-Shaders/cover.png'
 import JourneyLesson28Cover from './sketch-JourneyLesson28-RagingSea/cover.png'
 import JourneyLesson29Cover from './sketch-JourneyLesson29-AnimatedGalaxy/cover.png'
 import JourneyLesson30Cover from './sketch-JourneyLesson30-ModifiedMaterials/cover.png'
-import RapierKinematicCharacterControllerCover from './sketch-Rapier-KinematicCharacterController/cover.png'
-import RapierRaycastingCover from './sketch-Rapier-Raycasting/cover.png'
 import RapierCameraRaycastingCover from './sketch-Rapier-CameraRaycasting/cover.png'
+import RapierKinematicCharacterControllerCover from './sketch-Rapier-KinematicCharacterController/cover.png'
+import RapieMousePickCover from './sketch-Rapier-MousePick/cover.png'
+import RapierRaycastingCover from './sketch-Rapier-Raycasting/cover.png'
 import RapierRaycastVehicleCover from './sketch-Rapier-RaycastVehicle/cover.png'
 import RapierRevoluteJointVehicleCover from './sketch-Rapier-RevoluteJointVehicle/cover.png'
+import RapierSpringCover from './sketch-Rapier-Spring/cover.png'
 
 export type Sketch = {
     title: string
@@ -175,6 +177,16 @@ const sketchList = [
         title: 'Rapier - Camera Raycasting',
         route: 'Rapier-CameraRaycasting',
         cover: RapierCameraRaycastingCover,
+    },
+    {
+        title: 'Rapier - Spring',
+        route: 'Rapier-Spring',
+        cover: RapierSpringCover,
+    },
+    {
+        title: 'Rapier - Mouse Pick',
+        route: 'Rapier-MousePick',
+        cover: RapieMousePickCover,
     },
     {
         title: 'Rapier - Raycast Vehicle',

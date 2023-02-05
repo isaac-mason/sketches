@@ -147,11 +147,11 @@ const Scene = () => {
                 colliders="hull"
                 type="fixed"
                 position={[0, 0, 3.2]}
-                rotation={[-Math.PI / 4, 0, 0]}
+                rotation={[-Math.PI / 4, 0, Math.PI / 4]}
                 userData={{ shape: Shapes.CONE } as ShapeRapierUserData}
             >
                 <mesh>
-                    <coneGeometry args={[1.2, 1.2, 4]} />
+                    <coneGeometry args={[1.2, 1.6, 4]} />
                     <meshStandardMaterial
                         color={raycastHit === Shapes.CONE ? 'red' : '#666'}
                     />
@@ -192,7 +192,8 @@ export default () => {
                 <OrbitControls autoRotate autoRotateSpeed={-0.5} />
 
                 <ambientLight intensity={0.5} />
-                <pointLight position={[10, 10, 10]} />
+                <pointLight position={[10, 10, 10]} intensity={0.5} />
+                <pointLight position={[-10, 10, -10]} intensity={0.5} />
 
                 <Physics gravity={[0, 0, 0]}>
                     <Scene />
