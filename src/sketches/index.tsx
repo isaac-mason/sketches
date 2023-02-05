@@ -25,6 +25,7 @@ import JourneyLesson29Cover from './sketch-JourneyLesson29-AnimatedGalaxy/cover.
 import JourneyLesson30Cover from './sketch-JourneyLesson30-ModifiedMaterials/cover.png'
 import RapierKinematicCharacterControllerCover from './sketch-Rapier-KinematicCharacterController/cover.png'
 import RapierRaycastingCover from './sketch-Rapier-Raycasting/cover.png'
+import RapierCameraRaycastingCover from './sketch-Rapier-CameraRaycasting/cover.png'
 import RapierRaycastVehicleCover from './sketch-Rapier-RaycastVehicle/cover.png'
 import RapierRevoluteJointVehicleCover from './sketch-Rapier-RevoluteJointVehicle/cover.png'
 
@@ -169,6 +170,11 @@ const sketchList = [
         title: 'Rapier - Raycasting',
         route: 'Rapier-Raycasting',
         cover: RapierRaycastingCover,
+    },
+    {
+        title: 'Rapier - Camera Raycasting',
+        route: 'Rapier-CameraRaycasting',
+        cover: RapierCameraRaycastingCover,
     },
     {
         title: 'Rapier - Raycast Vehicle',
