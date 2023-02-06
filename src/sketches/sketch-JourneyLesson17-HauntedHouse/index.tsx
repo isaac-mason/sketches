@@ -58,7 +58,10 @@ const House = (props: JSX.IntrinsicElements['group']) => {
             wallsBoxGeometryRef.current.setAttribute(
                 'uv2',
                 new BufferAttribute(
-                    wallsBoxGeometryRef.current.attributes.uv.array,
+                    (
+                        wallsBoxGeometryRef.current.attributes
+                            .uv as BufferAttribute
+                    ).array,
                     2
                 )
             )
@@ -68,7 +71,10 @@ const House = (props: JSX.IntrinsicElements['group']) => {
             doorPlaneGeometryRef.current.setAttribute(
                 'uv2',
                 new BufferAttribute(
-                    doorPlaneGeometryRef.current.attributes.uv.array,
+                    (
+                        doorPlaneGeometryRef.current.attributes
+                            .uv as BufferAttribute
+                    ).array,
                     2
                 )
             )
@@ -204,7 +210,10 @@ const Grass = () => {
             planeGeometryRef.current.setAttribute(
                 'uv2',
                 new BufferAttribute(
-                    planeGeometryRef.current.attributes.uv.array,
+                    (
+                        planeGeometryRef.current.attributes
+                            .uv as BufferAttribute
+                    ).array,
                     2
                 )
             )

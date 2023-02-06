@@ -35,8 +35,9 @@ const App = () => {
     }, [])
 
     useFrame(({ clock: { elapsedTime } }) => {
-        const positions = bufferGeometry.attributes.position
-            .array as Float32Array
+        const positions = (
+            bufferGeometry.attributes.position as BufferAttribute
+        ).array as Float32Array
 
         for (let i = 0; i < COUNT * 3; i += 3) {
             const x = positions[i] + 7.5

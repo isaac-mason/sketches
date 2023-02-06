@@ -9,6 +9,7 @@ import { Vector3 } from '@react-three/fiber'
 import { Box, Flex } from '@react-three/flex'
 import { useRef, useEffect, useLayoutEffect } from 'react'
 import * as THREE from 'three'
+import { BufferAttribute } from 'three'
 import { Canvas } from '../Canvas'
 import doorAlphaImage from './textures/door/alpha.jpg'
 import doorAmbientOcclusionImage from './textures/door/ambientOcclusion.jpg'
@@ -105,24 +106,30 @@ const Door = (props: { position: Vector3 }) => {
     })
 
     const planeGeometryRef = useRef<THREE.PlaneGeometry>(null)
-    
+
     useLayoutEffect(() => {
-            if (planeGeometryRef.current) {
-                planeGeometryRef.current.setAttribute(
-                    'uv2',
-                    new THREE.BufferAttribute(
-                        planeGeometryRef.current.attributes.uv.array,
-                        2
-                    )
+        if (planeGeometryRef.current) {
+            planeGeometryRef.current.setAttribute(
+                'uv2',
+                new THREE.BufferAttribute(
+                    (
+                        planeGeometryRef.current.attributes
+                            .uv as BufferAttribute
+                    ).array,
+                    2
                 )
-            }
-        }, [])
+            )
+        }
+    }, [])
 
     return (
         <>
             <Float floatIntensity={5} position={props.position}>
                 <mesh>
-                    <planeGeometry ref={planeGeometryRef} args={[4, 4, 100, 100]} />
+                    <planeGeometry
+                        ref={planeGeometryRef}
+                        args={[4, 4, 100, 100]}
+                    />
                     <meshStandardMaterial
                         {...doorTextureProps}
                         transparent
