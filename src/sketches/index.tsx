@@ -164,11 +164,6 @@ const sketchList = [
     },
     /* Rapier */
     {
-        title: 'Rapier - Revolute Joint Vehicle',
-        route: 'Rapier-RevoluteJointVehicle',
-        cover: RapierRevoluteJointVehicleCover,
-    },
-    {
         title: 'Rapier - Raycasting',
         route: 'Rapier-Raycasting',
         cover: RapierRaycastingCover,
@@ -187,6 +182,11 @@ const sketchList = [
         title: 'Rapier - Pointer Constraint',
         route: 'Rapier-PointerConstraint',
         cover: RapierPointerConstraintCover,
+    },
+    {
+        title: 'Rapier - Revolute Joint Vehicle',
+        route: 'Rapier-RevoluteJointVehicle',
+        cover: RapierRevoluteJointVehicleCover,
     },
     {
         title: 'Rapier - Raycast Vehicle',

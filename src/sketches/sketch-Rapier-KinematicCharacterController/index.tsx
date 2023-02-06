@@ -10,16 +10,14 @@ import {
     CapsuleCollider,
     Debug,
     Physics,
+    RapierRigidBody,
     RigidBody,
-    RigidBodyApi,
-    RigidBodyApiRef,
     useRapier,
 } from '@react-three/rapier'
 import { useControls as useLevaControls } from 'leva'
 import { RefObject, useEffect, useMemo, useRef } from 'react'
 import styled from 'styled-components'
-import * as THREE from 'three'
-import { Group, PerspectiveCamera, Vector3 } from 'three'
+import { Group, MathUtils, PerspectiveCamera, Vector3 } from 'three'
 import { clamp } from 'three/src/math/MathUtils'
 import { useLoadingAssets } from '../../hooks/use-loading-assets'
 import { usePageVisible } from '../../hooks/use-page-visible'
@@ -28,19 +26,21 @@ import { GameLevel, Shield, Sword } from './models'
 
 const LEVA_KEY = 'rapier-kinematic-character-controller'
 
-const direction = new THREE.Vector3()
-const frontVector = new THREE.Vector3()
-const sideVector = new THREE.Vector3()
-const rotation = new THREE.Vector3()
+const direction = new Vector3()
+const frontVector = new Vector3()
+const sideVector = new Vector3()
+const rotation = new Vector3()
+const characterLinvel = new Vector3()
+const characterTranslation = new Vector3()
 
 const NORMAL_FOV = 90
 const SPRINT_FOV = 105
 
 type KinematicCharacterControllerProps = {
-    characterRigidBody: RigidBodyApiRef
-    characterColliderRef: RefObject<Rapier.Collider[]>
-    shieldHandRef: RefObject<THREE.Group | null>
-    swordHandRef: RefObject<THREE.Group | null>
+    characterRigidBody: RefObject<RapierRigidBody>
+    characterColliderRef: RefObject<Rapier.Collider>
+    shieldHandRef: RefObject<Group | null>
+    swordHandRef: RefObject<Group | null>
 }
 
 const useKinematicCharacterController = ({
@@ -150,11 +150,11 @@ const useKinematicCharacterController = ({
         const { forward, backward, left, right, jump, sprint } =
             getKeyboardControls()
 
-        const characterCollider = characterColliderRef.current[0]
+        const characterCollider = characterColliderRef.current
 
         const speed = (1.0 - Math.pow(0.0001, delta)) * (sprint ? 1.5 : 1)
 
-        const characterLinvel = characterRigidBody.current.linvel()
+        characterLinvel.copy(characterRigidBody.current.linvel() as Vector3)
         const currentSpeed = characterLinvel.length()
         const movingHorizontally =
             Math.abs(characterLinvel.x) > 0.1 ||
@@ -182,12 +182,12 @@ const useKinematicCharacterController = ({
             .applyEuler(camera.rotation)
 
         horizontalVelocity.current = {
-            x: THREE.MathUtils.lerp(
+            x: MathUtils.lerp(
                 horizontalVelocity.current.x,
                 direction.x,
                 factor
             ),
-            z: THREE.MathUtils.lerp(
+            z: MathUtils.lerp(
                 horizontalVelocity.current.z,
                 direction.z,
                 factor
@@ -243,7 +243,7 @@ const useKinematicCharacterController = ({
         )
 
         const translation = characterRigidBody.current.translation()
-        const newPosition = new Vector3().copy(translation)
+        const newPosition = characterTranslation.copy(translation as Vector3)
         const movement = characterController.current.computedMovement()
         newPosition.x += movement.x
         newPosition.y += movement.y
@@ -253,7 +253,7 @@ const useKinematicCharacterController = ({
         // update camera
         camera.position.set(translation.x, translation.y + 1, translation.z)
         if (camera instanceof PerspectiveCamera) {
-            camera.fov = THREE.MathUtils.lerp(
+            camera.fov = MathUtils.lerp(
                 camera.fov,
                 sprint && currentSpeed > 0.1 ? SPRINT_FOV : NORMAL_FOV,
                 10 * delta
@@ -280,7 +280,7 @@ const useKinematicCharacterController = ({
                         handRotationSpeed
                 ) / 6
 
-            group.children[0].rotation.x = THREE.MathUtils.lerp(
+            group.children[0].rotation.x = MathUtils.lerp(
                 group.children[0].rotation.x,
                 yRot * rotationScalar * (side === 'left' ? -1 : 1),
                 0.1
@@ -312,10 +312,10 @@ const useKinematicCharacterController = ({
 }
 
 export const Player = (props: JSX.IntrinsicElements['group']) => {
-    const characterRigidBody = useRef<RigidBodyApi>(null!)
-    const characterColliderRef = useRef<Rapier.Collider[]>(null!)
-    const shieldHandRef = useRef<THREE.Group>(null)
-    const swordHandRef = useRef<THREE.Group>(null)
+    const characterRigidBody = useRef<RapierRigidBody>(null!)
+    const characterColliderRef = useRef<Rapier.Collider>(null!)
+    const shieldHandRef = useRef<Group>(null)
+    const swordHandRef = useRef<Group>(null)
 
     useKinematicCharacterController({
         characterRigidBody,

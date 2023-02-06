@@ -4,8 +4,8 @@ import { useThree, Vector3 as Vector3Tuple } from '@react-three/fiber'
 import {
     Debug,
     Physics,
+    RapierRigidBody,
     RigidBody,
-    RigidBodyApi,
     RigidBodyProps,
     useRapier,
 } from '@react-three/rapier'
@@ -25,7 +25,9 @@ type PointerConstraintControlsProps = {
     target: Vector3Tuple
 }
 
-const PointerConstraintControls = ({ target }: PointerConstraintControlsProps) => {
+const PointerConstraintControls = ({
+    target,
+}: PointerConstraintControlsProps) => {
     const { pointerRigidBodyVisible, movementPlaneVisible } = useControls(
         `${LEVA_KEY}-movement-plane`,
         {
@@ -45,15 +47,14 @@ const PointerConstraintControls = ({ target }: PointerConstraintControlsProps) =
     const gl = useThree((state) => state.gl)
     const mouse = useThree((state) => state.mouse)
 
-    const pointerRigidBody = useRef<RigidBodyApi>(null!)
+    const pointerRigidBody = useRef<RapierRigidBody>(null!)
     const movementPlane = useRef<Mesh>(null!)
 
     const joint = useRef<Rapier.ImpulseJoint | null>(null)
 
     const [rayDirection] = useState(() => new Vector3())
     const [raycaster] = useState(() => new Raycaster())
-
-    const [orbitControlsEnabled, setOrbitControlsEnabled] = useState(true)
+    const [dragging, setDragging] = useState(false)
 
     const updatePointerRigidBody = () => {
         raycaster.setFromCamera(mouse, camera)
@@ -62,7 +63,7 @@ const PointerConstraintControls = ({ target }: PointerConstraintControlsProps) =
 
         if (!hitPoint) return
 
-        pointerRigidBody.current.setTranslation(hitPoint)
+        pointerRigidBody.current.setTranslation(hitPoint, true)
     }
 
     useEffect(() => {
@@ -94,7 +95,7 @@ const PointerConstraintControls = ({ target }: PointerConstraintControlsProps) =
             )?.draggable
             if (!draggable) return
 
-            setOrbitControlsEnabled(false)
+            setDragging(true)
 
             const rayHitPosition = new Vector3()
                 .copy(camera.position)
@@ -106,7 +107,7 @@ const PointerConstraintControls = ({ target }: PointerConstraintControlsProps) =
             updatePointerRigidBody()
 
             const rigidBodyAnchor = new Vector3()
-                .copy(pointerRigidBody.current.translation())
+                .copy(pointerRigidBody.current.translation() as Vector3)
                 .sub(rigidBody.translation() as Vector3)
                 .applyQuaternion(
                     new Quaternion()
@@ -119,7 +120,7 @@ const PointerConstraintControls = ({ target }: PointerConstraintControlsProps) =
                     new Rapier.Vector3(0, 0, 0),
                     rigidBodyAnchor
                 ),
-                pointerRigidBody.current.raw(),
+                pointerRigidBody.current,
                 rigidBody,
                 true
             )
@@ -131,7 +132,7 @@ const PointerConstraintControls = ({ target }: PointerConstraintControlsProps) =
                 joint.current = null
             }
 
-            setOrbitControlsEnabled(true)
+            setDragging(false)
         }
 
         const onPointerMove = () => {
@@ -164,7 +165,7 @@ const PointerConstraintControls = ({ target }: PointerConstraintControlsProps) =
                 </mesh>
             </RigidBody>
 
-            <OrbitControls enabled={orbitControlsEnabled} target={target} />
+            <OrbitControls enabled={!dragging} target={target} />
         </>
     )
 }
@@ -203,7 +204,9 @@ export default () => {
 
     return (
         <>
-            <h1 style={{ pointerEvents: 'none' }}>Rapier - Pointer Constraint</h1>
+            <h1 style={{ pointerEvents: 'none' }}>
+                Rapier - Pointer Constraint
+            </h1>
 
             <Canvas camera={{ position: [4, 4, 4] }} shadows>
                 <Physics paused={!visible}>

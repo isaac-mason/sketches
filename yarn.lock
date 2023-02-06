@@ -274,10 +274,10 @@
   resolved "https://registry.yarnpkg.com/@chevrotain/utils/-/utils-10.4.2.tgz#87735732184cc5a2f8aad2f3454082294ef3c924"
   integrity sha512-V34dacxWLwKcvcy32dx96ADJVdB7kOJLm7LyBkBQw5u5HC9WdEFw2G17zml+U3ivavGTrGPJHl8o9/UJm0PlUw==
 
-"@dimforge/rapier3d-compat@0.10.0":
-  version "0.10.0"
-  resolved "https://registry.yarnpkg.com/@dimforge/rapier3d-compat/-/rapier3d-compat-0.10.0.tgz#d8c3c75ea5183cfdc0db616a6ee9b0983a219d4c"
-  integrity sha512-3SPxyAnPQz9P3cIhgF8VncwJwrqyAW2xsNEYgXbxDhvB2IaIG63eTX7rNIJUnec5FDYqgvVo/nqY1XarzT5T2Q==
+"@dimforge/rapier3d-compat@0.11.1":
+  version "0.11.1"
+  resolved "https://registry.yarnpkg.com/@dimforge/rapier3d-compat/-/rapier3d-compat-0.11.1.tgz#24cdf14ea7c6551242f186133c0b09ada310803d"
+  integrity sha512-Xt3KcvwxnTZxjZ3uA4Qx5S9LoAqCvj4mTzcSwdPnVpM0F/ZPU7cY9bjGiNqB3+/IvUSCQB1eVamAd2IQX7hzTA==
 
 "@emotion/is-prop-valid@^1.1.0":
   version "1.2.0"
@@ -734,6 +734,13 @@
   resolved "https://registry.yarnpkg.com/@react-spring/types/-/types-9.5.5.tgz#c8e94f1b9232ca7cb9d860ea67762ec401b1de14"
   integrity sha512-7I/qY8H7Enwasxr4jU6WmtNK+RZ4Z/XvSlDvjXFVe7ii1x0MoSlkw6pD7xuac8qrHQRm9BTcbZNyeeKApYsvCg==
 
+"@react-three/csg@^2.0.7":
+  version "2.0.7"
+  resolved "https://registry.yarnpkg.com/@react-three/csg/-/csg-2.0.7.tgz#c5fa8ed04b420832ac18781f9deeb57177975ef0"
+  integrity sha512-V7Vj6CSKayFB78rPAN3yiQ35EmIXbxFUAkD2N/VbYmFNfUSUIc6TPQNM/t4JSv5Pkp8zNjHOQeIxxzZko0nACA==
+  dependencies:
+    three-bvh-csg "^0.0.4"
+
 "@react-three/drei@^9.53.0":
   version "9.53.0"
   resolved "https://registry.yarnpkg.com/@react-three/drei/-/drei-9.53.0.tgz#61c5eae7fba5974e60c67303542a03546ef5008b"
@@ -791,14 +798,14 @@
     screen-space-reflections "2.5.0"
     three-stdlib "^2.8.11"
 
-"@react-three/rapier@^0.12.2":
-  version "0.12.2"
-  resolved "https://registry.yarnpkg.com/@react-three/rapier/-/rapier-0.12.2.tgz#602c37617476397f3d91d586b31d98e76785b328"
-  integrity sha512-h0WMnw2BOKBULRobxrPGGM+ZTIqjrEydqv1bxbDNoRNtyEtljq8hTkDnpOzWpE2YnHbc/pEN/dznn8P6w075ow==
+"@react-three/rapier@^0.13.2":
+  version "0.13.2"
+  resolved "https://registry.yarnpkg.com/@react-three/rapier/-/rapier-0.13.2.tgz#73347e9e1d1dd6d423262b61610b390b32b3a2c3"
+  integrity sha512-zdajV4X+P449lTV9BiuxOvXZMeTQ7HTtc5YVBztKFZBOaib1kXWGhnirdv0ZrYvetvr1JZKmnl1UtgipCBKcTg==
   dependencies:
-    "@dimforge/rapier3d-compat" "0.10.0"
-    three-stdlib "^2.15.0"
-    use-asset "^1.0.4"
+    "@dimforge/rapier3d-compat" "0.11.1"
+    three-stdlib "2.21.6"
+    use-asset "1.0.4"
 
 "@remix-run/router@1.2.1":
   version "1.2.1"
@@ -3835,12 +3842,34 @@ tempfile@^2.0.0:
     temp-dir "^1.0.0"
     uuid "^3.0.1"
 
+three-bvh-csg@^0.0.4:
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/three-bvh-csg/-/three-bvh-csg-0.0.4.tgz#356ffe6235f5349cef42aefac30f234706ee8b1c"
+  integrity sha512-j8W/x2KpTrzmDl7FkqQlJmTsfPFm38jvf7z0D+5qyiehh79Vnjnkxh33FquP+rzxI9zCv64aa57FsUJOkktghA==
+
 three-mesh-bvh@^0.5.21:
   version "0.5.21"
   resolved "https://registry.yarnpkg.com/three-mesh-bvh/-/three-mesh-bvh-0.5.21.tgz#e08f5f3052d624cce36d0975692949c02359832f"
   integrity sha512-TGXPk7YwtlU5rgQJYA25OT6yAdBMeekfC4BTkGNtTWA5glb2rmEpjxvhZncRQSl73QZir2LFOQT0FjfzgG55xw==
 
-three-stdlib@^2.15.0, three-stdlib@^2.20.4, three-stdlib@^2.8.11:
+three-stdlib@2.21.6:
+  version "2.21.6"
+  resolved "https://registry.yarnpkg.com/three-stdlib/-/three-stdlib-2.21.6.tgz#764711f317a355a47138a8a5abe95bff0a0bbd45"
+  integrity sha512-J3DyCVKIpYJw7TWG4mQKKPpMgswq4pRRPMtxgipKedpUj8e4EgGtNLt623ws9RHvphPPamTHXacaEzOrm3dFsA==
+  dependencies:
+    "@babel/runtime" "^7.16.7"
+    "@types/offscreencanvas" "^2019.6.4"
+    "@webgpu/glslang" "^0.0.15"
+    chevrotain "^10.1.2"
+    draco3d "^1.4.1"
+    fflate "^0.6.9"
+    ktx-parse "^0.4.5"
+    mmd-parser "^1.0.4"
+    opentype.js "^1.3.3"
+    potpack "^1.0.1"
+    zstddec "^0.0.2"
+
+three-stdlib@^2.20.4, three-stdlib@^2.8.11:
   version "2.21.5"
   resolved "https://registry.yarnpkg.com/three-stdlib/-/three-stdlib-2.21.5.tgz#d7a8ae6713d6c9193a06f81e181b7f4fcf6f8570"
   integrity sha512-PzlbMFVApPjdFwNoTCnrH6r8J1rQw5Dn40qkHc8P+vVDj1czHOmCduYAA27bYwNNTcd+q3AWE+qutDrvvc5B2g==
@@ -3995,7 +4024,7 @@ url-to-options@^1.0.1:
   resolved "https://registry.yarnpkg.com/url-to-options/-/url-to-options-1.0.1.tgz#1505a03a289a48cbd7a434efbaeec5055f5633a9"
   integrity sha512-0kQLIzG4fdk/G5NONku64rSH/x32NOA39LVQqlK8Le6lvTF6GGRJpqaQFGgU+CLwySIqBSMdwYM0sYcW9f6P4A==
 
-use-asset@^1.0.4:
+use-asset@1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/use-asset/-/use-asset-1.0.4.tgz#506caafc29f602890593799e58b577b70293a6e2"
   integrity sha512-7/hqDrWa0iMnCoET9W1T07EmD4Eg/Wmoj/X8TGBc++ECRK4m5yTsjP4O6s0yagbxfqIOuUkIxe2/sA+VR2GxZA==

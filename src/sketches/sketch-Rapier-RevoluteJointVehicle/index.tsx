@@ -8,9 +8,8 @@ import {
     CylinderCollider,
     Debug,
     Physics,
+    RapierRigidBody,
     RigidBody,
-    RigidBodyApi,
-    RigidBodyApiRef,
     useFixedJoint,
     useRapier,
     useRevoluteJoint,
@@ -18,7 +17,7 @@ import {
 import { useControls } from 'leva'
 import React, { createRef, RefObject, useEffect, useMemo, useRef } from 'react'
 import styled from 'styled-components'
-import { Vector3, Vector3Tuple, Vector4Tuple } from 'three'
+import { Quaternion, Vector3, Vector3Tuple, Vector4Tuple } from 'three'
 import { usePageVisible } from '../../hooks/use-page-visible'
 import { Canvas } from '../Canvas'
 
@@ -50,8 +49,8 @@ const DRIVEN_WHEEL_FORCE = 600
 const DRIVEN_WHEEL_DAMPING = 5
 
 type FixedJointProps = {
-    body: RigidBodyApiRef
-    wheel: RigidBodyApiRef
+    body: RefObject<RapierRigidBody>
+    wheel: RefObject<RapierRigidBody>
     body1Anchor: Vector3Tuple
     body1LocalFrame: Vector4Tuple
     body2Anchor: Vector3Tuple
@@ -77,8 +76,8 @@ const FixedJoint = ({
 }
 
 type AxleJointProps = {
-    body: RigidBodyApiRef
-    wheel: RigidBodyApiRef
+    body: RefObject<RapierRigidBody>
+    wheel: RefObject<RapierRigidBody>
     bodyAnchor: Vector3Tuple
     wheelAnchor: Vector3Tuple
     rotationAxis: Vector3Tuple
@@ -112,18 +111,18 @@ const AxleJoint = ({
         forward *= DRIVEN_WHEEL_FORCE
 
         if (forward !== 0) {
-            wheel.current?.raw().wakeUp()
+            wheel.current?.wakeUp()
         }
 
-        joint.configureMotorVelocity(forward, DRIVEN_WHEEL_DAMPING)
+        joint.current?.configureMotorVelocity(forward, DRIVEN_WHEEL_DAMPING)
     }, [forwardPressed, backwardPressed])
 
     return null
 }
 
 type SteeredJointProps = {
-    body: RigidBodyApiRef
-    wheel: RigidBodyApiRef
+    body: RefObject<RapierRigidBody>
+    wheel: RefObject<RapierRigidBody>
     bodyAnchor: Vector3Tuple
     wheelAnchor: Vector3Tuple
     rotationAxis: Vector3Tuple
@@ -147,7 +146,7 @@ const SteeredJoint = ({
     const targetPos = left ? 0.2 : right ? -0.2 : 0
 
     useEffect(() => {
-        joint?.configureMotorPosition(
+        joint.current?.configureMotorPosition(
             targetPos,
             AXLE_TO_CHASSIS_JOINT_STIFFNESS,
             AXLE_TO_CHASSIS_JOINT_DAMPING
@@ -177,7 +176,7 @@ const RevoluteJointVehicle = () => {
     const currentCameraPosition = useRef(new Vector3(15, 15, 0))
     const currentCameraLookAt = useRef(new Vector3())
 
-    const chassisRef = useRef<RigidBodyApi>(null)
+    const chassisRef = useRef<RapierRigidBody>(null)
 
     const wheels: WheelInfo[] = [
         {
@@ -210,11 +209,11 @@ const RevoluteJointVehicle = () => {
         },
     ]
 
-    const wheelRefs = useRef<RefObject<RigidBodyApi>[]>(
+    const wheelRefs = useRef<RefObject<RapierRigidBody>[]>(
         wheels.map(() => createRef())
     )
 
-    const axleRefs = useRef<RefObject<RigidBodyApi>[]>(
+    const axleRefs = useRef<RefObject<RapierRigidBody>[]>(
         wheels.map(() => createRef())
     )
 
@@ -226,15 +225,15 @@ const RevoluteJointVehicle = () => {
         const t = 1.0 - Math.pow(0.01, delta)
 
         const idealOffset = new Vector3(10, 5, 0)
-        idealOffset.applyQuaternion(chassisRef.current.rotation())
-        idealOffset.add(chassisRef.current.translation())
+        idealOffset.applyQuaternion(chassisRef.current.rotation() as Quaternion)
+        idealOffset.add(chassisRef.current.translation() as Vector3)
         if (idealOffset.y < 0) {
             idealOffset.y = 0
         }
 
         const idealLookAt = new Vector3(0, 1, 0)
-        idealLookAt.applyQuaternion(chassisRef.current.rotation())
-        idealLookAt.add(chassisRef.current.translation())
+        idealLookAt.applyQuaternion(chassisRef.current.rotation() as Quaternion)
+        idealLookAt.add(chassisRef.current.translation() as Vector3)
 
         currentCameraPosition.current.lerp(idealOffset, t)
         currentCameraLookAt.current.lerp(idealLookAt, t)

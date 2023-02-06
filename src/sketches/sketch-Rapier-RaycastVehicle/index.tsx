@@ -10,14 +10,12 @@ import {
 } from '@react-three/rapier'
 import { useControls as useLeva } from 'leva'
 import { useRef } from 'react'
-import { Vector3 } from 'three'
+import styled from 'styled-components'
+import { Quaternion, Vector3 } from 'three'
 import { useLoadingAssets } from '../../hooks/use-loading-assets'
 import { usePageVisible } from '../../hooks/use-page-visible'
 import { Canvas } from '../Canvas'
-import { ControlsText } from './components/controls-text'
 import { LampPost } from './components/lamp-post'
-import { SpeedText } from './components/speed-text'
-import { SpeedTextTunnel } from './components/speed-text-tunnel'
 import { TrafficCone } from './components/traffic-cone'
 import {
     BRAKE_LIGHTS_OFF_COLOR,
@@ -30,7 +28,34 @@ import {
     LEVA_KEY,
     RAPIER_UPDATE_PRIORITY,
 } from './constants'
+import { SpeedTextTunnel } from './constants/speed-text-tunnel'
 import { useControls } from './hooks/use-controls'
+
+const Text = styled.div`
+    width: 100%;
+    text-align: center;
+    font-size: 2em;
+    color: white;
+    font-family: monospace;
+    text-shadow: 2px 2px black;
+`
+
+const ControlsText = styled(Text)`
+    position: absolute;
+    bottom: 4em;
+    left: 0;
+`
+
+const SpeedText = styled(Text)`
+    position: absolute;
+    bottom: 2em;
+    left: 0;
+`
+
+const cameraIdealOffset = new Vector3()
+const cameraIdealLookAt = new Vector3()
+const chassisTranslation = new Vector3()
+const chassisRotation = new Quaternion()
 
 const Game = () => {
     const raycastVehicle = useRef<VehicleRef>(null)
@@ -141,21 +166,25 @@ const Game = () => {
         const chassis = raycastVehicle.current?.chassisRigidBody
         if (!chassis?.current) return
 
+        chassisRotation.copy(chassis.current.rotation() as Quaternion)
+        chassisTranslation.copy(chassis.current.translation() as Vector3)
+
         const t = 1.0 - Math.pow(0.01, delta)
 
-        const idealOffset = new Vector3(-10, 3, 0)
-        idealOffset.applyQuaternion(chassis.current.rotation())
-        idealOffset.add(chassis.current.translation())
-        if (idealOffset.y < 0) {
-            idealOffset.y = 0.5
+        cameraIdealOffset.set(-10, 3, 0)
+        cameraIdealOffset.applyQuaternion(chassisRotation)
+        cameraIdealOffset.add(chassisTranslation)
+
+        if (cameraIdealOffset.y < 0) {
+            cameraIdealOffset.y = 0.5
         }
 
-        const idealLookAt = new Vector3(0, 1, 0)
-        idealLookAt.applyQuaternion(chassis.current.rotation())
-        idealLookAt.add(chassis.current.translation())
+        cameraIdealLookAt.set(0, 1, 0)
+        cameraIdealLookAt.applyQuaternion(chassisRotation)
+        cameraIdealLookAt.add(chassisTranslation)
 
-        currentCameraPosition.current.lerp(idealOffset, t)
-        currentCameraLookAt.current.lerp(idealLookAt, t)
+        currentCameraPosition.current.lerp(cameraIdealOffset, t)
+        currentCameraLookAt.current.lerp(cameraIdealLookAt, t)
 
         camera.position.copy(currentCameraPosition.current)
         camera.lookAt(currentCameraLookAt.current)

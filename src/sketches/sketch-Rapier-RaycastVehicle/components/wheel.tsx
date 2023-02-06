@@ -1,6 +1,6 @@
 import { useGLTF } from '@react-three/drei'
 import { forwardRef, useImperativeHandle, useRef } from 'react'
-import { Mesh, MeshStandardMaterial, Group } from 'three'
+import { Group, Mesh, MeshStandardMaterial } from 'three'
 import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import wheelGlbUrl from '../assets/wheel-draco.glb?url'
 

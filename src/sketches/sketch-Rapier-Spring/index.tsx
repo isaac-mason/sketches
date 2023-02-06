@@ -2,8 +2,8 @@ import { OrbitControls } from '@react-three/drei'
 import {
     Debug,
     Physics,
+    RapierRigidBody,
     RigidBody,
-    RigidBodyApi,
     useBeforePhysicsStep,
 } from '@react-three/rapier'
 import { useControls } from 'leva'
@@ -22,11 +22,14 @@ const SpringDemo = () => {
             postPosition: {
                 value: [0, 2],
                 onChange: (value) => {
-                    postRigidBody.current.setTranslation({
-                        x: value[0],
-                        y: value[1],
-                        z: 0,
-                    })
+                    postRigidBody.current?.setTranslation(
+                        {
+                            x: value[0],
+                            y: value[1],
+                            z: 0,
+                        },
+                        true
+                    )
                 },
             },
             springRestLength: 2,
@@ -34,14 +37,14 @@ const SpringDemo = () => {
             springDamping: 1,
         })
 
-    const postRigidBody = useRef<RigidBodyApi>(null!)
-    const cubeRigidBody = useRef<RigidBodyApi>(null!)
+    const postRigidBody = useRef<RapierRigidBody>(null!)
+    const cubeRigidBody = useRef<RapierRigidBody>(null!)
     const spring = useRef<Spring | null>(null)
 
     useEffect(() => {
         spring.current = new Spring(
-            cubeRigidBody.current.raw(),
-            postRigidBody.current.raw(),
+            cubeRigidBody.current,
+            postRigidBody.current,
             {
                 restLength: springRestLength,
                 stiffness: springStiffness,

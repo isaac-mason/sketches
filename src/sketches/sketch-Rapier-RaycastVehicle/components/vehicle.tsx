@@ -1,7 +1,7 @@
 import {
     CuboidCollider,
     RigidBody,
-    RigidBodyApi,
+    RapierRigidBody,
     RigidBodyProps,
     useRapier,
 } from '@react-three/rapier'
@@ -37,7 +37,7 @@ export type RaycastVehicleWheel = {
 export type VehicleProps = RigidBodyProps
 
 export type VehicleRef = {
-    chassisRigidBody: RefObject<RigidBodyApi>
+    chassisRigidBody: RefObject<RapierRigidBody>
     rapierRaycastVehicle: RefObject<RapierRaycastVehicle>
     chassis: RefObject<ChassisRef>
     wheels: RaycastVehicleWheel[]
@@ -49,7 +49,7 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(
 
         const vehicleRef = useRef<RapierRaycastVehicle>(null!)
         const chassisRef = useRef<ChassisRef>(null!)
-        const chassisRigidBodyRef = useRef<RigidBodyApi>(null!)
+        const chassisRigidBodyRef = useRef<RapierRigidBody>(null!)
 
         const topLeftWheelObject = useRef<Group>(null!)
         const topRightWheelObject = useRef<Group>(null!)
@@ -173,7 +173,7 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(
         useEffect(() => {
             vehicleRef.current = new RapierRaycastVehicle({
                 world: rapier.world.raw(),
-                chassisRigidBody: chassisRigidBodyRef.current.raw(),
+                chassisRigidBody: chassisRigidBodyRef.current,
                 chassisHalfExtents: CHASSIS_CUBOID_HALF_EXTENTS,
                 indexRightAxis,
                 indexForwardAxis,

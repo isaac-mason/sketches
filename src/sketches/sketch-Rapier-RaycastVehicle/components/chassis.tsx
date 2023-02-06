@@ -1,18 +1,6 @@
-import { Box, useGLTF } from '@react-three/drei'
-import {
-    forwardRef,
-    RefObject,
-    useImperativeHandle,
-    useRef,
-    useState,
-} from 'react'
-import {
-    Mesh,
-    MeshStandardMaterial,
-    BoxGeometry,
-    Group,
-    Object3D,
-} from 'three'
+import { useGLTF } from '@react-three/drei'
+import { forwardRef, RefObject, useImperativeHandle, useRef } from 'react'
+import { BoxGeometry, Group, Mesh, MeshStandardMaterial } from 'three'
 import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import chassisDracoUrl from '../assets/chassis-draco.glb?url'
 
