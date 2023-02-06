@@ -15,7 +15,7 @@
     "@react-three/postprocessing": "^2.7.0",
     "@react-three/rapier": "^0.13.2",
     "leva": "^0.9.25",
-    "r3f-perf": "^6.6.3",
+    "r3f-perf": "^7.1.1",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-router-dom": "^6.8.0",
