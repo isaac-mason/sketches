@@ -765,10 +765,10 @@
   dependencies:
     three-bvh-csg "^0.0.4"
 
-"@react-three/drei@^9.56.25":
-  version "9.56.25"
-  resolved "https://registry.yarnpkg.com/@react-three/drei/-/drei-9.56.25.tgz#3f7f17ae4f2a28caac48301c2c78efd6c2e03c9c"
-  integrity sha512-Wlsmp8q1yqpsHgbUbnt+R83esU4rAE21k4xmcGXaJwNx4PJHR8VZY2kpnEt6TE2uo3L2blUFU0yBMi5/mCyhyw==
+"@react-three/drei@^9.56.10", "@react-three/drei@^9.56.25":
+  version "9.56.26"
+  resolved "https://registry.yarnpkg.com/@react-three/drei/-/drei-9.56.26.tgz#609125f604d52f21d734e14e6e1c060b0c333b49"
+  integrity sha512-nCZsbrp5BW5MZorjIB5Z3ApYDEqE64vWoOIiJFUIvayG0kVALu5jzCa++SxCiH/nCo1Xakp3SiNe+5xJ4lu6Mg==
   dependencies:
     "@babel/runtime" "^7.11.2"
     "@react-spring/three" "^9.3.1"
@@ -1024,6 +1024,13 @@
   integrity sha512-rAZ8Nnpu1g4eFzqCPlaq+TppJpMy0dTpYOQx5KpfoBF4P3aWnCqwj7eKxcmdIb1NJKpIJj50DPugUH4mq5cpBg==
   dependencies:
     "@use-gesture/core" "10.2.24"
+
+"@utsubo/events@^0.1.7":
+  version "0.1.7"
+  resolved "https://registry.yarnpkg.com/@utsubo/events/-/events-0.1.7.tgz#d4d7aa6b26de29bdf64da5cb89005534a0651e52"
+  integrity sha512-WB/GEj/0h27Bz8rJ0+CBtNz5mLT79ne1OjB7PUM4n0qLBqEDwm6yBzZC3j6tasHjlBPJDYZiBVIA1glaMlgZ5g==
+  dependencies:
+    eventemitter3 "^4.0.7"
 
 "@vitejs/plugin-react@^3.1.0":
   version "3.1.0"
@@ -1878,6 +1885,11 @@ escape-string-regexp@^1.0.2, escape-string-regexp@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz#1b61c0562190a8dff6ae3bb2cf0200ca130b86d4"
   integrity sha512-vbRorB5FUQWvla16U8R/qgaFIya2qGzwDrNmCZuYKrbdSUMG6I1ZCGQRefkRVhuOkIGVne7BQ35DSfo1qvJqFg==
+
+eventemitter3@^4.0.7:
+  version "4.0.7"
+  resolved "https://registry.yarnpkg.com/eventemitter3/-/eventemitter3-4.0.7.tgz#2de9b68f6528d5644ef5c59526a1b4a07306169f"
+  integrity sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw==
 
 exec-buffer@^3.0.0:
   version "3.2.0"
@@ -3327,14 +3339,16 @@ queue-microtask@^1.2.2:
   resolved "https://registry.yarnpkg.com/queue-microtask/-/queue-microtask-1.2.3.tgz#4929228bbc724dfac43e0efb058caf7b6cfb6243"
   integrity sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==
 
-r3f-perf@^6.6.3:
-  version "6.6.3"
-  resolved "https://registry.yarnpkg.com/r3f-perf/-/r3f-perf-6.6.3.tgz#cf4f3d7038b7902bb5cae9d1564f5bd3530d163d"
-  integrity sha512-qP/bNKpVDG5eZC0eBx/a8p6Y1Y9ZoxySYFyqVwcR/ci9DtDd4hFEahNgWvN8nIRD2t5BQ0wsxkJ5RXDssICC8w==
+r3f-perf@^7.1.2:
+  version "7.1.2"
+  resolved "https://registry.yarnpkg.com/r3f-perf/-/r3f-perf-7.1.2.tgz#48b538f2b2f5921963d4b74edd8709b38441bd31"
+  integrity sha512-AQ78ULjufILylHZpbgBdzk7JF3F7bceehlgOL19xtyJIDhvi4J4vwE5wpxNZ5q4PT4Oza1WADZt6KSlrkCqgkA==
   dependencies:
     "@radix-ui/react-icons" "^1.0.3"
+    "@react-three/drei" "^9.56.10"
     "@stitches/react" "^1.2.8"
-    zustand "^4.1.5"
+    "@utsubo/events" "^0.1.7"
+    zustand "~4.1.5"
 
 react-colorful@^5.5.1:
   version "5.6.1"
@@ -4195,9 +4209,16 @@ zustand@^3.5.13, zustand@^3.6.9, zustand@^3.7.1:
   resolved "https://registry.yarnpkg.com/zustand/-/zustand-3.7.2.tgz#7b44c4f4a5bfd7a8296a3957b13e1c346f42514d"
   integrity sha512-PIJDIZKtokhof+9+60cpockVOq05sJzHCriyvaLBmEJixseQ1a5Kdov6fWZfWOu5SK9c+FhH1jU0tntLxRJYMA==
 
-zustand@^4.1.0, zustand@^4.1.5:
+zustand@^4.1.0:
   version "4.3.1"
   resolved "https://registry.yarnpkg.com/zustand/-/zustand-4.3.1.tgz#76c47ef713c43763953f7a9e518f89efd898e3bb"
   integrity sha512-EVyo/eLlOTcJm/X5M00rwtbYFXwRVTaRteSvhtbTZUCQFJkNfIyHPiJ6Ke68MSWzcKHpPzvqNH4gC2ZS/sbNqw==
+  dependencies:
+    use-sync-external-store "1.2.0"
+
+zustand@~4.1.5:
+  version "4.1.5"
+  resolved "https://registry.yarnpkg.com/zustand/-/zustand-4.1.5.tgz#7402b511f5b23ccb0f9ba6d20ae01ec817e16eb6"
+  integrity sha512-PsdRT8Bvq22Yyh1tvpgdHNE7OAeFKqJXUxtJvj1Ixw2B9O2YZ1M34ImQ+xyZah4wZrR4lENMoDUutKPpyXCQ/Q==
   dependencies:
     use-sync-external-store "1.2.0"
