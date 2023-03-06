@@ -202,6 +202,10 @@ const sketchList = [
     {
         title: '🚧 Marching Cubes - Goo',
         route: 'MarchingCubes-Goo',
+    },
+    {
+        title: '🚧 Postprocessing - Pixelation',
+        route: 'Postprocessing-Pixelation',
     }
 ] as const
 
