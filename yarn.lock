@@ -10,6 +10,20 @@
     "@jridgewell/gen-mapping" "^0.1.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
+"@arancini/core@2.0.0", "@arancini/core@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@arancini/core/-/core-2.0.0.tgz#89ebc930c7c767cb78562f7858aaf2502c46b36e"
+  integrity sha512-K8iKBKRPLLWeYeLsaOL4sCveFIT1DjgsZ06ncClGC0NMp4aoO9rfdCBjU8Y+AWcziWJUyyzYxtsQidIawl0vYQ==
+
+"@arancini/react@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@arancini/react/-/react-2.0.1.tgz#9889a6648c5c75053e2141ca4a20da92f61df62c"
+  integrity sha512-0n/no7Icc0/PaaohFk1LNhLDRJ/2PqlfdOhMRYjz/YhbwEgDvnye5NQiUbiCRMqK0gBcMb1WtB7tnG0BGq5p5g==
+  dependencies:
+    "@arancini/core" "^2.0.0"
+    react "^18.2.0"
+    react-dom "^18.2.0"
+
 "@babel/code-frame@^7.18.6":
   version "7.18.6"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.18.6.tgz#3b25d38c89600baa2dcc219edfa88a74eb2c427a"
@@ -1071,6 +1085,13 @@ ansi-styles@^4.1.0:
   integrity sha512-zbB9rCJAT1rbjiVDb2hqKFHNYLxgtk8NURxZ3IZwD3F6NtxbXZQCnnSi1Lkx+IDohdPlFp222wVALIheZJQSEg==
   dependencies:
     color-convert "^2.0.1"
+
+arancini@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/arancini/-/arancini-2.0.0.tgz#1cf41e3665bd538db385cbb99b456cb077e563b2"
+  integrity sha512-TnwwDfYsPj3P8zPmW7la2N5P8RGSeIN61et3VrnCxZCjZS8u/WHdqVjI8QAWDuub4vmSGKnkso/KTA/dJRiYxA==
+  dependencies:
+    "@arancini/core" "2.0.0"
 
 arch@^2.1.0:
   version "2.2.0"
@@ -3155,6 +3176,13 @@ p-timeout@^2.0.1:
   dependencies:
     p-finally "^1.0.0"
 
+p2-es@^1.1.7:
+  version "1.1.7"
+  resolved "https://registry.yarnpkg.com/p2-es/-/p2-es-1.1.7.tgz#dacad57adb4e34173feacf62f75733a4b3555b75"
+  integrity sha512-3yAUDhIrSPBWSCCUYc97wG/IP8uiMANhhul7C1z6y0+hLNaKnbgnqct47BrJZObwypy44SivOFFqWhXgRVfU2Q==
+  dependencies:
+    poly-decomp-es "0.4.1"
+
 parse-json@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/parse-json/-/parse-json-2.2.0.tgz#f480f40434ef80741f8469099f8dea18f55a4dc9"
@@ -3259,6 +3287,11 @@ pngquant-bin@^6.0.0:
     bin-wrapper "^4.0.1"
     execa "^4.0.0"
 
+poly-decomp-es@0.4.1:
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/poly-decomp-es/-/poly-decomp-es-0.4.1.tgz#523e81338ab7e16b2f5648315ddb5a4370e00109"
+  integrity sha512-ClJK/YGQ3A2xCQ1YkxCM5KvHtwplZ9LHHoPlJMJ/+O3EnF7OSq9OcqsOfMilgIjZiFpccBobpb4nnDlEKdg+ig==
+
 postcss-value-parser@^4.0.2:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/postcss-value-parser/-/postcss-value-parser-4.2.0.tgz#723c09920836ba6d3e5af019f92bc0971c02e514"
@@ -3362,7 +3395,7 @@ react-composer@^5.0.3:
   dependencies:
     prop-types "^15.6.0"
 
-react-dom@^18.0.0:
+react-dom@^18.0.0, react-dom@^18.2.0:
   version "18.2.0"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-18.2.0.tgz#22aaf38708db2674ed9ada224ca4aa708d821e3d"
   integrity sha512-6IMTriUmvsjHUjNtEDudZfuDQUoWXVxKHhlEGSk81n4YFS+r/Kl99wXiwlVXtPBtJenozv2P+hxDsw9eA7Xo6g==
@@ -3424,7 +3457,7 @@ react-use-measure@^2.1.1:
   dependencies:
     debounce "^1.2.1"
 
-react@^18.0.0:
+react@^18.0.0, react@^18.2.0:
   version "18.2.0"
   resolved "https://registry.yarnpkg.com/react/-/react-18.2.0.tgz#555bd98592883255fa00de14f1151a917b5d77d5"
   integrity sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==

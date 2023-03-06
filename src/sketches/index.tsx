@@ -198,6 +198,11 @@ const sketchList = [
         route: 'Rapier-KinematicCharacterController',
         cover: RapierKinematicCharacterControllerCover,
     },
+    /* Misc */
+    {
+        title: '🚧 Marching Cubes - Goo',
+        route: 'MarchingCubes-Goo',
+    }
 ] as const
 
 export const sketches: readonly Sketch[] = sketchList
