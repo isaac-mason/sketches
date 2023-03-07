@@ -4042,10 +4042,10 @@ tunnel-agent@^0.6.0:
   dependencies:
     safe-buffer "^5.0.1"
 
-tunnel-rat@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/tunnel-rat/-/tunnel-rat-0.1.0.tgz#62cfbaf1b24cabac9318fe45ef26d70dc40e86fe"
-  integrity sha512-/FKZLBXCoKhA7Wz+dsqitrItaLXYmT2bkZXod+1UuR4JqHtdb54yHvHhmMgLg+eyH1Od/CCnhA2VQQ2A/54Tcw==
+tunnel-rat@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/tunnel-rat/-/tunnel-rat-0.1.1.tgz#e3c98d848b02c3efd0ce1ae0121e1b306528828c"
+  integrity sha512-CvTl0oosvtFf2j7r/5gm6Obl/d/OIuZe2XL5lfx8FaiNAxz76A51OiKXLg22mCqrMHunkodmZs24mnMCl3FeyQ==
   dependencies:
     zustand "^4.1.0"
 
