@@ -97,7 +97,7 @@ const App = () => {
             </group>
 
             <mesh receiveShadow rotation-x={-Math.PI / 2} position-y={-0.2}>
-                <meshStandardMaterial color="#555" />
+                <meshStandardMaterial color="#555" dithering={true} />
                 <planeGeometry args={[15, 15]} />
             </mesh>
 

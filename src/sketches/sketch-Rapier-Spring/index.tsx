@@ -85,9 +85,9 @@ const SpringDemo = () => {
                         // apply impulse on click
                         cubeRigidBody.current.applyImpulse(
                             {
-                                x: -5,
-                                y: -10,
-                                z: -20,
+                                x: -1,
+                                y: -2.5,
+                                z: -5,
                             },
                             true
                         )

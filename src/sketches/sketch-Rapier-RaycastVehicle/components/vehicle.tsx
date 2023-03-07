@@ -1,13 +1,16 @@
+import { useGLTF } from '@react-three/drei'
 import {
     CuboidCollider,
-    RigidBody,
     RapierRigidBody,
+    RigidBody,
     RigidBodyProps,
     useRapier,
+    Vector3Array,
 } from '@react-three/rapier'
 import { useControls as useLeva } from 'leva'
 import {
     forwardRef,
+    Fragment,
     RefObject,
     useEffect,
     useImperativeHandle,
@@ -15,21 +18,106 @@ import {
     useRef,
     useState,
 } from 'react'
-import { Color, Group, Object3D, Vector3 } from 'three'
+import {
+    Color,
+    Group,
+    Mesh,
+    MeshStandardMaterial,
+    Object3D,
+    Vector3,
+    Vector3Tuple,
+} from 'three'
+import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
+import chassisDracoUrl from '../assets/chassis-draco.glb?url'
+import { LEVA_KEY } from '../constants'
 import {
     RapierRaycastVehicle,
     WheelOptions,
 } from '../lib/rapier-raycast-vehicle'
-import { Chassis, ChassisRef } from './chassis'
-import { Wheel } from './wheel'
-import { LEVA_KEY } from '../constants'
 
-export const BRAKE_LIGHTS_ON_COLOR = new Color(0xff3333)
-export const BRAKE_LIGHTS_OFF_COLOR = new Color(0x333333)
+import wheelGlbUrl from '../assets/wheel-draco.glb?url'
 
-const CHASSIS_CUBOID_HALF_EXTENTS = new Vector3(2.35, 0.55, 1)
+type WheelGLTF = GLTF & {
+    nodes: {
+        Mesh_14: Mesh
+        Mesh_14_1: Mesh
+    }
+    materials: {
+        'Material.002': MeshStandardMaterial
+        'Material.009': MeshStandardMaterial
+    }
+}
 
-export type RaycastVehicleWheel = {
+interface ChassisGLTF extends GLTF {
+    nodes: {
+        Chassis_1: Mesh
+        Chassis_2: Mesh
+        Glass: Mesh
+        BrakeLights: Mesh
+        HeadLights: Mesh
+        Cabin_Grilles: Mesh
+        Undercarriage: Mesh
+        TurnSignals: Mesh
+        Chrome: Mesh
+        Wheel_1: Mesh
+        Wheel_2: Mesh
+        License_1: Mesh
+        License_2: Mesh
+        Cube013: Mesh
+        Cube013_1: Mesh
+        Cube013_2: Mesh
+        'pointer-left': Mesh
+        'pointer-right': Mesh
+    }
+    materials: {
+        BodyPaint: MeshStandardMaterial
+        License: MeshStandardMaterial
+        Chassis_2: MeshStandardMaterial
+        Glass: MeshStandardMaterial
+        BrakeLight: MeshStandardMaterial
+        defaultMatClone: MeshStandardMaterial
+        HeadLight: MeshStandardMaterial
+        Black: MeshStandardMaterial
+        Undercarriage: MeshStandardMaterial
+        TurnSignal: MeshStandardMaterial
+    }
+}
+
+type WheelProps = JSX.IntrinsicElements['group'] & {
+    side: 'left' | 'right'
+    radius: number
+}
+
+const Wheel = ({ side, radius, ...props }: WheelProps) => {
+    const groupRef = useRef<Group>(null!)
+
+    const { nodes, materials } = useGLTF(wheelGlbUrl) as WheelGLTF
+    const scale = radius / 0.34
+
+    return (
+        <group dispose={null} {...props} ref={groupRef}>
+            <group scale={scale}>
+                <group scale={side === 'left' ? -1 : 1}>
+                    <mesh
+                        castShadow
+                        geometry={nodes.Mesh_14.geometry}
+                        material={materials['Material.002']}
+                    />
+                    <mesh
+                        castShadow
+                        geometry={nodes.Mesh_14_1.geometry}
+                        material={materials['Material.009']}
+                    />
+                </group>
+            </group>
+        </group>
+    )
+}
+
+const BRAKE_LIGHTS_ON_COLOR = new Color(1, 0.2, 0.2).multiplyScalar(1.5)
+const BRAKE_LIGHTS_OFF_COLOR = new Color(0x333333)
+
+type RaycastVehicleWheel = {
     options: WheelOptions
     object: RefObject<Object3D>
 }
@@ -39,17 +127,21 @@ export type VehicleProps = RigidBodyProps
 export type VehicleRef = {
     chassisRigidBody: RefObject<RapierRigidBody>
     rapierRaycastVehicle: RefObject<RapierRaycastVehicle>
-    chassis: RefObject<ChassisRef>
     wheels: RaycastVehicleWheel[]
+    setBraking: (braking: boolean) => void
 }
 
 export const Vehicle = forwardRef<VehicleRef, VehicleProps>(
     ({ children, ...groupProps }, ref) => {
         const rapier = useRapier()
 
+        const { nodes: n, materials: m } = useGLTF(
+            chassisDracoUrl
+        ) as ChassisGLTF
+
         const vehicleRef = useRef<RapierRaycastVehicle>(null!)
-        const chassisRef = useRef<ChassisRef>(null!)
         const chassisRigidBodyRef = useRef<RapierRigidBody>(null!)
+        const brakeLightsRef = useRef<Mesh>(null!)
 
         const topLeftWheelObject = useRef<Group>(null!)
         const topRightWheelObject = useRef<Group>(null!)
@@ -166,7 +258,13 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(
         useImperativeHandle(ref, () => ({
             chassisRigidBody: chassisRigidBodyRef,
             rapierRaycastVehicle: vehicleRef,
-            chassis: chassisRef,
+            setBraking: (braking: boolean) => {
+                const material = brakeLightsRef.current
+                    .material as MeshStandardMaterial
+                material.color = braking
+                    ? BRAKE_LIGHTS_ON_COLOR
+                    : BRAKE_LIGHTS_OFF_COLOR
+            },
             wheels,
         }))
 
@@ -174,7 +272,6 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(
             vehicleRef.current = new RapierRaycastVehicle({
                 world: rapier.world.raw(),
                 chassisRigidBody: chassisRigidBodyRef.current,
-                chassisHalfExtents: CHASSIS_CUBOID_HALF_EXTENTS,
                 indexRightAxis,
                 indexForwardAxis,
                 indexUpAxis,
@@ -202,6 +299,7 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(
             object.position.set(10, 0, -0.7)
             return object
         })
+
         const [rightHeadlightTarget] = useState(() => {
             const object = new Object3D()
             object.position.set(10, 0, 0.7)
@@ -216,41 +314,145 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(
                     ref={chassisRigidBodyRef}
                     mass={150}
                 >
-                    <primitive object={leftHeadlightTarget} />
-                    <spotLight
-                        position={[2.5, -0.2, -0.7]}
-                        target={leftHeadlightTarget}
-                        angle={0.4}
-                        distance={50}
-                        castShadow
-                        penumbra={1}
-                    />
+                    {/* Collider */}
+                    {/* todo: change to performant convex hull */}
+                    <CuboidCollider args={[2.35, 0.55, 1]} />
 
-                    <primitive object={rightHeadlightTarget} />
-                    <spotLight
-                        position={[2.5, -0.2, 0.7]}
-                        target={rightHeadlightTarget}
-                        angle={0.4}
-                        distance={50}
-                        castShadow
-                        penumbra={1}
-                    />
+                    {/* Headlights */}
+                    {[
+                        {
+                            position: [2.5, -0.2, -0.7] as Vector3Tuple,
+                            target: leftHeadlightTarget,
+                        },
+                        {
+                            position: [2.5, -0.2, 0.7] as Vector3Tuple,
+                            target: rightHeadlightTarget,
+                        },
+                    ].map(({ position, target }, idx) => (
+                        <Fragment key={idx}>
+                            <primitive object={target} />
+                            <spotLight
+                                position={position}
+                                target={target}
+                                angle={0.4}
+                                distance={50}
+                                castShadow
+                                penumbra={1}
+                                intensity={1.5}
+                            />
+                        </Fragment>
+                    ))}
 
-                    <Chassis
-                        ref={chassisRef}
+                    {/* Chassis */}
+                    <group
                         position={[-0.2, -0.25, 0]}
                         rotation-y={Math.PI / 2}
-                    />
-
-                    <CuboidCollider
-                        args={[
-                            CHASSIS_CUBOID_HALF_EXTENTS.x,
-                            CHASSIS_CUBOID_HALF_EXTENTS.y,
-                            CHASSIS_CUBOID_HALF_EXTENTS.z,
-                        ]}
-                    />
+                        dispose={null}
+                    >
+                        <group>
+                            <mesh
+                                castShadow
+                                receiveShadow
+                                geometry={n.Chassis_1.geometry}
+                                material={m.BodyPaint}
+                                material-color="#f0c050"
+                            />
+                            <mesh
+                                castShadow
+                                geometry={n.Chassis_2.geometry}
+                                material={n.Chassis_2.material}
+                                material-color="#353535"
+                            />
+                            <mesh
+                                castShadow
+                                geometry={n.Glass.geometry}
+                                material={m.Glass}
+                                material-transparent
+                            />
+                            <mesh
+                                ref={brakeLightsRef}
+                                geometry={n.BrakeLights.geometry}
+                                material={m.BrakeLight}
+                                material-transparent
+                                material-toneMapped={true}
+                            />
+                            <mesh
+                                geometry={n.HeadLights.geometry}
+                                material={m.HeadLight}
+                            />
+                            <mesh
+                                geometry={n.Cabin_Grilles.geometry}
+                                material={m.Black}
+                            />
+                            <mesh
+                                geometry={n.Undercarriage.geometry}
+                                material={m.Undercarriage}
+                            />
+                            <mesh
+                                geometry={n.TurnSignals.geometry}
+                                material={m.TurnSignal}
+                            />
+                            <mesh
+                                geometry={n.Chrome.geometry}
+                                material={n.Chrome.material}
+                            />
+                            <group position={[0.37, 0.25, 0.46]}>
+                                <mesh
+                                    geometry={n.Wheel_1.geometry}
+                                    material={n.Wheel_1.material}
+                                />
+                                <mesh
+                                    geometry={n.Wheel_2.geometry}
+                                    material={n.Wheel_2.material}
+                                />
+                            </group>
+                            <group position={[0, 0, 0]}>
+                                <mesh
+                                    geometry={n.License_1.geometry}
+                                    material={m.License}
+                                />
+                                <mesh
+                                    geometry={n.License_2.geometry}
+                                    material={n.License_2.material}
+                                />
+                            </group>
+                            <group
+                                position={[0.2245, 0.3045, 0.6806]}
+                                scale={[0.0594, 0.0594, 0.0594]}
+                            >
+                                <mesh
+                                    geometry={n.Cube013.geometry}
+                                    material={n.Cube013.material}
+                                />
+                                <mesh
+                                    geometry={n.Cube013_1.geometry}
+                                    material={n.Cube013_1.material}
+                                />
+                                <mesh
+                                    geometry={n.Cube013_2.geometry}
+                                    material={n.Cube013_2.material}
+                                />
+                            </group>
+                            <mesh
+                                geometry={n['pointer-left'].geometry}
+                                material={n['pointer-left'].material}
+                                position={[0.5107, 0.3045, 0.6536]}
+                                rotation={[Math.PI / 2, -1.1954, 0]}
+                                scale={[0.0209, 0.0209, 0.0209]}
+                            />
+                            <mesh
+                                geometry={n['pointer-right'].geometry}
+                                material={n['pointer-right'].material}
+                                position={[0.2245, 0.3045, 0.6536]}
+                                rotation={[-Math.PI / 2, -0.9187, Math.PI]}
+                                scale={[0.0209, 0.0209, 0.0209]}
+                            />
+                        </group>
+                        {children}
+                    </group>
                 </RigidBody>
 
+                {/* Wheels */}
                 <group ref={topLeftWheelObject}>
                     <Wheel
                         rotation={[0, Math.PI / 2, 0]}
@@ -258,7 +460,6 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(
                         radius={commonWheelOptions.radius}
                     />
                 </group>
-
                 <group ref={topRightWheelObject}>
                     <Wheel
                         rotation={[0, Math.PI / 2, 0]}
@@ -266,7 +467,6 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(
                         radius={commonWheelOptions.radius}
                     />
                 </group>
-
                 <group ref={bottomLeftWheelObject}>
                     <Wheel
                         rotation={[0, Math.PI / 2, 0]}
@@ -274,7 +474,6 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(
                         radius={commonWheelOptions.radius}
                     />
                 </group>
-
                 <group ref={bottomRightWheelObject}>
                     <Wheel
                         rotation={[0, Math.PI / 2, 0]}

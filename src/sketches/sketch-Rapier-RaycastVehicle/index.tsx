@@ -17,12 +17,7 @@ import { usePageVisible } from '../../hooks/use-page-visible'
 import { Canvas } from '../Canvas'
 import { LampPost } from './components/lamp-post'
 import { TrafficCone } from './components/traffic-cone'
-import {
-    BRAKE_LIGHTS_OFF_COLOR,
-    BRAKE_LIGHTS_ON_COLOR,
-    Vehicle,
-    VehicleRef,
-} from './components/vehicle'
+import { Vehicle, VehicleRef } from './components/vehicle'
 import {
     AFTER_RAPIER_UPDATE,
     LEVA_KEY,
@@ -75,9 +70,9 @@ const Game = () => {
     })
 
     const { maxForce, maxSteer, maxBrake } = useLeva(`${LEVA_KEY}-controls`, {
-        maxForce: 500,
-        maxSteer: 0.5,
-        maxBrake: 10,
+        maxForce: 30,
+        maxSteer: 10,
+        maxBrake: 2,
     })
 
     const { debug } = useLeva(`${LEVA_KEY}-physics`, {
@@ -151,13 +146,8 @@ const Game = () => {
         }
 
         // update brake lights
-        const brakeLights =
-            raycastVehicle.current.chassis.current?.brake.current
-
-        if (brakeLights) {
-            brakeLights.material.color =
-                brakeForce > 0 ? BRAKE_LIGHTS_ON_COLOR : BRAKE_LIGHTS_OFF_COLOR
-        }
+        const { setBraking } = raycastVehicle.current
+        setBraking(brakeForce > 0)
     })
 
     useFrame((_, delta) => {
@@ -253,7 +243,7 @@ const Game = () => {
 
             {/* boxes */}
             {Array.from({ length: 6 }).map((_, idx) => (
-                <RigidBody key={idx} colliders="cuboid" mass={10} friction={1}>
+                <RigidBody key={idx} colliders="cuboid" mass={0.2}>
                     <mesh position={[0, 2 + idx * 2.5, 70]}>
                         <boxGeometry args={[2, 1, 2]} />
                         <meshStandardMaterial color="orange" />
@@ -312,7 +302,7 @@ export default () => {
                 <Physics
                     gravity={[0, -9.81, 0]}
                     updatePriority={RAPIER_UPDATE_PRIORITY}
-                    timeStep="vary"
+                    timeStep={1/60}
                     paused={!visible || loading}
                 >
                     <Game />
