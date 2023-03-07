@@ -312,10 +312,10 @@
   resolved "https://registry.yarnpkg.com/@chevrotain/utils/-/utils-10.4.2.tgz#87735732184cc5a2f8aad2f3454082294ef3c924"
   integrity sha512-V34dacxWLwKcvcy32dx96ADJVdB7kOJLm7LyBkBQw5u5HC9WdEFw2G17zml+U3ivavGTrGPJHl8o9/UJm0PlUw==
 
-"@dimforge/rapier3d-compat@0.11.1":
-  version "0.11.1"
-  resolved "https://registry.yarnpkg.com/@dimforge/rapier3d-compat/-/rapier3d-compat-0.11.1.tgz#24cdf14ea7c6551242f186133c0b09ada310803d"
-  integrity sha512-Xt3KcvwxnTZxjZ3uA4Qx5S9LoAqCvj4mTzcSwdPnVpM0F/ZPU7cY9bjGiNqB3+/IvUSCQB1eVamAd2IQX7hzTA==
+"@dimforge/rapier3d-compat@0.11.2":
+  version "0.11.2"
+  resolved "https://registry.yarnpkg.com/@dimforge/rapier3d-compat/-/rapier3d-compat-0.11.2.tgz#ae2b335f545decf1e82ff45bb10368e143de0fcb"
+  integrity sha512-vdWmlkpS3G8nGAzLuK7GYTpNdrkn/0NKCe0l1Jqxc7ZZOB3N0q9uG/Ap9l9bothWuAvxscIt0U97GVLr0lXWLg==
 
 "@emotion/is-prop-valid@^1.1.0":
   version "1.2.0"
@@ -837,12 +837,12 @@
     screen-space-reflections "2.5.0"
     three-stdlib "^2.8.11"
 
-"@react-three/rapier@^0.13.2":
-  version "0.13.2"
-  resolved "https://registry.yarnpkg.com/@react-three/rapier/-/rapier-0.13.2.tgz#73347e9e1d1dd6d423262b61610b390b32b3a2c3"
-  integrity sha512-zdajV4X+P449lTV9BiuxOvXZMeTQ7HTtc5YVBztKFZBOaib1kXWGhnirdv0ZrYvetvr1JZKmnl1UtgipCBKcTg==
+"@react-three/rapier@^0.14.0":
+  version "0.14.0"
+  resolved "https://registry.yarnpkg.com/@react-three/rapier/-/rapier-0.14.0.tgz#83fa88f61e2889f558118c0ddc678d891ac05a38"
+  integrity sha512-8edoz4Rq2SO/bxiQCsdRK6ELHg7hWO2Vu3Ybjo2t4HaMzPs66xrqGDFk6d9iKeGwB/KnM6q29jzmGewXJex6Lw==
   dependencies:
-    "@dimforge/rapier3d-compat" "0.11.1"
+    "@dimforge/rapier3d-compat" "0.11.2"
     three-stdlib "2.21.6"
     use-asset "1.0.4"
 
