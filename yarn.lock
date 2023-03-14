@@ -10,19 +10,17 @@
     "@jridgewell/gen-mapping" "^0.1.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@arancini/core@2.0.0", "@arancini/core@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@arancini/core/-/core-2.0.0.tgz#89ebc930c7c767cb78562f7858aaf2502c46b36e"
-  integrity sha512-K8iKBKRPLLWeYeLsaOL4sCveFIT1DjgsZ06ncClGC0NMp4aoO9rfdCBjU8Y+AWcziWJUyyzYxtsQidIawl0vYQ==
+"@arancini/core@2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@arancini/core/-/core-2.2.0.tgz#49cbcaac837ad05fa6beb91ed4813839f3c035e0"
+  integrity sha512-4IxftYJsInzNCTOx0KDzSsLrPBrxXkG+G7zAZOBYNLU+G9CeT9VMFl4L5s+2GfodJsNfiBsstp+FQsqz9/ZEjA==
 
-"@arancini/react@^2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@arancini/react/-/react-2.0.1.tgz#9889a6648c5c75053e2141ca4a20da92f61df62c"
-  integrity sha512-0n/no7Icc0/PaaohFk1LNhLDRJ/2PqlfdOhMRYjz/YhbwEgDvnye5NQiUbiCRMqK0gBcMb1WtB7tnG0BGq5p5g==
+"@arancini/react@2.2.0", "@arancini/react@^2.0.1":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@arancini/react/-/react-2.2.0.tgz#d811da1d911d2a32f5bf03c7e86196dbc44607d0"
+  integrity sha512-AiLj3M3W+doDnaESMq92o+YFaIdALsfV0dONb85WLG9FcJnoowkE2jg6TdYlfWdLDwrfvd6cHO7kl0iclI85Xg==
   dependencies:
-    "@arancini/core" "^2.0.0"
-    react "^18.2.0"
-    react-dom "^18.2.0"
+    "@arancini/core" "2.2.0"
 
 "@babel/code-frame@^7.18.6":
   version "7.18.6"
@@ -1061,12 +1059,13 @@ ansi-styles@^4.1.0:
   dependencies:
     color-convert "^2.0.1"
 
-arancini@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/arancini/-/arancini-2.0.0.tgz#1cf41e3665bd538db385cbb99b456cb077e563b2"
-  integrity sha512-TnwwDfYsPj3P8zPmW7la2N5P8RGSeIN61et3VrnCxZCjZS8u/WHdqVjI8QAWDuub4vmSGKnkso/KTA/dJRiYxA==
+arancini@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/arancini/-/arancini-2.2.0.tgz#cf8bd23ecd3d9d714b874db8be349a6095e3a6fd"
+  integrity sha512-J4Hmvmp0hav92FXnlmxKhsySL314NVWgc4vrWRq53t6aTalw/envVCA1VgPW5W19RVUxfNyDzIA9j4cFCfIb4g==
   dependencies:
-    "@arancini/core" "2.0.0"
+    "@arancini/core" "2.2.0"
+    "@arancini/react" "2.2.0"
 
 arch@^2.1.0:
   version "2.2.0"
@@ -3370,7 +3369,7 @@ react-composer@^5.0.3:
   dependencies:
     prop-types "^15.6.0"
 
-react-dom@^18.0.0, react-dom@^18.2.0:
+react-dom@^18.0.0:
   version "18.2.0"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-18.2.0.tgz#22aaf38708db2674ed9ada224ca4aa708d821e3d"
   integrity sha512-6IMTriUmvsjHUjNtEDudZfuDQUoWXVxKHhlEGSk81n4YFS+r/Kl99wXiwlVXtPBtJenozv2P+hxDsw9eA7Xo6g==
@@ -3432,7 +3431,7 @@ react-use-measure@^2.1.1:
   dependencies:
     debounce "^1.2.1"
 
-react@^18.0.0, react@^18.2.0:
+react@^18.0.0:
   version "18.2.0"
   resolved "https://registry.yarnpkg.com/react/-/react-18.2.0.tgz#555bd98592883255fa00de14f1151a917b5d77d5"
   integrity sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==
