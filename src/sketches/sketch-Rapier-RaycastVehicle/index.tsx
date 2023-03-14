@@ -90,6 +90,7 @@ const Game = () => {
         const {
             wheels,
             rapierRaycastVehicle: { current: vehicle },
+            setBraking,
         } = raycastVehicle.current
 
         // update wheels from controls
@@ -146,7 +147,6 @@ const Game = () => {
         }
 
         // update brake lights
-        const { setBraking } = raycastVehicle.current
         setBraking(brakeForce > 0)
     })
 
@@ -302,7 +302,9 @@ export default () => {
                 <Physics
                     gravity={[0, -9.81, 0]}
                     updatePriority={RAPIER_UPDATE_PRIORITY}
-                    timeStep={1/60}
+                    // todo: support fixed timestepping
+                    // right now if timeStep is not "vary", the wheel positions will be incorrect and will visually jitter
+                    timeStep="vary"
                     paused={!visible || loading}
                 >
                     <Game />
