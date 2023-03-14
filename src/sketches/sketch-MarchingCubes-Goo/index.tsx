@@ -1,4 +1,3 @@
-import { createECS } from '@arancini/react'
 import {
     Bounds,
     MarchingCube,
@@ -7,6 +6,7 @@ import {
 } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { Component, System, World as ECSWorld } from 'arancini'
+import { createECS } from 'arancini/react'
 import { Body, Box, Circle, ContactMaterial, Material, World } from 'p2-es'
 import { Canvas } from '../Canvas'
 
