@@ -754,16 +754,16 @@
   dependencies:
     three-bvh-csg "^0.0.4"
 
-"@react-three/drei@^9.56.10", "@react-three/drei@^9.57.0":
-  version "9.57.0"
-  resolved "https://registry.yarnpkg.com/@react-three/drei/-/drei-9.57.0.tgz#9ec3120c88fc0a21c38f10478108fc95ebba0288"
-  integrity sha512-jlGnzJ8zJdfFof8HtGGY7ANKvuupK81V0YX+lc4aayIlVFrN4Pi0GvpsR7+vhpkyPfxQ0qOOE6HWBqhfBm8EIg==
+"@react-three/drei@^9.56.10", "@react-three/drei@^9.57.3":
+  version "9.57.3"
+  resolved "https://registry.yarnpkg.com/@react-three/drei/-/drei-9.57.3.tgz#86410c55279bb402845af10f18cd6736c7d1f98d"
+  integrity sha512-zkkrIrd3kuKkRlT0IUg6y8dBppZiv2KXrS6IzUIOKAAwbsNAotAQT//0u6Z242q0WdSfxiQgPFi3WApKpbENPw==
   dependencies:
     "@babel/runtime" "^7.11.2"
     "@react-spring/three" "~9.6.1"
     "@use-gesture/react" "^10.2.24"
-    camera-controls "^2.1.0"
-    detect-gpu "^5.0.10"
+    camera-controls "^2.3.1"
+    detect-gpu "^5.0.14"
     glsl-noise "^0.0.0"
     lodash.clamp "^4.0.3"
     lodash.omit "^4.5.0"
@@ -1281,10 +1281,10 @@ camelize@^1.0.0:
   resolved "https://registry.yarnpkg.com/camelize/-/camelize-1.0.1.tgz#89b7e16884056331a35d6b5ad064332c91daa6c3"
   integrity sha512-dU+Tx2fsypxTgtLoE36npi3UqcjSSMNYfkqgmoEhtZrraP5VWq0K7FkWVTYa8eMPtnU/G2txVsfdCJTn9uzpuQ==
 
-camera-controls@^2.1.0:
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/camera-controls/-/camera-controls-2.3.0.tgz#1f7894d6f7a6f337e36f728d1ddb2a834e0d0a10"
-  integrity sha512-uchKL1JCxyCJxpAmIq3VR5WDJOvzQbylAYhjzIvDhoDFndvfKB0MYG+4c/Ei6UyY7XMHa9qaDJ6g9oJ9unXXGA==
+camera-controls@^2.3.1:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/camera-controls/-/camera-controls-2.3.1.tgz#8e8e241fb874ae38b6fa1d22ba445a2e7b3b94ea"
+  integrity sha512-mGPDOqCTSUqaeX3yR3bWQ/p1M5CR8C+cnqndBxQugfGKysn1dhRtw8Q6sG1hq4GL8RPsGwRanwQk5zwQjyrxyQ==
 
 caniuse-lite@^1.0.30001400:
   version "1.0.30001429"
@@ -1604,10 +1604,10 @@ dequal@^2.0.2:
   resolved "https://registry.yarnpkg.com/dequal/-/dequal-2.0.3.tgz#2644214f1997d39ed0ee0ece72335490a7ac67be"
   integrity sha512-0je+qPKHEMohvfRTCEo3CrPG6cAzAYgmzKyxRiYSSDkS6eGJdyVJm7WaYA5ECaAD9wLB2T4EEeymA5aFVcYXCA==
 
-detect-gpu@^5.0.10:
-  version "5.0.12"
-  resolved "https://registry.yarnpkg.com/detect-gpu/-/detect-gpu-5.0.12.tgz#01835cae00627946108967b4e462c006019cae69"
-  integrity sha512-HRI2Ci3hwfu9wtAikHpQ5MiGu3I7YDuWXshvkRtwCBAS2tYVqGd7x0fRzA19YjYgRXO6RFW5Yaf8o/xGYTojjg==
+detect-gpu@^5.0.14:
+  version "5.0.15"
+  resolved "https://registry.yarnpkg.com/detect-gpu/-/detect-gpu-5.0.15.tgz#d375f89b246f21167859efbbd89eff60ccbcfd4d"
+  integrity sha512-ImImgPRhTvo/bmtotR1KG534ZE+L6yIV9sMe4y3zOUzeInnYk/9KOBqxz9M5hKkHXhGKKjY04pMrLMb+rp3FWw==
   dependencies:
     webgl-constants "^1.1.1"
 
