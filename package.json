@@ -14,7 +14,7 @@
     "@react-three/flex": "^1.0.1",
     "@react-three/postprocessing": "^2.7.0",
     "@react-three/rapier": "^0.14.0",
-    "arancini": "^2.2.0",
+    "arancini": "^2.2.1",
     "leva": "^0.9.25",
     "p2-es": "^1.1.7",
     "r3f-perf": "^7.1.2",
