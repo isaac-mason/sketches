@@ -745,10 +745,10 @@
   resolved "https://registry.yarnpkg.com/@react-spring/types/-/types-9.6.1.tgz#913d3a68c5cbc1124fdb18eff919432f7b6abdde"
   integrity sha512-POu8Mk0hIU3lRXB3bGIGe4VHIwwDsQyoD1F394OK7STTiX9w4dG3cTLljjYswkQN+hDSHRrj4O36kuVa7KPU8Q==
 
-"@react-three/csg@^2.0.7":
-  version "2.0.7"
-  resolved "https://registry.yarnpkg.com/@react-three/csg/-/csg-2.0.7.tgz#c5fa8ed04b420832ac18781f9deeb57177975ef0"
-  integrity sha512-V7Vj6CSKayFB78rPAN3yiQ35EmIXbxFUAkD2N/VbYmFNfUSUIc6TPQNM/t4JSv5Pkp8zNjHOQeIxxzZko0nACA==
+"@react-three/csg@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@react-three/csg/-/csg-2.1.1.tgz#3ed7d9dbec8819fae383953411ecdb50a0f9ccb4"
+  integrity sha512-0YC2p0GvtJZ1oqdJ46wg1BMAwtWkpeKXepRIVS5Bx6mGQZKzou32CmdxSIViyTxhjH6LTw6vIaQv1tdr8UxNOQ==
   dependencies:
     three-bvh-csg "^0.0.4"
 
