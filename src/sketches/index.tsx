@@ -24,6 +24,8 @@ import JourneyLesson27Cover from './sketch-JourneyLesson27-Shaders/cover.png'
 import JourneyLesson28Cover from './sketch-JourneyLesson28-RagingSea/cover.png'
 import JourneyLesson29Cover from './sketch-JourneyLesson29-AnimatedGalaxy/cover.png'
 import JourneyLesson30Cover from './sketch-JourneyLesson30-ModifiedMaterials/cover.png'
+import MarchingCubesGooCover from './sketch-MarchingCubes-Goo/cover.png'
+import PostprocessingPixelationCover from './sketch-Postprocessing-Pixelation/cover.png'
 import RapierCameraRaycastingCover from './sketch-Rapier-CameraRaycasting/cover.png'
 import RapierKinematicCharacterControllerCover from './sketch-Rapier-KinematicCharacterController/cover.png'
 import RapierPointerConstraintCover from './sketch-Rapier-PointerConstraint/cover.png'
@@ -201,12 +203,14 @@ const sketchList = [
     },
     /* Misc */
     {
-        title: '🚧 Marching Cubes - Goo',
+        title: 'Marching Cubes - Goo',
         route: 'MarchingCubes-Goo',
+        cover: MarchingCubesGooCover,
     },
     {
-        title: '🚧 Postprocessing - Pixelation',
+        title: 'Postprocessing - Pixelation',
         route: 'Postprocessing-Pixelation',
+        cover: PostprocessingPixelationCover,
     },
     /* D3 */
     {
