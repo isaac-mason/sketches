@@ -1,4 +1,5 @@
 import { lazy } from 'react'
+import D3ForceDirectedGraphCover from './sketch-D3-ForceDirectedGraph/cover.png'
 import GLSLShadersFromScratch01Cover from './sketch-GLSLShadersFromScratch01-Varyings/cover.png'
 import GLSLShadersFromScratch02Cover from './sketch-GLSLShadersFromScratch02-Uniforms/cover.png'
 import GLSLShadersFromScratch03Cover from './sketch-GLSLShadersFromScratch03-Attributes/cover.png'
@@ -206,7 +207,13 @@ const sketchList = [
     {
         title: '🚧 Postprocessing - Pixelation',
         route: 'Postprocessing-Pixelation',
-    }
+    },
+    /* D3 */
+    {
+        title: 'D3 - Force Directed Graph',
+        route: 'D3-ForceDirectedGraph',
+        cover: D3ForceDirectedGraphCover,
+    },
 ] as const
 
 export const sketches: readonly Sketch[] = sketchList

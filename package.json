@@ -15,7 +15,9 @@
     "@react-three/postprocessing": "^2.7.1",
     "@react-three/rapier": "^0.14.0",
     "arancini": "^2.2.1",
+    "d3": "^7.8.4",
     "leva": "^0.9.25",
+    "meshline": "^3.1.6",
     "p2-es": "^1.1.7",
     "r3f-perf": "^7.1.2",
     "react": "^18.0.0",
@@ -27,6 +29,7 @@
     "tunnel-rat": "^0.1.1"
   },
   "devDependencies": {
+    "@types/d3": "^7.4.0",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
     "@types/styled-components": "^5.1.25",
