@@ -3628,10 +3628,10 @@ p-timeout@^2.0.1:
   dependencies:
     p-finally "^1.0.0"
 
-p2-es@^1.1.7:
-  version "1.1.7"
-  resolved "https://registry.yarnpkg.com/p2-es/-/p2-es-1.1.7.tgz#dacad57adb4e34173feacf62f75733a4b3555b75"
-  integrity sha512-3yAUDhIrSPBWSCCUYc97wG/IP8uiMANhhul7C1z6y0+hLNaKnbgnqct47BrJZObwypy44SivOFFqWhXgRVfU2Q==
+p2-es@^1.1.8:
+  version "1.1.8"
+  resolved "https://registry.yarnpkg.com/p2-es/-/p2-es-1.1.8.tgz#0a5d3d5a7d1945b38f083cfbc5bc074c927f32b9"
+  integrity sha512-K7ecscAsmdAU7sqQNYhZIFVgrS5jtizLOG1js3p7p5I8zxXjNSf7mPfUQKsQkgEanUMLmpAWgpH8O8kw0nRoUw==
   dependencies:
     poly-decomp-es "0.4.1"
 
