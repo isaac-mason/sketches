@@ -10,17 +10,17 @@
     "@jridgewell/gen-mapping" "^0.1.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@arancini/core@2.2.1":
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/@arancini/core/-/core-2.2.1.tgz#d73465333967a39f6f3034d52d919696b07aca19"
-  integrity sha512-AWZwdUsC0Pwd2qSaNpSAEx5+m7vuJolN/xn4Abfoczc37oVIYEnv93HHG9hZxQwhv8UGR/Y/ZuW7M4zuVcIoaw==
+"@arancini/core@2.2.2":
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/@arancini/core/-/core-2.2.2.tgz#374cf13cad639803d25002f9ba6da510cbb3ce4e"
+  integrity sha512-1LohTWdI+NI8TECWlsQHoR4JE3YKDyuFl2Q2l7GFM8fx4szopJ9cIkqn2Tkryp6v+ZoQEoUCe/wWP3EaVo58Bw==
 
-"@arancini/react@2.2.1":
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/@arancini/react/-/react-2.2.1.tgz#16c06daabd280e3cff2731eb5f69052c455396fd"
-  integrity sha512-Cn8ei0Jqqv5PLQ8cGIqm8888B2seM5P9OWC6KnqrawLyPzKn2TqpQWEYVb3xBO9AJNkmsnSEdUIzE4/jmx2l3g==
+"@arancini/react@2.2.2":
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/@arancini/react/-/react-2.2.2.tgz#5cde379e47621723b8fd5a812e74cf2fed4402ec"
+  integrity sha512-Gbfa1qdtpkcebxNItmCJSsRgJbNADKVlztha19fYNnMeRtbCOg9vWVVyw27/r7RvL+NZ9FcTwkXznM1RHEKzgQ==
   dependencies:
-    "@arancini/core" "2.2.1"
+    "@arancini/core" "2.2.2"
 
 "@babel/code-frame@^7.18.6":
   version "7.18.6"
@@ -1274,13 +1274,13 @@ ansi-styles@^4.1.0:
   dependencies:
     color-convert "^2.0.1"
 
-arancini@^2.2.1:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/arancini/-/arancini-2.2.1.tgz#53139e1e128f40bab81e991b16069bec61c4b38d"
-  integrity sha512-TqxfE4ibEXRK6mD+325ZmpNVD4zopb11vQkWPxgtwBUnVqaq7PU+06E5TiJBEcbUOvUZj12WfpX4ffU5e4DpDw==
+arancini@^2.2.2:
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/arancini/-/arancini-2.2.2.tgz#fed2a8666b376fac5683f1047753eede9813e78e"
+  integrity sha512-rxxnCiF4h/AdsLO0iRFuLoCvnxoaT9rm64vPA289qyTk+xq83rTj+qTXkaKk6nkfj4zKNxd6BGEcwVVH8cs9Fw==
   dependencies:
-    "@arancini/core" "2.2.1"
-    "@arancini/react" "2.2.1"
+    "@arancini/core" "2.2.2"
+    "@arancini/react" "2.2.2"
 
 arch@^2.1.0:
   version "2.2.0"
