@@ -1,7 +1,7 @@
 import Rapier from '@dimforge/rapier3d-compat'
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
-import { Debug, Physics, RigidBody, useRapier } from '@react-three/rapier'
+import { Physics, RigidBody, useRapier } from '@react-three/rapier'
 import { useControls as useLevaControls } from 'leva'
 import { useState } from 'react'
 import { Vector3 } from 'three'
@@ -195,9 +195,8 @@ export default () => {
                 <pointLight position={[10, 10, 10]} intensity={0.5} />
                 <pointLight position={[-10, 10, -10]} intensity={0.5} />
 
-                <Physics gravity={[0, 0, 0]}>
+                <Physics gravity={[0, 0, 0]} debug={debug}>
                     <Scene />
-                    {debug && <Debug />}
                 </Physics>
             </Canvas>
         </>

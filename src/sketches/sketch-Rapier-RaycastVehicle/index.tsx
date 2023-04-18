@@ -3,7 +3,6 @@ import { useFrame, useThree } from '@react-three/fiber'
 import {
     CuboidCollider,
     CylinderCollider,
-    Debug,
     Physics,
     RigidBody,
     useBeforePhysicsStep,
@@ -73,10 +72,6 @@ const Game = () => {
         maxForce: 30,
         maxSteer: 10,
         maxBrake: 2,
-    })
-
-    const { debug } = useLeva(`${LEVA_KEY}-physics`, {
-        debug: false,
     })
 
     useBeforePhysicsStep((world) => {
@@ -282,8 +277,6 @@ const Game = () => {
             <Stars />
 
             {cameraMode === 'orbit' && <OrbitControls />}
-
-            {debug ? <Debug /> : null}
         </>
     )
 }
@@ -291,6 +284,10 @@ const Game = () => {
 export default () => {
     const loading = useLoadingAssets()
     const visible = usePageVisible()
+
+    const { debug } = useLeva(`${LEVA_KEY}-physics`, {
+        debug: false,
+    })
 
     return (
         <>
@@ -306,6 +303,7 @@ export default () => {
                     // right now if timeStep is not "vary", the wheel positions will be incorrect and will visually jitter
                     timeStep="vary"
                     paused={!visible || loading}
+                    debug={debug}
                 >
                     <Game />
                 </Physics>

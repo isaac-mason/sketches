@@ -2,7 +2,6 @@ import Rapier from '@dimforge/rapier3d-compat'
 import { OrbitControls } from '@react-three/drei'
 import { useThree, Vector3 as Vector3Tuple } from '@react-three/fiber'
 import {
-    Debug,
     Physics,
     RapierRigidBody,
     RigidBody,
@@ -209,7 +208,7 @@ export default () => {
             </h1>
 
             <Canvas camera={{ position: [4, 4, 4] }} shadows>
-                <Physics paused={!visible}>
+                <Physics paused={!visible} debug={debug}>
                     <PointerConstraintControls target={[0, 1, 0]} />
 
                     <Cube position={[0, 5, 0]} />
@@ -217,8 +216,6 @@ export default () => {
 
                     <ambientLight intensity={0.5} />
                     <pointLight position={[-10, 5, 10]} />
-
-                    {debug && <Debug />}
                 </Physics>
             </Canvas>
         </>

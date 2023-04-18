@@ -8,7 +8,6 @@ import {
 import { useFrame, useThree } from '@react-three/fiber'
 import {
     CapsuleCollider,
-    Debug,
     Physics,
     RapierRigidBody,
     RigidBody,
@@ -356,10 +355,6 @@ export const Player = (props: JSX.IntrinsicElements['group']) => {
 }
 
 const Scene = () => {
-    const { debug } = useLevaControls(`${LEVA_KEY}-physics`, {
-        debug: false,
-    })
-
     return (
         <>
             <KeyboardControls
@@ -379,8 +374,6 @@ const Scene = () => {
             <GameLevel />
 
             <Environment preset="sunset" />
-
-            {debug && <Debug />}
         </>
     )
 }
@@ -401,12 +394,20 @@ export default () => {
     const loading = useLoadingAssets()
     const visible = usePageVisible()
 
+    const { debug } = useLevaControls(`${LEVA_KEY}-physics`, {
+        debug: false,
+    })
+
     return (
         <>
             <h1>Rapier - Kinematic Character Controller</h1>
 
             <Canvas>
-                <Physics timeStep="vary" paused={!visible || loading}>
+                <Physics
+                    timeStep="vary"
+                    paused={!visible || loading}
+                    debug={debug}
+                >
                     <Scene />
                 </Physics>
             </Canvas>
