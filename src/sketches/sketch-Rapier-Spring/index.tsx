@@ -1,6 +1,5 @@
 import { OrbitControls } from '@react-three/drei'
 import {
-    Debug,
     Physics,
     RapierRigidBody,
     RigidBody,
@@ -16,9 +15,9 @@ import { Spring } from './Spring'
 const LEVA_KEY = 'rapier-spring'
 
 const SpringDemo = () => {
-    const { debug, springRestLength, springStiffness, springDamping } =
-        useControls(LEVA_KEY, {
-            debug: false,
+    const { springRestLength, springStiffness, springDamping } = useControls(
+        LEVA_KEY,
+        {
             postPosition: {
                 value: [0, 2],
                 onChange: (value) => {
@@ -35,7 +34,8 @@ const SpringDemo = () => {
             springRestLength: 2,
             springStiffness: 1,
             springDamping: 1,
-        })
+        }
+    )
 
     const postRigidBody = useRef<RapierRigidBody>(null!)
     const cubeRigidBody = useRef<RapierRigidBody>(null!)
@@ -97,8 +97,6 @@ const SpringDemo = () => {
                     <meshStandardMaterial color="orange" />
                 </mesh>
             </RigidBody>
-
-            {debug && <Debug />}
         </>
     )
 }
@@ -117,12 +115,16 @@ const Scene = () => (
 export default () => {
     const visible = usePageVisible()
 
+    const { debug } = useControls(`${LEVA_KEY}-physics`, {
+        debug: false,
+    })
+
     return (
         <>
             <h1>Rapier - Spring</h1>
 
             <Canvas camera={{ fov: 60, position: [0, 0, 10] }} shadows>
-                <Physics paused={!visible}>
+                <Physics paused={!visible} debug={debug}>
                     <Scene />
                 </Physics>
             </Canvas>

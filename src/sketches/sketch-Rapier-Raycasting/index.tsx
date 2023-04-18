@@ -1,7 +1,7 @@
 import Rapier from '@dimforge/rapier3d-compat'
 import { Line, OrbitControls, PerspectiveCamera } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
-import { Debug, Physics, RigidBody, useRapier } from '@react-three/rapier'
+import { Physics, RigidBody, useRapier } from '@react-three/rapier'
 import { useControls as useLevaControls } from 'leva'
 import { useRef, useState } from 'react'
 import { Group } from 'three'
@@ -144,6 +144,7 @@ export default () => {
     const { debug } = useLevaControls('rapier-raycasting', {
         debug: false,
     })
+
     return (
         <>
             <h1>Rapier - Raycasting</h1>
@@ -157,9 +158,8 @@ export default () => {
 
                 <ambientLight intensity={0.5} />
 
-                <Physics gravity={[0, 0, 0]}>
+                <Physics gravity={[0, 0, 0]} debug={debug}>
                     <Scene />
-                    {debug && <Debug />}
                 </Physics>
             </Canvas>
         </>

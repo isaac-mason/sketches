@@ -6,7 +6,6 @@ import {
 import { useFrame, useThree } from '@react-three/fiber'
 import {
     CylinderCollider,
-    Debug,
     Physics,
     RapierRigidBody,
     RigidBody,
@@ -466,14 +465,13 @@ export default () => {
                 <Physics
                     updatePriority={RAPIER_UPDATE_PRIORITY}
                     paused={!visible}
+                    debug={debug}
                 >
                     <KeyboardControls map={CONTROLS_MAP}>
                         <RevoluteJointVehicle />
                     </KeyboardControls>
 
                     <Scene />
-
-                    {debug && <Debug />}
 
                     <RapierConfiguration />
                 </Physics>

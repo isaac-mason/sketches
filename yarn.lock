@@ -810,10 +810,10 @@
     screen-space-reflections "2.5.0"
     three-stdlib "^2.8.11"
 
-"@react-three/rapier@^0.14.0":
-  version "0.14.0"
-  resolved "https://registry.yarnpkg.com/@react-three/rapier/-/rapier-0.14.0.tgz#83fa88f61e2889f558118c0ddc678d891ac05a38"
-  integrity sha512-8edoz4Rq2SO/bxiQCsdRK6ELHg7hWO2Vu3Ybjo2t4HaMzPs66xrqGDFk6d9iKeGwB/KnM6q29jzmGewXJex6Lw==
+"@react-three/rapier@^0.15.0":
+  version "0.15.0"
+  resolved "https://registry.yarnpkg.com/@react-three/rapier/-/rapier-0.15.0.tgz#ab8d1f745f6cd824c1985cb371ed821720cbaf5a"
+  integrity sha512-NlyEvda0nBhSO9cOYvS/8HY6KAsf+9EG/ZBuj0H1AiPjiK5UV+JZbPbxCt0LRukaqOh9J7nxfVyLkklfZTKEtw==
   dependencies:
     "@dimforge/rapier3d-compat" "0.11.2"
     three-stdlib "2.21.6"
