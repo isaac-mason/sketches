@@ -752,10 +752,10 @@
   dependencies:
     three-bvh-csg "^0.0.5"
 
-"@react-three/drei@^9.56.10", "@react-three/drei@^9.65.3":
-  version "9.65.3"
-  resolved "https://registry.yarnpkg.com/@react-three/drei/-/drei-9.65.3.tgz#c3eea58a5a97d14a0cc027fd3c5e06b86af25a82"
-  integrity sha512-kVyrCtyCE3gN8On0ndf9798jCVcYHxNF22rWBsIi82SgskHnYIKBde5S6Udvwb4RWL34Y+vz4103MLmjcgMwxg==
+"@react-three/drei@^9.56.10", "@react-three/drei@^9.65.5":
+  version "9.65.5"
+  resolved "https://registry.yarnpkg.com/@react-three/drei/-/drei-9.65.5.tgz#b9f2d7d02b569d94a21b34853d99fb8bfbab72f7"
+  integrity sha512-zfT7MTqkK5AYU6Yhe3nJ5S0mV2+oRaXfbxU1KkHzTlipssInb5kHSYwG4Topl0n7aPVNiV4A25LgvELjCeWPvw==
   dependencies:
     "@babel/runtime" "^7.11.2"
     "@react-spring/three" "~9.6.1"
