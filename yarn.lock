@@ -4356,10 +4356,10 @@ strnum@^1.0.4:
   resolved "https://registry.yarnpkg.com/strnum/-/strnum-1.0.5.tgz#5c4e829fe15ad4ff0d20c3db5ac97b73c9b072db"
   integrity sha512-J8bbNyKKXl5qYcR36TIO8W3mVGVHrmmxsd5PAItGkmyzwJvybiw2IVq5nqd0i4LSNSkB/sx9VHllbfFdr9k1JA==
 
-styled-breakpoints@^11.1.2:
-  version "11.1.2"
-  resolved "https://registry.yarnpkg.com/styled-breakpoints/-/styled-breakpoints-11.1.2.tgz#33f1c07689c5c4a765274af475daf1be91a6f656"
-  integrity sha512-JKRXww/6HgM2IqC19b8Qxe0VuVFa1wzuG8bqdhTyX2hqc7DgAPucgmdHLJzZzg8Y3sqmFt4qw6DIfNtV+xEwww==
+styled-breakpoints@^11.2.3:
+  version "11.2.3"
+  resolved "https://registry.yarnpkg.com/styled-breakpoints/-/styled-breakpoints-11.2.3.tgz#ddef928c3de59d4e701deb249694ab0a82d02e65"
+  integrity sha512-NJLcZfrV/+OCzxgBrJjSLGpWmzQUuBCIsFhurTlWrjA7qXBD4XHmPqd68NNAqz92j0JUpGnitwL1RF6Fh1/IUw==
 
 styled-components@^5.3.9:
   version "5.3.9"
