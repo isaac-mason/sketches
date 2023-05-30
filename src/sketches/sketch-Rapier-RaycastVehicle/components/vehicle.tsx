@@ -5,7 +5,6 @@ import {
     RigidBody,
     RigidBodyProps,
     useRapier,
-    Vector3Array,
 } from '@react-three/rapier'
 import { useControls as useLeva } from 'leva'
 import {
@@ -27,7 +26,7 @@ import {
     Vector3,
     Vector3Tuple,
 } from 'three'
-import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
+import { GLTF } from 'three-stdlib'
 import chassisDracoUrl from '../assets/chassis-draco.glb?url'
 import { LEVA_KEY } from '../constants'
 import {
