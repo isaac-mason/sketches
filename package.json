@@ -24,7 +24,7 @@
     "react-dom": "^18.0.0",
     "react-router-dom": "^6.11.2",
     "styled-breakpoints": "^11.2.3",
-    "styled-components": "^5.3.9",
+    "styled-components": "^5.3.11",
     "three": "^0.150.1",
     "tunnel-rat": "^0.1.2"
   },
