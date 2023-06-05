@@ -774,7 +774,7 @@
   dependencies:
     three-bvh-csg "^0.0.5"
 
-"@react-three/drei@^9.56.10", "@react-three/drei@^9.70.0":
+"@react-three/drei@^9.56.10":
   version "9.70.0"
   resolved "https://registry.yarnpkg.com/@react-three/drei/-/drei-9.70.0.tgz#aaca8d2abe8b265af6bf739f9e27b78f9b69e58d"
   integrity sha512-fABIyRCXfOuosWgKQwSCXoPi2Zpi2BNRZEef4tnq2MLKaOG6NnZ5F/IA+7bO1Dy/lqOUQv+g4Nf5CtbY2Vet2w==
@@ -796,6 +796,32 @@
     suspend-react "^0.0.8"
     three-mesh-bvh "^0.5.23"
     three-stdlib "^2.22.10"
+    troika-three-text "^0.47.1"
+    utility-types "^3.10.0"
+    zustand "^3.5.13"
+
+"@react-three/drei@^9.72.1":
+  version "9.72.1"
+  resolved "https://registry.yarnpkg.com/@react-three/drei/-/drei-9.72.1.tgz#e357e59db0c321f75194a1a12568444c9f7716c1"
+  integrity sha512-lgD4uCQOcagTO4Kw6EBRXvqjnI3aPAwpoQpuYSIg8cWwvGLHVo2rf2vx8JaalUb2fcBtggckhPUgF2XWDRxT6Q==
+  dependencies:
+    "@babel/runtime" "^7.11.2"
+    "@react-spring/three" "~9.6.1"
+    "@use-gesture/react" "^10.2.24"
+    camera-controls "^2.3.1"
+    detect-gpu "^5.0.14"
+    glsl-noise "^0.0.0"
+    lodash.clamp "^4.0.3"
+    lodash.omit "^4.5.0"
+    lodash.pick "^4.4.0"
+    maath "^0.5.2"
+    meshline "^3.1.6"
+    react-composer "^5.0.3"
+    react-merge-refs "^1.1.0"
+    stats.js "^0.17.0"
+    suspend-react "^0.0.8"
+    three-mesh-bvh "^0.5.23"
+    three-stdlib "^2.23.5"
     troika-three-text "^0.47.1"
     utility-types "^3.10.0"
     zustand "^3.5.13"
@@ -4445,6 +4471,23 @@ three-stdlib@^2.22.10, three-stdlib@^2.23.4:
   version "2.23.4"
   resolved "https://registry.yarnpkg.com/three-stdlib/-/three-stdlib-2.23.4.tgz#21e415573f9cddb8dbc2dea0495cc35d8d390b8b"
   integrity sha512-bNtKL0UsE/TeSQ30tb9qDoGEuO6hqJfLFVqIiWlVpgAs2W/aZcpSISaLP3q+L4E9NSGmpRzI3dGufmDj0AnQ7Q==
+  dependencies:
+    "@types/draco3d" "^1.4.0"
+    "@types/offscreencanvas" "^2019.6.4"
+    "@types/webxr" "^0.5.2"
+    chevrotain "^10.1.2"
+    draco3d "^1.4.1"
+    fflate "^0.6.9"
+    ktx-parse "^0.4.5"
+    mmd-parser "^1.0.4"
+    opentype.js "^1.3.3"
+    potpack "^1.0.1"
+    zstddec "^0.0.2"
+
+three-stdlib@^2.23.5:
+  version "2.23.7"
+  resolved "https://registry.yarnpkg.com/three-stdlib/-/three-stdlib-2.23.7.tgz#18b4a1a00d79737006622c9a2301232c3f4fa9e9"
+  integrity sha512-nxs0z6OthtN+Qy6N1Ee0ztR87IcaCEOF+WHCJCzjpu+37c+/IFDzI9igg7xgw4qWM05vETxUAkrXnLRxSZlgcw==
   dependencies:
     "@types/draco3d" "^1.4.0"
     "@types/offscreencanvas" "^2019.6.4"
