@@ -269,7 +269,7 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(
 
         useEffect(() => {
             vehicleRef.current = new RapierRaycastVehicle({
-                world: rapier.world.raw(),
+                world: rapier.world,
                 chassisRigidBody: chassisRigidBodyRef.current,
                 indexRightAxis,
                 indexForwardAxis,

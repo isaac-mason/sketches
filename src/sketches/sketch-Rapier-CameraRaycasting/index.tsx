@@ -33,7 +33,7 @@ const Scene = () => {
     const [rayDirection] = useState(() => new Vector3())
 
     useFrame(() => {
-        const world = rapier.world.raw()
+        const { world } = rapier
 
         rayDirection
             .set(mouse.x, mouse.y, 0)

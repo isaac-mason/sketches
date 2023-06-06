@@ -423,21 +423,6 @@ const Scene = () => {
     )
 }
 
-const RapierConfiguration = () => {
-    const rapier = useRapier()
-
-    useEffect(() => {
-        const world = rapier.world.raw()
-
-        if (!world) return
-        world.maxStabilizationIterations = 50
-        world.maxVelocityFrictionIterations = 50
-        world.maxVelocityIterations = 100
-    }, [])
-
-    return null
-}
-
 const ControlsText = styled.div`
     position: absolute;
     bottom: 4em;
@@ -466,14 +451,15 @@ export default () => {
                     updatePriority={RAPIER_UPDATE_PRIORITY}
                     paused={!visible}
                     debug={debug}
+                    maxStabilizationIterations={50}
+                    maxVelocityFrictionIterations={50}
+                    maxVelocityIterations={100}
                 >
                     <KeyboardControls map={CONTROLS_MAP}>
                         <RevoluteJointVehicle />
                     </KeyboardControls>
 
                     <Scene />
-
-                    <RapierConfiguration />
                 </Physics>
             </Canvas>
 

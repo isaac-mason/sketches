@@ -66,7 +66,7 @@ const PointerConstraintControls = ({
     }
 
     useEffect(() => {
-        const world = rapier.world.raw()
+        const { world } = rapier
         const { domElement } = gl
 
         const onPointerDown = () => {

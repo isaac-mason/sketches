@@ -110,7 +110,7 @@ const useKinematicCharacterController = ({
     const jumping = useRef(false)
 
     useEffect(() => {
-        const world = rapier.world.raw()
+        const { world } = rapier
 
         characterController.current =
             world.createCharacterController(characterShapeOffset)
