@@ -36,7 +36,7 @@ const Scene = () => {
         laser.position.set(-2, Math.sin(elapsedTime * 1.2) * 2, 0)
         line.position.copy(laser.position)
 
-        const world = rapier.world.raw()
+        const { world } = rapier
 
         const raycastResult = world.castRay(
             new Rapier.Ray(laser.position, { x: 1, y: 0, z: 0 }),

@@ -121,7 +121,7 @@ const Game = () => {
         vehicle.applyEngineForce(engineForce, 3)
 
         // update the vehicle
-        vehicle.update(world.raw().timestep)
+        vehicle.update(world.timestep)
 
         // update the wheels
         for (let i = 0; i < vehicle.wheels.length; i++) {
