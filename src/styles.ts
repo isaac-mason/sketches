@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
-import { up } from 'styled-breakpoints'
 import styled, { createGlobalStyle } from 'styled-components'
+import { createStyledBreakpointsTheme } from 'styled-breakpoints';
+
+export const theme = createStyledBreakpointsTheme();
 
 export const Page = styled.div`
     position: relative;
@@ -25,14 +27,14 @@ export const Page = styled.div`
         
         color: #eee;
 
-        ${up('md')} {
+        ${({ theme }) => theme.breakpoints.up('md')} {
             top: 70px;
             left: 60px;
 
             font-size: 4em;
         }
 
-        ${up('lg')} {
+        ${({ theme }) => theme.breakpoints.up('lg')} {
             font-size: 5em;
         }
     }
@@ -46,7 +48,7 @@ export const Page = styled.div`
         color: #eee;
         text-decoration: none;
 
-        ${up('md')} {
+        ${({ theme }) => theme.breakpoints.up('md')} {
             bottom: 60px;
             right: 60px;
         }
@@ -125,7 +127,7 @@ export const MenuToggle = styled(ResetButton)`
     bottom: 10px;
     left: 10px;
 
-    ${up('md')} {
+    ${({ theme }) => theme.breakpoints.up('md')} {
         bottom: 50px;
         left: 50px;
     }
@@ -174,7 +176,7 @@ export const Menu = styled.div<{ open: boolean }>`
     transition: transform 0.5s ease;
     transform: translateX(${(props) => (props.open ? '0' : '-100%')});
 
-    ${up('md')} {
+    ${({ theme }) => theme.breakpoints.up('md')} {
         width: 350px;
     }
 `

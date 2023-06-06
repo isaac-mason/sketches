@@ -26,7 +26,9 @@ import {
     MenuItemTitle,
     MenuToggle,
     Page,
+    theme,
 } from './styles'
+import { ThemeProvider } from 'styled-components'
 
 const defaultSketch = 'Home'
 const DefaultComponent = sketchComponents[defaultSketch].Component
@@ -41,7 +43,7 @@ const RoutedComponent = () => {
 }
 
 const modes = ['default', 'debug', 'screenshot'] as const
-type DisplayMode = typeof modes[number]
+type DisplayMode = (typeof modes)[number]
 
 type NavigationProps = {
     currentRoute?: string
@@ -200,7 +202,9 @@ const App = () => {
 export default () => {
     return (
         <Router>
-            <App />
+            <ThemeProvider theme={theme}>
+                <App />
+            </ThemeProvider>
             <GlobalStyle />
         </Router>
     )
