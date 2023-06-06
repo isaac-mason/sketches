@@ -4331,10 +4331,10 @@ strnum@^1.0.4:
   resolved "https://registry.yarnpkg.com/strnum/-/strnum-1.0.5.tgz#5c4e829fe15ad4ff0d20c3db5ac97b73c9b072db"
   integrity sha512-J8bbNyKKXl5qYcR36TIO8W3mVGVHrmmxsd5PAItGkmyzwJvybiw2IVq5nqd0i4LSNSkB/sx9VHllbfFdr9k1JA==
 
-styled-breakpoints@^11.2.3:
-  version "11.2.3"
-  resolved "https://registry.yarnpkg.com/styled-breakpoints/-/styled-breakpoints-11.2.3.tgz#ddef928c3de59d4e701deb249694ab0a82d02e65"
-  integrity sha512-NJLcZfrV/+OCzxgBrJjSLGpWmzQUuBCIsFhurTlWrjA7qXBD4XHmPqd68NNAqz92j0JUpGnitwL1RF6Fh1/IUw==
+styled-breakpoints@^12.0.4:
+  version "12.0.4"
+  resolved "https://registry.yarnpkg.com/styled-breakpoints/-/styled-breakpoints-12.0.4.tgz#39cb0787457da7c89702c65dc552fb9d8130fcfd"
+  integrity sha512-mlYURG2VsV599AOdaqF2puWS0m2bHxuG+O8LjSQU/52HNVixyeFGhu2HzXrXD1xVKSKajluE0uhpf57uXw+0xg==
 
 styled-components@^5.3.11:
   version "5.3.11"
