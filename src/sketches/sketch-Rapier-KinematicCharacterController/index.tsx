@@ -20,7 +20,7 @@ import { Group, MathUtils, PerspectiveCamera, Vector3 } from 'three'
 import { clamp } from 'three/src/math/MathUtils'
 import { useLoadingAssets } from '../../hooks/use-loading-assets'
 import { usePageVisible } from '../../hooks/use-page-visible'
-import { Canvas } from '../Canvas'
+import { Canvas } from '../../components/canvas'
 import { GameLevel, Shield, Sword } from './models'
 
 const LEVA_KEY = 'rapier-kinematic-character-controller'

@@ -88,7 +88,7 @@ export const GlobalStyle = createGlobalStyle`
   }
 `
 
-export const HideH1GlobalStyle = createGlobalStyle`
+export const ScreenshotDisplayModeStyles = createGlobalStyle`
   h1 {
     display: none;
   }

@@ -1,6 +1,6 @@
 import { OrthographicCamera } from '@react-three/drei'
 import { Color } from 'three'
-import { Canvas } from '../Canvas'
+import { Canvas } from '../../components/canvas'
 
 const vertexShader = /* glsl */ `
 attribute vec3 myColors;

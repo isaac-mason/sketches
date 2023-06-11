@@ -6,7 +6,7 @@ import { useControls as useLevaControls } from 'leva'
 import { useRef, useState } from 'react'
 import { Group } from 'three'
 import { Line2 } from 'three-stdlib'
-import { Canvas } from '../Canvas'
+import { Canvas } from '../../components/canvas'
 
 const Shapes = {
     TORUS: 'TORUS',

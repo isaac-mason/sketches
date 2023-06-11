@@ -1,6 +1,6 @@
 import { OrthographicCamera, useTexture } from '@react-three/drei'
 import { Vector4 } from 'three'
-import { Canvas } from '../Canvas'
+import { Canvas } from '../../components/canvas'
 import dogImage from './dog.jpeg'
 import overlayImage from './overlay.png'
 

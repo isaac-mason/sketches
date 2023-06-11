@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { useControls } from 'leva'
 import { useRef } from 'react'
 import * as THREE from 'three'
-import { Canvas } from '../Canvas'
+import { Canvas } from '../../components/canvas'
 
 const noiseFn = /* glsl */ `
 // Classic Perlin 3D Noise 

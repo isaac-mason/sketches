@@ -1,5 +1,5 @@
 import { Billboard, Float, Text } from '@react-three/drei'
-import { Canvas } from '../Canvas'
+import { Canvas } from '../../components/canvas'
 import NotoEmojiRegular from './NotoEmoji-Regular.ttf'
 
 const Balloons = () => {

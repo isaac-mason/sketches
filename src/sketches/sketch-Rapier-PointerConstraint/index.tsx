@@ -12,7 +12,7 @@ import { useControls } from 'leva'
 import { useEffect, useRef, useState } from 'react'
 import { Mesh, Quaternion, Raycaster, Vector3 } from 'three'
 import { usePageVisible } from '../../hooks/use-page-visible'
-import { Canvas } from '../Canvas'
+import { Canvas } from '../../components/canvas'
 
 const LEVA_KEY = 'rapier-pointer-constraint'
 

@@ -1,24 +1,18 @@
 import { Leva } from 'leva'
 import { Perf } from 'r3f-perf'
-import React, {
-    Suspense,
-    useEffect,
-    useImperativeHandle,
-    useRef,
-    useState,
-} from 'react'
-import { HashRouter as Router, Route, Routes, useMatch } from 'react-router-dom'
-import { DebugTunnel } from './DebugTunnel'
-import { Loader } from './Loader'
+import { SetStateAction, Suspense, useEffect, useState } from 'react'
+import { Route, HashRouter as Router, Routes, useMatch } from 'react-router-dom'
+import { ThemeProvider } from 'styled-components'
+import { Spinner } from './components/spinner'
+import { DebugTunnel } from './debug-tunnel'
 import {
-    isSketchRoute,
     Sketch,
+    isSketchRoute,
     sketchComponents,
     visibleSketches,
 } from './sketches'
 import {
     GlobalStyle,
-    HideH1GlobalStyle,
     Menu,
     MenuContainer,
     MenuItem,
@@ -26,9 +20,9 @@ import {
     MenuItemTitle,
     MenuToggle,
     Page,
+    ScreenshotDisplayModeStyles,
     theme,
 } from './styles'
-import { ThemeProvider } from 'styled-components'
 
 const defaultSketch = 'Home'
 const DefaultComponent = sketchComponents[defaultSketch].Component
@@ -48,78 +42,69 @@ type DisplayMode = (typeof modes)[number]
 type NavigationProps = {
     currentRoute?: string
     displayMode: DisplayMode | null
+    menuOpen: boolean
+    setMenuOpen: (value: SetStateAction<boolean>) => void
 }
 
-type NavigationRef = {
-    setMenuOpen: (value: boolean) => void
-}
-
-const Navigation = React.forwardRef<NavigationRef, NavigationProps>(
-    ({ displayMode, currentRoute }, ref) => {
-        const [menuOpen, setMenuOpen] = useState(false)
-
-        useImperativeHandle(ref, () => ({
-            setMenuOpen: (value: boolean) => {
-                setMenuOpen(value)
-            },
-        }))
-
-        useEffect(() => {
-            gtag({ event: 'event_name', route: currentRoute })
-        }, [currentRoute])
-
-        return (
-            <>
-                {displayMode !== 'screenshot' ? (
-                    <MenuToggle
-                        className="material-symbols-outlined"
-                        onClick={() => setMenuOpen((v) => !v)}
-                    >
-                        menu
-                    </MenuToggle>
-                ) : undefined}
-
-                <MenuContainer
-                    id="menu-container"
-                    open={menuOpen}
-                    onClick={() => setMenuOpen(false)}
+const Navigation = ({
+    menuOpen,
+    setMenuOpen,
+    displayMode,
+    currentRoute,
+}: NavigationProps) => {
+    return (
+        <>
+            {displayMode !== 'screenshot' ? (
+                <MenuToggle
+                    className="material-symbols-outlined"
+                    onClick={() => setMenuOpen((v) => !v)}
                 >
-                    <Menu id="menu" open={menuOpen}>
-                        {visibleSketches.map((sketch) => (
-                            <MenuItem
-                                key={sketch.route}
-                                to={`/sketch/${sketch.route}`}
-                                title={sketch.title}
-                                className={
-                                    sketch.route === currentRoute
-                                        ? 'active'
-                                        : ''
-                                }
-                            >
-                                {(sketch as Sketch).cover ? (
-                                    <MenuItemImage
-                                        src={sketch.cover}
-                                        alt={sketch.title}
-                                    />
-                                ) : undefined}
-                                <MenuItemTitle>{sketch.title}</MenuItemTitle>
-                            </MenuItem>
-                        ))}
-                    </Menu>
-                </MenuContainer>
-            </>
-        )
-    }
-)
+                    menu
+                </MenuToggle>
+            ) : undefined}
+
+            <MenuContainer
+                id="menu-container"
+                open={menuOpen}
+                onClick={() => setMenuOpen(false)}
+            >
+                <Menu id="menu" open={menuOpen}>
+                    {visibleSketches.map((sketch) => (
+                        <MenuItem
+                            key={sketch.route}
+                            to={`/sketch/${sketch.route}`}
+                            title={sketch.title}
+                            className={
+                                sketch.route === currentRoute ? 'active' : ''
+                            }
+                        >
+                            {(sketch as Sketch).cover ? (
+                                <MenuItemImage
+                                    src={sketch.cover}
+                                    alt={sketch.title}
+                                />
+                            ) : undefined}
+                            <MenuItemTitle>{sketch.title}</MenuItemTitle>
+                        </MenuItem>
+                    ))}
+                </Menu>
+            </MenuContainer>
+        </>
+    )
+}
 
 const App = () => {
+    const [menuOpen, setMenuOpen] = useState(false)
     const [displayMode, setDisplayMode] = useState<DisplayMode>('default')
     const [smallScreen, setSmallScreen] = useState(false)
-    const navigationRef = useRef<NavigationRef>(null)
 
     const {
         params: { name: currentRoute },
     } = useMatch('/sketch/:name') || { params: { name: defaultSketch } }
+
+    useEffect(() => {
+        gtag({ event: 'event_name', route: currentRoute })
+    }, [currentRoute])
 
     useEffect(() => {
         const handler = (e: WindowEventMap['keyup']): void => {
@@ -128,7 +113,7 @@ const App = () => {
                 const nextModeIndex = (currentIndex + 1) % modes.length
                 setDisplayMode(modes[nextModeIndex])
             } else if (e.key === 'Escape') {
-                navigationRef.current?.setMenuOpen(false)
+                setMenuOpen(false)
             }
         }
 
@@ -171,7 +156,7 @@ const App = () => {
                 }
             />
 
-            <Suspense fallback={<Loader />}>
+            <Suspense fallback={<Spinner />}>
                 <Routes>
                     <Route path="/*" element={<DefaultComponent />} />
                     <Route path="/sketch/:name" element={<RoutedComponent />} />
@@ -179,7 +164,8 @@ const App = () => {
             </Suspense>
 
             <Navigation
-                ref={navigationRef}
+                menuOpen={menuOpen}
+                setMenuOpen={setMenuOpen}
                 currentRoute={currentRoute}
                 displayMode={displayMode}
             />
@@ -198,7 +184,9 @@ const App = () => {
                 </DebugTunnel.In>
             ) : undefined}
 
-            {displayMode === 'screenshot' ? <HideH1GlobalStyle /> : undefined}
+            {displayMode === 'screenshot' ? (
+                <ScreenshotDisplayModeStyles />
+            ) : undefined}
         </Page>
     )
 }

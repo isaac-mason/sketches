@@ -1,6 +1,6 @@
 import { Html, OrbitControls } from '@react-three/drei'
 import { ReactNode } from 'react'
-import { Canvas } from '../Canvas'
+import { Canvas } from '../../components/canvas'
 import { Link, Network, Node } from './network'
 
 const Emoji = ({ children }: { children: ReactNode }) => {
