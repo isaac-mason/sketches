@@ -103,7 +103,7 @@ const App = () => {
     } = useMatch('/sketch/:name') || { params: { name: defaultSketch } }
 
     useEffect(() => {
-        gtag({ event: 'event_name', route: currentRoute })
+        gtag({ event: 'sketch_navigation', route: currentRoute })
     }, [currentRoute])
 
     useEffect(() => {
