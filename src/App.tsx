@@ -64,6 +64,10 @@ const Navigation = React.forwardRef<NavigationRef, NavigationProps>(
             },
         }))
 
+        useEffect(() => {
+            gtag({ event: 'event_name', route: currentRoute })
+        }, [currentRoute])
+
         return (
             <>
                 {displayMode !== 'screenshot' ? (
