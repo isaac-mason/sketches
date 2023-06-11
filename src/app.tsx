@@ -72,6 +72,7 @@ const Navigation = ({
                         <MenuItem
                             key={sketch.route}
                             to={`/sketch/${sketch.route}`}
+                            onClick={() => setMenuOpen(false)}
                             title={sketch.title}
                             className={
                                 sketch.route === currentRoute ? 'active' : ''
