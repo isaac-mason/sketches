@@ -12,9 +12,8 @@ import {
     visibleSketches,
 } from './sketches'
 import {
-    GlobalStyle,
     Menu,
-    MenuContainer,
+    MenuBackground,
     MenuItem,
     MenuItemImage,
     MenuItemTitle,
@@ -63,11 +62,11 @@ const Navigation = ({
                 </MenuToggle>
             ) : undefined}
 
-            <MenuContainer
-                id="menu-container"
-                open={menuOpen}
-                onClick={() => setMenuOpen(false)}
-            >
+            <div id="menu-container">
+                <MenuBackground
+                    open={menuOpen}
+                    onClick={() => setMenuOpen(false)}
+                />
                 <Menu id="menu" open={menuOpen}>
                     {visibleSketches.map((sketch) => (
                         <MenuItem
@@ -88,7 +87,7 @@ const Navigation = ({
                         </MenuItem>
                     ))}
                 </Menu>
-            </MenuContainer>
+            </div>
         </>
     )
 }
@@ -197,7 +196,6 @@ export default () => {
             <ThemeProvider theme={theme}>
                 <App />
             </ThemeProvider>
-            <GlobalStyle />
         </Router>
     )
 }

@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
 import styled, { createGlobalStyle } from 'styled-components'
-import { createStyledBreakpointsTheme } from 'styled-breakpoints';
+import { createStyledBreakpointsTheme } from 'styled-breakpoints'
 
-export const theme = createStyledBreakpointsTheme();
+export const theme = createStyledBreakpointsTheme()
 
 export const Page = styled.div`
     position: relative;
@@ -16,15 +16,15 @@ export const Page = styled.div`
         z-index: 1;
         top: 20px;
         left: 20px;
-        
+
         margin: 0;
         padding-right: 0.2em;
-        
+
         font-size: 2em;
         font-weight: 900;
         line-height: 1.2;
         letter-spacing: -2px;
-        
+
         color: #eee;
 
         ${({ theme }) => theme.breakpoints.up('md')} {
@@ -53,39 +53,6 @@ export const Page = styled.div`
             right: 60px;
         }
     }
-`
-
-export const GlobalStyle = createGlobalStyle`
-  * {
-    box-sizing: border-box;
-  }
-
-  html,
-  body,
-  #root {
-    height: 100%;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    user-select: none;
-    background: #222;
-  }
-
-  html {
-    position: fixed;
-  }
-
-  #gl {
-    position: relative;
-    z-index: 0;
-  }
-
-  body {
-    overflow: hidden;
-    overscroll-behavior-y: none;
-    font-family: 'Poppins', sans-serif;
-    color: black;
-  }
 `
 
 export const ScreenshotDisplayModeStyles = createGlobalStyle`
@@ -146,20 +113,25 @@ export const MenuToggle = styled(ResetButton)`
     }
 `
 
-export const MenuContainer = styled.div<{ open: boolean }>`
+export const MenuBackground = styled.div<{ open: boolean }>`
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     transition: background, 0.25s ease;
-
+    z-index: ${(props) => (props.open ? '1' : '-1')};
     background: ${(props) =>
         props.open ? 'rgba(0, 0, 0, 0.4)' : 'rgba(0, 0, 0, 0)'};
-    z-index: ${(props) => (props.open ? '1' : '-1')};
 `
 
 export const Menu = styled.div<{ open: boolean }>`
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: background, 0.25s ease;
+    z-index: 1;
+
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -167,12 +139,12 @@ export const Menu = styled.div<{ open: boolean }>`
     overflow-y: scroll;
     overflow-x: hidden;
     background-color: #111;
-    
+
     width: 300px;
     height: 100%;
     gap: 0.5em;
     padding: 1em;
-    
+
     transition: transform 0.5s ease;
     transform: translateX(${(props) => (props.open ? '0' : '-100%')});
 
