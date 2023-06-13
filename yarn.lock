@@ -863,13 +863,13 @@
     "@react-pdf/yoga" "^2.0.4"
     react-merge-refs "^1.1.0"
 
-"@react-three/postprocessing@^2.14.7":
-  version "2.14.7"
-  resolved "https://registry.yarnpkg.com/@react-three/postprocessing/-/postprocessing-2.14.7.tgz#205dcf22541181ed66cf99613353dec4a06d0080"
-  integrity sha512-e4m5jqOCslTST2k8/FtLRNQF52XGKVjwcFcfVgF0s75FgJDeS45ZJDQLDXKqHbTFN4V0w4EBl8FI+0Z0FLKBqw==
+"@react-three/postprocessing@^2.14.9":
+  version "2.14.9"
+  resolved "https://registry.yarnpkg.com/@react-three/postprocessing/-/postprocessing-2.14.9.tgz#f344c5c51ebee2622cc6b593d7e294192f7a1c1a"
+  integrity sha512-F40pZFHZ+zylx3tQP/DbTprJ0uUQu1sbv8agwsdvAHGT3qNhXpWiyu2+pUv1ok/c60JEits5uCAxMRRCUA6Q+A==
   dependencies:
     maath "^0.5.3"
-    n8ao "^1.4.2"
+    n8ao "^1.5.1"
     postprocessing "^6.31.0"
     screen-space-reflections "^2.5.0"
     three-stdlib "^2.23.4"
@@ -3661,10 +3661,10 @@ ms@2.1.2:
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.2.tgz#d09d1f357b443f493382a8eb3ccd183872ae6009"
   integrity sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==
 
-n8ao@^1.4.2:
-  version "1.4.4"
-  resolved "https://registry.yarnpkg.com/n8ao/-/n8ao-1.4.4.tgz#aac2898fe9c0539d8e1b8094f54dea4463174d0e"
-  integrity sha512-+XeZc1jv4EbGaz0fhxPnfxn+KcHLRaZu3rkh9RqlQalN425JtXOAtG0N29P2whntwe6+5SEFdufMVhEPYKDYBg==
+n8ao@^1.5.1:
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/n8ao/-/n8ao-1.5.1.tgz#e48960352e9c358955d7da072a341bbc64961bb5"
+  integrity sha512-Dn5o6ecmLC1xZm2mby2qdGYgwKcNsC9oKv85TQBKFbDJVzUHGXV2oys14rDl6nhwjH+zZU3YcLJkMcY7qe+jTg==
 
 nanoid@^3.3.6:
   version "3.3.6"
