@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@react-three/csg": "^2.2.0",
-    "@react-three/drei": "^9.74.8",
+    "@react-three/drei": "^9.74.12",
     "@react-three/fiber": "^8.13.0",
     "@react-three/flex": "^1.0.1",
     "@react-three/postprocessing": "^2.14.9",
