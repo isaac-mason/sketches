@@ -82,6 +82,7 @@ const Navigation = ({
                                 <MenuItemImage
                                     src={sketch.cover}
                                     alt={sketch.title}
+                                    loading="lazy"
                                 />
                             ) : undefined}
                             <MenuItemTitle>{sketch.title}</MenuItemTitle>

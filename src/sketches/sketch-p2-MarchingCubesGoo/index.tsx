@@ -9,6 +9,7 @@ import { Component, System, World as ECSWorld } from 'arancini'
 import { createECS } from 'arancini/react'
 import { Body, Box, Circle, ContactMaterial, Material, World } from 'p2-es'
 import { Canvas } from '../../components/canvas'
+import { useMemo } from 'react'
 
 const defaultMaterial = new Material()
 
@@ -32,7 +33,7 @@ const gooColors = [0xff0000, 0x00ff00, 0x0000ff]
 
 class RotateTagComponent extends Component {}
 
-class ThreeComponent extends Component {
+class Object3DComponent extends Component {
     object!: THREE.Object3D
 
     construct(object: THREE.Object3D) {
@@ -43,8 +44,8 @@ class ThreeComponent extends Component {
 class PhysicsBodyComponent extends Component {
     body!: Body
 
-    construct(body: () => Body) {
-        this.body = body()
+    construct(body: Body) {
+        this.body = body
     }
 }
 
@@ -63,19 +64,19 @@ class RotateSystem extends System {
 class PhysicsSystem extends System {
     physicsWorld = new World({ gravity: [0, -5] })
 
-    physicsTimeStep = 1 / 60
-
-    physicsMaxSubSteps = 10
-
     physicsBodies = new Map<string, Body>()
 
-    physicsBodyQuery = this.query([PhysicsBodyComponent, ThreeComponent])
+    physicsBodyQuery = this.query([PhysicsBodyComponent, Object3DComponent])
+
+    static TIME_STEP = 1 / 60
+
+    static MAX_SUB_STEPS = 10
 
     onInit(): void {
         this.physicsWorld.addContactMaterial(contactMaterial)
 
         this.physicsBodyQuery.onEntityAdded.add((entity) => {
-            const body = entity.get(PhysicsBodyComponent).body
+            const { body } = entity.get(PhysicsBodyComponent)
             this.physicsWorld.addBody(body)
             this.physicsBodies.set(entity.id, body)
         })
@@ -92,14 +93,14 @@ class PhysicsSystem extends System {
 
     onUpdate(delta: number): void {
         this.physicsWorld.step(
-            this.physicsTimeStep,
+            PhysicsSystem.TIME_STEP,
             delta,
-            this.physicsMaxSubSteps
+            PhysicsSystem.MAX_SUB_STEPS
         )
 
         for (const entity of this.physicsBodyQuery.entities) {
             const body = entity.get(PhysicsBodyComponent).body
-            const three = entity.get(ThreeComponent).object
+            const three = entity.get(Object3DComponent).object
 
             three.position.set(
                 body.interpolatedPosition[0],
@@ -114,7 +115,7 @@ class PhysicsSystem extends System {
 
 const world = new ECSWorld()
 
-world.registerComponent(ThreeComponent)
+world.registerComponent(Object3DComponent)
 world.registerComponent(PhysicsBodyComponent)
 world.registerComponent(RotateTagComponent)
 
@@ -122,6 +123,41 @@ world.registerSystem(RotateSystem)
 world.registerSystem(PhysicsSystem)
 
 const ECS = createECS(world)
+
+type BallProps = { index: number }
+
+const Ball = ({ index }: BallProps) => {
+    const body = useMemo(() => {
+        const body = new Body({
+            mass: 1,
+            position: [Math.random() - 0.5, Math.random() - 0.5],
+        })
+
+        body.addShape(
+            new Circle({
+                radius: 0.02,
+                material: defaultMaterial,
+            })
+        )
+
+        return body
+    }, [])
+
+    return (
+        <ECS.Entity>
+            <ECS.Component type={Object3DComponent}>
+                <MarchingCube
+                    strength={0.08}
+                    subtract={6}
+                    // @ts-expect-error type incorrect
+                    color={gooColors[index % gooColors.length]}
+                />
+            </ECS.Component>
+
+            <ECS.Component type={PhysicsBodyComponent} args={[body]} />
+        </ECS.Entity>
+    )
+}
 
 const Balls = () => (
     <MarchingCubes
@@ -135,86 +171,52 @@ const Balls = () => (
         {Array.from({ length: 150 })
             .fill(null)
             .map((_, i) => (
-                <ECS.Entity key={i}>
-                    <ECS.Component type={ThreeComponent}>
-                        <MarchingCube
-                            strength={0.08}
-                            subtract={6}
-                            // @ts-expect-error type incorrect
-                            color={gooColors[i % gooColors.length]}
-                        />
-                    </ECS.Component>
-
-                    <ECS.Component
-                        type={PhysicsBodyComponent}
-                        args={[
-                            () => {
-                                const body = new Body({
-                                    mass: 1,
-                                    position: [
-                                        Math.random() - 0.5,
-                                        Math.random() - 0.5,
-                                    ],
-                                })
-
-                                body.addShape(
-                                    new Circle({
-                                        radius: 0.02,
-                                        material: defaultMaterial,
-                                    })
-                                )
-
-                                return body
-                            },
-                        ]}
-                    />
-                </ECS.Entity>
+                <Ball key={i} index={i} />
             ))}
     </MarchingCubes>
 )
 
-const Container = () => (
-    <ECS.Entity>
-        <ECS.Component type={RotateTagComponent} />
+const Container = () => {
+    const body = useMemo(() => {
+        const body = new Body({
+            mass: 0,
+            position: [0, 0],
+        })
 
-        <ECS.Component type={ThreeComponent}>
-            <group>
-                {containerParts.map(({ width, height, position }, i) => (
-                    <mesh key={i} position={[position[0], position[1], 0]}>
-                        <boxGeometry args={[width, height, 0.8]} />
-                        <meshStandardMaterial color="#999" />
-                    </mesh>
-                ))}
-            </group>
-        </ECS.Component>
+        containerParts.map(({ width, height, position }) => {
+            body.addShape(
+                new Box({
+                    width,
+                    height,
+                    material: defaultMaterial,
+                }),
+                position,
+                0
+            )
+        })
 
-        <ECS.Component
-            type={PhysicsBodyComponent}
-            args={[
-                () => {
-                    const body = new Body({
-                        mass: 0,
-                        position: [0, 0],
-                    })
+        return body
+    }, [])
 
-                    containerParts.map(({ width, height, position }) => {
-                        body.addShape(
-                            new Box({
-                                width,
-                                height,
-                                material: defaultMaterial,
-                            }),
-                            position,
-                            0
-                        )
-                    })
+    return (
+        <ECS.Entity>
+            <ECS.Component type={RotateTagComponent} />
 
-                    return body
-                },
-            ]}
-        />
-    </ECS.Entity>
-)
+            <ECS.Component type={Object3DComponent}>
+                <group>
+                    {containerParts.map(({ width, height, position }, i) => (
+                        <mesh key={i} position={[position[0], position[1], 0]}>
+                            <boxGeometry args={[width, height, 0.8]} />
+                            <meshStandardMaterial color="#999" />
+                        </mesh>
+                    ))}
+                </group>
+            </ECS.Component>
+
+            <ECS.Component type={PhysicsBodyComponent} args={[body]} />
+        </ECS.Entity>
+    )
+}
 
 const Loop = () => {
     useFrame((_, delta) => {
@@ -226,7 +228,7 @@ const Loop = () => {
 
 export default () => (
     <>
-        <h1>Marching Cubes - Goo</h1>
+        <h1>p2-es - Marching Cubes Goo</h1>
         <Canvas camera={{ position: [-0.5, 0, 5], fov: 25 }}>
             <Balls />
             <Container />

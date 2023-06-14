@@ -24,15 +24,16 @@ import JourneyLesson27Cover from './sketch-JourneyLesson27-Shaders/cover.png'
 import JourneyLesson28Cover from './sketch-JourneyLesson28-RagingSea/cover.png'
 import JourneyLesson29Cover from './sketch-JourneyLesson29-AnimatedGalaxy/cover.png'
 import JourneyLesson30Cover from './sketch-JourneyLesson30-ModifiedMaterials/cover.png'
-import MarchingCubesGooCover from './sketch-MarchingCubes-Goo/cover.png'
 import PostprocessingPixelationCover from './sketch-Postprocessing-Pixelation/cover.png'
 import RapierCameraRaycastingCover from './sketch-Rapier-CameraRaycasting/cover.png'
 import RapierKinematicCharacterControllerCover from './sketch-Rapier-KinematicCharacterController/cover.png'
 import RapierPointerConstraintCover from './sketch-Rapier-PointerConstraint/cover.png'
-import RapierRaycastingCover from './sketch-Rapier-Raycasting/cover.png'
 import RapierRaycastVehicleCover from './sketch-Rapier-RaycastVehicle/cover.png'
+import RapierRaycastingCover from './sketch-Rapier-Raycasting/cover.png'
 import RapierRevoluteJointVehicleCover from './sketch-Rapier-RevoluteJointVehicle/cover.png'
 import RapierSpringCover from './sketch-Rapier-Spring/cover.png'
+import P2MarchingCubesGooCover from './sketch-p2-MarchingCubesGoo/cover.png'
+import P2PixelatedTextCover from './sketch-p2-PixelatedText/cover.png'
 
 export type Sketch = {
     title: string
@@ -201,18 +202,24 @@ const sketchList = [
         route: 'Rapier-KinematicCharacterController',
         cover: RapierKinematicCharacterControllerCover,
     },
-    /* Misc */
+    /* p2-es */
     {
-        title: 'Marching Cubes - Goo',
-        route: 'MarchingCubes-Goo',
-        cover: MarchingCubesGooCover,
+        title: 'p2-es - Marching Cubes Goo',
+        route: 'p2-MarchingCubesGoo',
+        cover: P2MarchingCubesGooCover,
     },
+    {
+        title: 'p2-es - Pixelated Text',
+        route: 'p2-PixelatedText',
+        cover: P2PixelatedTextCover,
+    },
+    /* Postprocessing */
     {
         title: 'Postprocessing - Pixelation',
         route: 'Postprocessing-Pixelation',
         cover: PostprocessingPixelationCover,
     },
-    /* D3 */
+    /* d3.js */
     {
         title: 'D3 - Force Directed Graph',
         route: 'D3-ForceDirectedGraph',
