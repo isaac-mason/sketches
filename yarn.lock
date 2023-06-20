@@ -813,10 +813,10 @@
     utility-types "^3.10.0"
     zustand "^3.5.13"
 
-"@react-three/fiber@^8.13.0":
-  version "8.13.0"
-  resolved "https://registry.yarnpkg.com/@react-three/fiber/-/fiber-8.13.0.tgz#c9eabe60f2276a66d7ce9a3b927083894f4202f9"
-  integrity sha512-hPFzFNgikEMyEbL+NpSA7q+UWZxInrrkJldWaCR2w34Fwf20x9p68bsyN0/yn9oM2VlWoJcJjR8hw1tN9AxHuA==
+"@react-three/fiber@^8.13.3":
+  version "8.13.3"
+  resolved "https://registry.yarnpkg.com/@react-three/fiber/-/fiber-8.13.3.tgz#a46e09bf28b80c6e0228fee9e18dbaec9fd8957c"
+  integrity sha512-mCdTUB8D1kwlsOSxGhUg5nuGHt3HN3aNFc0s9I/N7ayk+nzT2ttLdn49c56nrHu+YK+SU1xnrxe6LqftZgIRmQ==
   dependencies:
     "@babel/runtime" "^7.17.8"
     "@types/react-reconciler" "^0.26.7"
@@ -824,7 +824,7 @@
     react-reconciler "^0.27.0"
     react-use-measure "^2.1.1"
     scheduler "^0.21.0"
-    suspend-react "^0.0.8"
+    suspend-react "^0.1.3"
     zustand "^3.7.1"
 
 "@react-three/flex@^1.0.1":
@@ -4571,11 +4571,6 @@ supports-preserve-symlinks-flag@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz#6eda4bd344a3c94aea376d4cc31bc77311039e09"
   integrity sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==
-
-suspend-react@^0.0.8:
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/suspend-react/-/suspend-react-0.0.8.tgz#b0740c1386b4eb652f17affe4339915ee268bd31"
-  integrity sha512-ZC3r8Hu1y0dIThzsGw0RLZplnX9yXwfItcvaIzJc2VQVi8TGyGDlu92syMB5ulybfvGLHAI5Ghzlk23UBPF8xg==
 
 suspend-react@^0.1.3:
   version "0.1.3"
