@@ -218,7 +218,7 @@ export default () => {
 
     return (
         <>
-            <h1>p2-es - Text Box</h1>
+            <h1>p2-es - Pixelated Text</h1>
             <Canvas camera={{ position: [-0.5, 0, 5], fov: 25 }}>
                 <Text
                     key={`first ${textKey}`}
