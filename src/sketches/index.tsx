@@ -1,5 +1,6 @@
 import { lazy } from 'react'
 import D3ForceDirectedGraphCover from './sketch-D3-ForceDirectedGraph/cover.png'
+import EmissiveCover from './sketch-Postprocessing-EmissiveBloom/cover.png'
 import GLSLShadersFromScratch01Cover from './sketch-GLSLShadersFromScratch01-Varyings/cover.png'
 import GLSLShadersFromScratch02Cover from './sketch-GLSLShadersFromScratch02-Uniforms/cover.png'
 import GLSLShadersFromScratch03Cover from './sketch-GLSLShadersFromScratch03-Attributes/cover.png'
@@ -218,6 +219,11 @@ const sketchList = [
         title: 'Postprocessing - Pixelation',
         route: 'Postprocessing-Pixelation',
         cover: PostprocessingPixelationCover,
+    },
+    {
+        title: 'Postprocessing - Emissive Bloom',
+        route: 'Postprocessing-EmissiveBloom',
+        cover: EmissiveCover,
     },
     /* d3.js */
     {
