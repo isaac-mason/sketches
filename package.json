@@ -14,7 +14,7 @@
     "@react-three/flex": "^1.0.1",
     "@react-three/postprocessing": "^2.14.9",
     "@react-three/rapier": "^1.1.1",
-    "arancini": "^2.2.2",
+    "arancini": "^2.3.0",
     "d3": "^7.8.5",
     "leva": "^0.9.35",
     "meshline": "^3.1.6",
