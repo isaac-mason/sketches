@@ -2,7 +2,7 @@ import { Float, OrbitControls, Stats, useHelper } from '@react-three/drei'
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { DirectionalLight, PointLight, SpotLight } from 'three'
-import { Canvas } from '../../components/canvas'
+import { Canvas } from '../../common'
 
 const floatProps = {
     floatIntensity: 2,

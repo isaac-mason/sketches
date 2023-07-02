@@ -8,8 +8,7 @@ import {
 import { useControls } from 'leva'
 import { useEffect, useRef } from 'react'
 import { Vector3 } from 'three'
-import { Canvas } from '../../components/canvas'
-import { usePageVisible } from '../../hooks/use-page-visible'
+import { Canvas, usePageVisible } from '../../common'
 import { Spring } from './spring'
 
 const LEVA_KEY = 'rapier-spring'

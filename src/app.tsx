@@ -3,8 +3,7 @@ import { Perf } from 'r3f-perf'
 import { SetStateAction, Suspense, useEffect, useState } from 'react'
 import { Route, HashRouter as Router, Routes, useMatch } from 'react-router-dom'
 import { ThemeProvider } from 'styled-components'
-import { Spinner } from './components/spinner'
-import { DebugTunnel } from './debug-tunnel'
+import { DebugTunnel, Spinner } from './common'
 import {
     Sketch,
     isSketchRoute,

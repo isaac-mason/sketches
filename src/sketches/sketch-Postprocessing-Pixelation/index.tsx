@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import { Group, OrthographicCamera, Quaternion, Vector2, Vector3 } from 'three'
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
 import { RenderPixelatedPass } from 'three/examples/jsm/postprocessing/RenderPixelatedPass'
-import { Canvas } from '../../components/canvas'
+import { Canvas } from '../../common'
 
 // https://threejs.org/examples/#webgl_postprocessing_pixel
 function pixelAlignFrustum(

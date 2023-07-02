@@ -10,15 +10,13 @@ import {
     RapierRigidBody,
     RigidBody,
     useFixedJoint,
-    useRapier,
     useRevoluteJoint,
 } from '@react-three/rapier'
 import { useControls } from 'leva'
-import React, { createRef, RefObject, useEffect, useMemo, useRef } from 'react'
+import React, { RefObject, createRef, useEffect, useMemo, useRef } from 'react'
 import styled from 'styled-components'
 import { Quaternion, Vector3, Vector3Tuple, Vector4Tuple } from 'three'
-import { usePageVisible } from '../../hooks/use-page-visible'
-import { Canvas } from '../../components/canvas'
+import { Canvas, usePageVisible } from '../../common'
 
 const LEVA_KEY = 'rapier-revolute-joint-vehicle'
 

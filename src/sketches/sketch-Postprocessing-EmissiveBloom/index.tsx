@@ -1,8 +1,8 @@
 import { Effects, OrbitControls } from '@react-three/drei'
 import { Object3DNode, extend } from '@react-three/fiber'
-import { LinearEncoding } from 'three'
+import { LinearEncoding, sRGBEncoding } from 'three'
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass'
-import { Canvas } from '../../components/canvas'
+import { Canvas } from '../../common'
 
 extend({ UnrealBloomPass })
 
@@ -43,7 +43,7 @@ export default () => (
 
             <color attach="background" args={['#222']} />
 
-            <Effects disableGamma encoding={LinearEncoding}>
+            <Effects disableGamma>
                 <unrealBloomPass args={[undefined!, 1.2, 0.01, 0.9]} />
             </Effects>
 

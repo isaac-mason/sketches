@@ -2,7 +2,7 @@ import { OrbitControls, useTexture } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { useMemo, useRef } from 'react'
 import { BufferAttribute, BufferGeometry, Points } from 'three'
-import { Canvas } from '../../components/canvas'
+import { Canvas } from '../../common'
 import particleTextureImage from './particle.png'
 
 const COUNT = 15000
