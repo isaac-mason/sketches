@@ -966,15 +966,14 @@
     "@react-pdf/yoga" "^2.0.4"
     react-merge-refs "^1.1.0"
 
-"@react-three/postprocessing@^2.14.12":
-  version "2.14.12"
-  resolved "https://registry.yarnpkg.com/@react-three/postprocessing/-/postprocessing-2.14.12.tgz#b8bb0f8961dd5f079166d5ba403ca9e3ddb30fff"
-  integrity sha512-hft9Z1Rg6FZoMK2NFSxVp/aSIQPTB7lxNUiDJsqhQ+y4/0xh85WgCLF1JzagBBPnKpD+CTQLiaKD+ns5BZLFTw==
+"@react-three/postprocessing@^2.14.13":
+  version "2.14.13"
+  resolved "https://registry.yarnpkg.com/@react-three/postprocessing/-/postprocessing-2.14.13.tgz#fce7fdd7a2b70836cfdd36bb9bab286eb3ce3eec"
+  integrity sha512-wtlaynEFVwCBCmVExnrCRDyGj0OHUWL4gNNkpN+hgVifWAnOVYmoH5vA7dI93NMUQ/T7ApY5lk03zoLyVKdsug==
   dependencies:
     maath "^0.6.0"
     n8ao "^1.6.6"
     postprocessing "^6.32.1"
-    screen-space-reflections "^2.5.0"
     three-stdlib "^2.23.4"
 
 "@react-three/rapier@^1.1.1":
@@ -4430,11 +4429,6 @@ scheduler@^0.23.0:
   integrity sha512-CtuThmgHNg7zIZWAXi3AsyIzA3n4xx7aNyjwC2VJldO2LMVDhFK+63xGqq6CsJH4rTAt6/M+N4GhZiDYPx9eUw==
   dependencies:
     loose-envify "^1.1.0"
-
-screen-space-reflections@^2.5.0:
-  version "2.5.0"
-  resolved "https://registry.yarnpkg.com/screen-space-reflections/-/screen-space-reflections-2.5.0.tgz#2a6ea982da96f9c35f34a361b2555439f9fbb1f6"
-  integrity sha512-fWSDMhJS0xwD3LTxRRch7Lb9NzxsR66sCmtDmAA7i+OGnghUrBBsrha85ng7StnCBaLq/BKmZ97dLxWd1XgWdQ==
 
 seek-bzip@^1.0.5:
   version "1.0.6"
