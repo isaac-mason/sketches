@@ -1622,37 +1622,10 @@
   dependencies:
     three-bvh-csg "^0.0.5"
 
-"@react-three/drei@^9.56.10":
-  version "9.77.0"
-  resolved "https://registry.yarnpkg.com/@react-three/drei/-/drei-9.77.0.tgz#78c5cacdfccb1ba00871706a70af4096b88abbb4"
-  integrity sha512-hAPXkPbmvBB1oKcGgkX+fRfAT9j7+Y2/78pa0xL8jgmkjVbLsrKYh7SOcPuVZ1kUmFFsg75pTZA85KTWqCIzew==
-  dependencies:
-    "@babel/runtime" "^7.11.2"
-    "@mediapipe/tasks-vision" "0.10.2-rc2"
-    "@react-spring/three" "~9.6.1"
-    "@use-gesture/react" "^10.2.24"
-    camera-controls "^2.4.2"
-    detect-gpu "^5.0.28"
-    glsl-noise "^0.0.0"
-    lodash.clamp "^4.0.3"
-    lodash.omit "^4.5.0"
-    lodash.pick "^4.4.0"
-    maath "^0.6.0"
-    meshline "^3.1.6"
-    react-composer "^5.0.3"
-    react-merge-refs "^1.1.0"
-    stats.js "^0.17.0"
-    suspend-react "^0.1.3"
-    three-mesh-bvh "^0.6.0"
-    three-stdlib "^2.23.9"
-    troika-three-text "^0.47.2"
-    utility-types "^3.10.0"
-    zustand "^3.5.13"
-
-"@react-three/drei@^9.77.4":
-  version "9.77.4"
-  resolved "https://registry.yarnpkg.com/@react-three/drei/-/drei-9.77.4.tgz#61a369d113ba1097a1e1bf3786ba47b8303aa618"
-  integrity sha512-GL7iRB16DTwikLOotUbwkkDay/ZcVThykQ+s3Ahw95ith5FwKTokv7LA57CVldlgEWEjVEGwqDLJmAJ6eE6UYA==
+"@react-three/drei@^9.56.10", "@react-three/drei@^9.78.0":
+  version "9.78.0"
+  resolved "https://registry.yarnpkg.com/@react-three/drei/-/drei-9.78.0.tgz#6128b6e5e679c74c34c4bbc3a00e6693163f4b7b"
+  integrity sha512-GU8bakUkh8xR5pDQ47FWi8+G3huqigZqn9a/n53wBKs1iM52u8iM+Vm59Q9cPqXenBAGxLIaAWf01sbeYzYf6g==
   dependencies:
     "@babel/runtime" "^7.11.2"
     "@mediapipe/tasks-vision" "0.10.2-rc2"
