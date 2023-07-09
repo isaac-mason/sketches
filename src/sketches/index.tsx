@@ -145,6 +145,12 @@ const sketchList = [
         title: 'p2-es - Pixelated Text',
         route: 'p2-PixelatedText',
     },
+    /* Voxels */
+    {
+        title: 'Voxels - Culled Mesher',
+        route: 'Voxels-CulledMesher',
+        hidden: true,
+    },
     /* Postprocessing */
     {
         title: 'Postprocessing - Pixelation',

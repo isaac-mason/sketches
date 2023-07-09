@@ -130,3 +130,7 @@ export default () => {
         </>
     )
 }
+
+export const meta = {
+    
+}
