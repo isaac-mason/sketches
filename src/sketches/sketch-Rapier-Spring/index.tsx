@@ -1,10 +1,4 @@
-import { OrbitControls } from '@react-three/drei'
-import {
-    Physics,
-    RapierRigidBody,
-    RigidBody,
-    useBeforePhysicsStep,
-} from '@react-three/rapier'
+import { Physics, RapierRigidBody, RigidBody, useBeforePhysicsStep } from '@react-three/rapier'
 import { useControls } from 'leva'
 import { useEffect, useRef } from 'react'
 import { Vector3 } from 'three'
@@ -14,43 +8,36 @@ import { Spring } from './spring'
 const LEVA_KEY = 'rapier-spring'
 
 const SpringDemo = () => {
-    const { springRestLength, springStiffness, springDamping } = useControls(
-        LEVA_KEY,
-        {
-            postPosition: {
-                value: [0, 2],
-                onChange: (value) => {
-                    postRigidBody.current?.setTranslation(
-                        {
-                            x: value[0],
-                            y: value[1],
-                            z: 0,
-                        },
-                        true
-                    )
-                },
+    const { springRestLength, springStiffness, springDamping } = useControls(LEVA_KEY, {
+        postPosition: {
+            value: [0, 2],
+            onChange: (value) => {
+                postRigidBody.current?.setTranslation(
+                    {
+                        x: value[0],
+                        y: value[1],
+                        z: 0,
+                    },
+                    true
+                )
             },
-            springRestLength: 2,
-            springStiffness: 1,
-            springDamping: 1,
-        }
-    )
+        },
+        springRestLength: 1,
+        springStiffness: 2,
+        springDamping: 1,
+    })
 
     const postRigidBody = useRef<RapierRigidBody>(null!)
     const cubeRigidBody = useRef<RapierRigidBody>(null!)
     const spring = useRef<Spring | null>(null)
 
     useEffect(() => {
-        spring.current = new Spring(
-            cubeRigidBody.current,
-            postRigidBody.current,
-            {
-                restLength: springRestLength,
-                stiffness: springStiffness,
-                damping: springDamping,
-                localAnchorA: new Vector3(-1.2, 1.2, 0),
-            }
-        )
+        spring.current = new Spring(cubeRigidBody.current, postRigidBody.current, {
+            restLength: springRestLength,
+            stiffness: springStiffness,
+            damping: springDamping,
+            localAnchorA: new Vector3(0, 1.2, 0),
+        })
     }, [springRestLength, springStiffness, springDamping])
 
     useBeforePhysicsStep(() => {
@@ -68,14 +55,14 @@ const SpringDemo = () => {
                 </mesh>
             </RigidBody>
 
-            {/* cube rigid body */}
+            {/* ball rigid body */}
             <RigidBody
                 position={[0, 0, 0]}
-                colliders="cuboid"
+                colliders="ball"
                 type="dynamic"
                 ref={cubeRigidBody}
                 mass={5}
-                rotation={[0, 0, -Math.PI / 4]}
+                rotation={[0, 0, 0]}
             >
                 <mesh
                     castShadow
@@ -84,16 +71,16 @@ const SpringDemo = () => {
                         // apply impulse on click
                         cubeRigidBody.current.applyImpulse(
                             {
-                                x: -1,
-                                y: -2.5,
-                                z: -5,
+                                x: Math.random() < 0.5 ? 10 : -10,
+                                y: -200,
+                                z: 0,
                             },
                             true
                         )
                     }}
                 >
-                    <boxGeometry args={[1.2, 1.2, 1.2]} />
-                    <meshStandardMaterial color="orange" />
+                    <sphereGeometry args={[1.2, 32, 32]} />
+                    <meshStandardMaterial color="orange" wireframe />
                 </mesh>
             </RigidBody>
         </>
@@ -106,8 +93,6 @@ const Scene = () => (
 
         <ambientLight intensity={0.5} />
         <pointLight position={[10, 10, 10]} intensity={0.5} />
-
-        <OrbitControls />
     </>
 )
 
@@ -131,6 +116,4 @@ export default () => {
     )
 }
 
-export const meta = {
-    
-}
+export const meta = {}
