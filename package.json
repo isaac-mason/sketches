@@ -10,7 +10,7 @@
     },
     "dependencies": {
         "@pmndrs/assets": "^1.6.0",
-        "@react-three/csg": "^2.2.0",
+        "@react-three/csg": "^3.0.0",
         "@react-three/drei": "^9.78.1",
         "@react-three/fiber": "^8.13.4",
         "@react-three/flex": "^1.0.1",
