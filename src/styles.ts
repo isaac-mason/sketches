@@ -156,6 +156,17 @@ export const Menu = styled.div<{ open: boolean }>`
     }
 `
 
+export const MenuItemTags = styled.div`
+    display: flex;
+    flex-flow: row wrap;
+    gap: 0.5em 1em;
+    font-size: 0.8em;
+    color: #fff;
+    margin: 0.7em;
+    margin-top: 0;
+    font-style: italic;
+`
+
 export const MenuItem = styled(Link)`
     display: flex;
     flex-direction: column;
@@ -166,18 +177,34 @@ export const MenuItem = styled(Link)`
     margin: 0.5em;
     border-radius: 0.2em;
     text-decoration: none;
+
+    background-color: #333;
     transition:
         background 0.3s ease,
         transform 0.5s ease;
-    background-color: #333;
 
-    &.active {
+    &.active,
+    &:hover {
         background-color: #444;
     }
 
     &:hover {
         transform: scale(1.02);
+    }
+
+    ${MenuItemTags} span {
+        padding: 0.2em 0.3em;
+        border-radius: 0.2em;
+
         background-color: #444;
+        transition:
+            background 0.3s ease,
+            transform 0.5s ease;
+    }
+
+    &.active ${MenuItemTags} span,
+    &:hover ${MenuItemTags} span {
+        background-color: #555;
     }
 `
 

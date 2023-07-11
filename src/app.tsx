@@ -10,6 +10,7 @@ import {
     MenuBackground,
     MenuItem,
     MenuItemImage,
+    MenuItemTags,
     MenuItemTitle,
     MenuToggle,
     Page,
@@ -62,6 +63,7 @@ const Navigation = ({ menuOpen, setMenuOpen, displayMode, currentSketch: current
 
             <div id="menu-container">
                 <MenuBackground open={menuOpen} onClick={() => setMenuOpen(false)} />
+
                 <Menu id="menu" open={menuOpen}>
                     {visibleSketches.map((sketch) => (
                         <MenuItem
@@ -71,10 +73,17 @@ const Navigation = ({ menuOpen, setMenuOpen, displayMode, currentSketch: current
                             title={sketch.title}
                             className={sketch.route === currentRoute ? 'active' : ''}
                         >
-                            {(sketch as Sketch).cover ? (
-                                <MenuItemImage src={sketch.cover} alt={sketch.title} loading="lazy" />
-                            ) : undefined}
+                            {sketch.cover ? <MenuItemImage src={sketch.cover} alt={sketch.title} loading="lazy" /> : undefined}
+
                             <MenuItemTitle>{sketch.title}</MenuItemTitle>
+
+                            {sketch.tags && (
+                                <MenuItemTags>
+                                    {sketch.tags.map((tag) => (
+                                        <span key={tag}>{tag}</span>
+                                    ))}
+                                </MenuItemTags>
+                            )}
                         </MenuItem>
                     ))}
                 </Menu>
