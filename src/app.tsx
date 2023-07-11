@@ -17,13 +17,14 @@ import {
     theme,
 } from './styles'
 
-const DefaultComponent = sketchComponents['home'].Component
+const defaultSketch = 'home'
+const DefaultComponent = sketchComponents[defaultSketch].Component
 
 const useSketch = () => {
     const { pathname } = useLocation()
 
     const path = pathname.replace('/sketch/', '')
-    const sketchPath = isSketchRoute(path) ? path : undefined
+    const sketchPath = isSketchRoute(path) ? path : defaultSketch
 
     return sketchPath
 }
