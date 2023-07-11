@@ -119,17 +119,20 @@ export const MenuBackground = styled.div<{ open: boolean }>`
     left: 0;
     width: 100%;
     height: 100%;
-    transition: background, 0.25s ease;
+    transition:
+        background,
+        0.25s ease;
     z-index: ${(props) => (props.open ? '1' : '-1')};
-    background: ${(props) =>
-        props.open ? 'rgba(0, 0, 0, 0.4)' : 'rgba(0, 0, 0, 0)'};
+    background: ${(props) => (props.open ? 'rgba(0, 0, 0, 0.4)' : 'rgba(0, 0, 0, 0)')};
 `
 
 export const Menu = styled.div<{ open: boolean }>`
     position: absolute;
     top: 0;
     left: 0;
-    transition: background, 0.25s ease;
+    transition:
+        background,
+        0.25s ease;
     z-index: 1;
 
     display: flex;
@@ -163,7 +166,9 @@ export const MenuItem = styled(Link)`
     margin: 0.5em;
     border-radius: 0.2em;
     text-decoration: none;
-    transition: background 0.3s ease, transform 0.5s ease;
+    transition:
+        background 0.3s ease,
+        transform 0.5s ease;
     background-color: #333;
 
     &.active {

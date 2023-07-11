@@ -15,16 +15,10 @@ export const usePageVisible = () => {
             }
         }
 
-        document.addEventListener(
-            VISIBILITY_CHANGE_EVENT,
-            onPageVisibilityChange
-        )
+        document.addEventListener(VISIBILITY_CHANGE_EVENT, onPageVisibilityChange)
 
         return () => {
-            document.removeEventListener(
-                VISIBILITY_CHANGE_EVENT,
-                onPageVisibilityChange
-            )
+            document.removeEventListener(VISIBILITY_CHANGE_EVENT, onPageVisibilityChange)
         }
     }, [])
 

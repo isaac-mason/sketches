@@ -1,15 +1,10 @@
 import { Leva } from 'leva'
 import { Perf } from 'r3f-perf'
 import { SetStateAction, Suspense, useEffect, useState } from 'react'
-import { Route, HashRouter as Router, Routes, useMatch } from 'react-router-dom'
+import { RouterProvider, createBrowserRouter, redirect, useLocation } from 'react-router-dom'
 import { ThemeProvider } from 'styled-components'
 import { DebugTunnel, Spinner } from './common'
-import {
-    Sketch,
-    isSketchRoute,
-    sketchComponents,
-    visibleSketches,
-} from './sketches'
+import { Sketch, isSketchRoute, sketchComponents, sketches, visibleSketches } from './sketches'
 import {
     Menu,
     MenuBackground,
@@ -22,15 +17,26 @@ import {
     theme,
 } from './styles'
 
-const defaultSketch = 'Home'
-const DefaultComponent = sketchComponents[defaultSketch].Component
+const DefaultComponent = sketchComponents['home'].Component
+
+const useSketch = () => {
+    const { pathname } = useLocation()
+
+    const path = pathname.replace('/sketch/', '')
+    const sketchPath = isSketchRoute(path) ? path : undefined
+
+    return sketchPath
+}
 
 const RoutedComponent = () => {
-    const {
-        params: { name: routeName },
-    } = useMatch('/sketch/:name') || { params: { name: defaultSketch } }
-    const sketchName = isSketchRoute(routeName) ? routeName : defaultSketch
-    const { Component } = sketchComponents[sketchName]
+    const sketch = useSketch()
+
+    if (!sketch) {
+        return <DefaultComponent />
+    }
+
+    const { Component } = sketchComponents[sketch]
+
     return <Component />
 }
 
@@ -38,34 +44,23 @@ const modes = ['default', 'debug', 'screenshot'] as const
 type DisplayMode = (typeof modes)[number]
 
 type NavigationProps = {
-    currentRoute?: string
+    currentSketch?: string
     displayMode: DisplayMode | null
     menuOpen: boolean
     setMenuOpen: (value: SetStateAction<boolean>) => void
 }
 
-const Navigation = ({
-    menuOpen,
-    setMenuOpen,
-    displayMode,
-    currentRoute,
-}: NavigationProps) => {
+const Navigation = ({ menuOpen, setMenuOpen, displayMode, currentSketch: currentRoute }: NavigationProps) => {
     return (
         <>
             {displayMode !== 'screenshot' ? (
-                <MenuToggle
-                    className="material-symbols-outlined"
-                    onClick={() => setMenuOpen((v) => !v)}
-                >
+                <MenuToggle className="material-symbols-outlined" onClick={() => setMenuOpen((v) => !v)}>
                     menu
                 </MenuToggle>
             ) : undefined}
 
             <div id="menu-container">
-                <MenuBackground
-                    open={menuOpen}
-                    onClick={() => setMenuOpen(false)}
-                />
+                <MenuBackground open={menuOpen} onClick={() => setMenuOpen(false)} />
                 <Menu id="menu" open={menuOpen}>
                     {visibleSketches.map((sketch) => (
                         <MenuItem
@@ -73,16 +68,10 @@ const Navigation = ({
                             to={`/sketch/${sketch.route}`}
                             onClick={() => setMenuOpen(false)}
                             title={sketch.title}
-                            className={
-                                sketch.route === currentRoute ? 'active' : ''
-                            }
+                            className={sketch.route === currentRoute ? 'active' : ''}
                         >
                             {(sketch as Sketch).cover ? (
-                                <MenuItemImage
-                                    src={sketch.cover}
-                                    alt={sketch.title}
-                                    loading="lazy"
-                                />
+                                <MenuItemImage src={sketch.cover} alt={sketch.title} loading="lazy" />
                             ) : undefined}
                             <MenuItemTitle>{sketch.title}</MenuItemTitle>
                         </MenuItem>
@@ -98,13 +87,13 @@ const App = () => {
     const [displayMode, setDisplayMode] = useState<DisplayMode>('default')
     const [smallScreen, setSmallScreen] = useState(false)
 
-    const {
-        params: { name: currentRoute },
-    } = useMatch('/sketch/:name') || { params: { name: defaultSketch } }
+    const sketch = useSketch()
 
     useEffect(() => {
-        gtag({ event: 'sketch_navigation', route: currentRoute })
-    }, [currentRoute])
+        if (sketch) {
+            gtag({ event: 'sketch_navigation', route: sketch })
+        }
+    }, [sketch])
 
     useEffect(() => {
         const handler = (e: WindowEventMap['keyup']): void => {
@@ -136,6 +125,7 @@ const App = () => {
         }
 
         window.addEventListener('resize', listener)
+
         return () => window.removeEventListener('resize', listener)
     }, [smallScreen])
 
@@ -157,25 +147,13 @@ const App = () => {
             />
 
             <Suspense fallback={<Spinner />}>
-                <Routes>
-                    <Route path="/*" element={<DefaultComponent />} />
-                    <Route path="/sketch/:name" element={<RoutedComponent />} />
-                </Routes>
+                <RoutedComponent />
             </Suspense>
 
-            <Navigation
-                menuOpen={menuOpen}
-                setMenuOpen={setMenuOpen}
-                currentRoute={currentRoute}
-                displayMode={displayMode}
-            />
+            <Navigation menuOpen={menuOpen} setMenuOpen={setMenuOpen} currentSketch={sketch} displayMode={displayMode} />
 
             {displayMode === 'default' ? (
-                <a
-                    href={`https://github.com/isaac-mason/sketches/tree/main/src/sketches/sketch-${currentRoute}`}
-                >
-                    GitHub
-                </a>
+                <a href={`https://github.com/isaac-mason/sketches/tree/main/src/sketches/${sketch}`}>GitHub</a>
             ) : undefined}
 
             {displayMode === 'debug' ? (
@@ -184,19 +162,33 @@ const App = () => {
                 </DebugTunnel.In>
             ) : undefined}
 
-            {displayMode === 'screenshot' ? (
-                <ScreenshotDisplayModeStyles />
-            ) : undefined}
+            {displayMode === 'screenshot' ? <ScreenshotDisplayModeStyles /> : undefined}
         </Page>
     )
 }
 
+const router = createBrowserRouter([
+    ...sketches.map((sketch) => ({
+        path: `/sketch/${sketch.route}`,
+        Component: App,
+    })),
+    {
+        path: '/',
+        Component: App,
+    },
+    {
+        path: '*',
+        element: null,
+        loader: async () => {
+            return redirect('/')
+        },
+    },
+])
+
 export default () => {
     return (
-        <Router>
-            <ThemeProvider theme={theme}>
-                <App />
-            </ThemeProvider>
-        </Router>
+        <ThemeProvider theme={theme}>
+            <RouterProvider router={router} />
+        </ThemeProvider>
     )
 }
