@@ -1605,12 +1605,12 @@
   resolved "https://registry.yarnpkg.com/@react-spring/types/-/types-9.6.1.tgz#913d3a68c5cbc1124fdb18eff919432f7b6abdde"
   integrity sha512-POu8Mk0hIU3lRXB3bGIGe4VHIwwDsQyoD1F394OK7STTiX9w4dG3cTLljjYswkQN+hDSHRrj4O36kuVa7KPU8Q==
 
-"@react-three/csg@^2.2.0":
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/@react-three/csg/-/csg-2.2.0.tgz#71600388161b7b6e646e863b45bf1010e968981b"
-  integrity sha512-YgQ9anVePRKWdkZFozyEoQkhrZUYSXxGaUibXzPk3U7RKj5119Fv+Gc9t5EyF/G4ypUm5gSYUiep6owGD8abmA==
+"@react-three/csg@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@react-three/csg/-/csg-3.0.0.tgz#1bee7bef8a9d289e920e860492464ab6912b7e96"
+  integrity sha512-O0fb0Da8GqD6oOFGogcbL10cD8Ppu1r/jDgHNST2NVlUPgd4SifNlvR4xkTo7SH9AujdW3bRAM9O0n2OY2zHOw==
   dependencies:
-    three-bvh-csg "^0.0.5"
+    three-bvh-csg "^0.0.8"
 
 "@react-three/drei@^9.56.10", "@react-three/drei@^9.78.1":
   version "9.78.1"
@@ -5616,10 +5616,10 @@ terser@^5.10.0:
     commander "^2.20.0"
     source-map-support "~0.5.20"
 
-three-bvh-csg@^0.0.5:
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/three-bvh-csg/-/three-bvh-csg-0.0.5.tgz#db8254a0b9472edecc10a836c98adc6286ff1dca"
-  integrity sha512-gxqmaV3HlGHUGB857AV8oLoNxx5Q0T7io1DUs5nrCwmmFqjWZT3a8ue7WapE394wY8awFVAMr+YvdSrzqswpFA==
+three-bvh-csg@^0.0.8:
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/three-bvh-csg/-/three-bvh-csg-0.0.8.tgz#9dc7f29bf43744f7496bfcf2de6f8ae1137f51d9"
+  integrity sha512-c09fHCTSOn82n1Q2Q9rdWL7lVvs6yaMV+APFhSRXTjtNxAjhtyng+pLoLobIPfcTOjGUQyfkqksW5Vd+sa8yRw==
 
 three-mesh-bvh@^0.6.0:
   version "0.6.1"
