@@ -163,7 +163,9 @@ const App = () => {
             <Navigation menuOpen={menuOpen} setMenuOpen={setMenuOpen} currentSketch={sketch} displayMode={displayMode} />
 
             {displayMode === 'default' ? (
-                <a href={`https://github.com/isaac-mason/sketches/tree/main/src/sketches/${sketch}`}>GitHub</a>
+                <a target="_blank" href={`https://github.com/isaac-mason/sketches/tree/main/src/sketches/${sketch}`}>
+                    GitHub
+                </a>
             ) : undefined}
 
             {displayMode === 'debug' ? (
