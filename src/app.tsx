@@ -11,14 +11,13 @@ import {
     redirect,
     useAsyncValue,
     useLoaderData,
-    useLocation,
 } from 'react-router-dom'
 import { createStyledBreakpointsTheme } from 'styled-breakpoints'
 import styled, { ThemeProvider } from 'styled-components'
 import { DebugTunnel, Spinner } from './common'
+import { useDebounce } from './common/ui/hooks/use-debounce'
 import { findSketchByRoute, sketchModules, sketches, visibleSketches } from './sketches'
 import { Sketch, SketchOptions } from './sketches/types'
-import { useDebounce } from './common/ui/hooks/use-debounce'
 
 const theme = createStyledBreakpointsTheme()
 
