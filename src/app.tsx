@@ -1,7 +1,18 @@
 import { Leva } from 'leva'
 import { Perf } from 'r3f-perf'
 import { Suspense, useEffect, useMemo, useState } from 'react'
-import { Link, RouteObject, RouterProvider, createBrowserRouter, redirect, useLoaderData, useLocation } from 'react-router-dom'
+import {
+    Await,
+    Link,
+    RouteObject,
+    RouterProvider,
+    createBrowserRouter,
+    defer,
+    redirect,
+    useAsyncValue,
+    useLoaderData,
+    useLocation,
+} from 'react-router-dom'
 import { createStyledBreakpointsTheme } from 'styled-breakpoints'
 import styled, { ThemeProvider } from 'styled-components'
 import { DebugTunnel, Spinner } from './common'
@@ -10,6 +21,14 @@ import { Sketch, SketchOptions } from './sketches/types'
 import { useDebounce } from './common/ui/hooks/use-debounce'
 
 const theme = createStyledBreakpointsTheme()
+
+const Error = styled.div`
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+`
 
 const GithubLink = styled.a`
     font-size: 1.2em;
@@ -101,10 +120,12 @@ const Nav = styled.div<{ open: boolean }>`
     overflow-x: hidden;
 
     width: 300px;
+    min-width: 300px;
     height: 100%;
 
     ${({ theme }) => theme.breakpoints.up('md')} {
         width: 350px;
+        min-width: 350px;
     }
 `
 
@@ -322,13 +343,42 @@ const useIsSmallScreen = () => {
     return smallScreen
 }
 
-type SketchLoaderData = {
+type SketchData = {
     sketch: Sketch
     options?: SketchOptions
 }
 
-const App = () => {
-    const { sketch, options } = useLoaderData() as SketchLoaderData
+type SketchLoaderData = {
+    sketchPath: string
+    sketchData: SketchData
+}
+
+type LazySketchProps = {
+    displayMode: DisplayMode
+}
+
+const LazySketch = ({ displayMode }: LazySketchProps) => {
+    const { sketch, options } = useAsyncValue() as SketchData
+
+    useEffect(() => {
+        if (sketch) {
+            gtag({ event: 'sketch_navigation', route: sketch })
+        }
+    }, [sketch])
+
+    const { component: SketchModuleComponent } = sketchModules[sketch!.route]
+
+    return (
+        <SketchWrapper>
+            {displayMode !== 'screenshot' && !options?.noTitle && <h1>{sketch?.title}</h1>}
+
+            <SketchModuleComponent />
+        </SketchWrapper>
+    )
+}
+
+const SketchComponent = () => {
+    const { sketchPath, sketchData } = useLoaderData() as SketchLoaderData
 
     const [navOpen, setNavOpen] = useState(false)
 
@@ -350,14 +400,6 @@ const App = () => {
         })
     }, [debouncedSearchTerm])
 
-    useEffect(() => {
-        if (sketch) {
-            gtag({ event: 'sketch_navigation', route: sketch })
-        }
-    }, [sketch])
-
-    const { component: SketchComponent } = sketchModules[sketch!.route]
-
     return (
         <>
             <PageLayout>
@@ -376,7 +418,7 @@ const App = () => {
                                 to={`/sketch/${s.route}`}
                                 onClick={() => setNavOpen(false)}
                                 title={s.title}
-                                className={s.route === sketch?.route ? 'active' : ''}
+                                className={s.route === sketchPath ? 'active' : ''}
                             >
                                 {s.cover ? <NavItemImage src={s.cover} alt={s.title} loading="lazy" /> : undefined}
 
@@ -394,13 +436,11 @@ const App = () => {
                     </NavItems>
                 </Nav>
 
-                <SketchWrapper>
-                    {displayMode !== 'screenshot' && !options?.noTitle && <h1>{sketch?.title}</h1>}
-
-                    <Suspense fallback={<Spinner />}>
-                        <SketchComponent />
-                    </Suspense>
-                </SketchWrapper>
+                <Suspense fallback={<Spinner />}>
+                    <Await resolve={sketchData} errorElement={<Error>Something went wrong loading the sketch!</Error>}>
+                        <LazySketch displayMode={displayMode} />
+                    </Await>
+                </Suspense>
             </PageLayout>
 
             <NavBackground open={navOpen} onClick={() => setNavOpen(false)} />
@@ -412,10 +452,7 @@ const App = () => {
             ) : undefined}
 
             {displayMode === 'default' ? (
-                <GithubLink
-                    target="_blank"
-                    href={`https://github.com/isaac-mason/sketches/tree/main/src/sketches/${sketch.route}`}
-                >
+                <GithubLink target="_blank" href={`https://github.com/isaac-mason/sketches/tree/main/src/sketches/${sketchPath}`}>
                     GitHub
                 </GithubLink>
             ) : undefined}
@@ -448,16 +485,21 @@ const routes: RouteObject[] = [
     ...sketches.map((sketch) => {
         const route: RouteObject = {
             path: `/sketch/${sketch.route}`,
-            Component: App,
+            Component: SketchComponent,
             loader: async ({ request }) => {
                 const sketchPath = new URL(request.url).pathname.replace('/sketch/', '')
 
-                const sketch = findSketchByRoute(sketchPath)!
-                const options = await sketchModules[sketchPath].getOptions()
+                const getSketchData = async (): Promise<SketchData> => {
+                    const sketch = findSketchByRoute(sketchPath)!
+                    const options = await sketchModules[sketchPath].getOptions()
 
-                const data: SketchLoaderData = { sketch, options }
+                    return { sketch, options }
+                }
 
-                return data
+                return defer({
+                    sketchPath,
+                    sketchData: getSketchData(),
+                })
             },
         }
         return route
