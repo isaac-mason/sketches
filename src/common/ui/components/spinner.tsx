@@ -9,10 +9,15 @@ to {
 }
 `
 
-export const Spinner = styled.div`
-    position: fixed;
-    left: calc(50% - 25px);
-    top: calc(50vh - 50px);
+const CenterLayout = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+`
+
+const SpinnerDiv = styled.div`
     width: 50px;
     height: 50px;
     border: 3px solid rgba(0, 0, 0, 0);
@@ -20,3 +25,9 @@ export const Spinner = styled.div`
     border-radius: 50%;
     animation: ${SpinnerKeyframes} 1s ease infinite;
 `
+
+export const Spinner = () => (
+    <CenterLayout>
+        <SpinnerDiv />
+    </CenterLayout>
+)
