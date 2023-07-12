@@ -24,7 +24,6 @@ const App = () => {
 
 export default () => (
     <>
-        <h1>Journey 06 - Animations</h1>
         <Canvas>
             <App />
         </Canvas>

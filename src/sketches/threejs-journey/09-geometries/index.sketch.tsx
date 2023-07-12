@@ -62,7 +62,6 @@ const App = () => {
 
 export default () => (
     <>
-        <h1>Journey 09 - Geometries</h1>
         <Canvas camera={{ position: [0, 0, 10], fov: 60 }} gl={{ outputEncoding: THREE.sRGBEncoding }}>
             <App />
             <OrbitControls />

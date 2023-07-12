@@ -355,7 +355,6 @@ const App = () => {
 
 export default () => (
     <>
-        <h1>Voxels - Culled Mesher</h1>
         <Canvas camera={{ position: [20, 20, 20] }}>
             <App />
             <OrbitControls />

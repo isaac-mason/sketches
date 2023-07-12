@@ -51,7 +51,6 @@ const App = () => {
 
 export default () => (
     <>
-        <h1>SFS 06 - Addressing</h1>
         <Canvas>
             <App />
             <OrthographicCamera

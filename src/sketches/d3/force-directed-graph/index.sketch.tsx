@@ -52,7 +52,6 @@ const App = () => {
 
 export default () => (
     <>
-        <h1>D3 - Force Directed Graph</h1>
         <Canvas camera={{ position: [0, 0, 10] }}>
             <App />
             <OrbitControls />

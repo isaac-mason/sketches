@@ -1,16 +1,8 @@
-import { Suspense, lazy } from 'react'
-
-export type Sketch = {
-    title: string
-    route: string
-    description?: string
-    tags?: string[]
-    cover?: string
-    hidden?: boolean
-}
+import { lazy } from 'react'
+import { Sketch, SketchOptions } from './types'
 
 const sketchList = [
-    { title: 'Home', path: 'home' },
+    { title: 'Intro', path: 'intro' },
     /* GLSL Shaders From Scratch */
     {
         title: 'Shaders From Scratch 1 - Varyings',
@@ -223,19 +215,28 @@ export const visibleSketches: readonly Sketch[] = sketches.filter(
     (sketch) => sketch.hidden === undefined || sketch.hidden === false,
 )
 
-export const isSketchRoute = (v?: string): v is Sketch['route'] => sketchList.some((s) => s.path === v)
+export const findSketchByRoute = (v?: string): Sketch | undefined => sketches.find((s) => s.route === v)
 
-const sketchModules = import.meta.glob(`./**/*.sketch.tsx`)
+const glob = import.meta.glob(`./**/*.sketch.tsx`)
 
-export const sketchComponents = sketchList.reduce(
+export const sketchModules = sketchList.reduce(
     (o, sketch) => {
-        const module = Object.values(sketchModules).find((i) => i.name.includes(sketch.path))!
+        const module = Object.values(glob).find((i) => i.name.includes(sketch.path))!
 
         o[sketch.path] = {
-            Component: lazy(module as never),
+            module,
+            component: lazy(module as never),
+            getOptions: async () => {
+                const exports = await module()
+
+                return (exports as { options?: SketchOptions })?.options
+            },
         }
 
         return o
     },
-    {} as Record<Sketch['route'], { Component: React.ComponentType }>,
+    {} as Record<
+        Sketch['route'],
+        { module: () => Promise<unknown>; component: React.ComponentType; getOptions: () => Promise<SketchOptions | undefined> }
+    >,
 )

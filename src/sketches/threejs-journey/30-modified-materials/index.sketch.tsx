@@ -153,7 +153,6 @@ const App = () => {
 
 export default () => (
     <>
-        <h1>Journey 30 - Modified Materials</h1>
         <Canvas gl={{ antialias: true }} camera={{ position: [3, 2, 11] }} shadows={{ type: THREE.PCFSoftShadowMap }}>
             <App />
             <OrbitControls />

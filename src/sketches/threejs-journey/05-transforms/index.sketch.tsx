@@ -18,7 +18,6 @@ const App = () => {
 
 export default () => (
     <>
-        <h1>Journey 05 - Transforms</h1>
         <Canvas camera={{ position: [3, 3, 3] }}>
             <App />
             <axesHelper scale={2} />

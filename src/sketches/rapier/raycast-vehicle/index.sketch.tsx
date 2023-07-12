@@ -256,8 +256,6 @@ export default () => {
 
     return (
         <>
-            <h1>Rapier - Raycast Vehicle</h1>
-
             <Canvas camera={{ fov: 60, position: [0, 30, -20] }} shadows>
                 <color attach="background" args={['#000']} />
 

@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { Ref, RefObject, useRef } from 'react'
 import { Group } from 'three'
 import { Canvas } from '../../common'
+import { SketchOptions } from '../types'
 
 const Home = () => {
     const group = useRef(null) as RefObject<Group>
@@ -38,3 +39,7 @@ export default () => (
         </Canvas>
     </>
 )
+
+export const options: SketchOptions = {
+    noTitle: true,
+}

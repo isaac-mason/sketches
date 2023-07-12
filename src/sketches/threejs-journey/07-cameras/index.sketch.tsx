@@ -58,7 +58,6 @@ const App = () => {
 
 export default () => (
     <>
-        <h1>Journey 07 - Cameras</h1>
         <Canvas camera={{ position: [0, 1, 5], fov: 50 }} shadows={{ type: PCFSoftShadowMap }}>
             <App />
         </Canvas>

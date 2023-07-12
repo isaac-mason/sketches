@@ -169,8 +169,6 @@ export default () => {
 
     return (
         <>
-            <h1 style={{ pointerEvents: 'none' }}>Rapier - Pointer Constraint</h1>
-
             <Canvas camera={{ position: [4, 4, 4] }} shadows>
                 <Physics paused={!visible} debug={debug}>
                     <PointerConstraintControls target={[0, 1, 0]} />

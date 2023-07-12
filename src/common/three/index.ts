@@ -1,2 +1,2 @@
-export * from './canvas'
-export * from './magic-mirror'
+export * from './components'
+export * from './hooks'

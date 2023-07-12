@@ -33,7 +33,6 @@ const App = () => {
 
 export default () => (
     <>
-        <h1>SFS 01 - Varyings</h1>
         <Canvas>
             <App />
             <OrthographicCamera

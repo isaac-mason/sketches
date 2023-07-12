@@ -111,7 +111,6 @@ const App = () => {
 
 export default () => (
     <>
-        <h1>Postprocessing - Pixelation</h1>
         <Canvas shadows orthographic camera={{ position: [30, 30, 30], zoom: 0.6 }}>
             <App />
         </Canvas>

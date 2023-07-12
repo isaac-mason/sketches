@@ -111,7 +111,6 @@ const App = () => {
 
 export default () => (
     <>
-        <h1>Journey 16 - Shadows</h1>
         <Canvas camera={{ position: [0, 5, 6], fov: 50 }} shadows={{ type: THREE.PCFSoftShadowMap }}>
             <App />
             <OrbitControls target={[0, 2, 0]} />

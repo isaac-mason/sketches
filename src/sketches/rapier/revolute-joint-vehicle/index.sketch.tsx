@@ -341,8 +341,6 @@ export default () => {
 
     return (
         <>
-            <h1>Rapier - Revolute Joint Vehicle</h1>
-
             <Canvas camera={{ fov: 60, position: [30, 30, 0] }} shadows>
                 <Physics
                     updatePriority={RAPIER_UPDATE_PRIORITY}

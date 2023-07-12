@@ -12,7 +12,6 @@ const App = () => {
 
 export default () => (
     <>
-        <h1>Journey 03 - Basic</h1>
         <Canvas camera={{ position: [3, 3, 3] }}>
             <App />
             <OrbitControls />

@@ -98,8 +98,6 @@ export default () => {
 
     return (
         <>
-            <h1>Rapier - Spring</h1>
-
             <Canvas camera={{ fov: 60, position: [0, 0, 10] }} shadows>
                 <Physics paused={!visible} debug={debug}>
                     <Scene />

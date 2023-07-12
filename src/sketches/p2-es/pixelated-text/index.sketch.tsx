@@ -201,7 +201,6 @@ export default () => {
 
     return (
         <>
-            <h1>p2-es - Pixelated Text</h1>
             <Canvas camera={{ position: [-0.5, 0, 5], fov: 25 }}>
                 <Text key={`first ${textKey}`} text={firstWord} color="white" position={[0, 0]} underline />
 

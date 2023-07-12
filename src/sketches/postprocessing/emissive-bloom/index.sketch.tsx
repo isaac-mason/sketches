@@ -29,7 +29,6 @@ const App = () => {
 
 export default () => (
     <>
-        <h1>Postprocessing - Emissive Bloom</h1>
         <Canvas flat gl={{ logarithmicDepthBuffer: true }} camera={{ position: [3, 3, 3] }}>
             <App />
 

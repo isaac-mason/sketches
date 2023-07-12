@@ -247,7 +247,6 @@ const App = () => {
 
 export default () => (
     <>
-        <h1>Journey 28 - Raging Sea</h1>
         <Canvas camera={{ position: [3, 3, 3] }}>
             <App />
             <OrbitControls />

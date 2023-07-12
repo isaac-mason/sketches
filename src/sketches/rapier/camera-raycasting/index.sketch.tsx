@@ -154,7 +154,6 @@ export default () => {
     })
     return (
         <>
-            <h1>Rapier - Camera Raycasting</h1>
             <Canvas>
                 <PerspectiveCamera makeDefault position={[-5, 0, 10]} fov={60} />
                 <OrbitControls autoRotate autoRotateSpeed={-0.5} />

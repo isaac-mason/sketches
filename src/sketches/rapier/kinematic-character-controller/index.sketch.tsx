@@ -324,8 +324,6 @@ export default () => {
 
     return (
         <>
-            <h1>Rapier - Kinematic Character Controller</h1>
-
             <Canvas>
                 <Physics timeStep="vary" paused={!visible || loading} debug={debug}>
                     <Scene />

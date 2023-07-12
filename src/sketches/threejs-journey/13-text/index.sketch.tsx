@@ -50,7 +50,6 @@ const Confettis = () => {
 export default () => {
     return (
         <>
-            <h1>Journey 13 - Text</h1>
             <Canvas camera={{ position: [0, 2, 5] }}>
                 <Float>
                     <Billboard follow>

@@ -42,7 +42,6 @@ const App = () => {
 
 export default () => (
     <>
-        <h1>SFS 03 - Attributes</h1>
         <Canvas>
             <App />
             <OrthographicCamera

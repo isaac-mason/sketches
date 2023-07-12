@@ -210,7 +210,6 @@ const Loop = () => {
 
 export default () => (
     <>
-        <h1>p2-es - Marching Cubes Goo</h1>
         <Canvas camera={{ position: [-0.5, 0, 5], fov: 25 }}>
             <Balls />
             <Container />
