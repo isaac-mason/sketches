@@ -111,7 +111,7 @@ const Nav = styled.div<{ open: boolean }>`
     top: 0;
     left: 0;
 
-    z-index: 2;
+    z-index: 4;
 
     background-color: #111;
 
@@ -131,7 +131,7 @@ const Nav = styled.div<{ open: boolean }>`
 const NavTop = styled.div`
     position: sticky;
     top: 0;
-    z-index: 2;
+    z-index: 5;
 
     width: 100%;
     padding: 1em;
@@ -235,7 +235,7 @@ const NavBackground = styled.div<{ open: boolean }>`
     transition:
         background,
         0.25s ease;
-    z-index: ${(props) => (props.open ? '2' : '-1')};
+    z-index: ${(props) => (props.open ? '3' : '-1')};
     background: ${(props) => (props.open ? 'rgba(0, 0, 0, 0.4)' : 'rgba(0, 0, 0, 0)')};
 
     ${({ theme }) => theme.breakpoints.up('md')} {
