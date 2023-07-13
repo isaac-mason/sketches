@@ -187,7 +187,7 @@ const NavItemTitle = styled.div`
     padding: 0.5em;
 `
 
-const NavItem = styled(Link)`
+const NavItemWrapper = styled(Link)`
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -197,13 +197,16 @@ const NavItem = styled(Link)`
     text-decoration: none;
 
     background-color: #333;
+    border: 1px solid #444;
     transition:
         background 0.3s ease,
+        border 0.3s ease,
         transform 0.5s ease;
 
     &.active,
     &:hover {
         background-color: #444;
+        border: 1px solid #999;
     }
 
     &:hover {
@@ -376,7 +379,36 @@ const LazySketch = ({ displayMode }: LazySketchProps) => {
     )
 }
 
-const SketchComponent = () => {
+type NavItemProps = {
+    sketch: Sketch
+    currentSketchPath: string
+    closeNav: () => void
+}
+
+const NavItem = ({ sketch, currentSketchPath, closeNav }: NavItemProps) => {
+    return (
+        <NavItemWrapper
+            to={`/sketch/${sketch.route}`}
+            onClick={() => closeNav()}
+            title={sketch.title}
+            className={sketch.route === currentSketchPath ? 'active' : ''}
+        >
+            {sketch.cover ? <NavItemImage src={sketch.cover} alt={sketch.title} loading="lazy" /> : undefined}
+
+            <NavItemTitle>{sketch.title}</NavItemTitle>
+
+            {sketch.tags && (
+                <NavItemTags>
+                    {sketch.tags.map((tag) => (
+                        <span key={tag}>{tag}</span>
+                    ))}
+                </NavItemTags>
+            )}
+        </NavItemWrapper>
+    )
+}
+
+const App = () => {
     const { sketchPath, sketchData } = useLoaderData() as SketchLoaderData
 
     const [navOpen, setNavOpen] = useState(false)
@@ -412,25 +444,7 @@ const SketchComponent = () => {
 
                     <NavItems>
                         {filteredSketches.map((s) => (
-                            <NavItem
-                                key={s.route}
-                                to={`/sketch/${s.route}`}
-                                onClick={() => setNavOpen(false)}
-                                title={s.title}
-                                className={s.route === sketchPath ? 'active' : ''}
-                            >
-                                {s.cover ? <NavItemImage src={s.cover} alt={s.title} loading="lazy" /> : undefined}
-
-                                <NavItemTitle>{s.title}</NavItemTitle>
-
-                                {s.tags && (
-                                    <NavItemTags>
-                                        {s.tags.map((tag) => (
-                                            <span key={tag}>{tag}</span>
-                                        ))}
-                                    </NavItemTags>
-                                )}
-                            </NavItem>
+                            <NavItem key={s.route} sketch={s} currentSketchPath={sketchPath} closeNav={() => setNavOpen(false)} />
                         ))}
                     </NavItems>
                 </Nav>
@@ -484,7 +498,7 @@ const routes: RouteObject[] = [
     ...sketches.map((sketch) => {
         const route: RouteObject = {
             path: `/sketch/${sketch.route}`,
-            Component: SketchComponent,
+            Component: App,
             loader: async ({ request }) => {
                 const sketchPath = new URL(request.url).pathname.replace('/sketch/', '')
 
