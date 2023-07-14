@@ -37,6 +37,7 @@ const GithubLink = styled.a`
 
     color: #eee;
     text-shadow: 2px 2px #333;
+    font-family: 'Poppins', sans-serif;
 
     bottom: 20px;
     right: 20px;
@@ -152,6 +153,7 @@ const NavSearchBar = styled.input`
 
     font-size: 1em;
     font-weight: 400;
+    font-family: 'Poppins', sans-serif;
 `
 
 const NavItems = styled.div`
@@ -256,6 +258,8 @@ const PageLayout = styled.div`
     height: 100%;
 
     position: relative;
+
+    font-family: 'Poppins', sans-serif;
 `
 
 const SketchWrapper = styled.div`
@@ -285,11 +289,13 @@ const SketchWrapper = styled.div`
         color: #eee;
         text-shadow: 2px 2px #333;
 
+        pointer-events: none;
+
         ${({ theme }) => theme.breakpoints.up('md')} {
             top: 40px;
             left: 40px;
 
-            font-size: 3em;
+            font-size: 2.5em;
         }
 
         ${({ theme }) => theme.breakpoints.up('lg')} {

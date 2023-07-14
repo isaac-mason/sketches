@@ -196,6 +196,12 @@ const sketchList = [
         path: 'd3/force-directed-graph',
         tags: ['d3', 'data-viz', 'graph'],
     },
+    /* Procedural Generation */
+    {
+        title: 'Procedural Generation - Diamond Square Heightmap',
+        path: 'procedural-generation/diamond-square-heightmap',
+        tags: ['procedural-generation', 'diamond-square', 'heightmap'],
+    },
 ] as const
 
 export const sketches: readonly Sketch[] = sketchList.map((s) => {
