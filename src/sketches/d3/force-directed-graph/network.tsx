@@ -8,20 +8,15 @@ const vec = new Vector3()
 
 export type NetworkNode = {
     id: string
+    group: Group
 } & d3.SimulationNodeDatum
 
 export type NetworkLink = d3.SimulationLinkDatum<NetworkNode>
 
-export type DedupedLink = {
-    source: NetworkNode
-    target: NetworkNode
-    n: number
-}
-
-type NetworkContextType = {
-    addNode: (node: NetworkNode, group: Group) => void
-    addLink: (link: NetworkLink) => void
+export type NetworkContextType = {
+    addNode: (node: NetworkNode) => void
     removeNode: (node: NetworkNode) => void
+    addLink: (link: NetworkLink) => void
     removeLink: (link: NetworkLink) => void
 }
 
@@ -29,6 +24,12 @@ const networkContext = createContext<NetworkContextType>(null!)
 
 export const useNetwork = () => {
     return useContext(networkContext)
+}
+
+type DedupedLink = {
+    source: NetworkNode
+    target: NetworkNode
+    n: number
 }
 
 export type NetworkProps = {
@@ -39,25 +40,43 @@ export const Network = ({ children, ...groupProps }: NetworkProps) => {
     const scene = useThree((state) => state.scene)
     const viewport = useThree((state) => state.viewport)
 
-    const [nodes, setNodes] = useState<{ node: NetworkNode; group: Group }[]>([])
-    const [links, setLinks] = useState<NetworkLink[]>([])
-    const [lines] = useState<Map<string, Mesh>>(() => new Map())
+    const simulation = useMemo(() => {
+        const s = d3
+            .forceSimulation()
+            .force(
+                'link',
+                d3
+                    .forceLink()
+                    .id((d) => (d as NetworkNode).id)
+                    .strength((d) => (d as DedupedLink).n),
+            )
+            .force('charge', d3.forceManyBody().strength(-10000))
+            .force('collide', d3.forceManyBody())
+            .force('center', d3.forceCenter(viewport.width / 2, viewport.height / 2))
 
-    const validDedupedLinks = useMemo(() => {
+        return s
+    }, [viewport.width, viewport.height])
+
+    const [nodes, setNodes] = useState<NetworkNode[]>([])
+    const [links, setLinks] = useState<NetworkLink[]>([])
+
+    const lineMeshes = useMemo<Map<string, Mesh>>(() => new Map(), [])
+
+    const dedupedLinks = useMemo(() => {
         const linkMap = new Map<string, DedupedLink>()
 
         links.forEach((link) => {
             const key = `${link.source}-${link.target}`
 
             if (!linkMap.has(key)) {
-                const source = nodes.find((n) => n.node.id === link.source)
-                const target = nodes.find((n) => n.node.id === link.target)
+                const source = nodes.find((n) => n.id === link.source)
+                const target = nodes.find((n) => n.id === link.target)
 
                 if (source && target) {
                     linkMap.set(key, {
                         n: 1,
-                        source: source!.node,
-                        target: target!.node,
+                        source,
+                        target,
                     })
                 }
             } else {
@@ -69,13 +88,13 @@ export const Network = ({ children, ...groupProps }: NetworkProps) => {
     }, [nodes, links])
 
     useEffect(() => {
-        const unseen = new Set(lines.keys())
+        const unseenLineMeshes = new Set(lineMeshes.keys())
 
-        validDedupedLinks.forEach((link) => {
+        dedupedLinks.forEach((link) => {
             const key = `${link.source.id}-${link.target.id}`
 
-            if (lines.has(key)) {
-                unseen.delete(key)
+            if (lineMeshes.has(key)) {
+                unseenLineMeshes.delete(key)
             } else {
                 const geometry = new MeshLineGeometry()
 
@@ -88,84 +107,63 @@ export const Network = ({ children, ...groupProps }: NetworkProps) => {
                 const mesh = new Mesh(geometry, material)
 
                 scene.add(mesh)
-                lines.set(key, mesh)
+                lineMeshes.set(key, mesh)
             }
         })
 
-        for (const key of unseen) {
-            const line = lines.get(key)
+        for (const key of unseenLineMeshes) {
+            const line = lineMeshes.get(key)
 
             if (line) {
                 scene.remove(line)
-                lines.delete(key)
+                lineMeshes.delete(key)
             }
         }
-    }, [validDedupedLinks])
-
-    const simulation = useMemo(() => {
-        const s = d3
-            .forceSimulation()
-            .force(
-                'link',
-                d3
-                    .forceLink()
-                    .id((d) => (d as unknown as { id: string }).id)
-                    .strength((d) => (d as DedupedLink).n),
-            )
-            .force('charge', d3.forceManyBody().strength(-20000))
-            .force('collide', d3.forceManyBody())
-            .force('center', d3.forceCenter(viewport.width / 2, viewport.height / 2))
-
-        return s
-    }, [viewport.width, viewport.height])
+    }, [dedupedLinks])
 
     useEffect(() => {
-        const update = () => {
-            nodes.forEach(({ node, group }) => {
-                vec.set(node.x! / viewport.factor, node.y! / viewport.factor, 0)
-                group.position.lerp(vec, 0.1)
-            })
+        simulation.nodes(nodes.map((node) => node))
 
-            validDedupedLinks.forEach((link) => {
-                const key = `${link.source.id}-${link.target.id}`
-                const line = lines.get(key)
-                if (line) {
-                    const geometry = line.geometry as MeshLineGeometry
-
-                    const points = [
-                        (link.source.x ?? 0) / viewport.factor,
-                        (link.source.y ?? 0) / viewport.factor,
-                        0,
-                        (link.target.x ?? 0) / viewport.factor,
-                        (link.target.y ?? 0) / viewport.factor,
-                        0,
-                    ]
-                    geometry.setPoints(points)
-                }
-            })
-        }
+        simulation.force<d3.ForceLink<NetworkNode, DedupedLink>>('link')!.links(dedupedLinks)
 
         simulation.tick(100)
 
-        simulation.on('tick', update)
+        simulation.on('tick', () => {
+            nodes.forEach((node) => {
+                vec.set(node.x! / viewport.factor, node.y! / viewport.factor, 0)
+                node.group.position.lerp(vec, 0.1)
+            })
+
+            dedupedLinks.forEach((link) => {
+                const key = `${link.source.id}-${link.target.id}`
+                const line = lineMeshes.get(key)!
+
+                const geometry = line.geometry as MeshLineGeometry
+
+                const points = [
+                    link.source.group.position.x,
+                    link.source.group.position.y,
+                    0,
+                    link.target.group.position.x,
+                    link.target.group.position.y,
+                    0,
+                ]
+
+                geometry.setPoints(points)
+            })
+        })
 
         return () => {
             simulation.on('tick', null)
         }
-    }, [nodes, validDedupedLinks])
+    }, [nodes, dedupedLinks, simulation])
 
-    useEffect(() => {
-        simulation.nodes(nodes.map(({ node }) => node))
-
-        simulation.force<d3.ForceLink<NetworkNode, DedupedLink>>('link')!.links(validDedupedLinks)
-    }, [nodes, links, viewport.factor])
-
-    const addNode = (node: NetworkNode, group: Group) => {
-        setNodes((nodes) => [...nodes, { node, group }])
+    const addNode = (node: NetworkNode) => {
+        setNodes((nodes) => [...nodes, node])
     }
 
     const removeNode = (node: NetworkNode) => {
-        setNodes((nodes) => nodes.filter((n) => n.node !== node))
+        setNodes((nodes) => nodes.filter((n) => n !== node))
     }
 
     const addLink = (link: NetworkLink) => {
@@ -185,29 +183,23 @@ export const Network = ({ children, ...groupProps }: NetworkProps) => {
 
 export type NodeProps = {
     id: string
-    fixedPosition?: [number, number]
     children?: React.ReactNode
 }
 
-export const Node = ({ children, id, fixedPosition }: NodeProps) => {
-    const viewport = useThree((state) => state.viewport)
+export const Node = ({ children, id }: NodeProps) => {
     const network = useNetwork()
 
     const group = useRef<THREE.Group>(null!)
 
     useEffect(() => {
-        const [fx, fy] = fixedPosition
-            ? [fixedPosition[0] * viewport.factor, fixedPosition[1] * viewport.factor]
-            : [undefined, undefined]
+        const node: NetworkNode = { id, group: group.current }
 
-        const node: NetworkNode = { id, fx, fy }
-
-        network.addNode(node, group.current)
+        network.addNode(node)
 
         return () => {
             network.removeNode(node)
         }
-    }, [id, fixedPosition && fixedPosition.join(',')])
+    }, [id])
 
     return <group ref={group}>{children}</group>
 }
