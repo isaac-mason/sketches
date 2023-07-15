@@ -1,6 +1,5 @@
 import { useFrame } from '@react-three/fiber'
 import { Topic } from 'arancini'
-import { packSiblings } from 'd3'
 import { BufferAttribute, BufferGeometry, Color, Mesh, MeshStandardMaterial } from 'three'
 import { useStore } from 'zustand'
 import { createStore } from 'zustand/vanilla'
