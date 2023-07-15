@@ -90,13 +90,13 @@ const App = () => {
     return (
         <>
             <group ref={torusKnotRef}>
-                <mesh position={[0, 1.5, 0]} castShadow>
+                <mesh position={[0, 0, 0]} castShadow>
                     <torusKnotGeometry args={[0.5, 0.1, 100, 16]} />
                     <meshStandardMaterial color="orange" />
                 </mesh>
             </group>
 
-            <mesh receiveShadow rotation-x={-Math.PI / 2} position-y={-0.2}>
+            <mesh receiveShadow rotation-x={-Math.PI / 2} position-y={-1.5}>
                 <meshStandardMaterial color="#555" dithering={true} />
                 <planeGeometry args={[15, 15]} />
             </mesh>
@@ -104,7 +104,7 @@ const App = () => {
             <ambientLight intensity={1} />
             <pointLight castShadow position={[5, 10, 2]} intensity={1} />
 
-            <OrbitControls target={[0, 1.5, 0]} />
+            <OrbitControls makeDefault />
         </>
     )
 }
