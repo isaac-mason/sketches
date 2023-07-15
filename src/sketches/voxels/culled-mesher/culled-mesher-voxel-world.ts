@@ -1,5 +1,6 @@
 import { useFrame } from '@react-three/fiber'
 import { Topic } from 'arancini'
+import { packSiblings } from 'd3'
 import { BufferAttribute, BufferGeometry, Color, Mesh, MeshStandardMaterial } from 'three'
 import { useStore } from 'zustand'
 import { createStore } from 'zustand/vanilla'
@@ -163,23 +164,29 @@ export class VoxelWorld {
                 [0, -1],
                 [CHUNK_SIZE - 1, 1],
             ]) {
-                if (position[axis] === pos) {
-                    const offset = [0, 0, 0]
-                    offset[axis] = dir
-
-                    const neighbourChunk = this.chunks.get(
-                        VoxelUtils.chunkId([
-                            chunkPosition[0] + offset[0],
-                            chunkPosition[1] + offset[1],
-                            chunkPosition[2] + offset[2],
-                        ]),
-                    )
-
-                    if (neighbourChunk) {
-                        neighbourChunk.dirty = true
-                        this.onChunkDirtied.emit(neighbourChunk)
-                    }
+                if (position[axis] !== pos) {
+                    continue
                 }
+
+                const offset = [0, 0, 0]
+                offset[axis] = dir
+
+                const neighbourPosition: Vec3 = [position[0] + offset[0], position[1] + offset[1], position[2] + offset[2]]
+
+                if (!this.isSolid(neighbourPosition)) return
+
+                const neighbourChunk = this.chunks.get(
+                    VoxelUtils.chunkId([
+                        chunkPosition[0] + offset[0],
+                        chunkPosition[1] + offset[1],
+                        chunkPosition[2] + offset[2],
+                    ]),
+                )!
+
+                neighbourChunk.dirty = true
+                this.onChunkDirtied.emit(neighbourChunk)
+
+                return
             }
         }
     }
