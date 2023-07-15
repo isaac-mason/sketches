@@ -3,6 +3,120 @@ import { useControls } from 'leva'
 import { BufferAttribute, BufferGeometry, Color, Mesh, MeshStandardMaterial } from 'three'
 import { Canvas } from '../../../common'
 
+const VOXEL_FACE_DIRECTIONS: {
+    // direction of the neighbour voxel
+    dx: number
+    dy: number
+    dz: number
+
+    // local position offset of the neighbour face
+    lx: number
+    ly: number
+    lz: number
+
+    // uvs of the neighbour faces
+    ux: number
+    uy: number
+    vx: number
+    vy: number
+
+    // normal of the neighbour face
+    nx: number
+    ny: number
+    nz: number
+}[] = [
+    {
+        dx: 0,
+        dy: 0,
+        dz: 1,
+        lx: 1,
+        ly: 0,
+        lz: 1,
+        ux: -1,
+        uy: 0,
+        vx: 0,
+        vy: 1,
+        nx: 0,
+        ny: 0,
+        nz: 1,
+    },
+    {
+        dx: 0,
+        dy: 0,
+        dz: -1,
+        lx: 0,
+        ly: 0,
+        lz: 0,
+        ux: 1,
+        uy: 0,
+        vx: 0,
+        vy: 1,
+        nx: 0,
+        ny: 0,
+        nz: -1,
+    },
+    {
+        dx: -1,
+        dy: 0,
+        dz: 0,
+        lx: 0,
+        ly: 1,
+        lz: 0,
+        ux: 0,
+        uy: 0,
+        vx: 0,
+        vy: -1,
+        nx: -1,
+        ny: 0,
+        nz: 0,
+    },
+    {
+        dx: 1,
+        dy: 0,
+        dz: 0,
+        lx: 1,
+        ly: 0,
+        lz: 0,
+        ux: 0,
+        uy: 0,
+        vx: 0,
+        vy: 1,
+        nx: 1,
+        ny: 0,
+        nz: 0,
+    },
+    {
+        dx: 0,
+        dy: -1,
+        dz: 0,
+        lx: 0,
+        ly: 0,
+        lz: 0,
+        ux: 0,
+        uy: 0,
+        vx: 1,
+        vy: 0,
+        nx: 0,
+        ny: -1,
+        nz: 0,
+    },
+    {
+        dx: 0,
+        dy: 1,
+        dz: 0,
+        lx: 1,
+        ly: 1,
+        lz: 0,
+        ux: 0,
+        uy: 0,
+        vx: -1,
+        vy: 0,
+        nx: 0,
+        ny: 1,
+        nz: 0,
+    },
+]
+
 const CHUNK_BITS = 4
 const CHUNK_SIZE = Math.pow(2, 4)
 
@@ -111,68 +225,6 @@ class VoxelChunkMesh {
         const chunkY = this.chunk.position[1] * CHUNK_SIZE
         const chunkZ = this.chunk.position[2] * CHUNK_SIZE
 
-        const emit = (face: {
-            x: number
-            y: number
-            z: number
-            ux: number
-            uy: number
-            vx: number
-            vy: number
-            color: number
-            nx: number
-            ny: number
-            nz: number
-        }) => {
-            const uz = face.ux == 0 && face.uy == 0 ? 1 : 0
-            const vz = face.vx == 0 && face.vy == 0 ? 1 : 0
-
-            positions.push(face.x, face.y, face.z)
-            positions.push(face.x + face.ux, face.y + face.uy, face.z + uz)
-            positions.push(face.x + face.vx, face.y + face.vy, face.z + vz)
-            positions.push(face.x + face.ux + face.vx, face.y + face.uy + face.vy, face.z + uz + vz)
-
-            const index = positions.length / 3 - 4
-            const a = index
-            const b = index + 1
-            const c = index + 2
-            const d = index + 3
-
-            indices.push(b, a, c)
-            indices.push(b, c, d)
-
-            this.tmpColor.set(face.color)
-            colors.push(
-                this.tmpColor.r,
-                this.tmpColor.g,
-                this.tmpColor.b,
-                this.tmpColor.r,
-                this.tmpColor.g,
-                this.tmpColor.b,
-                this.tmpColor.r,
-                this.tmpColor.g,
-                this.tmpColor.b,
-                this.tmpColor.r,
-                this.tmpColor.g,
-                this.tmpColor.b,
-            )
-
-            normals.push(
-                face.nx,
-                face.ny,
-                face.nz,
-                face.nx,
-                face.ny,
-                face.nz,
-                face.nx,
-                face.ny,
-                face.nz,
-                face.nx,
-                face.ny,
-                face.nz,
-            )
-        }
-
         for (let localX = 0; localX < CHUNK_SIZE; localX++) {
             for (let localY = 0; localY < CHUNK_SIZE; localY++) {
                 for (let localZ = 0; localZ < CHUNK_SIZE; localZ++) {
@@ -187,101 +239,64 @@ class VoxelChunkMesh {
                     const worldZ = chunkZ + localZ
 
                     const col = this.chunk.color[chunkDataIndex]
+                    this.tmpColor.set(col)
 
-                    if (!this.world.isSolid([worldX, worldY, worldZ + 1])) {
-                        emit({
-                            x: localX + 1,
-                            y: localY,
-                            z: localZ + 1,
-                            ux: -1,
-                            uy: 0,
-                            vx: 0,
-                            vy: 1,
-                            color: col,
-                            nx: 0,
-                            ny: 0,
-                            nz: 1,
-                        })
-                    }
+                    for (const { dx, dy, dz, lx, ly, lz, ux, uy, vx, vy, nx, ny, nz } of VOXEL_FACE_DIRECTIONS) {
+                        let solid: boolean
 
-                    if (!this.world.isSolid([worldX, worldY, worldZ - 1])) {
-                        emit({
-                            x: localX,
-                            y: localY,
-                            z: localZ,
-                            ux: 1,
-                            uy: 0,
-                            vx: 0,
-                            vy: 1,
-                            color: col,
-                            nx: 0,
-                            ny: 0,
-                            nz: -1,
-                        })
-                    }
+                        if (
+                            localX + dx < 0 ||
+                            localX + dx >= CHUNK_SIZE ||
+                            localY + dy < 0 ||
+                            localY + dy >= CHUNK_SIZE ||
+                            localZ + dz < 0 ||
+                            localZ + dz >= CHUNK_SIZE
+                        ) {
+                            solid = this.world.isSolid([worldX + dx, worldY + dy, worldZ + dz])
+                        } else {
+                            const index = VoxelUtils.positionToChunkIndex([localX + dx, localY + dy, localZ + dz])
+                            solid = this.chunk.solid[index] === 1
+                        }
 
-                    if (!this.world.isSolid([worldX - 1, worldY, worldZ])) {
-                        emit({
-                            x: localX,
-                            y: localY + 1,
-                            z: localZ,
-                            ux: 0,
-                            uy: 0,
-                            vx: 0,
-                            vy: -1,
-                            color: col,
-                            nx: -1,
-                            ny: 0,
-                            nz: 0,
-                        })
-                    }
+                        if (!solid) {
+                            const x = localX + lx
+                            const y = localY + ly
+                            const z = localZ + lz
 
-                    if (!this.world.isSolid([worldX + 1, worldY, worldZ])) {
-                        emit({
-                            x: localX + 1,
-                            y: localY,
-                            z: localZ,
-                            ux: 0,
-                            uy: 0,
-                            vx: 0,
-                            vy: 1,
-                            color: col,
-                            nx: 1,
-                            ny: 0,
-                            nz: 0,
-                        })
-                    }
+                            const uz = ux == 0 && uy == 0 ? 1 : 0
+                            const vz = vx == 0 && vy == 0 ? 1 : 0
 
-                    if (!this.world.isSolid([worldX, worldY - 1, worldZ])) {
-                        emit({
-                            x: localX,
-                            y: localY,
-                            z: localZ,
-                            ux: 0,
-                            uy: 0,
-                            vx: 1,
-                            vy: 0,
-                            color: col,
-                            nx: 0,
-                            ny: -1,
-                            nz: 0,
-                        })
-                    }
+                            positions.push(x, y, z)
+                            positions.push(x + ux, y + uy, z + uz)
+                            positions.push(x + vx, y + vy, z + vz)
+                            positions.push(x + ux + vx, y + uy + vy, z + uz + vz)
 
-                    if (!this.world.isSolid([worldX, worldY + 1, worldZ])) {
-                        emit({
-                            x: localX + 1,
-                            y: localY + 1,
-                            z: localZ,
-                            ux: 0,
-                            uy: 0,
-                            vx: -1,
-                            vy: 0,
-                            color: col,
-                            nx: 0,
-                            ny: 1,
-                            nz: 0,
-                        })
+                            const index = positions.length / 3 - 4
+                            const a = index
+                            const b = index + 1
+                            const c = index + 2
+                            const d = index + 3
+
+                            indices.push(b, a, c)
+                            indices.push(b, c, d)
+
+                            colors.push(
+                                this.tmpColor.r,
+                                this.tmpColor.g,
+                                this.tmpColor.b,
+                                this.tmpColor.r,
+                                this.tmpColor.g,
+                                this.tmpColor.b,
+                                this.tmpColor.r,
+                                this.tmpColor.g,
+                                this.tmpColor.b,
+                                this.tmpColor.r,
+                                this.tmpColor.g,
+                                this.tmpColor.b,
+                            )
+
+                            normals.push(nx, ny, nz, nx, ny, nz, nx, ny, nz, nx, ny, nz)
+                        }
                     }
                 }
             }

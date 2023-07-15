@@ -227,7 +227,9 @@ const glob = import.meta.glob(`./**/*.sketch.tsx`)
 
 export const sketchModules = sketchList.reduce(
     (o, sketch) => {
-        const module = Object.values(glob).find((i) => i.name.includes(sketch.path))!
+        const module = Object.values(glob).find(
+            (i) => i.name.replace('./', '').replace(/\/[a-zA-Z-]*.sketch.tsx/, '') === sketch.path,
+        )!
 
         o[sketch.path] = {
             module,
