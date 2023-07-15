@@ -174,10 +174,14 @@ const sketchList = [
     },
     /* Voxels */
     {
-        title: 'Voxels - Culled Mesher',
-        path: 'voxels/culled-mesher',
-        tags: ['voxels'],
-        hidden: true,
+        title: '🚧 Voxels - Culled Mesher - Basic',
+        path: 'voxels/culled-mesher/basic',
+        tags: ['voxels', 'culled-mesher'],
+    },
+    {
+        title: '🚧 Voxels - Culled Mesher - Building',
+        path: 'voxels/culled-mesher/building',
+        tags: ['voxels', 'culled-mesher', 'building'],
     },
     /* Postprocessing */
     {
@@ -211,7 +215,7 @@ export const sketches: readonly Sketch[] = sketchList.map((s) => {
         title: s.title,
         route: s.path,
         cover: coverUrl.pathname.includes('/undefined') ? undefined : coverUrl.href,
-        hidden: 'hidden' in s ? s.hidden : false,
+        hidden: 'hidden' in s ? (s.hidden as boolean) : false,
         tags: ('tags' in s ? s.tags : undefined) as string[] | undefined,
         description: ('description' in s ? s.description : undefined) as string | undefined,
     }

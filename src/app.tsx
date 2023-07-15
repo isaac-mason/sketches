@@ -1,6 +1,6 @@
 import { Leva } from 'leva'
 import { Perf } from 'r3f-perf'
-import { Suspense, useEffect, useMemo, useState } from 'react'
+import { Component, ReactNode, Suspense, useEffect, useMemo, useState } from 'react'
 import {
     Await,
     Link,
@@ -365,6 +365,37 @@ type LazySketchProps = {
     displayMode: DisplayMode
 }
 
+type ErrorBoundaryProps = {
+    children: ReactNode
+}
+
+type ErrorBoundaryState = {
+    hasError: boolean
+}
+
+class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+    constructor(props: { children: ReactNode }) {
+        super(props)
+        this.state = { hasError: false }
+    }
+
+    static getDerivedStateFromError(error: Error) {
+        return { hasError: true }
+    }
+
+    componentDidCatch(error: Error, errorInfo: never) {
+        console.error(error, errorInfo)
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return <Error>Something went wrong rendering the sketch!</Error>
+        }
+
+        return this.props.children
+    }
+}
+
 const LazySketch = ({ displayMode }: LazySketchProps) => {
     const { sketch, options } = useAsyncValue() as SketchData
 
@@ -380,7 +411,9 @@ const LazySketch = ({ displayMode }: LazySketchProps) => {
         <SketchWrapper>
             {displayMode !== 'screenshot' && !options?.noTitle && <h1>{sketch?.title}</h1>}
 
-            <SketchModuleComponent />
+            <ErrorBoundary>
+                <SketchModuleComponent />
+            </ErrorBoundary>
         </SketchWrapper>
     )
 }
@@ -455,11 +488,13 @@ const App = () => {
                     </NavItems>
                 </Nav>
 
-                <Suspense fallback={<Spinner />}>
-                    <Await resolve={sketchData} errorElement={<Error>Something went wrong loading the sketch!</Error>}>
-                        <LazySketch displayMode={displayMode} />
-                    </Await>
-                </Suspense>
+                <ErrorBoundary>
+                    <Suspense fallback={<Spinner />}>
+                        <Await resolve={sketchData}>
+                            <LazySketch displayMode={displayMode} />
+                        </Await>
+                    </Suspense>
+                </ErrorBoundary>
             </PageLayout>
 
             <NavBackground open={navOpen} onClick={() => setNavOpen(false)} />

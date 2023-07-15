@@ -4302,6 +4302,11 @@ lil-gui@~0.17.0:
   resolved "https://registry.yarnpkg.com/lil-gui/-/lil-gui-0.17.0.tgz#b41ae55d0023fcd9185f7395a218db0f58189663"
   integrity sha512-MVBHmgY+uEbmJNApAaPbtvNh1RCAeMnKym82SBjtp5rODTYKWtM+MXHCifLe2H2Ti1HuBGBtK/5SyG4ShQ3pUQ==
 
+linguine@^0.0.7:
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/linguine/-/linguine-0.0.7.tgz#74c7ca888306d856a1c729c233e0645ec1d48610"
+  integrity sha512-0Vg0ZIiqLAwzZWsj4aM7DlVROuxOX9YolNW+nVsCa2ugLmLTXxP+X+deRFVIRSoxelYwdFj8aXJrfIP5uiJdxg==
+
 load-json-file@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/load-json-file/-/load-json-file-1.1.0.tgz#956905708d58b4bab4c2261b04f59f31c99374c0"
@@ -4985,7 +4990,7 @@ r3f-perf@^7.1.2:
     "@utsubo/events" "^0.1.7"
     zustand "~4.1.5"
 
-react-colorful@^5.5.1:
+react-colorful@^5.5.1, react-colorful@^5.6.1:
   version "5.6.1"
   resolved "https://registry.yarnpkg.com/react-colorful/-/react-colorful-5.6.1.tgz#7dc2aed2d7c72fac89694e834d179e32f3da563b"
   integrity sha512-1exovf0uGTGyq5mXQT0zgQ80uvj2PCwvF8zY1RN9/vbJVSjSo3fsB/4L3ObbF7u70NduSiK4xu4Y6q1MHoUGEw==
@@ -5981,7 +5986,7 @@ zustand@^3.5.13, zustand@^3.6.9, zustand@^3.7.1:
   resolved "https://registry.yarnpkg.com/zustand/-/zustand-3.7.2.tgz#7b44c4f4a5bfd7a8296a3957b13e1c346f42514d"
   integrity sha512-PIJDIZKtokhof+9+60cpockVOq05sJzHCriyvaLBmEJixseQ1a5Kdov6fWZfWOu5SK9c+FhH1jU0tntLxRJYMA==
 
-zustand@^4.3.2:
+zustand@^4.3.2, zustand@^4.3.9:
   version "4.3.9"
   resolved "https://registry.yarnpkg.com/zustand/-/zustand-4.3.9.tgz#a7d4332bbd75dfd25c6848180b3df1407217f2ad"
   integrity sha512-Tat5r8jOMG1Vcsj8uldMyqYKC5IZvQif8zetmLHs9WoZlntTHmIoNM8TpLRY31ExncuUvUOXehd0kvahkuHjDw==
