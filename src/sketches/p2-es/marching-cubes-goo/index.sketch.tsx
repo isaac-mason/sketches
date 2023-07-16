@@ -202,7 +202,7 @@ const Container = () => {
 
 const Loop = () => {
     useFrame((_, delta) => {
-        ECS.update(Math.max(delta, 0.1))
+        ECS.update(Math.min(delta, 0.1))
     })
 
     return null
