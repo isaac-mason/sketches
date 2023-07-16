@@ -44,6 +44,17 @@ export default defineConfig(() => {
                     speed: 4,
                 },
             }),
+            {
+                name: 'configure-server',
+                configureServer: (server) => {
+                    server.middlewares.use((_req, res, next) => {
+                        // required for SharedArrayBuffer
+                        res.setHeader('Cross-Origin-Opener-Policy', 'same-origin')
+                        res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp')
+                        next()
+                    })
+                },
+            },
         ],
     }
 })

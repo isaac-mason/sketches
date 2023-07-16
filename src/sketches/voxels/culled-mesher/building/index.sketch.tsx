@@ -4,7 +4,10 @@ import { HexColorPicker } from 'react-colorful'
 import { Color } from 'three'
 import { create } from 'zustand'
 import { Canvas } from '../../../../common'
-import { Vec3, VoxelUtils, createVoxelWorld } from '../culled-mesher-voxel-world'
+import { Vec3 } from '../voxel-types'
+import { VoxelUtils } from '../voxel-utils'
+import { useVoxelWorld } from '../voxel-world'
+import { useEffect } from 'react'
 
 const green1 = new Color('green').addScalar(-0.02).getHex()
 const green2 = new Color('green').addScalar(0.02).getHex()
@@ -18,24 +21,22 @@ const useColorStore = create<ColorStore>((set) => ({
     setColor: (color: string) => set({ color }),
 }))
 
-const { world, updateVoxelChunkMeshes, useVoxelWorld } = createVoxelWorld()
-
-// ground
-for (let x = -15; x < 15; x++) {
-    for (let z = -15; z < 15; z++) {
-        world.setBlock([x, 0, z], {
-            solid: true,
-            color: Math.random() > 0.5 ? green1 : green2,
-        })
-    }
-}
-
-updateVoxelChunkMeshes()
-
 const App = () => {
-    const { world, chunkMeshes } = useVoxelWorld()
+    const world = useVoxelWorld()
 
     const { color } = useColorStore()
+
+    useEffect(() => {
+        // ground
+        for (let x = -15; x < 15; x++) {
+            for (let z = -15; z < 15; z++) {
+                world.setBlock([x, 0, z], {
+                    solid: true,
+                    color: Math.random() > 0.5 ? green1 : green2,
+                })
+            }
+        }
+    }, [world])
 
     const onClick = (event: ThreeEvent<MouseEvent>) => {
         event.stopPropagation()
@@ -74,9 +75,7 @@ const App = () => {
     return (
         <>
             <Bounds fit margin={1.5}>
-                {chunkMeshes.map((chunkMesh) => (
-                    <primitive key={chunkMesh.mesh.id} object={chunkMesh.mesh} onPointerDown={onClick} />
-                ))}
+                <primitive object={world.group} onPointerDown={onClick} />
             </Bounds>
 
             <ambientLight intensity={0.2} />
@@ -93,8 +92,8 @@ const ColorPicker = () => {
         <div
             style={{
                 position: 'absolute',
-                bottom: '2em',
-                left: '2em',
+                bottom: '3em',
+                left: '3em',
             }}
         >
             <HexColorPicker className="picker" color={color} onChange={(c) => setColor(c)} />

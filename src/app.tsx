@@ -23,6 +23,7 @@ const theme = createStyledBreakpointsTheme()
 
 const Error = styled.div`
     width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -279,7 +280,7 @@ const SketchWrapper = styled.div`
         left: 20px;
 
         margin: 0;
-        padding-right: 0.2em;
+        padding-right: 20px;
 
         font-size: 2em;
         font-weight: 900;
@@ -294,6 +295,7 @@ const SketchWrapper = styled.div`
         ${({ theme }) => theme.breakpoints.up('md')} {
             top: 40px;
             left: 40px;
+            padding-right: 40px;
 
             font-size: 2.5em;
         }
