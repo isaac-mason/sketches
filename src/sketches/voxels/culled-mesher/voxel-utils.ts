@@ -235,6 +235,18 @@ export class VoxelUtils {
         return (x & mask) + ((y & mask) << CHUNK_BITS) + ((z & mask) << (CHUNK_BITS * 2))
     }
 
+    static worldPositionToLocalChunkPosition([x, y, z]: Vec3): Vec3 {
+        const chunkX = Math.floor(x / CHUNK_SIZE)
+        const chunkY = Math.floor(y / CHUNK_SIZE)
+        const chunkZ = Math.floor(z / CHUNK_SIZE)
+
+        const localX = x - chunkX * CHUNK_SIZE
+        const localY = y - chunkY * CHUNK_SIZE
+        const localZ = z - chunkZ * CHUNK_SIZE
+
+        return [localX, localY, localZ]
+    }
+
     static worldPositionToChunkPosition([x, y, z]: Vec3): Vec3 {
         // Using signed right shift to convert to chunk vec
         // Shifts right by pushing copies of the leftmost bit in from the left, and let the rightmost bits fall off

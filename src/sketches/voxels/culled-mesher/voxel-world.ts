@@ -109,16 +109,16 @@ export class VoxelWorld {
         if (!value.solid) {
             for (let axis = 0; axis < 3; axis++) {
                 for (const [pos, dir] of [
-                    [0, -1],
                     [CHUNK_SIZE - 1, 1],
+                    [0, -1],
                 ]) {
-                    if (position[axis] !== pos) continue
+                    const chunkLocalPosition = VoxelUtils.worldPositionToLocalChunkPosition(position)
+                    if (chunkLocalPosition[axis] !== pos) continue
 
                     const offset: Vec3 = [0, 0, 0]
                     offset[axis] = dir
 
                     const neighbourPosition: Vec3 = [position[0] + offset[0], position[1] + offset[1], position[2] + offset[2]]
-
                     if (!this.isSolid(neighbourPosition)) continue
 
                     const neighbourChunkId = VoxelUtils.chunkId([
