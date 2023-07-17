@@ -11,7 +11,7 @@
     "dependencies": {
         "@pmndrs/assets": "^1.6.0",
         "@react-three/csg": "^3.0.0",
-        "@react-three/drei": "^9.78.1",
+        "@react-three/drei": "^9.78.2",
         "@react-three/fiber": "^8.13.4",
         "@react-three/flex": "^1.0.1",
         "@react-three/postprocessing": "^2.14.13",
