@@ -27,10 +27,11 @@ const Sphere = () => {
                 }
             }
         }
+
     }, [world])
 
     useControls(
-        'voxels-culled-mesher-sphere',
+        'voxels-culled-mesher-basic',
         {
             wireframe: {
                 value: false,

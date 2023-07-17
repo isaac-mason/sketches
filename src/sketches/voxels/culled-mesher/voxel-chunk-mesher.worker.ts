@@ -22,8 +22,10 @@ const VOXEL_FACE_DIRECTIONS: {
     // uvs of the neighbour faces
     ux: number
     uy: number
+    uz: number
     vx: number
     vy: number
+    vz: number
 
     // normal of the neighbour face
     nx: number
@@ -39,8 +41,10 @@ const VOXEL_FACE_DIRECTIONS: {
         lz: 1,
         ux: -1,
         uy: 0,
+        uz: 0,
         vx: 0,
         vy: 1,
+        vz: 0,
         nx: 0,
         ny: 0,
         nz: 1,
@@ -54,8 +58,10 @@ const VOXEL_FACE_DIRECTIONS: {
         lz: 0,
         ux: 1,
         uy: 0,
+        uz: 0,
         vx: 0,
         vy: 1,
+        vz: 0,
         nx: 0,
         ny: 0,
         nz: -1,
@@ -69,8 +75,10 @@ const VOXEL_FACE_DIRECTIONS: {
         lz: 0,
         ux: 0,
         uy: 0,
+        uz: 1,
         vx: 0,
         vy: -1,
+        vz: 0,
         nx: -1,
         ny: 0,
         nz: 0,
@@ -84,8 +92,10 @@ const VOXEL_FACE_DIRECTIONS: {
         lz: 0,
         ux: 0,
         uy: 0,
+        uz: 1,
         vx: 0,
         vy: 1,
+        vz: 0,
         nx: 1,
         ny: 0,
         nz: 0,
@@ -99,8 +109,10 @@ const VOXEL_FACE_DIRECTIONS: {
         lz: 0,
         ux: 0,
         uy: 0,
+        uz: 1,
         vx: 1,
         vy: 0,
+        vz: 0,
         nx: 0,
         ny: -1,
         nz: 0,
@@ -114,8 +126,10 @@ const VOXEL_FACE_DIRECTIONS: {
         lz: 0,
         ux: 0,
         uy: 0,
+        uz: 1,
         vx: -1,
         vy: 0,
+        vz: 0,
         nx: 0,
         ny: 1,
         nz: 0,
@@ -157,7 +171,7 @@ class VoxelChunkMesher {
                     const col = this.chunk.color[chunkDataIndex]
                     this.tmpColor.set(col)
 
-                    for (const { dx, dy, dz, lx, ly, lz, ux, uy, vx, vy, nx, ny, nz } of VOXEL_FACE_DIRECTIONS) {
+                    for (const { dx, dy, dz, lx, ly, lz, ux, uy, uz, vx, vy, vz, nx, ny, nz } of VOXEL_FACE_DIRECTIONS) {
                         let solid: boolean
 
                         if (
@@ -180,9 +194,6 @@ class VoxelChunkMesher {
                         const y = localY + ly
                         const z = localZ + lz
 
-                        const uz = ux == 0 && uy == 0 ? 1 : 0
-                        const vz = vx == 0 && vy == 0 ? 1 : 0
-
                         positions[positionsCount++] = x
                         positions[positionsCount++] = y
                         positions[positionsCount++] = z
@@ -191,13 +202,20 @@ class VoxelChunkMesher {
                         positions[positionsCount++] = y + uy
                         positions[positionsCount++] = z + uz
 
+                        positions[positionsCount++] = x + ux + vx
+                        positions[positionsCount++] = y + uy + vy
+                        positions[positionsCount++] = z + uz + vz
+
                         positions[positionsCount++] = x + vx
                         positions[positionsCount++] = y + vy
                         positions[positionsCount++] = z + vz
 
-                        positions[positionsCount++] = x + ux + vx
-                        positions[positionsCount++] = y + uy + vy
-                        positions[positionsCount++] = z + uz + vz
+                        /*
+                            make two triangles for the face
+                            d --- c
+                            |     |
+                            a --- b
+                        */
 
                         const index = (positionsCount + 1) / 3 - 4
                         const a = index
@@ -205,13 +223,13 @@ class VoxelChunkMesher {
                         const c = index + 2
                         const d = index + 3
 
-                        indices[indicesCount++] = b
                         indices[indicesCount++] = a
-                        indices[indicesCount++] = c
+                        indices[indicesCount++] = d
+                        indices[indicesCount++] = b
 
                         indices[indicesCount++] = b
-                        indices[indicesCount++] = c
                         indices[indicesCount++] = d
+                        indices[indicesCount++] = c
 
                         normals[normalsCount++] = nx
                         normals[normalsCount++] = ny

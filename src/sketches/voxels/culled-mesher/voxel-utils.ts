@@ -1,8 +1,16 @@
-import { Vec3, VoxelChunk, VoxelChunkMeshData } from "./voxel-types"
-import { VoxelWorld } from "./voxel-world"
+import { Vec3, VoxelChunk, VoxelChunkMeshData } from './voxel-types'
+import { VoxelWorld } from './voxel-world'
 
 export const CHUNK_BITS = 4
 export const CHUNK_SIZE = Math.pow(2, 4)
+
+const CHUNK_VOXELS = CHUNK_SIZE ** 3
+
+const VOXEL_SIDES = 6
+const VOXEL_SIDE_VERTICES = 4
+
+const CHUNK_MESH_DATA_MAX_VERTICES = (Float32Array.BYTES_PER_ELEMENT * CHUNK_VOXELS * VOXEL_SIDES * VOXEL_SIDE_VERTICES * 3) / 2
+const CHUNK_MESH_DATA_MAX_INDICES = (Uint32Array.BYTES_PER_ELEMENT * CHUNK_VOXELS * VOXEL_SIDES * 3 * 2) / 2
 
 const traceRayImpl = (
     world: VoxelWorld,
@@ -259,13 +267,11 @@ export class VoxelUtils {
     }
 
     static emptyChunkMeshData() {
-        const nVoxels = CHUNK_SIZE ** 3
-        const nSides = 6
-
-        const positionsBuffer = new SharedArrayBuffer(Float32Array.BYTES_PER_ELEMENT * nVoxels * nSides * 12)
-        const indicesBuffer = new SharedArrayBuffer(Uint32Array.BYTES_PER_ELEMENT * nVoxels * nSides * 6)
-        const normalsBuffer = new SharedArrayBuffer(Float32Array.BYTES_PER_ELEMENT * nVoxels * nSides * 12)
-        const colorsBuffer = new SharedArrayBuffer(Float32Array.BYTES_PER_ELEMENT * nVoxels * nSides * 12)
+        // create buffers that can hold the maximum amount of data for a chunk
+        const positionsBuffer = new SharedArrayBuffer(CHUNK_MESH_DATA_MAX_VERTICES)
+        const indicesBuffer = new SharedArrayBuffer(CHUNK_MESH_DATA_MAX_INDICES)
+        const normalsBuffer = new SharedArrayBuffer(CHUNK_MESH_DATA_MAX_VERTICES)
+        const colorsBuffer = new SharedArrayBuffer(CHUNK_MESH_DATA_MAX_VERTICES)
         const metaBuffer = new SharedArrayBuffer(Uint32Array.BYTES_PER_ELEMENT * 4)
 
         const chunkMeshData: VoxelChunkMeshData = {
