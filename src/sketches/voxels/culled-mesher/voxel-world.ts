@@ -46,7 +46,7 @@ export class VoxelWorld {
                 const { data: message } = e as { data: WorkerMessage }
 
                 if (message.type === 'chunk-mesh-update-notification') {
-                    this.handleChunkMeshUpdateNotification(message)
+                    this.onMeshUpdated(message)
                 }
             }
 
@@ -103,7 +103,7 @@ export class VoxelWorld {
         chunk.solid[index] = value.solid ? 1 : 0
         chunk.color[index] = value.solid ? value.color : 0
 
-        this.requestChunkMeshUpdate({ id })
+        this.remesh(id)
 
         // check if we need to make neighbour chunks dirty
         if (!value.solid) {
@@ -127,7 +127,7 @@ export class VoxelWorld {
                         chunkPosition[2] + offset[2],
                     ])
 
-                    this.requestChunkMeshUpdate({ id: neighbourChunkId })
+                    this.remesh(neighbourChunkId)
                 }
             }
         }
@@ -151,13 +151,13 @@ export class VoxelWorld {
         }
     }
 
-    private requestChunkMeshUpdate({ id }: Omit<RequestChunkMeshUpdateMessage, 'type'>): void {
+    private remesh(chunkId: string): void {
         const data: RequestChunkMeshUpdateMessage = {
             type: 'request-chunk-mesh-update',
-            id,
+            id: chunkId,
         }
 
-        const workerWithPendingMeshUpdate = this.pendingMeshUpdates.get(id)
+        const workerWithPendingMeshUpdate = this.pendingMeshUpdates.get(chunkId)
 
         if (workerWithPendingMeshUpdate) {
             this.mesherWorkers[workerWithPendingMeshUpdate].postMessage(data)
@@ -166,14 +166,14 @@ export class VoxelWorld {
 
         const workerIndex = this.workerMeshUpdateRoundRobin
         const worker = this.mesherWorkers[workerIndex]
-        this.pendingMeshUpdates.set(id, workerIndex)
+        this.pendingMeshUpdates.set(chunkId, workerIndex)
 
         worker.postMessage(data)
 
         this.workerMeshUpdateRoundRobin = (this.workerMeshUpdateRoundRobin + 1) % this.mesherWorkers.length
     }
 
-    private handleChunkMeshUpdateNotification({ id }: ChunkMeshUpdateNotificationMessage) {
+    private onMeshUpdated({ id }: ChunkMeshUpdateNotificationMessage) {
         this.pendingMeshUpdates.delete(id)
         this.chunkMeshes.get(id)!.update()
     }
