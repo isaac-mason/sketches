@@ -183,6 +183,16 @@ const sketchList = [
         path: 'voxels/culled-mesher/building',
         tags: ['voxels', 'culled-mesher', 'building'],
     },
+    {
+        title: '🚧 Voxels - Culled Mesher - Fly Controls',
+        path: 'voxels/culled-mesher/fly-controls',
+        tags: ['voxels', 'culled-mesher', 'controller'],
+    },
+    {
+        title: '🚧 Voxels - Culled Mesher - Box Character Controller',
+        path: 'voxels/culled-mesher/box-character-controller',
+        tags: ['voxels', 'culled-mesher', 'controller'],
+    },
     /* Postprocessing */
     {
         title: 'Postprocessing - Pixelation',

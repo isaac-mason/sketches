@@ -46,29 +46,25 @@ const App = () => {
 
         const ray = VoxelUtils.traceRay(world, origin, direction)
 
-        if (ray.hit) {
-            if (event.button === 2) {
-                const block: Vec3 = [
-                    Math.floor(ray.hitPosition[0]),
-                    Math.floor(ray.hitPosition[1]),
-                    Math.floor(ray.hitPosition[2]),
-                ]
+        if (!ray.hit) return
 
-                world.setBlock(block, {
-                    solid: false,
-                })
-            } else {
-                const block: Vec3 = [
-                    Math.floor(ray.hitPosition[0] + ray.hitNormal[0]),
-                    Math.floor(ray.hitPosition[1] + ray.hitNormal[1]),
-                    Math.floor(ray.hitPosition[2] + ray.hitNormal[2]),
-                ]
+        if (event.button === 2) {
+            const block: Vec3 = [Math.floor(ray.hitPosition[0]), Math.floor(ray.hitPosition[1]), Math.floor(ray.hitPosition[2])]
 
-                world.setBlock(block, {
-                    solid: true,
-                    color: tmpColor.set(color).getHex(),
-                })
-            }
+            world.setBlock(block, {
+                solid: false,
+            })
+        } else {
+            const block: Vec3 = [
+                Math.floor(ray.hitPosition[0] + ray.hitNormal[0]),
+                Math.floor(ray.hitPosition[1] + ray.hitNormal[1]),
+                Math.floor(ray.hitPosition[2] + ray.hitNormal[2]),
+            ]
+
+            world.setBlock(block, {
+                solid: true,
+                color: tmpColor.set(color).getHex(),
+            })
         }
     }
 

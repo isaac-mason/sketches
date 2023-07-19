@@ -137,6 +137,14 @@ export class VoxelWorld {
         return VoxelUtils.isSolid(position, this.chunks)
     }
 
+    intersectsVoxel(position: Vec3): boolean {
+        return VoxelUtils.isSolid([
+            Math.floor(position[0]),
+            Math.floor(position[1]),
+            Math.floor(position[2]),
+        ], this.chunks)
+    }
+
     private registerChunk({ id, position, chunkBuffers, chunkMeshBuffers }: Omit<RegisterChunkMessage, 'type'>): void {
         const data: RegisterChunkMessage = {
             type: 'register-chunk',
