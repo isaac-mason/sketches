@@ -161,6 +161,11 @@ const sketchList = [
         path: 'rapier/kinematic-character-controller',
         tags: ['physics', 'rapier', 'controller'],
     },
+    {
+        title: 'Rapier - Ball Pit Mixer',
+        path: 'rapier/ball-pit-mixer',
+        tags: ['physics', 'rapier'],
+    },
     /* p2-es */
     {
         title: 'p2-es - Marching Cubes Goo',
