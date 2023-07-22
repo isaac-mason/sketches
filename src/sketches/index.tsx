@@ -234,13 +234,21 @@ const sketchList = [
     },
 ] as const
 
+const sketchCoverGlob: Record<string, { default: string }> = import.meta.glob(`./**/cover.png`, {
+    query: {
+        w: 1000,
+        format: 'webp',
+    },
+    eager: true,
+})
+
 export const sketches: readonly Sketch[] = sketchList.map((s) => {
-    const coverUrl = new URL(`./${s.path}/cover.png`, import.meta.url)
+    const cover = sketchCoverGlob[`./${s.path}/cover.png`]
 
     return {
         title: s.title,
         route: s.path,
-        cover: coverUrl.pathname.includes('/undefined') ? undefined : coverUrl.href,
+        cover: cover?.default,
         hidden: 'hidden' in s ? (s.hidden as boolean) : false,
         tags: ('tags' in s ? s.tags : undefined) as string[] | undefined,
         description: ('description' in s ? s.description : undefined) as string | undefined,
@@ -253,11 +261,11 @@ export const visibleSketches: readonly Sketch[] = sketches.filter(
 
 export const findSketchByRoute = (v?: string): Sketch | undefined => sketches.find((s) => s.route === v)
 
-const glob = import.meta.glob(`./**/*.sketch.tsx`)
+const sketchGlob = import.meta.glob(`./**/*.sketch.tsx`)
 
 export const sketchModules = sketchList.reduce(
     (o, sketch) => {
-        const module = Object.values(glob).find(
+        const module = Object.values(sketchGlob).find(
             (i) => i.name.replace('./', '').replace(/\/[a-zA-Z-]*.sketch.tsx/, '') === sketch.path,
         )!
 
