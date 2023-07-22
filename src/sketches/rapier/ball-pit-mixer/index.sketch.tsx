@@ -124,7 +124,7 @@ const Scene = () => (
         <ambientLight intensity={0.5} />
         <pointLight position={[10, 10, 10]} intensity={0.5} />
 
-        <OrbitControls makeDefault target={[0, -25, 0]} />
+        <OrbitControls makeDefault target={[0, -25, 0]} minPolarAngle={0} maxPolarAngle={Math.PI / 16} />
     </>
 )
 
