@@ -221,6 +221,12 @@ const sketchList = [
         path: 'procedural-generation/diamond-square-heightmap',
         tags: ['procedural-generation', 'diamond-square', 'heightmap'],
     },
+    /* Sprites */
+    {
+        title: 'Sprites - Face Camera',
+        path: 'sprites/face-camera',
+        tags: ['sprites'],
+    },
 ] as const
 
 export const sketches: readonly Sketch[] = sketchList.map((s) => {
