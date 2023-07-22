@@ -2,6 +2,7 @@
     "name": "sketches",
     "private": true,
     "version": "0.0.0",
+    "type": "module",
     "scripts": {
         "dev": "vite",
         "build": "tsc && vite build",
@@ -31,10 +32,12 @@
         "styled-components": "^6.0.4",
         "three": "^0.154.0",
         "tunnel-rat": "^0.1.2",
+        "vite-imagetools": "^5.0.5",
         "zustand": "^4.3.9"
     },
     "devDependencies": {
         "@types/d3": "^7.4.0",
+        "@types/node": "^20.4.4",
         "@types/react": "^18.2.15",
         "@types/react-dom": "^18.2.6",
         "@types/styled-components": "^5.1.25",
@@ -43,7 +46,6 @@
         "prettier": "^3.0.0",
         "typescript": "^5.1.6",
         "vite": "^4.3.9",
-        "vite-plugin-html": "^3.2.0",
-        "vite-plugin-imagemin": "^0.6.1"
+        "vite-plugin-html": "^3.2.0"
     }
 }

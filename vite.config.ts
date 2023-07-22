@@ -1,6 +1,6 @@
-import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import viteImagemin from 'vite-plugin-imagemin'
+import { defineConfig } from 'vite'
+import { imagetools } from 'vite-imagetools'
 import { createHtmlPlugin } from 'vite-plugin-html'
 
 // https://vitejs.dev/config/
@@ -38,12 +38,7 @@ export default defineConfig(() => {
                     },
                 },
             }),
-            viteImagemin({
-                pngquant: {
-                    quality: [0.8, 0.9],
-                    speed: 4,
-                },
-            }),
+            imagetools(),
             {
                 name: 'configure-server',
                 configureServer: (server) => {
