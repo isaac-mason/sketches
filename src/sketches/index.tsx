@@ -177,6 +177,11 @@ const sketchList = [
         path: 'p2-es/pixelated-text',
         tags: ['physics', 'p2-es', 'text'],
     },
+    {
+        title: 'p2-es - Kinematic Character Controller',
+        path: 'p2-es/kinematic-character-controller',
+        tags: ['physics', 'p2-es', 'controller'],
+    },
     /* Voxels */
     {
         title: '🚧 Voxels - Culled Mesher - Basic',
