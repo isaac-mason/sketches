@@ -1,19 +1,10 @@
-import { Vec3, VoxelChunk, VoxelChunkMeshData } from './voxel-types'
-import { VoxelWorld } from './voxel-world'
+import { Vec3, VoxelChunk } from '.'
 
 export const CHUNK_BITS = 4
 export const CHUNK_SIZE = Math.pow(2, 4)
 
-const CHUNK_VOXELS = CHUNK_SIZE ** 3
-
-const VOXEL_SIDES = 6
-const VOXEL_SIDE_VERTICES = 4
-
-const CHUNK_MESH_DATA_MAX_VERTICES = (Float32Array.BYTES_PER_ELEMENT * CHUNK_VOXELS * VOXEL_SIDES * VOXEL_SIDE_VERTICES * 3) / 2
-const CHUNK_MESH_DATA_MAX_INDICES = (Uint32Array.BYTES_PER_ELEMENT * CHUNK_VOXELS * VOXEL_SIDES * 3 * 2) / 2
-
 const traceRayImpl = (
-    world: VoxelWorld,
+    isSolid: (position: Vec3) => boolean,
     origin: Vec3,
     direction: Vec3,
     maxDistance: number,
@@ -52,7 +43,7 @@ const traceRayImpl = (
         fx = ox - ix
         fy = oy - iy
         fz = oz - iz
-        b = world.isSolid([ix, iy, iz])
+        b = isSolid([ix, iy, iz])
 
         if (b) {
             if (hitPosition) {
@@ -76,10 +67,7 @@ const traceRayImpl = (
             ey = ny < 0 ? fy <= minStep : fy >= 1.0 - minStep
             ez = nz < 0 ? fz <= minStep : fz >= 1.0 - minStep
             if (ex && ey && ez) {
-                b =
-                    world.isSolid([ix + nx, iy + ny, iz]) ||
-                    world.isSolid([ix, iy + ny, iz + nz]) ||
-                    world.isSolid([ix + nx, iy, iz + nz])
+                b = isSolid([ix + nx, iy + ny, iz]) || isSolid([ix, iy + ny, iz + nz]) || isSolid([ix + nx, iy, iz + nz])
                 if (b) {
                     if (hitPosition) {
                         hitPosition[0] = nx < 0 ? ix - epsilon : ix + 1.0 - epsilon
@@ -95,7 +83,7 @@ const traceRayImpl = (
                 }
             }
             if (ex && (ey || ez)) {
-                b = world.isSolid([ix + nx, iy, iz])
+                b = isSolid([ix + nx, iy, iz])
                 if (b) {
                     if (hitPosition) {
                         hitPosition[0] = nx < 0 ? ix - epsilon : ix + 1.0 - epsilon
@@ -111,7 +99,7 @@ const traceRayImpl = (
                 }
             }
             if (ey && (ex || ez)) {
-                b = world.isSolid([ix, iy + ny, iz])
+                b = isSolid([ix, iy + ny, iz])
                 if (b) {
                     if (hitPosition) {
                         hitPosition[0] = fx < epsilon ? +ix : ox
@@ -127,7 +115,7 @@ const traceRayImpl = (
                 }
             }
             if (ez && (ex || ey)) {
-                b = world.isSolid([ix, iy, iz + nz])
+                b = isSolid([ix, iy, iz + nz])
                 if (b) {
                     if (hitPosition) {
                         hitPosition[0] = fx < epsilon ? +ix : ox
@@ -217,128 +205,104 @@ const traceRayImpl = (
     return false
 }
 
-export class VoxelUtils {
-    static isSolid(position: Vec3, chunks: Map<string, VoxelChunk>) {
-        const chunk = chunks.get(VoxelUtils.chunkId(VoxelUtils.worldPositionToChunkPosition(position)))
+export const positionToChunkIndex = ([x, y, z]: Vec3): number => {
+    const mask = (1 << CHUNK_BITS) - 1
 
-        if (!chunk) {
-            return false
-        }
+    return (x & mask) + ((y & mask) << CHUNK_BITS) + ((z & mask) << (CHUNK_BITS * 2))
+}
 
-        const chunkDataIndex = VoxelUtils.positionToChunkIndex(position)
-        return chunk.solid[chunkDataIndex] === 1
+export const isSolid = (position: Vec3, chunks: Map<string, VoxelChunk>) => {
+    const chunk = chunks.get(chunkId(worldPositionToChunkPosition(position)))
+
+    if (!chunk) {
+        return false
     }
 
-    static positionToChunkIndex([x, y, z]: Vec3): number {
-        const mask = (1 << CHUNK_BITS) - 1
+    const chunkDataIndex = positionToChunkIndex(position)
+    return chunk.solid[chunkDataIndex] === 1
+}
 
-        return (x & mask) + ((y & mask) << CHUNK_BITS) + ((z & mask) << (CHUNK_BITS * 2))
+export const worldPositionToLocalChunkPosition = ([x, y, z]: Vec3): Vec3 => {
+    const chunkX = Math.floor(x / CHUNK_SIZE)
+    const chunkY = Math.floor(y / CHUNK_SIZE)
+    const chunkZ = Math.floor(z / CHUNK_SIZE)
+
+    const localX = x - chunkX * CHUNK_SIZE
+    const localY = y - chunkY * CHUNK_SIZE
+    const localZ = z - chunkZ * CHUNK_SIZE
+
+    return [localX, localY, localZ]
+}
+
+export const worldPositionToChunkPosition = ([x, y, z]: Vec3): Vec3 => {
+    // Using signed right shift to convert to chunk vec
+    // Shifts right by pushing copies of the leftmost bit in from the left, and let the rightmost bits fall off
+    // e.g.
+    // 15 >> 4 = 0
+    // 16 >> 4 = 1
+    const cx = x >> CHUNK_BITS
+    const cy = y >> CHUNK_BITS
+    const cz = z >> CHUNK_BITS
+
+    return [cx, cy, cz]
+}
+
+export const chunkId = (position: Vec3): string => {
+    return position.join(',')
+}
+
+export const createEmptyChunk = (): VoxelChunk => {
+    const solidBuffer = new SharedArrayBuffer(Uint8Array.BYTES_PER_ELEMENT * CHUNK_SIZE ** 3)
+    const colorBuffer = new SharedArrayBuffer(Uint32Array.BYTES_PER_ELEMENT * CHUNK_SIZE ** 3)
+
+    return {
+        id: '',
+        position: [0, 0, 0],
+        solid: new Uint8Array(solidBuffer),
+        color: new Uint32Array(colorBuffer),
+        solidBuffer,
+        colorBuffer,
+    }
+}
+
+export type TraceRayResult = { hit: false; hitPosition: undefined; hitNormal: undefined } | { hit: true; hitPosition: Vec3; hitNormal: Vec3 }
+
+export const traceRay = (
+    isSolid: (pos: Vec3) => boolean,
+    origin: Vec3,
+    direction: Vec3,
+    maxDistance = 500,
+    hitPosition: Vec3 = [0, 0, 0],
+    hitNormal: Vec3 = [0, 0, 0],
+    EPSILON = 1e-8,
+): TraceRayResult => {
+    const px = +origin[0]
+    const py = +origin[1]
+    const pz = +origin[2]
+
+    let dx = +direction[0]
+    let dy = +direction[1]
+    let dz = +direction[2]
+
+    const ds = Math.sqrt(dx * dx + dy * dy + dz * dz)
+
+    if (typeof EPSILON === 'undefined') {
+        EPSILON = 1e-8
     }
 
-    static worldPositionToLocalChunkPosition([x, y, z]: Vec3): Vec3 {
-        const chunkX = Math.floor(x / CHUNK_SIZE)
-        const chunkY = Math.floor(y / CHUNK_SIZE)
-        const chunkZ = Math.floor(z / CHUNK_SIZE)
-
-        const localX = x - chunkX * CHUNK_SIZE
-        const localY = y - chunkY * CHUNK_SIZE
-        const localZ = z - chunkZ * CHUNK_SIZE
-
-        return [localX, localY, localZ]
+    if (ds < EPSILON) {
+        return { hit: false, hitPosition: undefined, hitNormal: undefined }
     }
 
-    static worldPositionToChunkPosition([x, y, z]: Vec3): Vec3 {
-        // Using signed right shift to convert to chunk vec
-        // Shifts right by pushing copies of the leftmost bit in from the left, and let the rightmost bits fall off
-        // e.g.
-        // 15 >> 4 = 0
-        // 16 >> 4 = 1
-        const cx = x >> CHUNK_BITS
-        const cy = y >> CHUNK_BITS
-        const cz = z >> CHUNK_BITS
+    dx /= ds
+    dy /= ds
+    dz /= ds
 
-        return [cx, cy, cz]
+    const hit = traceRayImpl(isSolid, [px, py, pz], [dx, dy, dz], maxDistance, hitPosition, hitNormal, EPSILON)
+
+    if (hit) {
+        return { hit: true, hitPosition: hitPosition, hitNormal: hitNormal }
     }
 
-    static chunkId = (position: Vec3): string => {
-        return position.join(',')
-    }
-
-    static emptyChunk(id: string, position: Vec3): VoxelChunk {
-        const solidBuffer = new SharedArrayBuffer(Uint8Array.BYTES_PER_ELEMENT * CHUNK_SIZE ** 3)
-        const colorBuffer = new SharedArrayBuffer(Uint32Array.BYTES_PER_ELEMENT * CHUNK_SIZE ** 3)
-
-        return {
-            id,
-            position,
-            solid: new Uint8Array(solidBuffer),
-            color: new Uint32Array(colorBuffer),
-            solidBuffer,
-            colorBuffer,
-        }
-    }
-
-    static emptyChunkMeshData() {
-        // create buffers that can hold the maximum amount of data for a chunk
-        const positionsBuffer = new SharedArrayBuffer(CHUNK_MESH_DATA_MAX_VERTICES)
-        const indicesBuffer = new SharedArrayBuffer(CHUNK_MESH_DATA_MAX_INDICES)
-        const normalsBuffer = new SharedArrayBuffer(CHUNK_MESH_DATA_MAX_VERTICES)
-        const colorsBuffer = new SharedArrayBuffer(CHUNK_MESH_DATA_MAX_VERTICES)
-        const metaBuffer = new SharedArrayBuffer(Uint32Array.BYTES_PER_ELEMENT * 4)
-
-        const chunkMeshData: VoxelChunkMeshData = {
-            positions: new Float32Array(positionsBuffer),
-            positionsBuffer: positionsBuffer,
-            indices: new Uint32Array(indicesBuffer),
-            indicesBuffer,
-            normals: new Float32Array(normalsBuffer),
-            normalsBuffer: normalsBuffer,
-            colors: new Float32Array(colorsBuffer),
-            colorsBuffer: colorsBuffer,
-            meta: new Uint32Array(metaBuffer),
-            metaBuffer,
-        }
-
-        return chunkMeshData
-    }
-
-    static traceRay(
-        world: VoxelWorld,
-        origin: Vec3,
-        direction: Vec3,
-        maxDistance = 500,
-        hitPosition: Vec3 = [0, 0, 0],
-        hitNormal: Vec3 = [0, 0, 0],
-        EPSILON = 1e-8,
-    ): { hit: false; hitPosition: undefined; hitNormal: undefined } | { hit: true; hitPosition: Vec3; hitNormal: Vec3 } {
-        const px = +origin[0]
-        const py = +origin[1]
-        const pz = +origin[2]
-
-        let dx = +direction[0]
-        let dy = +direction[1]
-        let dz = +direction[2]
-
-        const ds = Math.sqrt(dx * dx + dy * dy + dz * dz)
-
-        if (typeof EPSILON === 'undefined') {
-            EPSILON = 1e-8
-        }
-
-        if (ds < EPSILON) {
-            return { hit: false, hitPosition: undefined, hitNormal: undefined }
-        }
-
-        dx /= ds
-        dy /= ds
-        dz /= ds
-
-        const hit = traceRayImpl(world, [px, py, pz], [dx, dy, dz], maxDistance, hitPosition, hitNormal, EPSILON)
-
-        if (hit) {
-            return { hit: true, hitPosition: hitPosition, hitNormal: hitNormal }
-        }
-
-        return { hit, hitPosition: undefined, hitNormal: undefined }
-    }
+    return { hit, hitPosition: undefined, hitNormal: undefined }
 }

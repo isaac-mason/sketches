@@ -4,9 +4,9 @@ import { useEffect, useRef } from 'react'
 import { styled } from 'styled-components'
 import { Color, Vector3 } from 'three'
 import { Canvas } from '../../../../common'
-import { Vec3 } from '../voxel-types'
-import { VoxelUtils } from '../voxel-utils'
-import { VoxelWorld, useVoxelWorld } from '../voxel-world'
+import { BlockValue, CorePlugin, Vec3, VoxelWorldComponent } from '../../engine/core'
+import { CulledMesherPlugin } from '../../engine/culled-mesher'
+import { useVoxelEngine } from '../../engine/use-voxel-engine'
 
 const green1 = new Color('green').addScalar(-0.02).getHex()
 const green2 = new Color('green').addScalar(0.02).getHex()
@@ -19,10 +19,11 @@ const sideVector = new Vector3()
 const direction = new Vector3()
 
 type PlayerProps = {
-    world: VoxelWorld
+    voxelWorld: VoxelWorldComponent
+    setBlock: (pos: Vec3, value: BlockValue) => void
 }
 
-const Player = ({ world }: PlayerProps) => {
+const Player = ({ voxelWorld, setBlock }: PlayerProps) => {
     const position = useRef<Vector3>(new Vector3(0, 5, 0))
 
     const [, getControls] = useKeyboardControls()
@@ -54,7 +55,7 @@ const Player = ({ world }: PlayerProps) => {
             const origin = camera.position.toArray()
             const direction = camera.getWorldDirection(vec3).toArray()
 
-            const ray = VoxelUtils.traceRay(world, origin, direction)
+            const ray = voxelWorld.traceRay(origin, direction)
 
             if (!ray.hit) return
 
@@ -65,7 +66,7 @@ const Player = ({ world }: PlayerProps) => {
                     Math.floor(ray.hitPosition[2]),
                 ]
 
-                world.setBlock(block, {
+                setBlock(block, {
                     solid: false,
                 })
             } else {
@@ -75,7 +76,7 @@ const Player = ({ world }: PlayerProps) => {
                     Math.floor(ray.hitPosition[2] + ray.hitNormal[2]),
                 ]
 
-                world.setBlock(block, {
+                setBlock(block, {
                     solid: true,
                     color: orange,
                 })
@@ -93,13 +94,13 @@ const Player = ({ world }: PlayerProps) => {
 }
 
 const App = () => {
-    const world = useVoxelWorld()
+    const { world, voxelWorld, setBlock, CulledMeshes } = useVoxelEngine([CorePlugin, CulledMesherPlugin])
 
     useEffect(() => {
         // ground
         for (let x = -15; x < 15; x++) {
             for (let z = -15; z < 15; z++) {
-                world.setBlock([x, 0, z], {
+                setBlock([x, 0, z], {
                     solid: true,
                     color: Math.random() > 0.5 ? green1 : green2,
                 })
@@ -109,9 +110,9 @@ const App = () => {
 
     return (
         <>
-            <primitive object={world.group} />
+            <CulledMeshes />
 
-            <Player world={world} />
+            <Player voxelWorld={voxelWorld} setBlock={setBlock} />
 
             <ambientLight intensity={0.2} />
             <pointLight intensity={0.5} position={[20, 20, 20]} />

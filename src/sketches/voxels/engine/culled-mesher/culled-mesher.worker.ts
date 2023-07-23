@@ -1,12 +1,7 @@
 import { Color } from 'three'
-import {
-    ChunkMeshUpdateNotificationMessage,
-    RegisterChunkMessage,
-    VoxelChunk,
-    VoxelChunkMeshData,
-    WorkerMessage,
-} from './voxel-types'
-import { CHUNK_SIZE, VoxelUtils } from './voxel-utils'
+import { VoxelChunk, isSolid, positionToChunkIndex } from '../core'
+import { CHUNK_SIZE } from '../core/utils'
+import { ChunkMeshUpdateNotificationMessage, RegisterChunkMessage, VoxelChunkMeshData, WorkerMessage } from './types'
 
 const VOXEL_FACE_DIRECTIONS: {
     // direction of the neighbour voxel
@@ -160,7 +155,7 @@ class VoxelChunkMesher {
         for (let localX = 0; localX < CHUNK_SIZE; localX++) {
             for (let localY = 0; localY < CHUNK_SIZE; localY++) {
                 for (let localZ = 0; localZ < CHUNK_SIZE; localZ++) {
-                    const chunkDataIndex = VoxelUtils.positionToChunkIndex([localX, localY, localZ])
+                    const chunkDataIndex = positionToChunkIndex([localX, localY, localZ])
 
                     if (this.chunk.solid[chunkDataIndex] === 0) continue
 
@@ -182,9 +177,9 @@ class VoxelChunkMesher {
                             localZ + dz < 0 ||
                             localZ + dz >= CHUNK_SIZE
                         ) {
-                            solid = VoxelUtils.isSolid([worldX + dx, worldY + dy, worldZ + dz], this.chunks)
+                            solid = isSolid([worldX + dx, worldY + dy, worldZ + dz], this.chunks)
                         } else {
-                            const index = VoxelUtils.positionToChunkIndex([localX + dx, localY + dy, localZ + dz])
+                            const index = positionToChunkIndex([localX + dx, localY + dy, localZ + dz])
                             solid = this.chunk.solid[index] === 1
                         }
 

@@ -1,67 +1,66 @@
 import { KeyboardControls, PointerLockControls, useKeyboardControls } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
+import { createECS } from 'arancini/react'
 import { useControls } from 'leva'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { styled } from 'styled-components'
-import { Color, Vector3 } from 'three'
+import { Color, PerspectiveCamera, Vector3 } from 'three'
 import { Canvas } from '../../../../common'
-import { VoxelBoxCharacterController } from '../voxel-box-character-controller'
-import { Vec3 } from '../voxel-types'
-import { VoxelUtils } from '../voxel-utils'
-import { VoxelWorld, useVoxelWorld } from '../voxel-world'
+import {
+    BoxCharacterControllerCameraComponent,
+    BoxCharacterControllerComponent,
+    BoxCharacterControllerInputComponent,
+    BoxCharacterControllerPlugin,
+} from '../../engine/box-character-controller'
+import { BlockValue, CorePlugin, Object3DComponent, Vec3, VoxelWorldComponent } from '../../engine/core'
+import { CulledMesherPlugin } from '../../engine/culled-mesher'
+import { useVoxelEngine } from '../../engine/use-voxel-engine'
 
 const green1 = new Color('green').addScalar(-0.02).getHex()
 const green2 = new Color('green').addScalar(0.02).getHex()
 const orange = new Color('orange').getHex()
 
 type PlayerProps = {
-    world: VoxelWorld
+    ecs: ReturnType<typeof createECS>
+    voxelWorld: VoxelWorldComponent
+    setBlock: (pos: Vec3, value: BlockValue) => void
 }
 
-const Player = ({ world }: PlayerProps) => {
+const Player = ({ ecs, voxelWorld, setBlock }: PlayerProps) => {
     const gl = useThree((s) => s.gl)
+
     const camera = useThree((s) => s.camera)
 
     const [, getControls] = useKeyboardControls()
 
-    const [controller, setController] = useState<VoxelBoxCharacterController>()
-
-    useControls(
-        'voxels-fps-controls-camera',
-        () => ({
-            cameraMode: {
-                value: 'first-person',
-                options: ['first-person', 'third-person'],
-                onChange: (v) => {
-                    if (!controller) return
-                    controller.cameraMode = v
-                },
-            },
-        }),
-        [controller],
-    )
-
-    const { width, height } = useControls('voxel-fps-controls-controller', {
+    const { width, height, initialPosition } = useControls('voxel-fps-controls-controller', {
         width: 0.8,
         height: 2,
+        initialPosition: { x: 0, y: 1, z: 0 },
     })
 
-    useEffect(() => {
-        const voxelCharacterController = new VoxelBoxCharacterController(world, camera, {
-            initialPosition: new Vector3(0, 1, 0),
-            height,
+    const options = useMemo(
+        () => ({
             width,
-        })
+            height,
+            initialPosition: new Vector3().copy(initialPosition as Vector3),
+        }),
+        [],
+    )
 
-        setController(voxelCharacterController)
+    const input = useMemo(
+        () => ({
+            forward: false,
+            backward: false,
+            left: false,
+            right: false,
+            jump: false,
+        }),
+        [],
+    )
 
-        return () => setController(undefined)
-    }, [camera, width, height])
-
-    useFrame(({ clock: { elapsedTime } }, delta) => {
-        if (!controller) return
-
-        const input = getControls() as {
+    useFrame(() => {
+        const { forward, backward, left, right, jump } = getControls() as {
             forward: boolean
             backward: boolean
             left: boolean
@@ -69,8 +68,24 @@ const Player = ({ world }: PlayerProps) => {
             jump: boolean
         }
 
-        controller.update(input, elapsedTime, delta)
+        input.forward = forward
+        input.backward = backward
+        input.left = left
+        input.right = right
+        input.jump = jump
     })
+
+    useControls('voxels-fps-controls-camera', () => ({
+        cameraMode: {
+            value: 'first-person',
+            options: ['first-person', 'third-person'],
+            onChange: (v) => {
+                ecs.world.query([BoxCharacterControllerComponent]).forEach((e) => {
+                    e.get(BoxCharacterControllerComponent).cameraMode = v
+                })
+            },
+        },
+    }))
 
     useEffect(() => {
         const vec3 = new Vector3()
@@ -79,7 +94,7 @@ const Player = ({ world }: PlayerProps) => {
             const origin = camera.position.toArray()
             const direction = camera.getWorldDirection(vec3).toArray()
 
-            const ray = VoxelUtils.traceRay(world, origin, direction)
+            const ray = voxelWorld.traceRay(origin, direction)
 
             if (!ray.hit) return
 
@@ -90,7 +105,7 @@ const Player = ({ world }: PlayerProps) => {
                     Math.floor(ray.hitPosition[2]),
                 ]
 
-                world.setBlock(block, {
+                setBlock(block, {
                     solid: false,
                 })
             } else {
@@ -100,7 +115,7 @@ const Player = ({ world }: PlayerProps) => {
                     Math.floor(ray.hitPosition[2] + ray.hitNormal[2]),
                 ]
 
-                world.setBlock(block, {
+                setBlock(block, {
                     solid: true,
                     color: orange,
                 })
@@ -115,41 +130,46 @@ const Player = ({ world }: PlayerProps) => {
     }, [gl])
 
     return (
-        <>
-            {controller && (
-                <primitive object={controller.transform}>
-                    <mesh>
-                        <boxGeometry args={[width, height, width]} />
-                        <meshStandardMaterial color="red" />
-                    </mesh>
-                </primitive>
-            )}
-        </>
+        <ecs.Entity>
+            <ecs.Component type={Object3DComponent}>
+                <mesh>
+                    <boxGeometry args={[width, height, width]} />
+                    <meshStandardMaterial color="red" />
+                </mesh>
+            </ecs.Component>
+            <ecs.Component type={BoxCharacterControllerCameraComponent} args={[camera as PerspectiveCamera]} />
+            <ecs.Component type={BoxCharacterControllerInputComponent} args={[input]} />
+            <ecs.Component type={BoxCharacterControllerComponent} args={[options]} />
+        </ecs.Entity>
     )
 }
 
 const App = () => {
-    const world = useVoxelWorld()
+    const { ecs, voxelWorld, setBlock, CulledMeshes } = useVoxelEngine([
+        CorePlugin,
+        CulledMesherPlugin,
+        BoxCharacterControllerPlugin,
+    ])
 
     useEffect(() => {
         // ground
         for (let x = -15; x < 15; x++) {
             for (let y = -10; y < -5; y++) {
                 for (let z = -15; z < 15; z++) {
-                    world.setBlock([x, y, z], {
+                    setBlock([x, y, z], {
                         solid: true,
                         color: Math.random() > 0.5 ? green1 : green2,
                     })
                 }
             }
         }
-    }, [world])
+    }, [voxelWorld])
 
     return (
         <>
-            <primitive object={world.group} />
+            <CulledMeshes />
 
-            <Player world={world} />
+            <Player ecs={ecs} voxelWorld={voxelWorld} setBlock={setBlock} />
 
             <ambientLight intensity={0.2} />
             <pointLight intensity={0.5} position={[20, 20, 20]} />

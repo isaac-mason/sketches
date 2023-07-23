@@ -1,13 +1,13 @@
 import { Bounds, OrbitControls } from '@react-three/drei'
 import { ThreeEvent } from '@react-three/fiber'
+import { useEffect } from 'react'
 import { HexColorPicker } from 'react-colorful'
 import { Color } from 'three'
 import { create } from 'zustand'
 import { Canvas } from '../../../../common'
-import { Vec3 } from '../voxel-types'
-import { VoxelUtils } from '../voxel-utils'
-import { useVoxelWorld } from '../voxel-world'
-import { useEffect } from 'react'
+import { CorePlugin, Vec3, traceRay } from '../../engine/core'
+import { CulledMesherPlugin } from '../../engine/culled-mesher'
+import { useVoxelEngine } from '../../engine/use-voxel-engine'
 
 const green1 = new Color('green').addScalar(-0.02).getHex()
 const green2 = new Color('green').addScalar(0.02).getHex()
@@ -22,7 +22,7 @@ const useColorStore = create<ColorStore>((set) => ({
 }))
 
 const App = () => {
-    const world = useVoxelWorld()
+    const { world, voxelWorld, setBlock, CulledMeshes } = useVoxelEngine([CorePlugin, CulledMesherPlugin])
 
     const { color } = useColorStore()
 
@@ -30,7 +30,7 @@ const App = () => {
         // ground
         for (let x = -15; x < 15; x++) {
             for (let z = -15; z < 15; z++) {
-                world.setBlock([x, 0, z], {
+                setBlock([x, 0, z], {
                     solid: true,
                     color: Math.random() > 0.5 ? green1 : green2,
                 })
@@ -44,14 +44,14 @@ const App = () => {
         const origin = event.ray.origin.toArray()
         const direction = event.ray.direction.toArray()
 
-        const ray = VoxelUtils.traceRay(world, origin, direction)
+        const ray = traceRay(voxelWorld.isSolid, origin, direction)
 
         if (!ray.hit) return
 
         if (event.button === 2) {
             const block: Vec3 = [Math.floor(ray.hitPosition[0]), Math.floor(ray.hitPosition[1]), Math.floor(ray.hitPosition[2])]
 
-            world.setBlock(block, {
+            setBlock(block, {
                 solid: false,
             })
         } else {
@@ -61,7 +61,7 @@ const App = () => {
                 Math.floor(ray.hitPosition[2] + ray.hitNormal[2]),
             ]
 
-            world.setBlock(block, {
+            setBlock(block, {
                 solid: true,
                 color: tmpColor.set(color).getHex(),
             })
@@ -71,7 +71,9 @@ const App = () => {
     return (
         <>
             <Bounds fit margin={1.5}>
-                <primitive object={world.group} onPointerDown={onClick} />
+                <group onClick={onClick}>
+                    <CulledMeshes />
+                </group>
             </Bounds>
 
             <ambientLight intensity={0.2} />
