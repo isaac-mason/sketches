@@ -87,6 +87,8 @@ export class VoxelWorldCoreSystem extends System {
 
     setBlockRequestQuery = this.query([SetBlockRequestComponent])
 
+    static PRIORITY = 100
+
     onInit() {
         this.chunkQuery.onEntityAdded.add((e) => {
             if (!this.voxelWorld) return

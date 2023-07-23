@@ -5,13 +5,14 @@ import { Color } from 'three'
 import { Canvas } from '../../../../common'
 import { CorePlugin } from '../../engine/core'
 import { CulledMesherPlugin, VoxelChunkMeshComponent } from '../../engine/culled-mesher'
+import { PhysicsPlugin, RapierInit } from '../../engine/physics'
 import { useVoxelEngine } from '../../engine/use-voxel-engine'
 
 const orange = new Color('orange').getHex()
 const hotpink = new Color('hotpink').getHex()
 
 const Sphere = () => {
-    const { world, voxelWorld, setBlock, CulledMeshes } = useVoxelEngine([CorePlugin, CulledMesherPlugin])
+    const { world, physicsWorld, voxelWorld, setBlock, CulledMeshes } = useVoxelEngine([CorePlugin, CulledMesherPlugin, PhysicsPlugin])
 
     useEffect(() => {
         // sphere
@@ -59,9 +60,11 @@ const Sphere = () => {
 
 export default () => {
     return (
-        <Canvas camera={{ position: [20, 20, 20] }}>
-            <Sphere />
-            <OrbitControls makeDefault />
-        </Canvas>
+        <RapierInit>
+            <Canvas camera={{ position: [20, 20, 20] }}>
+                <Sphere />
+                <OrbitControls makeDefault />
+            </Canvas>
+        </RapierInit>
     )
 }

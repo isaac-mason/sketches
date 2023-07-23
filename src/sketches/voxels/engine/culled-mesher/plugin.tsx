@@ -1,7 +1,6 @@
 import { Component, Entity, System } from 'arancini'
 import { BufferAttribute, BufferGeometry, Mesh, MeshStandardMaterial } from 'three'
-import { DirtyComponent, VoxelChunkComponent, VoxelWorldComponent } from '../core/plugin'
-import { CHUNK_SIZE } from '../core/utils'
+import { CHUNK_SIZE, DirtyComponent, VoxelChunkComponent, VoxelWorldComponent, VoxelWorldCoreSystem } from '../core'
 import { VoxelEnginePlugin } from '../voxel-engine-types'
 import VoxelChunkMesherWorker from './culled-mesher.worker.ts?worker'
 import {
@@ -54,6 +53,8 @@ export class VoxelChunkMesherSystem extends System {
     private workerMeshUpdateRoundRobin = 0
 
     private static WORKER_POOL_SIZE = 3
+
+    static PRIORITY = VoxelWorldCoreSystem.PRIORITY - 1
 
     onInit() {
         for (let i = 0; i < VoxelChunkMesherSystem.WORKER_POOL_SIZE; i++) {

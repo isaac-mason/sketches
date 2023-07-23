@@ -247,6 +247,10 @@ export const worldPositionToChunkPosition = ([x, y, z]: Vec3): Vec3 => {
     return [cx, cy, cz]
 }
 
+export const chunkPositionToWorldPosition = ([x, y, z]: Vec3): Vec3 => {
+    return [x * CHUNK_SIZE, y * CHUNK_SIZE, z * CHUNK_SIZE]
+}
+
 export const chunkId = (position: Vec3): string => {
     return position.join(',')
 }
@@ -265,7 +269,9 @@ export const createEmptyChunk = (): VoxelChunk => {
     }
 }
 
-export type TraceRayResult = { hit: false; hitPosition: undefined; hitNormal: undefined } | { hit: true; hitPosition: Vec3; hitNormal: Vec3 }
+export type TraceRayResult =
+    | { hit: false; hitPosition: undefined; hitNormal: undefined }
+    | { hit: true; hitPosition: Vec3; hitNormal: Vec3 }
 
 export const traceRay = (
     isSolid: (pos: Vec3) => boolean,

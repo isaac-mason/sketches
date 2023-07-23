@@ -1,6 +1,6 @@
 import { Component, System } from 'arancini'
 import { Object3D, PerspectiveCamera, Vector3 } from 'three'
-import { Object3DComponent, VoxelWorldComponent } from '../core'
+import { Object3DComponent, VoxelWorldComponent, VoxelWorldCoreSystem } from '../core'
 import { VoxelEnginePlugin } from '../voxel-engine-types'
 
 export class BoxCharacterControllerCameraComponent extends Component {
@@ -70,7 +70,7 @@ export class BoxCharacterControllerComponent extends Component {
     }
 }
 
-export class VoxelBoxCharacterControllerSystem extends System {
+export class BoxCharacterControllerSystem extends System {
     controllerQuery = this.query([BoxCharacterControllerComponent, BoxCharacterControllerInputComponent, Object3DComponent], {
         required: true,
     })
@@ -81,6 +81,8 @@ export class VoxelBoxCharacterControllerSystem extends System {
 
     tmpThirdPersonCameraOffset = new Vector3()
 
+    static PRIORITY = VoxelWorldCoreSystem.PRIORITY - 1
+
     onUpdate(delta: number, time: number): void {
         const controllerEntity = this.controllerQuery.first!
         const controller = controllerEntity.get(BoxCharacterControllerComponent)
@@ -88,11 +90,11 @@ export class VoxelBoxCharacterControllerSystem extends System {
         const controllerCameraEntity = this.controllerCameraQuery.first!
         const { camera } = controllerCameraEntity.get(BoxCharacterControllerCameraComponent)
 
-        const grounded = this.checkGrounded(controller)
-
         const {
             input: { forward, backward, left, right, jump },
         } = controllerEntity.get(BoxCharacterControllerInputComponent)
+
+        const grounded = this.checkGrounded(controller)
 
         /* desired vertical velocity */
         // jumping
@@ -280,5 +282,5 @@ export class VoxelBoxCharacterControllerSystem extends System {
 
 export const BoxCharacterControllerPlugin = {
     components: [BoxCharacterControllerCameraComponent, BoxCharacterControllerInputComponent, BoxCharacterControllerComponent],
-    systems: [VoxelBoxCharacterControllerSystem],
+    systems: [BoxCharacterControllerSystem],
 } satisfies VoxelEnginePlugin

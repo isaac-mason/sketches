@@ -5,11 +5,11 @@ export type UnionToIntersection<U> = ((U extends any ? (k: U) => void : never) e
 
 export type Api = Record<string, unknown>
 
-export type VoxelEnginePluginSetup = (world: World, ecs: ReturnType<typeof createECS>) => Api
+export type VoxelEnginePluginSetup = (world: World, ecs: ReturnType<typeof createECS>) => Api | void
 
 export type VoxelEnginePlugin = {
     components: ComponentClass[]
-    systems: SystemClass[]
+    systems: (SystemClass & { PRIORITY?: number })[]
     setup?: VoxelEnginePluginSetup
 }
 
