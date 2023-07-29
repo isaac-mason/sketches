@@ -196,6 +196,8 @@ world.registerSystem(PhysicsSystem)
 world.registerSystem(CameraSystem)
 world.registerSystem(PlayerModelSystem)
 
+world.init()
+
 const ECS = createECS(world)
 
 const Loop = () => {

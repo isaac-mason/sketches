@@ -96,12 +96,14 @@ world.registerComponent(RotateTagComponent)
 world.registerSystem(RotateSystem)
 world.registerSystem(PhysicsSystem)
 
+world.init()
+
 const ECS = createECS(world)
 
 type BallProps = { index: number }
 
 const Ball = ({ index }: BallProps) => {
-    const body = useMemo(() => {
+    const circleBody = useMemo(() => {
         const body = new Body({
             mass: 1,
             position: [Math.random() - 0.5, Math.random() - 0.5],
@@ -128,7 +130,7 @@ const Ball = ({ index }: BallProps) => {
                 />
             </ECS.Component>
 
-            <ECS.Component type={PhysicsBodyComponent} args={[body]} />
+            <ECS.Component type={PhysicsBodyComponent} args={[circleBody]} />
         </ECS.Entity>
     )
 }

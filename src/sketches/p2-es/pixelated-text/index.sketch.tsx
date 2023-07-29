@@ -79,6 +79,8 @@ world.registerComponent(Object3DComponent)
 
 world.registerSystem(PhysicsSystem)
 
+world.init()
+
 const ECS = createECS(world)
 
 const MAX_DELTA = (1 / 60) * 10
