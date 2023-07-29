@@ -4,8 +4,8 @@ import { createECS } from 'arancini/react'
 import { useEffect, useMemo } from 'react'
 import { UnionToIntersection, VoxelEnginePlugin, VoxelEnginePluginApi } from './voxel-engine-types'
 
-export const useVoxelEngine = <Plugins extends Array<VoxelEnginePlugin>>(plugins: [...Plugins] = [] as never) => {
-    const { ecs, ...pluginApis } = useMemo(() => {
+export const useVoxelEngine = <Plugins extends Array<VoxelEnginePlugin>>(plugins: [...Plugins]) => {
+    const { ecs, world, ...pluginApis } = useMemo(() => {
         const world = new World()
         const ecs = createECS(world)
 
@@ -17,15 +17,22 @@ export const useVoxelEngine = <Plugins extends Array<VoxelEnginePlugin>>(plugins
 
         let api: Partial<WorldApi> = {}
 
+        // register all components first
         for (const plugin of plugins) {
             for (const component of plugin.components) {
                 world.registerComponent(component)
             }
+        }
 
+        // register systems
+        for (const plugin of plugins) {
             for (const system of plugin.systems) {
-                world.registerSystem(system)
+                world.registerSystem(system, { priority: system?.PRIORITY })
             }
+        }
 
+        // setup plugins
+        for (const plugin of plugins) {
             const pluginApi = plugin.setup?.(world, ecs)
 
             if (pluginApi) {
@@ -37,16 +44,16 @@ export const useVoxelEngine = <Plugins extends Array<VoxelEnginePlugin>>(plugins
     }, [])
 
     useEffect(() => {
-        ecs.world.init()
+        world.init()
 
-        return () => ecs.world.destroy()
+        return () => world.destroy()
     }, [ecs])
 
     useFrame((_, delta) => {
-        if (!ecs.world.initialised) return
+        if (!world.initialised) return
 
-        ecs.update(delta)
+        world.update(delta)
     })
 
-    return { ecs, ...pluginApis }
+    return { ecs, world, ...pluginApis }
 }

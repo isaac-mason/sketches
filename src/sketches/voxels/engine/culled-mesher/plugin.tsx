@@ -1,7 +1,6 @@
 import { Component, Entity, System } from 'arancini'
 import { BufferAttribute, BufferGeometry, Mesh, MeshStandardMaterial } from 'three'
-import { DirtyComponent, VoxelChunkComponent, VoxelWorldComponent } from '../core/plugin'
-import { CHUNK_SIZE } from '../core/utils'
+import { CHUNK_SIZE, EventsComponent, VoxelChunkComponent, VoxelWorldComponent, VoxelWorldCoreSystem } from '../core'
 import { VoxelEnginePlugin } from '../voxel-engine-types'
 import VoxelChunkMesherWorker from './culled-mesher.worker.ts?worker'
 import {
@@ -43,8 +42,6 @@ export class VoxelChunkMeshComponent extends Component {
 export class VoxelChunkMesherSystem extends System {
     chunkQuery = this.query([VoxelChunkComponent])
 
-    dirtyChunks = this.query([VoxelChunkComponent, VoxelChunkMeshComponent, DirtyComponent])
-
     voxelWorld = this.singleton(VoxelWorldComponent, { required: true })!
 
     private mesherWorkers: InstanceType<typeof VoxelChunkMesherWorker>[] = []
@@ -54,6 +51,8 @@ export class VoxelChunkMesherSystem extends System {
     private workerMeshUpdateRoundRobin = 0
 
     private static WORKER_POOL_SIZE = 3
+
+    static PRIORITY = VoxelWorldCoreSystem.PRIORITY - 1
 
     onInit() {
         for (let i = 0; i < VoxelChunkMesherSystem.WORKER_POOL_SIZE; i++) {
@@ -72,15 +71,15 @@ export class VoxelChunkMesherSystem extends System {
 
         this.chunkQuery.onEntityAdded.add((e) => {
             this.registerChunk(e)
+
+            e.get(EventsComponent).dirty.add(() => {
+                const voxelChunk = e.get(VoxelChunkComponent)
+                this.remesh(voxelChunk.id)
+            })
         })
 
         this.chunkQuery.onEntityRemoved.add((e) => {
             // todo
-        })
-
-        this.dirtyChunks.onEntityAdded.add((e) => {
-            const voxelChunk = e.get(VoxelChunkComponent)
-            this.remesh(voxelChunk.id)
         })
     }
 
@@ -147,10 +146,6 @@ export class VoxelChunkMesherSystem extends System {
         const entity = this.voxelWorld.chunkEntities.get(id)!
 
         this.updateVoxelChunkMesh(entity)
-
-        if (entity.has(DirtyComponent)) {
-            entity.remove(DirtyComponent)
-        }
     }
 
     private updateVoxelChunkMesh(entity: Entity) {

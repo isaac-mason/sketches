@@ -11,7 +11,7 @@ const orange = new Color('orange').getHex()
 const hotpink = new Color('hotpink').getHex()
 
 const Sphere = () => {
-    const { ecs, setBlock, CulledMeshes } = useVoxelEngine([CorePlugin, CulledMesherPlugin])
+    const { world, voxelWorld, setBlock, CulledMeshes } = useVoxelEngine([CorePlugin, CulledMesherPlugin])
 
     useEffect(() => {
         // sphere
@@ -27,7 +27,7 @@ const Sphere = () => {
                 }
             }
         }
-    }, [ecs])
+    }, [voxelWorld])
 
     useControls(
         'voxels-culled-mesher-basic',
@@ -35,13 +35,13 @@ const Sphere = () => {
             wireframe: {
                 value: false,
                 onChange: (value) => {
-                    ecs.world.query([VoxelChunkMeshComponent]).forEach((entity) => {
+                    world.find([VoxelChunkMeshComponent]).forEach((entity) => {
                         entity.get(VoxelChunkMeshComponent).material.wireframe = value
                     })
                 },
             },
         },
-        [ecs],
+        [world],
     )
 
     return (

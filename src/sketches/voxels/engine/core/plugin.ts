@@ -1,4 +1,4 @@
-import { Component, Entity, System } from 'arancini'
+import { Component, Entity, System, Topic } from 'arancini'
 import { Object3D } from 'three'
 import { VoxelEnginePlugin } from '../voxel-engine-types'
 import { BlockValue, Vec3 } from './types'
@@ -6,7 +6,7 @@ import {
     CHUNK_SIZE,
     TraceRayResult,
     chunkId,
-    createEmptyChunk,
+    emptyChunk,
     isSolid,
     positionToChunkIndex,
     traceRay,
@@ -14,7 +14,13 @@ import {
     worldPositionToLocalChunkPosition,
 } from './utils'
 
-export class DirtyComponent extends Component {}
+export class EventsComponent extends Component {
+    dirty = new Topic()
+
+    construct(): void {
+        this.dirty.clear()
+    }
+}
 
 export class VoxelChunkComponent extends Component {
     id: string
@@ -27,13 +33,13 @@ export class VoxelChunkComponent extends Component {
     constructor() {
         super()
 
-        const emptyChunk = createEmptyChunk()
-        this.id = emptyChunk.id
-        this.position = emptyChunk.position
-        this.solid = emptyChunk.solid
-        this.color = emptyChunk.color
-        this.solidBuffer = emptyChunk.solidBuffer
-        this.colorBuffer = emptyChunk.colorBuffer
+        const chunk = emptyChunk()
+        this.id = chunk.id
+        this.position = chunk.position
+        this.solid = chunk.solid
+        this.color = chunk.color
+        this.solidBuffer = chunk.solidBuffer
+        this.colorBuffer = chunk.colorBuffer
     }
 
     construct(id: string, position: Vec3) {
@@ -87,6 +93,8 @@ export class VoxelWorldCoreSystem extends System {
 
     setBlockRequestQuery = this.query([SetBlockRequestComponent])
 
+    static PRIORITY = 100
+
     onInit() {
         this.chunkQuery.onEntityAdded.add((e) => {
             if (!this.voxelWorld) return
@@ -116,6 +124,13 @@ export class VoxelWorldCoreSystem extends System {
         }
     }
 
+    private addChunk(id: string, chunkPosition: Vec3) {
+        return this.world.create((entity) => {
+            entity.add(VoxelChunkComponent, id, chunkPosition)
+            entity.add(EventsComponent)
+        })
+    }
+
     private setBlock(position: Vec3, value: BlockValue): void {
         const chunkPosition = worldPositionToChunkPosition(position)
         const id = chunkId(chunkPosition)
@@ -132,9 +147,7 @@ export class VoxelWorldCoreSystem extends System {
         voxelChunk.solid[index] = value.solid ? 1 : 0
         voxelChunk.color[index] = value.solid ? value.color : 0
 
-        if (!chunkEntity.has(DirtyComponent)) {
-            chunkEntity.add(DirtyComponent)
-        }
+        chunkEntity.get(EventsComponent).dirty.emit()
 
         // check if we need to make neighbour chunks dirty
         for (let axis = 0; axis < 3; axis++) {
@@ -159,39 +172,23 @@ export class VoxelWorldCoreSystem extends System {
 
                 const neighbourEntity = this.voxelWorld.chunkEntities.get(neighbourChunkId)
 
-                if (neighbourEntity && !neighbourEntity.has(DirtyComponent)) {
-                    neighbourEntity.add(DirtyComponent)
-                }
+                neighbourEntity?.get(EventsComponent).dirty.emit()
             }
         }
     }
-
-    private addChunk(id: string, chunkPosition: Vec3) {
-        const entity = this.world.create.entity()
-        entity.add(VoxelChunkComponent, id, chunkPosition)
-
-        return entity
-    }
 }
 
-export class Object3DComponent extends Component {
-    object3D!: Object3D
-
-    construct(object3D: Object3D) {
-        this.object3D = object3D
-    }
-}
+export const Object3DComponent = Component.object<Object3D>('Object3D')
 
 export const CorePlugin = {
-    components: [VoxelWorldComponent, VoxelChunkComponent, DirtyComponent, SetBlockRequestComponent, Object3DComponent],
+    components: [VoxelWorldComponent, VoxelChunkComponent, EventsComponent, SetBlockRequestComponent, Object3DComponent],
     systems: [VoxelWorldCoreSystem],
     setup: (world) => {
-        const voxelWorldEntity = world.create.entity()
+        const voxelWorldEntity = world.create()
         const voxelWorld = voxelWorldEntity.add(VoxelWorldComponent)
 
         const setBlock = (position: Vec3, value: BlockValue) => {
-            const entity = world.create.entity()
-            entity.add(SetBlockRequestComponent, position, value)
+            world.create().add(SetBlockRequestComponent, position, value)
         }
 
         return {

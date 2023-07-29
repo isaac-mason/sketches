@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Yarn berry
+.yarn/cache
+.yarn/install-state.gz

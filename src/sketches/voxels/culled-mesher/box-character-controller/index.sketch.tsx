@@ -80,7 +80,7 @@ const Player = ({ ecs, voxelWorld, setBlock }: PlayerProps) => {
             value: 'first-person',
             options: ['first-person', 'third-person'],
             onChange: (v) => {
-                ecs.world.query([BoxCharacterControllerComponent]).forEach((e) => {
+                ecs.world.find([BoxCharacterControllerComponent]).forEach((e) => {
                     e.get(BoxCharacterControllerComponent).cameraMode = v
                 })
             },

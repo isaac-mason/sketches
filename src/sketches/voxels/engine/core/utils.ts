@@ -247,25 +247,37 @@ export const worldPositionToChunkPosition = ([x, y, z]: Vec3): Vec3 => {
     return [cx, cy, cz]
 }
 
+export const chunkPositionToWorldPosition = ([x, y, z]: Vec3): Vec3 => {
+    return [x * CHUNK_SIZE, y * CHUNK_SIZE, z * CHUNK_SIZE]
+}
+
 export const chunkId = (position: Vec3): string => {
     return position.join(',')
 }
 
-export const createEmptyChunk = (): VoxelChunk => {
+export const emptyChunk = (): VoxelChunk => {
     const solidBuffer = new SharedArrayBuffer(Uint8Array.BYTES_PER_ELEMENT * CHUNK_SIZE ** 3)
     const colorBuffer = new SharedArrayBuffer(Uint32Array.BYTES_PER_ELEMENT * CHUNK_SIZE ** 3)
+
+    const solid = new Uint8Array(solidBuffer)
+    solid.fill(0)
+
+    const color = new Uint32Array(colorBuffer)
+    color.fill(0)
 
     return {
         id: '',
         position: [0, 0, 0],
-        solid: new Uint8Array(solidBuffer),
-        color: new Uint32Array(colorBuffer),
+        solid,
+        color,
         solidBuffer,
         colorBuffer,
     }
 }
 
-export type TraceRayResult = { hit: false; hitPosition: undefined; hitNormal: undefined } | { hit: true; hitPosition: Vec3; hitNormal: Vec3 }
+export type TraceRayResult =
+    | { hit: false; hitPosition: undefined; hitNormal: undefined }
+    | { hit: true; hitPosition: Vec3; hitNormal: Vec3 }
 
 export const traceRay = (
     isSolid: (pos: Vec3) => boolean,

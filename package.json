@@ -10,6 +10,7 @@
         "format": "prettier src/. --write"
     },
     "dependencies": {
+        "@dimforge/rapier3d-compat": "0.11.2",
         "@pmndrs/assets": "^1.6.0",
         "@react-three/csg": "^3.0.0",
         "@react-three/drei": "^9.78.2",
@@ -17,7 +18,7 @@
         "@react-three/flex": "^1.0.1",
         "@react-three/postprocessing": "^2.14.13",
         "@react-three/rapier": "^1.1.1",
-        "arancini": "^2.3.0",
+        "arancini": "^3.0.0",
         "d3": "^7.8.5",
         "leva": "^0.9.35",
         "linguine": "^0.0.7",
@@ -47,5 +48,6 @@
         "typescript": "^5.1.6",
         "vite": "^4.3.9",
         "vite-plugin-html": "^3.2.0"
-    }
+    },
+    "packageManager": "yarn@3.6.1"
 }

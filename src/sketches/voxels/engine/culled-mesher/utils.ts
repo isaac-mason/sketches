@@ -1,4 +1,5 @@
 import { CHUNK_SIZE } from '../core'
+import { VoxelChunkMeshData } from './types'
 
 const CHUNK_VOXELS = CHUNK_SIZE ** 3
 

@@ -12,41 +12,15 @@ import { KinematicCharacterController } from './kinematic-character-controller'
 const SCENERY_GROUP = 0x01
 const PLAYER_GROUP = 0x02
 
-class PlayerComponent extends Component {}
+const PlayerComponent  = Component.tag('Player')
 
-class CameraComponent extends Component {
-    camera!: THREE.Camera
+const CameraComponent = Component.object<THREE.Camera>('Camera')
 
-    construct(camera: THREE.Camera) {
-        this.camera = camera
-    }
-}
+const Object3DComponent = Component.object<THREE.Object3D>('Object3D')
 
-class Object3DComponent extends Component {
-    object3D!: THREE.Object3D
+const PhysicsBodyComponent = Component.object<p2.Body>('PhysicsBody')
 
-    construct(object: THREE.Object3D) {
-        this.object3D = object
-    }
-}
-
-class PhysicsBodyComponent extends Component {
-    body!: p2.Body
-
-    construct(body: p2.Body) {
-        this.body = body
-    }
-}
-
-type PlayerInput = { up: boolean; left: boolean; right: boolean }
-
-class PlayerInputComponent extends Component {
-    input!: PlayerInput
-
-    construct(input: PlayerInput) {
-        this.input = input
-    }
-}
+const PlayerInputComponent = Component.object<{ up: boolean; left: boolean; right: boolean }>('PlayerInput')
 
 class KinematicCharacterControllerComponent extends Component {
     controller!: KinematicCharacterController
@@ -69,7 +43,7 @@ class PhysicsSystem extends System {
 
     onInit(): void {
         this.physicsBodyQuery.onEntityAdded.add((entity) => {
-            const { body } = entity.get(PhysicsBodyComponent)
+            const body = entity.get(PhysicsBodyComponent)
             this.physicsWorld.addBody(body)
             this.physicsBodies.set(entity.id, body)
         })
@@ -92,27 +66,22 @@ class PhysicsSystem extends System {
         )
 
         for (const entity of this.physicsBodyQuery.entities) {
-            const body = entity.get(PhysicsBodyComponent).body
-            const three = entity.get(Object3DComponent).object3D
+            const body = entity.get(PhysicsBodyComponent)
+            const object3D = entity.get(Object3DComponent)
 
-            three.position.set(body.interpolatedPosition[0], body.interpolatedPosition[1], 0)
+            object3D.position.set(body.interpolatedPosition[0], body.interpolatedPosition[1], 0)
 
-            three.rotation.set(0, 0, body.angle)
+            object3D.rotation.set(0, 0, body.angle)
         }
     }
 }
 
 class KinematicCharacterControllerSystem extends System {
-    playerQuery = this.query([
-        PlayerInputComponent,
-        PhysicsBodyComponent,
-        Object3DComponent,
-        KinematicCharacterControllerComponent,
-    ])
+    playerQuery = this.query([PlayerInputComponent, PhysicsBodyComponent, KinematicCharacterControllerComponent])
 
     onInit(): void {
         this.playerQuery.onEntityAdded.add((entity) => {
-            const { body } = entity.get(PhysicsBodyComponent)
+            const body = entity.get(PhysicsBodyComponent)
 
             const controller = new KinematicCharacterController({
                 world: this.world.getSystem(PhysicsSystem)!.physicsWorld,
@@ -130,9 +99,10 @@ class KinematicCharacterControllerSystem extends System {
 
     onUpdate(delta: number): void {
         for (const entity of this.playerQuery.entities) {
-            const { input } = entity.get(PlayerInputComponent)
+            const input = entity.get(PlayerInputComponent)
             const { controller } = entity.get(KinematicCharacterControllerComponent)
-            const { object3D } = entity.get(Object3DComponent)
+
+            if (!controller) continue
 
             let left = 0
             let right = 0
@@ -160,11 +130,11 @@ class PlayerModelSystem extends System {
 
     onUpdate(): void {
         for (const entity of this.players) {
-            const { object3D } = entity.get(Object3DComponent)
-            const { input } = entity.get(PlayerInputComponent)
+            const object3D = entity.get(Object3DComponent)
+            const input = entity.get(PlayerInputComponent)
             const { controller } = entity.get(KinematicCharacterControllerComponent)
 
-            if (controller.wallSliding) {
+            if (controller?.wallSliding) {
                 object3D.rotation.y = 0
             } else if (input.left) {
                 object3D.rotation.y = -Math.PI / 2
@@ -194,14 +164,12 @@ class CameraSystem extends System {
 
         const points: Vector3[] = []
         for (const entity of this.players) {
-            const { body } = entity.get(PhysicsBodyComponent)
+            const body = entity.get(PhysicsBodyComponent)
 
             points.push({ x: body.interpolatedPosition[0], y: body.interpolatedPosition[1], z: 0 } as Vector3)
         }
 
         this.box3.setFromPoints(points)
-
-        const { camera } = this.camera
 
         const center = this.box3.getCenter(this.vec3)
 
@@ -209,8 +177,8 @@ class CameraSystem extends System {
         this.cameraTargetPosition.z = 10
         this.cameraTargetPosition.y += 2
 
-        camera.position.lerp(this.cameraTargetPosition, 5 * delta)
-        camera.lookAt(center)
+        this.camera.position.lerp(this.cameraTargetPosition, 5 * delta)
+        this.camera.lookAt(center)
     }
 }
 

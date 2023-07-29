@@ -44,7 +44,7 @@ const App = () => {
         const origin = event.ray.origin.toArray()
         const direction = event.ray.direction.toArray()
 
-        const ray = traceRay(voxelWorld.isSolid, origin, direction)
+        const ray = voxelWorld.traceRay(origin, direction)
 
         if (!ray.hit) return
 
@@ -71,7 +71,7 @@ const App = () => {
     return (
         <>
             <Bounds fit margin={1.5}>
-                <group onClick={onClick}>
+                <group onPointerDown={onClick}>
                     <CulledMeshes />
                 </group>
             </Bounds>

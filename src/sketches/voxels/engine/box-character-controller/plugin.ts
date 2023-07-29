@@ -1,15 +1,9 @@
 import { Component, System } from 'arancini'
 import { Object3D, PerspectiveCamera, Vector3 } from 'three'
-import { Object3DComponent, VoxelWorldComponent } from '../core'
+import { Object3DComponent, VoxelWorldComponent, VoxelWorldCoreSystem } from '../core'
 import { VoxelEnginePlugin } from '../voxel-engine-types'
 
-export class BoxCharacterControllerCameraComponent extends Component {
-    camera!: PerspectiveCamera
-
-    construct(camera: PerspectiveCamera): void {
-        this.camera = camera
-    }
-}
+export const BoxCharacterControllerCameraComponent = Component.object<PerspectiveCamera>('BoxCharacterControllerCamera')
 
 export type VoxelBoxCharacterControllerInput = {
     forward: boolean
@@ -19,13 +13,8 @@ export type VoxelBoxCharacterControllerInput = {
     jump: boolean
 }
 
-export class BoxCharacterControllerInputComponent extends Component {
-    input!: VoxelBoxCharacterControllerInput
-
-    construct(input: VoxelBoxCharacterControllerInput): void {
-        this.input = input
-    }
-}
+export const BoxCharacterControllerInputComponent =
+    Component.object<VoxelBoxCharacterControllerInput>('BoxCharacterControllerInput')
 
 export type BoxCharacterControllerCameraType = 'first-person' | 'third-person'
 
@@ -70,7 +59,7 @@ export class BoxCharacterControllerComponent extends Component {
     }
 }
 
-export class VoxelBoxCharacterControllerSystem extends System {
+export class BoxCharacterControllerSystem extends System {
     controllerQuery = this.query([BoxCharacterControllerComponent, BoxCharacterControllerInputComponent, Object3DComponent], {
         required: true,
     })
@@ -81,18 +70,18 @@ export class VoxelBoxCharacterControllerSystem extends System {
 
     tmpThirdPersonCameraOffset = new Vector3()
 
+    static PRIORITY = VoxelWorldCoreSystem.PRIORITY - 1
+
     onUpdate(delta: number, time: number): void {
         const controllerEntity = this.controllerQuery.first!
         const controller = controllerEntity.get(BoxCharacterControllerComponent)
 
         const controllerCameraEntity = this.controllerCameraQuery.first!
-        const { camera } = controllerCameraEntity.get(BoxCharacterControllerCameraComponent)
+        const camera = controllerCameraEntity.get(BoxCharacterControllerCameraComponent)
+
+        const { forward, backward, left, right, jump } = controllerEntity.get(BoxCharacterControllerInputComponent)
 
         const grounded = this.checkGrounded(controller)
-
-        const {
-            input: { forward, backward, left, right, jump },
-        } = controllerEntity.get(BoxCharacterControllerInputComponent)
 
         /* desired vertical velocity */
         // jumping
@@ -235,7 +224,7 @@ export class VoxelBoxCharacterControllerSystem extends System {
         }
 
         /* update object3D */
-        const { object3D } = controllerEntity.get(Object3DComponent)
+        const object3D = controllerEntity.get(Object3DComponent)
         object3D.position.copy(controller.position)
     }
 
@@ -280,5 +269,5 @@ export class VoxelBoxCharacterControllerSystem extends System {
 
 export const BoxCharacterControllerPlugin = {
     components: [BoxCharacterControllerCameraComponent, BoxCharacterControllerInputComponent, BoxCharacterControllerComponent],
-    systems: [VoxelBoxCharacterControllerSystem],
+    systems: [BoxCharacterControllerSystem],
 } satisfies VoxelEnginePlugin

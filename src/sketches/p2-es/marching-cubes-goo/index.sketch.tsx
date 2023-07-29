@@ -26,30 +26,18 @@ const containerParts: {
 
 const gooColors = [0xff0000, 0x00ff00, 0x0000ff]
 
-class RotateTagComponent extends Component {}
+const RotateTagComponent = Component.tag('Rotate')
 
-class Object3DComponent extends Component {
-    object!: THREE.Object3D
+const Object3DComponent = Component.object<THREE.Object3D>('Object3D')
 
-    construct(object: THREE.Object3D) {
-        this.object = object
-    }
-}
-
-class PhysicsBodyComponent extends Component {
-    body!: Body
-
-    construct(body: Body) {
-        this.body = body
-    }
-}
+const PhysicsBodyComponent = Component.object<Body>('PhysicsBody')
 
 class RotateSystem extends System {
     rotate = this.query([RotateTagComponent, PhysicsBodyComponent])
 
     onUpdate(_delta: number, time: number): void {
         for (const entity of this.rotate.entities) {
-            const { body } = entity.get(PhysicsBodyComponent)
+            const body = entity.get(PhysicsBodyComponent)
 
             body.angle = time * -0.5
         }
@@ -71,7 +59,7 @@ class PhysicsSystem extends System {
         this.physicsWorld.addContactMaterial(contactMaterial)
 
         this.physicsBodyQuery.onEntityAdded.add((entity) => {
-            const { body } = entity.get(PhysicsBodyComponent)
+            const body = entity.get(PhysicsBodyComponent)
             this.physicsWorld.addBody(body)
             this.physicsBodies.set(entity.id, body)
         })
@@ -90,12 +78,11 @@ class PhysicsSystem extends System {
         this.physicsWorld.step(PhysicsSystem.TIME_STEP, delta, PhysicsSystem.MAX_SUB_STEPS)
 
         for (const entity of this.physicsBodyQuery.entities) {
-            const body = entity.get(PhysicsBodyComponent).body
-            const three = entity.get(Object3DComponent).object
+            const body = entity.get(PhysicsBodyComponent)
+            const object3D = entity.get(Object3DComponent)
 
-            three.position.set(body.interpolatedPosition[0], body.interpolatedPosition[1], 0)
-
-            three.rotation.set(0, 0, body.angle)
+            object3D.position.set(body.interpolatedPosition[0], body.interpolatedPosition[1], 0)
+            object3D.rotation.set(0, 0, body.angle)
         }
     }
 }

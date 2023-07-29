@@ -5,7 +5,7 @@ import { createECS } from 'arancini/react'
 import { button, useControls } from 'leva'
 import * as p2 from 'p2-es'
 import { ReactNode, useMemo, useState } from 'react'
-import { MathUtils, Object3D } from 'three'
+import { MathUtils } from 'three'
 import { Canvas } from '../../../common'
 import { createTextShape } from './font'
 
@@ -13,15 +13,9 @@ const LEVA_ROOT = 'p2-text-box'
 
 const BOX_SIZE = 0.1
 
-class BoxTagComponent extends Component {}
+const BoxTagComponent = Component.tag('Box')
 
-class PhysicsBodyComponent extends Component {
-    body!: p2.Body
-
-    construct(body: p2.Body) {
-        this.body = body
-    }
-}
+const PhysicsBodyComponent = Component.object<p2.Body>('PhysicsBody')
 
 class ColorComponent extends Component {
     color!: Color
@@ -31,13 +25,7 @@ class ColorComponent extends Component {
     }
 }
 
-class Object3DComponent extends Component {
-    object!: THREE.Object3D
-
-    construct() {
-        this.object = new Object3D()
-    }
-}
+const Object3DComponent = Component.object<THREE.Object3D>('Object3D')
 
 class PhysicsSystem extends System {
     physicsWorld = new p2.World({ gravity: [0, 0] })
@@ -52,7 +40,7 @@ class PhysicsSystem extends System {
 
     onInit() {
         this.bodies.onEntityAdded.add((entity) => {
-            const { body } = entity.get(PhysicsBodyComponent)
+            const body = entity.get(PhysicsBodyComponent)
             this.physicsBodies.set(entity.id, body)
             this.physicsWorld.addBody(body)
         })
@@ -71,12 +59,12 @@ class PhysicsSystem extends System {
         this.physicsWorld.step(PhysicsSystem.TIME_STEP, delta, PhysicsSystem.MAX_SUB_STEPS)
 
         for (const entity of this.bodies) {
-            const { body } = entity.get(PhysicsBodyComponent)
-            const { object } = entity.find(Object3DComponent) ?? {}
+            const body = entity.get(PhysicsBodyComponent)
+            const object3D = entity.find(Object3DComponent)
 
-            if (object) {
-                object.position.set(body.interpolatedPosition[0], body.interpolatedPosition[1], 0)
-                object.rotation.set(0, 0, body.interpolatedAngle)
+            if (object3D) {
+                object3D.position.set(body.interpolatedPosition[0], body.interpolatedPosition[1], 0)
+                object3D.rotation.set(0, 0, body.interpolatedAngle)
             }
         }
     }
@@ -126,24 +114,22 @@ const Box = ({ position, velocity, color }: BoxProps) => {
             <ECS.Component type={BoxTagComponent} />
             <ECS.Component type={ColorComponent} args={[color ?? 'white']} />
             <ECS.Component type={PhysicsBodyComponent} args={[body]} />
-            <ECS.Component type={Object3DComponent} />
         </ECS.Entity>
     )
 }
 
 const BoxRenderer = () => (
-    <ECS.QueryEntities query={[BoxTagComponent, Object3DComponent, ColorComponent]}>
+    <ECS.QueryEntities query={[BoxTagComponent, ColorComponent]}>
         {(entity) => {
-            const { object } = entity.get(Object3DComponent)
             const { color } = entity.get(ColorComponent)
 
             return (
-                <primitive object={object}>
+                <ECS.Component type={Object3DComponent}>
                     <mesh>
                         <boxGeometry args={[BOX_SIZE, BOX_SIZE, BOX_SIZE]} />
                         <meshBasicMaterial color={color} />
                     </mesh>
-                </primitive>
+                </ECS.Component>
             )
         }}
     </ECS.QueryEntities>
