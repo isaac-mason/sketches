@@ -15,22 +15,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@arancini/core@npm:3.0.0":
-  version: 3.0.0
-  resolution: "@arancini/core@npm:3.0.0"
-  checksum: 343867edfac5a02ae5b01e7313595b4f53332c88c869184b5b7130e2b9ffae9ecbec9ad8e0fe5568beb3984276ee3e5d5c3e21d6cf1c949cc624ea1596fc588c
+"@arancini/core@npm:3.1.0":
+  version: 3.1.0
+  resolution: "@arancini/core@npm:3.1.0"
+  checksum: 5e89146f6d188505402a020fd7c041ae76e481edd97d8a339e80b54db98d2f4dd2c5ced03f0a74f4626295c5b4d0c43b273fdb08e692c584e5239167d660539c
   languageName: node
   linkType: hard
 
-"@arancini/react@npm:3.0.0":
-  version: 3.0.0
-  resolution: "@arancini/react@npm:3.0.0"
+"@arancini/react@npm:3.1.0":
+  version: 3.1.0
+  resolution: "@arancini/react@npm:3.1.0"
   dependencies:
-    "@arancini/core": 3.0.0
+    "@arancini/core": 3.1.0
   peerDependencies:
     react: ^18.0.0
     react-dom: ^18.0.0
-  checksum: 1e08cb6633e696e6a33e80a935e9a373c5729bb9618deb59e5ffe144fcbb22395c8099d327f02232b430f42434af5676f028d233c29bb5719a2a65d065c05ad1
+  checksum: eeac33376fef76b4a2f95346f41adcd0d86753bebeffb48a1d2927ac4c7d674f9e9061b1e5a5b00c6c8302df8ff53206601f9da89b0b8c43fb7660847e590196
   languageName: node
   linkType: hard
 
@@ -3148,16 +3148,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"arancini@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "arancini@npm:3.0.0"
+"arancini@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "arancini@npm:3.1.0"
   dependencies:
-    "@arancini/core": 3.0.0
-    "@arancini/react": 3.0.0
+    "@arancini/core": 3.1.0
+    "@arancini/react": 3.1.0
   peerDependencies:
     react: ^18.0.0
     react-dom: ^18.0.0
-  checksum: 656ca32d5385e591ccc4538210761b6c1c27fb639e331fb01d7222e6356b32d75152ef628c74ce678ea6c301376b3e3668f1b310f9c8dbeaf194a4637c87fe25
+  checksum: b0c9f6e43c658f3dfa9ab69d6eca68a5b2e62551b3853cb90b1e4543be08ffad97d43a0d3f5cd677b2c1ae3fca9849c9ff5e10b1dca156cf0d158474800943e7
   languageName: node
   linkType: hard
 
@@ -6280,7 +6280,7 @@ __metadata:
     "@types/styled-components": ^5.1.25
     "@types/three": ^0.152.1
     "@vitejs/plugin-react": ^4.0.3
-    arancini: ^3.0.0
+    arancini: ^3.1.0
     d3: ^7.8.5
     leva: ^0.9.35
     linguine: ^0.0.7

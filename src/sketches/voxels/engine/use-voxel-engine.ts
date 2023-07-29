@@ -46,7 +46,9 @@ export const useVoxelEngine = <Plugins extends Array<VoxelEnginePlugin>>(plugins
     useEffect(() => {
         world.init()
 
-        return () => world.destroy()
+        return () => {
+            world.destroy()
+        }
     }, [ecs])
 
     useFrame((_, delta) => {
