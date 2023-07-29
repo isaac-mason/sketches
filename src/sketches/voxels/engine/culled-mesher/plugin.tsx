@@ -1,6 +1,15 @@
 import { Component, Entity, System } from 'arancini'
 import { BufferAttribute, BufferGeometry, Mesh, MeshStandardMaterial } from 'three'
-import { CHUNK_SIZE, EventsComponent, VoxelChunkComponent, VoxelWorldComponent, VoxelWorldCoreSystem } from '../core'
+import {
+    CHUNK_SIZE,
+    EventsComponent,
+    Vec3,
+    VoxelChunkComponent,
+    VoxelWorldComponent,
+    VoxelWorldCoreSystem,
+    chunkId,
+    worldPositionToLocalChunkPosition,
+} from '../core'
 import { VoxelEnginePlugin } from '../voxel-engine-types'
 import VoxelChunkMesherWorker from './culled-mesher.worker.ts?worker'
 import {
@@ -44,6 +53,8 @@ export class VoxelChunkMesherSystem extends System {
 
     voxelWorld = this.singleton(VoxelWorldComponent, { required: true })!
 
+    dirtyChunks = new Set<string>()
+
     private mesherWorkers: InstanceType<typeof VoxelChunkMesherWorker>[] = []
 
     private pendingMeshUpdates: Map<string, number> = new Map()
@@ -69,12 +80,13 @@ export class VoxelChunkMesherSystem extends System {
             this.mesherWorkers.push(worker)
         }
 
-        this.chunkQuery.onEntityAdded.add((e) => {
-            this.registerChunk(e)
+        this.chunkQuery.onEntityAdded.add((chunk) => {
+            this.registerChunk(chunk)
 
-            e.get(EventsComponent).dirty.add(() => {
-                const voxelChunk = e.get(VoxelChunkComponent)
-                this.remesh(voxelChunk.id)
+            this.dirtyChunks.add(chunk.get(VoxelChunkComponent).id)
+
+            chunk.get(EventsComponent).onChange.add(({ position }) => {
+                this.handleBlockUpdate(position)
             })
         })
 
@@ -83,11 +95,54 @@ export class VoxelChunkMesherSystem extends System {
         })
     }
 
+    onUpdate() {
+        for (const chunkId of this.dirtyChunks) {
+            this.remesh(chunkId)
+        }
+
+        this.dirtyChunks.clear()
+    }
+
     onDestroy() {
         for (const worker of this.mesherWorkers) {
             worker.terminate()
         }
         this.mesherWorkers = []
+    }
+
+    private handleBlockUpdate(position: Vec3): void {
+        const chunkEntity = this.voxelWorld.getChunkAt(position)!
+        const chunk = chunkEntity.get(VoxelChunkComponent)
+
+        this.dirtyChunks.add(chunk.id)
+
+        // check if we need to make neighbour chunks dirty
+        for (let axis = 0; axis < 3; axis++) {
+            for (const [pos, dir] of [
+                [CHUNK_SIZE - 1, 1],
+                [0, -1],
+            ]) {
+                const chunkLocalPosition = worldPositionToLocalChunkPosition(position)
+                if (chunkLocalPosition[axis] !== pos) continue
+
+                const offset: Vec3 = [0, 0, 0]
+                offset[axis] = dir
+
+                const neighbourPosition: Vec3 = [position[0] + offset[0], position[1] + offset[1], position[2] + offset[2]]
+                if (!this.voxelWorld.isSolid(neighbourPosition)) continue
+
+                const neighbourChunkId = chunkId([
+                    chunk.position[0] + offset[0],
+                    chunk.position[1] + offset[1],
+                    chunk.position[2] + offset[2],
+                ])
+
+                const neighbourEntity = this.voxelWorld.chunkEntities.get(neighbourChunkId)
+                if (!neighbourEntity) continue
+
+                this.dirtyChunks.add(neighbourChunkId)
+            }
+        }
     }
 
     private registerChunk(e: Entity): void {

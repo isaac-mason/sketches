@@ -9,19 +9,14 @@ import {
     Object3DComponent,
     Vec3,
     VoxelChunkComponent,
+    VoxelWorldComponent,
     chunkPositionToWorldPosition,
     positionToChunkIndex,
 } from '../core'
 import { VoxelEnginePlugin } from '../voxel-engine-types'
 import { worldVoxelPositionToPhysicsPosition } from './utils'
 
-export class PhysicsWorldComponent extends Component {
-    physicsWorld!: Rapier.World
-
-    construct() {
-        this.physicsWorld = new Rapier.World(new Rapier.Vector3(0, -9.81, 0))
-    }
-}
+export const PhysicsWorldComponent = Component.object<Rapier.World>('PhysicsWorld')
 
 export class RigidBodyComponent extends Component {
     rigidBody!: Rapier.RigidBody
@@ -124,11 +119,9 @@ export class VoxelChunkPhysicsComponent extends Component {
 }
 
 export class VoxelPhysicsSystem extends System {
-    physicsWorldSingleton = this.singleton(PhysicsWorldComponent, { required: true })!
+    physicsWorld = this.singleton(PhysicsWorldComponent, { required: true })!
 
-    get physicsWorld() {
-        return this.physicsWorldSingleton.physicsWorld
-    }
+    voxelWorld = this.singleton(VoxelWorldComponent, { required: true })!
 
     chunks = this.query([VoxelChunkComponent])
 
@@ -136,9 +129,9 @@ export class VoxelPhysicsSystem extends System {
 
     onInit(): void {
         this.chunks.onEntityAdded.add((e) => {
-            this.updateCollider(e)
+            this.dirtyChunks.add(e)
 
-            e.get(EventsComponent).dirty.add(() => {
+            e.get(EventsComponent).onChange.add(() => {
                 this.dirtyChunks.add(e)
             })
         })
@@ -148,6 +141,7 @@ export class VoxelPhysicsSystem extends System {
         for (const e of this.dirtyChunks) {
             this.updateCollider(e)
         }
+
         this.dirtyChunks.clear()
     }
 
@@ -160,7 +154,7 @@ export class VoxelPhysicsSystem extends System {
 
         const chunkPhysics = e.get(VoxelChunkPhysicsComponent)
 
-        // todo - use setblockRequest instead
+        // todo: optimise, should only update the changed blocks
         for (let x = 0; x < CHUNK_SIZE; x++) {
             for (let y = 0; y < CHUNK_SIZE; y++) {
                 for (let z = 0; z < CHUNK_SIZE; z++) {
@@ -320,17 +314,15 @@ export class PhysicsSystem extends System {
 
     worldScale = new Vector3(1, 1, 1)
 
-    rigidBodies = this.query([RigidBodyComponent])
+    rigidBodyQuery = this.query([RigidBodyComponent])
 
-    physicsWorldComponent = this.singleton(PhysicsWorldComponent, { required: true })!
+    physicsWorld = this.singleton(PhysicsWorldComponent, { required: true })!
 
     static MAX_SUB_STEPS = 10
 
     static TIME_STEP = 1 / 60
 
     onUpdate(delta: number): void {
-        const { physicsWorld } = this.physicsWorldComponent
-
         // Fixed timeStep simulation progression
         // https://gafferongames.com/post/fix_your_timestep/
         const previousTranslations: Record<
@@ -354,7 +346,7 @@ export class PhysicsSystem extends System {
             let subSteps = 0
             while (this.accumulator >= timeStepMs && subSteps < PhysicsSystem.MAX_SUB_STEPS) {
                 // Collect previous state
-                physicsWorld.bodies.forEach((b) => {
+                this.physicsWorld.bodies.forEach((b) => {
                     previousTranslations[b.handle] = {
                         rotation: b.rotation(),
                         translation: b.translation(),
@@ -362,7 +354,7 @@ export class PhysicsSystem extends System {
                 })
 
                 // Step
-                physicsWorld.step(this.eventQueue)
+                this.physicsWorld.step(this.eventQueue)
                 subSteps++
                 this.accumulator -= timeStepMs
             }
@@ -371,7 +363,7 @@ export class PhysicsSystem extends System {
         const interpolationAlpha = (this.accumulator % timeStepMs) / timeStepMs
 
         // Update physics bodies and transforms
-        for (const entity of this.rigidBodies) {
+        for (const entity of this.rigidBodyQuery) {
             const rigidBodyComponent = entity.get(RigidBodyComponent)
             const { rigidBody } = rigidBodyComponent
 
@@ -414,8 +406,8 @@ export class PhysicsSystem extends System {
 
         // Emit collision events
         this.eventQueue.drainCollisionEvents((handle1, handle2, started) => {
-            const collider1 = physicsWorld.getCollider(handle1)
-            const collider2 = physicsWorld.getCollider(handle2)
+            const collider1 = this.physicsWorld.getCollider(handle1)
+            const collider2 = this.physicsWorld.getCollider(handle2)
 
             const rigidBodyHandle1 = collider1.parent()?.handle
             const rigidBodyHandle2 = collider2.parent()?.handle
@@ -444,7 +436,7 @@ export const PhysicsPlugin = {
     systems: [PhysicsSystem, VoxelPhysicsSystem],
     setup: (world, ecs) => {
         const physicsWorldEntity = world.create()
-        const { physicsWorld } = physicsWorldEntity.add(PhysicsWorldComponent)
+        const physicsWorld = physicsWorldEntity.add(PhysicsWorldComponent, new Rapier.World(new Rapier.Vector3(0, -9.81, 0)))
 
         return { physicsWorld }
     },

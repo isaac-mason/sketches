@@ -3,7 +3,6 @@ import { Object3D } from 'three'
 import { VoxelEnginePlugin } from '../voxel-engine-types'
 import { BlockValue, Vec3 } from './types'
 import {
-    CHUNK_SIZE,
     TraceRayResult,
     chunkId,
     emptyChunk,
@@ -11,14 +10,13 @@ import {
     positionToChunkIndex,
     traceRay,
     worldPositionToChunkPosition,
-    worldPositionToLocalChunkPosition,
 } from './utils'
 
 export class EventsComponent extends Component {
-    dirty = new Topic()
+    onChange = new Topic<[{ position: Vec3; value: BlockValue }]>()
 
-    construct(): void {
-        this.dirty.clear()
+    construct() {
+        this.onChange.clear()
     }
 }
 
@@ -73,6 +71,10 @@ export class VoxelWorldComponent extends Component {
 
     traceRay = (origin: Vec3, direction: Vec3): TraceRayResult => {
         return traceRay(this.isSolid, origin, direction)
+    }
+
+    getChunkAt = (position: Vec3): Entity | undefined => {
+        return this.chunkEntities.get(chunkId(worldPositionToChunkPosition(position)))
     }
 }
 
@@ -147,48 +149,22 @@ export class VoxelWorldCoreSystem extends System {
         voxelChunk.solid[index] = value.solid ? 1 : 0
         voxelChunk.color[index] = value.solid ? value.color : 0
 
-        chunkEntity.get(EventsComponent).dirty.emit()
-
-        // check if we need to make neighbour chunks dirty
-        for (let axis = 0; axis < 3; axis++) {
-            for (const [pos, dir] of [
-                [CHUNK_SIZE - 1, 1],
-                [0, -1],
-            ]) {
-                const chunkLocalPosition = worldPositionToLocalChunkPosition(position)
-                if (chunkLocalPosition[axis] !== pos) continue
-
-                const offset: Vec3 = [0, 0, 0]
-                offset[axis] = dir
-
-                const neighbourPosition: Vec3 = [position[0] + offset[0], position[1] + offset[1], position[2] + offset[2]]
-                if (!this.voxelWorld.isSolid(neighbourPosition)) continue
-
-                const neighbourChunkId = chunkId([
-                    chunkPosition[0] + offset[0],
-                    chunkPosition[1] + offset[1],
-                    chunkPosition[2] + offset[2],
-                ])
-
-                const neighbourEntity = this.voxelWorld.chunkEntities.get(neighbourChunkId)
-
-                neighbourEntity?.get(EventsComponent).dirty.emit()
-            }
-        }
+        const chunkEvents = chunkEntity.get(EventsComponent)
+        chunkEvents.onChange.emit({ position, value })
     }
 }
 
 export const Object3DComponent = Component.object<Object3D>('Object3D')
 
 export const CorePlugin = {
-    components: [VoxelWorldComponent, VoxelChunkComponent, EventsComponent, SetBlockRequestComponent, Object3DComponent],
+    components: [VoxelWorldComponent, VoxelChunkComponent, SetBlockRequestComponent, EventsComponent, Object3DComponent],
     systems: [VoxelWorldCoreSystem],
     setup: (world) => {
         const voxelWorldEntity = world.create()
         const voxelWorld = voxelWorldEntity.add(VoxelWorldComponent)
 
         const setBlock = (position: Vec3, value: BlockValue) => {
-            world.create().add(SetBlockRequestComponent, position, value)
+            world.create((e) => e.add(SetBlockRequestComponent, position, value))
         }
 
         return {
