@@ -6281,7 +6281,7 @@ __metadata:
     react-colorful: ^5.6.1
     react-dom: ^18.0.0
     react-router-dom: ^6.14.2
-    styled-breakpoints: ^12.1.1
+    styled-breakpoints: ^12.1.5
     styled-components: ^6.0.4
     three: ^0.154.0
     tunnel-rat: ^0.1.2
@@ -6450,15 +6450,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"styled-breakpoints@npm:^12.1.1":
-  version: 12.1.2
-  resolution: "styled-breakpoints@npm:12.1.2"
+"styled-breakpoints@npm:^12.1.5":
+  version: 12.1.5
+  resolution: "styled-breakpoints@npm:12.1.5"
   peerDependencies:
-    react: ^18.x.x
-  peerDependenciesMeta:
-    react:
-      optional: true
-  checksum: 13c13b094f0d03fad92efc49bd0131407f589cfef8732a81044eba4757d25f0152edc2305ad1c8c0589cecad974939f045e074af078b08e9c98651cc19faba01
+    react: ">= 16.8.0"
+    react-dom: ">= 16.8.0"
+    styled-components: ">= 5.0.0"
+  checksum: 8b387a02dca89fe25d4b6e73de680f185912a07262839e8cd04e6722cd189e0e031e6791c2f8132c004f0be2e74d03be3a5f8bc2c611accb1fa86f1777d4bc74
   languageName: node
   linkType: hard
 
