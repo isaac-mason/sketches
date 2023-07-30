@@ -1,6 +1,6 @@
 import { Leva } from 'leva'
 import { Perf } from 'r3f-perf'
-import { Component, ReactNode, Suspense, useEffect, useMemo, useState } from 'react'
+import { Component, ReactNode, Suspense, memo, useEffect, useMemo, useState } from 'react'
 import {
     Await,
     Link,
@@ -398,6 +398,12 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     }
 }
 
+const SketchModule = memo(({ route }: { route: string }) => {
+    const { component: SketchModuleComponent } = sketchModules[route]
+
+    return <SketchModuleComponent key={route} />
+})
+
 const LazySketch = ({ displayMode }: LazySketchProps) => {
     const { sketch, options } = useAsyncValue() as SketchData
 
@@ -407,14 +413,12 @@ const LazySketch = ({ displayMode }: LazySketchProps) => {
         }
     }, [sketch])
 
-    const { component: SketchModuleComponent } = sketchModules[sketch!.route]
-
     return (
         <SketchWrapper>
             {displayMode !== 'screenshot' && !options?.noTitle && <h1>{sketch?.title}</h1>}
 
             <ErrorBoundary>
-                <SketchModuleComponent />
+                <SketchModule route={sketch.route} />
             </ErrorBoundary>
         </SketchWrapper>
     )

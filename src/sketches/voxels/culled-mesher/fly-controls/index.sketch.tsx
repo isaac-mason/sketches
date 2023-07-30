@@ -4,9 +4,9 @@ import { useEffect, useRef } from 'react'
 import { styled } from 'styled-components'
 import { Color, Vector3 } from 'three'
 import { Canvas } from '../../../../common'
-import { BlockValue, CorePlugin, Vec3, VoxelWorldComponent } from '../../engine/core'
+import { CorePlugin, Vec3 } from '../../engine/core'
 import { CulledMesherPlugin } from '../../engine/culled-mesher'
-import { useVoxelEngine } from '../../engine/use-voxel-engine'
+import { useVoxelEngine, useVoxelEngineApi } from '../../engine/use-voxel-engine'
 
 const green1 = new Color('green').addScalar(-0.02).getHex()
 const green2 = new Color('green').addScalar(0.02).getHex()
@@ -18,12 +18,9 @@ const frontVector = new Vector3()
 const sideVector = new Vector3()
 const direction = new Vector3()
 
-type PlayerProps = {
-    voxelWorld: VoxelWorldComponent
-    setBlock: (pos: Vec3, value: BlockValue) => void
-}
+const Player = () => {
+    const { voxelWorld, setBlock } = useVoxelEngineApi<[CorePlugin, CulledMesherPlugin]>()
 
-const Player = ({ voxelWorld, setBlock }: PlayerProps) => {
     const position = useRef<Vector3>(new Vector3(0, 5, 0))
 
     const [, getControls] = useKeyboardControls()
@@ -94,7 +91,9 @@ const Player = ({ voxelWorld, setBlock }: PlayerProps) => {
 }
 
 const App = () => {
-    const { world, voxelWorld, setBlock, CulledMeshes } = useVoxelEngine([CorePlugin, CulledMesherPlugin])
+    const { CulledMeshes, VoxelEngineProvider, setBlock } = useVoxelEngine({
+        plugins: [CorePlugin, CulledMesherPlugin],
+    })
 
     useEffect(() => {
         // ground
@@ -106,13 +105,15 @@ const App = () => {
                 })
             }
         }
-    }, [world])
+    })
 
     return (
         <>
             <CulledMeshes />
 
-            <Player voxelWorld={voxelWorld} setBlock={setBlock} />
+            <VoxelEngineProvider>
+                <Player />
+            </VoxelEngineProvider>
 
             <ambientLight intensity={0.2} />
             <pointLight intensity={0.5} position={[20, 20, 20]} />

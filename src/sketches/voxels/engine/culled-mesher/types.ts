@@ -41,9 +41,9 @@ export type RequestChunkMeshUpdateMessage = {
     id: string
 }
 
-export type ChunkMeshUpdateNotificationMessage = {
-    type: 'chunk-mesh-update-notification'
+export type ChunkMeshUpdateMessage = {
+    type: 'chunk-mesh-update'
     id: string
 }
 
-export type WorkerMessage = RegisterChunkMessage | RequestChunkMeshUpdateMessage | ChunkMeshUpdateNotificationMessage
+export type WorkerMessage = RegisterChunkMessage | RequestChunkMeshUpdateMessage | ChunkMeshUpdateMessage

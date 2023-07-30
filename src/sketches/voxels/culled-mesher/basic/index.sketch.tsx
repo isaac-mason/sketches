@@ -1,6 +1,6 @@
 import { Bounds, OrbitControls } from '@react-three/drei'
 import { useControls } from 'leva'
-import { useEffect } from 'react'
+import { useLayoutEffect } from 'react'
 import { Color } from 'three'
 import { Canvas } from '../../../../common'
 import { CorePlugin } from '../../engine/core'
@@ -10,10 +10,12 @@ import { useVoxelEngine } from '../../engine/use-voxel-engine'
 const orange = new Color('orange').getHex()
 const hotpink = new Color('hotpink').getHex()
 
-const Sphere = () => {
-    const { world, voxelWorld, setBlock, CulledMeshes } = useVoxelEngine([CorePlugin, CulledMesherPlugin])
+const App = () => {
+    const { world, CulledMeshes, setBlock } = useVoxelEngine({
+        plugins: [CorePlugin, CulledMesherPlugin],
+    })
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         // sphere
         for (let x = -10; x < 10; x++) {
             for (let y = -10; y < 10; y++) {
@@ -27,7 +29,7 @@ const Sphere = () => {
                 }
             }
         }
-    }, [voxelWorld])
+    }, [])
 
     useControls(
         'voxels-culled-mesher-basic',
@@ -60,7 +62,7 @@ const Sphere = () => {
 export default () => {
     return (
         <Canvas camera={{ position: [20, 20, 20] }}>
-            <Sphere />
+            <App />
             <OrbitControls makeDefault />
         </Canvas>
     )

@@ -2,25 +2,50 @@ import Rapier from '@dimforge/rapier3d-compat'
 import { Bounds, OrbitControls } from '@react-three/drei'
 import { ThreeEvent } from '@react-three/fiber'
 import { useControls } from 'leva'
-import { useEffect } from 'react'
+import { useLayoutEffect, useMemo } from 'react'
 import { Color } from 'three'
 import { Canvas } from '../../../../common'
-import { CorePlugin, Vec3 } from '../../engine/core'
+import { CorePlugin, Object3DComponent, Vec3 } from '../../engine/core'
 import { CulledMesherPlugin, VoxelChunkMeshComponent } from '../../engine/culled-mesher'
-import { PhysicsDebug, PhysicsPlugin, RapierInit } from '../../engine/physics'
-import { useVoxelEngine } from '../../engine/use-voxel-engine'
+import { PhysicsDebug, PhysicsPlugin, RapierInit, RigidBodyComponent } from '../../engine/physics'
+import { useVoxelEngine, useVoxelEngineApi } from '../../engine/use-voxel-engine'
 
 const gray = new Color('#666').getHex()
 const orange = new Color('orange').getHex()
 
-const Sphere = () => {
-    const { world, physicsWorld, voxelWorld, setBlock, CulledMeshes } = useVoxelEngine([
-        CorePlugin,
-        CulledMesherPlugin,
-        PhysicsPlugin,
-    ])
+type BallProps = {
+    position: Vec3
+    radius: number
+}
 
-    useEffect(() => {
+const Ball = ({ position: [x, y, z], radius }: BallProps) => {
+    const { ecs, physicsWorld } = useVoxelEngineApi<[CorePlugin, PhysicsPlugin]>()
+
+    const rigidBody = useMemo(() => {
+        const body = physicsWorld.createRigidBody(Rapier.RigidBodyDesc.dynamic().setTranslation(x, y, z))
+        physicsWorld.createCollider(Rapier.ColliderDesc.ball(radius), body)
+        return body
+    }, [])
+
+    return (
+        <ecs.Entity>
+            <ecs.Component type={RigidBodyComponent} args={[rigidBody]} />
+            <ecs.Component type={Object3DComponent}>
+                <mesh position={[x, y, z]}>
+                    <meshStandardMaterial color="orange" />
+                    <sphereGeometry args={[radius]} />
+                </mesh>
+            </ecs.Component>
+        </ecs.Entity>
+    )
+}
+
+const App = () => {
+    const { world, physicsWorld, voxelWorld, setBlock, CulledMeshes, VoxelEngineProvider } = useVoxelEngine({
+        plugins: [CorePlugin, CulledMesherPlugin, PhysicsPlugin],
+    })
+
+    useLayoutEffect(() => {
         // container
         for (let x = -10; x < 10; x++) {
             for (let y = -10; y < 10; y++) {
@@ -34,17 +59,7 @@ const Sphere = () => {
                 }
             }
         }
-
-        // drop some physics bodies into the container
-        for (let i = 0; i < 20; i++) {
-            const x = Math.random() * 6 - 3
-            const y = 10 + i * 2
-            const z = Math.random() * 6 - 3
-
-            const rigidBody = physicsWorld.createRigidBody(Rapier.RigidBodyDesc.dynamic().setTranslation(x, y, z))
-            physicsWorld.createCollider(Rapier.ColliderDesc.ball(1), rigidBody)
-        }
-    }, [voxelWorld])
+    }, [])
 
     useControls(
         'voxels-culled-mesher-physics',
@@ -91,20 +106,31 @@ const Sphere = () => {
         }
     }
 
+    const balls = useMemo(() => {
+        return Array.from({ length: 20 }).map(() => ({
+            position: [Math.random() * 10 - 5, Math.random() * 10 - 5, Math.random() * 10 - 5] as Vec3,
+            radius: 0.5,
+        }))
+    }, [])
+
     return (
-        <>
+        <VoxelEngineProvider>
             <Bounds fit margin={1.5}>
                 <group onPointerDown={onPointerDown}>
                     <CulledMeshes />
                 </group>
             </Bounds>
 
+            {balls.map(({ position, radius }, idx) => (
+                <Ball key={idx} position={position} radius={radius} />
+            ))}
+
             <PhysicsDebug world={physicsWorld} />
 
             <ambientLight intensity={0.2} />
             <pointLight intensity={0.5} position={[20, 20, 20]} />
             <pointLight intensity={0.5} position={[-20, 20, -20]} />
-        </>
+        </VoxelEngineProvider>
     )
 }
 
@@ -112,7 +138,7 @@ export default () => {
     return (
         <RapierInit>
             <Canvas camera={{ position: [5, 20, 5] }}>
-                <Sphere />
+                <App />
                 <OrbitControls makeDefault />
             </Canvas>
         </RapierInit>

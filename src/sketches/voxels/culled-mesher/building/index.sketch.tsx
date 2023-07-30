@@ -1,11 +1,11 @@
 import { Bounds, OrbitControls } from '@react-three/drei'
 import { ThreeEvent } from '@react-three/fiber'
-import { useEffect } from 'react'
+import { useLayoutEffect } from 'react'
 import { HexColorPicker } from 'react-colorful'
 import { Color } from 'three'
 import { create } from 'zustand'
 import { Canvas } from '../../../../common'
-import { CorePlugin, Vec3, traceRay } from '../../engine/core'
+import { CorePlugin, Vec3 } from '../../engine/core'
 import { CulledMesherPlugin } from '../../engine/culled-mesher'
 import { useVoxelEngine } from '../../engine/use-voxel-engine'
 
@@ -22,11 +22,11 @@ const useColorStore = create<ColorStore>((set) => ({
 }))
 
 const App = () => {
-    const { world, voxelWorld, setBlock, CulledMeshes } = useVoxelEngine([CorePlugin, CulledMesherPlugin])
+    const { voxelWorld, setBlock, CulledMeshes } = useVoxelEngine({
+        plugins: [CorePlugin, CulledMesherPlugin],
+    })
 
-    const { color } = useColorStore()
-
-    useEffect(() => {
+    useLayoutEffect(() => {
         // ground
         for (let x = -15; x < 15; x++) {
             for (let z = -15; z < 15; z++) {
@@ -36,7 +36,9 @@ const App = () => {
                 })
             }
         }
-    }, [world])
+    }, [])
+
+    const { color } = useColorStore()
 
     const onClick = (event: ThreeEvent<MouseEvent>) => {
         event.stopPropagation()
@@ -51,9 +53,7 @@ const App = () => {
         if (event.button === 2) {
             const block: Vec3 = [Math.floor(ray.hitPosition[0]), Math.floor(ray.hitPosition[1]), Math.floor(ray.hitPosition[2])]
 
-            setBlock(block, {
-                solid: false,
-            })
+            setBlock(block, { solid: false })
         } else {
             const block: Vec3 = [
                 Math.floor(ray.hitPosition[0] + ray.hitNormal[0]),

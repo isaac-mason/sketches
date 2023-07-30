@@ -271,3 +271,5 @@ export const BoxCharacterControllerPlugin = {
     components: [BoxCharacterControllerCameraComponent, BoxCharacterControllerInputComponent, BoxCharacterControllerComponent],
     systems: [BoxCharacterControllerSystem],
 } satisfies VoxelEnginePlugin
+
+export type BoxCharacterControllerPlugin = typeof BoxCharacterControllerPlugin

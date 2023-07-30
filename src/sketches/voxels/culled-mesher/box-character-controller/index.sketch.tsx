@@ -1,8 +1,7 @@
 import { KeyboardControls, PointerLockControls, useKeyboardControls } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
-import { createECS } from 'arancini/react'
 import { useControls } from 'leva'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useLayoutEffect, useMemo } from 'react'
 import { styled } from 'styled-components'
 import { Color, PerspectiveCamera, Vector3 } from 'three'
 import { Canvas } from '../../../../common'
@@ -12,21 +11,17 @@ import {
     BoxCharacterControllerInputComponent,
     BoxCharacterControllerPlugin,
 } from '../../engine/box-character-controller'
-import { BlockValue, CorePlugin, Object3DComponent, Vec3, VoxelWorldComponent } from '../../engine/core'
+import { CorePlugin, Object3DComponent, Vec3 } from '../../engine/core'
 import { CulledMesherPlugin } from '../../engine/culled-mesher'
-import { useVoxelEngine } from '../../engine/use-voxel-engine'
+import { useVoxelEngine, useVoxelEngineApi } from '../../engine/use-voxel-engine'
 
 const green1 = new Color('green').addScalar(-0.02).getHex()
 const green2 = new Color('green').addScalar(0.02).getHex()
 const orange = new Color('orange').getHex()
 
-type PlayerProps = {
-    ecs: ReturnType<typeof createECS>
-    voxelWorld: VoxelWorldComponent
-    setBlock: (pos: Vec3, value: BlockValue) => void
-}
+const Player = () => {
+    const { ecs, voxelWorld, setBlock } = useVoxelEngineApi<[CorePlugin, CulledMesherPlugin]>()
 
-const Player = ({ ecs, voxelWorld, setBlock }: PlayerProps) => {
     const gl = useThree((s) => s.gl)
 
     const camera = useThree((s) => s.camera)
@@ -145,13 +140,11 @@ const Player = ({ ecs, voxelWorld, setBlock }: PlayerProps) => {
 }
 
 const App = () => {
-    const { ecs, voxelWorld, setBlock, CulledMeshes } = useVoxelEngine([
-        CorePlugin,
-        CulledMesherPlugin,
-        BoxCharacterControllerPlugin,
-    ])
+    const { VoxelEngineProvider, setBlock, CulledMeshes } = useVoxelEngine({
+        plugins: [CorePlugin, CulledMesherPlugin, BoxCharacterControllerPlugin],
+    })
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         // ground
         for (let x = -15; x < 15; x++) {
             for (let y = -10; y < -5; y++) {
@@ -163,13 +156,15 @@ const App = () => {
                 }
             }
         }
-    }, [voxelWorld])
+    }, [])
 
     return (
         <>
             <CulledMeshes />
 
-            <Player ecs={ecs} voxelWorld={voxelWorld} setBlock={setBlock} />
+            <VoxelEngineProvider>
+                <Player />
+            </VoxelEngineProvider>
 
             <ambientLight intensity={0.2} />
             <pointLight intensity={0.5} position={[20, 20, 20]} />

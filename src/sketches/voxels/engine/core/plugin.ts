@@ -12,8 +12,10 @@ import {
     worldPositionToChunkPosition,
 } from './utils'
 
-export class EventsComponent extends Component {
-    onChange = new Topic<[{ position: Vec3; value: BlockValue }]>()
+export type VoxelWorldChange = { position: Vec3; value: BlockValue; chunk: Entity }
+
+export class VoxelWorldEventsComponent extends Component {
+    onChange = new Topic<[changes: VoxelWorldChange[]]>()
 
     construct() {
         this.onChange.clear()
@@ -78,18 +80,16 @@ export class VoxelWorldComponent extends Component {
     }
 }
 
-export class SetBlockRequestComponent extends Component {
-    position!: Vec3
-    value!: BlockValue
+export type SetBlockRequest = { position: Vec3; value: BlockValue }
 
-    construct(position: Vec3, value: BlockValue) {
-        this.position = position
-        this.value = value
-    }
-}
+export const SetBlockRequestComponent = Component.object<SetBlockRequest>('SetBlockRequest')
+
+export const Object3DComponent = Component.object<Object3D>('Object3D')
 
 export class VoxelWorldCoreSystem extends System {
     voxelWorld = this.singleton(VoxelWorldComponent, { required: true })!
+
+    voxelWorldEvents = this.singleton(VoxelWorldEventsComponent, { required: true })!
 
     chunkQuery = this.query([VoxelChunkComponent])
 
@@ -119,52 +119,62 @@ export class VoxelWorldCoreSystem extends System {
     }
 
     onUpdate() {
-        for (const e of this.setBlockRequestQuery.entities) {
-            const { position, value } = e.get(SetBlockRequestComponent)
-            this.setBlock(position, value)
-            e.destroy()
+        const changes: VoxelWorldChange[] = []
+
+        for (const setBlockRequest of this.setBlockRequestQuery) {
+            const { position, value } = setBlockRequest.get(SetBlockRequestComponent)
+
+            const chunkPosition = worldPositionToChunkPosition(position)
+            const id = chunkId(chunkPosition)
+
+            let chunkEntity = this.voxelWorld.chunkEntities.get(id)
+
+            if (!chunkEntity) {
+                chunkEntity = this.addChunk(id, chunkPosition)
+            }
+
+            const index = positionToChunkIndex(position)
+
+            const voxelChunk = chunkEntity.get(VoxelChunkComponent)
+            voxelChunk.solid[index] = value.solid ? 1 : 0
+            voxelChunk.color[index] = value.solid ? value.color : 0
+
+            changes.push({ position, value, chunk: chunkEntity })
+
+            setBlockRequest.destroy()
+        }
+
+        if (changes.length > 0) {
+            this.voxelWorldEvents.onChange.emit(changes)
         }
     }
 
     private addChunk(id: string, chunkPosition: Vec3) {
         return this.world.create((entity) => {
             entity.add(VoxelChunkComponent, id, chunkPosition)
-            entity.add(EventsComponent)
         })
-    }
-
-    private setBlock(position: Vec3, value: BlockValue): void {
-        const chunkPosition = worldPositionToChunkPosition(position)
-        const id = chunkId(chunkPosition)
-
-        let chunkEntity = this.voxelWorld.chunkEntities.get(id)
-
-        if (!chunkEntity) {
-            chunkEntity = this.addChunk(id, chunkPosition)
-        }
-
-        const index = positionToChunkIndex(position)
-
-        const voxelChunk = chunkEntity.get(VoxelChunkComponent)
-        voxelChunk.solid[index] = value.solid ? 1 : 0
-        voxelChunk.color[index] = value.solid ? value.color : 0
-
-        const chunkEvents = chunkEntity.get(EventsComponent)
-        chunkEvents.onChange.emit({ position, value })
     }
 }
 
-export const Object3DComponent = Component.object<Object3D>('Object3D')
-
 export const CorePlugin = {
-    components: [VoxelWorldComponent, VoxelChunkComponent, SetBlockRequestComponent, EventsComponent, Object3DComponent],
+    components: [
+        VoxelWorldComponent,
+        VoxelWorldEventsComponent,
+        VoxelChunkComponent,
+        SetBlockRequestComponent,
+        Object3DComponent,
+    ],
     systems: [VoxelWorldCoreSystem],
     setup: (world) => {
-        const voxelWorldEntity = world.create()
-        const voxelWorld = voxelWorldEntity.add(VoxelWorldComponent)
+        const voxelWorldEntity = world.create((e) => {
+            e.add(VoxelWorldComponent)
+            e.add(VoxelWorldEventsComponent)
+        })
+
+        const voxelWorld = voxelWorldEntity.get(VoxelWorldComponent)
 
         const setBlock = (position: Vec3, value: BlockValue) => {
-            world.create((e) => e.add(SetBlockRequestComponent, position, value))
+            world.create((e) => e.add(SetBlockRequestComponent, { position, value }))
         }
 
         return {
@@ -173,3 +183,5 @@ export const CorePlugin = {
         }
     },
 } satisfies VoxelEnginePlugin
+
+export type CorePlugin = typeof CorePlugin

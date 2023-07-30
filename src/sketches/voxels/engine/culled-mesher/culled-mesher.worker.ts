@@ -1,7 +1,7 @@
 import { Color } from 'three'
 import { VoxelChunk, isSolid, positionToChunkIndex } from '../core'
 import { CHUNK_SIZE } from '../core/utils'
-import { ChunkMeshUpdateNotificationMessage, RegisterChunkMessage, VoxelChunkMeshData, WorkerMessage } from './types'
+import { ChunkMeshUpdateMessage, RegisterChunkMessage, VoxelChunkMeshData, WorkerMessage } from './types'
 
 const VOXEL_FACE_DIRECTIONS: {
     // direction of the neighbour voxel
@@ -298,8 +298,8 @@ const update = () => {
 
         incomplete.delete(chunkId)
 
-        const chunkMeshUpdateNotification: ChunkMeshUpdateNotificationMessage = {
-            type: 'chunk-mesh-update-notification',
+        const chunkMeshUpdateNotification: ChunkMeshUpdateMessage = {
+            type: 'chunk-mesh-update',
             id: chunkId,
         }
 
