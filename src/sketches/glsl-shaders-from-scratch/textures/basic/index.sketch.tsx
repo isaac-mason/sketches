@@ -1,6 +1,6 @@
 import { OrthographicCamera, useTexture } from '@react-three/drei'
-import * as THREE from 'three'
-import { Canvas } from '../../../common'
+import { Vector4 } from 'three'
+import { Canvas } from '../../../../common'
 import dogImage from './dog.jpeg'
 
 const vertexShader = /* glsl */ `
@@ -18,30 +18,37 @@ const fragmentShader = /* glsl */ `
 varying vec2 vUvs;
 
 uniform sampler2D diffuse;
-uniform sampler2D overlay;
+uniform vec4 tint;
 
 void main() {
-    vec2 uvs = vUvs * -2.0;
-    vec4 diffuseSample = texture2D(diffuse, uvs);
-    gl_FragColor = diffuseSample;
+    // flip the image horizontally, just for fun
+    vec4 diffuseSample = texture2D(diffuse, vec2(1.0 - vUvs.x, vUvs.y));
+
+    // apply the tint
+    // "modulate" or "modulation" blending
+    gl_FragColor = diffuseSample * tint;
+
+    // 'diffuseSample * tint' is doing component-wise multiplication
+    // same as:
+    // gl_FragColor = vec4(
+    //     diffuseSample.r * tint.x,
+    //     diffuseSample.g * tint.y,
+    //     diffuseSample.b * tint.z,
+    //     1.0
+    // );
 }
 `
 
 const App = () => {
-    const dogTexture = useTexture(dogImage)
-
-    // address modes
-    dogTexture.wrapS = THREE.MirroredRepeatWrapping
-    dogTexture.wrapT = THREE.MirroredRepeatWrapping
-
+    const texture = useTexture(dogImage)
     return (
         <mesh position={[0.5, 0.5, 0]}>
             <shaderMaterial
                 vertexShader={vertexShader}
                 fragmentShader={fragmentShader}
                 uniforms={{
-                    diffuse: { value: dogTexture },
-                    tint: { value: new THREE.Vector4(1, 0.5, 0.5) },
+                    diffuse: { value: texture },
+                    tint: { value: new Vector4(1, 0.7, 0.7) },
                 }}
             />
             <planeGeometry args={[1, 1]} />

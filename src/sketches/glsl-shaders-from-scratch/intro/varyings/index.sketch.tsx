@@ -1,7 +1,5 @@
 import { OrthographicCamera } from '@react-three/drei'
-import { useThree } from '@react-three/fiber'
-import { useEffect } from 'react'
-import { Canvas } from '../../../common'
+import { Canvas } from '../../../../common'
 
 const vertexShader = /* glsl */ `
 varying vec2 vUvs;

@@ -3,36 +3,41 @@ import { Sketch, SketchOptions } from './types'
 
 const sketchList = [
     { title: 'Intro', path: 'intro' },
-    /* GLSL Shaders From Scratch */
+    /* GLSL GLSL Shaders From Scratch */
     {
-        title: 'Shaders From Scratch 1 - Varyings',
-        path: 'glsl-shaders-from-scratch/01-varyings',
+        title: 'GLSL Shaders From Scratch - Intro - Varyings',
+        path: 'glsl-shaders-from-scratch/intro/varyings',
         tags: ['shaders-from-scratch', 'shaders', 'varyings'],
     },
     {
-        title: 'Shaders From Scratch 2 - Uniforms',
-        path: 'glsl-shaders-from-scratch/02-uniforms',
+        title: 'GLSL Shaders From Scratch - Intro - Uniforms',
+        path: 'glsl-shaders-from-scratch/intro/uniforms',
         tags: ['shaders-from-scratch', 'shaders', 'uniforms'],
     },
     {
-        title: 'Shaders From Scratch 3 - Attributes',
-        path: 'glsl-shaders-from-scratch/03-attributes',
+        title: 'GLSL Shaders From Scratch - Intro - Attributes',
+        path: 'glsl-shaders-from-scratch/intro/attributes',
         tags: ['shaders-from-scratch', 'shaders', 'attributes'],
     },
     {
-        title: 'Shaders From Scratch 4 - Textures',
-        path: 'glsl-shaders-from-scratch/04-textures',
+        title: 'GLSL Shaders From Scratch - Textures - Basic',
+        path: 'glsl-shaders-from-scratch/textures/basic',
         tags: ['shaders-from-scratch', 'shaders', 'textures'],
     },
     {
-        title: 'Shaders From Scratch 5 - Alpha',
-        path: 'glsl-shaders-from-scratch/05-alpha',
+        title: 'GLSL Shaders From Scratch - Textures - Alpha',
+        path: 'glsl-shaders-from-scratch/textures/alpha',
         tags: ['shaders-from-scratch', 'shaders', 'alpha'],
     },
     {
-        title: 'Shaders From Scratch 6 - Addressing',
-        path: 'glsl-shaders-from-scratch/06-addressing',
+        title: 'GLSL Shaders From Scratch - Textures - Adressing',
+        path: 'glsl-shaders-from-scratch/textures/addressing',
         tags: ['shaders-from-scratch', 'shaders', 'addressing'],
+    },
+    {
+        title: 'GLSL Shaders From Scratch - Common Functions and Tricks - Step, Mix, Smoothstep',
+        path: 'glsl-shaders-from-scratch/common-functions-and-tricks/step-mix-smoothstep',
+        tags: ['shaders-from-scratch', 'shaders', 'step', 'mix', 'smoothstep'],
     },
     /* Three.js Journey */
     {

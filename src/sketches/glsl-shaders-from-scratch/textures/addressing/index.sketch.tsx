@@ -1,8 +1,7 @@
 import { OrthographicCamera, useTexture } from '@react-three/drei'
-import { Vector4 } from 'three'
-import { Canvas } from '../../../common'
+import * as THREE from 'three'
+import { Canvas } from '../../../../common'
 import dogImage from './dog.jpeg'
-import overlayImage from './overlay.png'
 
 const vertexShader = /* glsl */ `
 varying vec2 vUvs;
@@ -22,15 +21,19 @@ uniform sampler2D diffuse;
 uniform sampler2D overlay;
 
 void main() {
-    vec4 diffuseSample = texture2D(diffuse, vUvs);
-    vec4 overlaySample = texture2D(overlay, vUvs);
-    gl_FragColor = mix(diffuseSample, overlaySample, overlaySample.w);
+    vec2 uvs = vUvs * -2.0;
+    vec4 diffuseSample = texture2D(diffuse, uvs);
+    gl_FragColor = diffuseSample;
 }
 `
 
 const App = () => {
     const dogTexture = useTexture(dogImage)
-    const overlayTexture = useTexture(overlayImage)
+
+    // address modes
+    dogTexture.wrapS = THREE.MirroredRepeatWrapping
+    dogTexture.wrapT = THREE.MirroredRepeatWrapping
+
     return (
         <mesh position={[0.5, 0.5, 0]}>
             <shaderMaterial
@@ -38,8 +41,7 @@ const App = () => {
                 fragmentShader={fragmentShader}
                 uniforms={{
                     diffuse: { value: dogTexture },
-                    overlay: { value: overlayTexture },
-                    tint: { value: new Vector4(1, 0.5, 0.5) },
+                    tint: { value: new THREE.Vector4(1, 0.5, 0.5) },
                 }}
             />
             <planeGeometry args={[1, 1]} />
