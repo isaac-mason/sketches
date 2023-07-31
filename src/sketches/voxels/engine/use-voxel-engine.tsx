@@ -64,7 +64,7 @@ export const useVoxelEngine = <Plugins extends Array<VoxelEnginePlugin>, Api = V
     }, [])
 
     useFrame((_, delta) => {
-        if (!world.initialised && !paused) return
+        if (!world.initialised || paused) return
 
         world.update(delta)
     })

@@ -1,7 +1,7 @@
 import { KeyboardControls, PointerLockControls, useKeyboardControls } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
 import { useControls } from 'leva'
-import { useEffect, useLayoutEffect, useMemo } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import { styled } from 'styled-components'
 import { Color, PerspectiveCamera, Vector3 } from 'three'
 import { Canvas } from '../../../../common'
@@ -140,8 +140,11 @@ const Player = () => {
 }
 
 const App = () => {
+    const [paused, setPaused] = useState(true)
+
     const { VoxelEngineProvider, setBlock, CulledMeshes } = useVoxelEngine({
         plugins: [CorePlugin, CulledMesherPlugin, BoxCharacterControllerPlugin],
+        paused,
     })
 
     useLayoutEffect(() => {
@@ -156,6 +159,8 @@ const App = () => {
                 }
             }
         }
+
+        setPaused(false)
     }, [])
 
     return (
