@@ -1,3 +1,3 @@
-export * from './debug'
-export * from './three'
-export * from './ui'
+export * from './components'
+export * from './hooks'
+export * from './utils'
