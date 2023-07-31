@@ -3,8 +3,7 @@ import { useControls } from 'leva'
 import { useMemo } from 'react'
 import { PlaneGeometry, PointLightHelper } from 'three'
 import { VertexNormalsHelper } from 'three/examples/jsm/helpers/VertexNormalsHelper'
-import { Canvas } from '../../../common'
-import { Helper } from '../../../common/three/components/helper'
+import { Canvas, Helper } from '../../../common'
 
 const randomInRange = (min: number, max: number): number => {
     return Math.random() * (max - min) + min
