@@ -39,6 +39,11 @@ const sketchList = [
         path: 'glsl-shaders-from-scratch/common-functions-and-tricks/step-mix-smoothstep',
         tags: ['shaders-from-scratch', 'shaders', 'step', 'mix', 'smoothstep'],
     },
+    {
+        title: 'GLSL Shaders From Scratch - Common Functions and Tricks - Min, Max, Clamp, Saturate',
+        path: 'glsl-shaders-from-scratch/common-functions-and-tricks/min-max-clamp-saturate',
+        tags: ['shaders-from-scratch', 'shaders', 'min', 'max', 'clamp', 'saturate'],
+    },
     /* Three.js Journey */
     {
         title: 'Journey Lesson 3 - Basic',
