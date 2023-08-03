@@ -17,14 +17,14 @@ void main() {
 const fragmentShader = (value: TemplateStringsArray) => /* glsl */ `
 varying vec2 vUvs;
 
+vec3 white = vec3(1.0);
+vec3 red = vec3(1.0, 0.0, 0.0);
+vec3 blue = vec3(0.0, 0.0, 1.0);
+
 void main() {
     ${value}
 
     float linearLine = smoothstep(0.0, 0.02, abs(vUvs.y - mix(0.0, 1.0, value)));
-    
-    vec3 white = vec3(1.0);
-    vec3 red = vec3(1.0, 0.0, 0.0);
-    vec3 blue = vec3(0.0, 0.0, 1.0);
 
     vec3 color = mix(red, blue, value);
 

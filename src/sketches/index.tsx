@@ -44,6 +44,11 @@ const sketchList = [
         path: 'glsl-shaders-from-scratch/common-functions-and-tricks/min-max-clamp-saturate',
         tags: ['shaders-from-scratch', 'shaders', 'min', 'max', 'clamp', 'saturate'],
     },
+    {
+        title: 'GLSL Shaders From Scratch - Common Functions and Tricks - Fract and Friends',
+        path: 'glsl-shaders-from-scratch/common-functions-and-tricks/fract-and-friends',
+        tags: ['shaders-from-scratch', 'shaders', 'min', 'fract'],
+    },
     /* Three.js Journey */
     {
         title: 'Journey Lesson 3 - Basic',
