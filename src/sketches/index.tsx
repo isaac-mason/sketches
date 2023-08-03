@@ -49,6 +49,11 @@ const sketchList = [
         path: 'glsl-shaders-from-scratch/common-functions-and-tricks/fract-and-friends',
         tags: ['shaders-from-scratch', 'shaders', 'min', 'fract'],
     },
+    {
+        title: 'GLSL Shaders From Scratch - Vector Operations & Math - Sin/Cos',
+        path: 'glsl-shaders-from-scratch/vector-operations-and-math/sin-cos',
+        tags: ['shaders-from-scratch', 'shaders', 'min', 'fract'],
+    },
     /* Three.js Journey */
     {
         title: 'Journey Lesson 3 - Basic',
