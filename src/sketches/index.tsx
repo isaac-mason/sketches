@@ -164,7 +164,12 @@ const sketchList = [
         {
             title: 'GLSL Shaders From Scratch - Vector Operations & Math - Sin/Cos',
             path: 'glsl-shaders-from-scratch/vector-operations-and-math/sin-cos',
-            tags: ['shaders-from-scratch', 'shaders', 'min', 'fract'],
+            tags: ['shaders-from-scratch', 'shaders', 'sin', 'cos'],
+        },
+        {
+            title: 'GLSL Shaders From Scratch - Vector Operations & Math - Shaping Functions',
+            path: 'glsl-shaders-from-scratch/vector-operations-and-math/shaping-functions',
+            tags: ['shaders-from-scratch', 'shaders'],
         },
         /* Three.js Journey */
         {
