@@ -1,11 +1,20 @@
 import Rapier from '@dimforge/rapier3d-compat'
 import { OrbitControls } from '@react-three/drei'
 import { useThree, Vector3 as Vector3Tuple } from '@react-three/fiber'
-import { Physics, RapierRigidBody, RigidBody, RigidBodyProps, useRapier } from '@react-three/rapier'
+import {
+    Physics,
+    RapierRigidBody,
+    RigidBody,
+    RigidBodyProps,
+    useAfterPhysicsStep,
+    useBeforePhysicsStep,
+    useRapier,
+} from '@react-three/rapier'
 import { useControls } from 'leva'
 import { useEffect, useRef, useState } from 'react'
 import { Mesh, Quaternion, Raycaster, Vector3 } from 'three'
 import { Canvas, usePageVisible } from '../../../common'
+import { Spring } from '../spring/spring'
 
 const LEVA_KEY = 'rapier-pointer-constraint'
 
@@ -17,8 +26,16 @@ type PointerConstraintControlsProps = {
     target: Vector3Tuple
 }
 
-const PointerConstraintControls = ({ target }: PointerConstraintControlsProps) => {
-    const { pointerRigidBodyVisible, movementPlaneVisible } = useControls(`${LEVA_KEY}-movement-plane`, {
+const SPHERICAL_CONSTRAINT = 'spherical constraint'
+const SPRING = 'spring'
+
+const PointerControls = ({ target }: PointerConstraintControlsProps) => {
+    const { type, pointerRigidBodyVisible, movementPlaneVisible } = useControls(LEVA_KEY, {
+        type: {
+            label: 'Type',
+            value: SPHERICAL_CONSTRAINT,
+            options: [SPHERICAL_CONSTRAINT, SPRING],
+        },
         pointerRigidBodyVisible: {
             label: 'Show Pointer Rigid Body',
             value: true,
@@ -38,6 +55,7 @@ const PointerConstraintControls = ({ target }: PointerConstraintControlsProps) =
     const movementPlane = useRef<Mesh>(null!)
 
     const joint = useRef<Rapier.ImpulseJoint | null>(null)
+    const spring = useRef<Spring | null>(null)
 
     const [rayDirection] = useState(() => new Vector3())
     const [raycaster] = useState(() => new Raycaster())
@@ -58,21 +76,16 @@ const PointerConstraintControls = ({ target }: PointerConstraintControlsProps) =
         const { domElement } = gl
 
         const onPointerDown = () => {
-            if (joint.current) {
+            if (joint.current || spring.current) {
                 onPointerUp()
             }
 
-            rayDirection.set(mouse.x, mouse.y, 0.5).unproject(camera).sub(camera.position).normalize()
+            rayDirection.set(mouse.x, mouse.y, 1).unproject(camera).sub(camera.position).normalize()
 
-            const rayColliderIntersection = world.castRay(new Rapier.Ray(camera.position, rayDirection), 100, false)
+            const rayColliderIntersection = world.castRay(new Rapier.Ray(camera.position, rayDirection), 100, true)
 
             const rigidBody = rayColliderIntersection?.collider.parent()
-            if (!rigidBody) return
-
-            const draggable = (rigidBody.userData as DraggableUserData | undefined)?.draggable
-            if (!draggable) return
-
-            setDragging(true)
+            if (!rigidBody || !(rigidBody.userData as DraggableUserData | undefined)?.draggable) return
 
             const rayHitPosition = new Vector3()
                 .copy(camera.position)
@@ -81,19 +94,31 @@ const PointerConstraintControls = ({ target }: PointerConstraintControlsProps) =
             movementPlane.current.position.copy(rayHitPosition)
             movementPlane.current.quaternion.copy(camera.quaternion)
             movementPlane.current.updateMatrixWorld()
-            updatePointerRigidBody()
 
-            const rigidBodyAnchor = new Vector3()
-                .copy(pointerRigidBody.current.translation() as Vector3)
+            pointerRigidBody.current.setTranslation(rayHitPosition, true)
+
+            const rayHitPositionBodyLocalFrame = new Vector3()
+                .copy(rayHitPosition)
                 .sub(rigidBody.translation() as Vector3)
                 .applyQuaternion(new Quaternion().copy(rigidBody.rotation() as Quaternion).conjugate())
 
-            joint.current = world.createImpulseJoint(
-                Rapier.JointData.spherical(new Rapier.Vector3(0, 0, 0), rigidBodyAnchor),
-                pointerRigidBody.current,
-                rigidBody,
-                true,
-            )
+            if (type === SPRING) {
+                spring.current = new Spring(pointerRigidBody.current, rigidBody, {
+                    damping: 10,
+                    stiffness: 50,
+                    restLength: 0,
+                    localAnchorB: rayHitPositionBodyLocalFrame,
+                })
+            } else {
+                joint.current = world.createImpulseJoint(
+                    Rapier.JointData.spherical(new Rapier.Vector3(0, 0, 0), rayHitPositionBodyLocalFrame),
+                    pointerRigidBody.current,
+                    rigidBody,
+                    true,
+                )
+            }
+
+            setDragging(true)
         }
 
         const onPointerUp = () => {
@@ -102,11 +127,15 @@ const PointerConstraintControls = ({ target }: PointerConstraintControlsProps) =
                 joint.current = null
             }
 
+            if (spring.current) {
+                spring.current = null
+            }
+
             setDragging(false)
         }
 
         const onPointerMove = () => {
-            if (!joint.current) return
+            if (!joint.current && !spring.current) return
             updatePointerRigidBody()
         }
 
@@ -119,7 +148,17 @@ const PointerConstraintControls = ({ target }: PointerConstraintControlsProps) =
             domElement.removeEventListener('pointerup', onPointerUp)
             domElement.removeEventListener('pointermove', onPointerMove)
         }
-    }, [camera, mouse, gl])
+    }, [type, camera, mouse, gl])
+
+    useBeforePhysicsStep(() => {
+        if (!spring.current) return
+        spring.current.preStep()
+    })
+
+    useAfterPhysicsStep(() => {
+        if (!spring.current) return
+        spring.current.postStep()
+    })
 
     return (
         <>
@@ -145,7 +184,12 @@ const Cube = (props: RigidBodyProps) => {
         <RigidBody {...props} colliders="cuboid" type="dynamic" userData={{ draggable: true } as DraggableUserData}>
             <mesh castShadow receiveShadow>
                 <boxGeometry args={[1.2, 1.2, 1.2]} />
-                <meshStandardMaterial color="orange" />
+                <meshStandardMaterial color="aquamarine" attach="material-0" />
+                <meshStandardMaterial color="yellow" attach="material-1" />
+                <meshStandardMaterial color="hotpink" attach="material-2" />
+                <meshStandardMaterial color="skyblue" attach="material-3" />
+                <meshStandardMaterial color="orange" attach="material-4" />
+                <meshStandardMaterial color="indianred" attach="material-5" />
             </mesh>
         </RigidBody>
     )
@@ -171,13 +215,13 @@ export default () => {
         <>
             <Canvas camera={{ position: [4, 4, 4] }} shadows>
                 <Physics paused={!visible} debug={debug}>
-                    <PointerConstraintControls target={[0, 1, 0]} />
+                    <PointerControls target={[0, 1, 0]} />
 
                     <Cube position={[0, 5, 0]} />
                     <Floor />
 
                     <ambientLight intensity={1.5} />
-                    <pointLight position={[-10, 5, 10]} intensity={300}/>
+                    <pointLight position={[-10, 5, 10]} intensity={100} />
                 </Physics>
             </Canvas>
         </>

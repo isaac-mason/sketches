@@ -1,40 +1,15 @@
 import { RigidBody } from '@dimforge/rapier3d-compat'
-import { Object3D, Quaternion, Vector3 } from 'three'
+import { Quaternion, Vector3 } from 'three'
 import { pointToWorldFrame } from '../raycast-vehicle/lib/utils'
-
-const multiplyQuaternionByVector = (q: Quaternion, v: Vector3, target = new Vector3()): Vector3 => {
-    const x = v.x
-    const y = v.y
-    const z = v.z
-    const qx = q.x
-    const qy = q.y
-    const qz = q.z
-    const qw = q.w
-
-    // q*v
-    const ix = qw * x + qy * z - qz * y
-
-    const iy = qw * y + qz * x - qx * z
-    const iz = qw * z + qx * y - qy * x
-    const iw = -qx * x - qy * y - qz * z
-
-    target.x = ix * qw + iw * -qx + iy * -qz - iz * -qy
-    target.y = iy * qw + iw * -qy + iz * -qx - ix * -qz
-    target.z = iz * qw + iw * -qz + ix * -qy - iy * -qx
-
-    return target
-}
 
 const vectorToLocalFrame_quaternion = new Quaternion()
 
-const vectorToLocalFrame = (object: RigidBody | Object3D, worldVector: Vector3, target = new Vector3()): Vector3 => {
-    const quaternion = vectorToLocalFrame_quaternion.copy(
-        object instanceof Object3D ? object.quaternion : (object.rotation() as Quaternion),
-    )
+const vectorToLocalFrame = (object: RigidBody, worldVector: Vector3, target = new Vector3()): Vector3 => {
+    const quaternion = vectorToLocalFrame_quaternion.copy(object.rotation() as Quaternion)
 
     quaternion.conjugate()
 
-    return multiplyQuaternionByVector(quaternion, worldVector, target)
+    return target.copy(worldVector).applyQuaternion(quaternion)
 }
 
 /**
@@ -259,16 +234,23 @@ export class Spring {
         bodyATorque.sub(ri_x_f)
         bodyBTorque.add(rj_x_f)
 
-        // // Apply force and torque to bodies
-        // bodyA.addForce(bodyAForce, true)
-        // bodyA.addTorque(bodyATorque, true)
-        // bodyB.addForce(bodyBForce, true)
-        // bodyB.addTorque(bodyBTorque, true)
+        // Apply force and torque to bodies
+        bodyA.addForce(bodyAForce, true)
+        bodyA.addTorque(bodyATorque, true)
+        bodyB.addForce(bodyBForce, true)
+        bodyB.addTorque(bodyBTorque, true)
+    }
 
-        bodyA.applyImpulse(bodyAForce, true)
-        bodyA.applyTorqueImpulse(bodyATorque, true)
-        bodyB.applyImpulse(bodyBForce, true)
-        bodyB.applyTorqueImpulse(bodyBTorque, true)
+    preStep(): void {
+        this.applyForce()
+    }
+
+    postStep(): void {
+        this.bodyA.resetForces(true)
+        this.bodyA.resetTorques(true)
+
+        this.bodyB.resetForces(true)
+        this.bodyB.resetTorques(true)
     }
 }
 

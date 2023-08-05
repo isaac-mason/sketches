@@ -20,8 +20,8 @@ const sketchList = [
         tags: ['physics', 'rapier'],
     },
     {
-        title: 'Rapier - Pointer Constraint',
-        path: 'rapier/pointer-constraint',
+        title: 'Rapier - Pointer Controls',
+        path: 'rapier/pointer-controls',
         tags: ['physics', 'rapier'],
     },
     {
