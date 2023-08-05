@@ -1,4 +1,4 @@
-import { Bounds, Float, MeshPortalMaterial, OrbitControls, Text } from '@react-three/drei'
+import { Bounds, Edges, Float, MeshPortalMaterial, OrbitControls, Text } from '@react-three/drei'
 import { ThreeElements } from '@react-three/fiber'
 import { Canvas } from '../../../common'
 
@@ -23,62 +23,58 @@ const Scene = () => (
     </>
 )
 
-const AmbientLight = (props: ThreeElements['group']) => (
+const Portal = ({ children, ...props }: ThreeElements['group']) => (
     <group {...props}>
         <mesh position-z={-0.01}>
             <planeGeometry args={[4, 4]} />
-            <MeshPortalMaterial worldUnits={true}>
-                <Scene />
-                <ambientLight color={0xff9999} intensity={1.5} />
+            <Edges color="white" />
+            <MeshPortalMaterial>
+                {children}
             </MeshPortalMaterial>
         </mesh>
+    </group>
+)
+
+const AmbientLight = (props: ThreeElements['group']) => (
+    <group {...props}>
+        <Portal>
+            <Scene />
+            <ambientLight color={0xff9999} intensity={1.5} />
+        </Portal>
         <Label>ambient light</Label>
     </group>
 )
 
 const DirectionalLight = (props: ThreeElements['group']) => (
     <group {...props}>
-        <mesh position-z={-0.01}>
-            <planeGeometry args={[4, 4]} />
-            <MeshPortalMaterial>
-                <Scene />
-                <ambientLight intensity={0.2} />
-                <directionalLight position={[-3, 1, 2]} intensity={0.5} color={0xff9999} />
-            </MeshPortalMaterial>
-        </mesh>
+        <Portal>
+            <Scene />
+            <ambientLight intensity={0.2} />
+            <directionalLight position={[-3, 1, 2]} intensity={0.5} color={0xff9999} />
+        </Portal>
         <Label>directional light</Label>
     </group>
 )
 
 const HemisphereLight = (props: ThreeElements['group']) => (
     <group {...props}>
-        <mesh position-z={-0.01}>
-            <planeGeometry args={[4, 4]} />
-            <MeshPortalMaterial>
-                <Scene />
-                <hemisphereLight intensity={1.5} color={0xff9999} />
-            </MeshPortalMaterial>
-        </mesh>
+        <Portal>
+            <Scene />
+            <ambientLight intensity={0.2} />
+            <hemisphereLight intensity={1.5} color={0xff9999} />
+        </Portal>
         <Label>hemisphere light</Label>
     </group>
 )
 
-const App = () => {
-    return (
-        <>
-            <Bounds fit observe margin={1}>
-                <AmbientLight position-x={0} />
-                <DirectionalLight position-x={-4} />
-                <HemisphereLight position-x={4} />
-            </Bounds>
-        </>
-    )
-}
-
 export default () => (
     <>
         <Canvas camera={{ position: [0, 2, 10], fov: 50 }}>
-            <App />
+            <Bounds fit observe margin={1}>
+                <AmbientLight position-x={0} />
+                <DirectionalLight position-x={-4.5} />
+                <HemisphereLight position-x={4.5} />
+            </Bounds>
             <OrbitControls />
         </Canvas>
     </>
