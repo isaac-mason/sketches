@@ -338,8 +338,8 @@ export default () => (
                 </Text>
             </Billboard>
 
-            <ambientLight intensity={0.5} />
-            <directionalLight position={[10, 40, 10]} intensity={0.5} />
+            <ambientLight intensity={1.5} />
+            <directionalLight position={[10, 40, 10]} intensity={1.5} />
         </Canvas>
     </KeyboardControls>
 )

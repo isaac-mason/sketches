@@ -52,9 +52,9 @@ const App = () => {
                 <CulledMeshes />
             </Bounds>
 
-            <ambientLight intensity={0.2} />
-            <pointLight intensity={0.5} position={[20, 20, 20]} />
-            <pointLight intensity={0.5} position={[-20, 20, -20]} />
+            <ambientLight intensity={0.6} />
+            <pointLight decay={1.5} intensity={200} position={[20, 20, 20]} />
+            <pointLight decay={1.5} intensity={200} position={[-20, 20, -20]} />
         </>
     )
 }

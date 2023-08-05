@@ -105,7 +105,8 @@ const House = (props: JSX.IntrinsicElements['group']) => {
                     ref={lightRef}
                     position={[0, 2, 2.3]}
                     color={0xff7d67}
-                    intensity={1}
+                    intensity={2}
+                    decay={0.5}
                     distance={12}
                     castShadow
                     shadow-mapSize-width={256}
@@ -149,13 +150,12 @@ const Ghost = (props: { color: string; offset: number }) => {
 
     useFrame(({ clock: { elapsedTime } }) => {
         const ghostAngle = elapsedTime * 0.5
+
         pointLightRef.current.position.x = Math.cos(ghostAngle + props.offset) * (7 + Math.sin(elapsedTime * 2) * 2)
-
         pointLightRef.current.position.z = Math.sin(ghostAngle + props.offset) * (7 + Math.sin(elapsedTime * 2) * 2)
-
         pointLightRef.current.position.y = Math.sin(ghostAngle * 2) + 1
 
-        pointLightRef.current.intensity = (Math.sin(ghostAngle) + 1) * 1.2
+        pointLightRef.current.intensity = (Math.sin(ghostAngle) + 1) * 2
     })
 
     return (
@@ -245,7 +245,7 @@ const App = () => {
             <color attach="background" args={[BACKGROUND_COLOR]} />
             <fog attach="fog" args={[BACKGROUND_COLOR, 12, 24]} />
 
-            <ambientLight color={0xb5b5ff} intensity={0.2} />
+            <ambientLight color={0xb5b5ff} intensity={0.6} />
 
             <Grass />
             <House />

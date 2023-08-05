@@ -158,9 +158,9 @@ export default () => {
                 <PerspectiveCamera makeDefault position={[-5, 0, 10]} fov={60} />
                 <OrbitControls autoRotate autoRotateSpeed={-0.5} />
 
-                <ambientLight intensity={0.5} />
-                <pointLight position={[10, 10, 10]} intensity={0.5} />
-                <pointLight position={[-10, 10, -10]} intensity={0.5} />
+                <ambientLight intensity={2} />
+                <pointLight position={[10, 10, 10]} intensity={250} />
+                <pointLight position={[-10, 10, -10]} intensity={250} />
 
                 <Physics gravity={[0, 0, 0]} debug={debug}>
                     <Scene />

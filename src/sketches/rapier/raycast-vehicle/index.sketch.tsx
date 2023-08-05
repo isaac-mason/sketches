@@ -235,8 +235,8 @@ const Game = () => {
                 <meshStandardMaterial color="#222" depthWrite={false} />
             </mesh>
 
-            <hemisphereLight intensity={0.25} />
-            <ambientLight intensity={0.1} />
+            <hemisphereLight intensity={0.75} />
+            <ambientLight intensity={0.3} />
             <Environment preset="night" />
 
             <Stars />

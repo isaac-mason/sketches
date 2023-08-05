@@ -1,5 +1,4 @@
 import { CameraShake } from '@react-three/drei'
-import { useEffect, useRef } from 'react'
 import { PCFSoftShadowMap } from 'three'
 import { Canvas } from '../../../common'
 
@@ -17,33 +16,24 @@ const Ground = () => (
     </mesh>
 )
 
-const Lights = () => {
-    const directionalLight = useRef<THREE.DirectionalLight>(null!)
-
-    useEffect(() => {
-        directionalLight.current.lookAt(0, 0, 0)
-    }, [])
-
-    return (
-        <>
-            <ambientLight intensity={0.5} />
-            <directionalLight
-                ref={directionalLight}
-                intensity={1}
-                position={[3, 2, 3]}
-                castShadow
-                shadow-camera-near={2}
-                shadow-camera-far={10}
-                shadow-camera-top={8}
-                shadow-camera-right={8}
-                shadow-camera-bottom={-8}
-                shadow-camera-left={-8}
-                shadow-mapSize-height={2048}
-                shadow-mapSize-width={2048}
-            />
-        </>
-    )
-}
+const Lights = () => (
+    <>
+        <ambientLight intensity={0.5} />
+        <directionalLight
+            intensity={1}
+            position={[3, 2, 3]}
+            castShadow
+            shadow-camera-near={2}
+            shadow-camera-far={10}
+            shadow-camera-top={8}
+            shadow-camera-right={8}
+            shadow-camera-bottom={-8}
+            shadow-camera-left={-8}
+            shadow-mapSize-height={2048}
+            shadow-mapSize-width={2048}
+        />
+    </>
+)
 
 const App = () => {
     return (

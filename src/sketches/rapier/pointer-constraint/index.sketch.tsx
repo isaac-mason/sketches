@@ -176,8 +176,8 @@ export default () => {
                     <Cube position={[0, 5, 0]} />
                     <Floor />
 
-                    <ambientLight intensity={0.5} />
-                    <pointLight position={[-10, 5, 10]} />
+                    <ambientLight intensity={1.5} />
+                    <pointLight position={[-10, 5, 10]} intensity={300}/>
                 </Physics>
             </Canvas>
         </>

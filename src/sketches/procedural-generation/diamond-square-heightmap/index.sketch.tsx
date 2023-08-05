@@ -223,10 +223,10 @@ export default () => {
                     <Terrain size={size} range={range} wireframe={wireframe} vertexNormalsHelper={vertexNormalsHelper} />
                 </Bounds>
 
-                <ambientLight intensity={0.3} />
+                <ambientLight intensity={0.7} />
 
                 <Helper helper={PointLightHelper} args={[10]}>
-                    <pointLight position={pointLightPosition} intensity={0.5} />
+                    <directionalLight position={pointLightPosition} intensity={1.5} />
                 </Helper>
 
                 <OrbitControls makeDefault />

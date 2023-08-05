@@ -203,8 +203,8 @@ export default () => (
             <Balls />
             <Container />
 
-            <ambientLight />
-            <pointLight intensity={0.5} position={[10, 10, 10]} />
+            <ambientLight intensity={3} />
+            <pointLight decay={1.5} intensity={100} position={[15, 15, 15]} />
 
             <Bounds fit clip observe margin={3}>
                 <mesh>

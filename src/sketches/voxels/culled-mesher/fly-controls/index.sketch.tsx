@@ -115,9 +115,9 @@ const App = () => {
                 <Player />
             </VoxelEngineProvider>
 
-            <ambientLight intensity={0.2} />
-            <pointLight intensity={0.5} position={[20, 20, 20]} />
-            <pointLight intensity={0.5} position={[-20, 20, -20]} />
+            <ambientLight intensity={0.6} />
+            <pointLight decay={0.5} intensity={10} position={[20, 20, 20]} />
+            <pointLight decay={0.5} intensity={10} position={[-20, 20, -20]} />
         </>
     )
 }

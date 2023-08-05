@@ -121,8 +121,8 @@ const Scene = () => (
         <Balls />
         <Container />
 
-        <ambientLight intensity={0.5} />
-        <pointLight position={[10, 10, 10]} intensity={0.5} />
+        <ambientLight intensity={1.5} />
+        <pointLight position={[10, 10, 10]} decay={1.5} intensity={150} />
 
         <OrbitControls makeDefault target={[0, -25, 0]} minPolarAngle={0} maxPolarAngle={Math.PI / 16} />
     </>

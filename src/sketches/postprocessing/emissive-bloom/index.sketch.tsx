@@ -21,8 +21,8 @@ const App = () => {
                 <sphereGeometry args={[1]} />
             </mesh>
 
-            <ambientLight intensity={0.2} />
-            <directionalLight intensity={0.8} position={[5, 5, 0]} />
+            <ambientLight intensity={0.7} />
+            <directionalLight intensity={2.5} position={[5, 5, 0]} />
         </>
     )
 }

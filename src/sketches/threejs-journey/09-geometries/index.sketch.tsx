@@ -16,49 +16,41 @@ const Item = ({ children }: { children: JSX.Element }) => (
     </Box>
 )
 
-const App = () => {
-    const directionalLight = useRef<THREE.DirectionalLight>(null!)
-
-    useEffect(() => {
-        directionalLight.current.lookAt(0, 0, 0)
-    }, [])
-
-    return (
-        <>
-            <directionalLight ref={directionalLight} intensity={0.5} position={[-3, 0, 5]} />
-            <ambientLight intensity={0.5} />
-            <Flex width={6} height={6} centerAnchor flexDirection="row" flexWrap="wrap">
-                <Item>
-                    <sphereGeometry args={[0.6]} />
-                </Item>
-                <Item>
-                    <boxGeometry args={[1, 1, 1]} />
-                </Item>
-                <Item>
-                    <coneGeometry args={[0.7, 1, 5, 5]} />
-                </Item>
-                <Item>
-                    <torusKnotGeometry args={[0.4, 0.1]} />
-                </Item>
-                <Item>
-                    <ringGeometry args={[0.3, 0.7]} />
-                </Item>
-                <Item>
-                    <dodecahedronGeometry args={[0.7]} />
-                </Item>
-                <Item>
-                    <octahedronGeometry args={[0.7]} />
-                </Item>
-                <Item>
-                    <tetrahedronGeometry args={[0.7]} />
-                </Item>
-                <Item>
-                    <icosahedronGeometry args={[0.7]} />
-                </Item>
-            </Flex>
-        </>
-    )
-}
+const App = () => (
+    <>
+        <directionalLight intensity={1.5} position={[-3, 0, 5]} />
+        <ambientLight intensity={1.5} />
+        <Flex width={6} height={6} centerAnchor flexDirection="row" flexWrap="wrap">
+            <Item>
+                <sphereGeometry args={[0.6]} />
+            </Item>
+            <Item>
+                <boxGeometry args={[1, 1, 1]} />
+            </Item>
+            <Item>
+                <coneGeometry args={[0.7, 1, 5, 5]} />
+            </Item>
+            <Item>
+                <torusKnotGeometry args={[0.4, 0.1]} />
+            </Item>
+            <Item>
+                <ringGeometry args={[0.3, 0.7]} />
+            </Item>
+            <Item>
+                <dodecahedronGeometry args={[0.7]} />
+            </Item>
+            <Item>
+                <octahedronGeometry args={[0.7]} />
+            </Item>
+            <Item>
+                <tetrahedronGeometry args={[0.7]} />
+            </Item>
+            <Item>
+                <icosahedronGeometry args={[0.7]} />
+            </Item>
+        </Flex>
+    </>
+)
 
 export default () => (
     <>

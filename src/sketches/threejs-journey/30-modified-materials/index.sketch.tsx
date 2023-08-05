@@ -137,10 +137,10 @@ const App = () => {
 
             <Wall rotation-y={Math.PI / 2} position={[-6, -1.2, -3]} />
 
-            <ambientLight intensity={0.1} />
+            <ambientLight intensity={0.3} />
             <directionalLight
                 ref={directionalLight}
-                intensity={1}
+                intensity={3}
                 position={[5, 1, 2]}
                 shadow-normalBias={0.05}
                 shadow-camera-far={15}

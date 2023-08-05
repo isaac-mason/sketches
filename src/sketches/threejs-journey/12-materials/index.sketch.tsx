@@ -113,20 +113,12 @@ const Door = (props: { position: Vector3 }) => {
     )
 }
 
-const Lights = () => {
-    const directionalLight = useRef<THREE.DirectionalLight>(null!)
-
-    useEffect(() => {
-        directionalLight.current.lookAt(0, 0, 0)
-    }, [])
-
-    return (
-        <>
-            <directionalLight ref={directionalLight} intensity={0.3} position={[-3, 0, 5]} />
-            <ambientLight intensity={0.5} />
-        </>
-    )
-}
+const Lights = () => (
+    <>
+        <directionalLight intensity={1} position={[-3, 0, 5]} />
+        <ambientLight intensity={1.5} />
+    </>
+)
 
 export default () => {
     const cubeTexture = useCubeTexture(

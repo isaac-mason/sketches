@@ -54,11 +54,11 @@ const Lights = () => {
 
     return (
         <>
-            <ambientLight intensity={0.1} />
+            <ambientLight intensity={0.3} />
             <directionalLight
                 ref={directionalLight}
                 castShadow
-                intensity={0.3}
+                intensity={1}
                 color={0xffffff}
                 position={[0, 3, 1]}
                 shadow-camera-top={4}
@@ -70,7 +70,7 @@ const Lights = () => {
             />
             <spotLight
                 ref={spotLight}
-                args={[0xffffff, 0.3, 10, Math.PI * 0.3]}
+                args={[0xffffff, 1, 10, Math.PI * 0.3]}
                 castShadow
                 position={[-3, 4, 2]}
                 shadow-camera-near={2}
@@ -84,7 +84,7 @@ const Lights = () => {
             />
             <pointLight
                 ref={pointLight}
-                args={[0xffffff, 0.3, 10, Math.PI * 0.3]}
+                args={[0xffffff, 5, 10, Math.PI * 0.3]}
                 castShadow
                 position={[3, 4, 2]}
                 shadow-camera-top={8}

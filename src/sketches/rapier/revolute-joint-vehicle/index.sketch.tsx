@@ -304,9 +304,10 @@ const Scene = () => {
             <gridHelper args={[150, 15]} position-y={-0.99} />
 
             {/* lights */}
-            <ambientLight intensity={0.8} />
+            <ambientLight intensity={2.5} />
             <pointLight
-                intensity={0.5}
+                intensity={500}
+                decay={1.5}
                 position={[-10, 30, 20]}
                 castShadow
                 shadow-camera-top={8}

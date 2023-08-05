@@ -101,8 +101,8 @@ const App = () => {
                 <planeGeometry args={[15, 15]} />
             </mesh>
 
-            <ambientLight intensity={1} />
-            <pointLight castShadow position={[5, 10, 2]} intensity={1} />
+            <ambientLight intensity={3} />
+            <pointLight castShadow position={[5, 10, 2]} decay={0.5} intensity={8} />
 
             <OrbitControls makeDefault />
         </>

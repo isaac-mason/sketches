@@ -1,12 +1,9 @@
-import { Float, OrbitControls, Text } from '@react-three/drei'
-import { Box, Flex } from '@react-three/flex'
-import { useEffect, useRef } from 'react'
-import { Canvas, MagicMirror } from '../../../common'
-
-const MIRROR_SIZE = [3, 3] as [number, number]
+import { Bounds, Float, MeshPortalMaterial, OrbitControls, Text } from '@react-three/drei'
+import { ThreeElements } from '@react-three/fiber'
+import { Canvas } from '../../../common'
 
 const Label = ({ children }: { children: string }) => (
-    <Text color="white" position={[0, -2, 0]} fontSize={0.2}>
+    <Text color="white" position={[0, -2.6, 0]} fontSize={0.4}>
         {children}
     </Text>
 )
@@ -26,78 +23,61 @@ const Scene = () => (
     </>
 )
 
-const AmbientLight = () => {
-    return (
-        <group>
-            <MagicMirror fov={50} size={MIRROR_SIZE}>
+const AmbientLight = (props: ThreeElements['group']) => (
+    <group {...props}>
+        <mesh position-z={-0.01}>
+            <planeGeometry args={[4, 4]} />
+            <MeshPortalMaterial worldUnits={true}>
                 <Scene />
-                <ambientLight color={0xff9999} intensity={0.5} />
-            </MagicMirror>
-            <Label>ambient light</Label>
-        </group>
-    )
-}
+                <ambientLight color={0xff9999} intensity={1.5} />
+            </MeshPortalMaterial>
+        </mesh>
+        <Label>ambient light</Label>
+    </group>
+)
 
-const DirectionalLight = () => {
-    const directionalLight = useRef<THREE.DirectionalLight>(null!)
-
-    useEffect(() => {
-        directionalLight.current.lookAt(0, 0, 0)
-    }, [])
-
-    return (
-        <group>
-            <MagicMirror fov={50} size={MIRROR_SIZE}>
+const DirectionalLight = (props: ThreeElements['group']) => (
+    <group {...props}>
+        <mesh position-z={-0.01}>
+            <planeGeometry args={[4, 4]} />
+            <MeshPortalMaterial>
                 <Scene />
-                <ambientLight intensity={0.05} />
-                <directionalLight ref={directionalLight} position={[-3, 1, 2]} intensity={0.5} color={0xff9999} />
-            </MagicMirror>
-            <Label>directional light</Label>
-        </group>
-    )
-}
+                <ambientLight intensity={0.2} />
+                <directionalLight position={[-3, 1, 2]} intensity={0.5} color={0xff9999} />
+            </MeshPortalMaterial>
+        </mesh>
+        <Label>directional light</Label>
+    </group>
+)
 
-const HemisphereLight = () => {
-    return (
-        <group>
-            <MagicMirror fov={50} size={MIRROR_SIZE}>
+const HemisphereLight = (props: ThreeElements['group']) => (
+    <group {...props}>
+        <mesh position-z={-0.01}>
+            <planeGeometry args={[4, 4]} />
+            <MeshPortalMaterial>
                 <Scene />
-                <hemisphereLight intensity={0.5} color={0xff9999} />
-            </MagicMirror>
-            <Label>hemisphere light</Label>
-        </group>
-    )
-}
+                <hemisphereLight intensity={1.5} color={0xff9999} />
+            </MeshPortalMaterial>
+        </mesh>
+        <Label>hemisphere light</Label>
+    </group>
+)
 
 const App = () => {
     return (
         <>
-            <Flex
-                width={9}
-                height={5}
-                centerAnchor
-                flexDirection="row"
-                flexWrap="wrap"
-                justifyContent="center"
-                alignItems="center"
-            >
-                <Box centerAnchor>
-                    <AmbientLight />
-                </Box>
-                <Box centerAnchor>
-                    <DirectionalLight />
-                </Box>
-                <Box centerAnchor>
-                    <HemisphereLight />
-                </Box>
-            </Flex>
+            <Bounds fit observe margin={1}>
+                <AmbientLight position-x={0} />
+                <DirectionalLight position-x={-4} />
+                <HemisphereLight position-x={4} />
+            </Bounds>
         </>
     )
 }
 
 export default () => (
     <>
-        <Canvas camera={{ position: [0, 0, 10], fov: 50 }}>
+        <Canvas camera={{ position: [0, 2, 10], fov: 50 }}>
             <App />
             <OrbitControls />
         </Canvas>

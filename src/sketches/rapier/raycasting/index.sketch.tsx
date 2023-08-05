@@ -69,7 +69,7 @@ const Scene = () => {
                     <cylinderGeometry args={[0.15, 0.15, 0.2, 32]} />
                     <meshStandardMaterial color="#aaa" />
                 </mesh>
-                <pointLight intensity={1} />
+                <pointLight intensity={15} />
             </group>
 
             <Line
@@ -135,7 +135,7 @@ export default () => {
                 <PerspectiveCamera makeDefault position={[-5, 0, 10]} fov={60} />
                 <OrbitControls />
 
-                <ambientLight intensity={0.5} />
+                <ambientLight intensity={1.5} />
 
                 <Physics gravity={[0, 0, 0]} debug={debug}>
                     <Scene />

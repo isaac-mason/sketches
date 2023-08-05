@@ -27,7 +27,7 @@ export const LampPost = (props: JSX.IntrinsicElements['group']) => {
             </mesh>
 
             <primitive object={target} />
-            <spotLight position={[-0.6, 10, 0]} target={target} intensity={1} angle={1} penumbra={1} castShadow />
+            <spotLight position={[-0.6, 10, 0]} target={target} intensity={150} decay={1.5} angle={1} penumbra={1} castShadow />
         </group>
     )
 }
