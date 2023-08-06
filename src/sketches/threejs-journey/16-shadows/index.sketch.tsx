@@ -70,7 +70,11 @@ const Lights = () => {
             />
             <spotLight
                 ref={spotLight}
-                args={[0xffffff, 1, 10, Math.PI * 0.3]}
+                color={0xffffff}
+                intensity={3}
+                distance={10}
+                angle={Math.PI * 0.3}
+                decay={1}
                 castShadow
                 position={[-3, 4, 2]}
                 shadow-camera-near={2}
@@ -84,7 +88,10 @@ const Lights = () => {
             />
             <pointLight
                 ref={pointLight}
-                args={[0xffffff, 5, 10, Math.PI * 0.3]}
+                color={0xffffff}
+                intensity={5}
+                distance={10}
+                decay={1}
                 castShadow
                 position={[3, 4, 2]}
                 shadow-camera-top={8}
