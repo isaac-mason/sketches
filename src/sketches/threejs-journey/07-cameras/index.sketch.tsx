@@ -18,9 +18,9 @@ const Ground = () => (
 
 const Lights = () => (
     <>
-        <ambientLight intensity={0.5} />
+        <ambientLight intensity={1} />
         <directionalLight
-            intensity={1}
+            intensity={3}
             position={[3, 2, 3]}
             castShadow
             shadow-camera-near={2}
