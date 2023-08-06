@@ -28,19 +28,27 @@ const Player = () => {
 
     const [, getControls] = useKeyboardControls()
 
-    const { width, height, initialPosition } = useControls('voxel-fps-controls-controller', {
+    const { width, height } = useControls('voxel-box-character-controller', {
         width: 0.8,
         height: 2,
-        initialPosition: { x: 0, y: 1, z: 0 },
+        cameraMode: {
+            value: 'first-person',
+            options: ['first-person', 'third-person'],
+            onChange: (v) => {
+                ecs.world.find([BoxCharacterControllerComponent]).forEach((e) => {
+                    e.get(BoxCharacterControllerComponent).cameraMode = v
+                })
+            },
+        },
     })
 
     const options = useMemo(
         () => ({
             width,
             height,
-            initialPosition: new Vector3().copy(initialPosition as Vector3),
+            initialPosition: new Vector3(0, 1, 0),
         }),
-        [],
+        [width, height],
     )
 
     const input = useMemo(
@@ -69,18 +77,6 @@ const Player = () => {
         input.right = right
         input.jump = jump
     })
-
-    useControls('voxels-fps-controls-camera', () => ({
-        cameraMode: {
-            value: 'first-person',
-            options: ['first-person', 'third-person'],
-            onChange: (v) => {
-                ecs.world.find([BoxCharacterControllerComponent]).forEach((e) => {
-                    e.get(BoxCharacterControllerComponent).cameraMode = v
-                })
-            },
-        },
-    }))
 
     useEffect(() => {
         const vec3 = new Vector3()
