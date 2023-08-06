@@ -2,13 +2,12 @@ import { Component, Entity, System } from 'arancini'
 import { BufferAttribute, BufferGeometry, Mesh, MeshStandardMaterial } from 'three'
 import {
     CHUNK_SIZE,
-    VoxelWorldEventsComponent,
     Vec3,
     VoxelChunkComponent,
     VoxelWorldComponent,
     VoxelWorldCoreSystem,
+    VoxelWorldEventsComponent,
     chunkId,
-    worldPositionToLocalChunkPosition,
 } from '../core'
 import { VoxelEnginePlugin } from '../voxel-engine-types'
 import VoxelChunkMesherWorker from './culled-mesher.worker.ts?worker'
@@ -20,6 +19,45 @@ import {
     WorkerMessage,
 } from './types'
 import { emptyChunkMeshData } from './utils'
+
+const voxelChunkShaderMaterial = new MeshStandardMaterial({
+    vertexColors: true,
+})
+
+voxelChunkShaderMaterial.onBeforeCompile = (shader) => {
+    shader.vertexShader = `
+        attribute float ambientOcclusion;
+        varying float vAmbientOcclusion;
+
+        ${shader.vertexShader}
+    `
+
+    shader.vertexShader = shader.vertexShader.replace(
+        '#include <uv_vertex>',
+        `
+        #include <uv_vertex>
+
+        vAmbientOcclusion = ambientOcclusion;
+        `,
+    )
+
+    shader.fragmentShader = `
+        varying float vAmbientOcclusion;
+
+        ${shader.fragmentShader}
+    `
+
+    shader.fragmentShader = shader.fragmentShader.replace(
+        '#include <dithering_fragment>',
+        `
+        #include <dithering_fragment>
+
+        float ambientOcclusion = 1.0 - (1.0 - vAmbientOcclusion) * 0.5;
+
+        gl_FragColor = vec4(gl_FragColor.rgb * ambientOcclusion, 1.0);
+    `,
+    )
+}
 
 export class VoxelChunkMeshComponent extends Component {
     voxelChunkMeshData: VoxelChunkMeshData = emptyChunkMeshData()
@@ -35,12 +73,11 @@ export class VoxelChunkMeshComponent extends Component {
         this.voxelChunkMeshData.indices.fill(0)
         this.voxelChunkMeshData.normals.fill(0)
         this.voxelChunkMeshData.positions.fill(0)
+        this.voxelChunkMeshData.ambientOcclusion.fill(0)
         this.voxelChunkMeshData.meta.fill(0)
 
         this.geometry = new BufferGeometry()
-        this.material = new MeshStandardMaterial({
-            vertexColors: true,
-        })
+        this.material = voxelChunkShaderMaterial
         this.mesh = new Mesh()
 
         this.mesh.geometry = this.geometry
@@ -118,30 +155,28 @@ export class VoxelChunkMesherSystem extends System {
             this.dirtyChunks.add(chunk.id)
 
             // check if we need to make neighbour chunks dirty
-            for (let axis = 0; axis < 3; axis++) {
-                for (const [pos, dir] of [
-                    [CHUNK_SIZE - 1, 1],
-                    [0, -1],
-                ]) {
-                    const chunkLocalPosition = worldPositionToLocalChunkPosition(position)
-                    if (chunkLocalPosition[axis] !== pos) continue
+            // we need to check diagonals as well for AO
+            for (let dx = -1; dx <= 1; dx++) {
+                for (let dy = -1; dy <= 1; dy++) {
+                    for (let dz = -1; dz <= 1; dz++) {
+                        if (dx === 0 && dy === 0 && dz === 0) {
+                            continue
+                        }
 
-                    const offset: Vec3 = [0, 0, 0]
-                    offset[axis] = dir
+                        const offset: Vec3 = [dx, dy, dz]
 
-                    const neighbourPosition: Vec3 = [position[0] + offset[0], position[1] + offset[1], position[2] + offset[2]]
-                    if (!this.voxelWorld.isSolid(neighbourPosition)) continue
+                        const neighbourChunkId = chunkId([
+                            chunk.position[0] + offset[0],
+                            chunk.position[1] + offset[1],
+                            chunk.position[2] + offset[2],
+                        ])
 
-                    const neighbourChunkId = chunkId([
-                        chunk.position[0] + offset[0],
-                        chunk.position[1] + offset[1],
-                        chunk.position[2] + offset[2],
-                    ])
+                        const neighbourEntity = this.voxelWorld.chunkEntities.get(neighbourChunkId)
 
-                    const neighbourEntity = this.voxelWorld.chunkEntities.get(neighbourChunkId)
-                    if (!neighbourEntity) continue
+                        if (!neighbourEntity) continue
 
-                    this.dirtyChunks.add(neighbourChunkId)
+                        this.dirtyChunks.add(neighbourChunkId)
+                    }
                 }
             }
         }
@@ -166,6 +201,7 @@ export class VoxelChunkMesherSystem extends System {
                 indices: voxelChunkMesh.voxelChunkMeshData.indicesBuffer,
                 normals: voxelChunkMesh.voxelChunkMeshData.normalsBuffer,
                 colors: voxelChunkMesh.voxelChunkMeshData.colorsBuffer,
+                ambientOcclusion: voxelChunkMesh.voxelChunkMeshData.ambientOcclusionBuffer,
                 meta: voxelChunkMesh.voxelChunkMeshData.metaBuffer,
             },
         }
@@ -214,13 +250,18 @@ export class VoxelChunkMesherSystem extends System {
             indices,
             normals,
             colors,
-            meta: [positionsCount, indicesCount, normalsCount, colorsCount],
+            ambientOcclusion,
+            meta: [positionsCount, indicesCount, normalsCount, colorsCount, ambientOcclusionCount],
         } = voxelChunkMesh.voxelChunkMeshData
 
         voxelChunkMesh.geometry.setIndex(new BufferAttribute(indices.slice(0, indicesCount), 1))
         voxelChunkMesh.geometry.setAttribute('position', new BufferAttribute(positions.slice(0, positionsCount), 3))
         voxelChunkMesh.geometry.setAttribute('normal', new BufferAttribute(normals.slice(0, normalsCount), 3))
         voxelChunkMesh.geometry.setAttribute('color', new BufferAttribute(colors.slice(0, colorsCount), 3))
+        voxelChunkMesh.geometry.setAttribute(
+            'ambientOcclusion',
+            new BufferAttribute(ambientOcclusion.slice(0, ambientOcclusionCount), 1),
+        )
 
         voxelChunkMesh.geometry.computeBoundingBox()
         voxelChunkMesh.geometry.computeBoundingSphere()

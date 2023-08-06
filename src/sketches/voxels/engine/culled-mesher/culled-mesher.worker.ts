@@ -1,7 +1,74 @@
-import { Color } from 'three'
-import { VoxelChunk, isSolid, positionToChunkIndex } from '../core'
+import { Color, Vector3 } from 'three'
+import { Vec3, VoxelChunk, isSolid, positionToChunkIndex } from '../core'
 import { CHUNK_SIZE } from '../core/utils'
 import { ChunkMeshUpdateMessage, RegisterChunkMessage, VoxelChunkMeshData, WorkerMessage } from './types'
+
+const vertexAmbientOcclusion = (side1: number, side2: number, corner: number) => {
+    if (side1 && side2) {
+        return 0
+    }
+
+    return (3 - (side1 + side2 + corner)) / 3
+}
+
+const voxelFaceAmbientOcclusionGrid = (
+    chunks: Map<string, VoxelChunk>,
+    pos: Vec3,
+    dir: (typeof VOXEL_FACE_DIRECTIONS)[number],
+): number[] => {
+    const u = new Vector3(dir.ux, dir.uy, dir.uz)
+    const v = new Vector3(dir.vx, dir.vy, dir.vz)
+    const normal = new Vector3(dir.nx, dir.ny, dir.nz)
+
+    const grid: number[] = []
+    const vec3 = new Vector3()
+
+    for (let q = -1; q < 2; q++) {
+        for (let p = -1; p < 2; p++) {
+            vec3.set(...pos)
+
+            vec3.x += normal.x
+            vec3.y += normal.y
+            vec3.z += normal.z
+
+            vec3.x += u.x * p
+            vec3.y += u.y * p
+            vec3.z += u.z * p
+
+            vec3.x += v.x * q
+            vec3.y += v.y * q
+            vec3.z += v.z * q
+
+            const solid = isSolid(vec3.toArray(), chunks)
+
+            grid.push(solid ? 1 : 0)
+        }
+    }
+
+    return grid
+}
+
+/**
+ * Calculates ambient occlusion for a voxel face quad
+ *
+ *  . --- . --- . --- .
+ *  |  6  |  7  |  8  |
+ *  . --- d --- c --- .
+ *  |  3  |  4  |  5  |
+ *  . --- a --- b --- .
+ *  |  0  |  1  |  2  |
+ *  . --- . --- . --- .
+ */
+const voxelFaceAmbientOcclusion = (chunks: Map<string, VoxelChunk>, pos: Vec3, dir: (typeof VOXEL_FACE_DIRECTIONS)[number]) => {
+    const grid = voxelFaceAmbientOcclusionGrid(chunks, pos, dir)
+
+    return [
+        vertexAmbientOcclusion(grid[3], grid[1], grid[0]),
+        vertexAmbientOcclusion(grid[1], grid[5], grid[2]),
+        vertexAmbientOcclusion(grid[5], grid[7], grid[8]),
+        vertexAmbientOcclusion(grid[3], grid[7], grid[6]),
+    ]
+}
 
 const VOXEL_FACE_DIRECTIONS: {
     // direction of the neighbour voxel
@@ -9,7 +76,7 @@ const VOXEL_FACE_DIRECTIONS: {
     dy: number
     dz: number
 
-    // local position offset of the neighbour face
+    // local position offset
     lx: number
     ly: number
     lz: number
@@ -27,6 +94,7 @@ const VOXEL_FACE_DIRECTIONS: {
     ny: number
     nz: number
 }[] = [
+    // top
     {
         dx: 0,
         dy: 1,
@@ -44,6 +112,7 @@ const VOXEL_FACE_DIRECTIONS: {
         ny: 1,
         nz: 0,
     },
+    // bottom
     {
         dx: 0,
         dy: -1,
@@ -61,6 +130,7 @@ const VOXEL_FACE_DIRECTIONS: {
         ny: -1,
         nz: 0,
     },
+    // left
     {
         dx: -1,
         dy: 0,
@@ -78,6 +148,7 @@ const VOXEL_FACE_DIRECTIONS: {
         ny: 0,
         nz: 0,
     },
+    // right
     {
         dx: 1,
         dy: 0,
@@ -95,6 +166,7 @@ const VOXEL_FACE_DIRECTIONS: {
         ny: 0,
         nz: 0,
     },
+    // front
     {
         dx: 0,
         dy: 0,
@@ -112,6 +184,7 @@ const VOXEL_FACE_DIRECTIONS: {
         ny: 0,
         nz: -1,
     },
+    // back
     {
         dx: 0,
         dy: 0,
@@ -149,8 +222,9 @@ class VoxelChunkMesher {
         let indicesCount = 0
         let normalsCount = 0
         let colorsCount = 0
+        let ambientOcclusionCount = 0
 
-        const { positions, indices, normals, colors, meta } = this.chunkMeshData
+        const { positions, indices, normals, colors, ambientOcclusion, meta } = this.chunkMeshData
 
         for (let localX = 0; localX < CHUNK_SIZE; localX++) {
             for (let localY = 0; localY < CHUNK_SIZE; localY++) {
@@ -166,7 +240,9 @@ class VoxelChunkMesher {
                     const col = this.chunk.color[chunkDataIndex]
                     this.tmpColor.set(col)
 
-                    for (const { dx, dy, dz, lx, ly, lz, ux, uy, uz, vx, vy, vz, nx, ny, nz } of VOXEL_FACE_DIRECTIONS) {
+                    for (const voxelFaceDirection of VOXEL_FACE_DIRECTIONS) {
+                        const { dx, dy, dz, lx, ly, lz, ux, uy, uz, vx, vy, vz, nx, ny, nz } = voxelFaceDirection
+
                         let solid: boolean
 
                         if (
@@ -185,28 +261,72 @@ class VoxelChunkMesher {
 
                         if (solid) continue
 
-                        const x = localX + lx
-                        const y = localY + ly
-                        const z = localZ + lz
+                        const voxelFaceLocalX = localX + lx
+                        const voxelFaceLocalY = localY + ly
+                        const voxelFaceLocalZ = localZ + lz
 
-                        positions[positionsCount++] = x
-                        positions[positionsCount++] = y
-                        positions[positionsCount++] = z
+                        positions[positionsCount++] = voxelFaceLocalX
+                        positions[positionsCount++] = voxelFaceLocalY
+                        positions[positionsCount++] = voxelFaceLocalZ
 
-                        positions[positionsCount++] = x + ux
-                        positions[positionsCount++] = y + uy
-                        positions[positionsCount++] = z + uz
+                        positions[positionsCount++] = voxelFaceLocalX + ux
+                        positions[positionsCount++] = voxelFaceLocalY + uy
+                        positions[positionsCount++] = voxelFaceLocalZ + uz
 
-                        positions[positionsCount++] = x + ux + vx
-                        positions[positionsCount++] = y + uy + vy
-                        positions[positionsCount++] = z + uz + vz
+                        positions[positionsCount++] = voxelFaceLocalX + ux + vx
+                        positions[positionsCount++] = voxelFaceLocalY + uy + vy
+                        positions[positionsCount++] = voxelFaceLocalZ + uz + vz
 
-                        positions[positionsCount++] = x + vx
-                        positions[positionsCount++] = y + vy
-                        positions[positionsCount++] = z + vz
+                        positions[positionsCount++] = voxelFaceLocalX + vx
+                        positions[positionsCount++] = voxelFaceLocalY + vy
+                        positions[positionsCount++] = voxelFaceLocalZ + vz
+
+                        normals[normalsCount++] = nx
+                        normals[normalsCount++] = ny
+                        normals[normalsCount++] = nz
+
+                        normals[normalsCount++] = nx
+                        normals[normalsCount++] = ny
+                        normals[normalsCount++] = nz
+
+                        normals[normalsCount++] = nx
+                        normals[normalsCount++] = ny
+                        normals[normalsCount++] = nz
+
+                        normals[normalsCount++] = nx
+                        normals[normalsCount++] = ny
+                        normals[normalsCount++] = nz
+
+                        colors[colorsCount++] = this.tmpColor.r
+                        colors[colorsCount++] = this.tmpColor.g
+                        colors[colorsCount++] = this.tmpColor.b
+
+                        colors[colorsCount++] = this.tmpColor.r
+                        colors[colorsCount++] = this.tmpColor.g
+                        colors[colorsCount++] = this.tmpColor.b
+
+                        colors[colorsCount++] = this.tmpColor.r
+                        colors[colorsCount++] = this.tmpColor.g
+                        colors[colorsCount++] = this.tmpColor.b
+
+                        colors[colorsCount++] = this.tmpColor.r
+                        colors[colorsCount++] = this.tmpColor.g
+                        colors[colorsCount++] = this.tmpColor.b
+
+                        const ao = voxelFaceAmbientOcclusion(state.chunks, [worldX, worldY, worldZ], voxelFaceDirection)
+                        const ao00 = ao[0]
+                        const ao01 = ao[1]
+                        const ao10 = ao[2]
+                        const ao11 = ao[3]
+
+                        ambientOcclusion[ambientOcclusionCount++] = ao00
+                        ambientOcclusion[ambientOcclusionCount++] = ao01
+                        ambientOcclusion[ambientOcclusionCount++] = ao10
+                        ambientOcclusion[ambientOcclusionCount++] = ao11
 
                         /*
                             make two triangles for the face
+
                             d --- c
                             |     |
                             a --- b
@@ -218,45 +338,28 @@ class VoxelChunkMesher {
                         const c = index + 2
                         const d = index + 3
 
-                        indices[indicesCount++] = a
-                        indices[indicesCount++] = b
-                        indices[indicesCount++] = d
+                        /**
+                         * @see https://0fps.net/2013/07/03/ambient-occlusion-for-minecraft-like-worlds/
+                         */
+                        if (ao00 + ao10 > ao11 + ao01) {
+                            // generate flipped quad
+                            indices[indicesCount++] = a
+                            indices[indicesCount++] = b
+                            indices[indicesCount++] = c
 
-                        indices[indicesCount++] = b
-                        indices[indicesCount++] = c
-                        indices[indicesCount++] = d
+                            indices[indicesCount++] = a
+                            indices[indicesCount++] = c
+                            indices[indicesCount++] = d
+                        } else {
+                            // generate normal quad
+                            indices[indicesCount++] = a
+                            indices[indicesCount++] = b
+                            indices[indicesCount++] = d
 
-                        normals[normalsCount++] = nx
-                        normals[normalsCount++] = ny
-                        normals[normalsCount++] = nz
-
-                        normals[normalsCount++] = nx
-                        normals[normalsCount++] = ny
-                        normals[normalsCount++] = nz
-
-                        normals[normalsCount++] = nx
-                        normals[normalsCount++] = ny
-                        normals[normalsCount++] = nz
-
-                        normals[normalsCount++] = nx
-                        normals[normalsCount++] = ny
-                        normals[normalsCount++] = nz
-
-                        colors[colorsCount++] = this.tmpColor.r
-                        colors[colorsCount++] = this.tmpColor.g
-                        colors[colorsCount++] = this.tmpColor.b
-
-                        colors[colorsCount++] = this.tmpColor.r
-                        colors[colorsCount++] = this.tmpColor.g
-                        colors[colorsCount++] = this.tmpColor.b
-
-                        colors[colorsCount++] = this.tmpColor.r
-                        colors[colorsCount++] = this.tmpColor.g
-                        colors[colorsCount++] = this.tmpColor.b
-
-                        colors[colorsCount++] = this.tmpColor.r
-                        colors[colorsCount++] = this.tmpColor.g
-                        colors[colorsCount++] = this.tmpColor.b
+                            indices[indicesCount++] = b
+                            indices[indicesCount++] = c
+                            indices[indicesCount++] = d
+                        }
                     }
                 }
             }
@@ -266,6 +369,7 @@ class VoxelChunkMesher {
         meta[1] = indicesCount
         meta[2] = normalsCount
         meta[3] = colorsCount
+        meta[4] = ambientOcclusionCount
     }
 }
 
@@ -330,6 +434,8 @@ const registerChunk = ({ id, position, chunkBuffers, chunkMeshBuffers }: Registe
         normalsBuffer: chunkMeshBuffers.normals,
         colors: new Float32Array(chunkMeshBuffers.colors),
         colorsBuffer: chunkMeshBuffers.colors,
+        ambientOcclusion: new Float32Array(chunkMeshBuffers.ambientOcclusion),
+        ambientOcclusionBuffer: chunkMeshBuffers.ambientOcclusion,
         meta: new Uint32Array(chunkMeshBuffers.meta),
         metaBuffer: chunkMeshBuffers.meta,
     }

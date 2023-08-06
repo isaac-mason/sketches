@@ -13,6 +13,9 @@ export type VoxelChunkMeshData = {
     colors: Float32Array
     colorsBuffer: SharedArrayBuffer
 
+    ambientOcclusion: Float32Array
+    ambientOcclusionBuffer: SharedArrayBuffer
+
     meta:
         | Uint32Array
         | [meshNeedsUpdate: number, positionsCount: number, indicesCount: number, normalsCount: number, colorsCount: number]
@@ -32,6 +35,7 @@ export type RegisterChunkMessage = {
         indices: SharedArrayBuffer
         normals: SharedArrayBuffer
         colors: SharedArrayBuffer
+        ambientOcclusion: SharedArrayBuffer
         meta: SharedArrayBuffer
     }
 }
