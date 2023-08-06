@@ -10,8 +10,8 @@ const sketchList = [
         tags: ['physics', 'rapier', 'raycasting'],
     },
     {
-        title: 'Rapier - Camera Raycasting',
-        path: 'rapier/camera-raycasting',
+        title: 'Rapier - Pointer Raycasting',
+        path: 'rapier/pointer-raycasting',
         tags: ['physics', 'rapier', 'raycasting'],
     },
     {

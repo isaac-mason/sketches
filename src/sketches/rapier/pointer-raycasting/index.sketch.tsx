@@ -149,7 +149,7 @@ const Scene = () => {
 }
 
 export default () => {
-    const { debug } = useLevaControls('rapier-raycasting', {
+    const { debug } = useLevaControls('rapier-pointer-raycasting', {
         debug: false,
     })
     return (
