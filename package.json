@@ -34,7 +34,7 @@
         "three": "^0.155.0",
         "tunnel-rat": "^0.1.2",
         "vite-imagetools": "^5.0.7",
-        "zustand": "^4.3.9"
+        "zustand": "^4.4.1"
     },
     "devDependencies": {
         "@types/d3": "^7.4.0",
