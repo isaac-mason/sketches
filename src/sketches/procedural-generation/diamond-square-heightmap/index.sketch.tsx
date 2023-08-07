@@ -192,12 +192,12 @@ const Terrain = ({ size, range, wireframe, vertexNormalsHelper }: TerrainProps) 
     }, [size, range])
 
     return (
-        <Helper helper={VertexNormalsHelper} enabled={vertexNormalsHelper}>
-            <mesh rotation-x={-Math.PI / 2} position-y={-10} receiveShadow>
-                <meshStandardMaterial color="#999" wireframe={wireframe} />
-                <primitive object={planeGeometry} attach="geometry" />
-            </mesh>
-        </Helper>
+        <mesh rotation-x={-Math.PI / 2} position-y={-10} receiveShadow>
+            <meshStandardMaterial color="#999" wireframe={wireframe} />
+            <primitive object={planeGeometry} attach="geometry" />
+
+            {vertexNormalsHelper && <Helper type={VertexNormalsHelper} />}
+        </mesh>
     )
 }
 
@@ -225,9 +225,9 @@ export default () => {
 
                 <ambientLight intensity={0.7} />
 
-                <Helper helper={PointLightHelper} args={[10]}>
-                    <directionalLight position={pointLightPosition} intensity={1.5} />
-                </Helper>
+                <directionalLight position={pointLightPosition} intensity={1.5}>
+                    <Helper type={PointLightHelper} args={[10]} />
+                </directionalLight>
 
                 <OrbitControls makeDefault />
             </Canvas>

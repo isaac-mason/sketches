@@ -1,59 +1,45 @@
 import { useFrame, useThree } from '@react-three/fiber'
-import * as React from 'react'
-import { Children, ReactElement, ReactNode, cloneElement, useLayoutEffect, useState } from 'react'
+import { useLayoutEffect, useRef } from 'react'
 import { Object3D } from 'three'
 
-type HelperObject = Object3D & { update: () => void; dispose: () => void }
-type Constructor = new (...args: any[]) => HelperObject
-type Rest<T> = T extends [infer _, ...infer R] ? R : never
+type HelperType = Object3D & { update: () => void; dispose: () => void }
+type HelperConstructor = new (...args: any[]) => HelperType
+type HelperArgs<T> = T extends [infer _, ...infer R] ? R : never
 
-export type HelperProps<T extends Constructor> = {
-  helper: T
-  enabled?: boolean
-  args?: Rest<ConstructorParameters<T>>
-  children: ReactNode
+export type HelperProps<T extends HelperConstructor> = {
+    type: T
+    args?: HelperArgs<ConstructorParameters<T>>
 }
 
-export const Helper = <T extends Constructor>({
-  helper: helperConstructor,
-  args = [] as never,
-  children,
-  enabled = true,
-}: HelperProps<T>) => {
-  const helper = React.useRef<HelperObject>()
-  const scene = useThree((state) => state.scene)
+export const Helper = <T extends HelperConstructor>({ type: helperConstructor, args = [] as never }: HelperProps<T>) => {
+    const objectRef = useRef<Object3D>(null!)
+    const helperRef = useRef<HelperType>()
 
-  const [childRef, setChildRef] = useState<never>(null!)
+    const scene = useThree((state) => state.scene)
 
-  useLayoutEffect(() => {
-    if (!enabled || !childRef || !helperConstructor) {
-      return
-    }
+    useLayoutEffect(() => {
+        const parent = objectRef.current?.parent
 
-    const currentHelper = new helperConstructor(childRef, ...args)
+        if (!helperConstructor || !parent) {
+            return
+        }
 
-    helper.current = currentHelper
+        const helper = new helperConstructor(parent, ...args)
 
-    currentHelper.traverse((child) => (child.raycast = () => null))
+        helperRef.current = helper
 
-    scene.add(currentHelper)
+        helper.traverse((child) => (child.raycast = () => null))
 
-    return () => {
-      helper.current = undefined
-      scene.remove(currentHelper)
-      currentHelper.dispose?.()
-    }
-  }, [scene, helperConstructor, childRef, enabled, ...args])
+        scene.add(helper)
 
-  useFrame(() => void helper.current?.update?.())
+        return () => {
+            helperRef.current = undefined
+            scene.remove(helper)
+            helper.dispose?.()
+        }
+    }, [scene, helperConstructor, ...args])
 
-  if (children) {
-    const child = Children.only(children) as ReactElement
+    useFrame(() => void helperRef.current?.update?.())
 
-    return cloneElement(child, {
-      ref: setChildRef,
-    })
-  }
-
-  return null
+    return <object3D ref={objectRef} />
 }
