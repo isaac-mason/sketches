@@ -4,6 +4,8 @@ import {
     CHUNK_SIZE,
     Vec3,
     VoxelChunkComponent,
+    VoxelChunkLoadedTagComponent,
+    VoxelWorldActorComponent,
     VoxelWorldComponent,
     VoxelWorldCoreSystem,
     VoxelWorldEventsComponent,
@@ -11,14 +13,7 @@ import {
 } from '../core'
 import { VoxelEnginePlugin } from '../voxel-engine-types'
 import VoxelChunkMesherWorker from './culled-mesher.worker.ts?worker'
-import {
-    ChunkMeshUpdateMessage,
-    RegisterChunkMessage,
-    RequestChunkMeshUpdateMessage,
-    VoxelChunkMeshData,
-    WorkerMessage,
-} from './types'
-import { emptyChunkMeshData } from './utils'
+import { ChunkMeshUpdateMessage, RegisterChunkMessage, RequestChunkMeshUpdateMessage, WorkerMessage } from './types'
 
 const voxelChunkShaderMaterial = new MeshStandardMaterial({
     vertexColors: true,
@@ -60,8 +55,6 @@ voxelChunkShaderMaterial.onBeforeCompile = (shader) => {
 }
 
 export class VoxelChunkMeshComponent extends Component {
-    voxelChunkMeshData: VoxelChunkMeshData = emptyChunkMeshData()
-
     geometry!: BufferGeometry
 
     material!: MeshStandardMaterial
@@ -69,36 +62,30 @@ export class VoxelChunkMeshComponent extends Component {
     mesh!: Mesh
 
     construct() {
-        this.voxelChunkMeshData.colors.fill(0)
-        this.voxelChunkMeshData.indices.fill(0)
-        this.voxelChunkMeshData.normals.fill(0)
-        this.voxelChunkMeshData.positions.fill(0)
-        this.voxelChunkMeshData.ambientOcclusion.fill(0)
-        this.voxelChunkMeshData.meta.fill(0)
-
-        this.geometry = new BufferGeometry()
-        this.material = voxelChunkShaderMaterial
-        this.mesh = new Mesh()
-
-        this.mesh.geometry = this.geometry
-        this.mesh.material = this.material
+        this.mesh = new Mesh(new BufferGeometry(), voxelChunkShaderMaterial)
+        this.geometry = this.mesh.geometry as BufferGeometry
+        this.material = this.mesh.material as MeshStandardMaterial
     }
 }
 
 export class VoxelChunkMesherSystem extends System {
-    chunkQuery = this.query([VoxelChunkComponent])
+    chunks = this.query([VoxelChunkComponent])
 
-    voxelWorld = this.singleton(VoxelWorldComponent, { required: true })!
+    loadedChunks = this.query([VoxelChunkComponent, VoxelChunkLoadedTagComponent])
 
-    voxelWorldEvents = this.singleton(VoxelWorldEventsComponent, { required: true })!
+    dirtyChunks = new Set<Entity>()
 
-    dirtyChunks = new Set<string>()
+    voxelWorld = this.singleton(VoxelWorldComponent)!
 
-    private mesherWorkers: InstanceType<typeof VoxelChunkMesherWorker>[] = []
+    voxelWorldEvents = this.singleton(VoxelWorldEventsComponent)!
+
+    voxelWorldActor = this.singleton(VoxelWorldActorComponent)!
+
+    private workers: InstanceType<typeof VoxelChunkMesherWorker>[] = []
 
     private pendingMeshUpdates: Map<string, number> = new Map()
 
-    private workerMeshUpdateRoundRobin = 0
+    private workerRoundRobin = 0
 
     static WORKER_POOL_SIZE = 3
 
@@ -112,50 +99,65 @@ export class VoxelChunkMesherSystem extends System {
                 const { data: message } = e as { data: WorkerMessage }
 
                 if (message.type === 'chunk-mesh-update') {
-                    this.onChunkMeshUpdate(message)
+                    this.updateVoxelChunkMesh(message)
                 }
             }
 
-            this.mesherWorkers.push(worker)
+            this.workers.push(worker)
         }
 
-        this.chunkQuery.onEntityAdded.add((chunk) => {
+        this.chunks.onEntityAdded.add((chunk) => {
             this.registerChunk(chunk)
         })
 
-        this.chunkQuery.onEntityRemoved.add((e) => {
+        this.chunks.onEntityRemoved.add((e) => {
             // todo
         })
 
-        this.voxelWorldEvents.onChange.add((updates) => {
+        this.voxelWorldEvents.onChunkChange.add((updates) => {
             this.handleBlockUpdates(updates.map((update) => update.position))
+        })
+
+        this.loadedChunks.onEntityAdded.add((chunk) => {
+            this.dirtyChunks.add(chunk)
+        })
+
+        this.loadedChunks.onEntityRemoved.add((chunk) => {
+            this.dirtyChunks.delete(chunk)
         })
     }
 
-    onUpdate() {
-        for (const chunkId of this.dirtyChunks) {
-            this.remesh(chunkId)
+    onUpdate(): void {
+        const prioritisedChunks = Array.from(this.dirtyChunks).sort((a, b) => {
+            return a.get(VoxelChunkComponent).priority - b.get(VoxelChunkComponent).priority
+        })
+
+        for (const chunk of prioritisedChunks) {
+            this.remesh(chunk.get(VoxelChunkComponent).id)
         }
 
         this.dirtyChunks.clear()
     }
 
     onDestroy() {
-        for (const worker of this.mesherWorkers) {
+        for (const worker of this.workers) {
             worker.terminate()
         }
-        this.mesherWorkers = []
+        this.workers = []
     }
 
     private handleBlockUpdates(positions: Vec3[]): void {
         for (const position of positions) {
             const chunkEntity = this.voxelWorld.getChunkAt(position)!
             const chunk = chunkEntity.get(VoxelChunkComponent)
+            const loaded = chunkEntity.has(VoxelChunkLoadedTagComponent)
 
-            this.dirtyChunks.add(chunk.id)
+            if (!loaded) return
+
+            this.dirtyChunks.add(chunkEntity)
 
             // check if we need to make neighbour chunks dirty
-            // we need to check diagonals as well for AO
+            // we need to check corners as well for AO
             for (let dx = -1; dx <= 1; dx++) {
                 for (let dy = -1; dy <= 1; dy++) {
                     for (let dz = -1; dz <= 1; dz++) {
@@ -166,16 +168,16 @@ export class VoxelChunkMesherSystem extends System {
                         const offset: Vec3 = [dx, dy, dz]
 
                         const neighbourChunkId = chunkId([
-                            chunk.position[0] + offset[0],
-                            chunk.position[1] + offset[1],
-                            chunk.position[2] + offset[2],
+                            chunk.position.x + offset[0],
+                            chunk.position.y + offset[1],
+                            chunk.position.z + offset[2],
                         ])
 
                         const neighbourEntity = this.voxelWorld.chunkEntities.get(neighbourChunkId)
 
                         if (!neighbourEntity) continue
 
-                        this.dirtyChunks.add(neighbourChunkId)
+                        this.dirtyChunks.add(neighbourEntity)
                     }
                 }
             }
@@ -186,27 +188,20 @@ export class VoxelChunkMesherSystem extends System {
         if (e.has(VoxelChunkMeshComponent)) return
 
         const voxelChunk = e.get(VoxelChunkComponent)
-        const voxelChunkMesh = e.add(VoxelChunkMeshComponent)
+
+        e.add(VoxelChunkMeshComponent)
 
         const data: RegisterChunkMessage = {
             type: 'register-chunk',
             id: voxelChunk.id,
-            position: voxelChunk.position,
+            position: voxelChunk.position.toArray(),
             chunkBuffers: {
                 solid: voxelChunk.solidBuffer,
                 color: voxelChunk.colorBuffer,
             },
-            chunkMeshBuffers: {
-                positions: voxelChunkMesh.voxelChunkMeshData.positionsBuffer,
-                indices: voxelChunkMesh.voxelChunkMeshData.indicesBuffer,
-                normals: voxelChunkMesh.voxelChunkMeshData.normalsBuffer,
-                colors: voxelChunkMesh.voxelChunkMeshData.colorsBuffer,
-                ambientOcclusion: voxelChunkMesh.voxelChunkMeshData.ambientOcclusionBuffer,
-                meta: voxelChunkMesh.voxelChunkMeshData.metaBuffer,
-            },
         }
 
-        for (const worker of this.mesherWorkers) {
+        for (const worker of this.workers) {
             worker.postMessage(data)
         }
     }
@@ -220,56 +215,39 @@ export class VoxelChunkMesherSystem extends System {
         const workerWithPendingMeshUpdate = this.pendingMeshUpdates.get(chunkId)
 
         if (workerWithPendingMeshUpdate) {
-            this.mesherWorkers[workerWithPendingMeshUpdate].postMessage(data)
+            this.workers[workerWithPendingMeshUpdate].postMessage(data)
             return
         }
 
-        const workerIndex = this.workerMeshUpdateRoundRobin
-        const worker = this.mesherWorkers[workerIndex]
+        const workerIndex = this.workerRoundRobin
+        const worker = this.workers[workerIndex]
         this.pendingMeshUpdates.set(chunkId, workerIndex)
 
         worker.postMessage(data)
 
-        this.workerMeshUpdateRoundRobin = (this.workerMeshUpdateRoundRobin + 1) % this.mesherWorkers.length
+        this.workerRoundRobin = (this.workerRoundRobin + 1) % this.workers.length
     }
 
-    private onChunkMeshUpdate({ id }: ChunkMeshUpdateMessage) {
+    private updateVoxelChunkMesh({ id, indices, positions, normals, colors, ambientOcclusion }: ChunkMeshUpdateMessage) {
         this.pendingMeshUpdates.delete(id)
 
         const entity = this.voxelWorld.chunkEntities.get(id)!
-
-        this.updateVoxelChunkMesh(entity)
-    }
-
-    private updateVoxelChunkMesh(entity: Entity) {
         const voxelChunk = entity.get(VoxelChunkComponent)
         const voxelChunkMesh = entity.get(VoxelChunkMeshComponent)
 
-        const {
-            positions,
-            indices,
-            normals,
-            colors,
-            ambientOcclusion,
-            meta: [positionsCount, indicesCount, normalsCount, colorsCount, ambientOcclusionCount],
-        } = voxelChunkMesh.voxelChunkMeshData
-
-        voxelChunkMesh.geometry.setIndex(new BufferAttribute(indices.slice(0, indicesCount), 1))
-        voxelChunkMesh.geometry.setAttribute('position', new BufferAttribute(positions.slice(0, positionsCount), 3))
-        voxelChunkMesh.geometry.setAttribute('normal', new BufferAttribute(normals.slice(0, normalsCount), 3))
-        voxelChunkMesh.geometry.setAttribute('color', new BufferAttribute(colors.slice(0, colorsCount), 3))
-        voxelChunkMesh.geometry.setAttribute(
-            'ambientOcclusion',
-            new BufferAttribute(ambientOcclusion.slice(0, ambientOcclusionCount), 1),
-        )
+        voxelChunkMesh.geometry.setIndex(new BufferAttribute(indices, 1))
+        voxelChunkMesh.geometry.setAttribute('position', new BufferAttribute(positions, 3))
+        voxelChunkMesh.geometry.setAttribute('normal', new BufferAttribute(normals, 3))
+        voxelChunkMesh.geometry.setAttribute('color', new BufferAttribute(colors, 3))
+        voxelChunkMesh.geometry.setAttribute('ambientOcclusion', new BufferAttribute(ambientOcclusion, 1))
 
         voxelChunkMesh.geometry.computeBoundingBox()
         voxelChunkMesh.geometry.computeBoundingSphere()
 
         voxelChunkMesh.mesh.position.set(
-            voxelChunk.position[0] * CHUNK_SIZE,
-            voxelChunk.position[1] * CHUNK_SIZE,
-            voxelChunk.position[2] * CHUNK_SIZE,
+            voxelChunk.position.x * CHUNK_SIZE,
+            voxelChunk.position.y * CHUNK_SIZE,
+            voxelChunk.position.z * CHUNK_SIZE,
         )
     }
 }
@@ -279,7 +257,7 @@ export const CulledMesherPlugin = {
     systems: [VoxelChunkMesherSystem],
     setup: (_, ecs) => {
         const CulledMeshes = () => (
-            <ecs.QueryEntities query={[VoxelChunkMeshComponent]}>
+            <ecs.QueryEntities query={[VoxelChunkMeshComponent, VoxelChunkLoadedTagComponent]}>
                 {(entity) => {
                     const voxelChunkMesh = entity.get(VoxelChunkMeshComponent)
 

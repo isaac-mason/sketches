@@ -61,7 +61,7 @@ const App = () => {
 
 export default () => {
     return (
-        <Canvas camera={{ position: [20, 20, 20] }}>
+        <Canvas camera={{ position: [10, 10, 10] }}>
             <App />
             <OrbitControls makeDefault />
         </Canvas>

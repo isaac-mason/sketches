@@ -118,11 +118,11 @@ export class VoxelChunkPhysicsComponent extends Component {
 }
 
 export class VoxelPhysicsSystem extends System {
-    physicsWorld = this.singleton(PhysicsWorldComponent, { required: true })!
+    physicsWorld = this.singleton(PhysicsWorldComponent)!
 
-    voxelWorld = this.singleton(VoxelWorldComponent, { required: true })!
+    voxelWorld = this.singleton(VoxelWorldComponent)!
 
-    voxelWorldEvents = this.singleton(VoxelWorldEventsComponent, { required: true })!
+    voxelWorldEvents = this.singleton(VoxelWorldEventsComponent)!
 
     chunks = this.query([VoxelChunkComponent])
 
@@ -133,7 +133,7 @@ export class VoxelPhysicsSystem extends System {
             this.dirtyChunks.add(e)
         })
 
-        this.voxelWorldEvents.onChange.add((updates) => {
+        this.voxelWorldEvents.onChunkChange.add((updates) => {
             for (const { chunk } of updates) {
                 this.dirtyChunks.add(chunk)
             }
@@ -154,7 +154,7 @@ export class VoxelPhysicsSystem extends System {
         if (!chunkEntity.has(VoxelChunkPhysicsComponent)) {
             chunkEntity.add(
                 VoxelChunkPhysicsComponent,
-                worldVoxelPositionToPhysicsPosition(chunkPositionToWorldPosition(chunk.position)),
+                worldVoxelPositionToPhysicsPosition(chunkPositionToWorldPosition(chunk.position.toArray())),
             )
         }
 
@@ -322,7 +322,7 @@ export class PhysicsSystem extends System {
 
     rigidBodyQuery = this.query([RigidBodyComponent])
 
-    physicsWorld = this.singleton(PhysicsWorldComponent, { required: true })!
+    physicsWorld = this.singleton(PhysicsWorldComponent)!
 
     static MAX_SUB_STEPS = 10
 

@@ -1,3 +1,4 @@
+import { Vector3 } from 'three'
 import { Vec3, VoxelChunk } from '.'
 
 export const CHUNK_BITS = 4
@@ -252,7 +253,7 @@ export const chunkPositionToWorldPosition = ([x, y, z]: Vec3): Vec3 => {
 }
 
 export const chunkId = (position: Vec3): string => {
-    return position.join(',')
+    return `${position[0]},${position[1]},${position[2]}`
 }
 
 export const emptyChunk = (): VoxelChunk => {
@@ -267,7 +268,7 @@ export const emptyChunk = (): VoxelChunk => {
 
     return {
         id: '',
-        position: [0, 0, 0],
+        position: new Vector3(),
         solid,
         color,
         solidBuffer,

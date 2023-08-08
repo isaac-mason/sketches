@@ -48,6 +48,8 @@ export const useVoxelEngine = <Plugins extends Array<VoxelEnginePlugin>, Api = V
             }
         }
 
+        world.init()
+
         const api = { ecs, world, ...(pluginApis as Api) }
 
         return api
@@ -56,7 +58,7 @@ export const useVoxelEngine = <Plugins extends Array<VoxelEnginePlugin>, Api = V
     const { world } = api
 
     useEffect(() => {
-        world.init()
+        if (!world.initialised) world.init()
 
         return () => {
             world.destroy()

@@ -1,7 +1,7 @@
 import { Color, Vector3 } from 'three'
 import { Vec3, VoxelChunk, isSolid, positionToChunkIndex } from '../core'
 import { CHUNK_SIZE } from '../core/utils'
-import { ChunkMeshUpdateMessage, RegisterChunkMessage, VoxelChunkMeshData, WorkerMessage } from './types'
+import { ChunkMeshUpdateMessage, RegisterChunkMessage, RequestChunkMeshUpdateMessage, WorkerMessage } from './types'
 
 const vertexAmbientOcclusion = (side1: number, side2: number, corner: number) => {
     if (side1 && side2) {
@@ -210,21 +210,18 @@ class VoxelChunkMesher {
     constructor(
         public chunks: Map<string, VoxelChunk>,
         public chunk: VoxelChunk,
-        public chunkMeshData: VoxelChunkMeshData,
     ) {}
 
-    update() {
-        const chunkX = this.chunk.position[0] * CHUNK_SIZE
-        const chunkY = this.chunk.position[1] * CHUNK_SIZE
-        const chunkZ = this.chunk.position[2] * CHUNK_SIZE
+    mesh() {
+        const chunkX = this.chunk.position.x * CHUNK_SIZE
+        const chunkY = this.chunk.position.y * CHUNK_SIZE
+        const chunkZ = this.chunk.position.z * CHUNK_SIZE
 
-        let positionsCount = 0
-        let indicesCount = 0
-        let normalsCount = 0
-        let colorsCount = 0
-        let ambientOcclusionCount = 0
-
-        const { positions, indices, normals, colors, ambientOcclusion, meta } = this.chunkMeshData
+        const positions: number[] = []
+        const indices: number[] = []
+        const normals: number[] = []
+        const colors: number[] = []
+        const ambientOcclusion: number[] = []
 
         for (let localX = 0; localX < CHUNK_SIZE; localX++) {
             for (let localY = 0; localY < CHUNK_SIZE; localY++) {
@@ -265,53 +262,30 @@ class VoxelChunkMesher {
                         const voxelFaceLocalY = localY + ly
                         const voxelFaceLocalZ = localZ + lz
 
-                        positions[positionsCount++] = voxelFaceLocalX
-                        positions[positionsCount++] = voxelFaceLocalY
-                        positions[positionsCount++] = voxelFaceLocalZ
+                        positions.push(voxelFaceLocalX, voxelFaceLocalY, voxelFaceLocalZ)
 
-                        positions[positionsCount++] = voxelFaceLocalX + ux
-                        positions[positionsCount++] = voxelFaceLocalY + uy
-                        positions[positionsCount++] = voxelFaceLocalZ + uz
+                        positions.push(voxelFaceLocalX + ux, voxelFaceLocalY + uy, voxelFaceLocalZ + uz)
 
-                        positions[positionsCount++] = voxelFaceLocalX + ux + vx
-                        positions[positionsCount++] = voxelFaceLocalY + uy + vy
-                        positions[positionsCount++] = voxelFaceLocalZ + uz + vz
+                        positions.push(voxelFaceLocalX + ux + vx, voxelFaceLocalY + uy + vy, voxelFaceLocalZ + uz + vz)
 
-                        positions[positionsCount++] = voxelFaceLocalX + vx
-                        positions[positionsCount++] = voxelFaceLocalY + vy
-                        positions[positionsCount++] = voxelFaceLocalZ + vz
+                        positions.push(voxelFaceLocalX + vx, voxelFaceLocalY + vy, voxelFaceLocalZ + vz)
 
-                        normals[normalsCount++] = nx
-                        normals[normalsCount++] = ny
-                        normals[normalsCount++] = nz
+                        normals.push(nx, ny, nz, nx, ny, nz, nx, ny, nz, nx, ny, nz)
 
-                        normals[normalsCount++] = nx
-                        normals[normalsCount++] = ny
-                        normals[normalsCount++] = nz
-
-                        normals[normalsCount++] = nx
-                        normals[normalsCount++] = ny
-                        normals[normalsCount++] = nz
-
-                        normals[normalsCount++] = nx
-                        normals[normalsCount++] = ny
-                        normals[normalsCount++] = nz
-
-                        colors[colorsCount++] = this.tmpColor.r
-                        colors[colorsCount++] = this.tmpColor.g
-                        colors[colorsCount++] = this.tmpColor.b
-
-                        colors[colorsCount++] = this.tmpColor.r
-                        colors[colorsCount++] = this.tmpColor.g
-                        colors[colorsCount++] = this.tmpColor.b
-
-                        colors[colorsCount++] = this.tmpColor.r
-                        colors[colorsCount++] = this.tmpColor.g
-                        colors[colorsCount++] = this.tmpColor.b
-
-                        colors[colorsCount++] = this.tmpColor.r
-                        colors[colorsCount++] = this.tmpColor.g
-                        colors[colorsCount++] = this.tmpColor.b
+                        colors.push(
+                            this.tmpColor.r,
+                            this.tmpColor.g,
+                            this.tmpColor.b,
+                            this.tmpColor.r,
+                            this.tmpColor.g,
+                            this.tmpColor.b,
+                            this.tmpColor.r,
+                            this.tmpColor.g,
+                            this.tmpColor.b,
+                            this.tmpColor.r,
+                            this.tmpColor.g,
+                            this.tmpColor.b,
+                        )
 
                         const ao = voxelFaceAmbientOcclusion(state.chunks, [worldX, worldY, worldZ], voxelFaceDirection)
                         const ao00 = ao[0]
@@ -319,10 +293,7 @@ class VoxelChunkMesher {
                         const ao10 = ao[2]
                         const ao11 = ao[3]
 
-                        ambientOcclusion[ambientOcclusionCount++] = ao00
-                        ambientOcclusion[ambientOcclusionCount++] = ao01
-                        ambientOcclusion[ambientOcclusionCount++] = ao10
-                        ambientOcclusion[ambientOcclusionCount++] = ao11
+                        ambientOcclusion.push(ao00, ao01, ao10, ao11)
 
                         /*
                             make two triangles for the face
@@ -332,7 +303,7 @@ class VoxelChunkMesher {
                             a --- b
                         */
 
-                        const index = (positionsCount + 1) / 3 - 4
+                        const index = (positions.length + 1) / 3 - 4
                         const a = index
                         const b = index + 1
                         const c = index + 2
@@ -343,80 +314,81 @@ class VoxelChunkMesher {
                          */
                         if (ao00 + ao10 > ao11 + ao01) {
                             // generate flipped quad
-                            indices[indicesCount++] = a
-                            indices[indicesCount++] = b
-                            indices[indicesCount++] = c
-
-                            indices[indicesCount++] = a
-                            indices[indicesCount++] = c
-                            indices[indicesCount++] = d
+                            indices.push(a, b, c, a, c, d)
                         } else {
                             // generate normal quad
-                            indices[indicesCount++] = a
-                            indices[indicesCount++] = b
-                            indices[indicesCount++] = d
-
-                            indices[indicesCount++] = b
-                            indices[indicesCount++] = c
-                            indices[indicesCount++] = d
+                            indices.push(a, b, d, b, c, d)
                         }
                     }
                 }
             }
         }
 
-        meta[0] = positionsCount
-        meta[1] = indicesCount
-        meta[2] = normalsCount
-        meta[3] = colorsCount
-        meta[4] = ambientOcclusionCount
+        return {
+            positions: new Float32Array(positions),
+            indices: new Uint32Array(indices),
+            normals: new Float32Array(normals),
+            colors: new Float32Array(colors),
+            ambientOcclusion: new Float32Array(ambientOcclusion),
+        }
     }
 }
 
 type WorkerState = {
     chunks: Map<string, VoxelChunk>
     meshers: Map<string, VoxelChunkMesher>
-    meshJobs: Set<string>
+    jobs: Set<string>
 }
 
 const state: WorkerState = {
     chunks: new Map(),
     meshers: new Map(),
-    meshJobs: new Set(),
+    jobs: new Set(),
 }
 
 const worker = self as unknown as Worker
 
 const update = () => {
-    const incomplete = new Set(state.meshJobs)
+    const incomplete = new Set(state.jobs)
 
-    const jobs = state.meshJobs
-    state.meshJobs = new Set()
+    const jobs = state.jobs
+    state.jobs = new Set()
 
     for (const chunkId of jobs) {
         const mesher = state.meshers.get(chunkId)
 
         if (!mesher) continue
 
-        mesher.update()
+        const { positions, indices, normals, colors, ambientOcclusion } = mesher.mesh()
 
         incomplete.delete(chunkId)
 
         const chunkMeshUpdateNotification: ChunkMeshUpdateMessage = {
             type: 'chunk-mesh-update',
             id: chunkId,
+            positions,
+            indices,
+            normals,
+            colors,
+            ambientOcclusion,
         }
 
-        worker.postMessage(chunkMeshUpdateNotification)
+        worker.postMessage(chunkMeshUpdateNotification, [
+            positions.buffer,
+            indices.buffer,
+            normals.buffer,
+            colors.buffer,
+            ambientOcclusion.buffer,
+        ])
     }
 
-    state.meshJobs = new Set([...incomplete, ...state.meshJobs])
+    state.jobs = new Set([...incomplete, ...state.jobs])
 }
 
-const registerChunk = ({ id, position, chunkBuffers, chunkMeshBuffers }: RegisterChunkMessage) => {
+const registerChunk = ({ id, position, chunkBuffers }: RegisterChunkMessage) => {
     const chunk: VoxelChunk = {
         id,
-        position,
+        position: new Vector3(...position),
         solid: new Uint8Array(chunkBuffers.solid),
         color: new Uint32Array(chunkBuffers.color),
         solidBuffer: chunkBuffers.solid,
@@ -425,22 +397,7 @@ const registerChunk = ({ id, position, chunkBuffers, chunkMeshBuffers }: Registe
 
     state.chunks.set(id, chunk)
 
-    const chunkMeshData: VoxelChunkMeshData = {
-        positions: new Float32Array(chunkMeshBuffers.positions),
-        positionsBuffer: chunkMeshBuffers.positions,
-        indices: new Uint32Array(chunkMeshBuffers.indices),
-        indicesBuffer: chunkMeshBuffers.indices,
-        normals: new Float32Array(chunkMeshBuffers.normals),
-        normalsBuffer: chunkMeshBuffers.normals,
-        colors: new Float32Array(chunkMeshBuffers.colors),
-        colorsBuffer: chunkMeshBuffers.colors,
-        ambientOcclusion: new Float32Array(chunkMeshBuffers.ambientOcclusion),
-        ambientOcclusionBuffer: chunkMeshBuffers.ambientOcclusion,
-        meta: new Uint32Array(chunkMeshBuffers.meta),
-        metaBuffer: chunkMeshBuffers.meta,
-    }
-
-    const mesher = new VoxelChunkMesher(state.chunks, chunk, chunkMeshData)
+    const mesher = new VoxelChunkMesher(state.chunks, chunk)
 
     state.meshers.set(chunk.id, mesher)
 }
@@ -452,7 +409,7 @@ worker.onmessage = (e) => {
     if (type === 'register-chunk') {
         registerChunk(data)
     } else if (type === 'request-chunk-mesh-update') {
-        state.meshJobs.add(data.id)
+        state.jobs.add(data.id)
     }
 }
 

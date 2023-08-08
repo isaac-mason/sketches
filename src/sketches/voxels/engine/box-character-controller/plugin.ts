@@ -1,6 +1,6 @@
 import { Component, System } from 'arancini'
 import { Object3D, PerspectiveCamera, Vector3 } from 'three'
-import { Object3DComponent, VoxelWorldComponent, VoxelWorldCoreSystem } from '../core'
+import { Object3DComponent, VoxelWorldActorComponent, VoxelWorldComponent, VoxelWorldCoreSystem } from '../core'
 import { VoxelEnginePlugin } from '../voxel-engine-types'
 
 export const BoxCharacterControllerCameraComponent = Component.object<PerspectiveCamera>('BoxCharacterControllerCamera')
@@ -60,13 +60,13 @@ export class BoxCharacterControllerComponent extends Component {
 }
 
 export class BoxCharacterControllerSystem extends System {
-    controllerQuery = this.query([BoxCharacterControllerComponent, BoxCharacterControllerInputComponent, Object3DComponent], {
-        required: true,
-    })
+    controllerQuery = this.query([BoxCharacterControllerComponent, BoxCharacterControllerInputComponent, Object3DComponent])
 
-    controllerCameraQuery = this.query([BoxCharacterControllerCameraComponent], { required: true })
+    controllerCameraQuery = this.query([BoxCharacterControllerCameraComponent])
 
-    voxelWorld = this.singleton(VoxelWorldComponent, { required: true })!
+    voxelWorld = this.singleton(VoxelWorldComponent)!
+
+    voxelWorldActor = this.singleton(VoxelWorldActorComponent)!
 
     tmpThirdPersonCameraOffset = new Vector3()
 
@@ -226,6 +226,9 @@ export class BoxCharacterControllerSystem extends System {
         /* update object3D */
         const object3D = controllerEntity.get(Object3DComponent)
         object3D.position.copy(controller.position)
+
+        /* update voxel world actor */
+        this.voxelWorldActor.position.copy(controller.position)
     }
 
     private checkGrounded(controller: BoxCharacterControllerComponent) {

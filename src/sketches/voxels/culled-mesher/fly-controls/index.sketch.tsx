@@ -19,7 +19,7 @@ const sideVector = new Vector3()
 const direction = new Vector3()
 
 const Player = () => {
-    const { voxelWorld, setBlock } = useVoxelEngineApi<[CorePlugin, CulledMesherPlugin]>()
+    const { voxelWorld, setBlock, voxelWorldActor } = useVoxelEngineApi<[CorePlugin, CulledMesherPlugin]>()
 
     const position = useRef<Vector3>(new Vector3(0, 5, 0))
 
@@ -43,6 +43,8 @@ const Player = () => {
         position.current.add(direction.multiplyScalar(delta))
 
         camera.position.lerp(position.current, 10 * delta)
+
+        voxelWorldActor.position.copy(position.current)
     })
 
     useEffect(() => {
@@ -97,8 +99,8 @@ const App = () => {
 
     useEffect(() => {
         // ground
-        for (let x = -15; x < 15; x++) {
-            for (let z = -15; z < 15; z++) {
+        for (let x = -50; x < 50; x++) {
+            for (let z = -50; z < 50; z++) {
                 setBlock([x, 0, z], {
                     solid: true,
                     color: Math.random() > 0.5 ? green1 : green2,

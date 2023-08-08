@@ -145,9 +145,9 @@ const App = () => {
 
     useLayoutEffect(() => {
         // ground
-        for (let x = -15; x < 15; x++) {
+        for (let x = -50; x < 50; x++) {
             for (let y = -10; y < -5; y++) {
-                for (let z = -15; z < 15; z++) {
+                for (let z = -50; z < 50; z++) {
                     setBlock([x, y, z], {
                         solid: true,
                         color: Math.random() > 0.5 ? green1 : green2,
