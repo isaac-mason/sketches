@@ -4,10 +4,8 @@ export type RegisterChunkMessage = {
     type: 'register-chunk'
     id: string
     position: Vec3
-    chunkBuffers: {
-        solid: SharedArrayBuffer
-        color: SharedArrayBuffer
-    }
+    solidBuffer: SharedArrayBuffer
+    colorBuffer: SharedArrayBuffer
 }
 
 export type RequestChunkMeshUpdateMessage = {

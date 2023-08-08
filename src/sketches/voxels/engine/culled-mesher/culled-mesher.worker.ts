@@ -385,14 +385,14 @@ const update = () => {
     state.jobs = new Set([...incomplete, ...state.jobs])
 }
 
-const registerChunk = ({ id, position, chunkBuffers }: RegisterChunkMessage) => {
+const registerChunk = ({ id, position, solidBuffer, colorBuffer }: RegisterChunkMessage) => {
     const chunk: VoxelChunk = {
         id,
         position: new Vector3(...position),
-        solid: new Uint8Array(chunkBuffers.solid),
-        color: new Uint32Array(chunkBuffers.color),
-        solidBuffer: chunkBuffers.solid,
-        colorBuffer: chunkBuffers.color,
+        solid: new Uint8Array(solidBuffer),
+        solidBuffer,
+        color: new Uint32Array(colorBuffer),
+        colorBuffer,
     }
 
     state.chunks.set(id, chunk)

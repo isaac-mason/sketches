@@ -195,10 +195,8 @@ export class VoxelChunkMesherSystem extends System {
             type: 'register-chunk',
             id: voxelChunk.id,
             position: voxelChunk.position.toArray(),
-            chunkBuffers: {
-                solid: voxelChunk.solidBuffer,
-                color: voxelChunk.colorBuffer,
-            },
+            solidBuffer: voxelChunk.solidBuffer,
+            colorBuffer: voxelChunk.colorBuffer,
         }
 
         for (const worker of this.workers) {
