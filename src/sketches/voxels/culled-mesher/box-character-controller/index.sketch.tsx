@@ -12,15 +12,15 @@ import {
     BoxCharacterControllerPlugin,
 } from '../../engine/box-character-controller'
 import { CorePlugin, Object3DComponent, Vec3 } from '../../engine/core'
-import { CulledMesherPlugin } from '../../engine/culled-mesher'
-import { useVoxelEngine, useVoxelEngineApi } from '../../engine/use-voxel-engine'
+import { CulledMesherPlugin, VoxelChunkCulledMeshes } from '../../engine/culled-mesher'
+import { VoxelEngine, useVoxelEngine } from '../../engine/voxel-engine'
 
 const green1 = new Color('green').addScalar(-0.02).getHex()
 const green2 = new Color('green').addScalar(0.02).getHex()
 const orange = new Color('orange').getHex()
 
 const Player = () => {
-    const { ecs, voxelWorld, setBlock } = useVoxelEngineApi<[CorePlugin, CulledMesherPlugin]>()
+    const { ecs, voxelWorld, setBlock } = useVoxelEngine<[CorePlugin, CulledMesherPlugin]>()
 
     const gl = useThree((s) => s.gl)
 
@@ -136,12 +136,9 @@ const Player = () => {
 }
 
 const App = () => {
-    const [paused, setPaused] = useState(true)
+    const { world, setBlock, step } = useVoxelEngine<[CorePlugin, CulledMesherPlugin, BoxCharacterControllerPlugin]>()
 
-    const { VoxelEngineProvider, setBlock, CulledMeshes } = useVoxelEngine({
-        plugins: [CorePlugin, CulledMesherPlugin, BoxCharacterControllerPlugin],
-        paused,
-    })
+    const [paused, setPaused] = useState(true)
 
     useLayoutEffect(() => {
         // ground
@@ -157,15 +154,18 @@ const App = () => {
         }
 
         setPaused(false)
-    }, [])
+    }, [world])
+
+    useFrame((_, delta) => {
+        if (paused) return
+        step(delta)
+    })
 
     return (
         <>
-            <CulledMeshes />
+            <Player />
 
-            <VoxelEngineProvider>
-                <Player />
-            </VoxelEngineProvider>
+            <VoxelChunkCulledMeshes />
 
             <ambientLight intensity={0.6} />
             <pointLight decay={0.5} intensity={10} position={[20, 20, 20]} />
@@ -201,7 +201,9 @@ export default () => {
                 ]}
             >
                 <Canvas>
-                    <App />
+                    <VoxelEngine paused plugins={[CorePlugin, CulledMesherPlugin, BoxCharacterControllerPlugin]}>
+                        <App />
+                    </VoxelEngine>
                     <PointerLockControls makeDefault />
                 </Canvas>
             </KeyboardControls>

@@ -1,14 +1,13 @@
 import Rapier from '@dimforge/rapier3d-compat'
 import { Bounds, OrbitControls } from '@react-three/drei'
 import { ThreeEvent } from '@react-three/fiber'
-import { useControls } from 'leva'
 import { useLayoutEffect, useMemo } from 'react'
 import { Color } from 'three'
 import { Canvas } from '../../../../common'
 import { CorePlugin, Object3DComponent, Vec3 } from '../../engine/core'
-import { CulledMesherPlugin, VoxelChunkMeshComponent } from '../../engine/culled-mesher'
+import { CulledMesherPlugin, VoxelChunkCulledMeshes } from '../../engine/culled-mesher'
 import { PhysicsDebug, PhysicsPlugin, RapierInit, RigidBodyComponent } from '../../engine/physics'
-import { useVoxelEngine, useVoxelEngineApi } from '../../engine/use-voxel-engine'
+import { VoxelEngine, useVoxelEngine } from '../../engine/voxel-engine'
 
 const gray = new Color('#666').getHex()
 const orange = new Color('orange').getHex()
@@ -19,7 +18,7 @@ type BallProps = {
 }
 
 const Ball = ({ position: [x, y, z], radius }: BallProps) => {
-    const { ecs, physicsWorld } = useVoxelEngineApi<[CorePlugin, PhysicsPlugin]>()
+    const { ecs, physicsWorld } = useVoxelEngine<[CorePlugin, PhysicsPlugin]>()
 
     const rigidBody = useMemo(() => {
         const body = physicsWorld.createRigidBody(Rapier.RigidBodyDesc.dynamic().setTranslation(x, y, z))
@@ -41,9 +40,7 @@ const Ball = ({ position: [x, y, z], radius }: BallProps) => {
 }
 
 const App = () => {
-    const { world, physicsWorld, voxelWorld, setBlock, CulledMeshes, VoxelEngineProvider } = useVoxelEngine({
-        plugins: [CorePlugin, CulledMesherPlugin, PhysicsPlugin],
-    })
+    const { world, physicsWorld, voxelWorld, setBlock } = useVoxelEngine<[CorePlugin, CulledMesherPlugin, PhysicsPlugin]>()
 
     useLayoutEffect(() => {
         // container
@@ -60,21 +57,6 @@ const App = () => {
             }
         }
     }, [])
-
-    useControls(
-        'voxels-culled-mesher-physics',
-        {
-            wireframe: {
-                value: false,
-                onChange: (value) => {
-                    world.find([VoxelChunkMeshComponent]).forEach((entity) => {
-                        entity.get(VoxelChunkMeshComponent).material.wireframe = value
-                    })
-                },
-            },
-        },
-        [world],
-    )
 
     const onPointerDown = (event: ThreeEvent<MouseEvent>) => {
         event.stopPropagation()
@@ -114,10 +96,10 @@ const App = () => {
     }, [])
 
     return (
-        <VoxelEngineProvider>
+        <>
             <Bounds fit margin={1.5}>
                 <group onPointerDown={onPointerDown}>
-                    <CulledMeshes />
+                    <VoxelChunkCulledMeshes />
                 </group>
             </Bounds>
 
@@ -130,7 +112,7 @@ const App = () => {
             <ambientLight intensity={0.6} />
             <pointLight decay={0.5} intensity={10} position={[20, 20, 20]} />
             <pointLight decay={0.5} intensity={10} position={[-20, 20, -20]} />
-        </VoxelEngineProvider>
+        </>
     )
 }
 
@@ -138,7 +120,9 @@ export default () => {
     return (
         <RapierInit>
             <Canvas camera={{ position: [5, 20, 5] }}>
-                <App />
+                <VoxelEngine plugins={[CorePlugin, CulledMesherPlugin, PhysicsPlugin]}>
+                    <App />
+                </VoxelEngine>
                 <OrbitControls makeDefault />
             </Canvas>
         </RapierInit>

@@ -5,21 +5,19 @@ import { styled } from 'styled-components'
 import { Color, Vector3 } from 'three'
 import { Canvas } from '../../../../common'
 import { CorePlugin, Vec3 } from '../../engine/core'
-import { CulledMesherPlugin } from '../../engine/culled-mesher'
-import { useVoxelEngine, useVoxelEngineApi } from '../../engine/use-voxel-engine'
+import { CulledMesherPlugin, VoxelChunkCulledMeshes } from '../../engine/culled-mesher'
+import { VoxelEngine, useVoxelEngine } from '../../engine/voxel-engine'
 
 const green1 = new Color('green').addScalar(-0.02).getHex()
 const green2 = new Color('green').addScalar(0.02).getHex()
 const orange = new Color('orange').getHex()
-
-const SPEED = 10
 
 const frontVector = new Vector3()
 const sideVector = new Vector3()
 const direction = new Vector3()
 
 const Player = () => {
-    const { voxelWorld, setBlock, voxelWorldActor } = useVoxelEngineApi<[CorePlugin, CulledMesherPlugin]>()
+    const { voxelWorld, setBlock, voxelWorldActor } = useVoxelEngine<[CorePlugin, CulledMesherPlugin]>()
 
     const position = useRef<Vector3>(new Vector3(0, 5, 0))
 
@@ -38,7 +36,11 @@ const Player = () => {
 
         frontVector.set(0, 0, Number(backward) - Number(forward))
         sideVector.set(Number(left) - Number(right), 0, 0)
-        direction.subVectors(frontVector, sideVector).normalize().multiplyScalar(SPEED).applyEuler(camera.rotation)
+        direction
+            .subVectors(frontVector, sideVector)
+            .normalize()
+            .multiplyScalar(1000 * delta)
+            .applyEuler(camera.rotation)
 
         position.current.add(direction.multiplyScalar(delta))
 
@@ -93,9 +95,7 @@ const Player = () => {
 }
 
 const App = () => {
-    const { CulledMeshes, VoxelEngineProvider, setBlock } = useVoxelEngine({
-        plugins: [CorePlugin, CulledMesherPlugin],
-    })
+    const { setBlock } = useVoxelEngine<[CorePlugin, CulledMesherPlugin]>()
 
     useEffect(() => {
         // ground
@@ -111,11 +111,9 @@ const App = () => {
 
     return (
         <>
-            <CulledMeshes />
+            <Player />
 
-            <VoxelEngineProvider>
-                <Player />
-            </VoxelEngineProvider>
+            <VoxelChunkCulledMeshes />
 
             <ambientLight intensity={0.6} />
             <pointLight decay={0.5} intensity={10} position={[20, 20, 20]} />
@@ -150,7 +148,9 @@ export default () => {
                 ]}
             >
                 <Canvas camera={{ near: 0.001 }}>
-                    <App />
+                    <VoxelEngine plugins={[CorePlugin, CulledMesherPlugin]}>
+                        <App />
+                    </VoxelEngine>
                     <PointerLockControls makeDefault />
                 </Canvas>
             </KeyboardControls>

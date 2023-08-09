@@ -4,16 +4,14 @@ import { useLayoutEffect } from 'react'
 import { Color } from 'three'
 import { Canvas } from '../../../../common'
 import { CorePlugin } from '../../engine/core'
-import { CulledMesherPlugin, VoxelChunkMeshComponent } from '../../engine/culled-mesher'
-import { useVoxelEngine } from '../../engine/use-voxel-engine'
+import { CulledMesherPlugin, VoxelChunkCulledMeshes, VoxelChunkMeshComponent } from '../../engine/culled-mesher'
+import { VoxelEngine, useVoxelEngine } from '../../engine/voxel-engine'
 
 const orange = new Color('orange').getHex()
 const hotpink = new Color('hotpink').getHex()
 
 const App = () => {
-    const { world, CulledMeshes, setBlock } = useVoxelEngine({
-        plugins: [CorePlugin, CulledMesherPlugin],
-    })
+    const { world, setBlock } = useVoxelEngine<[CorePlugin, CulledMesherPlugin]>()
 
     useLayoutEffect(() => {
         // sphere
@@ -29,7 +27,7 @@ const App = () => {
                 }
             }
         }
-    }, [])
+    }, [world])
 
     useControls(
         'voxels-culled-mesher-basic',
@@ -49,7 +47,7 @@ const App = () => {
     return (
         <>
             <Bounds fit margin={1.5}>
-                <CulledMeshes />
+                <VoxelChunkCulledMeshes />
             </Bounds>
 
             <ambientLight intensity={0.6} />
@@ -59,11 +57,11 @@ const App = () => {
     )
 }
 
-export default () => {
-    return (
-        <Canvas camera={{ position: [10, 10, 10] }}>
+export default () => (
+    <Canvas camera={{ position: [10, 10, 10] }}>
+        <VoxelEngine plugins={[CorePlugin, CulledMesherPlugin]}>
             <App />
-            <OrbitControls makeDefault />
-        </Canvas>
-    )
-}
+        </VoxelEngine>
+        <OrbitControls makeDefault />
+    </Canvas>
+)

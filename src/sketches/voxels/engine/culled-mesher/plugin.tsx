@@ -14,6 +14,7 @@ import {
 import { VoxelEnginePlugin } from '../voxel-engine-types'
 import VoxelChunkMesherWorker from './culled-mesher.worker.ts?worker'
 import { ChunkMeshUpdateMessage, RegisterChunkMessage, RequestChunkMeshUpdateMessage, WorkerMessage } from './types'
+import { useVoxelEngine } from '../voxel-engine'
 
 const voxelChunkShaderMaterial = new MeshStandardMaterial({
     vertexColors: true,
@@ -250,24 +251,23 @@ export class VoxelChunkMesherSystem extends System {
     }
 }
 
+export const VoxelChunkCulledMeshes = () => {
+    const { ecs } = useVoxelEngine()
+
+    return (
+        <ecs.QueryEntities query={[VoxelChunkMeshComponent, VoxelChunkLoadedTagComponent]}>
+            {(entity) => {
+                const voxelChunkMesh = entity.get(VoxelChunkMeshComponent)
+
+                return <primitive object={voxelChunkMesh.mesh} />
+            }}
+        </ecs.QueryEntities>
+    )
+}
+
 export const CulledMesherPlugin = {
     components: [VoxelChunkMeshComponent],
     systems: [VoxelChunkMesherSystem],
-    setup: (_, ecs) => {
-        const CulledMeshes = () => (
-            <ecs.QueryEntities query={[VoxelChunkMeshComponent, VoxelChunkLoadedTagComponent]}>
-                {(entity) => {
-                    const voxelChunkMesh = entity.get(VoxelChunkMeshComponent)
-
-                    return <primitive object={voxelChunkMesh.mesh} />
-                }}
-            </ecs.QueryEntities>
-        )
-
-        return {
-            CulledMeshes,
-        }
-    },
 } satisfies VoxelEnginePlugin
 
 export type CulledMesherPlugin = typeof CulledMesherPlugin
