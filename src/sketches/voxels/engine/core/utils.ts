@@ -1,5 +1,5 @@
 import { Vector3 } from 'three'
-import { Vec3, VoxelChunk } from '.'
+import { Vec3, VoxelChunk } from './types'
 
 export const CHUNK_BITS = 4
 export const CHUNK_SIZE = Math.pow(2, 4)

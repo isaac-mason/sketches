@@ -1,7 +1,7 @@
 import { Color, Vector3 } from 'three'
 import { Vec3, VoxelChunk, isSolid, positionToChunkIndex } from '../core'
 import { CHUNK_SIZE } from '../core/utils'
-import { ChunkMeshUpdateMessage, RegisterChunkMessage, RequestChunkMeshUpdateMessage, WorkerMessage } from './types'
+import { ChunkMeshUpdateMessage, RegisterChunkMessage, WorkerMessage } from './types'
 
 const vertexAmbientOcclusion = (side1: number, side2: number, corner: number) => {
     if (side1 && side2) {

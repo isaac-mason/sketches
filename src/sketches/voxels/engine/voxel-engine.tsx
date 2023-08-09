@@ -1,7 +1,7 @@
 import { useFrame } from '@react-three/fiber'
 import { World } from 'arancini'
 import { createECS } from 'arancini/react'
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { VoxelEnginePlugin, VoxelEnginePluginsApi } from './voxel-engine-types'
 
 const voxelEngineContext = createContext<unknown>(null!)
