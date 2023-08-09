@@ -1,6 +1,6 @@
 import Rapier from '@dimforge/rapier3d-compat'
-import { OrbitControls } from '@react-three/drei'
-import { useThree, Vector3 as Vector3Tuple } from '@react-three/fiber'
+import { OrbitControls, Wireframe } from '@react-three/drei'
+import { Vector3 as Vector3Tuple, useThree } from '@react-three/fiber'
 import {
     Physics,
     RapierRigidBody,
@@ -15,6 +15,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Mesh, Quaternion, Raycaster, Vector3 } from 'three'
 import { Canvas, usePageVisible } from '../../../common'
 import { Spring } from '../spring/spring'
+import { getQueryParamOrDefault } from '../../../common/utils/url-query-param'
 
 const LEVA_KEY = 'rapier-pointer-constraint'
 
@@ -28,13 +29,14 @@ type PointerConstraintControlsProps = {
 
 const SPHERICAL_CONSTRAINT = 'spherical constraint'
 const SPRING = 'spring'
+const OPTIONS = [SPHERICAL_CONSTRAINT, SPRING]
 
 const PointerControls = ({ target }: PointerConstraintControlsProps) => {
     const { type, pointerRigidBodyVisible, movementPlaneVisible } = useControls(LEVA_KEY, {
         type: {
             label: 'Type',
-            value: SPHERICAL_CONSTRAINT,
-            options: [SPHERICAL_CONSTRAINT, SPRING],
+            value: getQueryParamOrDefault('type', SPHERICAL_CONSTRAINT, (value) => OPTIONS.includes(value)),
+            options: OPTIONS,
         },
         pointerRigidBodyVisible: {
             label: 'Show Pointer Rigid Body',
@@ -104,8 +106,8 @@ const PointerControls = ({ target }: PointerConstraintControlsProps) => {
 
             if (type === SPRING) {
                 spring.current = new Spring(pointerRigidBody.current, rigidBody, {
-                    damping: 10,
-                    stiffness: 50,
+                    damping: 5,
+                    stiffness: 20,
                     restLength: 0,
                     localAnchorB: rayHitPositionBodyLocalFrame,
                 })
@@ -195,6 +197,30 @@ const Cube = (props: RigidBodyProps) => {
     )
 }
 
+const Torus = (props: RigidBodyProps) => {
+    return (
+        <RigidBody {...props} colliders="trimesh" type="dynamic" userData={{ draggable: true } as DraggableUserData}>
+            <mesh castShadow receiveShadow>
+                <torusGeometry args={[0.6, 0.2, 16, 32]} />
+                <meshStandardMaterial color="orange" />
+            </mesh>
+        </RigidBody>
+    )
+}
+
+const Sphere = (props: RigidBodyProps) => {
+    return (
+        <RigidBody {...props} colliders="ball" type="dynamic" userData={{ draggable: true } as DraggableUserData}>
+            <mesh castShadow receiveShadow>
+                <sphereGeometry args={[0.6]} />
+                <meshStandardMaterial color="hotpink" />
+
+                <Wireframe />
+            </mesh>
+        </RigidBody>
+    )
+}
+
 const Floor = () => (
     <RigidBody colliders="cuboid" type="fixed" position={[0, -1, 0]}>
         <mesh receiveShadow>
@@ -217,7 +243,10 @@ export default () => {
                 <Physics paused={!visible} debug={debug}>
                     <PointerControls target={[0, 1, 0]} />
 
-                    <Cube position={[0, 5, 0]} />
+                    <Torus position={[-2, 5, 2]} />
+                    <Cube position={[0, 5, 0]} rotation={[-Math.PI / 8, -Math.PI / 8, 0]} />
+                    <Sphere position={[2, 5, -2]} angularVelocity={[1, 0, -0.5]} />
+
                     <Floor />
 
                     <ambientLight intensity={1.5} />
