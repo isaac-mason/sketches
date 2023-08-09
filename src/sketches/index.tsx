@@ -115,154 +115,161 @@ const sketchList = [
         path: 'sprites/face-camera',
         tags: ['sprites'],
     },
-        /* GLSL GLSL Shaders From Scratch */
-        {
-            title: 'GLSL Shaders From Scratch - Intro - Varyings',
-            path: 'glsl-shaders-from-scratch/intro/varyings',
-            tags: ['shaders-from-scratch', 'shaders', 'varyings'],
-        },
-        {
-            title: 'GLSL Shaders From Scratch - Intro - Uniforms',
-            path: 'glsl-shaders-from-scratch/intro/uniforms',
-            tags: ['shaders-from-scratch', 'shaders', 'uniforms'],
-        },
-        {
-            title: 'GLSL Shaders From Scratch - Intro - Attributes',
-            path: 'glsl-shaders-from-scratch/intro/attributes',
-            tags: ['shaders-from-scratch', 'shaders', 'attributes'],
-        },
-        {
-            title: 'GLSL Shaders From Scratch - Textures - Basic',
-            path: 'glsl-shaders-from-scratch/textures/basic',
-            tags: ['shaders-from-scratch', 'shaders', 'textures'],
-        },
-        {
-            title: 'GLSL Shaders From Scratch - Textures - Alpha',
-            path: 'glsl-shaders-from-scratch/textures/alpha',
-            tags: ['shaders-from-scratch', 'shaders', 'alpha'],
-        },
-        {
-            title: 'GLSL Shaders From Scratch - Textures - Adressing',
-            path: 'glsl-shaders-from-scratch/textures/addressing',
-            tags: ['shaders-from-scratch', 'shaders', 'addressing'],
-        },
-        {
-            title: 'GLSL Shaders From Scratch - Common Functions and Tricks - Step, Mix, Smoothstep',
-            path: 'glsl-shaders-from-scratch/common-functions-and-tricks/step-mix-smoothstep',
-            tags: ['shaders-from-scratch', 'shaders', 'step', 'mix', 'smoothstep'],
-        },
-        {
-            title: 'GLSL Shaders From Scratch - Common Functions and Tricks - Min, Max, Clamp, Saturate',
-            path: 'glsl-shaders-from-scratch/common-functions-and-tricks/min-max-clamp-saturate',
-            tags: ['shaders-from-scratch', 'shaders', 'min', 'max', 'clamp', 'saturate'],
-        },
-        {
-            title: 'GLSL Shaders From Scratch - Common Functions and Tricks - Fract and Friends',
-            path: 'glsl-shaders-from-scratch/common-functions-and-tricks/fract-and-friends',
-            tags: ['shaders-from-scratch', 'shaders', 'min', 'fract'],
-        },
-        {
-            title: 'GLSL Shaders From Scratch - Vector Operations & Math - Sin/Cos',
-            path: 'glsl-shaders-from-scratch/vector-operations-and-math/sin-cos',
-            tags: ['shaders-from-scratch', 'shaders', 'sin', 'cos'],
-        },
-        {
-            title: 'GLSL Shaders From Scratch - Vector Operations & Math - Shaping Functions',
-            path: 'glsl-shaders-from-scratch/vector-operations-and-math/shaping-functions',
-            tags: ['shaders-from-scratch', 'shaders'],
-        },
-        /* Three.js Journey */
-        {
-            title: 'Journey Lesson 3 - Basic',
-            path: 'threejs-journey/03-basic',
-            tags: ['threejs-journey'],
-        },
-        {
-            title: 'Journey Lesson 5 - Transforms',
-            path: 'threejs-journey/05-transforms',
-            tags: ['threejs-journey'],
-        },
-        {
-            title: 'Journey Lesson 6 - Animations',
-            path: 'threejs-journey/06-animations',
-            tags: ['threejs-journey', 'animation'],
-        },
-        {
-            title: 'Journey Lesson 7 - Cameras',
-            path: 'threejs-journey/07-cameras',
-            tags: ['threejs-journey', 'cameras'],
-        },
-        {
-            title: 'Journey Lesson 9 - Geometries',
-            path: 'threejs-journey/09-geometries',
-            tags: ['threejs-journey', 'geometries'],
-        },
-        {
-            title: 'Journey Lesson 11 - Textures',
-            path: 'threejs-journey/11-textures',
-            tags: ['threejs-journey', 'textures'],
-        },
-        {
-            title: 'Journey Lesson 12 - Materials',
-            path: 'threejs-journey/12-materials',
-            tags: ['threejs-journey', 'materials'],
-        },
-        {
-            title: 'Journey Lesson 13 - Text',
-            path: 'threejs-journey/13-text',
-            tags: ['threejs-journey', 'text'],
-        },
-        {
-            title: 'Journey Lesson 15 - Lights',
-            path: 'threejs-journey/15-lights',
-            tags: ['threejs-journey', 'lighting'],
-        },
-        {
-            title: 'Journey Lesson 16 - Shadows',
-            path: 'threejs-journey/16-shadows',
-            tags: ['threejs-journey', 'shadows'],
-        },
-        {
-            title: 'Journey Lesson 17 - Haunted House',
-            path: 'threejs-journey/17-haunted-house',
-            tags: ['threejs-journey', 'lighting', 'shadows', 'scene'],
-        },
-        {
-            title: 'Journey Lesson 18.1 - Particles',
-            path: 'threejs-journey/18-1-particles',
-            tags: ['threejs-journey', 'particles'],
-        },
-        {
-            title: 'Journey Lesson 18.2 - Particles',
-            path: 'threejs-journey/18-2-particles',
-            tags: ['threejs-journey', 'particles'],
-        },
-        {
-            title: 'Journey Lesson 19 - Galaxy Generator',
-            path: 'threejs-journey/19-galaxy-generator',
-            tags: ['threejs-journey', 'particles'],
-        },
-        {
-            title: 'Journey Lesson 27 - Shaders',
-            path: 'threejs-journey/27-shaders',
-            tags: ['threejs-journey', 'shaders'],
-        },
-        {
-            title: 'Journey Lesson 28 - Raging Sea',
-            path: 'threejs-journey/28-raging-sea',
-            tags: ['threejs-journey', 'shaders'],
-        },
-        {
-            title: 'Journey Lesson 29 - Animated Galaxy',
-            path: 'threejs-journey/29-animated-galaxy',
-            tags: ['threejs-journey', 'shaders'],
-        },
-        {
-            title: 'Journey Lesson 30 - Modified Materials',
-            path: 'threejs-journey/30-modified-materials',
-            tags: ['threejs-journey', 'shaders'],
-        },
-] as const
+    /* GLSL GLSL Shaders From Scratch */
+    {
+        title: 'GLSL Shaders From Scratch - Intro - Varyings',
+        path: 'glsl-shaders-from-scratch/intro/varyings',
+        tags: ['shaders-from-scratch', 'shaders', 'varyings'],
+    },
+    {
+        title: 'GLSL Shaders From Scratch - Intro - Uniforms',
+        path: 'glsl-shaders-from-scratch/intro/uniforms',
+        tags: ['shaders-from-scratch', 'shaders', 'uniforms'],
+    },
+    {
+        title: 'GLSL Shaders From Scratch - Intro - Attributes',
+        path: 'glsl-shaders-from-scratch/intro/attributes',
+        tags: ['shaders-from-scratch', 'shaders', 'attributes'],
+    },
+    {
+        title: 'GLSL Shaders From Scratch - Textures - Basic',
+        path: 'glsl-shaders-from-scratch/textures/basic',
+        tags: ['shaders-from-scratch', 'shaders', 'textures'],
+    },
+    {
+        title: 'GLSL Shaders From Scratch - Textures - Alpha',
+        path: 'glsl-shaders-from-scratch/textures/alpha',
+        tags: ['shaders-from-scratch', 'shaders', 'alpha'],
+    },
+    {
+        title: 'GLSL Shaders From Scratch - Textures - Adressing',
+        path: 'glsl-shaders-from-scratch/textures/addressing',
+        tags: ['shaders-from-scratch', 'shaders', 'addressing'],
+    },
+    {
+        title: 'GLSL Shaders From Scratch - Common Functions and Tricks - Step, Mix, Smoothstep',
+        path: 'glsl-shaders-from-scratch/common-functions-and-tricks/step-mix-smoothstep',
+        tags: ['shaders-from-scratch', 'shaders', 'step', 'mix', 'smoothstep'],
+    },
+    {
+        title: 'GLSL Shaders From Scratch - Common Functions and Tricks - Min, Max, Clamp, Saturate',
+        path: 'glsl-shaders-from-scratch/common-functions-and-tricks/min-max-clamp-saturate',
+        tags: ['shaders-from-scratch', 'shaders', 'min', 'max', 'clamp', 'saturate'],
+    },
+    {
+        title: 'GLSL Shaders From Scratch - Common Functions and Tricks - Fract and Friends',
+        path: 'glsl-shaders-from-scratch/common-functions-and-tricks/fract-and-friends',
+        tags: ['shaders-from-scratch', 'shaders', 'min', 'fract'],
+    },
+    {
+        title: 'GLSL Shaders From Scratch - Vector Operations & Math - Sin/Cos',
+        path: 'glsl-shaders-from-scratch/vector-operations-and-math/sin-cos',
+        tags: ['shaders-from-scratch', 'shaders', 'sin', 'cos'],
+    },
+    {
+        title: 'GLSL Shaders From Scratch - Vector Operations & Math - Shaping Functions',
+        path: 'glsl-shaders-from-scratch/vector-operations-and-math/shaping-functions',
+        tags: ['shaders-from-scratch', 'shaders'],
+    },
+    /* Three.js Journey */
+    {
+        title: 'Journey Lesson 3 - Basic',
+        path: 'threejs-journey/03-basic',
+        tags: ['threejs-journey'],
+    },
+    {
+        title: 'Journey Lesson 5 - Transforms',
+        path: 'threejs-journey/05-transforms',
+        tags: ['threejs-journey'],
+    },
+    {
+        title: 'Journey Lesson 6 - Animations',
+        path: 'threejs-journey/06-animations',
+        tags: ['threejs-journey', 'animation'],
+    },
+    {
+        title: 'Journey Lesson 7 - Cameras',
+        path: 'threejs-journey/07-cameras',
+        tags: ['threejs-journey', 'cameras'],
+    },
+    {
+        title: 'Journey Lesson 9 - Geometries',
+        path: 'threejs-journey/09-geometries',
+        tags: ['threejs-journey', 'geometries'],
+    },
+    {
+        title: 'Journey Lesson 11 - Textures',
+        path: 'threejs-journey/11-textures',
+        tags: ['threejs-journey', 'textures'],
+    },
+    {
+        title: 'Journey Lesson 12 - Materials',
+        path: 'threejs-journey/12-materials',
+        tags: ['threejs-journey', 'materials'],
+    },
+    {
+        title: 'Journey Lesson 13 - Text',
+        path: 'threejs-journey/13-text',
+        tags: ['threejs-journey', 'text'],
+    },
+    {
+        title: 'Journey Lesson 15 - Lights',
+        path: 'threejs-journey/15-lights',
+        tags: ['threejs-journey', 'lighting'],
+    },
+    {
+        title: 'Journey Lesson 16 - Shadows',
+        path: 'threejs-journey/16-shadows',
+        tags: ['threejs-journey', 'shadows'],
+    },
+    {
+        title: 'Journey Lesson 17 - Haunted House',
+        path: 'threejs-journey/17-haunted-house',
+        tags: ['threejs-journey', 'lighting', 'shadows', 'scene'],
+    },
+    {
+        title: 'Journey Lesson 18.1 - Particles',
+        path: 'threejs-journey/18-1-particles',
+        tags: ['threejs-journey', 'particles'],
+    },
+    {
+        title: 'Journey Lesson 18.2 - Particles',
+        path: 'threejs-journey/18-2-particles',
+        tags: ['threejs-journey', 'particles'],
+    },
+    {
+        title: 'Journey Lesson 19 - Galaxy Generator',
+        path: 'threejs-journey/19-galaxy-generator',
+        tags: ['threejs-journey', 'particles'],
+    },
+    {
+        title: 'Journey Lesson 27 - Shaders',
+        path: 'threejs-journey/27-shaders',
+        tags: ['threejs-journey', 'shaders'],
+    },
+    {
+        title: 'Journey Lesson 28 - Raging Sea',
+        path: 'threejs-journey/28-raging-sea',
+        tags: ['threejs-journey', 'shaders'],
+    },
+    {
+        title: 'Journey Lesson 29 - Animated Galaxy',
+        path: 'threejs-journey/29-animated-galaxy',
+        tags: ['threejs-journey', 'shaders'],
+    },
+    {
+        title: 'Journey Lesson 30 - Modified Materials',
+        path: 'threejs-journey/30-modified-materials',
+        tags: ['threejs-journey', 'shaders'],
+    },
+    /* XR */
+    {
+        title: 'XR - Basic VR',
+        path: 'xr/basic-vr',
+        tags: ['xr', 'vr'],
+        hidden: true,
+    },
+]
 
 const sketchCoverGlob: Record<string, { default: string }> = import.meta.glob(`./**/cover.png`, {
     query: {

@@ -2697,6 +2697,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-three/xr@npm:^5.6.2":
+  version: 5.6.2
+  resolution: "@react-three/xr@npm:5.6.2"
+  dependencies:
+    "@types/webxr": "*"
+    three-stdlib: ^2.21.1
+    zustand: ^3.7.1
+  peerDependencies:
+    "@react-three/fiber": ">=8.0.0"
+    react: ">=18.0"
+    three: ">=0.141"
+  checksum: 4928ede121cff8ceed210081f5058a4be7d2e6a66417352f524ec409e3881cbe1df0e4412ed7241f1d3f8bc5e7ba72e1debd94580d649a3c41bd166b93b76adc
+  languageName: node
+  linkType: hard
+
 "@remix-run/router@npm:1.7.2":
   version: 1.7.2
   resolution: "@remix-run/router@npm:1.7.2"
@@ -3215,6 +3230,15 @@ __metadata:
     react:
       optional: true
   checksum: b6c580f7569a0bb3fe17066e0d5144bdef36dcfcbe2053254738991a8e3859ca8b7617d8cfa0056800551439917da4e3eb6aae58fe0529f4cb982aa258ba8436
+  languageName: node
+  linkType: hard
+
+"@vitejs/plugin-basic-ssl@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@vitejs/plugin-basic-ssl@npm:1.0.1"
+  peerDependencies:
+    vite: ^3.0.0 || ^4.0.0
+  checksum: 9060dd9b02b51f48f9e655d920214879157db5b8bea9681465ab199e1be4f207cc968393410f93935a0443f8c2b302cef2a3ac0a69087af68fb33a8795e1e203
   languageName: node
   linkType: hard
 
@@ -6486,12 +6510,14 @@ __metadata:
     "@react-three/flex": ^1.0.1
     "@react-three/postprocessing": ^2.15.0
     "@react-three/rapier": ^1.1.1
+    "@react-three/xr": ^5.6.2
     "@types/d3": ^7.4.0
     "@types/node": ^20.4.8
     "@types/react": ^18.2.18
     "@types/react-dom": ^18.2.7
     "@types/styled-components": ^5.1.25
     "@types/three": ^0.155.0
+    "@vitejs/plugin-basic-ssl": ^1.0.1
     "@vitejs/plugin-react": ^4.0.4
     arancini: ^3.1.0
     d3: ^7.8.5
@@ -6879,6 +6905,27 @@ __metadata:
   peerDependencies:
     three: ">=0.128.0"
   checksum: bebd4723b74b7ab58aa7e4f9911e7a319bdd367070ef9d2206236fb91ae5dcad80374cd98fa909cb7d60b4a9192c77a71f3cd68b863fdaa60194697411b072b0
+  languageName: node
+  linkType: hard
+
+"three-stdlib@npm:^2.21.1":
+  version: 2.24.2
+  resolution: "three-stdlib@npm:2.24.2"
+  dependencies:
+    "@types/draco3d": ^1.4.0
+    "@types/offscreencanvas": ^2019.6.4
+    "@types/webxr": ^0.5.2
+    chevrotain: ^10.1.2
+    draco3d: ^1.4.1
+    fflate: ^0.6.9
+    ktx-parse: ^0.4.5
+    mmd-parser: ^1.0.4
+    opentype.js: ^1.3.3
+    potpack: ^1.0.1
+    zstddec: ^0.0.2
+  peerDependencies:
+    three: ">=0.128.0"
+  checksum: 6c8963180dad0c31a6f6ea6cdce4a29d4419778b09374581e1ffc15e8d8b03c05b8c56d3a35416088c6ac7045966c9a9f67ede975a774ed0aed1feff95285df3
   languageName: node
   linkType: hard
 
