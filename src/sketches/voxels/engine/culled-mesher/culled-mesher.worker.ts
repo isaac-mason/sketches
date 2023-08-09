@@ -263,11 +263,8 @@ class VoxelChunkMesher {
                         const voxelFaceLocalZ = localZ + lz
 
                         positions.push(voxelFaceLocalX, voxelFaceLocalY, voxelFaceLocalZ)
-
                         positions.push(voxelFaceLocalX + ux, voxelFaceLocalY + uy, voxelFaceLocalZ + uz)
-
                         positions.push(voxelFaceLocalX + ux + vx, voxelFaceLocalY + uy + vy, voxelFaceLocalZ + uz + vz)
-
                         positions.push(voxelFaceLocalX + vx, voxelFaceLocalY + vy, voxelFaceLocalZ + vz)
 
                         normals.push(nx, ny, nz, nx, ny, nz, nx, ny, nz, nx, ny, nz)

@@ -208,14 +208,9 @@ export const CorePlugin = {
     ],
     systems: [VoxelWorldCoreSystem],
     setup: (world) => {
-        const voxelWorldEntity = world.create((e) => {
-            e.add(VoxelWorldComponent)
-            e.add(VoxelWorldEventsComponent)
-        })
-
-        const voxelWorld = voxelWorldEntity.get(VoxelWorldComponent)
-
-        const voxelWorldEvents = voxelWorldEntity.get(VoxelWorldEventsComponent)
+        const voxelWorldEntity = world.create()
+        const voxelWorld = voxelWorldEntity.add(VoxelWorldComponent)
+        const voxelWorldEvents = voxelWorldEntity.add(VoxelWorldEventsComponent)
 
         const setBlock = (position: Vec3, value: BlockValue) => {
             voxelWorldEvents.onSetBlockRequest.emit({ position, value })
@@ -226,8 +221,8 @@ export const CorePlugin = {
 
         return {
             voxelWorld,
-            setBlock,
             voxelWorldActor,
+            setBlock,
         }
     },
 } satisfies VoxelEnginePlugin
