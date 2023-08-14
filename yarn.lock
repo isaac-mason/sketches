@@ -6532,7 +6532,7 @@ __metadata:
     react-dom: ^18.0.0
     react-router-dom: ^6.14.2
     styled-breakpoints: ^12.1.5
-    styled-components: ^6.0.5
+    styled-components: ^6.0.7
     three: ^0.155.0
     tunnel-rat: ^0.1.2
     typescript: ^5.1.6
@@ -6718,9 +6718,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"styled-components@npm:^6.0.5":
-  version: 6.0.5
-  resolution: "styled-components@npm:6.0.5"
+"styled-components@npm:^6.0.7":
+  version: 6.0.7
+  resolution: "styled-components@npm:6.0.7"
   dependencies:
     "@babel/cli": ^7.21.0
     "@babel/core": ^7.21.0
@@ -6748,7 +6748,7 @@ __metadata:
   peerDependenciesMeta:
     babel-plugin-styled-components:
       optional: true
-  checksum: 81cc55bb8cba3e85164b9504ac87a61d9435dccc660851f28b570a343facf90e184c01bf8a816ed0b05e21eec0ae36ba6f50a681dd5737696415e8822225bd5f
+  checksum: 38645f38f145225e456f8f9303f5be1d988180e0e3d84d1f3e1d14fb006c7deb69704745e266d61016616a154938697d011a0bff6eaeb7dd25dbba659e2411f7
   languageName: node
   linkType: hard
 
