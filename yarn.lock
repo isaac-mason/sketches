@@ -2579,9 +2579,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-three/drei@npm:^9.80.1":
-  version: 9.80.1
-  resolution: "@react-three/drei@npm:9.80.1"
+"@react-three/drei@npm:^9.80.3":
+  version: 9.80.3
+  resolution: "@react-three/drei@npm:9.80.3"
   dependencies:
     "@babel/runtime": ^7.11.2
     "@mediapipe/tasks-vision": 0.10.2
@@ -2613,7 +2613,7 @@ __metadata:
   peerDependenciesMeta:
     react-dom:
       optional: true
-  checksum: 5855bad702d02a57aba233e200d724050cc0ae012e6871150d9356829f29a6fe4f54be8f682ee237a11194eb98e3f67028395f56e9c9fc0fdcd86bad986e3c1d
+  checksum: 15d5f1fac99166cbf834c73f8bc02529194fa59f0accca5e37ed57a91abeae9f80e6ab35d1cf03f7b98de0bc8f5709e1d8a7470a5d4a6303a1b2d083c4ae06ff
   languageName: node
   linkType: hard
 
@@ -6505,7 +6505,7 @@ __metadata:
     "@dimforge/rapier3d-compat": 0.11.2
     "@pmndrs/assets": ^1.6.0
     "@react-three/csg": ^3.0.0
-    "@react-three/drei": ^9.80.1
+    "@react-three/drei": ^9.80.3
     "@react-three/fiber": ^8.13.6
     "@react-three/flex": ^1.0.1
     "@react-three/postprocessing": ^2.15.0
