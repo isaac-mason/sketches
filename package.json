@@ -31,7 +31,7 @@
         "react-dom": "^18.0.0",
         "react-router-dom": "^6.14.2",
         "styled-breakpoints": "^12.1.5",
-        "styled-components": "^6.0.5",
+        "styled-components": "^6.0.7",
         "three": "^0.155.0",
         "tunnel-rat": "^0.1.2",
         "vite-imagetools": "^5.0.7",
