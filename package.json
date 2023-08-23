@@ -34,7 +34,7 @@
         "styled-components": "^6.0.7",
         "three": "^0.155.0",
         "tunnel-rat": "^0.1.2",
-        "vite-imagetools": "^5.0.7",
+        "vite-imagetools": "^5.0.8",
         "zustand": "^4.4.1"
     },
     "devDependencies": {

@@ -6537,7 +6537,7 @@ __metadata:
     tunnel-rat: ^0.1.2
     typescript: ^5.1.6
     vite: ^4.4.9
-    vite-imagetools: ^5.0.7
+    vite-imagetools: ^5.0.8
     vite-plugin-html: ^3.2.0
     zustand: ^4.4.1
   languageName: unknown
@@ -7166,13 +7166,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite-imagetools@npm:^5.0.7":
-  version: 5.0.7
-  resolution: "vite-imagetools@npm:5.0.7"
+"vite-imagetools@npm:^5.0.8":
+  version: 5.0.8
+  resolution: "vite-imagetools@npm:5.0.8"
   dependencies:
     "@rollup/pluginutils": ^5.0.2
     imagetools-core: ^4.0.5
-  checksum: 3db5c7842e4bd67aa5fd7c55b08d45b1a784055496b547447932aaf819cec1a0eb26405908e2363481cb428495b1ede673926c37b92fd6b2d7373460dc8fa32e
+  checksum: e63a15cde87e1ea72a3401aee8494d047c4ff84240461fb465adcbafd5d5b428dc50547610308c45a7f542d5684f67d16ed619b7bc1e34af60f43485c3257262
   languageName: node
   linkType: hard
 
