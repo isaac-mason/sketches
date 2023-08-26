@@ -62,7 +62,9 @@ export class VoxelChunkMeshComponent extends Component {
 
     mesh!: Mesh
 
-    construct() {
+    constructor() {
+        super()
+
         this.mesh = new Mesh(new BufferGeometry(), voxelChunkShaderMaterial)
         this.geometry = this.mesh.geometry as BufferGeometry
         this.material = this.mesh.material as MeshStandardMaterial

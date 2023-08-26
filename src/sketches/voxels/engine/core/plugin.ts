@@ -1,4 +1,4 @@
-import { Component, Entity, System, Topic } from 'arancini'
+import { Component, Entity, System, Topic, objectPooled } from 'arancini'
 import { Object3D, Vector3 } from 'three'
 import { VoxelEnginePlugin } from '../voxel-engine-types'
 import { BlockValue, Vec3 } from './types'
@@ -19,8 +19,11 @@ export type SetBlockRequest = { position: Vec3; value: BlockValue }
 
 export type VoxelWorldChange = { position: Vec3; value: BlockValue; chunk: Entity }
 
+export const Object3DComponent = Component.object<Object3D>('Object3D')
+
 export const VoxelWorldActorComponent = Component.object<{ position: Vector3 }>('voxel world actor')
 
+@objectPooled()
 export class VoxelWorldEventsComponent extends Component {
     onSetBlockRequest = new Topic<[SetBlockRequest]>()
 
@@ -33,6 +36,7 @@ export class VoxelWorldEventsComponent extends Component {
 
 export const VoxelChunkLoadedTagComponent = Component.tag('loaded voxel chunk')
 
+@objectPooled()
 export class VoxelChunkComponent extends Component {
     id: string
     position: Vector3
@@ -71,6 +75,7 @@ export class VoxelChunkComponent extends Component {
     }
 }
 
+@objectPooled()
 export class VoxelWorldComponent extends Component {
     chunks = new Map<string, VoxelChunkComponent>()
 
@@ -100,8 +105,6 @@ export class VoxelWorldComponent extends Component {
         return this.chunkEntities.get(chunkId(worldPositionToChunkPosition(position)))
     }
 }
-
-export const Object3DComponent = Component.object<Object3D>('Object3D')
 
 export class VoxelWorldCoreSystem extends System {
     voxelWorld = this.singleton(VoxelWorldComponent)!

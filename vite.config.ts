@@ -30,7 +30,14 @@ export default defineConfig(() => {
 
     return {
         plugins: [
-            react(),
+            react({
+                babel: {
+                    plugins: [
+                        ['@babel/plugin-proposal-decorators', { legacy: true }],
+                        ['@babel/plugin-proposal-class-properties', { loose: true }],
+                    ],
+                },
+            }),
             createHtmlPlugin({
                 minify: true,
                 inject: {

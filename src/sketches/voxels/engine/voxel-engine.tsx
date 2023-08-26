@@ -76,7 +76,7 @@ export const VoxelEngine = <Plugins extends Array<VoxelEnginePlugin>, Api = Voxe
         }
 
         return () => {
-            engine?.world.destroy()
+            engine?.world.reset()
             initialised.current = false
         }
     }, [])

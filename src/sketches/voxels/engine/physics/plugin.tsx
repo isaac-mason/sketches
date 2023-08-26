@@ -1,5 +1,6 @@
 import Rapier from '@dimforge/rapier3d-compat'
 import { Component, Entity, System } from 'arancini'
+import { suspend } from 'suspend-react'
 import { Quaternion, Vector3 } from 'three'
 import {
     CHUNK_SIZE,
@@ -13,7 +14,6 @@ import {
 } from '../core'
 import { VoxelEnginePlugin } from '../voxel-engine-types'
 import { worldVoxelPositionToPhysicsPosition } from './utils'
-import { suspend } from 'suspend-react'
 
 export const PhysicsWorldComponent = Component.object<Rapier.World>('PhysicsWorld')
 

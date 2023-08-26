@@ -17,6 +17,8 @@ const BoxTagComponent = Component.tag('Box')
 
 const PhysicsBodyComponent = Component.object<p2.Body>('PhysicsBody')
 
+const Object3DComponent = Component.object<THREE.Object3D>('Object3D')
+
 class ColorComponent extends Component {
     color!: Color
 
@@ -24,8 +26,6 @@ class ColorComponent extends Component {
         this.color = color
     }
 }
-
-const Object3DComponent = Component.object<THREE.Object3D>('Object3D')
 
 class PhysicsSystem extends System {
     physicsWorld = new p2.World({ gravity: [0, 0] })

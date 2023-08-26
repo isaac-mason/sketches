@@ -12,7 +12,7 @@ import { KinematicCharacterController } from './kinematic-character-controller'
 const SCENERY_GROUP = 0x01
 const PLAYER_GROUP = 0x02
 
-const PlayerComponent  = Component.tag('Player')
+const PlayerComponent = Component.tag('Player')
 
 const CameraComponent = Component.object<THREE.Camera>('Camera')
 

@@ -19,7 +19,7 @@
         "@react-three/postprocessing": "^2.15.0",
         "@react-three/rapier": "^1.1.1",
         "@react-three/xr": "^5.6.2",
-        "arancini": "^3.1.0",
+        "arancini": "^3.2.0",
         "d3": "^7.8.5",
         "leva": "^0.9.35",
         "linguine": "^0.0.7",
@@ -38,6 +38,7 @@
         "zustand": "^4.4.1"
     },
     "devDependencies": {
+        "@babel/plugin-proposal-decorators": "^7.22.10",
         "@types/d3": "^7.4.0",
         "@types/node": "^20.5.3",
         "@types/react": "^18.2.20",
