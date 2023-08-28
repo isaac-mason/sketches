@@ -205,6 +205,9 @@ export class BoxCharacterControllerSystem extends System {
         // if no collision, set the new position to the desired new y position
         if (controller.velocity.y < 0 && grounded) {
             controller.velocity.y = 0
+            
+            // snap to the ground
+            controller.position.y = Math.floor(controller.position.y) + controller.characterHalfHeight
         } else {
             controller.position.y = ny
         }
