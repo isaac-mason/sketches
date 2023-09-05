@@ -2755,9 +2755,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-three/postprocessing@npm:^2.15.0":
-  version: 2.15.0
-  resolution: "@react-three/postprocessing@npm:2.15.0"
+"@react-three/postprocessing@npm:^2.15.1":
+  version: 2.15.1
+  resolution: "@react-three/postprocessing@npm:2.15.1"
   dependencies:
     maath: ^0.6.0
     n8ao: ^1.6.6
@@ -2767,7 +2767,7 @@ __metadata:
     "@react-three/fiber": ">=8.0"
     react: ">=18.0"
     three: ">= 0.138.0"
-  checksum: bfc82fc6e34a56fbf181df5f8adc3909b69e59f9e21809e54dc58ad0588a8024a6942c5ab79102e90d020624fb0a0c558e64e5ec260d9bab3763839fdedd93e0
+  checksum: 5f6a226445e94902e1238cd54120307f32ba3f2f3160817cf54a0471c63329c537c24e28a0c8f348f0737a18d3409a3a0971e7e26dabf747963d15ac116b7af7
   languageName: node
   linkType: hard
 
@@ -6598,7 +6598,7 @@ __metadata:
     "@react-three/drei": ^9.80.9
     "@react-three/fiber": ^8.14.1
     "@react-three/flex": ^1.0.1
-    "@react-three/postprocessing": ^2.15.0
+    "@react-three/postprocessing": ^2.15.1
     "@react-three/rapier": ^1.1.1
     "@react-three/xr": ^5.6.2
     "@types/d3": ^7.4.0
