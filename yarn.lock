@@ -2675,12 +2675,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-three/fiber@npm:^8.13.6":
-  version: 8.13.6
-  resolution: "@react-three/fiber@npm:8.13.6"
+"@react-three/fiber@npm:^8.14.1":
+  version: 8.14.1
+  resolution: "@react-three/fiber@npm:8.14.1"
   dependencies:
     "@babel/runtime": ^7.17.8
     "@types/react-reconciler": ^0.26.7
+    base64-js: ^1.5.1
     its-fine: ^1.0.6
     react-reconciler: ^0.27.0
     react-use-measure: ^2.1.1
@@ -2690,6 +2691,7 @@ __metadata:
   peerDependencies:
     expo: ">=43.0"
     expo-asset: ">=8.4"
+    expo-file-system: ">=11.0"
     expo-gl: ">=11.0"
     react: ">=18.0"
     react-dom: ">=18.0"
@@ -2700,13 +2702,15 @@ __metadata:
       optional: true
     expo-asset:
       optional: true
+    expo-file-system:
+      optional: true
     expo-gl:
       optional: true
     react-dom:
       optional: true
     react-native:
       optional: true
-  checksum: b7ad58c20f1c2193b57425f8cbe6614797b62668744ab164922250a954a18720fa1d3c0bca4152a4577651e49b07b72fdcd28c05c310773e72ac62d6674764b9
+  checksum: 7da8c29d015039fe22381a7e804d4ac4e3c4d4ed33a05e81ea9dfc9c1ce764b37842f4c91da8f780ade2b202c32633ef16c4ecd7308662dba4465ea846db7afa
   languageName: node
   linkType: hard
 
@@ -3510,7 +3514,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"base64-js@npm:^1.3.1":
+"base64-js@npm:^1.3.1, base64-js@npm:^1.5.1":
   version: 1.5.1
   resolution: "base64-js@npm:1.5.1"
   checksum: 669632eb3745404c2f822a18fc3a0122d2f9a7a13f7fb8b5823ee19d1d2ff9ee5b52c53367176ea4ad093c332fd5ab4bd0ebae5a8e27917a4105a4cfc86b1005
@@ -6565,7 +6569,7 @@ __metadata:
     "@pmndrs/assets": ^1.6.0
     "@react-three/csg": ^3.0.0
     "@react-three/drei": ^9.80.9
-    "@react-three/fiber": ^8.13.6
+    "@react-three/fiber": ^8.14.1
     "@react-three/flex": ^1.0.1
     "@react-three/postprocessing": ^2.15.0
     "@react-three/rapier": ^1.1.1
