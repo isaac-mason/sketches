@@ -60,6 +60,12 @@ const sketchList = [
         path: 'p2-es/kinematic-character-controller',
         tags: ['physics', 'p2-es', 'controller'],
     },
+    /* AI / Pathfinding */
+    {
+        title: 'AI - Busy Street Crossing',
+        path: 'ai/busy-street-crossing',
+        tags: ['ai', 'navigation', 'pathfinding', 'recast-navigation'],
+    },
     /* Voxels */
     {
         title: '🚧 Voxels - Culled Mesher - Basic',

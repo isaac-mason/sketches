@@ -30,11 +30,11 @@
         "react-colorful": "^5.6.1",
         "react-dom": "^18.0.0",
         "react-router-dom": "^6.15.0",
+        "recast-navigation": "^0.7.1",
         "styled-breakpoints": "^12.1.5",
         "styled-components": "^6.0.7",
         "three": "^0.155.0",
         "tunnel-rat": "^0.1.2",
-        "vite-imagetools": "^5.0.8",
         "zustand": "^4.4.1"
     },
     "devDependencies": {
@@ -50,6 +50,7 @@
         "prettier": "^3.0.3",
         "typescript": "^5.2.2",
         "vite": "^4.4.9",
+        "vite-imagetools": "^5.0.8",
         "vite-plugin-html": "^3.2.0"
     },
     "packageManager": "yarn@3.6.1"

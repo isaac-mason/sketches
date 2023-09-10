@@ -61,5 +61,11 @@ export default defineConfig(() => {
             // for easy local development of xr sketches
             basicSsl(),
         ],
+        optimizeDeps: {
+            exclude: [
+                // does not play nicely with vite pre-bundling
+                'recast-navigation',
+            ],
+        },
     }
 })
