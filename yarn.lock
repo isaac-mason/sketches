@@ -6662,7 +6662,7 @@ __metadata:
     recast-navigation: ^0.7.1
     styled-breakpoints: ^12.1.5
     styled-components: ^6.0.7
-    three: ^0.155.0
+    three: ^0.156.1
     tunnel-rat: ^0.1.2
     typescript: ^5.2.2
     vite: ^4.4.9
@@ -7079,10 +7079,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"three@npm:^0.155.0":
-  version: 0.155.0
-  resolution: "three@npm:0.155.0"
-  checksum: 55de8af716686be2159b2ff407501ce2e6418b7d16a8dc57f3dcf9f08c4a6bedf0623fa8ddb67c1ae6f679d7ca53cfa0c64bab6b0577d6c467618389d5561211
+"three@npm:^0.156.1":
+  version: 0.156.1
+  resolution: "three@npm:0.156.1"
+  checksum: 18b3381efadb6a2bb10ca09f6de0cea8f6f5369acc7bd5531dfdc80f60c3d075e28151f56194dd19144352e646a50664a243111060985e1f428bff9484461d08
   languageName: node
   linkType: hard
 
