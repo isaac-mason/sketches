@@ -2786,9 +2786,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-three/xr@npm:^5.6.2":
-  version: 5.6.2
-  resolution: "@react-three/xr@npm:5.6.2"
+"@react-three/xr@npm:^5.7.1":
+  version: 5.7.1
+  resolution: "@react-three/xr@npm:5.7.1"
   dependencies:
     "@types/webxr": "*"
     three-stdlib: ^2.21.1
@@ -2797,7 +2797,7 @@ __metadata:
     "@react-three/fiber": ">=8.0.0"
     react: ">=18.0"
     three: ">=0.141"
-  checksum: 4928ede121cff8ceed210081f5058a4be7d2e6a66417352f524ec409e3881cbe1df0e4412ed7241f1d3f8bc5e7ba72e1debd94580d649a3c41bd166b93b76adc
+  checksum: c7f8ca59a5e765b5edb7b9d1dad0bbdd55f80a83b09545a8aabe4bf3d00b2bd6bc414d44c1d9850f9ec1207323702d2e7fb282b8d893f9df3c01c0fe3065c0b3
   languageName: node
   linkType: hard
 
@@ -6638,7 +6638,7 @@ __metadata:
     "@react-three/flex": ^1.0.1
     "@react-three/postprocessing": ^2.15.1
     "@react-three/rapier": ^1.1.1
-    "@react-three/xr": ^5.6.2
+    "@react-three/xr": ^5.7.1
     "@types/d3": ^7.4.0
     "@types/node": ^20.6.0
     "@types/react": ^18.2.21
