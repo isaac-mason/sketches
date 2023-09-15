@@ -40,7 +40,7 @@ const Ball = ({ position: [x, y, z], radius }: BallProps) => {
 }
 
 const App = () => {
-    const { world, physicsWorld, voxelWorld, setBlock } = useVoxelEngine<[CorePlugin, CulledMesherPlugin, PhysicsPlugin]>()
+    const { physicsWorld, voxelWorld, setBlock } = useVoxelEngine<[CorePlugin, CulledMesherPlugin, PhysicsPlugin]>()
 
     useLayoutEffect(() => {
         // container

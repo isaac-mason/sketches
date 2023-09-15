@@ -66,6 +66,17 @@ const sketchList = [
         path: 'ai/busy-street-crossing',
         tags: ['ai', 'navigation', 'pathfinding', 'recast-navigation'],
     },
+    /* Character Animation */
+    {
+        title: 'Character Animation - Basic',
+        path: 'character-animation/basic',
+        tags: ['animation', 'character']
+    },
+    {
+        title: 'Character Animation - Mixamo Animations',
+        path: 'character-animation/mixamo-animations',
+        tags: ['animation', 'character', 'mixamo']
+    },
     /* Voxels */
     {
         title: '🚧 Voxels - Culled Mesher - Basic',
