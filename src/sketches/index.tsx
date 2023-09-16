@@ -66,6 +66,12 @@ const sketchList = [
         path: 'ai/busy-street-crossing',
         tags: ['ai', 'navigation', 'pathfinding', 'recast-navigation'],
     },
+    /* Recast Navigation */
+    {
+        title: 'Recast Navigation - Character Controller',
+        path: 'recast-navigation/character-controller',
+        tags: ['recast-navigation', 'controller'],
+    },
     /* Character Animation */
     {
         title: 'Character Animation - Basic',
