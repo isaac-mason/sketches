@@ -151,7 +151,7 @@ const Agent = () => {
 
     const camera = useThree((s) => s.camera)
     const cameraIdealLookAt = useMemo<Vector3>(() => new Vector3(), [])
-    const cameraIdealPosition = useMemo<Vector3>(() => new Vector3(), [])
+    const cameraIdealPosition = useMemo<Vector3>(() => new Vector3(0, 100, 100), [])
 
     const raycaster = useMemo(() => new Raycaster(), [])
 
