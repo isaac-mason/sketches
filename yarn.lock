@@ -5760,6 +5760,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"nipplejs@npm:^0.10.1":
+  version: 0.10.1
+  resolution: "nipplejs@npm:0.10.1"
+  checksum: ba7e5252e643c4fba601dd562a9f89455a4a8a3675094c348465e155278a0ff867142f87ec4ee2f35c1929529b92774167368d8089b7e8a8c0352350b2f9d769
+  languageName: node
+  linkType: hard
+
 "no-case@npm:^3.0.4":
   version: 3.0.4
   resolution: "no-case@npm:3.0.4"
@@ -6665,6 +6672,7 @@ __metadata:
     leva: ^0.9.35
     linguine: ^0.0.7
     meshline: ^3.1.6
+    nipplejs: ^0.10.1
     p2-es: ^1.1.8
     prettier: ^3.0.3
     r3f-perf: ^7.1.2

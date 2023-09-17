@@ -31,10 +31,12 @@ const Error = styled.div`
 `
 
 const GithubLink = styled.a`
+    position: absolute;
+    z-index: 2;
+
     font-size: 1.2em;
     margin: 0;
     text-decoration: none;
-    position: absolute;
 
     color: #eee;
     text-shadow: 2px 2px #333;
@@ -79,6 +81,7 @@ const UnstyledButton = styled.button`
 
 const NavToggle = styled(UnstyledButton)`
     position: absolute;
+    z-index: 2;
     bottom: 10px;
     left: 10px;
 

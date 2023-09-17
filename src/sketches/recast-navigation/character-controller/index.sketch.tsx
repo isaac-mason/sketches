@@ -8,9 +8,12 @@ import { NavMeshHelper, threeToSoloNavMesh } from 'recast-navigation/three'
 import { suspend } from 'suspend-react'
 import { Group, LoopRepeat, MathUtils, Mesh, MeshBasicMaterial, Object3D, Raycaster, Vector3 } from 'three'
 import { create } from 'zustand'
+import { createJoystick } from '../../../common/joystick'
 import characterGltfUrl from './character.glb?url'
 import { Chest } from './chest'
 import { Crate } from './crate'
+
+const { Joystick, getJoystickState } = createJoystick()
 
 type NavigationState = {
     navMesh: NavMesh | undefined
@@ -183,11 +186,20 @@ const Agent = () => {
 
         const t = 1.0 - Math.pow(0.01, delta)
 
+        const { vector: joystickVector } = getJoystickState()
+        joystickVector[0] = Math.abs(joystickVector[0]) > 0.2 ? joystickVector[0] : 0
+        joystickVector[1] = Math.abs(joystickVector[1]) > 0.2 ? joystickVector[1] : 0
+
         /* rotation */
         let rotation = 0
 
-        if (left) rotation += 1
-        if (right) rotation -= 1
+        if (left || right) {
+            if (left) rotation += 1
+            if (right) rotation -= 1
+        } else {
+            rotation = -joystickVector[0]
+        }
+
         rotation *= t * 0.75
 
         agent.rotation.y += rotation
@@ -195,12 +207,19 @@ const Agent = () => {
         /* movement */
         const movementVector = tmpMovementVector.set(0, 0, 0)
 
-        if (forward) movementVector.z -= 1
-        if (back) movementVector.z += 1
+        if (forward || back) {
+            if (forward) movementVector.z -= 1
+            if (back) movementVector.z += 1
+        } else {
+            movementVector.z -= joystickVector[1]
+        }
+
+        const running = (forward && !back && run) || joystickVector[1] > 0.5
+
         movementVector
             .normalize()
             .multiplyScalar(t)
-            .multiplyScalar(forward && !back && run ? 1.5 : 0.5)
+            .multiplyScalar(running ? 1.5 : 0.5)
             .applyEuler(agent.rotation)
 
         const movementTarget = tmpMovementTarget.copy(agent.position).add(movementVector)
@@ -231,8 +250,6 @@ const Agent = () => {
         let idleWeight = idleAction.weight
         let walkWeight = walkAction.weight
         let runWeight = runAction.weight
-
-        const running = forward && !back && run
 
         if (speed < 0.01 && rotation === 0) {
             idleWeight = 1
@@ -288,8 +305,8 @@ const Agent = () => {
         idealLookAt.applyEuler(agent.rotation)
         idealLookAt.add(agent.position)
 
-        cameraIdealLookAt.lerp(idealLookAt, t * 2)
-        cameraIdealPosition.lerp(idealOffset, t / 0.5)
+        cameraIdealLookAt.lerp(idealLookAt, t * 1.5)
+        cameraIdealPosition.lerp(idealOffset, t / 1.5)
 
         camera.position.copy(cameraIdealPosition)
         camera.lookAt(cameraIdealLookAt)
@@ -306,14 +323,18 @@ export default () => {
     suspend(() => init(), [])
 
     return (
-        <Canvas>
-            <Navigation />
+        <>
+            <Canvas camera={{ position: [0, 100, 100] }}>
+                <Navigation />
 
-            <KeyboardControls map={CONTROLS_MAP}>
-                <Agent />
-            </KeyboardControls>
+                <KeyboardControls map={CONTROLS_MAP}>
+                    <Agent />
+                </KeyboardControls>
 
-            <Environment files={cityEnvironment} />
-        </Canvas>
+                <Environment files={cityEnvironment} />
+            </Canvas>
+
+            <Joystick />
+        </>
     )
 }
