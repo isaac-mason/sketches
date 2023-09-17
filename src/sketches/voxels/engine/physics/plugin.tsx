@@ -374,13 +374,13 @@ export class PhysicsSystem extends System {
             const { rigidBody } = rigidBodyComponent
 
             // todo: sleep events
-
             rigidBodyComponent.isSleeping = rigidBody.isSleeping()
 
             // Only proceed if Object3DComponent is in the entity
             const object3D = entity.find(Object3DComponent)
+
             if (object3D) {
-                // todo: optimisation - can skip if the  object is sleeping or fixed, and has been updated once already
+                if (rigidBody.isFixed() && object3D.userData.physicsPositionInitialised) return
 
                 const oldState = previousTranslations[rigidBody.handle]
 
@@ -406,24 +406,13 @@ export class PhysicsSystem extends System {
                 object3D.matrixAutoUpdate = false
                 object3D.matrix.compose(interpolatedTranslation, interpolatedRotation, this.worldScale)
 
+                object3D.userData.physicsPositionInitialised = true
+
                 // todo: instanced mesh support
             }
         }
 
-        // Emit collision events
-        this.eventQueue.drainCollisionEvents((handle1, handle2, started) => {
-            const collider1 = this.physicsWorld.getCollider(handle1)
-            const collider2 = this.physicsWorld.getCollider(handle2)
-
-            const rigidBodyHandle1 = collider1.parent()?.handle
-            const rigidBodyHandle2 = collider2.parent()?.handle
-
-            if (!collider1 || !collider2 || !rigidBodyHandle1 || !rigidBodyHandle2) {
-                return
-            }
-
-            // todo: contact events
-        })
+        // todo: emit collision events
     }
 }
 

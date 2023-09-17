@@ -1,66 +1,107 @@
 import Rapier from '@dimforge/rapier3d-compat'
 import { Bounds, OrbitControls } from '@react-three/drei'
-import { ThreeEvent } from '@react-three/fiber'
-import { useLayoutEffect, useMemo } from 'react'
+import { ThreeEvent, useThree } from '@react-three/fiber'
+import { useEffect, useLayoutEffect } from 'react'
 import { Color } from 'three'
 import { Canvas } from '../../../../common'
 import { CorePlugin, Object3DComponent, Vec3 } from '../../engine/core'
 import { CulledMesherPlugin, VoxelChunkCulledMeshes } from '../../engine/culled-mesher'
 import { PhysicsDebug, PhysicsPlugin, RapierInit, RigidBodyComponent } from '../../engine/physics'
 import { VoxelEngine, useVoxelEngine } from '../../engine/voxel-engine'
+import { Leva, useControls } from 'leva'
 
-const gray = new Color('#666').getHex()
+const green1 = new Color('green').addScalar(-0.02).getHex()
+const green2 = new Color('green').addScalar(0.02).getHex()
+
 const orange = new Color('orange').getHex()
-
-type BallProps = {
-    position: Vec3
-    radius: number
-}
-
-const Ball = ({ position: [x, y, z], radius }: BallProps) => {
-    const { ecs, physicsWorld } = useVoxelEngine<[CorePlugin, PhysicsPlugin]>()
-
-    const rigidBody = useMemo(() => {
-        const body = physicsWorld.createRigidBody(Rapier.RigidBodyDesc.dynamic().setTranslation(x, y, z))
-        physicsWorld.createCollider(Rapier.ColliderDesc.ball(radius), body)
-        return body
-    }, [])
-
-    return (
-        <ecs.Entity>
-            <ecs.Component type={RigidBodyComponent} args={[rigidBody]} />
-            <ecs.Component type={Object3DComponent}>
-                <mesh position={[x, y, z]}>
-                    <meshStandardMaterial color="orange" />
-                    <sphereGeometry args={[radius]} />
-                </mesh>
-            </ecs.Component>
-        </ecs.Entity>
-    )
-}
+const brown = new Color('brown').getHex()
 
 const App = () => {
-    const { physicsWorld, voxelWorld, setBlock } = useVoxelEngine<[CorePlugin, CulledMesherPlugin, PhysicsPlugin]>()
+    const { ecs, voxelWorld, physicsWorld, setBlock } = useVoxelEngine<[CorePlugin, CulledMesherPlugin, PhysicsPlugin]>()
+
+    const camera = useThree((s) => s.camera)
+
+    const { tool, physicsDebug } = useControls('voxels-culled-mesher-physics', {
+        tool: {
+            label: 'Tool',
+            options: ['cannon', 'build'],
+            value: 'cannon',
+        },
+        physicsDebug: {
+            label: 'Physics Debug',
+            value: false,
+        },
+    })
 
     useLayoutEffect(() => {
-        // container
-        for (let x = -10; x < 10; x++) {
-            for (let y = -10; y < 10; y++) {
-                for (let z = -10; z < 10; z++) {
-                    if (x === -10 || x === 9 || y === -10 || z === -10 || z === 9) {
-                        setBlock([x, y, z], {
-                            solid: true,
-                            color: gray,
-                        })
+        const tree = (treeX: number, treeY: number, treeZ: number) => {
+            // trunk
+            for (let y = 0; y < 10; y++) {
+                setBlock([treeX, treeY + y, treeZ], {
+                    solid: true,
+                    color: brown,
+                })
+            }
+
+            // leaves
+            const radius = 5
+            const center = [0, radius, 0]
+
+            for (let x = -radius; x < radius; x++) {
+                for (let y = -radius; y < radius; y++) {
+                    for (let z = -radius; z < radius; z++) {
+                        const position: Vec3 = [x, y, z]
+                        const distance = Math.sqrt(position[0] ** 2 + position[1] ** 2 + position[2] ** 2)
+
+                        if (distance < radius) {
+                            const block: Vec3 = [center[0] + x + treeX, center[1] + y + 5 + treeY, center[2] + z + treeZ]
+
+                            setBlock(block, {
+                                solid: true,
+                                color: Math.random() > 0.5 ? green1 : green2,
+                            })
+                        }
                     }
+                }
+            }
+        }
+
+        for (let x = -50; x < 50; x++) {
+            for (let z = -50; z < 50; z++) {
+                const y = Math.floor(Math.sin(x / 10) * Math.cos(z / 10) * 5)
+                setBlock([x, y, z], {
+                    solid: true,
+                    color: Math.random() > 0.5 ? green1 : green2,
+                })
+
+                // random chance to place a tree
+                if (Math.abs(x) < 40 && Math.abs(z) < 40 && Math.random() < 0.002) {
+                    tree(x, y, z)
                 }
             }
         }
     }, [])
 
-    const onPointerDown = (event: ThreeEvent<MouseEvent>) => {
-        event.stopPropagation()
+    const handleCannon = (event: ThreeEvent<MouseEvent>) => {
+        const position = camera.position
+        const ray = event.ray
 
+        const body = physicsWorld.createRigidBody(
+            Rapier.RigidBodyDesc.dynamic().setTranslation(position.x, position.y, position.z).setRotation(camera.quaternion),
+        )
+        physicsWorld.createCollider(Rapier.ColliderDesc.cuboid(0.5, 0.5, 0.5), body)
+
+        const impulse = new Rapier.Vector3(ray.direction.x, ray.direction.y, ray.direction.z)
+        const impulseScale = 50
+        impulse.x *= impulseScale
+        impulse.y *= impulseScale
+        impulse.z *= impulseScale
+        body.applyImpulse(impulse, true)
+
+        ecs.world.create().add(RigidBodyComponent, body)
+    }
+
+    const handleBuild = (event: ThreeEvent<MouseEvent>) => {
         const origin = event.ray.origin.toArray()
         const direction = event.ray.direction.toArray()
 
@@ -71,9 +112,7 @@ const App = () => {
         if (event.button === 2) {
             const block: Vec3 = [Math.floor(ray.hitPosition[0]), Math.floor(ray.hitPosition[1]), Math.floor(ray.hitPosition[2])]
 
-            setBlock(block, {
-                solid: false,
-            })
+            setBlock(block, { solid: false })
         } else {
             const block: Vec3 = [
                 Math.floor(ray.hitPosition[0] + ray.hitNormal[0]),
@@ -88,30 +127,66 @@ const App = () => {
         }
     }
 
-    const balls = useMemo(() => {
-        return Array.from({ length: 20 }).map(() => ({
-            position: [Math.random() * 10 - 5, Math.random() * 10 - 5, Math.random() * 10 - 5] as Vec3,
-            radius: 0.5,
-        }))
+    const onPointerDown = (event: ThreeEvent<MouseEvent>) => {
+        event.stopPropagation()
+
+        if (tool === 'cannon') {
+            handleCannon(event)
+        } else {
+            handleBuild(event)
+        }
+    }
+
+    useEffect(() => {
+        const timeouts: NodeJS.Timeout[] = []
+
+        const interval = setInterval(() => {
+            const x = Math.floor((Math.random() - 0.5) * 100)
+            const z = Math.floor((Math.random() - 0.5) * 100)
+
+            const body = physicsWorld.createRigidBody(Rapier.RigidBodyDesc.dynamic().setTranslation(x, 80, z))
+            physicsWorld.createCollider(Rapier.ColliderDesc.cuboid(0.5, 0.5, 0.5), body)
+
+            const entity = ecs.world.create((e) => {
+                e.add(RigidBodyComponent, body)
+            })
+
+            const timeout = setTimeout(() => {
+                entity.destroy()
+                physicsWorld.removeRigidBody(body)
+            }, 15000)
+
+            timeouts.push(timeout)
+        }, 20)
+
+        return () => {
+            clearInterval(interval)
+            timeouts.forEach((timeout) => clearTimeout(timeout))
+        }
     }, [])
 
     return (
         <>
-            <Bounds fit margin={1.5}>
-                <group onPointerDown={onPointerDown}>
+            <group onPointerDown={onPointerDown}>
+                <Bounds fit margin={1.5}>
                     <VoxelChunkCulledMeshes />
-                </group>
-            </Bounds>
+                </Bounds>
 
-            {balls.map(({ position, radius }, idx) => (
-                <Ball key={idx} position={position} radius={radius} />
-            ))}
+                <ecs.QueryEntities query={[RigidBodyComponent]}>
+                    <ecs.Component type={Object3DComponent}>
+                        <mesh>
+                            <meshStandardMaterial color="white" />
+                            <boxGeometry args={[1, 1, 1]} />
+                        </mesh>
+                    </ecs.Component>
+                </ecs.QueryEntities>
+            </group>
 
-            <PhysicsDebug world={physicsWorld} />
+            {physicsDebug && <PhysicsDebug world={physicsWorld} />}
 
             <ambientLight intensity={0.6} />
-            <pointLight decay={0.5} intensity={10} position={[20, 20, 20]} />
-            <pointLight decay={0.5} intensity={10} position={[-20, 20, -20]} />
+            <pointLight decay={0.5} intensity={10} position={[40, 20, 40]} />
+            <pointLight decay={0.5} intensity={10} position={[-40, 20, -40]} />
         </>
     )
 }
@@ -119,7 +194,7 @@ const App = () => {
 export default () => {
     return (
         <RapierInit>
-            <Canvas camera={{ position: [5, 20, 5] }}>
+            <Canvas camera={{ position: [20, 50, 50] }}>
                 <VoxelEngine plugins={[CorePlugin, CulledMesherPlugin, PhysicsPlugin]}>
                     <App />
                 </VoxelEngine>
