@@ -14,6 +14,7 @@ import {
 } from 'react-router-dom'
 import { createStyledBreakpointsTheme } from 'styled-breakpoints'
 import styled, { ThemeProvider } from 'styled-components'
+import { create } from 'zustand'
 import { DebugTunnel, Spinner } from './common'
 import { useDebounce } from './common/hooks/use-debounce'
 import { findSketchByRoute, sketchModules, sketches, visibleSketches } from './sketches'
@@ -366,34 +367,25 @@ type SketchLoaderData = {
     sketchData: SketchData
 }
 
-type LazySketchProps = {
-    displayMode: DisplayMode
-}
+const errorBoundaryState = create<{ error: boolean }>(() => ({
+    error: false,
+}))
 
 type ErrorBoundaryProps = {
     children: ReactNode
 }
 
-type ErrorBoundaryState = {
-    hasError: boolean
-}
-
-class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-    constructor(props: { children: ReactNode }) {
-        super(props)
-        this.state = { hasError: false }
+class ErrorBoundary extends Component<ErrorBoundaryProps> {
+    static getDerivedStateFromError() {
+        return {}
     }
 
-    static getDerivedStateFromError(error: Error) {
-        return { hasError: true }
-    }
-
-    componentDidCatch(error: Error, errorInfo: never) {
-        console.error(error, errorInfo)
+    componentDidCatch(_error: Error, _errorInfo: never) {
+        errorBoundaryState.setState({ error: true })
     }
 
     render() {
-        if (this.state.hasError) {
+        if (errorBoundaryState.getState().error) {
             return <Error>Something went wrong rendering the sketch!</Error>
         }
 
@@ -406,6 +398,10 @@ const SketchModule = memo(({ route }: { route: string }) => {
 
     return <SketchModuleComponent key={route} />
 })
+
+type LazySketchProps = {
+    displayMode: DisplayMode
+}
 
 const LazySketch = ({ displayMode }: LazySketchProps) => {
     const { sketch, options } = useAsyncValue() as SketchData
@@ -420,9 +416,7 @@ const LazySketch = ({ displayMode }: LazySketchProps) => {
         <SketchWrapper>
             {displayMode !== 'screenshot' && !options?.noTitle && <h1>{sketch?.title}</h1>}
 
-            <ErrorBoundary>
-                <SketchModule route={sketch.route} />
-            </ErrorBoundary>
+            <SketchModule route={sketch.route} />
         </SketchWrapper>
     )
 }
@@ -550,6 +544,8 @@ const routes: RouteObject[] = [
             path: `/sketch/${sketch.route}`,
             Component: App,
             loader: async ({ request }) => {
+                errorBoundaryState.setState({ error: false })
+
                 const sketchPath = new URL(request.url).pathname.replace('/sketch/', '')
 
                 const getSketchData = async (): Promise<SketchData> => {
