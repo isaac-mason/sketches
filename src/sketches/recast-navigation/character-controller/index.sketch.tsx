@@ -3,7 +3,7 @@ import { Environment, KeyboardControls, useAnimations, useGLTF, useKeyboardContr
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useControls } from 'leva'
 import { useEffect, useMemo, useRef } from 'react'
-import { NavMesh, NavMeshQuery, init } from 'recast-navigation'
+import { NavMesh, NavMeshQuery, Vector3Tuple, init } from 'recast-navigation'
 import { NavMeshHelper, threeToSoloNavMesh } from 'recast-navigation/three'
 import { suspend } from 'suspend-react'
 import { Group, LoopRepeat, MathUtils, Mesh, MeshBasicMaterial, Object3D, Raycaster, Vector3 } from 'three'
@@ -54,11 +54,12 @@ const Navigation = () => {
             }
         })
 
-        const cs = 0.1
-        const ch = 0.1
+        const cs = 0.2
+        const ch = 0.2
         const { success, navMesh } = threeToSoloNavMesh(meshes, {
             cs,
             ch,
+            walkableClimb: 0.5 / ch,
             walkableRadius: 0.5 / cs,
             walkableHeight: 2 / cs,
         })
@@ -94,7 +95,6 @@ const Navigation = () => {
     return (
         <>
             <group ref={group}>
-                {/* base */}
                 <mesh position-y={-0.2}>
                     <meshStandardMaterial color="#333" />
                     <boxGeometry args={[10, 0.2, 10]} />
@@ -138,12 +138,18 @@ const tmpIdealLookAt = new Vector3()
 const tmpRaycasterOrigin = new Vector3()
 const tmpRaycasterDirection = new Vector3()
 
-const Agent = () => {
+type AgentProps = {
+    initialPosition: Vector3Tuple
+}
+
+const Agent = ({ initialPosition }: AgentProps) => {
     const agent = useMemo<Object3D>(() => {
         const object = new Object3D()
-        object.position.set(0, 0, 3)
+        object.position.set(...initialPosition)
         return object
     }, [])
+
+    const initialised = useRef(false)
 
     const groupRef = useRef<Group>(null!)
 
@@ -154,7 +160,7 @@ const Agent = () => {
 
     const camera = useThree((s) => s.camera)
     const cameraIdealLookAt = useMemo<Vector3>(() => new Vector3(), [])
-    const cameraIdealPosition = useMemo<Vector3>(() => new Vector3(0, 100, 100), [])
+    const cameraIdealPosition = useMemo<Vector3>(() => new Vector3(0, 50, 50), [])
 
     const raycaster = useMemo(() => new Raycaster(), [])
 
@@ -186,7 +192,10 @@ const Agent = () => {
 
         const t = 1.0 - Math.pow(0.01, delta)
 
+        /* get joystick input */
         const { vector: joystickVector } = getJoystickState()
+
+        // deadzone
         joystickVector[0] = Math.abs(joystickVector[0]) > 0.2 ? joystickVector[0] : 0
         joystickVector[1] = Math.abs(joystickVector[1]) > 0.2 ? joystickVector[1] : 0
 
@@ -219,24 +228,28 @@ const Agent = () => {
         movementVector
             .normalize()
             .multiplyScalar(t)
-            .multiplyScalar(running ? 1.5 : 0.5)
+            .multiplyScalar(joystickVector[1] !== 0 ? joystickVector[1] * 1.5 : running ? 1.5 : 0.5)
             .applyEuler(agent.rotation)
 
-        const movementTarget = tmpMovementTarget.copy(agent.position).add(movementVector)
+        if (movementVector.length() > 0 || !initialised.current) {
+            const movementTarget = tmpMovementTarget.copy(agent.position).add(movementVector)
 
-        const { nearestRef: polyRef } = navMeshQuery.findNearestPoly(agent.position)
-        const { resultPosition } = navMeshQuery.moveAlongSurface(polyRef, agent.position, movementTarget)
+            const { nearestRef: polyRef } = navMeshQuery.findNearestPoly(agent.position)
+            const { resultPosition } = navMeshQuery.moveAlongSurface(polyRef, agent.position, movementTarget)
 
-        const { nearestRef: resultPolyRef } = navMeshQuery.findNearestPoly(resultPosition)
-        const { success: heightSuccess, height } = navMeshQuery.getPolyHeight(resultPolyRef, resultPosition)
+            const { nearestRef: resultPolyRef } = navMeshQuery.findNearestPoly(resultPosition)
+            const { success: heightSuccess, height } = navMeshQuery.getPolyHeight(resultPolyRef, resultPosition)
 
-        agent.position.copy(resultPosition as Vector3)
+            agent.position.copy(resultPosition as Vector3)
 
-        if (heightSuccess) {
-            agent.position.y = height
+            if (heightSuccess) {
+                agent.position.y = height
+            }
+
+            initialised.current = true
         }
 
-        /* agent position */
+        /* update position and rotation */
         groupRef.current.position.copy(agent.position)
         groupRef.current.rotation.copy(agent.rotation)
 
@@ -278,7 +291,7 @@ const Agent = () => {
         walkAction.weight = MathUtils.lerp(walkAction.weight, walkWeight, t)
         runAction.weight = MathUtils.lerp(runAction.weight, runWeight, t)
 
-        // raycast to find the ground
+        /* raycast to correct character height */
         const raycasterOrigin = tmpRaycasterOrigin.copy(agent.position)
         raycasterOrigin.y += 1
 
@@ -290,10 +303,14 @@ const Agent = () => {
         const hitPoint = hit ? hit.point : undefined
 
         if (hitPoint) {
-            groupRef.current.position.y = hitPoint.y
+            const yDifference = Math.abs(hitPoint.y - agent.position.y)
+
+            if (yDifference < 0.5) {
+                groupRef.current.position.y = hitPoint.y
+            }
         }
 
-        /* camera */
+        /* update camera */
         const idealOffset = tmpIdealOffset.set(0, 5, 8)
         idealOffset.applyEuler(agent.rotation)
         idealOffset.add(agent.position)
@@ -324,11 +341,11 @@ export default () => {
 
     return (
         <>
-            <Canvas camera={{ position: [0, 100, 100] }}>
+            <Canvas>
                 <Navigation />
 
                 <KeyboardControls map={CONTROLS_MAP}>
-                    <Agent />
+                    <Agent initialPosition={[0, 0, 3]} />
                 </KeyboardControls>
 
                 <Environment files={cityEnvironment} />
