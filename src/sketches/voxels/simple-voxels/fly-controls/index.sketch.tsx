@@ -4,9 +4,9 @@ import { useEffect, useRef } from 'react'
 import { styled } from 'styled-components'
 import { Color, Vector3 } from 'three'
 import { Canvas } from '../../../../common'
-import { CorePlugin, Vec3 } from '../../engine/core'
-import { CulledMesherPlugin, VoxelChunkCulledMeshes } from '../../engine/culled-mesher'
-import { VoxelEngine, useVoxelEngine } from '../../engine/voxel-engine'
+import { CorePlugin, Vec3 } from '../engine/core'
+import { CulledMesherPlugin, VoxelChunkCulledMeshes } from '../engine/culled-mesher'
+import { VoxelEngine, useVoxelEngine } from '../engine/voxel-engine'
 
 const green1 = new Color('green').addScalar(-0.02).getHex()
 const green2 = new Color('green').addScalar(0.02).getHex()

@@ -1,14 +1,14 @@
 import Rapier from '@dimforge/rapier3d-compat'
 import { Bounds, OrbitControls } from '@react-three/drei'
 import { ThreeEvent, useThree } from '@react-three/fiber'
+import { useControls } from 'leva'
 import { useEffect, useLayoutEffect } from 'react'
 import { Color } from 'three'
 import { Canvas } from '../../../../common'
-import { CorePlugin, Object3DComponent, Vec3 } from '../../engine/core'
-import { CulledMesherPlugin, VoxelChunkCulledMeshes } from '../../engine/culled-mesher'
-import { PhysicsDebug, PhysicsPlugin, RapierInit, RigidBodyComponent } from '../../engine/physics'
-import { VoxelEngine, useVoxelEngine } from '../../engine/voxel-engine'
-import { Leva, useControls } from 'leva'
+import { CorePlugin, Object3DComponent, Vec3 } from '../engine/core'
+import { CulledMesherPlugin, VoxelChunkCulledMeshes } from '../engine/culled-mesher'
+import { PhysicsDebug, RapierInit, RapierPhysicsPlugin, RigidBodyComponent } from '../engine/rapier-physics'
+import { VoxelEngine, useVoxelEngine } from '../engine/voxel-engine'
 
 const green1 = new Color('green').addScalar(-0.02).getHex()
 const green2 = new Color('green').addScalar(0.02).getHex()
@@ -17,7 +17,7 @@ const orange = new Color('orange').getHex()
 const brown = new Color('brown').getHex()
 
 const App = () => {
-    const { ecs, voxelWorld, physicsWorld, setBlock } = useVoxelEngine<[CorePlugin, CulledMesherPlugin, PhysicsPlugin]>()
+    const { ecs, voxelWorld, physicsWorld, setBlock } = useVoxelEngine<[CorePlugin, CulledMesherPlugin, RapierPhysicsPlugin]>()
 
     const camera = useThree((s) => s.camera)
 
@@ -195,7 +195,7 @@ export default () => {
     return (
         <RapierInit>
             <Canvas camera={{ position: [20, 50, 50] }}>
-                <VoxelEngine plugins={[CorePlugin, CulledMesherPlugin, PhysicsPlugin]}>
+                <VoxelEngine plugins={[CorePlugin, CulledMesherPlugin, RapierPhysicsPlugin]}>
                     <App />
                 </VoxelEngine>
                 <OrbitControls makeDefault />

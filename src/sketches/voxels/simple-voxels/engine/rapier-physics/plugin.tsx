@@ -328,7 +328,10 @@ export class PhysicsSystem extends System {
 
     static TIME_STEP = 1 / 60
 
-    onUpdate(delta: number): void {
+    onUpdate(deltaTime: number): void {
+        // clamp delta
+        const delta = Math.min(deltaTime, 0.1)
+
         // Fixed timeStep simulation progression
         // https://gafferongames.com/post/fix_your_timestep/
         const previousTranslations: Record<
@@ -422,7 +425,7 @@ export const RapierInit = ({ children }: { children: React.ReactNode }) => {
     return <>{children}</>
 }
 
-export const PhysicsPlugin = {
+export const RapierPhysicsPlugin = {
     components: [RigidBodyComponent, VoxelChunkPhysicsComponent, PhysicsWorldComponent],
     systems: [PhysicsSystem, VoxelPhysicsSystem],
     setup: (world) => {
@@ -433,4 +436,4 @@ export const PhysicsPlugin = {
     },
 } satisfies VoxelEnginePlugin
 
-export type PhysicsPlugin = typeof PhysicsPlugin
+export type RapierPhysicsPlugin = typeof RapierPhysicsPlugin

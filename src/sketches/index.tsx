@@ -76,38 +76,38 @@ const sketchList = [
     {
         title: 'Character Animation - Basic',
         path: 'character-animation/basic',
-        tags: ['animation', 'character']
+        tags: ['animation', 'character'],
     },
     {
         title: 'Character Animation - Mixamo Animations',
         path: 'character-animation/mixamo-animations',
-        tags: ['animation', 'character', 'mixamo']
+        tags: ['animation', 'character', 'mixamo'],
     },
     /* Voxels */
     {
-        title: '🚧 Voxels - Culled Mesher - Basic',
-        path: 'voxels/culled-mesher/basic',
-        tags: ['voxels', 'culled-mesher'],
+        title: 'Simple Voxels - Sphere',
+        path: 'voxels/simple-voxels/sphere',
+        tags: ['voxels', 'vertex-colors', 'culled-mesher'],
     },
     {
-        title: '🚧 Voxels - Culled Mesher - Building',
-        path: 'voxels/culled-mesher/building',
-        tags: ['voxels', 'culled-mesher', 'building'],
+        title: 'Simple Voxels - Building',
+        path: 'voxels/simple-voxels/building',
+        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'building'],
     },
     {
-        title: '🚧 Voxels - Culled Mesher - Fly Controls',
-        path: 'voxels/culled-mesher/fly-controls',
-        tags: ['voxels', 'culled-mesher', 'controller'],
+        title: 'Simple Voxels - Fly Controls',
+        path: 'voxels/simple-voxels/fly-controls',
+        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'controller'],
     },
     {
-        title: '🚧 Voxels - Culled Mesher - Box Character Controller',
-        path: 'voxels/culled-mesher/box-character-controller',
-        tags: ['voxels', 'culled-mesher', 'controller'],
+        title: 'Simple Voxels - Box Character Controller',
+        path: 'voxels/simple-voxels/box-character-controller',
+        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'controller'],
     },
     {
-        title: '🚧 Voxels - Culled Mesher - Physics',
-        path: 'voxels/culled-mesher/physics',
-        tags: ['voxels', 'culled-mesher', 'physics'],
+        title: 'Simple Voxels - Rapier Physics',
+        path: 'voxels/simple-voxels/rapier-physics',
+        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'physics', 'rapier'],
     },
     /* Postprocessing */
     {

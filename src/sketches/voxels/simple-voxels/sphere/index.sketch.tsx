@@ -3,9 +3,9 @@ import { useControls } from 'leva'
 import { useLayoutEffect } from 'react'
 import { Color } from 'three'
 import { Canvas } from '../../../../common'
-import { CorePlugin } from '../../engine/core'
-import { CulledMesherPlugin, VoxelChunkCulledMeshes, VoxelChunkMeshComponent } from '../../engine/culled-mesher'
-import { VoxelEngine, useVoxelEngine } from '../../engine/voxel-engine'
+import { CorePlugin } from '../engine/core'
+import { CulledMesherPlugin, VoxelChunkCulledMeshes, VoxelChunkMeshComponent } from '../engine/culled-mesher'
+import { VoxelEngine, useVoxelEngine } from '../engine/voxel-engine'
 
 const orange = new Color('orange').getHex()
 const hotpink = new Color('hotpink').getHex()

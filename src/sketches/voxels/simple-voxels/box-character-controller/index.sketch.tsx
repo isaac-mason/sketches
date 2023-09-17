@@ -10,10 +10,10 @@ import {
     BoxCharacterControllerComponent,
     BoxCharacterControllerInputComponent,
     BoxCharacterControllerPlugin,
-} from '../../engine/box-character-controller'
-import { CorePlugin, Object3DComponent, Vec3 } from '../../engine/core'
-import { CulledMesherPlugin, VoxelChunkCulledMeshes } from '../../engine/culled-mesher'
-import { VoxelEngine, useVoxelEngine } from '../../engine/voxel-engine'
+} from '../engine/box-character-controller'
+import { CorePlugin, Object3DComponent, Vec3 } from '../engine/core'
+import { CulledMesherPlugin, VoxelChunkCulledMeshes } from '../engine/culled-mesher'
+import { VoxelEngine, useVoxelEngine } from '../engine/voxel-engine'
 
 const green1 = new Color('green').addScalar(-0.02).getHex()
 const green2 = new Color('green').addScalar(0.02).getHex()
