@@ -2664,9 +2664,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-three/drei@npm:^9.83.9":
-  version: 9.83.9
-  resolution: "@react-three/drei@npm:9.83.9"
+"@react-three/drei@npm:^9.84.0":
+  version: 9.84.0
+  resolution: "@react-three/drei@npm:9.84.0"
   dependencies:
     "@babel/runtime": ^7.11.2
     "@mediapipe/tasks-vision": 0.10.2
@@ -2679,7 +2679,7 @@ __metadata:
     lodash.clamp: ^4.0.3
     lodash.omit: ^4.5.0
     lodash.pick: ^4.4.0
-    maath: ^0.6.0
+    maath: ^0.9.0
     meshline: ^3.1.6
     react-composer: ^5.0.3
     react-merge-refs: ^1.1.0
@@ -2699,7 +2699,7 @@ __metadata:
   peerDependenciesMeta:
     react-dom:
       optional: true
-  checksum: 1ae471f8231ef4b1307a82c0256ed0440061c32b3c8740b2593f515f9e098799f5ae8ff810fd924fbf5a936ea0b292902d04a70d6427f6205a31da404e0def1f
+  checksum: 706084c9f1ae70afea9d58c731c8f4984ba6caffbc838059aeefd9913db66f505cd96e07f1440df7c5f836748404da098b6c73dc8b6e4f287c3c914133958f5f
   languageName: node
   linkType: hard
 
@@ -5477,6 +5477,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"maath@npm:^0.9.0":
+  version: 0.9.0
+  resolution: "maath@npm:0.9.0"
+  peerDependencies:
+    "@types/three": ">=0.144.0"
+    three: ">=0.144.0"
+  checksum: 35a2cf9e86d9c92d2b9154cabb4149928e212c5c53054397dcc26bb3084073857d2c620f45d7ca2214a2f2f296882bffc9b2bb44a1009bead380fd84d158ae21
+  languageName: node
+  linkType: hard
+
 "make-dir@npm:^2.1.0":
   version: 2.1.0
   resolution: "make-dir@npm:2.1.0"
@@ -6653,7 +6663,7 @@ __metadata:
     "@dimforge/rapier3d-compat": 0.11.2
     "@pmndrs/assets": ^1.6.0
     "@react-three/csg": ^3.0.0
-    "@react-three/drei": ^9.83.9
+    "@react-three/drei": ^9.84.0
     "@react-three/fiber": ^8.14.1
     "@react-three/flex": ^1.0.1
     "@react-three/postprocessing": ^2.15.1
