@@ -138,6 +138,9 @@ const tmpIdealLookAt = new Vector3()
 const tmpRaycasterOrigin = new Vector3()
 const tmpRaycasterDirection = new Vector3()
 
+const FORWARD_SPEED = 1.5
+const BACKWARD_SPEED = 0.5
+
 type AgentProps = {
     initialPosition: Vector3Tuple
 }
@@ -224,12 +227,17 @@ const Agent = ({ initialPosition }: AgentProps) => {
         }
 
         const running = (forward && !back && run) || joystickVector[1] > 0.5
+        const walkingBackwards = back || joystickVector[1] < 0
 
-        movementVector
-            .normalize()
-            .multiplyScalar(t)
-            .multiplyScalar(joystickVector[1] !== 0 ? joystickVector[1] * 1.5 : running ? 1.5 : 0.5)
-            .applyEuler(agent.rotation)
+        let movementScalar: number
+        if (joystickVector[1] !== 0) {
+            const scalar = Math.abs(joystickVector[1])
+            movementScalar = running ? scalar * FORWARD_SPEED : scalar * BACKWARD_SPEED
+        } else {
+            movementScalar = running ? FORWARD_SPEED : BACKWARD_SPEED
+        }
+
+        movementVector.normalize().multiplyScalar(t).multiplyScalar(movementScalar).applyEuler(agent.rotation)
 
         if (movementVector.length() > 0 || !initialised.current) {
             const movementTarget = tmpMovementTarget.copy(agent.position).add(movementVector)
@@ -278,7 +286,7 @@ const Agent = ({ initialPosition }: AgentProps) => {
             runWeight = 0
         }
 
-        if (back) {
+        if (walkingBackwards) {
             // reverse
             walkAction.timeScale = -1
             runAction.timeScale = -1
@@ -320,7 +328,7 @@ const Agent = ({ initialPosition }: AgentProps) => {
 
         const idealLookAt = tmpIdealLookAt.set(0, 1, 0)
         idealLookAt.applyEuler(agent.rotation)
-        idealLookAt.add(agent.position)
+        idealLookAt.add(agent.position) // todo - agent.position or corrected groupRef.current.position ?
 
         cameraIdealLookAt.lerp(idealLookAt, t * 1.5)
         cameraIdealPosition.lerp(idealOffset, t / 1.5)
