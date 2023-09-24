@@ -2802,31 +2802,31 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@recast-navigation/core@npm:0.10.2":
-  version: 0.10.2
-  resolution: "@recast-navigation/core@npm:0.10.2"
+"@recast-navigation/core@npm:0.11.0":
+  version: 0.11.0
+  resolution: "@recast-navigation/core@npm:0.11.0"
   dependencies:
-    "@recast-navigation/wasm": 0.10.2
-  checksum: c39dd397d3a6e53d9c70276ccbb5c38d454bca0e1ea209e50ac8d04fad1a6886eab1abbb7001eb5e8e4523a3295b2dde2290d9d1a747b17d292f6787690bc67f
+    "@recast-navigation/wasm": 0.11.0
+  checksum: 5da4da0025a07cfe4c3dcebfffd70a24a02cc2c19ae38ae60ed704c47457dac02f580e2fa8b491930af898c4ded6d4c674310358cf3040d92993c1184940e03a
   languageName: node
   linkType: hard
 
-"@recast-navigation/three@npm:0.10.2":
-  version: 0.10.2
-  resolution: "@recast-navigation/three@npm:0.10.2"
+"@recast-navigation/three@npm:0.11.0":
+  version: 0.11.0
+  resolution: "@recast-navigation/three@npm:0.11.0"
   dependencies:
-    "@recast-navigation/core": 0.10.2
+    "@recast-navigation/core": 0.11.0
   peerDependencies:
     "@types/three": 0.x.x
     three: 0.x.x
-  checksum: 4b91b2e6824761f89b6a3c0d92a3d1eafb0623d097b7d192f3cb6b62407f9eb343f779b5361842a988d0152612a6c9809711ada61c78ebcd612e9594de824ff6
+  checksum: 7457041d8bb0358be152c4e9401db91c09f93684a63e629121c33b2ed10a58d921ddc364b7569fbdd5be13481d3f81a9a62a70b76522bc24063181719290b54a
   languageName: node
   linkType: hard
 
-"@recast-navigation/wasm@npm:0.10.2":
-  version: 0.10.2
-  resolution: "@recast-navigation/wasm@npm:0.10.2"
-  checksum: 90885b93fecf9ce3e7c0f5e37eea3f01a18a62cf47b1a7bc1be47fb3dc39cf485e5b882c8e1c0c294ffd7f88e80d483ae2cacf03b1688022df9b937ae49132ca
+"@recast-navigation/wasm@npm:0.11.0":
+  version: 0.11.0
+  resolution: "@recast-navigation/wasm@npm:0.11.0"
+  checksum: a1d146b9379bcaf7007aa6b3b561b225de34f3359fceba65a7fb11ca28114e5f350e76b9409a2514c212f78a66f8c79ed9229a6fd8da3ef79b861d33799ede39
   languageName: node
   linkType: hard
 
@@ -6295,13 +6295,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"recast-navigation@npm:^0.10.2":
-  version: 0.10.2
-  resolution: "recast-navigation@npm:0.10.2"
+"recast-navigation@npm:^0.11.0":
+  version: 0.11.0
+  resolution: "recast-navigation@npm:0.11.0"
   dependencies:
-    "@recast-navigation/core": 0.10.2
-    "@recast-navigation/three": 0.10.2
-  checksum: c62695284c805f083f693a8694405c4d7f409cfbd3de15d9dd689d2bd5fd53d29d76a4259f375d7049a56c9300a31b6cd83f29a9bf6605ca636eb72c6cc47009
+    "@recast-navigation/core": 0.11.0
+    "@recast-navigation/three": 0.11.0
+  checksum: 82902ed96d0e38abb9bcdfe4cc4c990636fbbfc8eaa1a4e9f841404cdef2552f91e72084c6973054701fdf15ddf29f6b659d2e2fe7ed0e1411173d59db7159f1
   languageName: node
   linkType: hard
 
@@ -6666,7 +6666,7 @@ __metadata:
     react-colorful: ^5.6.1
     react-dom: ^18.0.0
     react-router-dom: ^6.16.0
-    recast-navigation: ^0.10.2
+    recast-navigation: ^0.11.0
     styled-breakpoints: ^12.1.5
     styled-components: ^6.0.8
     three: ^0.156.1
