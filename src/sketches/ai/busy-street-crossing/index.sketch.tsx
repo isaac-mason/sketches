@@ -152,7 +152,7 @@ const App = () => {
             {Array.from({ length: 10 }).map((_, idx) => (
                 <mesh
                     key={idx}
-                    position={[-9 + idx * 2, 0.005, -15]}
+                    position={[-9 + idx * 2, 0.05, -15]}
                     rotation-x={-Math.PI / 2}
                     rotation-y={Math.PI / 2}
                     rotation-order="YXZ"
@@ -164,7 +164,7 @@ const App = () => {
             {Array.from({ length: 10 }).map((_, idx) => (
                 <mesh
                     key={idx}
-                    position={[-9 + idx * 2, 0.005, 15]}
+                    position={[-9 + idx * 2, 0.05, 15]}
                     rotation-x={-Math.PI / 2}
                     rotation-y={Math.PI / 2}
                     rotation-order="YXZ"
@@ -174,13 +174,13 @@ const App = () => {
                 </mesh>
             ))}
             {Array.from({ length: 10 }).map((_, idx) => (
-                <mesh key={idx} position={[15, 0.005, -9 + idx * 2]} rotation-x={-Math.PI / 2}>
+                <mesh key={idx} position={[15, 0.05, -9 + idx * 2]} rotation-x={-Math.PI / 2}>
                     <meshBasicMaterial color="#fff" />
                     <planeGeometry args={[10, 1]} />
                 </mesh>
             ))}
             {Array.from({ length: 10 }).map((_, idx) => (
-                <mesh key={idx} position={[-15, 0.005, -9 + idx * 2]} rotation-x={-Math.PI / 2}>
+                <mesh key={idx} position={[-15, 0.05, -9 + idx * 2]} rotation-x={-Math.PI / 2}>
                     <meshBasicMaterial color="#fff" />
                     <planeGeometry args={[10, 1]} />
                 </mesh>
