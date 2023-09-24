@@ -5357,13 +5357,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"linguine@npm:^0.0.7":
-  version: 0.0.7
-  resolution: "linguine@npm:0.0.7"
-  checksum: 80af3c2703b66af1051f02050140fb89e85bddef56ce1bf136b105194899d410dc4d9cb39c8071deb3bc2d8b32a5efe0c34759e39f333de7735180d43919d0b0
-  languageName: node
-  linkType: hard
-
 "lodash.clamp@npm:^4.0.3":
   version: 4.0.3
   resolution: "lodash.clamp@npm:4.0.3"
@@ -6664,7 +6657,6 @@ __metadata:
     arancini: ^3.2.0
     d3: ^7.8.5
     leva: ^0.9.35
-    linguine: ^0.0.7
     meshline: ^3.1.6
     nipplejs: ^0.10.1
     p2-es: ^1.1.8
