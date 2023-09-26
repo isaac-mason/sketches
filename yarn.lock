@@ -2664,9 +2664,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-three/drei@npm:^9.84.0":
-  version: 9.84.0
-  resolution: "@react-three/drei@npm:9.84.0"
+"@react-three/drei@npm:^9.85.0":
+  version: 9.85.0
+  resolution: "@react-three/drei@npm:9.85.0"
   dependencies:
     "@babel/runtime": ^7.11.2
     "@mediapipe/tasks-vision": 0.10.2
@@ -2687,9 +2687,10 @@ __metadata:
     stats.js: ^0.17.0
     suspend-react: ^0.1.3
     three-mesh-bvh: ^0.6.0
-    three-stdlib: ^2.25.1
+    three-stdlib: ^2.26.6
     troika-three-text: ^0.47.2
     utility-types: ^3.10.0
+    uuid: ^9.0.1
     zustand: ^3.5.13
   peerDependencies:
     "@react-three/fiber": ">=8.0"
@@ -2699,7 +2700,7 @@ __metadata:
   peerDependenciesMeta:
     react-dom:
       optional: true
-  checksum: 706084c9f1ae70afea9d58c731c8f4984ba6caffbc838059aeefd9913db66f505cd96e07f1440df7c5f836748404da098b6c73dc8b6e4f287c3c914133958f5f
+  checksum: a9c201a6179205bf90591ff3854df04ded831d14e8390cdd1f0d43ece62c84771c226e65503accd57bfb87bfc01dd7e7ebb1c1985d8e533349a085ffdbcca7b7
   languageName: node
   linkType: hard
 
@@ -6640,7 +6641,7 @@ __metadata:
     "@dimforge/rapier3d-compat": 0.11.2
     "@pmndrs/assets": ^1.6.0
     "@react-three/csg": ^3.0.0
-    "@react-three/drei": ^9.84.0
+    "@react-three/drei": ^9.85.0
     "@react-three/fiber": ^8.14.1
     "@react-three/flex": ^1.0.1
     "@react-three/postprocessing": ^2.15.1
@@ -7086,9 +7087,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"three-stdlib@npm:^2.25.1":
-  version: 2.25.1
-  resolution: "three-stdlib@npm:2.25.1"
+"three-stdlib@npm:^2.26.6":
+  version: 2.26.6
+  resolution: "three-stdlib@npm:2.26.6"
   dependencies:
     "@types/draco3d": ^1.4.0
     "@types/offscreencanvas": ^2019.6.4
@@ -7102,7 +7103,7 @@ __metadata:
     zstddec: ^0.0.2
   peerDependencies:
     three: ">=0.128.0"
-  checksum: 8ffb4ada8f7076b1165f5508c42e5c31293e2ef13799069cb6c9608a56c5f3c5b8b94cdddb3665aa0a0c62defa71c150b7566155f675b94d511df481e3d2940c
+  checksum: c9d88ec143962cd7553dfc59cbe408e2f16f78047c8e8fbde0bbd86798ce37fcea5ed8a718219b8df5586477b3fe18bbba1099732d0d3bdcda66714748453443
   languageName: node
   linkType: hard
 
@@ -7312,6 +7313,15 @@ __metadata:
   version: 3.10.0
   resolution: "utility-types@npm:3.10.0"
   checksum: 8f274415c6196ab62883b8bd98c9d2f8829b58016e4269aaa1ebd84184ac5dda7dc2ca45800c0d5e0e0650966ba063bf9a412aaeaea6850ca4440a391283d5c8
+  languageName: node
+  linkType: hard
+
+"uuid@npm:^9.0.1":
+  version: 9.0.1
+  resolution: "uuid@npm:9.0.1"
+  bin:
+    uuid: dist/bin/uuid
+  checksum: 39931f6da74e307f51c0fb463dc2462807531dc80760a9bff1e35af4316131b4fc3203d16da60ae33f07fdca5b56f3f1dd662da0c99fea9aaeab2004780cc5f4
   languageName: node
   linkType: hard
 
