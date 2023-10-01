@@ -109,6 +109,12 @@ const sketchList = [
         path: 'voxels/simple-voxels/rapier-physics',
         tags: ['voxels', 'vertex-colors', 'culled-mesher', 'physics', 'rapier'],
     },
+    /* Nature */
+    {
+        title: 'Nature - Grass',
+        path: 'nature/grass',
+        tags: ['nature', 'grass'],
+    },
     /* Postprocessing */
     {
         title: 'Postprocessing - Pixelation',
