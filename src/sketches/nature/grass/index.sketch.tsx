@@ -1,12 +1,13 @@
 import forestEnvironment from '@pmndrs/assets/hdri/forest.exr'
 import { CameraShake, Environment, OrbitControls, PerspectiveCamera, Sky, useTexture } from '@react-three/drei'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { useFrame } from '@react-three/fiber'
 import { useControls } from 'leva'
 import { useMemo, useRef } from 'react'
 import { createNoise2D } from 'simplex-noise'
 import * as THREE from 'three'
-import grassBladeAlphaUrl from './grass-blade-alpha.jpg?url'
+import { Canvas } from '../../../common'
 import cloudUrl from './cloud.jpg?url'
+import grassBladeAlphaUrl from './grass-blade-alpha.jpg?url'
 
 const GROUND_COLOR = '#073806'
 

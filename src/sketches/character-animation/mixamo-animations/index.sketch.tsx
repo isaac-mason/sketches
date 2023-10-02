@@ -1,7 +1,7 @@
 import { OrbitControls, useAnimations, useGLTF } from '@react-three/drei'
-import { Canvas } from '@react-three/fiber'
 import { useEffect, useState } from 'react'
 import { LoopRepeat } from 'three'
+import { Canvas } from '../../../common'
 import characterGltfUrl from './character.glb?url'
 
 const ANIMATION_NAMES = ['idle', 'walking']
