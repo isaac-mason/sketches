@@ -42,7 +42,7 @@
         "@babel/plugin-proposal-decorators": "^7.22.15",
         "@types/d3": "^7.4.0",
         "@types/node": "^20.6.0",
-        "@types/react": "^18.2.21",
+        "@types/react": "^18.2.24",
         "@types/react-dom": "^18.2.7",
         "@types/styled-components": "^5.1.27",
         "@types/three": "^0.156.0",
