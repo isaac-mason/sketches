@@ -13,7 +13,7 @@
         "@dimforge/rapier3d-compat": "0.11.2",
         "@pmndrs/assets": "^1.6.0",
         "@react-three/csg": "^3.0.0",
-        "@react-three/drei": "^9.84.0",
+        "@react-three/drei": "^9.86.3",
         "@react-three/fiber": "^8.14.4",
         "@react-three/flex": "^1.0.1",
         "@react-three/postprocessing": "^2.15.1",
