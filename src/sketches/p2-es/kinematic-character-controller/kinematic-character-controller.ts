@@ -35,10 +35,17 @@ function expandAABB(aabb: p2.AABB, amount: number) {
     aabb.upperBound[1] += halfAmount
 }
 
+type RaycastControllerEvents = {
+    raycast: {
+        type: 'raycast'
+        ray: p2.Ray
+    }
+}
+
 /**
  * Original code from: https://github.com/SebLague/2DPlatformer-Tutorial
  */
-export class RaycastController extends EventEmitter {
+export class RaycastController extends EventEmitter<RaycastControllerEvents> {
     updateRaycastOriginsBounds: p2.AABB
     calculateRaySpacingBounds: p2.AABB
 
