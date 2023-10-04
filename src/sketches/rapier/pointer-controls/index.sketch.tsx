@@ -75,7 +75,6 @@ const PointerControls = ({ target }: PointerConstraintControlsProps) => {
 
     useEffect(() => {
         const { world } = rapier
-        const { domElement } = gl
 
         const onPointerDown = () => {
             if (joint.current || spring.current) {
@@ -140,6 +139,8 @@ const PointerControls = ({ target }: PointerConstraintControlsProps) => {
             if (!joint.current && !spring.current) return
             updatePointerRigidBody()
         }
+
+        const domElement = document.body
 
         domElement.addEventListener('pointerdown', onPointerDown)
         domElement.addEventListener('pointerup', onPointerUp)
