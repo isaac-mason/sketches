@@ -332,7 +332,7 @@ const Grass = () => {
         bladeHeight: 1,
         bladeJoints: 5,
         width: 100,
-        instances: 100000,
+        instances: 50000,
         wireframe: false,
     })
 
