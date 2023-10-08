@@ -60,6 +60,12 @@ const sketchList = [
         path: 'p2-es/kinematic-character-controller',
         tags: ['physics', 'p2-es', 'controller'],
     },
+    /* Jolt Physics */
+    {
+        title: 'Jolt Physics - Cube Heap',
+        path: 'jolt-physics/cube-heap',
+        tags: ['physics', 'jolt-physics'],
+    },
     /* AI / Pathfinding */
     {
         title: 'AI - Busy Street Crossing',

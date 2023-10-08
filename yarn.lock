@@ -5028,6 +5028,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jolt-physics@npm:^0.0.10":
+  version: 0.0.10
+  resolution: "jolt-physics@npm:0.0.10"
+  checksum: 80c0c5930faf4cad963f19bff529b53f2efb16243916f7f3889eda219257436a5ae39b14cc461cec644f724c19e0b7e75b1417b91b6b881277c2155c16253ec7
+  languageName: node
+  linkType: hard
+
 "js-tokens@npm:^3.0.0 || ^4.0.0, js-tokens@npm:^4.0.0":
   version: 4.0.0
   resolution: "js-tokens@npm:4.0.0"
@@ -6399,6 +6406,7 @@ __metadata:
     "@vitejs/plugin-react": ^4.0.4
     arancini: ^3.2.0
     d3: ^7.8.5
+    jolt-physics: ^0.0.10
     leva: ^0.9.35
     meshline: ^3.1.6
     nipplejs: ^0.10.1

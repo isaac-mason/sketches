@@ -63,9 +63,13 @@ export default defineConfig(() => {
         ],
         optimizeDeps: {
             exclude: [
-                // does not play nicely with vite pre-bundling
+                // these packages do not play nicely with vite pre-bundling
                 'recast-navigation',
+                'jolt-physics',
             ],
+        },
+        build: {
+            target: 'esnext',
         },
     }
 })
