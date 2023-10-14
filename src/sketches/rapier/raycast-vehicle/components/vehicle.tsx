@@ -2,13 +2,14 @@ import { useGLTF } from '@react-three/drei'
 import { CuboidCollider, RapierRigidBody, RigidBody, RigidBodyProps, useRapier } from '@react-three/rapier'
 import { useControls as useLeva } from 'leva'
 import { forwardRef, Fragment, RefObject, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
-import { Color, Group, Mesh, MeshStandardMaterial, Object3D, Vector3, Vector3Tuple } from 'three'
+import { Color, Group, Mesh, MeshStandardMaterial, Object3D, SpotLightHelper, Vector3, Vector3Tuple } from 'three'
 import { GLTF } from 'three-stdlib'
 import chassisDracoUrl from '../assets/chassis-draco.glb?url'
 import { LEVA_KEY } from '../constants'
 import { RapierRaycastVehicle, WheelOptions } from '../lib/rapier-raycast-vehicle'
 
 import wheelGlbUrl from '../assets/wheel-draco.glb?url'
+import { Helper } from '../../../../common'
 
 type WheelGLTF = GLTF & {
     nodes: {
@@ -109,6 +110,10 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(({ children, ...grou
     const topRightWheelObject = useRef<Group>(null!)
     const bottomLeftWheelObject = useRef<Group>(null!)
     const bottomRightWheelObject = useRef<Group>(null!)
+
+    const { headlightsSpotLightHelper } = useLeva(`${LEVA_KEY}-headlights`, {
+        headlightsSpotLightHelper: false,
+    })
 
     const {
         indexRightAxis,
@@ -233,13 +238,13 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(({ children, ...grou
 
     const [leftHeadlightTarget] = useState(() => {
         const object = new Object3D()
-        object.position.set(10, 0, -0.7)
+        object.position.set(10, -0.5, -0.7)
         return object
     })
 
     const [rightHeadlightTarget] = useState(() => {
         const object = new Object3D()
-        object.position.set(10, 0, 0.7)
+        object.position.set(10, -0.5, 0.7)
         return object
     })
 
@@ -247,17 +252,17 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(({ children, ...grou
         <>
             <RigidBody {...groupProps} colliders={false} ref={chassisRigidBodyRef} mass={150}>
                 {/* Collider */}
-                {/* todo: change to performant convex hull */}
+                {/* todo: change to convex hull */}
                 <CuboidCollider args={[2.35, 0.55, 1]} />
 
                 {/* Headlights */}
                 {[
                     {
-                        position: [2.5, -0.2, -0.7] as Vector3Tuple,
+                        position: [2.4, -0.2, -0.7] as Vector3Tuple,
                         target: leftHeadlightTarget,
                     },
                     {
-                        position: [2.5, -0.2, 0.7] as Vector3Tuple,
+                        position: [2.4, -0.2, 0.7] as Vector3Tuple,
                         target: rightHeadlightTarget,
                     },
                 ].map(({ position, target }, idx) => (
@@ -266,12 +271,15 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(({ children, ...grou
                         <spotLight
                             position={position}
                             target={target}
-                            angle={0.4}
-                            distance={50}
+                            angle={0.8}
+                            decay={1}
+                            distance={20}
                             castShadow
                             penumbra={1}
-                            intensity={1.5}
-                        />
+                            intensity={20}
+                        >
+                            {headlightsSpotLightHelper && <Helper type={SpotLightHelper} />}
+                        </spotLight>
                     </Fragment>
                 ))}
 
