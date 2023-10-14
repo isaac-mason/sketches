@@ -383,7 +383,7 @@ export class PhysicsSystem extends System {
             const object3D = entity.find(Object3DComponent)
 
             if (object3D) {
-                if (rigidBody.isFixed() && object3D.userData.physicsPositionInitialised) return
+                if (rigidBody.isFixed() && object3D.userData.physicsPositionInitialised) continue
 
                 const oldState = previousTranslations[rigidBody.handle]
 
