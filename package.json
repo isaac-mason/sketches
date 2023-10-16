@@ -44,7 +44,7 @@
         "@types/d3": "^7.4.1",
         "@types/node": "^20.6.0",
         "@types/react": "^18.2.24",
-        "@types/react-dom": "^18.2.7",
+        "@types/react-dom": "^18.2.13",
         "@types/styled-components": "^5.1.27",
         "@types/three": "^0.156.0",
         "@vitejs/plugin-basic-ssl": "^1.0.1",
