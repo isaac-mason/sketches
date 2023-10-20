@@ -6,7 +6,7 @@ import { Canvas } from '../../common'
 import { SketchOptions } from '../types'
 
 const Home = () => {
-    const group = useRef(null) as RefObject<Group>
+    const group = useRef<Group>(null!)
     const time = useRef(0)
 
     useFrame((_, delta) => {
@@ -18,7 +18,7 @@ const Home = () => {
     })
 
     return (
-        <group ref={group as Ref<never>}>
+        <group ref={group}>
             <Html
                 transform
                 style={{
