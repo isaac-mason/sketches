@@ -244,10 +244,11 @@ const Agent = ({ initialPosition }: AgentProps) => {
             const movementTarget = tmpMovementTarget.copy(agent.position).add(movementVector)
 
             const { nearestRef: polyRef } = navMeshQuery.findNearestPoly(agent.position)
-            const { resultPosition } = navMeshQuery.moveAlongSurface(polyRef, agent.position, movementTarget)
 
-            const { nearestRef: resultPolyRef } = navMeshQuery.findNearestPoly(resultPosition)
-            const { success: heightSuccess, height } = navMeshQuery.getPolyHeight(resultPolyRef, resultPosition)
+            const { resultPosition, visited } = navMeshQuery.moveAlongSurface(polyRef, agent.position, movementTarget)
+            const moveAlongSurfaceFinalRef = visited[visited.length - 1]
+
+            const { success: heightSuccess, height } = navMeshQuery.getPolyHeight(moveAlongSurfaceFinalRef, resultPosition)
 
             agent.position.copy(resultPosition as Vector3)
 
