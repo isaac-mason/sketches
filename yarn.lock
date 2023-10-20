@@ -3045,7 +3045,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:^18.2.24":
+"@types/react@npm:*":
   version: 18.2.24
   resolution: "@types/react@npm:18.2.24"
   dependencies:
@@ -3053,6 +3053,17 @@ __metadata:
     "@types/scheduler": "*"
     csstype: ^3.0.2
   checksum: ea5d8204e71b1c9c6631f429a93f8e7be0614cdbdb464e92b3181bdccd8a7c45e30ded8b13da726684b6393f651317c36d54832e3d3cdea0da480a3f26268909
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:^18.2.28":
+  version: 18.2.28
+  resolution: "@types/react@npm:18.2.28"
+  dependencies:
+    "@types/prop-types": "*"
+    "@types/scheduler": "*"
+    csstype: ^3.0.2
+  checksum: 81381bedeba83278f4c9febb0b83e0bd3f42a25897a50b9cb36ef53651d34b3d50f87ebf11211ea57ea575131f85d31e93e496ce46478a00b0f9bf7b26b5917a
   languageName: node
   linkType: hard
 
@@ -6438,7 +6449,7 @@ __metadata:
     "@react-three/xr": ^5.7.1
     "@types/d3": ^7.4.1
     "@types/node": ^20.6.0
-    "@types/react": ^18.2.24
+    "@types/react": ^18.2.28
     "@types/react-dom": ^18.2.7
     "@types/styled-components": ^5.1.27
     "@types/three": ^0.156.0
