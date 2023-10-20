@@ -160,7 +160,7 @@ const Ghost = (props: { color: string; offset: number }) => {
 
     return (
         <pointLight
-            ref={pointLightRef as never}
+            ref={pointLightRef}
             color={props.color}
             distance={4}
             castShadow

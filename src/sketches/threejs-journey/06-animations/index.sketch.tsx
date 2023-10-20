@@ -15,7 +15,7 @@ const App = () => {
     })
 
     return (
-        <mesh ref={ref as never}>
+        <mesh ref={ref}>
             <meshBasicMaterial color="#ff8888" />
             <boxGeometry args={[1, 1, 1]} />
         </mesh>

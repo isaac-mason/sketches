@@ -46,7 +46,7 @@ const App = () => {
     })
 
     return (
-        <points ref={points as never}>
+        <points ref={points}>
             <pointsMaterial
                 size={0.2}
                 sizeAttenuation={true}
