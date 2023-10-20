@@ -150,7 +150,7 @@ const sketchList = [
         path: 'sprites/face-camera',
         tags: ['sprites'],
     },
-    /* GLSL GLSL Shaders From Scratch */
+    /* GLSL Shaders From Scratch */
     {
         title: 'GLSL Shaders From Scratch - Intro - Varyings',
         path: 'glsl-shaders-from-scratch/intro/varyings',
