@@ -6472,7 +6472,7 @@ __metadata:
     simplex-noise: ^4.0.1
     styled-breakpoints: ^12.1.5
     styled-components: ^6.0.8
-    three: ^0.156.1
+    three: ^0.157.0
     tunnel-rat: ^0.1.2
     typescript: ^5.2.2
     vite: ^4.4.11
@@ -6866,10 +6866,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"three@npm:^0.156.1":
-  version: 0.156.1
-  resolution: "three@npm:0.156.1"
-  checksum: 18b3381efadb6a2bb10ca09f6de0cea8f6f5369acc7bd5531dfdc80f60c3d075e28151f56194dd19144352e646a50664a243111060985e1f428bff9484461d08
+"three@npm:^0.157.0":
+  version: 0.157.0
+  resolution: "three@npm:0.157.0"
+  checksum: 444797461c9db09d8a4cad886e494c2e6dd5754f09ac7ac4af75a3bf1143ae79641388db31999edcc76c5dba9677639f09da2df8d0128396a1dd59e41226c85c
   languageName: node
   linkType: hard
 
