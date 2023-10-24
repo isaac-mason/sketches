@@ -13,11 +13,11 @@ const LEVA_ROOT = 'p2-text-box'
 
 const BOX_SIZE = 0.1
 
-const BoxTagComponent = Component.tag('Box')
+const BoxTagComponent = Component.tag({ name: 'Box' })
 
-const PhysicsBodyComponent = Component.object<p2.Body>('PhysicsBody')
+const PhysicsBodyComponent = Component.object<p2.Body>({ name: 'PhysicsBody' })
 
-const Object3DComponent = Component.object<THREE.Object3D>('Object3D')
+const Object3DComponent = Component.object<THREE.Object3D>({ name: 'Object3D' })
 
 class ColorComponent extends Component {
     color!: Color

@@ -3,7 +3,7 @@ import { Object3D, PerspectiveCamera, Vector3 } from 'three'
 import { Object3DComponent, VoxelWorldActorComponent, VoxelWorldComponent, VoxelWorldCoreSystem } from '../core'
 import { VoxelEnginePlugin } from '../voxel-engine-types'
 
-export const BoxCharacterControllerCameraComponent = Component.object<PerspectiveCamera>('BoxCharacterControllerCamera')
+export const BoxCharacterControllerCameraComponent = Component.object<PerspectiveCamera>({ name: 'BoxCharacterControllerCamera' })
 
 export type VoxelBoxCharacterControllerInput = {
     forward: boolean
@@ -14,7 +14,7 @@ export type VoxelBoxCharacterControllerInput = {
 }
 
 export const BoxCharacterControllerInputComponent =
-    Component.object<VoxelBoxCharacterControllerInput>('BoxCharacterControllerInput')
+    Component.object<VoxelBoxCharacterControllerInput>({ name: 'BoxCharacterControllerInput' })
 
 export type BoxCharacterControllerCameraType = 'first-person' | 'third-person'
 
@@ -205,7 +205,7 @@ export class BoxCharacterControllerSystem extends System {
         // if no collision, set the new position to the desired new y position
         if (controller.velocity.y < 0 && grounded) {
             controller.velocity.y = 0
-            
+
             // snap to the ground
             controller.position.y = Math.floor(controller.position.y) + controller.characterHalfHeight
         } else {

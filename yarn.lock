@@ -15,22 +15,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@arancini/core@npm:3.2.0":
-  version: 3.2.0
-  resolution: "@arancini/core@npm:3.2.0"
-  checksum: 8f7e5126a1d34d63fcab6c7659406315b1dd0d7baf9d87981b20042a51d30a102d008887e3ff779a4da76adc73b3591db93ef90e40cfba24c552e57c505f8709
+"@arancini/core@npm:3.3.0":
+  version: 3.3.0
+  resolution: "@arancini/core@npm:3.3.0"
+  checksum: 4c9cfbfa075bc9c1c0cf4cd05711b624beff1f623f4d226c2e1342989b797b66f51be2eda0c7efe5787b9e0c9105af76f5444db9ba9e71755ed42fd003961bcf
   languageName: node
   linkType: hard
 
-"@arancini/react@npm:3.2.0":
-  version: 3.2.0
-  resolution: "@arancini/react@npm:3.2.0"
+"@arancini/react@npm:3.3.0":
+  version: 3.3.0
+  resolution: "@arancini/react@npm:3.3.0"
   dependencies:
-    "@arancini/core": 3.2.0
+    "@arancini/core": 3.3.0
   peerDependencies:
     react: ^18.0.0
     react-dom: ^18.0.0
-  checksum: 3247704fa2bbaf4a0b6aaf70abe1b3533b5ac8dfc6cd3bb353098adb65c91f8d651927daa671045c2e4e7298b6b856d153c5be79664b7b50790e9f5004c0ac68
+  checksum: 173bfaba3590153af9befac276dbe129ec4e3c776af2faa5130051e0b397ae8ee3042a693269fd848a974a67c4007bc769d5fd68c2bc7e0d320ff18ab2c1d595
   languageName: node
   linkType: hard
 
@@ -2091,16 +2091,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"arancini@npm:^3.2.0":
-  version: 3.2.0
-  resolution: "arancini@npm:3.2.0"
+"arancini@npm:^3.3.0":
+  version: 3.3.0
+  resolution: "arancini@npm:3.3.0"
   dependencies:
-    "@arancini/core": 3.2.0
-    "@arancini/react": 3.2.0
+    "@arancini/core": 3.3.0
+    "@arancini/react": 3.3.0
   peerDependencies:
     react: ^18.0.0
     react-dom: ^18.0.0
-  checksum: 1bc7fa8cf851ea80b5930d7365f7d86a6a4018662235a3a431b41fe0cc4590301f3450998fd064ad89988b6eef9ef1f498e0b4e56796563e1ea2f50cf5ed6039
+  checksum: fec538a3dce90462f169c21391231694895ad513e8fc4383888a34b08f7cbe3a22a822f20d569c494edbf0b7a3035f456e19b030dfd7f1899541bc06c701811e
   languageName: node
   linkType: hard
 
@@ -3763,11 +3763,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jolt-physics@portal:/Users/isaacmason/Development/JoltPhysics.js::locator=sketches%40workspace%3A.":
-  version: 0.0.0-use.local
-  resolution: "jolt-physics@portal:/Users/isaacmason/Development/JoltPhysics.js::locator=sketches%40workspace%3A."
+"jolt-physics@npm:^0.0.10":
+  version: 0.0.10
+  resolution: "jolt-physics@npm:0.0.10"
+  checksum: 80c0c5930faf4cad963f19bff529b53f2efb16243916f7f3889eda219257436a5ae39b14cc461cec644f724c19e0b7e75b1417b91b6b881277c2155c16253ec7
   languageName: node
-  linkType: soft
+  linkType: hard
 
 "js-tokens@npm:^3.0.0 || ^4.0.0, js-tokens@npm:^4.0.0":
   version: 4.0.0
@@ -4997,7 +4998,7 @@ __metadata:
     "@types/three": ^0.156.0
     "@vitejs/plugin-basic-ssl": ^1.0.1
     "@vitejs/plugin-react": ^4.0.4
-    arancini: ^3.2.0
+    arancini: ^3.3.0
     d3: ^7.8.5
     jolt-physics: ^0.0.10
     leva: ^0.9.35

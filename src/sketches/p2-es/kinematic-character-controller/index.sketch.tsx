@@ -12,15 +12,15 @@ import { KinematicCharacterController } from './kinematic-character-controller'
 const SCENERY_GROUP = 0x01
 const PLAYER_GROUP = 0x02
 
-const PlayerComponent = Component.tag('Player')
+const PlayerComponent = Component.tag({ name: 'Player' })
 
-const CameraComponent = Component.object<THREE.Camera>('Camera')
+const CameraComponent = Component.object<THREE.Camera>({ name: 'Camera' })
 
-const Object3DComponent = Component.object<THREE.Object3D>('Object3D')
+const Object3DComponent = Component.object<THREE.Object3D>({ name: 'Object3D' })
 
-const PhysicsBodyComponent = Component.object<p2.Body>('PhysicsBody')
+const PhysicsBodyComponent = Component.object<p2.Body>({ name: 'PhysicsBody' })
 
-const PlayerInputComponent = Component.object<{ up: boolean; left: boolean; right: boolean }>('PlayerInput')
+const PlayerInputComponent = Component.object<{ up: boolean; left: boolean; right: boolean }>({ name: 'PlayerInput' })
 
 class KinematicCharacterControllerComponent extends Component {
     controller!: KinematicCharacterController

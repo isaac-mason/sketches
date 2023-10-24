@@ -35,7 +35,7 @@ const Player = () => {
             value: 'first-person',
             options: ['first-person', 'third-person'],
             onChange: (v) => {
-                ecs.world.find([BoxCharacterControllerComponent]).forEach((e) => {
+                ecs.world.filter([BoxCharacterControllerComponent]).forEach((e) => {
                     e.get(BoxCharacterControllerComponent).cameraMode = v
                 })
             },

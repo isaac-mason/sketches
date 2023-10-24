@@ -35,7 +35,7 @@ const App = () => {
             wireframe: {
                 value: false,
                 onChange: (value) => {
-                    world.find([VoxelChunkMeshComponent]).forEach((entity) => {
+                    world.filter([VoxelChunkMeshComponent]).forEach((entity) => {
                         entity.get(VoxelChunkMeshComponent).material.wireframe = value
                     })
                 },

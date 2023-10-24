@@ -15,7 +15,7 @@ import {
 import { VoxelEnginePlugin } from '../voxel-engine-types'
 import { worldVoxelPositionToPhysicsPosition } from './utils'
 
-export const PhysicsWorldComponent = Component.object<Rapier.World>('PhysicsWorld')
+export const PhysicsWorldComponent = Component.object<Rapier.World>({ name: 'PhysicsWorld' })
 
 export class RigidBodyComponent extends Component {
     rigidBody!: Rapier.RigidBody

@@ -19,7 +19,7 @@ class PhysicsBodyComponent extends Component {
     }
 }
 
-const Object3DComponent = Component.object<THREE.Object3D>('Object3D')
+const Object3DComponent = Component.object<THREE.Object3D>({ name: 'Object3D' })
 
 class PhysicsSystem extends System {
     settings: Jolt.JoltSettings
@@ -83,7 +83,7 @@ class PhysicsSystem extends System {
     }
 }
 
-const TeleportTagComponent = Component.tag('Teleport')
+const TeleportTagComponent = Component.tag({ name: 'Teleport' })
 
 const world = new World()
 

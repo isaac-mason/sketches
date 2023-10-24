@@ -28,9 +28,9 @@ const targets = [
     { x: 45, y: 0, z: -15 },
 ]
 
-const AgentComponent = Component.object<CrowdAgent>('Crowd Agent')
-const Object3DComponent = Component.object<Object3D>('Object3D')
-const AgentTarget = Component.object<Vector3>('Agent Target')
+const AgentComponent = Component.object<CrowdAgent>({ name: 'Crowd Agent' })
+const Object3DComponent = Component.object<Object3D>({ name: 'Object3D' })
+const AgentTarget = Component.object<Vector3>({ name: 'Agent Target' })
 
 const world = new World()
 world.registerComponent(AgentComponent)

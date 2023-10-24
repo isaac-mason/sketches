@@ -26,11 +26,11 @@ const containerParts: {
 
 const gooColors = [0xff0000, 0x00ff00, 0x0000ff]
 
-const RotateTagComponent = Component.tag('Rotate')
+const RotateTagComponent = Component.tag({ name: 'Rotate' })
 
-const Object3DComponent = Component.object<THREE.Object3D>('Object3D')
+const Object3DComponent = Component.object<THREE.Object3D>({ name: 'Object3D' })
 
-const PhysicsBodyComponent = Component.object<Body>('PhysicsBody')
+const PhysicsBodyComponent = Component.object<Body>({ name: 'PhysicsBody' })
 
 class RotateSystem extends System {
     rotate = this.query([RotateTagComponent, PhysicsBodyComponent])
