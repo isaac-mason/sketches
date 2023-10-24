@@ -1828,16 +1828,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/hoist-non-react-statics@npm:*":
-  version: 3.3.2
-  resolution: "@types/hoist-non-react-statics@npm:3.3.2"
-  dependencies:
-    "@types/react": "*"
-    hoist-non-react-statics: ^3.3.0
-  checksum: fe5d4b751e13f56010811fd6c4e49e53e2ccbcbbdc54bb8d86a413fbd08c5a83311bca9ef75a1a88d3ba62806711b5dea3f323c0e0f932b3a283dcebc3240238
-  languageName: node
-  linkType: hard
-
 "@types/node@npm:^20.6.0":
   version: 20.8.2
   resolution: "@types/node@npm:20.8.2"
@@ -1919,17 +1909,6 @@ __metadata:
   version: 0.17.1
   resolution: "@types/stats.js@npm:0.17.1"
   checksum: 9b05d22f4d3be1aaa2ac3104273fd80457ad6ed9c816f4cd73873aec76c823b8f2f4a437c803dc5a1df8a9d5e6bf33af6c7baf9cb8269ddf7ef4b7d2c1e3ed72
-  languageName: node
-  linkType: hard
-
-"@types/styled-components@npm:^5.1.27":
-  version: 5.1.28
-  resolution: "@types/styled-components@npm:5.1.28"
-  dependencies:
-    "@types/hoist-non-react-statics": "*"
-    "@types/react": "*"
-    csstype: ^3.0.2
-  checksum: 2e12be4fdc2d60f63e16f8f5cac98d8305e0686b3332a160fec39df2a277f16715b878e25384ddda29e48acf101110a29ca108b716296e9a06bf2740f1257385
   languageName: node
   linkType: hard
 
@@ -3532,15 +3511,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hoist-non-react-statics@npm:^3.3.0":
-  version: 3.3.2
-  resolution: "hoist-non-react-statics@npm:3.3.2"
-  dependencies:
-    react-is: ^16.7.0
-  checksum: b1538270429b13901ee586aa44f4cc3ecd8831c061d06cb8322e50ea17b3f5ce4d0e2e66394761e6c8e152cd8c34fb3b4b690116c6ce2bd45b18c746516cb9e8
-  languageName: node
-  linkType: hard
-
 "html-minifier-terser@npm:^6.1.0":
   version: 6.1.0
   resolution: "html-minifier-terser@npm:6.1.0"
@@ -3793,12 +3763,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jolt-physics@npm:^0.0.10":
-  version: 0.0.10
-  resolution: "jolt-physics@npm:0.0.10"
-  checksum: 80c0c5930faf4cad963f19bff529b53f2efb16243916f7f3889eda219257436a5ae39b14cc461cec644f724c19e0b7e75b1417b91b6b881277c2155c16253ec7
+"jolt-physics@portal:/Users/isaacmason/Development/JoltPhysics.js::locator=sketches%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "jolt-physics@portal:/Users/isaacmason/Development/JoltPhysics.js::locator=sketches%40workspace%3A."
   languageName: node
-  linkType: hard
+  linkType: soft
 
 "js-tokens@npm:^3.0.0 || ^4.0.0, js-tokens@npm:^4.0.0":
   version: 4.0.0
@@ -4658,7 +4627,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-is@npm:^16.13.1, react-is@npm:^16.7.0":
+"react-is@npm:^16.13.1":
   version: 16.13.1
   resolution: "react-is@npm:16.13.1"
   checksum: f7a19ac3496de32ca9ae12aa030f00f14a3d45374f1ceca0af707c831b2a6098ef0d6bdae51bd437b0a306d7f01d4677fcc8de7c0d331eb47ad0f46130e53c5f
@@ -5025,7 +4994,6 @@ __metadata:
     "@types/node": ^20.6.0
     "@types/react": ^18.2.28
     "@types/react-dom": ^18.2.14
-    "@types/styled-components": ^5.1.27
     "@types/three": ^0.156.0
     "@vitejs/plugin-basic-ssl": ^1.0.1
     "@vitejs/plugin-react": ^4.0.4
