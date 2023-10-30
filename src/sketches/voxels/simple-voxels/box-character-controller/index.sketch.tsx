@@ -5,13 +5,8 @@ import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import { styled } from 'styled-components'
 import { Color, PerspectiveCamera, Vector3 } from 'three'
 import { Canvas } from '../../../../common'
-import {
-    BoxCharacterControllerCameraComponent,
-    BoxCharacterControllerComponent,
-    BoxCharacterControllerInputComponent,
-    BoxCharacterControllerPlugin,
-} from '../engine/box-character-controller'
-import { CorePlugin, Object3DComponent, Vec3 } from '../engine/core'
+import { BoxCharacterController, BoxCharacterControllerPlugin } from '../engine/box-character-controller'
+import { CorePlugin, Vec3 } from '../engine/core'
 import { CulledMesherPlugin, VoxelChunkCulledMeshes } from '../engine/culled-mesher'
 import { VoxelEngine, useVoxelEngine } from '../engine/voxel-engine'
 
@@ -20,7 +15,7 @@ const green2 = new Color('green').addScalar(0.02).getHex()
 const orange = new Color('orange').getHex()
 
 const Player = () => {
-    const { ecs, voxelWorld, setBlock } = useVoxelEngine<[CorePlugin, CulledMesherPlugin]>()
+    const { ecs, voxelWorld, setBlock } = useVoxelEngine<[CorePlugin, CulledMesherPlugin, BoxCharacterControllerPlugin]>()
 
     const gl = useThree((s) => s.gl)
 
@@ -35,9 +30,11 @@ const Player = () => {
             value: 'first-person',
             options: ['first-person', 'third-person'],
             onChange: (v) => {
-                ecs.world.filter([BoxCharacterControllerComponent]).forEach((e) => {
-                    e.get(BoxCharacterControllerComponent).cameraMode = v
-                })
+                ecs.world
+                    .filter((e) => e.has('boxCharacterController'))
+                    .forEach((e) => {
+                        e.boxCharacterController.cameraMode = v
+                    })
             },
         },
     })
@@ -120,17 +117,22 @@ const Player = () => {
         }
     }, [gl])
 
+    const boxCharacterController = useMemo(() => {
+        return new BoxCharacterController(options)
+    }, [])
+
     return (
-        <ecs.Entity>
-            <ecs.Component type={Object3DComponent}>
+        <ecs.Entity
+            boxCharacterControllerCamera={camera as PerspectiveCamera}
+            boxCharacterControllerInput={input}
+            boxCharacterController={boxCharacterController}
+        >
+            <ecs.Component name="object3D">
                 <mesh>
                     <boxGeometry args={[width, height, width]} />
                     <meshStandardMaterial color="red" />
                 </mesh>
             </ecs.Component>
-            <ecs.Component type={BoxCharacterControllerCameraComponent} args={[camera as PerspectiveCamera]} />
-            <ecs.Component type={BoxCharacterControllerInputComponent} args={[input]} />
-            <ecs.Component type={BoxCharacterControllerComponent} args={[options]} />
         </ecs.Entity>
     )
 }

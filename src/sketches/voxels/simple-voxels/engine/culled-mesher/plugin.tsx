@@ -1,20 +1,10 @@
-import { Component, Entity, System } from 'arancini'
+import { System, With } from 'arancini'
 import { BufferAttribute, BufferGeometry, Mesh, MeshStandardMaterial } from 'three'
-import {
-    CHUNK_SIZE,
-    Vec3,
-    VoxelChunkComponent,
-    VoxelChunkLoadedTagComponent,
-    VoxelWorldActorComponent,
-    VoxelWorldComponent,
-    VoxelWorldCoreSystem,
-    VoxelWorldEventsComponent,
-    chunkId,
-} from '../core'
+import { CHUNK_SIZE, ChunkEntity, CorePlugin, CorePluginEntity, Vec3, VoxelChunk, VoxelWorldCoreSystem, chunkId } from '../core'
+import { useVoxelEngine } from '../voxel-engine'
 import { VoxelEnginePlugin } from '../voxel-engine-types'
 import VoxelChunkMesherWorker from './culled-mesher.worker.ts?worker'
 import { ChunkMeshUpdateMessage, RegisterChunkMessage, RequestChunkMeshUpdateMessage, WorkerMessage } from './types'
-import { useVoxelEngine } from '../voxel-engine'
 
 const voxelChunkShaderMaterial = new MeshStandardMaterial({
     vertexColors: true,
@@ -55,7 +45,7 @@ voxelChunkShaderMaterial.onBeforeCompile = (shader) => {
     )
 }
 
-export class VoxelChunkMeshComponent extends Component {
+export class VoxelChunkMesh {
     geometry!: BufferGeometry
 
     material!: MeshStandardMaterial
@@ -63,26 +53,24 @@ export class VoxelChunkMeshComponent extends Component {
     mesh!: Mesh
 
     constructor() {
-        super()
-
         this.mesh = new Mesh(new BufferGeometry(), voxelChunkShaderMaterial)
         this.geometry = this.mesh.geometry as BufferGeometry
         this.material = this.mesh.material as MeshStandardMaterial
     }
 }
 
-export class VoxelChunkMesherSystem extends System {
-    chunks = this.query([VoxelChunkComponent])
+export class VoxelChunkMesherSystem extends System<CorePluginEntity & CulledMesherPluginEntity> {
+    chunks = this.query((e) => e.has('voxelChunk'))
 
-    loadedChunks = this.query([VoxelChunkComponent, VoxelChunkLoadedTagComponent])
+    loadedChunks = this.query((e) => e.has('voxelChunk', 'voxelChunkLoaded'))
 
-    dirtyChunks = new Set<Entity>()
+    voxelWorld = this.singleton('voxelWorld')!
 
-    voxelWorld = this.singleton(VoxelWorldComponent)!
+    voxelWorldEvents = this.singleton('voxelWorldEvents')!
 
-    voxelWorldEvents = this.singleton(VoxelWorldEventsComponent)!
+    voxelWorldActor = this.singleton('voxelWorldActor')!
 
-    voxelWorldActor = this.singleton(VoxelWorldActorComponent)!
+    dirtyChunks = new Set<With<CorePluginEntity & CulledMesherPluginEntity, 'voxelChunk'>>()
 
     private workers: InstanceType<typeof VoxelChunkMesherWorker>[] = []
 
@@ -132,11 +120,11 @@ export class VoxelChunkMesherSystem extends System {
 
     onUpdate(): void {
         const prioritisedChunks = Array.from(this.dirtyChunks).sort((a, b) => {
-            return a.get(VoxelChunkComponent).priority - b.get(VoxelChunkComponent).priority
+            return a.voxelChunk!.priority - b.voxelChunk!.priority
         })
 
         for (const chunk of prioritisedChunks) {
-            this.remesh(chunk.get(VoxelChunkComponent).id)
+            this.remesh(chunk.voxelChunk.id)
         }
 
         this.dirtyChunks.clear()
@@ -152,10 +140,9 @@ export class VoxelChunkMesherSystem extends System {
     private handleBlockUpdates(positions: Vec3[]): void {
         for (const position of positions) {
             const chunkEntity = this.voxelWorld.getChunkAt(position)!
-            const chunk = chunkEntity.get(VoxelChunkComponent)
-            const loaded = chunkEntity.has(VoxelChunkLoadedTagComponent)
+            const { voxelChunk, voxelChunkLoaded } = chunkEntity
 
-            if (!loaded) return
+            if (!voxelChunkLoaded) return
 
             this.dirtyChunks.add(chunkEntity)
 
@@ -171,9 +158,9 @@ export class VoxelChunkMesherSystem extends System {
                         const offset: Vec3 = [dx, dy, dz]
 
                         const neighbourChunkId = chunkId([
-                            chunk.position.x + offset[0],
-                            chunk.position.y + offset[1],
-                            chunk.position.z + offset[2],
+                            voxelChunk.position.x + offset[0],
+                            voxelChunk.position.y + offset[1],
+                            voxelChunk.position.z + offset[2],
                         ])
 
                         const neighbourEntity = this.voxelWorld.chunkEntities.get(neighbourChunkId)
@@ -187,12 +174,12 @@ export class VoxelChunkMesherSystem extends System {
         }
     }
 
-    private registerChunk(e: Entity): void {
-        if (e.has(VoxelChunkMeshComponent)) return
+    private registerChunk(e: ChunkEntity & CulledMesherPluginEntity): void {
+        if (e.voxelChunkMesh) return
 
-        const voxelChunk = e.get(VoxelChunkComponent)
+        const { voxelChunk } = e
 
-        e.add(VoxelChunkMeshComponent)
+        this.world.add(e, 'voxelChunkMesh', new VoxelChunkMesh())
 
         const data: RegisterChunkMessage = {
             type: 'register-chunk',
@@ -232,9 +219,9 @@ export class VoxelChunkMesherSystem extends System {
     private updateVoxelChunkMesh({ id, indices, positions, normals, colors, ambientOcclusion }: ChunkMeshUpdateMessage) {
         this.pendingMeshUpdates.delete(id)
 
-        const entity = this.voxelWorld.chunkEntities.get(id)!
-        const voxelChunk = entity.get(VoxelChunkComponent)
-        const voxelChunkMesh = entity.get(VoxelChunkMeshComponent)
+        const entity = this.voxelWorld.chunkEntities.get(id)! as CorePluginEntity & CulledMesherPluginEntity
+        const voxelChunk = entity.voxelChunk!
+        const voxelChunkMesh = entity.voxelChunkMesh!
 
         voxelChunkMesh.geometry.setIndex(new BufferAttribute(indices, 1))
         voxelChunkMesh.geometry.setAttribute('position', new BufferAttribute(positions, 3))
@@ -254,12 +241,12 @@ export class VoxelChunkMesherSystem extends System {
 }
 
 export const VoxelChunkCulledMeshes = () => {
-    const { ecs } = useVoxelEngine()
+    const { ecs } = useVoxelEngine<[CorePlugin, CulledMesherPlugin]>()
 
     return (
-        <ecs.QueryEntities query={[VoxelChunkMeshComponent, VoxelChunkLoadedTagComponent]}>
+        <ecs.QueryEntities query={(e) => e.has('voxelChunkMesh', 'voxelChunkLoaded')}>
             {(entity) => {
-                const voxelChunkMesh = entity.get(VoxelChunkMeshComponent)
+                const { voxelChunkMesh } = entity
 
                 return <primitive object={voxelChunkMesh.mesh} />
             }}
@@ -267,9 +254,14 @@ export const VoxelChunkCulledMeshes = () => {
     )
 }
 
+export type CulledMesherPluginEntity = {
+    voxelChunkMesh?: VoxelChunkMesh
+}
+
 export const CulledMesherPlugin = {
-    components: [VoxelChunkMeshComponent],
+    E: {} as CulledMesherPluginEntity,
+    components: ['voxelChunkMesh'],
     systems: [VoxelChunkMesherSystem],
-} satisfies VoxelEnginePlugin
+} satisfies VoxelEnginePlugin<CulledMesherPluginEntity>
 
 export type CulledMesherPlugin = typeof CulledMesherPlugin

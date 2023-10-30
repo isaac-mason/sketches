@@ -5,9 +5,9 @@ import { useControls } from 'leva'
 import { useEffect, useLayoutEffect } from 'react'
 import { Color } from 'three'
 import { Canvas } from '../../../../common'
-import { CorePlugin, Object3DComponent, Vec3 } from '../engine/core'
+import { CorePlugin, Vec3 } from '../engine/core'
 import { CulledMesherPlugin, VoxelChunkCulledMeshes } from '../engine/culled-mesher'
-import { PhysicsDebug, RapierInit, RapierPhysicsPlugin, RigidBodyComponent } from '../engine/rapier-physics'
+import { PhysicsDebug, RapierInit, RapierPhysicsPlugin } from '../engine/rapier-physics'
 import { VoxelEngine, useVoxelEngine } from '../engine/voxel-engine'
 
 const green1 = new Color('green').addScalar(-0.02).getHex()
@@ -98,7 +98,7 @@ const App = () => {
         impulse.z *= impulseScale
         body.applyImpulse(impulse, true)
 
-        ecs.world.create().add(RigidBodyComponent, body)
+        ecs.world.create({ rigidBody: body })
     }
 
     const handleBuild = (event: ThreeEvent<MouseEvent>) => {
@@ -147,12 +147,12 @@ const App = () => {
             const body = physicsWorld.createRigidBody(Rapier.RigidBodyDesc.dynamic().setTranslation(x, 80, z))
             physicsWorld.createCollider(Rapier.ColliderDesc.cuboid(0.5, 0.5, 0.5), body)
 
-            const entity = ecs.world.create((e) => {
-                e.add(RigidBodyComponent, body)
+            const entity = ecs.world.create({
+                rigidBody: body,
             })
 
             const timeout = setTimeout(() => {
-                entity.destroy()
+                ecs.world.destroy(entity)
                 physicsWorld.removeRigidBody(body)
             }, 15000)
 
@@ -172,8 +172,8 @@ const App = () => {
                     <VoxelChunkCulledMeshes />
                 </Bounds>
 
-                <ecs.QueryEntities query={[RigidBodyComponent]}>
-                    <ecs.Component type={Object3DComponent}>
+                <ecs.QueryEntities query={(e) => e.has('rigidBody')}>
+                    <ecs.Component name="object3D">
                         <mesh>
                             <meshStandardMaterial color="white" />
                             <boxGeometry args={[1, 1, 1]} />

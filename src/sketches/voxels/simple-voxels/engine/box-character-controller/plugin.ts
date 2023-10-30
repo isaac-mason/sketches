@@ -1,9 +1,7 @@
-import { Component, System } from 'arancini'
-import { Object3D, PerspectiveCamera, Vector3 } from 'three'
-import { Object3DComponent, VoxelWorldActorComponent, VoxelWorldComponent, VoxelWorldCoreSystem } from '../core'
+import { System } from 'arancini'
+import { Object3D, Vector3 } from 'three'
+import { CorePluginEntity, VoxelWorldCoreSystem } from '../core'
 import { VoxelEnginePlugin } from '../voxel-engine-types'
-
-export const BoxCharacterControllerCameraComponent = Component.object<PerspectiveCamera>({ name: 'BoxCharacterControllerCamera' })
 
 export type VoxelBoxCharacterControllerInput = {
     forward: boolean
@@ -13,9 +11,6 @@ export type VoxelBoxCharacterControllerInput = {
     jump: boolean
 }
 
-export const BoxCharacterControllerInputComponent =
-    Component.object<VoxelBoxCharacterControllerInput>({ name: 'BoxCharacterControllerInput' })
-
 export type BoxCharacterControllerCameraType = 'first-person' | 'third-person'
 
 export type VoxelBoxCharacterControllerOptions = {
@@ -24,23 +19,23 @@ export type VoxelBoxCharacterControllerOptions = {
     initialPosition: Vector3
 }
 
-export class BoxCharacterControllerComponent extends Component {
-    transform!: Object3D
-    position!: Vector3
-    velocity!: Vector3
+export class BoxCharacterController {
+    transform: Object3D
+    position: Vector3
+    velocity: Vector3
 
-    cameraMode!: BoxCharacterControllerCameraType
+    cameraMode: BoxCharacterControllerCameraType
 
-    jumping!: boolean
-    jumpTime!: number
+    jumping: boolean
+    jumpTime: number
 
-    characterHalfHeight!: number
-    characterHalfWidth!: number
-    horizontalSensorOffset!: number
+    characterHalfHeight: number
+    characterHalfWidth: number
+    horizontalSensorOffset: number
 
-    options!: VoxelBoxCharacterControllerOptions
+    options: VoxelBoxCharacterControllerOptions
 
-    construct(options: VoxelBoxCharacterControllerOptions) {
+    constructor(options: VoxelBoxCharacterControllerOptions) {
         this.options = options
 
         this.transform = new Object3D()
@@ -59,27 +54,24 @@ export class BoxCharacterControllerComponent extends Component {
     }
 }
 
-export class BoxCharacterControllerSystem extends System {
-    controllerQuery = this.query([BoxCharacterControllerComponent, BoxCharacterControllerInputComponent, Object3DComponent])
+export class BoxCharacterControllerSystem extends System<BoxChararacterControllerPluginEntity & CorePluginEntity> {
+    controller = this.query((e) => e.has('boxCharacterController', 'boxCharacterControllerInput', 'object3D'), { required: true })
 
-    controllerCameraQuery = this.query([BoxCharacterControllerCameraComponent])
+    controllerCamera = this.query((e) => e.has('boxCharacterControllerCamera'), { required: true })
 
-    voxelWorld = this.singleton(VoxelWorldComponent)!
+    voxelWorld = this.singleton('voxelWorld')!
 
-    voxelWorldActor = this.singleton(VoxelWorldActorComponent)!
+    voxelWorldActor = this.singleton('voxelWorldActor')!
 
     tmpThirdPersonCameraOffset = new Vector3()
 
     static PRIORITY = VoxelWorldCoreSystem.PRIORITY - 1
 
     onUpdate(delta: number, time: number): void {
-        const controllerEntity = this.controllerQuery.first!
-        const controller = controllerEntity.get(BoxCharacterControllerComponent)
+        const { boxCharacterController: controller, boxCharacterControllerInput: input, object3D } = this.controller.first!
+        const { boxCharacterControllerCamera: camera } = this.controllerCamera.first!
 
-        const controllerCameraEntity = this.controllerCameraQuery.first!
-        const camera = controllerCameraEntity.get(BoxCharacterControllerCameraComponent)
-
-        const { forward, backward, left, right, jump } = controllerEntity.get(BoxCharacterControllerInputComponent)
+        const { forward, backward, left, right, jump } = input
 
         const grounded = this.checkGrounded(controller)
 
@@ -227,26 +219,25 @@ export class BoxCharacterControllerSystem extends System {
         }
 
         /* update object3D */
-        const object3D = controllerEntity.get(Object3DComponent)
         object3D.position.copy(controller.position)
 
         /* update voxel world actor */
         this.voxelWorldActor.position.copy(controller.position)
     }
 
-    private checkGrounded(controller: BoxCharacterControllerComponent) {
+    private checkGrounded(controller: BoxCharacterController) {
         const feetOffset = -controller.characterHalfHeight
 
         return this.checkVerticalCollision(controller, feetOffset)
     }
 
-    private checkHitCeiling(controller: BoxCharacterControllerComponent) {
+    private checkHitCeiling(controller: BoxCharacterController) {
         const headOffset = controller.characterHalfHeight
 
         return this.checkVerticalCollision(controller, headOffset)
     }
 
-    private checkVerticalCollision(controller: BoxCharacterControllerComponent, yOffset: number): boolean {
+    private checkVerticalCollision(controller: BoxCharacterController, yOffset: number): boolean {
         const y = controller.position.y + yOffset
         return (
             this.voxelWorld.intersectsVoxel([
@@ -273,9 +264,16 @@ export class BoxCharacterControllerSystem extends System {
     }
 }
 
+export type BoxChararacterControllerPluginEntity = {
+    boxCharacterControllerCamera?: THREE.PerspectiveCamera
+    boxCharacterControllerInput?: VoxelBoxCharacterControllerInput
+    boxCharacterController?: BoxCharacterController
+}
+
 export const BoxCharacterControllerPlugin = {
-    components: [BoxCharacterControllerCameraComponent, BoxCharacterControllerInputComponent, BoxCharacterControllerComponent],
+    E: {} as BoxChararacterControllerPluginEntity,
+    components: ['boxCharacterController', 'boxCharacterControllerInput', 'boxCharacterControllerCamera'],
     systems: [BoxCharacterControllerSystem],
-} satisfies VoxelEnginePlugin
+} satisfies VoxelEnginePlugin<BoxChararacterControllerPluginEntity>
 
 export type BoxCharacterControllerPlugin = typeof BoxCharacterControllerPlugin

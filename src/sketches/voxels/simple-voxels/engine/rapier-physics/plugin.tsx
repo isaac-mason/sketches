@@ -1,31 +1,15 @@
 import Rapier from '@dimforge/rapier3d-compat'
-import { Component, Entity, System } from 'arancini'
+import { System, World } from 'arancini'
 import { suspend } from 'suspend-react'
 import { Quaternion, Vector3 } from 'three'
-import {
-    CHUNK_SIZE,
-    Object3DComponent,
-    Vec3,
-    VoxelChunkComponent,
-    VoxelWorldComponent,
-    VoxelWorldEventsComponent,
-    chunkPositionToWorldPosition,
-    positionToChunkIndex,
-} from '../core'
+import { CHUNK_SIZE, ChunkEntity, CorePluginEntity, Vec3, chunkPositionToWorldPosition, positionToChunkIndex } from '../core'
 import { VoxelEnginePlugin } from '../voxel-engine-types'
 import { worldVoxelPositionToPhysicsPosition } from './utils'
 
-export const PhysicsWorldComponent = Component.object<Rapier.World>({ name: 'PhysicsWorld' })
-
-export class RigidBodyComponent extends Component {
-    rigidBody!: Rapier.RigidBody
-
-    isSleeping!: boolean
-
-    construct(rigidBody: Rapier.RigidBody) {
-        this.rigidBody = rigidBody
-        this.isSleeping = rigidBody.isSleeping()
-    }
+export type RapierPhysicsPluginEntity = {
+    physicsWorld?: Rapier.World
+    rigidBody?: Rapier.RigidBody
+    voxelChunkPhysics?: VoxelChunkPhysics
 }
 
 export type VoxelChunkPhysicsBox = {
@@ -38,7 +22,7 @@ export type VoxelChunkPhysicsBox = {
     zi: number
 }
 
-export class VoxelChunkPhysicsComponent extends Component {
+export class VoxelChunkPhysics {
     offset!: Vec3
 
     nx!: number
@@ -53,7 +37,7 @@ export class VoxelChunkPhysicsComponent extends Component {
     boxified!: boolean[]
     boxes!: VoxelChunkPhysicsBox[]
 
-    construct(offset: Vec3) {
+    constructor(offset: Vec3) {
         this.offset = offset
 
         this.nx = CHUNK_SIZE
@@ -117,16 +101,16 @@ export class VoxelChunkPhysicsComponent extends Component {
     }
 }
 
-export class VoxelPhysicsSystem extends System {
-    physicsWorld = this.singleton(PhysicsWorldComponent)!
+export class VoxelPhysicsSystem extends System<CorePluginEntity & RapierPhysicsPluginEntity> {
+    physicsWorld = this.singleton('physicsWorld')!
 
-    voxelWorld = this.singleton(VoxelWorldComponent)!
+    voxelWorld = this.singleton('voxelWorld')!
 
-    voxelWorldEvents = this.singleton(VoxelWorldEventsComponent)!
+    voxelWorldEvents = this.singleton('voxelWorldEvents')!
 
-    chunks = this.query([VoxelChunkComponent])
+    chunks = this.query((e) => e.has('voxelChunk'))
 
-    dirtyChunks = new Set<Entity>()
+    dirtyChunks = new Set<ChunkEntity & RapierPhysicsPluginEntity>()
 
     onInit(): void {
         this.chunks.onEntityAdded.add((e) => {
@@ -135,7 +119,7 @@ export class VoxelPhysicsSystem extends System {
 
         this.voxelWorldEvents.onChunkChange.add((updates) => {
             for (const { chunk } of updates) {
-                this.dirtyChunks.add(chunk)
+                this.dirtyChunks.add(chunk as ChunkEntity & RapierPhysicsPluginEntity)
             }
         })
     }
@@ -148,23 +132,26 @@ export class VoxelPhysicsSystem extends System {
         this.dirtyChunks.clear()
     }
 
-    private updateCollider(chunkEntity: Entity) {
-        const chunk = chunkEntity.get(VoxelChunkComponent)
+    private updateCollider(chunkEntity: ChunkEntity & RapierPhysicsPluginEntity) {
+        const { voxelChunk } = chunkEntity
 
-        if (!chunkEntity.has(VoxelChunkPhysicsComponent)) {
-            chunkEntity.add(
-                VoxelChunkPhysicsComponent,
-                worldVoxelPositionToPhysicsPosition(chunkPositionToWorldPosition(chunk.position.toArray())),
+        if (!chunkEntity.voxelChunkPhysics) {
+            this.world.add(
+                chunkEntity,
+                'voxelChunkPhysics',
+                new VoxelChunkPhysics(
+                    worldVoxelPositionToPhysicsPosition(chunkPositionToWorldPosition(voxelChunk.position.toArray())),
+                ),
             )
         }
 
-        const chunkPhysics = chunkEntity.get(VoxelChunkPhysicsComponent)
+        const chunkPhysics = chunkEntity.voxelChunkPhysics!
 
         // todo: optimise, should only update the changed blocks
         for (let x = 0; x < CHUNK_SIZE; x++) {
             for (let y = 0; y < CHUNK_SIZE; y++) {
                 for (let z = 0; z < CHUNK_SIZE; z++) {
-                    chunkPhysics.setFilled(x, y, z, !!chunk.solid[positionToChunkIndex([x, y, z])])
+                    chunkPhysics.setFilled(x, y, z, !!voxelChunk.solid[positionToChunkIndex([x, y, z])])
                 }
             }
         }
@@ -306,11 +293,8 @@ export class VoxelPhysicsSystem extends System {
     }
 }
 
-export class PhysicsSystem extends System {
+export class PhysicsSystem extends System<CorePluginEntity & RapierPhysicsPluginEntity> {
     eventQueue = new Rapier.EventQueue(false)
-
-    entityToRigidBody = new Map<Entity, Rapier.RigidBody>()
-    rigidBodyToEntity = new Map<Rapier.RigidBody, Entity>()
 
     paused = false
 
@@ -320,9 +304,9 @@ export class PhysicsSystem extends System {
 
     worldScale = new Vector3(1, 1, 1)
 
-    rigidBodyQuery = this.query([RigidBodyComponent])
+    rigidBodyQuery = this.query((e) => e.has('rigidBody'))
 
-    physicsWorld = this.singleton(PhysicsWorldComponent)!
+    physicsWorld = this.singleton('physicsWorld')!
 
     static MAX_SUB_STEPS = 10
 
@@ -373,14 +357,14 @@ export class PhysicsSystem extends System {
 
         // Update physics bodies and transforms
         for (const entity of this.rigidBodyQuery) {
-            const rigidBodyComponent = entity.get(RigidBodyComponent)
-            const { rigidBody } = rigidBodyComponent
+            const rigidBody = entity.rigidBody
 
-            // todo: sleep events
-            rigidBodyComponent.isSleeping = rigidBody.isSleeping()
+            if (!rigidBody.userData) {
+                rigidBody.userData = {}
+            }
 
             // Only proceed if Object3DComponent is in the entity
-            const object3D = entity.find(Object3DComponent)
+            const { object3D } = entity
 
             if (object3D) {
                 if (rigidBody.isFixed() && object3D.userData.physicsPositionInitialised) continue
@@ -426,14 +410,18 @@ export const RapierInit = ({ children }: { children: React.ReactNode }) => {
 }
 
 export const RapierPhysicsPlugin = {
-    components: [RigidBodyComponent, VoxelChunkPhysicsComponent, PhysicsWorldComponent],
+    E: {} as RapierPhysicsPluginEntity,
+    components: ['rigidBody', 'physicsWorld', 'voxelChunkPhysics'],
     systems: [PhysicsSystem, VoxelPhysicsSystem],
-    setup: (world) => {
-        const physicsWorldEntity = world.create()
-        const physicsWorld = physicsWorldEntity.add(PhysicsWorldComponent, new Rapier.World(new Rapier.Vector3(0, -9.81, 0)))
+    setup: (world: World<RapierPhysicsPluginEntity>) => {
+        const physicsWorld = new Rapier.World(new Rapier.Vector3(0, -9.81, 0))
+
+        world.create({
+            physicsWorld,
+        })
 
         return { physicsWorld }
     },
-} satisfies VoxelEnginePlugin
+} satisfies VoxelEnginePlugin<RapierPhysicsPluginEntity>
 
 export type RapierPhysicsPlugin = typeof RapierPhysicsPlugin

@@ -1,6 +1,6 @@
 import { Billboard, KeyboardControls, Text, useKeyboardControls } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
-import { Component, System, World } from 'arancini'
+import { System, World } from 'arancini'
 import { createECS } from 'arancini/react'
 import * as p2 from 'p2-es'
 import { useMemo } from 'react'
@@ -9,31 +9,24 @@ import { Canvas } from '../../../common'
 import { Duck } from './duck'
 import { KinematicCharacterController } from './kinematic-character-controller'
 
+type EntityType = {
+    isPlayer?: boolean
+    camera?: THREE.Camera
+    object3D?: THREE.Object3D
+    physicsBody?: p2.Body
+    playerInput?: { up: boolean; left: boolean; right: boolean }
+    kinematicCharacterController?: KinematicCharacterController
+}
+
 const SCENERY_GROUP = 0x01
 const PLAYER_GROUP = 0x02
 
-const PlayerComponent = Component.tag({ name: 'Player' })
-
-const CameraComponent = Component.object<THREE.Camera>({ name: 'Camera' })
-
-const Object3DComponent = Component.object<THREE.Object3D>({ name: 'Object3D' })
-
-const PhysicsBodyComponent = Component.object<p2.Body>({ name: 'PhysicsBody' })
-
-const PlayerInputComponent = Component.object<{ up: boolean; left: boolean; right: boolean }>({ name: 'PlayerInput' })
-
-class KinematicCharacterControllerComponent extends Component {
-    controller!: KinematicCharacterController
-
-    construct() {}
-}
-
-class PhysicsSystem extends System {
+class PhysicsSystem extends System<EntityType> {
     physicsWorld = new p2.World({ gravity: [0, -9.81] })
 
     physicsBodies = new Map<string, p2.Body>()
 
-    physicsBodyQuery = this.query([PhysicsBodyComponent, Object3DComponent])
+    physicsBodyQuery = this.query((e) => e.has('physicsBody', 'object3D'))
 
     static TIME_STEP = 1 / 60
 
@@ -42,18 +35,13 @@ class PhysicsSystem extends System {
     static MAX_STEP_DELTA = PhysicsSystem.TIME_STEP * 5
 
     onInit(): void {
-        this.physicsBodyQuery.onEntityAdded.add((entity) => {
-            const body = entity.get(PhysicsBodyComponent)
-            this.physicsWorld.addBody(body)
-            this.physicsBodies.set(entity.id, body)
+        this.physicsBodyQuery.onEntityAdded.add(({ physicsBody }) => {
+            this.physicsWorld.addBody(physicsBody)
         })
 
-        this.physicsBodyQuery.onEntityRemoved.add((entity) => {
-            const body = this.physicsBodies.get(entity.id)
-            this.physicsBodies.delete(entity.id)
-
-            if (body) {
-                this.physicsWorld.removeBody(body)
+        this.physicsBodyQuery.onEntityRemoved.add(({ physicsBody }) => {
+            if (physicsBody) {
+                this.physicsWorld.removeBody(physicsBody)
             }
         })
     }
@@ -65,27 +53,24 @@ class PhysicsSystem extends System {
             PhysicsSystem.MAX_SUB_STEPS,
         )
 
-        for (const entity of this.physicsBodyQuery.entities) {
-            const body = entity.get(PhysicsBodyComponent)
-            const object3D = entity.get(Object3DComponent)
+        for (const { physicsBody, object3D } of this.physicsBodyQuery.entities) {
+            object3D.position.set(physicsBody.interpolatedPosition[0], physicsBody.interpolatedPosition[1], 0)
 
-            object3D.position.set(body.interpolatedPosition[0], body.interpolatedPosition[1], 0)
-
-            object3D.rotation.set(0, 0, body.angle)
+            object3D.rotation.set(0, 0, physicsBody.angle)
         }
     }
 }
 
-class KinematicCharacterControllerSystem extends System {
-    playerQuery = this.query([PlayerInputComponent, PhysicsBodyComponent, KinematicCharacterControllerComponent])
+class KinematicCharacterControllerSystem extends System<EntityType> {
+    playerQuery = this.query((e) => e.has('playerInput', 'physicsBody'))
 
     onInit(): void {
         this.playerQuery.onEntityAdded.add((entity) => {
-            const body = entity.get(PhysicsBodyComponent)
+            const { physicsBody } = entity
 
             const controller = new KinematicCharacterController({
                 world: this.world.getSystem(PhysicsSystem)!.physicsWorld,
-                body,
+                body: physicsBody,
                 collisionMask: SCENERY_GROUP,
                 velocityXSmoothing: 0.0001,
                 timeToJumpApex: 0.4,
@@ -93,52 +78,49 @@ class KinematicCharacterControllerSystem extends System {
                 wallJumpClimb: [15, 15],
             })
 
-            entity.get(KinematicCharacterControllerComponent).controller = controller
+            world.add(entity, 'kinematicCharacterController', controller)
         })
     }
 
     onUpdate(delta: number): void {
         for (const entity of this.playerQuery.entities) {
-            const input = entity.get(PlayerInputComponent)
-            const { controller } = entity.get(KinematicCharacterControllerComponent)
+            const { playerInput, kinematicCharacterController } = entity
 
-            if (!controller) continue
+            if (!kinematicCharacterController) continue
 
             let left = 0
             let right = 0
-            if (input.left) {
+            if (playerInput.left) {
                 left = 1
             }
-            if (input.right) {
+            if (playerInput.right) {
                 right = 1
             }
-            controller.input[0] = right - left
+            kinematicCharacterController.input[0] = right - left
 
-            if (input.up) {
-                controller.setJumpKeyState(true)
+            if (playerInput.up) {
+                kinematicCharacterController.setJumpKeyState(true)
             } else {
-                controller.setJumpKeyState(false)
+                kinematicCharacterController.setJumpKeyState(false)
             }
 
-            controller.update(delta)
+            kinematicCharacterController.update(delta)
         }
     }
 }
 
-class PlayerModelSystem extends System {
-    players = this.query([PlayerComponent, PlayerInputComponent, Object3DComponent])
+class PlayerModelSystem extends System<EntityType> {
+    players = this.query((e) => e.has('isPlayer', 'playerInput', 'object3D', 'kinematicCharacterController'))
 
     onUpdate(): void {
         for (const entity of this.players) {
-            const object3D = entity.get(Object3DComponent)
-            const input = entity.get(PlayerInputComponent)
-            const { controller } = entity.get(KinematicCharacterControllerComponent)
+            const { object3D, playerInput, kinematicCharacterController } = entity
 
-            if (controller?.wallSliding) {
+            if (kinematicCharacterController?.wallSliding) {
                 object3D.rotation.y = 0
-            } else if (input.left) {
+            } else if (playerInput.left) {
                 object3D.rotation.y = -Math.PI / 2
-            } else if (input.right) {
+            } else if (playerInput.right) {
                 object3D.rotation.y = Math.PI / 2
             } else {
                 object3D.rotation.y = 0
@@ -148,9 +130,9 @@ class PlayerModelSystem extends System {
 }
 
 class CameraSystem extends System {
-    camera = this.singleton(CameraComponent, { required: true })!
+    camera = this.singleton('camera', { required: true })!
 
-    players = this.query([PlayerComponent, PhysicsBodyComponent, Object3DComponent])
+    players = this.query((e) => e.has('isPlayer', 'physicsBody', 'object3D'))
 
     box3 = new Box3()
 
@@ -164,9 +146,9 @@ class CameraSystem extends System {
 
         const points: Vector3[] = []
         for (const entity of this.players) {
-            const body = entity.get(PhysicsBodyComponent)
+            const { physicsBody } = entity
 
-            points.push({ x: body.interpolatedPosition[0], y: body.interpolatedPosition[1], z: 0 } as Vector3)
+            points.push({ x: physicsBody.interpolatedPosition[0], y: physicsBody.interpolatedPosition[1], z: 0 } as Vector3)
         }
 
         this.box3.setFromPoints(points)
@@ -182,14 +164,9 @@ class CameraSystem extends System {
     }
 }
 
-const world = new World()
-
-world.registerComponent(Object3DComponent)
-world.registerComponent(PhysicsBodyComponent)
-world.registerComponent(PlayerInputComponent)
-world.registerComponent(KinematicCharacterControllerComponent)
-world.registerComponent(CameraComponent)
-world.registerComponent(PlayerComponent)
+const world = new World<EntityType>({
+    components: ['isPlayer', 'camera', 'object3D', 'physicsBody', 'playerInput', 'kinematicCharacterController'],
+})
 
 world.registerSystem(KinematicCharacterControllerSystem)
 world.registerSystem(PhysicsSystem)
@@ -198,11 +175,11 @@ world.registerSystem(PlayerModelSystem)
 
 world.init()
 
-const ECS = createECS(world)
+const { Entity, Component } = createECS(world)
 
 const Loop = () => {
     useFrame((_, delta) => {
-        world.update(delta)
+        world.step(delta)
     })
 
     return null
@@ -211,11 +188,7 @@ const Loop = () => {
 const Camera = () => {
     const camera = useThree((s) => s.camera)
 
-    return (
-        <ECS.Entity>
-            <ECS.Component type={CameraComponent} args={[camera]} />
-        </ECS.Entity>
-    )
+    return <Entity camera={camera} />
 }
 
 const Player = () => {
@@ -256,17 +229,13 @@ const Player = () => {
     })
 
     return (
-        <ECS.Entity>
-            <ECS.Component type={Object3DComponent}>
+        <Entity isPlayer physicsBody={player} playerInput={input}>
+            <Component name="object3D">
                 <group>
                     <Duck />
                 </group>
-            </ECS.Component>
-            <ECS.Component type={PhysicsBodyComponent} args={[player]} />
-            <ECS.Component type={PlayerInputComponent} args={[input]} />
-            <ECS.Component type={KinematicCharacterControllerComponent} />
-            <ECS.Component type={PlayerComponent} />
-        </ECS.Entity>
+            </Component>
+        </Entity>
     )
 }
 
@@ -298,15 +267,14 @@ const Box = (props: {
     }, [])
 
     return (
-        <ECS.Entity>
-            <ECS.Component type={Object3DComponent}>
+        <Entity physicsBody={box}>
+            <Component name="object3D">
                 <mesh rotation={[0, 0, props.angle ?? 0]}>
                     <boxGeometry args={[props.width, props.height, 2]} />
                     <meshStandardMaterial color="#555" />
                 </mesh>
-            </ECS.Component>
-            <ECS.Component type={PhysicsBodyComponent} args={[box]} />
-        </ECS.Entity>
+            </Component>
+        </Entity>
     )
 }
 

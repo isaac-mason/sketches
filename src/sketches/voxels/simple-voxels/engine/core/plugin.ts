@@ -1,7 +1,6 @@
-import { Component, Entity, System, Topic } from 'arancini'
-import { Object3D, Vector3 } from 'three'
+import { System, Topic, World, type With } from 'arancini'
+import * as THREE from 'three'
 import { VoxelEnginePlugin } from '../voxel-engine-types'
-import { BlockValue, Vec3 } from './types'
 import {
     CHUNK_SIZE,
     TraceRayResult,
@@ -13,33 +12,18 @@ import {
     worldPositionToChunkPosition,
 } from './utils'
 
-const ACTOR_CHUNK_LOADED_RADIUS = 10
+export type Vec3 = [number, number, number]
 
-export type SetBlockRequest = { position: Vec3; value: BlockValue }
+export type BlockValue = { solid: false } | { solid: true; color: number }
 
-export type VoxelWorldChange = { position: Vec3; value: BlockValue; chunk: Entity }
-
-export const Object3DComponent = Component.object<Object3D>({ name: 'Object3D' })
-
-export const VoxelWorldActorComponent = Component.object<{ position: Vector3 }>({ name: 'voxel world actor' })
-
-export class VoxelWorldEventsComponent extends Component {
-    onSetBlockRequest = new Topic<[SetBlockRequest]>()
-
-    onChunkChange = new Topic<[changes: VoxelWorldChange[]]>()
-
-    construct() {
-        this.onChunkChange.clear()
-    }
-
-    static objectPooled = true
+export type VoxelWorldEvents = {
+    onSetBlockRequest: Topic<[SetBlockRequest]>
+    onChunkChange: Topic<[changes: VoxelWorldChange[]]>
 }
 
-export const VoxelChunkLoadedTagComponent = Component.tag({ name: 'loaded voxel chunk' })
-
-export class VoxelChunkComponent extends Component {
+export type VoxelChunk = {
     id: string
-    position: Vector3
+    position: THREE.Vector3
 
     solid: Uint8Array
     solidBuffer: SharedArrayBuffer
@@ -48,50 +32,41 @@ export class VoxelChunkComponent extends Component {
     colorBuffer: SharedArrayBuffer
 
     // based on distance from player
-    priority!: number
-
-    constructor() {
-        super()
-
-        const chunk = emptyChunk()
-
-        this.id = chunk.id
-        this.position = chunk.position
-
-        this.solid = chunk.solid
-        this.solidBuffer = chunk.solidBuffer
-
-        this.color = chunk.color
-        this.colorBuffer = chunk.colorBuffer
-
-        this.priority = 0
-    }
-
-    construct(id: string, position: Vector3) {
-        this.id = id
-        this.position = position
-        this.solid.fill(0)
-        this.color.fill(0)
-    }
-
-    static objectPooled = true
+    priority: number
 }
 
-export class VoxelWorldComponent extends Component {
-    chunks = new Map<string, VoxelChunkComponent>()
+export const createVoxelChunk = (id: string, position: THREE.Vector3): VoxelChunk => {
+    const chunk = emptyChunk()
 
-    chunkEntities = new Map<string, Entity>()
+    return {
+        id,
+        position,
 
-    chunkEntitiesReverse = new Map<Entity, string>()
+        solid: chunk.solid,
+        solidBuffer: chunk.solidBuffer,
 
-    construct() {
-        this.chunks.clear()
-        this.chunkEntities.clear()
-        this.chunkEntitiesReverse.clear()
+        color: chunk.color,
+        colorBuffer: chunk.colorBuffer,
+
+        priority: 0,
     }
+}
+
+export type SetBlockRequest = { position: Vec3; value: BlockValue }
+
+export type VoxelWorldChange = { position: Vec3; value: BlockValue; chunk: CorePluginEntity }
+
+export type ChunkEntity = With<CorePluginEntity, 'voxelChunk'>
+
+export class VoxelWorld {
+    chunks = new Map<string, VoxelChunk>()
+
+    chunkEntities = new Map<string, ChunkEntity>()
+
+    chunkEntitiesReverse = new Map<ChunkEntity, string>()
 
     intersectsVoxel = (position: Vec3): boolean => {
-        return this.isSolid([Math.floor(position[0]), Math.floor(position[1]), Math.floor(position[2])])
+        return this.isSolid(position.map(Math.floor) as Vec3)
     }
 
     isSolid = (position: Vec3): boolean => {
@@ -102,21 +77,25 @@ export class VoxelWorldComponent extends Component {
         return traceRay(this.isSolid, origin, direction)
     }
 
-    getChunkAt = (position: Vec3): Entity | undefined => {
-        return this.chunkEntities.get(chunkId(worldPositionToChunkPosition(position)))
+    getChunkAt = (position: Vec3) => {
+        return this.chunkEntities.get(chunkId(worldPositionToChunkPosition(position))) as
+            | With<CorePluginEntity, 'voxelChunk'>
+            | undefined
     }
 
     static objectPooled = true
 }
 
-export class VoxelWorldCoreSystem extends System {
-    voxelWorld = this.singleton(VoxelWorldComponent)!
+const ACTOR_CHUNK_LOADED_RADIUS = 10
 
-    events = this.singleton(VoxelWorldEventsComponent)!
+export class VoxelWorldCoreSystem extends System<CorePluginEntity> {
+    voxelWorld = this.singleton('voxelWorld')!
 
-    actor = this.singleton(VoxelWorldActorComponent)!
+    events = this.singleton('voxelWorldEvents')!
 
-    chunks = this.query([VoxelChunkComponent])
+    actor = this.singleton('voxelWorldActor')!
+
+    chunks = this.query((e) => e.has('voxelChunk'))
 
     setBlockRequests: SetBlockRequest[] = []
 
@@ -130,7 +109,7 @@ export class VoxelWorldCoreSystem extends System {
         this.chunks.onEntityAdded.add((e) => {
             if (!this.voxelWorld) return
 
-            const voxelChunk = e.get(VoxelChunkComponent)
+            const { voxelChunk } = e
 
             this.voxelWorld.chunks.set(voxelChunk.id, voxelChunk)
             this.voxelWorld.chunkEntities.set(voxelChunk.id, e)
@@ -150,20 +129,20 @@ export class VoxelWorldCoreSystem extends System {
     onUpdate(): void {
         /* load and unload chunks based on distance, update chunk priorities */
         for (const chunkEntity of this.chunks) {
-            const chunk = chunkEntity.get(VoxelChunkComponent)
+            const { voxelChunk } = chunkEntity
 
-            const distance = chunk.position.distanceTo(this.actor.position) / CHUNK_SIZE
+            const distance = voxelChunk.position.distanceTo(this.actor.position) / CHUNK_SIZE
 
             const shouldBeLoaded = distance < ACTOR_CHUNK_LOADED_RADIUS
-            const loaded = chunkEntity.has(VoxelChunkLoadedTagComponent)
+            const loaded = chunkEntity.voxelChunkLoaded
 
             if (shouldBeLoaded && !loaded) {
-                chunkEntity.add(VoxelChunkLoadedTagComponent)
+                this.world.add(chunkEntity, 'voxelChunkLoaded', true)
             } else if (!shouldBeLoaded && loaded) {
-                chunkEntity.remove(VoxelChunkLoadedTagComponent)
+                this.world.remove(chunkEntity, 'voxelChunkLoaded')
             }
 
-            chunk.priority = -distance
+            voxelChunk.priority = -distance
         }
 
         /* handle set block requests */
@@ -179,14 +158,14 @@ export class VoxelWorldCoreSystem extends System {
             let chunkEntity = this.voxelWorld.chunkEntities.get(id)
 
             if (!chunkEntity) {
-                chunkEntity = this.addChunk(id, chunkPosition)
+                chunkEntity = this.addChunk(id, new THREE.Vector3(...chunkPosition))
             }
 
             const index = positionToChunkIndex(position)
 
-            const voxelChunk = chunkEntity.get(VoxelChunkComponent)
-            voxelChunk.solid[index] = value.solid ? 1 : 0
-            voxelChunk.color[index] = value.solid ? value.color : 0
+            const { voxelChunk } = chunkEntity
+            voxelChunk!.solid[index] = value.solid ? 1 : 0
+            voxelChunk!.color[index] = value.solid ? value.color : 0
 
             changes.push({ position, value, chunk: chunkEntity })
         }
@@ -196,41 +175,47 @@ export class VoxelWorldCoreSystem extends System {
         }
     }
 
-    private addChunk(id: string, chunkPosition: Vec3) {
-        return this.world.create((entity) => {
-            entity.add(VoxelChunkComponent, id, new Vector3(...chunkPosition))
-        })
+    private addChunk(id: string, chunkPosition: THREE.Vector3) {
+        return this.world.create({
+            voxelChunk: createVoxelChunk(id, chunkPosition),
+        }) as ChunkEntity
     }
 }
 
+export type CorePluginEntity = {
+    object3D?: THREE.Object3D
+    voxelWorldActor?: { position: THREE.Vector3 }
+    voxelWorldEvents?: VoxelWorldEvents
+    voxelChunkLoaded?: boolean
+    voxelChunk?: VoxelChunk
+    voxelWorld?: VoxelWorld
+}
+
 export const CorePlugin = {
-    components: [
-        VoxelWorldComponent,
-        VoxelWorldEventsComponent,
-        VoxelChunkComponent,
-        VoxelChunkLoadedTagComponent,
-        VoxelWorldActorComponent,
-        Object3DComponent,
-    ],
+    E: {} as CorePluginEntity,
+    components: ['voxelWorld', 'voxelWorldEvents', 'voxelChunk', 'voxelChunkLoaded', 'voxelWorldActor', 'object3D'],
     systems: [VoxelWorldCoreSystem],
-    setup: (world) => {
-        const voxelWorldEntity = world.create()
-        const voxelWorld = voxelWorldEntity.add(VoxelWorldComponent)
-        const voxelWorldEvents = voxelWorldEntity.add(VoxelWorldEventsComponent)
+    setup: (world: World<CorePluginEntity>) => {
+        const voxelWorldEntity = world.create({
+            voxelWorld: new VoxelWorld(),
+            voxelWorldEvents: {
+                onSetBlockRequest: new Topic<[SetBlockRequest]>(),
+                onChunkChange: new Topic<[VoxelWorldChange[]]>(),
+            },
+        })
 
         const setBlock = (position: Vec3, value: BlockValue) => {
-            voxelWorldEvents.onSetBlockRequest.emit({ position, value })
+            voxelWorldEntity.voxelWorldEvents!.onSetBlockRequest.emit({ position, value })
         }
 
-        const voxelWorldActorEntity = world.create()
-        const voxelWorldActor = voxelWorldActorEntity.add(VoxelWorldActorComponent, { position: new Vector3() })
+        const voxelWorldActorEntity = world.create({ voxelWorldActor: { position: new THREE.Vector3() } })
 
         return {
-            voxelWorld,
-            voxelWorldActor,
+            voxelWorld: voxelWorldEntity.voxelWorld!,
+            voxelWorldActor: voxelWorldActorEntity.voxelWorldActor!,
             setBlock,
         }
     },
-} satisfies VoxelEnginePlugin
+} satisfies VoxelEnginePlugin<CorePluginEntity>
 
 export type CorePlugin = typeof CorePlugin

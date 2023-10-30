@@ -1,24 +1,31 @@
-import { ComponentDefinition, SystemClass, World } from 'arancini'
-import { createECS } from 'arancini/react'
+import { AnyEntity, SystemClass, World } from 'arancini'
+import { ECS } from 'arancini/react'
 
 export type UnionToIntersection<U> = ((U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never) & {}
 
 export type Api = Record<string, unknown>
 
-export type VoxelEnginePluginSetup = (world: World, ecs: ReturnType<typeof createECS>) => Api | void
+export type VoxelEnginePluginSetup<E extends AnyEntity> = (world: World<E>, ecs: ECS<E>) => Api | void
 
-export type VoxelEnginePlugin = {
-    components?: ComponentDefinition[]
+export type VoxelEnginePlugin<E extends AnyEntity> = {
+    E?: E
+    components?: (keyof E)[]
     systems?: (SystemClass & { PRIORITY?: number })[]
-    setup?: VoxelEnginePluginSetup
+    setup?: VoxelEnginePluginSetup<E>
 }
 
-export type VoxelEnginePluginApi<P extends VoxelEnginePlugin> = P['setup'] extends VoxelEnginePluginSetup
+export type VoxelEnginePluginApi<P extends VoxelEnginePlugin<any>> = P['setup'] extends VoxelEnginePluginSetup<any>
     ? ReturnType<P['setup']>
     : {}
 
-export type VoxelEnginePluginsApi<Plugins extends Array<VoxelEnginePlugin>> = UnionToIntersection<
+export type VoxelEnginePluginsApi<Plugins extends Array<VoxelEnginePlugin<any>>> = UnionToIntersection<
     {
         [K in keyof Plugins]: VoxelEnginePluginApi<Plugins[K]>
+    }[number]
+>
+
+export type VoxelEngineEntity<Plugins extends Array<VoxelEnginePlugin<any>>> = UnionToIntersection<
+    {
+        [K in keyof Plugins]: Plugins[K]['E']
     }[number]
 >

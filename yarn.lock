@@ -15,22 +15,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@arancini/core@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@arancini/core@npm:3.3.0"
-  checksum: 4c9cfbfa075bc9c1c0cf4cd05711b624beff1f623f4d226c2e1342989b797b66f51be2eda0c7efe5787b9e0c9105af76f5444db9ba9e71755ed42fd003961bcf
+"@arancini/core@npm:4.0.0":
+  version: 4.0.0
+  resolution: "@arancini/core@npm:4.0.0"
+  checksum: 2ab9e573ac26c436238fc8d63537b505073934c7ff60d22f969a1e247028b0b12a870dd2b78f86c531cce8c9fa11e53e8ce4512f6c62827ff4c7a887b17f8606
   languageName: node
   linkType: hard
 
-"@arancini/react@npm:3.3.0":
-  version: 3.3.0
-  resolution: "@arancini/react@npm:3.3.0"
+"@arancini/react@npm:4.0.0":
+  version: 4.0.0
+  resolution: "@arancini/react@npm:4.0.0"
   dependencies:
-    "@arancini/core": 3.3.0
+    "@arancini/core": 4.0.0
   peerDependencies:
     react: ^18.0.0
     react-dom: ^18.0.0
-  checksum: 173bfaba3590153af9befac276dbe129ec4e3c776af2faa5130051e0b397ae8ee3042a693269fd848a974a67c4007bc769d5fd68c2bc7e0d320ff18ab2c1d595
+  checksum: 0050f54330859f6a95ae7bcdeb4e125929a29b0b61cdd40dd79aca0884db618e5bedf99fc45ac536664280df9eef3fef7360b73788fa3e25ec711f5683d464dc
   languageName: node
   linkType: hard
 
@@ -2094,16 +2094,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"arancini@npm:^3.3.0":
-  version: 3.3.0
-  resolution: "arancini@npm:3.3.0"
+"arancini@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "arancini@npm:4.0.0"
   dependencies:
-    "@arancini/core": 3.3.0
-    "@arancini/react": 3.3.0
+    "@arancini/core": 4.0.0
+    "@arancini/react": 4.0.0
   peerDependencies:
     react: ^18.0.0
     react-dom: ^18.0.0
-  checksum: fec538a3dce90462f169c21391231694895ad513e8fc4383888a34b08f7cbe3a22a822f20d569c494edbf0b7a3035f456e19b030dfd7f1899541bc06c701811e
+  checksum: d8ddc8f977d14f91b83f16392829499c3a6630351bf857078c0a66d60457b789a4678881cc163c5269c841c8fa006b56b7645fae0116187254609429ec0509be
   languageName: node
   linkType: hard
 
@@ -4366,11 +4366,11 @@ __metadata:
   linkType: hard
 
 "p2-es@npm:^1.1.8":
-  version: 1.2.0
-  resolution: "p2-es@npm:1.2.0"
+  version: 1.2.3
+  resolution: "p2-es@npm:1.2.3"
   dependencies:
     poly-decomp-es: 0.4.2
-  checksum: 0be6c72ec77ebcb9a10a596da2b331b26b6d82396912aad8ec0eb2a656fe130cedb66324ed07899ad9c2032af17fbc885d881a8cfbbdba1b832dcfbbe3208236
+  checksum: d467360855767a4ec453daa28599c4c413fe2d1d2af2513a5992cb3d4a6933ab619c77aa2c17ebba2ff09ea76445efe1bfdd585b016e5a140ba5790427c38bed
   languageName: node
   linkType: hard
 
@@ -5011,7 +5011,7 @@ __metadata:
     "@types/three": ^0.157.0
     "@vitejs/plugin-basic-ssl": ^1.0.1
     "@vitejs/plugin-react": ^4.0.4
-    arancini: ^3.3.0
+    arancini: ^4.0.0
     d3: ^7.8.5
     jolt-physics: ^0.0.10
     leva: ^0.9.35

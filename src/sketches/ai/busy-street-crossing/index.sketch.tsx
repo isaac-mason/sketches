@@ -1,7 +1,7 @@
 import cityEnvironment from '@pmndrs/assets/hdri/city.exr'
 import { Environment, OrbitControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
-import { Component, World } from 'arancini'
+import { World } from 'arancini'
 import { createECS } from 'arancini/react'
 import { useControls } from 'leva'
 import { CrowdAgent, Vector3, vec3 } from 'recast-navigation'
@@ -28,14 +28,15 @@ const targets = [
     { x: 45, y: 0, z: -15 },
 ]
 
-const AgentComponent = Component.object<CrowdAgent>({ name: 'Crowd Agent' })
-const Object3DComponent = Component.object<Object3D>({ name: 'Object3D' })
-const AgentTarget = Component.object<Vector3>({ name: 'Agent Target' })
+type EntityType = {
+    agent?: CrowdAgent
+    object3D?: Object3D
+    target?: Vector3
+}
 
-const world = new World()
-world.registerComponent(AgentComponent)
-world.registerComponent(Object3DComponent)
-world.registerComponent(AgentTarget)
+const world = new World<EntityType>({
+    components: ['agent', 'object3D', 'target'],
+})
 
 world.init()
 
@@ -46,32 +47,31 @@ const App = () => {
         debugNavMesh: false,
     })
 
-    const agents = ecs.useQuery([AgentComponent, Object3DComponent])
+    const agents = ecs.useQuery((e) => e.has('agent', 'object3D'))
 
     /* update agent positions */
     useFrame(() => {
         for (const entity of agents) {
-            const agent = entity.get(AgentComponent)
-            const object = entity.get(Object3DComponent)
-
+            const { agent, object3D } = entity
             const { x, y, z } = agent.position()
             const { x: vx, y: vy, z: vz } = agent.velocity()
-            object.position.set(x, y, z)
-            object.lookAt(x + vx, y + vy, z + vz)
+            object3D.position.set(x, y, z)
+            object3D.lookAt(x + vx, y + vy, z + vz)
 
-            if (!entity.has(AgentTarget)) {
+            if (!entity.target) {
                 const target = targets[Math.floor(Math.random() * targets.length)]
 
                 agent.goto(target)
-                entity.add(AgentTarget, { ...target })
+                entity.target = { ...target }
             }
 
-            const target = entity.get(AgentTarget)
+            const { target } = entity
+
             const tolerance = 5
 
             if (Math.abs(x - target.x) < tolerance && Math.abs(y - target.y) < tolerance && Math.abs(z - target.z) < tolerance) {
                 agent.resetMoveTarget()
-                entity.remove(AgentTarget)
+                world.remove(entity, 'target')
             }
         }
     })
@@ -82,7 +82,7 @@ const App = () => {
                 {/* create some agents */}
                 {Array.from({ length: 200 }).map((_, idx) => (
                     <ecs.Entity key={idx}>
-                        <ecs.Component type={AgentComponent}>
+                        <ecs.Component name="agent">
                             <Agent
                                 initialPosition={vec3.toArray(targets[Math.floor(Math.random() * targets.length)])}
                                 maxSpeed={4}
@@ -126,14 +126,13 @@ const App = () => {
             </AI>
 
             {/* render agents */}
-            <ecs.QueryEntities query={[AgentComponent]}>
-                <ecs.Component type={Object3DComponent}>
+            <ecs.QueryEntities query={(e) => e.has('agent')}>
+                <ecs.Component name="object3D">
                     <group>
                         <mesh position-y={0.5}>
                             <meshStandardMaterial color="orange" />
                             <cylinderGeometry args={[0.5, 0.5, 1]} />
                         </mesh>
-
                     </group>
                 </ecs.Component>
             </ecs.QueryEntities>

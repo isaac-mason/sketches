@@ -1,7 +1,7 @@
 import cityEnvironment from '@pmndrs/assets/hdri/city.exr'
 import { Environment, OrbitControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
-import { Component, Entity, System, World } from 'arancini'
+import { System, World } from 'arancini'
 import { createECS } from 'arancini/react'
 import Jolt from 'jolt-physics'
 import { useControls } from 'leva'
@@ -9,27 +9,21 @@ import { useMemo, useRef } from 'react'
 import { SpotLightHelper, Vector3Tuple } from 'three'
 import { Canvas, Helper, useInterval } from '../../../common'
 
-const jolt = await Jolt()
-
-class PhysicsBodyComponent extends Component {
-    body!: Jolt.Body
-
-    construct(body: Jolt.Body) {
-        this.body = body
-    }
+type EntityType = {
+    body?: Jolt.Body
+    object3D?: THREE.Object3D
+    teleporting?: boolean
 }
 
-const Object3DComponent = Component.object<THREE.Object3D>({ name: 'Object3D' })
+const jolt = await Jolt()
 
-class PhysicsSystem extends System {
+class PhysicsSystem extends System<EntityType> {
     settings: Jolt.JoltSettings
     joltInterface: Jolt.JoltInterface
     physicsSystem: Jolt.PhysicsSystem
     bodyInterface: Jolt.BodyInterface
 
-    bodies = this.query([PhysicsBodyComponent, Object3DComponent])
-
-    entityToBody = new Map<Entity, Jolt.Body>()
+    bodies = this.query((e) => e.has('body', 'object3D'))
 
     constructor(world: World) {
         super(world)
@@ -43,19 +37,13 @@ class PhysicsSystem extends System {
     }
 
     onInit(): void {
-        this.bodies.onEntityAdded.add((entity) => {
-            const body = entity.get(PhysicsBodyComponent).body
-
+        this.bodies.onEntityAdded.add(({ body }) => {
             this.bodyInterface.AddBody(body.GetID(), jolt.Activate)
-            this.entityToBody.set(entity, body)
         })
 
-        this.bodies.onEntityRemoved.add((entity) => {
-            const body = this.entityToBody.get(entity)
-
+        this.bodies.onEntityRemoved.add(({ body }) => {
             if (body) {
                 this.bodyInterface.RemoveBody(body.GetID())
-                this.entityToBody.delete(entity)
             }
         })
     }
@@ -71,31 +59,25 @@ class PhysicsSystem extends System {
         this.joltInterface.Step(deltaTime, numSteps)
 
         // Update body transforms
-        for (const entity of this.bodies) {
-            const body = entity.get(PhysicsBodyComponent).body
-            const three = entity.get(Object3DComponent)
-
+        for (const { body, object3D } of this.bodies) {
             let p = body.GetPosition()
             let q = body.GetRotation()
-            three.position.set(p.GetX(), p.GetY(), p.GetZ())
-            three.quaternion.set(q.GetX(), q.GetY(), q.GetZ(), q.GetW())
+            object3D.position.set(p.GetX(), p.GetY(), p.GetZ())
+            object3D.quaternion.set(q.GetX(), q.GetY(), q.GetZ(), q.GetW())
         }
     }
 }
 
-const TeleportTagComponent = Component.tag({ name: 'Teleport' })
-
-const world = new World()
-
-world.registerComponent(PhysicsBodyComponent)
-world.registerComponent(Object3DComponent)
-world.registerComponent(TeleportTagComponent)
+const world = new World<EntityType>({
+    components: ['body', 'object3D', 'teleporting'],
+})
 
 world.registerSystem(PhysicsSystem)
 
 world.init()
 
 const ecs = createECS(world)
+const { step, Entity, Component } = ecs
 
 const usePhysics = () => {
     return useMemo(() => world.getSystem(PhysicsSystem), [])!
@@ -121,15 +103,14 @@ const Ground = () => {
     }, [])
 
     return (
-        <ecs.Entity>
-            <ecs.Component type={Object3DComponent}>
+        <Entity body={body}>
+            <Component name="object3D">
                 <mesh receiveShadow castShadow>
                     <meshStandardMaterial color="#333" />
                     <boxGeometry args={[200, 2, 200]} />
                 </mesh>
-            </ecs.Component>
-            <ecs.Component type={PhysicsBodyComponent} args={[body]} />
-        </ecs.Entity>
+            </Component>
+        </Entity>
     )
 }
 
@@ -160,16 +141,14 @@ const Box = ({ args, position, color }: BoxProps) => {
     const boxGeometryArgs = useMemo(() => args.map((v) => v * 2) as Vector3Tuple, [args])
 
     return (
-        <ecs.Entity>
-            <ecs.Component type={Object3DComponent}>
+        <Entity body={body} teleporting>
+            <Component name="object3D">
                 <mesh receiveShadow castShadow>
                     <meshStandardMaterial color={color} />
                     <boxGeometry args={boxGeometryArgs} />
                 </mesh>
-            </ecs.Component>
-            <ecs.Component type={PhysicsBodyComponent} args={[body]} />
-            <ecs.Component type={TeleportTagComponent} />
-        </ecs.Entity>
+            </Component>
+        </Entity>
     )
 }
 
@@ -179,16 +158,16 @@ const App = () => {
     const { bodyInterface } = usePhysics()
 
     useFrame((_, delta) => {
-        world.update(delta)
+        world.step(delta)
     })
 
-    const bodiesToTeleport = world.query([TeleportTagComponent, PhysicsBodyComponent])
+    const bodiesToTeleport = world.query((e) => e.has('body').and.is('teleporting'))
     const nextToTeleport = useRef(0)
 
     useInterval(() => {
         const index = nextToTeleport.current % bodiesToTeleport.entities.length
 
-        const body = bodiesToTeleport.entities[index].get(PhysicsBodyComponent).body
+        const body = bodiesToTeleport.entities[index].body
         const bodyId = body.GetID()
 
         const x = (0.5 - Math.random()) * 10

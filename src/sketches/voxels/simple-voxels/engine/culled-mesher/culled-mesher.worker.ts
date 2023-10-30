@@ -390,6 +390,7 @@ const registerChunk = ({ id, position, solidBuffer, colorBuffer }: RegisterChunk
         solidBuffer,
         color: new Uint32Array(colorBuffer),
         colorBuffer,
+        priority: 0,
     }
 
     state.chunks.set(id, chunk)

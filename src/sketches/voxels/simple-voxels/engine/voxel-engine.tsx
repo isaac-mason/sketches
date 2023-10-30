@@ -1,22 +1,26 @@
 import { useFrame } from '@react-three/fiber'
-import { World } from 'arancini'
-import { createECS } from 'arancini/react'
+import { AnyEntity, World } from 'arancini'
+import { ECS, createECS } from 'arancini/react'
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
-import { VoxelEnginePlugin, VoxelEnginePluginsApi } from './voxel-engine-types'
+import { VoxelEngineEntity, VoxelEnginePlugin, VoxelEnginePluginsApi } from './voxel-engine-types'
 
 const voxelEngineContext = createContext<unknown>(null!)
 
-type VoxelEngineContext<Plugins extends Array<VoxelEnginePlugin>> = VoxelEnginePluginsApi<Plugins> & {
-    world: World
-    ecs: ReturnType<typeof createECS>
+type VoxelEngineContext<Plugins extends Array<VoxelEnginePlugin<any>>> = VoxelEnginePluginsApi<Plugins> & {
+    world: World<VoxelEngineEntity<Plugins>>
+    ecs: ECS<VoxelEngineEntity<Plugins>>
     step: (delta: number) => void
 }
 
-export const useVoxelEngine = <Plugins extends Array<VoxelEnginePlugin>>() => {
+export const useVoxelEngine = <Plugins extends Array<VoxelEnginePlugin<any>>>() => {
     return useContext(voxelEngineContext) as VoxelEngineContext<Plugins>
 }
 
-export const VoxelEngine = <Plugins extends Array<VoxelEnginePlugin>, Api = VoxelEnginePluginsApi<Plugins>>({
+export const VoxelEngine = <
+    Plugins extends Array<VoxelEnginePlugin<any>>,
+    Entity extends AnyEntity = VoxelEngineEntity<Plugins>,
+    Api = VoxelEnginePluginsApi<Plugins>,
+>({
     plugins,
     children,
     paused,
@@ -32,14 +36,12 @@ export const VoxelEngine = <Plugins extends Array<VoxelEnginePlugin>, Api = Voxe
     const init = () => {
         initialised.current = true
 
-        const world = new World()
+        const world = new World<Entity>()
         const ecs = createECS(world)
 
         for (const plugin of plugins) {
             if (!plugin.components) continue
-            for (const component of plugin.components) {
-                world.registerComponent(component)
-            }
+            world.registerComponents(plugin.components as (keyof Entity)[])
         }
 
         for (const plugin of plugins) {
@@ -84,7 +86,7 @@ export const VoxelEngine = <Plugins extends Array<VoxelEnginePlugin>, Api = Voxe
     const step = (delta: number) => {
         if (!engine?.world.initialised) return
 
-        engine.world.update(delta)
+        engine.world.step(delta)
     }
 
     useFrame((_, delta) => {

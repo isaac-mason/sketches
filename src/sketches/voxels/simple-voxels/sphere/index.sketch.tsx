@@ -4,7 +4,7 @@ import { useLayoutEffect } from 'react'
 import { Color } from 'three'
 import { Canvas } from '../../../../common'
 import { CorePlugin } from '../engine/core'
-import { CulledMesherPlugin, VoxelChunkCulledMeshes, VoxelChunkMeshComponent } from '../engine/culled-mesher'
+import { CulledMesherPlugin, VoxelChunkCulledMeshes, VoxelChunkMesh } from '../engine/culled-mesher'
 import { VoxelEngine, useVoxelEngine } from '../engine/voxel-engine'
 
 const orange = new Color('orange').getHex()
@@ -35,9 +35,11 @@ const App = () => {
             wireframe: {
                 value: false,
                 onChange: (value) => {
-                    world.filter([VoxelChunkMeshComponent]).forEach((entity) => {
-                        entity.get(VoxelChunkMeshComponent).material.wireframe = value
-                    })
+                    world
+                        .filter((e) => e.has('voxelChunkMesh'))
+                        .forEach((entity) => {
+                            entity.voxelChunkMesh.material.wireframe = value
+                        })
                 },
             },
         },

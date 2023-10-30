@@ -1,6 +1,6 @@
 import { Bounds } from '@react-three/drei'
 import { Color, useFrame } from '@react-three/fiber'
-import { Component, System, World } from 'arancini'
+import { System, World } from 'arancini'
 import { createECS } from 'arancini/react'
 import { button, useControls } from 'leva'
 import * as p2 from 'p2-es'
@@ -9,48 +9,34 @@ import { MathUtils } from 'three'
 import { Canvas } from '../../../common'
 import { createTextShape } from './font'
 
+type EntityType = {
+    isBox?: boolean
+    physicsBody?: p2.Body
+    object3D?: THREE.Object3D
+    color?: Color
+}
+
 const LEVA_ROOT = 'p2-text-box'
 
 const BOX_SIZE = 0.1
 
-const BoxTagComponent = Component.tag({ name: 'Box' })
-
-const PhysicsBodyComponent = Component.object<p2.Body>({ name: 'PhysicsBody' })
-
-const Object3DComponent = Component.object<THREE.Object3D>({ name: 'Object3D' })
-
-class ColorComponent extends Component {
-    color!: Color
-
-    construct(color: Color) {
-        this.color = color
-    }
-}
-
-class PhysicsSystem extends System {
+class PhysicsSystem extends System<EntityType> {
     physicsWorld = new p2.World({ gravity: [0, 0] })
 
-    bodies = this.query([PhysicsBodyComponent])
-
-    physicsBodies = new Map<string, p2.Body>()
+    bodies = this.query((e) => e.is('physicsBody'))
 
     static TIME_STEP = 1 / 60
 
     static MAX_SUB_STEPS = 10
 
     onInit() {
-        this.bodies.onEntityAdded.add((entity) => {
-            const body = entity.get(PhysicsBodyComponent)
-            this.physicsBodies.set(entity.id, body)
-            this.physicsWorld.addBody(body)
+        this.bodies.onEntityAdded.add(({ physicsBody }) => {
+            this.physicsWorld.addBody(physicsBody)
         })
 
-        this.bodies.onEntityRemoved.add((entity) => {
-            const body = this.physicsBodies.get(entity.id)
-            this.physicsBodies.delete(entity.id)
-
-            if (body) {
-                this.physicsWorld.removeBody(body)
+        this.bodies.onEntityRemoved.add(({ physicsBody }) => {
+            if (physicsBody) {
+                this.physicsWorld.removeBody(physicsBody)
             }
         })
     }
@@ -58,36 +44,30 @@ class PhysicsSystem extends System {
     onUpdate(delta: number) {
         this.physicsWorld.step(PhysicsSystem.TIME_STEP, delta, PhysicsSystem.MAX_SUB_STEPS)
 
-        for (const entity of this.bodies) {
-            const body = entity.get(PhysicsBodyComponent)
-            const object3D = entity.find(Object3DComponent)
-
+        for (const { physicsBody, object3D } of this.bodies) {
             if (object3D) {
-                object3D.position.set(body.interpolatedPosition[0], body.interpolatedPosition[1], 0)
-                object3D.rotation.set(0, 0, body.interpolatedAngle)
+                object3D.position.set(physicsBody.interpolatedPosition[0], physicsBody.interpolatedPosition[1], 0)
+                object3D.rotation.set(0, 0, physicsBody.interpolatedAngle)
             }
         }
     }
 }
 
-const world = new World()
-
-world.registerComponent(BoxTagComponent)
-world.registerComponent(PhysicsBodyComponent)
-world.registerComponent(ColorComponent)
-world.registerComponent(Object3DComponent)
+const world = new World<EntityType>({
+    components: ['isBox', 'physicsBody', 'object3D', 'color'],
+})
 
 world.registerSystem(PhysicsSystem)
 
 world.init()
 
-const ECS = createECS(world)
+const { Entity, Component, QueryEntities } = createECS(world)
 
 const MAX_DELTA = (1 / 60) * 10
 
 const Loop = () => {
     useFrame((_, delta) => {
-        ECS.update(MathUtils.clamp(delta, 0, MAX_DELTA))
+        world.step(MathUtils.clamp(delta, 0, MAX_DELTA))
     })
 
     return null
@@ -111,30 +91,22 @@ const Box = ({ position, velocity, color }: BoxProps) => {
         return b
     }, [])
 
-    return (
-        <ECS.Entity>
-            <ECS.Component type={BoxTagComponent} />
-            <ECS.Component type={ColorComponent} args={[color ?? 'white']} />
-            <ECS.Component type={PhysicsBodyComponent} args={[body]} />
-        </ECS.Entity>
-    )
+    return <Entity isBox color={color ?? 'white'} physicsBody={body} />
 }
 
 const BoxRenderer = () => (
-    <ECS.QueryEntities query={[BoxTagComponent, ColorComponent]}>
-        {(entity) => {
-            const { color } = entity.get(ColorComponent)
-
+    <QueryEntities query={(e) => e.has('isBox', 'color')}>
+        {({ color }) => {
             return (
-                <ECS.Component type={Object3DComponent}>
+                <Component name="object3D">
                     <mesh>
                         <boxGeometry args={[BOX_SIZE, BOX_SIZE, BOX_SIZE]} />
                         <meshBasicMaterial color={color} />
                     </mesh>
-                </ECS.Component>
+                </Component>
             )
         }}
-    </ECS.QueryEntities>
+    </QueryEntities>
 )
 
 type TextProps = {

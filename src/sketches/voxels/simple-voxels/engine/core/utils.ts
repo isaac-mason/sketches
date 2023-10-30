@@ -1,5 +1,6 @@
-import { Vector3 } from 'three'
-import { Vec3, VoxelChunk } from './types'
+import * as THREE from 'three'
+import { Vec3, VoxelChunk } from './plugin'
+import { Vector3Object } from '@react-three/rapier'
 
 export const CHUNK_BITS = 4
 export const CHUNK_SIZE = Math.pow(2, 4)
@@ -206,7 +207,7 @@ const traceRayImpl = (
     return false
 }
 
-export const positionToChunkIndex = ([x, y, z]: Vec3): number => {
+export const positionToChunkIndex = ([ x, y, z ]: Vec3): number => {
     const mask = (1 << CHUNK_BITS) - 1
 
     return (x & mask) + ((y & mask) << CHUNK_BITS) + ((z & mask) << (CHUNK_BITS * 2))
@@ -235,7 +236,7 @@ export const worldPositionToLocalChunkPosition = ([x, y, z]: Vec3): Vec3 => {
     return [localX, localY, localZ]
 }
 
-export const worldPositionToChunkPosition = ([x, y, z]: Vec3): Vec3 => {
+export const worldPositionToChunkPosition = ([ x, y, z ]: Vec3): Vec3 => {
     // Using signed right shift to convert to chunk vec
     // Shifts right by pushing copies of the leftmost bit in from the left, and let the rightmost bits fall off
     // e.g.
@@ -248,12 +249,12 @@ export const worldPositionToChunkPosition = ([x, y, z]: Vec3): Vec3 => {
     return [cx, cy, cz]
 }
 
-export const chunkPositionToWorldPosition = ([x, y, z]: Vec3): Vec3 => {
+export const chunkPositionToWorldPosition = ([ x, y, z ]: Vec3): Vec3 => {
     return [x * CHUNK_SIZE, y * CHUNK_SIZE, z * CHUNK_SIZE]
 }
 
-export const chunkId = (position: Vec3): string => {
-    return `${position[0]},${position[1]},${position[2]}`
+export const chunkId = ([x, y, z]: Vec3): string => {
+    return `${x},${y},${z}`
 }
 
 export const emptyChunk = (): VoxelChunk => {
@@ -268,11 +269,12 @@ export const emptyChunk = (): VoxelChunk => {
 
     return {
         id: '',
-        position: new Vector3(),
+        position: new THREE.Vector3(),
         solid,
         color,
         solidBuffer,
         colorBuffer,
+        priority: 0,
     }
 }
 

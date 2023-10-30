@@ -1,14 +1,14 @@
 import { Bounds, MarchingCube, MarchingCubes, OrbitControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
-import { Component, World as ECSWorld, System } from 'arancini'
+import { System, World } from 'arancini'
 import { createECS } from 'arancini/react'
-import { Body, Box, Circle, ContactMaterial, Material, World } from 'p2-es'
+import * as p2 from 'p2-es'
 import { useMemo } from 'react'
 import { Canvas } from '../../../common'
 
-const defaultMaterial = new Material()
+const defaultMaterial = new p2.Material()
 
-const contactMaterial = new ContactMaterial(defaultMaterial, defaultMaterial, {
+const contactMaterial = new p2.ContactMaterial(defaultMaterial, defaultMaterial, {
     restitution: 0.4,
     friction: 0,
 })
@@ -26,30 +26,26 @@ const containerParts: {
 
 const gooColors = [0xff0000, 0x00ff00, 0x0000ff]
 
-const RotateTagComponent = Component.tag({ name: 'Rotate' })
+type EntityType = {
+    isRotating?: boolean
+    object3D?: THREE.Object3D
+    physicsBody?: p2.Body
+}
 
-const Object3DComponent = Component.object<THREE.Object3D>({ name: 'Object3D' })
-
-const PhysicsBodyComponent = Component.object<Body>({ name: 'PhysicsBody' })
-
-class RotateSystem extends System {
-    rotate = this.query([RotateTagComponent, PhysicsBodyComponent])
+class RotateSystem extends System<EntityType> {
+    rotating = this.query((e) => e.has('isRotating', 'physicsBody'))
 
     onUpdate(_delta: number, time: number): void {
-        for (const entity of this.rotate.entities) {
-            const body = entity.get(PhysicsBodyComponent)
-
-            body.angle = time * -0.5
+        for (const { physicsBody } of this.rotating) {
+            physicsBody.angle = time * -0.5
         }
     }
 }
 
 class PhysicsSystem extends System {
-    physicsWorld = new World({ gravity: [0, -5] })
+    physicsWorld = new p2.World({ gravity: [0, -5] })
 
-    physicsBodies = new Map<string, Body>()
-
-    physicsBodyQuery = this.query([PhysicsBodyComponent, Object3DComponent])
+    physicsBodies = this.query((e) => e.has('physicsBody', 'object3D'))
 
     static TIME_STEP = 1 / 60
 
@@ -58,18 +54,13 @@ class PhysicsSystem extends System {
     onInit(): void {
         this.physicsWorld.addContactMaterial(contactMaterial)
 
-        this.physicsBodyQuery.onEntityAdded.add((entity) => {
-            const body = entity.get(PhysicsBodyComponent)
-            this.physicsWorld.addBody(body)
-            this.physicsBodies.set(entity.id, body)
+        this.physicsBodies.onEntityAdded.add(({ physicsBody }) => {
+            this.physicsWorld.addBody(physicsBody)
         })
 
-        this.physicsBodyQuery.onEntityRemoved.add((entity) => {
-            const body = this.physicsBodies.get(entity.id)
-            this.physicsBodies.delete(entity.id)
-
-            if (body) {
-                this.physicsWorld.removeBody(body)
+        this.physicsBodies.onEntityRemoved.add(({ physicsBody }) => {
+            if (physicsBody) {
+                this.physicsWorld.removeBody(physicsBody)
             }
         })
     }
@@ -77,21 +68,16 @@ class PhysicsSystem extends System {
     onUpdate(delta: number): void {
         this.physicsWorld.step(PhysicsSystem.TIME_STEP, delta, PhysicsSystem.MAX_SUB_STEPS)
 
-        for (const entity of this.physicsBodyQuery.entities) {
-            const body = entity.get(PhysicsBodyComponent)
-            const object3D = entity.get(Object3DComponent)
-
-            object3D.position.set(body.interpolatedPosition[0], body.interpolatedPosition[1], 0)
-            object3D.rotation.set(0, 0, body.angle)
+        for (const { physicsBody, object3D } of this.physicsBodies) {
+            object3D.position.set(physicsBody.interpolatedPosition[0], physicsBody.interpolatedPosition[1], 0)
+            object3D.rotation.set(0, 0, physicsBody.angle)
         }
     }
 }
 
-const world = new ECSWorld()
-
-world.registerComponent(Object3DComponent)
-world.registerComponent(PhysicsBodyComponent)
-world.registerComponent(RotateTagComponent)
+const world = new World<EntityType>({
+    components: ['isRotating', 'object3D', 'physicsBody'],
+})
 
 world.registerSystem(RotateSystem)
 world.registerSystem(PhysicsSystem)
@@ -104,13 +90,13 @@ type BallProps = { index: number }
 
 const Ball = ({ index }: BallProps) => {
     const circleBody = useMemo(() => {
-        const body = new Body({
+        const body = new p2.Body({
             mass: 1,
             position: [Math.random() - 0.5, Math.random() - 0.5],
         })
 
         body.addShape(
-            new Circle({
+            new p2.Circle({
                 radius: 0.02,
                 material: defaultMaterial,
             }),
@@ -120,8 +106,8 @@ const Ball = ({ index }: BallProps) => {
     }, [])
 
     return (
-        <ECS.Entity>
-            <ECS.Component type={Object3DComponent}>
+        <ECS.Entity physicsBody={circleBody}>
+            <ECS.Component name="object3D">
                 <MarchingCube
                     strength={0.08}
                     subtract={6}
@@ -129,8 +115,6 @@ const Ball = ({ index }: BallProps) => {
                     color={gooColors[index % gooColors.length]}
                 />
             </ECS.Component>
-
-            <ECS.Component type={PhysicsBodyComponent} args={[circleBody]} />
         </ECS.Entity>
     )
 }
@@ -149,14 +133,14 @@ const Balls = () => (
 
 const Container = () => {
     const body = useMemo(() => {
-        const body = new Body({
+        const body = new p2.Body({
             mass: 0,
             position: [0, 0],
         })
 
         containerParts.map(({ width, height, position }) => {
             body.addShape(
-                new Box({
+                new p2.Box({
                     width,
                     height,
                     material: defaultMaterial,
@@ -170,10 +154,8 @@ const Container = () => {
     }, [])
 
     return (
-        <ECS.Entity>
-            <ECS.Component type={RotateTagComponent} />
-
-            <ECS.Component type={Object3DComponent}>
+        <ECS.Entity isRotating physicsBody={body}>
+            <ECS.Component name="object3D">
                 <group>
                     {containerParts.map(({ width, height, position }, i) => (
                         <mesh key={i} position={[position[0], position[1], 0]}>
@@ -183,15 +165,13 @@ const Container = () => {
                     ))}
                 </group>
             </ECS.Component>
-
-            <ECS.Component type={PhysicsBodyComponent} args={[body]} />
         </ECS.Entity>
     )
 }
 
 const Loop = () => {
     useFrame((_, delta) => {
-        ECS.update(Math.min(delta, 0.1))
+        ECS.step(Math.min(delta, 0.1))
     })
 
     return null
