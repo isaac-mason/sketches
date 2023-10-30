@@ -144,6 +144,11 @@ const sketchList = [
         path: 'procedural-generation/diamond-square-heightmap',
         tags: ['procedural-generation', 'diamond-square', 'heightmap'],
     },
+    {
+        title: 'Procedural Generation - Pixelated Planet',
+        path: 'procedural-generation/pixelated-planet',
+        tags: ['procedural-generation', 'simplex-noise', 'space', 'planet'],
+    },
     /* Sprites */
     {
         title: 'Sprites - Face Camera',
