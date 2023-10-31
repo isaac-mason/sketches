@@ -121,23 +121,6 @@ const sketchList = [
         path: 'nature/grass',
         tags: ['nature', 'grass'],
     },
-    /* Postprocessing */
-    {
-        title: 'Postprocessing - Pixelation',
-        path: 'postprocessing/pixelation',
-        tags: ['postprocessing'],
-    },
-    {
-        title: 'Postprocessing - Emissive Bloom',
-        path: 'postprocessing/emissive-bloom',
-        tags: ['postprocessing', 'bloom'],
-    },
-    /* d3.js */
-    {
-        title: 'D3 - Force Directed Graph',
-        path: 'd3/force-directed-graph',
-        tags: ['d3', 'data-viz', 'graph'],
-    },
     /* Procedural Generation */
     {
         title: 'Procedural Generation - Diamond Square Heightmap',
@@ -149,11 +132,28 @@ const sketchList = [
         path: 'procedural-generation/pixelated-planet',
         tags: ['procedural-generation', 'simplex-noise', 'space', 'planet'],
     },
+    /* d3.js */
+    {
+        title: 'D3 - Force Directed Graph',
+        path: 'd3/force-directed-graph',
+        tags: ['d3', 'data-viz', 'graph'],
+    },
     /* Sprites */
     {
         title: 'Sprites - Face Camera',
         path: 'sprites/face-camera',
         tags: ['sprites'],
+    },
+    /* Postprocessing */
+    {
+        title: 'Postprocessing - Pixelation',
+        path: 'postprocessing/pixelation',
+        tags: ['postprocessing'],
+    },
+    {
+        title: 'Postprocessing - Emissive Bloom',
+        path: 'postprocessing/emissive-bloom',
+        tags: ['postprocessing', 'bloom'],
     },
     /* GLSL Shaders From Scratch */
     {
