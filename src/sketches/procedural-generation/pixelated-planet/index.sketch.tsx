@@ -1,12 +1,11 @@
 import { Html, OrbitControls } from '@react-three/drei'
-import { useFrame, useThree } from '@react-three/fiber'
+import { EffectComposer, Pixelation } from '@react-three/postprocessing'
 import { button, useControls } from 'leva'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { createNoise3D } from 'simplex-noise'
 import * as THREE from 'three'
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
-import { RenderPixelatedPass } from 'three/examples/jsm/postprocessing/RenderPixelatedPass'
 import { Canvas } from '../../../common'
+import { useThree } from '@react-three/fiber'
 
 type PlanetLayer = {
     /**
@@ -100,7 +99,7 @@ const Planet = ({ map, radius }: PlanetProps) => {
     return (
         <mesh>
             <sphereGeometry args={[radius]} />
-            <meshBasicMaterial map={map} />
+            <meshStandardMaterial map={map} />
         </mesh>
     )
 }
@@ -163,36 +162,25 @@ const WorldMap = ({ map }: WorldMapProps) => {
     )
 }
 
-const Pixelation = () => {
-    const { pixelSize } = useControls('procgen-pixelated-planet-postprocessing', {
-        pixelSize: {
+const Effects = () => {
+    const viewport = useThree((state) => state.viewport)
+
+    const { pixelationGranularity } = useControls('procgen-pixelated-planet-generation-postprocessing', {
+        pixelationGranularity: {
             value: 12,
             min: 1,
+            max: 30,
+            step: 1,
         },
     })
 
-    const renderer = useThree((state) => state.gl)
-    const scene = useThree((state) => state.scene)
-    const camera = useThree((state) => state.camera)
-    const size = useThree((state) => state.size)
-    const viewport = useThree((state) => state.viewport)
+    const adjustedPixelationGranularity = pixelationGranularity * viewport.dpr
 
-    const effectComposer = useMemo(() => {
-        const composer = new EffectComposer(renderer)
-        composer.addPass(new RenderPixelatedPass(pixelSize, scene, camera))
-        return composer
-    }, [pixelSize])
-
-    useEffect(() => {
-        effectComposer.setSize(size.width, size.height)
-        effectComposer.setPixelRatio(viewport.dpr)
-    }, [renderer, size, viewport.dpr])
-
-    useFrame(() => {
-        effectComposer.render()
-    }, 1)
-
-    return null
+    return (
+        <EffectComposer>
+            <Pixelation granularity={adjustedPixelationGranularity} />
+        </EffectComposer>
+    )
 }
 
 export default () => {
@@ -269,11 +257,14 @@ export default () => {
             <Canvas orthographic camera={{ position: [0, 0, 10], zoom: 200 }}>
                 <Planet map={map} radius={planetRadius} />
 
+                <directionalLight position={[10, 0, 10]} intensity={2} />
+                <ambientLight intensity={0.6} />
+
                 <WorldMap map={map} />
 
-                <OrbitControls enablePan={false} />
+                <Effects />
 
-                <Pixelation />
+                <OrbitControls enablePan={false} />
             </Canvas>
         </>
     )
