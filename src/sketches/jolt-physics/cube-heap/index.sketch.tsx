@@ -77,7 +77,7 @@ world.registerSystem(PhysicsSystem)
 world.init()
 
 const ecs = createECS(world)
-const { step, Entity, Component } = ecs
+const { Entity, Component } = ecs
 
 const usePhysics = () => {
     return useMemo(() => world.getSystem(PhysicsSystem), [])!
