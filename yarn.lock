@@ -3776,10 +3776,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jolt-physics@npm:^0.0.10":
-  version: 0.0.10
-  resolution: "jolt-physics@npm:0.0.10"
-  checksum: 80c0c5930faf4cad963f19bff529b53f2efb16243916f7f3889eda219257436a5ae39b14cc461cec644f724c19e0b7e75b1417b91b6b881277c2155c16253ec7
+"jolt-physics@npm:^0.6.3":
+  version: 0.6.3
+  resolution: "jolt-physics@npm:0.6.3"
+  checksum: 51c69066bbd77f890a4ad50d167a33f6029080a43af9788942da35c7e07573e2a6b12012774e868d5a6f90c419265f5c020abff818440b4fc98bb38d0e94d9ce
   languageName: node
   linkType: hard
 
@@ -5013,7 +5013,7 @@ __metadata:
     "@vitejs/plugin-react": ^4.0.4
     arancini: ^4.0.1
     d3: ^7.8.5
-    jolt-physics: ^0.0.10
+    jolt-physics: ^0.6.3
     leva: ^0.9.35
     meshline: ^3.1.6
     nipplejs: ^0.10.1
