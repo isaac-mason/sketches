@@ -5034,7 +5034,7 @@ __metadata:
     vite: ^4.5.0
     vite-imagetools: ^6.2.1
     vite-plugin-html: ^3.2.0
-    zustand: ^4.4.4
+    zustand: ^4.4.6
   languageName: unknown
   linkType: soft
 
@@ -5792,9 +5792,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zustand@npm:^4.4.4":
-  version: 4.4.4
-  resolution: "zustand@npm:4.4.4"
+"zustand@npm:^4.4.6":
+  version: 4.4.6
+  resolution: "zustand@npm:4.4.6"
   dependencies:
     use-sync-external-store: 1.2.0
   peerDependencies:
@@ -5808,7 +5808,7 @@ __metadata:
       optional: true
     react:
       optional: true
-  checksum: 371fd842dc704ed5983c6d64a77994c9c91867338c742d162ac95c4252b5f98fc38aeb2d5a07f48311babed5ca7dbff2d2258301db0ae143d32897bcf3ae651b
+  checksum: da7b00cc6dbe5cf5fc2e3fbca745317da4bbaf53bf4a6909bbd3e335242704df9689027f613461aff07eb5f672d5570bc1a2ef99d0ad7bc868920a3b331613d4
   languageName: node
   linkType: hard
 
