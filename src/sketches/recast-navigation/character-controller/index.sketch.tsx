@@ -1,367 +1,545 @@
 import cityEnvironment from '@pmndrs/assets/hdri/city.exr'
-import { Environment, KeyboardControls, useAnimations, useGLTF, useKeyboardControls } from '@react-three/drei'
-import { useFrame, useThree } from '@react-three/fiber'
+import { Environment, KeyboardControls, PerspectiveCamera, useAnimations, useGLTF, useKeyboardControls } from '@react-three/drei'
+import { useFrame } from '@react-three/fiber'
+import { System, With, World } from 'arancini'
+import { createECS } from 'arancini/react'
 import { useControls } from 'leva'
-import { useEffect, useMemo, useRef } from 'react'
-import { NavMesh, NavMeshQuery, Vector3Tuple, init } from 'recast-navigation'
+import { useEffect, useState } from 'react'
+import { NavMesh, NavMeshQuery, init as initRecast } from 'recast-navigation'
 import { NavMeshHelper, threeToSoloNavMesh } from 'recast-navigation/three'
 import { suspend } from 'suspend-react'
-import { Group, LoopRepeat, MathUtils, Mesh, MeshBasicMaterial, Object3D, Raycaster, Vector3 } from 'three'
-import { create } from 'zustand'
+import * as THREE from 'three'
 import { Canvas } from '../../../common'
-import { createJoystick } from '../../../common/joystick'
 import characterGltfUrl from './character.glb?url'
-import { Chest } from './chest'
-import { Crate } from './crate'
+import levelGlbUrl from './game-level-transformed.glb?url'
 
-const { Joystick, getJoystickState } = createJoystick()
+const LEVA_KEY = 'recast-navigation-character-controller'
 
-type NavigationState = {
-    navMesh: NavMesh | undefined
-    navMeshQuery: NavMeshQuery | undefined
-    walkableMeshes: Mesh[]
+type EntityType = {
+    player?: true
+    playerSpeed?: { walking: number; running: number }
+    playerMovement?: { vector: THREE.Vector3; sneaking: boolean }
+    playerInput?: {
+        forward: boolean
+        back: boolean
+        left: boolean
+        right: boolean
+        sneak: boolean
+    }
+    playerAnimation?: {
+        idle: THREE.AnimationAction
+        walk: THREE.AnimationAction
+        run: THREE.AnimationAction
+    }
+    camera?: THREE.PerspectiveCamera
+    cameraConfiguration?: {
+        offsetBehind: number
+        offsetAbove: number
+        lookAtY: number
+    }
+    three?: THREE.Object3D
+    traversable?: true
+    navigationMesh?: {
+        navMesh: NavMesh
+        query: NavMeshQuery
+    }
 }
 
-const useNavigation = create<
-    NavigationState & {
-        set: (state: Partial<NavigationState>) => void
+class MovementSystem extends System<EntityType> {
+    navigationMesh = this.singleton('navigationMesh')
+
+    playerQuery = this.query((e) => e.has('player', 'playerSpeed', 'playerInput', 'three'))
+
+    firstPositionUpdate = true
+
+    private tmpMovementTarget = new THREE.Vector3()
+
+    private tmpPlayerEuler = new THREE.Euler()
+
+    private tmpPlayerQuaternion = new THREE.Quaternion()
+
+    onUpdate(delta: number): void {
+        const player = this.playerQuery.first
+
+        if (!player || !this.navigationMesh) return
+
+        if (!player.playerMovement) {
+            this.world.add(player, 'playerMovement', {
+                vector: new THREE.Vector3(),
+                sneaking: false,
+            })
+        }
+
+        const {
+            playerInput: input,
+            three: playerObject,
+            playerMovement: movement,
+            playerSpeed: speed,
+        } = player as With<typeof player, 'playerMovement'>
+
+        const { left, right, forward, back, sneak } = input
+
+        /* movement */
+        const movementVector = movement.vector.set(0, 0, 0)
+
+        if (forward || back) {
+            if (forward) movementVector.z -= 1
+            if (back) movementVector.z += 1
+        }
+
+        if (left || right) {
+            if (left) movementVector.x -= 1
+            if (right) movementVector.x += 1
+        }
+
+        const movementScalar = sneak ? speed.walking : speed.running
+
+        const t = 1.0 - Math.pow(0.01, delta)
+
+        movementVector.normalize().multiplyScalar(t).multiplyScalar(movementScalar)
+
+        /* update position */
+        if (movementVector.length() > 0 || this.firstPositionUpdate) {
+            const { query: navMeshQuery } = this.navigationMesh
+
+            const movementTarget = this.tmpMovementTarget.copy(playerObject.position).add(movementVector)
+
+            const { nearestRef: polyRef } = navMeshQuery.findNearestPoly(playerObject.position)
+
+            const { resultPosition, visited } = navMeshQuery.moveAlongSurface(polyRef, playerObject.position, movementTarget)
+            const moveAlongSurfaceFinalRef = visited[visited.length - 1]
+
+            const { success: heightSuccess, height } = navMeshQuery.getPolyHeight(moveAlongSurfaceFinalRef, resultPosition)
+
+            playerObject.position.copy(resultPosition as THREE.Vector3)
+
+            if (heightSuccess) {
+                playerObject.position.y = height
+            }
+
+            this.firstPositionUpdate = false
+        }
+
+        /* update rotation */
+        const rotation =
+            movementVector.length() <= 0 ? playerObject.rotation.y : Math.atan2(movementVector.x, movementVector.z) - Math.PI
+        const targetQuaternion = this.tmpPlayerQuaternion.setFromEuler(this.tmpPlayerEuler.set(0, rotation, 0))
+        playerObject.quaternion.slerp(targetQuaternion, t * 5)
+
+        movement.sneaking = sneak
     }
->((set) => ({
-    navMesh: undefined,
-    navMeshQuery: undefined,
-    walkableMeshes: [],
-    set,
-}))
+}
 
-const Navigation = () => {
-    const { debugNavMesh } = useControls('navigation-navmesh', {
-        debugNavMesh: {
-            label: 'Debug NavMesh',
-            value: true,
+class AnimationSystem extends System<EntityType> {
+    playerQuery = this.query((q) => q.has('player', 'playerMovement', 'playerAnimation', 'three'))
+
+    traversableQuery = this.query((q) => q.has('traversable', 'three'))
+
+    raycaster: THREE.Raycaster
+
+    private tmpRaycasterOrigin = new THREE.Vector3()
+
+    private tmpRaycasterDirection = new THREE.Vector3()
+
+    constructor(world: World) {
+        super(world)
+
+        this.raycaster = new THREE.Raycaster()
+        this.raycaster.near = 0.01
+        this.raycaster.far = 10
+        this.raycaster.firstHitOnly = true
+    }
+
+    onUpdate(delta: number): void {
+        const player = this.playerQuery.first
+
+        if (!player) return
+
+        const { three: playerObject, playerMovement, playerAnimation } = player
+
+        const speed = playerMovement.vector.length()
+
+        /* update animation weights */
+        let idleWeight: number
+        let walkWeight: number
+        let runWeight: number
+
+        if (speed < 0.01) {
+            idleWeight = 1
+            walkWeight = 0
+            runWeight = 0
+        } else if (playerMovement.sneaking) {
+            idleWeight = 0
+            walkWeight = 1
+            runWeight = 0
+        } else {
+            idleWeight = 0
+            walkWeight = 0
+            runWeight = 1
+        }
+
+        const t = 1.0 - Math.pow(0.01, delta)
+
+        playerAnimation.idle.weight = THREE.MathUtils.lerp(playerAnimation.idle.weight, idleWeight, t)
+        playerAnimation.walk.weight = THREE.MathUtils.lerp(playerAnimation.walk.weight, walkWeight, t)
+        playerAnimation.run.weight = THREE.MathUtils.lerp(playerAnimation.run.weight, runWeight, t)
+
+        /* raycast to correct character height */
+        const characterRayOrigin = this.tmpRaycasterOrigin.copy(playerObject.position)
+        characterRayOrigin.y += 1
+
+        const characterRayDirection = this.tmpRaycasterDirection.set(0, -1, 0)
+        this.raycaster.set(characterRayOrigin, characterRayDirection)
+
+        const characterRayHits = this.raycaster.intersectObjects(
+            this.traversableQuery.entities.map((e) => e.three),
+            false,
+        )
+        const characterRayHit = characterRayHits.find((hit) => hit.object.userData.walkable)
+        const characterRayHitPoint = characterRayHit ? characterRayHit.point : undefined
+
+        if (characterRayHitPoint) {
+            const yDifference = Math.abs(characterRayHitPoint.y - playerObject.position.y)
+
+            if (yDifference < 1) {
+                playerObject.position.y = characterRayHitPoint.y
+            }
+        }
+    }
+}
+
+class CameraSystem extends System<EntityType> {
+    playerQuery = this.query((e) => e.has('player', 'three'))
+
+    traversableQuery = this.query((e) => e.has('traversable', 'three'))
+
+    cameraQuery = this.query((e) => e.has('camera', 'cameraConfiguration'))!
+
+    raycaster: THREE.Raycaster
+
+    cameraLookAtTarget = new THREE.Vector3()
+
+    cameraPositionTarget = new THREE.Vector3()
+
+    private tmpOffsetTarget = new THREE.Vector3(0, 0, 0)
+
+    private tmpLookAtTarget = new THREE.Vector3(0, 0, 0)
+
+    private tmpRaycasterOrigin = new THREE.Vector3()
+
+    private tmpRaycasterDirection = new THREE.Vector3()
+
+    constructor(world: World) {
+        super(world)
+
+        this.raycaster = new THREE.Raycaster()
+        this.raycaster.near = 0.01
+        this.raycaster.far = 10
+        this.raycaster.firstHitOnly = true
+    }
+
+    onInit(): void {
+        this.cameraQuery.onEntityAdded.add((e) => {
+            this.cameraPositionTarget.copy(e.camera.position)
+        })
+    }
+
+    onUpdate(delta: number): void {
+        const playerEntity = this.playerQuery.first
+        const cameraEntity = this.cameraQuery.first
+
+        if (!playerEntity || !cameraEntity) return
+
+        const { three: playerObject } = playerEntity
+        const { camera, cameraConfiguration } = cameraEntity
+
+        /* update camera */
+        const idealOffset = this.tmpOffsetTarget.set(0, cameraConfiguration.offsetAbove, cameraConfiguration.offsetBehind)
+        idealOffset.add(playerObject.position)
+
+        const idealLookAt = this.tmpLookAtTarget.set(0, cameraConfiguration.lookAtY, 0)
+        idealLookAt.add(playerObject.position)
+
+        /* basic camera collision */
+        const cameraCollisionRayOrigin = this.tmpRaycasterOrigin.copy(playerObject.position)
+        cameraCollisionRayOrigin.y += 1.5
+        const cameraCollisionRayDirection = this.tmpRaycasterDirection.copy(idealOffset).sub(cameraCollisionRayOrigin).normalize()
+
+        this.raycaster.set(cameraCollisionRayOrigin, cameraCollisionRayDirection)
+
+        const cameraCollisionHits = this.raycaster.intersectObjects(
+            this.traversableQuery.entities.map((e) => e.three),
+            true,
+        )
+
+        const cameraCollisionHitPoint = cameraCollisionHits.length > 0 ? cameraCollisionHits[0].point : undefined
+
+        if (cameraCollisionHitPoint) {
+            const dx = cameraCollisionHitPoint.x - playerObject.position.x
+            const dz = cameraCollisionHitPoint.z - playerObject.position.z
+            const horizontalDistance = Math.sqrt(dx * dx + dz * dz)
+
+            if (horizontalDistance < cameraConfiguration.offsetBehind) {
+                idealOffset.x = cameraCollisionHitPoint.x - dx * 0.1
+                idealOffset.z = cameraCollisionHitPoint.z - dz * 0.1
+
+                if (cameraCollisionHitPoint.y > idealOffset.y) {
+                    idealOffset.y = cameraCollisionHitPoint.y
+                }
+            }
+        }
+
+        /* lerp camera */
+        const t = 1.0 - Math.pow(0.01, delta)
+
+        this.cameraLookAtTarget.lerp(idealLookAt, t * 1.5)
+        this.cameraPositionTarget.lerp(idealOffset, t / 1.1)
+
+        camera.position.copy(this.cameraPositionTarget)
+        camera.lookAt(this.cameraLookAtTarget)
+    }
+}
+
+const world = new World<EntityType>({
+    components: [
+        'player',
+        'playerInput',
+        'playerSpeed',
+        'playerMovement',
+        'playerAnimation',
+        'camera',
+        'cameraConfiguration',
+        'traversable',
+        'three',
+        'navigationMesh',
+    ],
+})
+
+world.registerSystem(MovementSystem)
+world.registerSystem(AnimationSystem)
+world.registerSystem(CameraSystem)
+
+world.init()
+
+const { Entity, Component, useQuery } = createECS(world)
+
+const NavigationMesh = () => {
+    const { showHelper, cellSize, cellHeight, walkableClimb, walkableRadius, walkableHeight } = useControls(
+        `${LEVA_KEY}-nav-mesh`,
+        {
+            showHelper: true,
+            cellSize: 0.1,
+            cellHeight: 0.05,
+            walkableClimb: 0.4,
+            walkableRadius: 0.5,
+            walkableHeight: 1.5,
         },
-    })
+    )
+    const [navMeshHelper, setNavMeshHelper] = useState<NavMeshHelper>()
 
-    const { navMesh, set: setNavigation } = useNavigation()
-
-    const group = useRef<Group>(null!)
+    const traversable = useQuery((e) => e.has('three', 'traversable'))
 
     useEffect(() => {
-        const meshes: Mesh[] = []
+        if (traversable.entities.length === 0) return
 
-        group.current.traverse((child) => {
-            if (child instanceof Mesh) {
-                child.userData.walkable = true
-                meshes.push(child)
-            }
+        const meshes: THREE.Mesh[] = []
+
+        traversable.entities.forEach((e) => {
+            e.three.traverse((object) => {
+                if (object instanceof THREE.Mesh) {
+                    meshes.push(object)
+                }
+            })
         })
 
-        const cs = 0.2
-        const ch = 0.2
+        const cs = cellSize
+        const ch = cellHeight
         const { success, navMesh } = threeToSoloNavMesh(meshes, {
             cs,
             ch,
-            walkableClimb: 0.5 / ch,
-            walkableRadius: 0.5 / cs,
-            walkableHeight: 2 / cs,
+            walkableClimb: walkableClimb / ch,
+            walkableRadius: walkableRadius / cs,
+            walkableHeight: walkableHeight / ch,
         })
 
         if (!success) return
 
         const navMeshQuery = new NavMeshQuery({ navMesh })
 
-        setNavigation({
-            navMesh,
-            navMeshQuery,
-            walkableMeshes: meshes,
+        const navigationMeshEntity = world.create({
+            navigationMesh: {
+                navMesh,
+                query: navMeshQuery,
+            },
         })
 
+        const navMeshHelper = new NavMeshHelper({ navMesh })
+        navMeshHelper.position.y += 0.15
+
+        setNavMeshHelper(navMeshHelper)
+
         return () => {
-            setNavigation({
-                navMesh: undefined,
-                navMeshQuery: undefined,
-                walkableMeshes: [],
-            })
+            setNavMeshHelper(undefined)
+
+            world.destroy(navigationMeshEntity)
 
             navMesh.destroy()
             navMeshQuery.destroy()
         }
-    }, [])
+    }, [traversable.version, cellSize, cellHeight, walkableClimb, walkableRadius, walkableHeight])
 
-    const navMeshHelper = useMemo(() => {
-        if (!navMesh || !debugNavMesh) return null
+    return <>{navMeshHelper && showHelper && <primitive object={navMeshHelper} />}</>
+}
 
-        return new NavMeshHelper({ navMesh, navMeshMaterial: new MeshBasicMaterial({ color: '', wireframe: true }) })
-    }, [navMesh, debugNavMesh])
+const Traversable = ({ children }: { children: React.ReactNode }) => {
+    return (
+        <Entity traversable>
+            <Component name="three">{children}</Component>
+        </Entity>
+    )
+}
+
+const Level = () => {
+    const gltf = useGLTF(levelGlbUrl)
+
+    useEffect(() => {
+        gltf.scene.traverse((o) => {
+            if (o instanceof THREE.Mesh) {
+                o.castShadow = true
+                o.receiveShadow = true
+            }
+        })
+    }, [gltf])
 
     return (
         <>
-            <group ref={group}>
-                <mesh position-y={-0.2}>
-                    <meshStandardMaterial color="#333" />
-                    <boxGeometry args={[10, 0.2, 10]} />
-                </mesh>
-
-                <mesh position={[0, 0.5, -5]} rotation-x={Math.PI * 0.15}>
-                    <meshStandardMaterial color="#333" />
-                    <boxGeometry args={[2, 0.2, 5]} />
-                </mesh>
-
-                <mesh position={[0, 1.65, -9.5]}>
-                    <meshStandardMaterial color="#333" />
-                    <boxGeometry args={[5, 0.2, 5]} />
-                </mesh>
-
-                <Crate position={[2, 0, -1.5]} rotation-y={-Math.PI / 4} scale={2} />
-
-                <Crate position={[-2, 0, 1.5]} rotation-y={-Math.PI / 4} scale={2} />
-
-                <Chest position={[0, 1.65, -10]} scale={2} rotation-y={Math.PI} />
-            </group>
-
-            {navMeshHelper && <primitive object={navMeshHelper} />}
+            <Traversable>
+                <group scale={0.01}>
+                    <primitive object={gltf.scene} />
+                </group>
+            </Traversable>
         </>
     )
 }
 
-const CONTROLS_MAP = [
+const KEYBOARD_CONTROLS_MAP = [
     { name: 'forward', keys: ['ArrowUp', 'w', 'W'] },
     { name: 'back', keys: ['ArrowDown', 's', 'S'] },
     { name: 'left', keys: ['ArrowLeft', 'a', 'A'] },
     { name: 'right', keys: ['ArrowRight', 'd', 'D'] },
-    { name: 'run', keys: ['ShiftLeft', 'ShiftRight'] },
+    { name: 'sneak', keys: ['ShiftLeft', 'ShiftRight'] },
 ]
 
-const tmpMovementVector = new Vector3()
-const tmpMovementTarget = new Vector3()
-const tmpIdealOffset = new Vector3()
-const tmpIdealLookAt = new Vector3()
-
-const tmpRaycasterOrigin = new Vector3()
-const tmpRaycasterDirection = new Vector3()
-
-const FORWARD_SPEED = 1.5
-const BACKWARD_SPEED = 0.5
-
-type AgentProps = {
-    initialPosition: Vector3Tuple
-}
-
-const Agent = ({ initialPosition }: AgentProps) => {
-    const agent = useMemo<Object3D>(() => {
-        const object = new Object3D()
-        object.position.set(...initialPosition)
-        return object
-    }, [])
-
-    const initialised = useRef(false)
-
-    const groupRef = useRef<Group>(null!)
-
-    const { animations, scene } = useGLTF(characterGltfUrl)
-    const { ref, actions } = useAnimations(animations)
-
-    const { navMesh, navMeshQuery, walkableMeshes } = useNavigation()
-
-    const camera = useThree((s) => s.camera)
-    const cameraIdealLookAt = useMemo<Vector3>(() => new Vector3(), [])
-    const cameraIdealPosition = useMemo<Vector3>(() => new Vector3(0, 50, 50), [])
-
-    const raycaster = useMemo(() => new Raycaster(), [])
-
+const PlayerInputComponent = () => {
     const forward = useKeyboardControls((s) => s.forward)
     const back = useKeyboardControls((s) => s.back)
     const left = useKeyboardControls((s) => s.left)
     const right = useKeyboardControls((s) => s.right)
-    const run = useKeyboardControls((s) => s.run)
+    const sneak = useKeyboardControls((s) => s.sneak)
+
+    return <Component name="playerInput" data={{ forward, back, left, right, sneak }} />
+}
+
+type PlayerProps = {
+    initialPosition: THREE.Vector3Tuple
+}
+
+const Player = ({ initialPosition }: PlayerProps) => {
+    const { animations, scene: characterGltf } = useGLTF(characterGltfUrl)
+    const { ref, actions: gltfActions } = useAnimations(animations)
+
+    const [actions, setActions] = useState<EntityType['playerAnimation']>()
+
+    const playerSpeed = useControls(`${LEVA_KEY}-player-speed`, {
+        walking: 0.5,
+        running: 1.5,
+    })
 
     useEffect(() => {
-        const idleAction = actions['Idle']!
-        idleAction.loop = LoopRepeat
+        const idleAction = gltfActions['Idle']!
+        idleAction.loop = THREE.LoopRepeat
         idleAction.weight = 1
         idleAction.play()
 
-        const walkAction = actions['Walk']!
-        walkAction.loop = LoopRepeat
+        const walkAction = gltfActions['Walk']!
+        walkAction.loop = THREE.LoopRepeat
         walkAction.weight = 0
         walkAction.play()
 
-        const runAction = actions['Run']!
-        runAction.loop = LoopRepeat
+        const runAction = gltfActions['Run']!
+        runAction.loop = THREE.LoopRepeat
         runAction.weight = 0
         runAction.play()
+
+        setActions({
+            idle: idleAction,
+            walk: walkAction,
+            run: runAction,
+        })
     }, [])
 
-    useFrame((_, delta) => {
-        if (!navMesh || !navMeshQuery || !groupRef.current) return
+    return (
+        <Entity player playerSpeed={playerSpeed}>
+            {/* player object3d */}
+            <Component name="three">
+                <group position={initialPosition}>
+                    <primitive ref={ref} object={characterGltf} rotation-y={-Math.PI} />
+                </group>
+            </Component>
 
-        const t = 1.0 - Math.pow(0.01, delta)
+            {/* player input */}
+            <KeyboardControls map={KEYBOARD_CONTROLS_MAP}>
+                <PlayerInputComponent />
+            </KeyboardControls>
 
-        /* get joystick input */
-        const { vector: joystickVector } = getJoystickState()
+            {/* add animations component when actions loaded */}
+            {actions && <Component name="playerAnimation" data={actions} />}
+        </Entity>
+    )
+}
 
-        // deadzone
-        joystickVector[0] = Math.abs(joystickVector[0]) > 0.2 ? joystickVector[0] : 0
-        joystickVector[1] = Math.abs(joystickVector[1]) > 0.2 ? joystickVector[1] : 0
-
-        /* rotation */
-        let rotation = 0
-
-        if (left || right) {
-            if (left) rotation += 1
-            if (right) rotation -= 1
-        } else {
-            rotation = -joystickVector[0]
-        }
-
-        rotation *= t * 0.75
-
-        agent.rotation.y += rotation
-
-        /* movement */
-        const movementVector = tmpMovementVector.set(0, 0, 0)
-
-        if (forward || back) {
-            if (forward) movementVector.z -= 1
-            if (back) movementVector.z += 1
-        } else {
-            movementVector.z -= joystickVector[1]
-        }
-
-        const running = (forward && !back && run) || joystickVector[1] > 0.5
-        const walkingBackwards = back || joystickVector[1] < 0
-
-        let movementScalar: number
-        if (joystickVector[1] !== 0) {
-            const scalar = Math.abs(joystickVector[1])
-            movementScalar = running ? scalar * FORWARD_SPEED : scalar * BACKWARD_SPEED
-        } else {
-            movementScalar = running ? FORWARD_SPEED : BACKWARD_SPEED
-        }
-
-        movementVector.normalize().multiplyScalar(t).multiplyScalar(movementScalar).applyEuler(agent.rotation)
-
-        if (movementVector.length() > 0 || !initialised.current) {
-            const movementTarget = tmpMovementTarget.copy(agent.position).add(movementVector)
-
-            const { nearestRef: polyRef } = navMeshQuery.findNearestPoly(agent.position)
-
-            const { resultPosition, visited } = navMeshQuery.moveAlongSurface(polyRef, agent.position, movementTarget)
-            const moveAlongSurfaceFinalRef = visited[visited.length - 1]
-
-            const { success: heightSuccess, height } = navMeshQuery.getPolyHeight(moveAlongSurfaceFinalRef, resultPosition)
-
-            agent.position.copy(resultPosition as Vector3)
-
-            if (heightSuccess) {
-                agent.position.y = height
-            }
-
-            initialised.current = true
-        }
-
-        /* update position and rotation */
-        groupRef.current.position.copy(agent.position)
-        groupRef.current.rotation.copy(agent.rotation)
-
-        /* update character animation */
-        const idleAction = actions['Idle']!
-        const walkAction = actions['Walk']!
-        const runAction = actions['Run']!
-
-        const speed = movementVector.length()
-
-        let idleWeight = idleAction.weight
-        let walkWeight = walkAction.weight
-        let runWeight = runAction.weight
-
-        if (speed < 0.01 && rotation === 0) {
-            idleWeight = 1
-            walkWeight = 0
-            runWeight = 0
-        } else if (running) {
-            idleWeight = 0
-            walkWeight = 0
-            runWeight = 1
-        } else {
-            idleWeight = 0
-            walkWeight = 1
-            runWeight = 0
-        }
-
-        if (walkingBackwards) {
-            // reverse
-            walkAction.timeScale = -1
-            runAction.timeScale = -1
-        } else {
-            walkAction.timeScale = 1
-            runAction.timeScale = 1
-        }
-
-        idleAction.weight = MathUtils.lerp(idleAction.weight, idleWeight, t)
-        walkAction.weight = MathUtils.lerp(walkAction.weight, walkWeight, t)
-        runAction.weight = MathUtils.lerp(runAction.weight, runWeight, t)
-
-        /* raycast to correct character height */
-        const raycasterOrigin = tmpRaycasterOrigin.copy(agent.position)
-        raycasterOrigin.y += 1
-
-        const raycasterDirection = tmpRaycasterDirection.set(0, -1, 0)
-        raycaster.set(raycasterOrigin, raycasterDirection)
-
-        const hits = raycaster.intersectObjects(walkableMeshes, false)
-        const hit = hits.find((hit) => hit.object.userData.walkable)
-        const hitPoint = hit ? hit.point : undefined
-
-        if (hitPoint) {
-            const yDifference = Math.abs(hitPoint.y - agent.position.y)
-
-            if (yDifference < 0.5) {
-                groupRef.current.position.y = hitPoint.y
-            }
-        }
-
-        /* update camera */
-        const idealOffset = tmpIdealOffset.set(0, 5, 8)
-        idealOffset.applyEuler(agent.rotation)
-        idealOffset.add(agent.position)
-        if (idealOffset.y < 0) {
-            idealOffset.y = 0
-        }
-
-        const idealLookAt = tmpIdealLookAt.set(0, 1, 0)
-        idealLookAt.applyEuler(agent.rotation)
-        idealLookAt.add(agent.position) // todo - agent.position or corrected groupRef.current.position ?
-
-        cameraIdealLookAt.lerp(idealLookAt, t * 1.5)
-        cameraIdealPosition.lerp(idealOffset, t / 1.5)
-
-        camera.position.copy(cameraIdealPosition)
-        camera.lookAt(cameraIdealLookAt)
+const Camera = () => {
+    const cameraConfiguration = useControls(`${LEVA_KEY}-camera`, {
+        offsetBehind: 10,
+        offsetAbove: 15,
+        lookAtY: 1.5,
     })
 
     return (
-        <group ref={groupRef}>
-            <primitive ref={ref} object={scene} rotation-y={-Math.PI} />
-        </group>
+        <Entity cameraConfiguration={cameraConfiguration}>
+            <Component name="camera">
+                <PerspectiveCamera makeDefault position={[0, 1000, 1000]} />
+            </Component>
+        </Entity>
+    )
+}
+
+const App = () => {
+    useFrame((_, delta) => {
+        world.step(delta)
+    })
+
+    return (
+        <>
+            <Level />
+
+            <NavigationMesh />
+
+            <Player initialPosition={[21, -1.76, -63.53]} />
+
+            <Camera />
+
+            <Environment files={cityEnvironment} />
+        </>
     )
 }
 
 export default () => {
-    suspend(() => init(), [])
+    suspend(() => initRecast(), [])
 
     return (
-        <>
-            <Canvas>
-                <Navigation />
-
-                <KeyboardControls map={CONTROLS_MAP}>
-                    <Agent initialPosition={[0, 0, 3]} />
-                </KeyboardControls>
-
-                <Environment files={cityEnvironment} />
-            </Canvas>
-
-            <Joystick />
-        </>
+        <Canvas shadows={{ type: THREE.PCFSoftShadowMap }}>
+            <App />
+        </Canvas>
     )
 }
