@@ -46,7 +46,7 @@
         "@types/node": "^20.6.0",
         "@types/react": "^18.2.33",
         "@types/react-dom": "^18.2.14",
-        "@types/three": "^0.158.1",
+        "@types/three": "^0.158.2",
         "@vitejs/plugin-basic-ssl": "^1.0.1",
         "@vitejs/plugin-react": "^4.0.4",
         "prettier": "^3.0.3",

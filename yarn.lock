@@ -1922,15 +1922,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/three@npm:^0.158.1":
-  version: 0.158.1
-  resolution: "@types/three@npm:0.158.1"
+"@types/three@npm:^0.158.2":
+  version: 0.158.2
+  resolution: "@types/three@npm:0.158.2"
   dependencies:
     "@types/stats.js": "*"
     "@types/webxr": "*"
     fflate: ~0.6.10
     meshoptimizer: ~0.18.1
-  checksum: 72041d9b50622f2b077cb506a51cac616f3b9addd022a9654c638a4d7bb59edeca6a099f339d25429d18f690be39494d0900e8c025960d8944d1d8d2bd04cf7c
+  checksum: 043accb8067ef6adba283c07fa87025fe5718943c6048c170368c2582d82a8fb454d3ad75b9d26a386410c57b6ec1a309804f9f698f4554eb1df45b999d6cb26
   languageName: node
   linkType: hard
 
@@ -5017,7 +5017,7 @@ __metadata:
     "@types/node": ^20.6.0
     "@types/react": ^18.2.33
     "@types/react-dom": ^18.2.14
-    "@types/three": ^0.158.1
+    "@types/three": ^0.158.2
     "@vitejs/plugin-basic-ssl": ^1.0.1
     "@vitejs/plugin-react": ^4.0.4
     arancini: ^4.1.0
