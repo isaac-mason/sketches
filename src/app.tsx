@@ -17,7 +17,7 @@ import styled, { ThemeProvider } from 'styled-components'
 import { create } from 'zustand'
 import { DebugTunnel, Spinner } from './common'
 import { useDebounce } from './common/hooks/use-debounce'
-import { findSketchByRoute, sketchModules, sketches, visibleSketches } from './sketches'
+import { findSketchByRoute, renamedSketches, sketchModules, sketches, visibleSketches } from './sketches'
 import { Sketch, SketchOptions } from './sketches/types'
 
 const theme = createStyledBreakpointsTheme()
@@ -539,6 +539,13 @@ const App = () => {
 }
 
 const routes: RouteObject[] = [
+    ...renamedSketches.map((renamedSketch) => ({
+        path: `/sketch/${renamedSketch.from}`,
+        element: null,
+        loader: async () => {
+            return redirect(`/sketch/${renamedSketch.to}`)
+        },
+    })),
     ...sketches.map((sketch) => {
         const route: RouteObject = {
             path: `/sketch/${sketch.route}`,

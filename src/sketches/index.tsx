@@ -66,13 +66,12 @@ const sketchList = [
         path: 'jolt-physics/cube-heap',
         tags: ['physics', 'jolt-physics'],
     },
-    /* AI / Pathfinding */
+    /* Recast Navigation */
     {
-        title: 'AI - Busy Street Crossing',
-        path: 'ai/busy-street-crossing',
+        title: 'Recast Navigation - Busy Street Crossing',
+        path: 'recast-navigation/busy-street-crossing',
         tags: ['ai', 'navigation', 'pathfinding', 'recast-navigation'],
     },
-    /* Recast Navigation */
     {
         title: 'Recast Navigation - Character Controller',
         path: 'recast-navigation/character-controller',
@@ -309,6 +308,10 @@ const sketchList = [
         tags: ['xr', 'vr'],
         hidden: true,
     },
+]
+
+export const renamedSketches: { from: string; to: string }[] = [
+    { from: 'ai/busy-street-crossing', to: 'recast-navigation/busy-street-crossing' },
 ]
 
 const sketchCoverGlob: Record<string, { default: string }> = import.meta.glob(`./**/cover.png`, {
