@@ -1,7 +1,7 @@
 import { Bounds, MarchingCube, MarchingCubes, OrbitControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { System, World } from 'arancini'
-import { createECS } from 'arancini/react'
+import { createReactAPI } from 'arancini/react'
 import * as p2 from 'p2-es'
 import { useMemo } from 'react'
 import { Canvas } from '../../../common'
@@ -84,7 +84,7 @@ world.registerSystem(PhysicsSystem)
 
 world.init()
 
-const ECS = createECS(world)
+const { Entity, Component } = createReactAPI(world)
 
 type BallProps = { index: number }
 
@@ -106,16 +106,16 @@ const Ball = ({ index }: BallProps) => {
     }, [])
 
     return (
-        <ECS.Entity physicsBody={circleBody}>
-            <ECS.Component name="object3D">
+        <Entity physicsBody={circleBody}>
+            <Component name="object3D">
                 <MarchingCube
                     strength={0.08}
                     subtract={6}
                     // @ts-expect-error type incorrect
                     color={gooColors[index % gooColors.length]}
                 />
-            </ECS.Component>
-        </ECS.Entity>
+            </Component>
+        </Entity>
     )
 }
 
@@ -154,8 +154,8 @@ const Container = () => {
     }, [])
 
     return (
-        <ECS.Entity isRotating physicsBody={body}>
-            <ECS.Component name="object3D">
+        <Entity isRotating physicsBody={body}>
+            <Component name="object3D">
                 <group>
                     {containerParts.map(({ width, height, position }, i) => (
                         <mesh key={i} position={[position[0], position[1], 0]}>
@@ -164,14 +164,14 @@ const Container = () => {
                         </mesh>
                     ))}
                 </group>
-            </ECS.Component>
-        </ECS.Entity>
+            </Component>
+        </Entity>
     )
 }
 
 const Loop = () => {
     useFrame((_, delta) => {
-        ECS.step(Math.min(delta, 0.1))
+        world.step(Math.min(delta, 0.1))
     })
 
     return null

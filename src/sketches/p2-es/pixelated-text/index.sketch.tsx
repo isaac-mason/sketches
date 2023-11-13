@@ -1,7 +1,7 @@
 import { Bounds } from '@react-three/drei'
 import { Color, useFrame } from '@react-three/fiber'
 import { System, World } from 'arancini'
-import { createECS } from 'arancini/react'
+import { createReactAPI } from 'arancini/react'
 import { button, useControls } from 'leva'
 import * as p2 from 'p2-es'
 import { ReactNode, useMemo, useState } from 'react'
@@ -61,7 +61,7 @@ world.registerSystem(PhysicsSystem)
 
 world.init()
 
-const { Entity, Component, QueryEntities } = createECS(world)
+const { Entity, Entities, Component } = createReactAPI(world)
 
 const MAX_DELTA = (1 / 60) * 10
 
@@ -95,7 +95,7 @@ const Box = ({ position, velocity, color }: BoxProps) => {
 }
 
 const BoxRenderer = () => (
-    <QueryEntities query={(e) => e.has('isBox', 'color')}>
+    <Entities where={(e) => e.has('isBox', 'color')}>
         {({ color }) => {
             return (
                 <Component name="object3D">
@@ -106,7 +106,7 @@ const BoxRenderer = () => (
                 </Component>
             )
         }}
-    </QueryEntities>
+    </Entities>
 )
 
 type TextProps = {

@@ -2,7 +2,7 @@ import cityEnvironment from '@pmndrs/assets/hdri/city.exr'
 import { Environment, OrbitControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { System, World } from 'arancini'
-import { createECS } from 'arancini/react'
+import { createReactAPI } from 'arancini/react'
 import Jolt from 'jolt-physics'
 import { useControls } from 'leva'
 import { useMemo, useRef } from 'react'
@@ -76,8 +76,7 @@ world.registerSystem(PhysicsSystem)
 
 world.init()
 
-const ecs = createECS(world)
-const { Entity, Component } = ecs
+const { Entity, Component } = createReactAPI(world)
 
 const usePhysics = () => {
     return useMemo(() => world.getSystem(PhysicsSystem), [])!

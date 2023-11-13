@@ -1,8 +1,8 @@
-import cityEnvironment from '@pmndrs/assets/hdri/city.exr'
+import sunsetEnvironment from '@pmndrs/assets/hdri/sunset.exr'
 import { Environment, KeyboardControls, PerspectiveCamera, useAnimations, useGLTF, useKeyboardControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { System, With, World } from 'arancini'
-import { createECS } from 'arancini/react'
+import { createReactAPI } from 'arancini/react'
 import { useControls } from 'leva'
 import { useEffect, useState } from 'react'
 import { NavMesh, NavMeshQuery, init as initRecast } from 'recast-navigation'
@@ -121,10 +121,13 @@ class MovementSystem extends System<EntityType> {
         }
 
         /* update rotation */
-        const rotation =
-            movementVector.length() <= 0 ? playerObject.rotation.y : Math.atan2(movementVector.x, movementVector.z) - Math.PI
-        const targetQuaternion = this.tmpPlayerQuaternion.setFromEuler(this.tmpPlayerEuler.set(0, rotation, 0))
-        playerObject.quaternion.slerp(targetQuaternion, t * 5)
+        if (movementVector.length() > 0) {
+            const rotation = Math.atan2(movementVector.x, movementVector.z) - Math.PI
+
+            const targetQuaternion = this.tmpPlayerQuaternion.setFromEuler(this.tmpPlayerEuler.set(0, rotation, 0))
+
+            playerObject.quaternion.slerp(targetQuaternion, t * 5)
+        }
 
         movement.sneaking = sneak
     }
@@ -321,7 +324,7 @@ world.registerSystem(CameraSystem)
 
 world.init()
 
-const { Entity, Component, useQuery } = createECS(world)
+const { Entity, Component, useQuery } = createReactAPI(world)
 
 const NavigationMesh = () => {
     const { showHelper, cellSize, cellHeight, walkableClimb, walkableRadius, walkableHeight } = useControls(
@@ -352,14 +355,12 @@ const NavigationMesh = () => {
             })
         })
 
-        const cs = cellSize
-        const ch = cellHeight
         const { success, navMesh } = threeToSoloNavMesh(meshes, {
-            cs,
-            ch,
-            walkableClimb: walkableClimb / ch,
-            walkableRadius: walkableRadius / cs,
-            walkableHeight: walkableHeight / ch,
+            cs: cellSize,
+            ch: cellHeight,
+            walkableClimb: walkableClimb / cellHeight,
+            walkableRadius: walkableRadius / cellSize,
+            walkableHeight: walkableHeight / cellHeight,
         })
 
         if (!success) return
@@ -437,7 +438,7 @@ const PlayerInputComponent = () => {
     const right = useKeyboardControls((s) => s.right)
     const sneak = useKeyboardControls((s) => s.sneak)
 
-    return <Component name="playerInput" data={{ forward, back, left, right, sneak }} />
+    return <Component name="playerInput" value={{ forward, back, left, right, sneak }} />
 }
 
 type PlayerProps = {
@@ -493,7 +494,7 @@ const Player = ({ initialPosition }: PlayerProps) => {
             </KeyboardControls>
 
             {/* add animations component when actions loaded */}
-            {actions && <Component name="playerAnimation" data={actions} />}
+            {actions && <Component name="playerAnimation" value={actions} />}
         </Entity>
     )
 }
@@ -529,7 +530,7 @@ const App = () => {
 
             <Camera />
 
-            <Environment files={cityEnvironment} />
+            <Environment files={sunsetEnvironment} />
         </>
     )
 }

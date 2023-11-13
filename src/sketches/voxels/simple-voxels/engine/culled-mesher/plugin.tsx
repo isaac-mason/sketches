@@ -244,13 +244,13 @@ export const VoxelChunkCulledMeshes = () => {
     const { ecs } = useVoxelEngine<[CorePlugin, CulledMesherPlugin]>()
 
     return (
-        <ecs.QueryEntities query={(e) => e.has('voxelChunkMesh', 'voxelChunkLoaded')}>
+        <ecs.Entities where={(e) => e.has('voxelChunkMesh', 'voxelChunkLoaded')}>
             {(entity) => {
                 const { voxelChunkMesh } = entity
 
                 return <primitive object={voxelChunkMesh.mesh} />
             }}
-        </ecs.QueryEntities>
+        </ecs.Entities>
     )
 }
 

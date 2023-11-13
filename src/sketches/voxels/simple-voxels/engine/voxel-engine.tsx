@@ -1,6 +1,6 @@
 import { useFrame } from '@react-three/fiber'
 import { AnyEntity, World } from 'arancini'
-import { ECS, createECS } from 'arancini/react'
+import { ReactAPI, createReactAPI } from 'arancini/react'
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { VoxelEngineEntity, VoxelEnginePlugin, VoxelEnginePluginsApi } from './voxel-engine-types'
 
@@ -8,7 +8,7 @@ const voxelEngineContext = createContext<unknown>(null!)
 
 type VoxelEngineContext<Plugins extends Array<VoxelEnginePlugin<any>>> = VoxelEnginePluginsApi<Plugins> & {
     world: World<VoxelEngineEntity<Plugins>>
-    ecs: ECS<VoxelEngineEntity<Plugins>>
+    ecs: ReactAPI<VoxelEngineEntity<Plugins>>
     step: (delta: number) => void
 }
 
@@ -37,7 +37,7 @@ export const VoxelEngine = <
         initialised.current = true
 
         const world = new World<Entity>()
-        const ecs = createECS(world)
+        const ecs = createReactAPI(world)
 
         for (const plugin of plugins) {
             if (!plugin.components) continue

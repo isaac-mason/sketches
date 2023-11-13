@@ -172,14 +172,14 @@ const App = () => {
                     <VoxelChunkCulledMeshes />
                 </Bounds>
 
-                <ecs.QueryEntities query={(e) => e.has('rigidBody')}>
+                <ecs.Entities where={(e) => e.has('rigidBody')}>
                     <ecs.Component name="object3D">
                         <mesh>
                             <meshStandardMaterial color="white" />
                             <boxGeometry args={[1, 1, 1]} />
                         </mesh>
                     </ecs.Component>
-                </ecs.QueryEntities>
+                </ecs.Entities>
             </group>
 
             {physicsDebug && <PhysicsDebug world={physicsWorld} />}

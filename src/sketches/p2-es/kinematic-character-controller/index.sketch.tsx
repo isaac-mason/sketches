@@ -1,7 +1,7 @@
 import { Billboard, KeyboardControls, Text, useKeyboardControls } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
 import { System, World } from 'arancini'
-import { createECS } from 'arancini/react'
+import { createReactAPI } from 'arancini/react'
 import * as p2 from 'p2-es'
 import { useMemo } from 'react'
 import { Box3, Vector3 } from 'three'
@@ -175,7 +175,7 @@ world.registerSystem(PlayerModelSystem)
 
 world.init()
 
-const { Entity, Component } = createECS(world)
+const { Entity, Component } = createReactAPI(world)
 
 const Loop = () => {
     useFrame((_, delta) => {

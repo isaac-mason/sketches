@@ -15,22 +15,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@arancini/core@npm:4.0.1":
-  version: 4.0.1
-  resolution: "@arancini/core@npm:4.0.1"
-  checksum: 93a8b201e930d75ec95f448f8452700b6ba227ed1c2732a2f8bb0e079ce3d7185d6030b945de2be907843b87d72ff0f39b563a79ed74de7bff0a3315fa9fdd78
+"@arancini/core@npm:4.1.0":
+  version: 4.1.0
+  resolution: "@arancini/core@npm:4.1.0"
+  checksum: 04282a2447e1ae5c7c07ac9c2ed4e505f93b9e0fd5e1364ce0657405201b68c91dfbbfda1d312fc4befaa18107514e6a753831e6cf01890bf027937fe3eda890
   languageName: node
   linkType: hard
 
-"@arancini/react@npm:4.0.1":
-  version: 4.0.1
-  resolution: "@arancini/react@npm:4.0.1"
+"@arancini/react@npm:4.1.0":
+  version: 4.1.0
+  resolution: "@arancini/react@npm:4.1.0"
   dependencies:
-    "@arancini/core": 4.0.1
+    "@arancini/core": 4.1.0
   peerDependencies:
     react: ^18.0.0
     react-dom: ^18.0.0
-  checksum: 74620a881723fa3b9a28912a25391ebc3acfdb0ab6b52414063c8c22ca8028829b5a7c4eea21cb275cb3ab7d37dca7c91cb6122d3cd8cf7db119fce6bbef74d5
+  checksum: cd1de70b0d5cdd3e6e81f1ae78a9dacf5163941b48e6d0d98a6a239290dff65dddb036fbcce00c6daf6a789fd72be505f029a9e6dfed98ba9ba36eecb5d8cb36
   languageName: node
   linkType: hard
 
@@ -2094,16 +2094,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"arancini@npm:^4.0.1":
-  version: 4.0.1
-  resolution: "arancini@npm:4.0.1"
+"arancini@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "arancini@npm:4.1.0"
   dependencies:
-    "@arancini/core": 4.0.1
-    "@arancini/react": 4.0.1
+    "@arancini/core": 4.1.0
+    "@arancini/react": 4.1.0
   peerDependencies:
     react: ^18.0.0
     react-dom: ^18.0.0
-  checksum: ff6ef8ebf0bb924e654bff57593c630a688336871121315d71cafd801afba5afd45ce433d246f0d8678c3a4f65e78f79835397f2ba4c02c374870089f9b31ae6
+  checksum: dd7663a4c3698d7f9e67c5da3bb04864588ed62fac3c344c1703747e83ef29d8635c4c15331fd37d547fe2907ba3e0208a86aeaaa9b6145cc21a343e25b60a42
   languageName: node
   linkType: hard
 
@@ -5011,7 +5011,7 @@ __metadata:
     "@types/three": ^0.158.1
     "@vitejs/plugin-basic-ssl": ^1.0.1
     "@vitejs/plugin-react": ^4.0.4
-    arancini: ^4.0.1
+    arancini: ^4.1.0
     d3: ^7.8.5
     jolt-physics: ^0.6.3
     leva: ^0.9.35

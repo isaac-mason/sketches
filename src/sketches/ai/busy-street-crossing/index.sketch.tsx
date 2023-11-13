@@ -2,7 +2,7 @@ import cityEnvironment from '@pmndrs/assets/hdri/city.exr'
 import { Environment, OrbitControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { World } from 'arancini'
-import { createECS } from 'arancini/react'
+import { createReactAPI } from 'arancini/react'
 import { useControls } from 'leva'
 import { CrowdAgent, Vector3, vec3 } from 'recast-navigation'
 import { Object3D } from 'three'
@@ -40,14 +40,14 @@ const world = new World<EntityType>({
 
 world.init()
 
-const ecs = createECS(world)
+const { useQuery, Entity, Entities, Component } = createReactAPI(world)
 
 const App = () => {
     const { debugNavMesh } = useControls('ai-busy-crossing', {
         debugNavMesh: false,
     })
 
-    const agents = ecs.useQuery((e) => e.has('agent', 'object3D'))
+    const agents = useQuery((e) => e.has('agent', 'object3D'))
 
     /* update agent positions */
     useFrame(() => {
@@ -81,16 +81,16 @@ const App = () => {
             <AI debug={debugNavMesh} generatorConfig={{ walkableRadius: 2 }}>
                 {/* create some agents */}
                 {Array.from({ length: 200 }).map((_, idx) => (
-                    <ecs.Entity key={idx}>
-                        <ecs.Component name="agent">
+                    <Entity key={idx}>
+                        <Component name="agent">
                             <Agent
                                 initialPosition={vec3.toArray(targets[Math.floor(Math.random() * targets.length)])}
                                 maxSpeed={4}
                                 maxAcceleration={3}
                                 separationWeight={10}
                             />
-                        </ecs.Component>
-                    </ecs.Entity>
+                        </Component>
+                    </Entity>
                 ))}
 
                 {/* create a walkable surface */}
@@ -126,16 +126,16 @@ const App = () => {
             </AI>
 
             {/* render agents */}
-            <ecs.QueryEntities query={(e) => e.has('agent')}>
-                <ecs.Component name="object3D">
+            <Entities where={(e) => e.has('agent')}>
+                <Component name="object3D">
                     <group>
                         <mesh position-y={0.5}>
                             <meshStandardMaterial color="orange" />
                             <cylinderGeometry args={[0.5, 0.5, 1]} />
                         </mesh>
                     </group>
-                </ecs.Component>
-            </ecs.QueryEntities>
+                </Component>
+            </Entities>
 
             {/* road */}
             <mesh position-y={0.001}>
