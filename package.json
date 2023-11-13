@@ -37,7 +37,7 @@
         "styled-components": "^6.1.0",
         "three": "^0.158.0",
         "tunnel-rat": "^0.1.2",
-        "zustand": "^4.4.4"
+        "zustand": "^4.4.6"
     },
     "devDependencies": {
         "@babel/plugin-proposal-class-properties": "^7.18.6",
