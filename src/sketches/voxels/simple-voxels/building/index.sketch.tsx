@@ -7,7 +7,11 @@ import { create } from 'zustand'
 import { Canvas } from '../../../../common'
 import { CorePlugin, Vec3 } from '../engine/core'
 import { CulledMesherPlugin, VoxelChunkCulledMeshes } from '../engine/culled-mesher'
-import { VoxelEngine, useVoxelEngine } from '../engine/voxel-engine'
+import { createVoxelEngine } from '../engine/voxel-engine'
+
+const PLUGINS = [CorePlugin, CulledMesherPlugin] as const
+
+const { VoxelEngine, useVoxelEngine } = createVoxelEngine(PLUGINS)
 
 const green1 = new Color('green').addScalar(-0.02).getHex()
 const green2 = new Color('green').addScalar(0.02).getHex()
@@ -22,7 +26,7 @@ const useColorStore = create<ColorStore>((set) => ({
 }))
 
 const App = () => {
-    const { voxelWorld, setBlock } = useVoxelEngine<[CorePlugin, CulledMesherPlugin]>()
+    const { voxelWorld, setBlock } = useVoxelEngine()
 
     useLayoutEffect(() => {
         // ground
@@ -101,7 +105,7 @@ export default () => {
     return (
         <>
             <Canvas camera={{ position: [20, 20, 20], near: 0.001 }}>
-                <VoxelEngine plugins={[CorePlugin, CulledMesherPlugin]}>
+                <VoxelEngine>
                     <App />
                 </VoxelEngine>
 

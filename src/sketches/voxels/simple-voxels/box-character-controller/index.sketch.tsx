@@ -8,14 +8,18 @@ import { Canvas } from '../../../../common'
 import { BoxCharacterController, BoxCharacterControllerPlugin } from '../engine/box-character-controller'
 import { CorePlugin, Vec3 } from '../engine/core'
 import { CulledMesherPlugin, VoxelChunkCulledMeshes } from '../engine/culled-mesher'
-import { VoxelEngine, useVoxelEngine } from '../engine/voxel-engine'
+import { createVoxelEngine } from '../engine/voxel-engine'
+
+const PLUGINS = [CorePlugin, CulledMesherPlugin, BoxCharacterControllerPlugin] as const
+
+const { VoxelEngine, useVoxelEngine } = createVoxelEngine(PLUGINS)
 
 const green1 = new Color('green').addScalar(-0.02).getHex()
 const green2 = new Color('green').addScalar(0.02).getHex()
 const orange = new Color('orange').getHex()
 
 const Player = () => {
-    const { ecs, voxelWorld, setBlock } = useVoxelEngine<[CorePlugin, CulledMesherPlugin, BoxCharacterControllerPlugin]>()
+    const { ecs, voxelWorld, setBlock } = useVoxelEngine()
 
     const gl = useThree((s) => s.gl)
 
@@ -138,7 +142,7 @@ const Player = () => {
 }
 
 const App = () => {
-    const { world, setBlock, step } = useVoxelEngine<[CorePlugin, CulledMesherPlugin, BoxCharacterControllerPlugin]>()
+    const { world, setBlock, step } = useVoxelEngine()
 
     const [paused, setPaused] = useState(true)
 
@@ -203,7 +207,7 @@ export default () => {
                 ]}
             >
                 <Canvas>
-                    <VoxelEngine paused plugins={[CorePlugin, CulledMesherPlugin, BoxCharacterControllerPlugin]}>
+                    <VoxelEngine paused>
                         <App />
                     </VoxelEngine>
                     <PointerLockControls makeDefault />

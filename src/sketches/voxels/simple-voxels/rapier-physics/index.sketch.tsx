@@ -8,7 +8,11 @@ import { Canvas } from '../../../../common'
 import { CorePlugin, Vec3 } from '../engine/core'
 import { CulledMesherPlugin, VoxelChunkCulledMeshes } from '../engine/culled-mesher'
 import { PhysicsDebug, RapierInit, RapierPhysicsPlugin } from '../engine/rapier-physics'
-import { VoxelEngine, useVoxelEngine } from '../engine/voxel-engine'
+import { createVoxelEngine } from '../engine/voxel-engine'
+
+const PLUGINS = [CorePlugin, CulledMesherPlugin, RapierPhysicsPlugin] as const
+
+const { VoxelEngine, useVoxelEngine } = createVoxelEngine(PLUGINS)
 
 const green1 = new Color('green').addScalar(-0.02).getHex()
 const green2 = new Color('green').addScalar(0.02).getHex()
@@ -17,7 +21,7 @@ const orange = new Color('orange').getHex()
 const brown = new Color('brown').getHex()
 
 const App = () => {
-    const { ecs, voxelWorld, physicsWorld, setBlock } = useVoxelEngine<[CorePlugin, CulledMesherPlugin, RapierPhysicsPlugin]>()
+    const { ecs, voxelWorld, physicsWorld, setBlock } = useVoxelEngine()
 
     const camera = useThree((s) => s.camera)
 
@@ -195,7 +199,7 @@ export default () => {
     return (
         <RapierInit>
             <Canvas camera={{ position: [20, 50, 50] }}>
-                <VoxelEngine plugins={[CorePlugin, CulledMesherPlugin, RapierPhysicsPlugin]}>
+                <VoxelEngine>
                     <App />
                 </VoxelEngine>
                 <OrbitControls makeDefault />

@@ -1,7 +1,13 @@
 import { AnyEntity, SystemClass, World } from 'arancini'
 import { ReactAPI } from 'arancini/react'
 
-export type UnionToIntersection<U> = ((U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never) & {}
+type UnionToIntersection<U> = ((U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never) & {}
+
+type Pretty<T> = T extends unknown
+    ? {
+          [K in keyof T]: T[K]
+      }
+    : never
 
 export type Api = Record<string, unknown>
 
@@ -18,14 +24,16 @@ export type VoxelEnginePluginApi<P extends VoxelEnginePlugin<any>> = P['setup'] 
     ? ReturnType<P['setup']>
     : {}
 
-export type VoxelEnginePluginsApi<Plugins extends Array<VoxelEnginePlugin<any>>> = UnionToIntersection<
+export type VoxelEnginePluginsApi<Plugins extends ReadonlyArray<VoxelEnginePlugin<any>>> = UnionToIntersection<
     {
         [K in keyof Plugins]: VoxelEnginePluginApi<Plugins[K]>
     }[number]
 >
 
-export type VoxelEngineEntity<Plugins extends Array<VoxelEnginePlugin<any>>> = UnionToIntersection<
-    {
-        [K in keyof Plugins]: Plugins[K]['E']
-    }[number]
+export type VoxelEngineEntity<Plugins extends ReadonlyArray<VoxelEnginePlugin<any>>> = Pretty<
+    UnionToIntersection<
+        {
+            [K in keyof Plugins]: Plugins[K]['E']
+        }[number]
+    >
 >

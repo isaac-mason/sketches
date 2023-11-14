@@ -1,6 +1,6 @@
 import { System, With } from 'arancini'
 import { BufferAttribute, BufferGeometry, Mesh, MeshStandardMaterial } from 'three'
-import { CHUNK_SIZE, ChunkEntity, CorePlugin, CorePluginEntity, Vec3, VoxelChunk, VoxelWorldCoreSystem, chunkId } from '../core'
+import { CHUNK_SIZE, ChunkEntity, CorePlugin, CorePluginEntity, Vec3, VoxelWorldCoreSystem, chunkId } from '../core'
 import { useVoxelEngine } from '../voxel-engine'
 import { VoxelEnginePlugin } from '../voxel-engine-types'
 import VoxelChunkMesherWorker from './culled-mesher.worker.ts?worker'

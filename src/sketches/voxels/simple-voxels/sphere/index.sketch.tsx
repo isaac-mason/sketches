@@ -4,14 +4,18 @@ import { useLayoutEffect } from 'react'
 import { Color } from 'three'
 import { Canvas } from '../../../../common'
 import { CorePlugin } from '../engine/core'
-import { CulledMesherPlugin, VoxelChunkCulledMeshes, VoxelChunkMesh } from '../engine/culled-mesher'
-import { VoxelEngine, useVoxelEngine } from '../engine/voxel-engine'
+import { CulledMesherPlugin, VoxelChunkCulledMeshes } from '../engine/culled-mesher'
+import { createVoxelEngine } from '../engine/voxel-engine'
+
+const PLUGINS = [CorePlugin, CulledMesherPlugin] as const
+
+const { VoxelEngine, useVoxelEngine } = createVoxelEngine(PLUGINS)
 
 const orange = new Color('orange').getHex()
 const hotpink = new Color('hotpink').getHex()
 
 const App = () => {
-    const { world, setBlock } = useVoxelEngine<[CorePlugin, CulledMesherPlugin]>()
+    const { world, setBlock } = useVoxelEngine()
 
     useLayoutEffect(() => {
         // sphere
@@ -61,7 +65,7 @@ const App = () => {
 
 export default () => (
     <Canvas camera={{ position: [10, 10, 10] }}>
-        <VoxelEngine plugins={[CorePlugin, CulledMesherPlugin]}>
+        <VoxelEngine>
             <App />
         </VoxelEngine>
         <OrbitControls makeDefault />

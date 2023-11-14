@@ -6,7 +6,11 @@ import { Color, Vector3 } from 'three'
 import { Canvas } from '../../../../common'
 import { CorePlugin, Vec3 } from '../engine/core'
 import { CulledMesherPlugin, VoxelChunkCulledMeshes } from '../engine/culled-mesher'
-import { VoxelEngine, useVoxelEngine } from '../engine/voxel-engine'
+import { createVoxelEngine } from '../engine/voxel-engine'
+
+const PLUGINS = [CorePlugin, CulledMesherPlugin] as const
+
+const { VoxelEngine, useVoxelEngine } = createVoxelEngine(PLUGINS)
 
 const green1 = new Color('green').addScalar(-0.02).getHex()
 const green2 = new Color('green').addScalar(0.02).getHex()
@@ -17,7 +21,7 @@ const sideVector = new Vector3()
 const direction = new Vector3()
 
 const Player = () => {
-    const { voxelWorld, setBlock, voxelWorldActor } = useVoxelEngine<[CorePlugin, CulledMesherPlugin]>()
+    const { voxelWorld, setBlock, voxelWorldActor } = useVoxelEngine()
 
     const position = useRef<Vector3>(new Vector3(0, 5, 0))
 
@@ -95,7 +99,7 @@ const Player = () => {
 }
 
 const App = () => {
-    const { setBlock } = useVoxelEngine<[CorePlugin, CulledMesherPlugin]>()
+    const { setBlock } = useVoxelEngine()
 
     useEffect(() => {
         // ground
@@ -148,7 +152,7 @@ export default () => {
                 ]}
             >
                 <Canvas camera={{ near: 0.001 }}>
-                    <VoxelEngine plugins={[CorePlugin, CulledMesherPlugin]}>
+                    <VoxelEngine>
                         <App />
                     </VoxelEngine>
                     <PointerLockControls makeDefault />
