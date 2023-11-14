@@ -1772,9 +1772,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/d3@npm:^7.4.2":
-  version: 7.4.2
-  resolution: "@types/d3@npm:7.4.2"
+"@types/d3@npm:^7.4.3":
+  version: 7.4.3
+  resolution: "@types/d3@npm:7.4.3"
   dependencies:
     "@types/d3-array": "*"
     "@types/d3-axis": "*"
@@ -1806,7 +1806,7 @@ __metadata:
     "@types/d3-timer": "*"
     "@types/d3-transition": "*"
     "@types/d3-zoom": "*"
-  checksum: c87fefb3bbac4a591ea9b32e743a26a9de6ac4c856b6381e3692790438f4e44bc2b85190d789009d1ba5d5e156b483f49b3f53e1070b3725b687a16a51b7f299
+  checksum: 12234aa093c8661546168becdd8956e892b276f525d96f65a7b32fed886fc6a569fe5a1171bff26fef2a5663960635f460c9504a6f2d242ba281a2b6c8c6465c
   languageName: node
   linkType: hard
 
@@ -5015,7 +5015,7 @@ __metadata:
     "@react-three/postprocessing": ^2.15.11
     "@react-three/rapier": ^1.1.1
     "@react-three/xr": ^5.7.1
-    "@types/d3": ^7.4.2
+    "@types/d3": ^7.4.3
     "@types/node": ^20.9.0
     "@types/react": ^18.2.33
     "@types/react-dom": ^18.2.14
