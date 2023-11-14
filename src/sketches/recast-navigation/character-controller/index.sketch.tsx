@@ -264,6 +264,7 @@ class CameraSystem extends System<EntityType> {
         idealLookAt.add(playerObject.position)
 
         /* basic camera collision */
+        // todo: this doesn't work well with fences or other walls with gaps, could be a shape cast instead?
         const cameraCollisionRayOrigin = this.tmpRaycasterOrigin.copy(playerObject.position)
         cameraCollisionRayOrigin.y += 1.5
         const cameraCollisionRayDirection = this.tmpRaycasterDirection.copy(idealOffset).sub(cameraCollisionRayOrigin).normalize()
