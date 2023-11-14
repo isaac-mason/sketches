@@ -20,71 +20,18 @@ const green2 = new Color('green').addScalar(0.02).getHex()
 const orange = new Color('orange').getHex()
 const brown = new Color('brown').getHex()
 
-const App = () => {
+const Tools = ({ children }: { children: React.ReactNode }) => {
     const { ecs, voxelWorld, physicsWorld, setBlock } = useVoxelEngine()
 
     const camera = useThree((s) => s.camera)
 
-    const { tool, physicsDebug } = useControls('voxels-culled-mesher-physics', {
+    const { tool } = useControls('voxels-culled-mesher-physics-tool', {
         tool: {
             label: 'Tool',
             options: ['cannon', 'build'],
             value: 'cannon',
         },
-        physicsDebug: {
-            label: 'Physics Debug',
-            value: false,
-        },
     })
-
-    useLayoutEffect(() => {
-        const tree = (treeX: number, treeY: number, treeZ: number) => {
-            // trunk
-            for (let y = 0; y < 10; y++) {
-                setBlock([treeX, treeY + y, treeZ], {
-                    solid: true,
-                    color: brown,
-                })
-            }
-
-            // leaves
-            const radius = 5
-            const center = [0, radius, 0]
-
-            for (let x = -radius; x < radius; x++) {
-                for (let y = -radius; y < radius; y++) {
-                    for (let z = -radius; z < radius; z++) {
-                        const position: Vec3 = [x, y, z]
-                        const distance = Math.sqrt(position[0] ** 2 + position[1] ** 2 + position[2] ** 2)
-
-                        if (distance < radius) {
-                            const block: Vec3 = [center[0] + x + treeX, center[1] + y + 5 + treeY, center[2] + z + treeZ]
-
-                            setBlock(block, {
-                                solid: true,
-                                color: Math.random() > 0.5 ? green1 : green2,
-                            })
-                        }
-                    }
-                }
-            }
-        }
-
-        for (let x = -50; x < 50; x++) {
-            for (let z = -50; z < 50; z++) {
-                const y = Math.floor(Math.sin(x / 10) * Math.cos(z / 10) * 5)
-                setBlock([x, y, z], {
-                    solid: true,
-                    color: Math.random() > 0.5 ? green1 : green2,
-                })
-
-                // random chance to place a tree
-                if (Math.abs(x) < 40 && Math.abs(z) < 40 && Math.random() < 0.002) {
-                    tree(x, y, z)
-                }
-            }
-        }
-    }, [])
 
     const handleCannon = (event: ThreeEvent<MouseEvent>) => {
         const position = camera.position
@@ -141,6 +88,67 @@ const App = () => {
         }
     }
 
+    return <group onPointerDown={onPointerDown}>{children}</group>
+}
+
+const Level = () => {
+    const { setBlock } = useVoxelEngine()
+
+    useLayoutEffect(() => {
+        const tree = (treeX: number, treeY: number, treeZ: number) => {
+            // trunk
+            for (let y = 0; y < 10; y++) {
+                setBlock([treeX, treeY + y, treeZ], {
+                    solid: true,
+                    color: brown,
+                })
+            }
+
+            // leaves
+            const radius = 5
+            const center = [0, radius, 0]
+
+            for (let x = -radius; x < radius; x++) {
+                for (let y = -radius; y < radius; y++) {
+                    for (let z = -radius; z < radius; z++) {
+                        const position: Vec3 = [x, y, z]
+                        const distance = Math.sqrt(position[0] ** 2 + position[1] ** 2 + position[2] ** 2)
+
+                        if (distance < radius) {
+                            const block: Vec3 = [center[0] + x + treeX, center[1] + y + 5 + treeY, center[2] + z + treeZ]
+
+                            setBlock(block, {
+                                solid: true,
+                                color: Math.random() > 0.5 ? green1 : green2,
+                            })
+                        }
+                    }
+                }
+            }
+        }
+
+        for (let x = -50; x < 50; x++) {
+            for (let z = -50; z < 50; z++) {
+                const y = Math.floor(Math.sin(x / 10) * Math.cos(z / 10) * 5)
+                setBlock([x, y, z], {
+                    solid: true,
+                    color: Math.random() > 0.5 ? green1 : green2,
+                })
+
+                // random chance to place a tree
+                if (Math.abs(x) < 40 && Math.abs(z) < 40 && Math.random() < 0.002) {
+                    tree(x, y, z)
+                }
+            }
+        }
+    }, [])
+
+    return null
+}
+
+const Snow = () => {
+    const { ecs, physicsWorld } = useVoxelEngine()
+
     useEffect(() => {
         const timeouts: NodeJS.Timeout[] = []
 
@@ -169,25 +177,40 @@ const App = () => {
         }
     }, [])
 
+    return null
+}
+
+const PhysicsVoxelCubeRenderer = () => {
+    const { ecs } = useVoxelEngine()
+
+    return (
+        <ecs.Entities where={(e) => e.has('rigidBody')}>
+            <ecs.Component name="object3D">
+                <mesh>
+                    <meshStandardMaterial color="white" />
+                    <boxGeometry args={[1, 1, 1]} />
+                </mesh>
+            </ecs.Component>
+        </ecs.Entities>
+    )
+}
+
+const PhysicsDebugDisplay = () => {
+    const { physicsWorld } = useVoxelEngine()
+
+    const { physicsDebug } = useControls('voxels-culled-mesher-physics-debug', {
+        physicsDebug: {
+            label: 'Physics Debug',
+            value: false,
+        },
+    })
+
+    return physicsDebug && <PhysicsDebug world={physicsWorld} />
+}
+
+const Lights = () => {
     return (
         <>
-            <group onPointerDown={onPointerDown}>
-                <Bounds fit margin={1.5}>
-                    <VoxelChunkCulledMeshes />
-                </Bounds>
-
-                <ecs.Entities where={(e) => e.has('rigidBody')}>
-                    <ecs.Component name="object3D">
-                        <mesh>
-                            <meshStandardMaterial color="white" />
-                            <boxGeometry args={[1, 1, 1]} />
-                        </mesh>
-                    </ecs.Component>
-                </ecs.Entities>
-            </group>
-
-            {physicsDebug && <PhysicsDebug world={physicsWorld} />}
-
             <ambientLight intensity={0.6} />
             <pointLight decay={0.5} intensity={10} position={[40, 20, 40]} />
             <pointLight decay={0.5} intensity={10} position={[-40, 20, -40]} />
@@ -200,8 +223,23 @@ export default () => {
         <RapierInit>
             <Canvas camera={{ position: [20, 50, 50] }}>
                 <VoxelEngine>
-                    <App />
+                    <Tools>
+                        <Level />
+
+                        <Snow />
+
+                        <Bounds fit margin={1.5}>
+                            <VoxelChunkCulledMeshes />
+                        </Bounds>
+
+                        <PhysicsVoxelCubeRenderer />
+
+                        <PhysicsDebugDisplay />
+
+                        <Lights />
+                    </Tools>
                 </VoxelEngine>
+
                 <OrbitControls makeDefault />
             </Canvas>
         </RapierInit>

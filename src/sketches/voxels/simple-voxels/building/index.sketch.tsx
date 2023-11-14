@@ -25,20 +25,8 @@ const useColorStore = create<ColorStore>((set) => ({
     setColor: (color: string) => set({ color }),
 }))
 
-const App = () => {
+const PointerBuildTool = ({ children }: { children: React.ReactNode }) => {
     const { voxelWorld, setBlock } = useVoxelEngine()
-
-    useLayoutEffect(() => {
-        // ground
-        for (let x = -15; x < 15; x++) {
-            for (let z = -15; z < 15; z++) {
-                setBlock([x, 0, z], {
-                    solid: true,
-                    color: Math.random() > 0.5 ? green1 : green2,
-                })
-            }
-        }
-    }, [])
 
     const { color } = useColorStore()
 
@@ -70,19 +58,7 @@ const App = () => {
         }
     }
 
-    return (
-        <>
-            <Bounds fit margin={1.5}>
-                <group onPointerDown={onClick}>
-                    <VoxelChunkCulledMeshes />
-                </group>
-            </Bounds>
-
-            <ambientLight intensity={0.6} />
-            <pointLight decay={0.5} intensity={10} position={[20, 20, 20]} />
-            <pointLight decay={0.5} intensity={10} position={[-20, 20, -20]} />
-        </>
-    )
+    return <group onPointerDown={onClick}>{children}</group>
 }
 
 const ColorPicker = () => {
@@ -101,13 +77,40 @@ const ColorPicker = () => {
     )
 }
 
+const Level = () => {
+    const { setBlock } = useVoxelEngine()
+
+    useLayoutEffect(() => {
+        // ground
+        for (let x = -15; x < 15; x++) {
+            for (let z = -15; z < 15; z++) {
+                setBlock([x, 0, z], {
+                    solid: true,
+                    color: Math.random() > 0.5 ? green1 : green2,
+                })
+            }
+        }
+    }, [])
+
+    return null
+}
+
 export default () => {
     return (
         <>
             <Canvas camera={{ position: [20, 20, 20], near: 0.001 }}>
                 <VoxelEngine>
-                    <App />
+                    <Level />
+                    <PointerBuildTool>
+                        <Bounds fit margin={1.5}>
+                            <VoxelChunkCulledMeshes />
+                        </Bounds>
+                    </PointerBuildTool>
                 </VoxelEngine>
+
+                <ambientLight intensity={0.6} />
+                <pointLight decay={0.5} intensity={10} position={[20, 20, 20]} />
+                <pointLight decay={0.5} intensity={10} position={[-20, 20, -20]} />
 
                 <OrbitControls makeDefault />
             </Canvas>

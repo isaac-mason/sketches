@@ -19,9 +19,7 @@ const green2 = new Color('green').addScalar(0.02).getHex()
 const orange = new Color('orange').getHex()
 
 const Player = () => {
-    const { ecs, voxelWorld, setBlock } = useVoxelEngine()
-
-    const gl = useThree((s) => s.gl)
+    const { ecs } = useVoxelEngine()
 
     const camera = useThree((s) => s.camera)
 
@@ -79,6 +77,32 @@ const Player = () => {
         input.jump = jump
     })
 
+    const boxCharacterController = useMemo(() => {
+        return new BoxCharacterController(options)
+    }, [])
+
+    return (
+        <ecs.Entity
+            boxCharacterControllerCamera={camera as PerspectiveCamera}
+            boxCharacterControllerInput={input}
+            boxCharacterController={boxCharacterController}
+        >
+            <ecs.Component name="object3D">
+                <mesh>
+                    <boxGeometry args={[width, height, width]} />
+                    <meshStandardMaterial color="red" />
+                </mesh>
+            </ecs.Component>
+        </ecs.Entity>
+    )
+}
+
+const CameraBuildTool = () => {
+    const { voxelWorld, setBlock } = useVoxelEngine()
+
+    const gl = useThree((s) => s.gl)
+    const camera = useThree((s) => s.camera)
+
     useEffect(() => {
         const vec3 = new Vector3()
 
@@ -121,30 +145,13 @@ const Player = () => {
         }
     }, [gl])
 
-    const boxCharacterController = useMemo(() => {
-        return new BoxCharacterController(options)
-    }, [])
-
-    return (
-        <ecs.Entity
-            boxCharacterControllerCamera={camera as PerspectiveCamera}
-            boxCharacterControllerInput={input}
-            boxCharacterController={boxCharacterController}
-        >
-            <ecs.Component name="object3D">
-                <mesh>
-                    <boxGeometry args={[width, height, width]} />
-                    <meshStandardMaterial color="red" />
-                </mesh>
-            </ecs.Component>
-        </ecs.Entity>
-    )
+    return null
 }
 
 const App = () => {
-    const { world, setBlock, step } = useVoxelEngine()
+    const { world, setBlock } = useVoxelEngine()
 
-    const [paused, setPaused] = useState(true)
+    const [levelReady, setLevelReady] = useState(false)
 
     useLayoutEffect(() => {
         // ground
@@ -159,17 +166,14 @@ const App = () => {
             }
         }
 
-        setPaused(false)
+        setLevelReady(true)
     }, [world])
-
-    useFrame((_, delta) => {
-        if (paused) return
-        step(delta)
-    })
 
     return (
         <>
-            <Player />
+            {levelReady && <Player />}
+
+            <CameraBuildTool />
 
             <VoxelChunkCulledMeshes />
 
@@ -207,7 +211,7 @@ export default () => {
                 ]}
             >
                 <Canvas>
-                    <VoxelEngine paused>
+                    <VoxelEngine>
                         <App />
                     </VoxelEngine>
                     <PointerLockControls makeDefault />

@@ -20,7 +20,7 @@ export const createVoxelEngine = <Plugins extends ReadonlyArray<VoxelEnginePlugi
     type Entity = VoxelEngineEntity<Plugins>
     type Api = VoxelEnginePluginsApi<Plugins>
 
-    const VoxelEngine = ({ children, paused }: { children: React.ReactNode; paused?: boolean }) => {
+    const VoxelEngine = ({ children }: { children: React.ReactNode }) => {
         const [engine, setEngine] = useState<VoxelEngineContext<Plugins>>(null!)
 
         const initialised = useRef(false)
@@ -82,8 +82,6 @@ export const createVoxelEngine = <Plugins extends ReadonlyArray<VoxelEnginePlugi
         }
 
         useFrame((_, delta) => {
-            if (paused) return
-
             step(delta)
         })
 

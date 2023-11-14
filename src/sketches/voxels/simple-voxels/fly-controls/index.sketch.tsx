@@ -21,13 +21,12 @@ const sideVector = new Vector3()
 const direction = new Vector3()
 
 const Player = () => {
-    const { voxelWorld, setBlock, voxelWorldActor } = useVoxelEngine()
+    const { voxelWorldActor } = useVoxelEngine()
 
     const position = useRef<Vector3>(new Vector3(0, 5, 0))
 
     const [, getControls] = useKeyboardControls()
 
-    const gl = useThree((s) => s.gl)
     const camera = useThree((s) => s.camera)
 
     useFrame((_, delta) => {
@@ -52,6 +51,15 @@ const Player = () => {
 
         voxelWorldActor.position.copy(position.current)
     })
+
+    return null
+}
+
+const CameraBuildTool = () => {
+    const { voxelWorld, setBlock } = useVoxelEngine()
+
+    const gl = useThree((s) => s.gl)
+    const camera = useThree((s) => s.camera)
 
     useEffect(() => {
         const vec3 = new Vector3()
@@ -116,6 +124,8 @@ const App = () => {
     return (
         <>
             <Player />
+
+            <CameraBuildTool />
 
             <VoxelChunkCulledMeshes />
 
