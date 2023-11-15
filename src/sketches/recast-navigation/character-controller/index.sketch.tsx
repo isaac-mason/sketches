@@ -218,32 +218,17 @@ class CameraSystem extends System<EntityType> {
 
     cameraQuery = this.query((e) => e.has('camera', 'cameraConfiguration'))!
 
-    raycaster: THREE.Raycaster
+    cameraLookAt = new THREE.Vector3()
 
-    cameraLookAtTarget = new THREE.Vector3()
+    cameraPosition = new THREE.Vector3()
 
-    cameraPositionTarget = new THREE.Vector3()
+    private tmpCameraOffset = new THREE.Vector3(0, 0, 0)
 
-    private tmpOffsetTarget = new THREE.Vector3(0, 0, 0)
-
-    private tmpLookAtTarget = new THREE.Vector3(0, 0, 0)
-
-    private tmpRaycasterOrigin = new THREE.Vector3()
-
-    private tmpRaycasterDirection = new THREE.Vector3()
-
-    constructor(world: World) {
-        super(world)
-
-        this.raycaster = new THREE.Raycaster()
-        this.raycaster.near = 0.01
-        this.raycaster.far = 10
-        this.raycaster.firstHitOnly = true
-    }
+    private tmpCameraPositionTarget = new THREE.Vector3()
 
     onInit(): void {
         this.cameraQuery.onEntityAdded.add((e) => {
-            this.cameraPositionTarget.copy(e.camera.position)
+            this.cameraPosition.copy(e.camera.position)
         })
     }
 
@@ -256,51 +241,16 @@ class CameraSystem extends System<EntityType> {
         const { three: playerObject } = playerEntity
         const { camera, cameraConfiguration } = cameraEntity
 
-        /* update camera */
-        const idealOffset = this.tmpOffsetTarget.set(0, cameraConfiguration.offsetAbove, cameraConfiguration.offsetBehind)
-        idealOffset.add(playerObject.position)
+        const cameraOffset = this.tmpCameraOffset.set(0, cameraConfiguration.offsetAbove, cameraConfiguration.offsetBehind)
+        const cameraPositionTarget = this.tmpCameraPositionTarget.copy(playerObject.position).add(cameraOffset)
 
-        const idealLookAt = this.tmpLookAtTarget.set(0, cameraConfiguration.lookAtY, 0)
-        idealLookAt.add(playerObject.position)
-
-        /* basic camera collision */
-        // todo: this doesn't work well with fences or other walls with gaps, could be a shape cast instead?
-        const cameraCollisionRayOrigin = this.tmpRaycasterOrigin.copy(playerObject.position)
-        cameraCollisionRayOrigin.y += 1.5
-        const cameraCollisionRayDirection = this.tmpRaycasterDirection.copy(idealOffset).sub(cameraCollisionRayOrigin).normalize()
-
-        this.raycaster.set(cameraCollisionRayOrigin, cameraCollisionRayDirection)
-
-        const cameraCollisionHits = this.raycaster.intersectObjects(
-            this.traversableQuery.entities.map((e) => e.three),
-            true,
-        )
-
-        const cameraCollisionHitPoint = cameraCollisionHits.length > 0 ? cameraCollisionHits[0].point : undefined
-
-        if (cameraCollisionHitPoint) {
-            const dx = cameraCollisionHitPoint.x - playerObject.position.x
-            const dz = cameraCollisionHitPoint.z - playerObject.position.z
-            const horizontalDistance = Math.sqrt(dx * dx + dz * dz)
-
-            if (horizontalDistance < cameraConfiguration.offsetBehind) {
-                idealOffset.x = cameraCollisionHitPoint.x - dx * 0.1
-                idealOffset.z = cameraCollisionHitPoint.z - dz * 0.1
-
-                if (cameraCollisionHitPoint.y > idealOffset.y) {
-                    idealOffset.y = cameraCollisionHitPoint.y
-                }
-            }
-        }
-
-        /* lerp camera */
         const t = 1.0 - Math.pow(0.01, delta)
 
-        this.cameraLookAtTarget.lerp(idealLookAt, t * 1.5)
-        this.cameraPositionTarget.lerp(idealOffset, t / 1.1)
+        this.cameraPosition.lerp(cameraPositionTarget, t / 1.1)
+        camera.position.copy(this.cameraPosition)
 
-        camera.position.copy(this.cameraPositionTarget)
-        camera.lookAt(this.cameraLookAtTarget)
+        const lookAt = this.cameraLookAt.copy(this.cameraPosition).sub(cameraOffset)
+        camera.lookAt(lookAt)
     }
 }
 
