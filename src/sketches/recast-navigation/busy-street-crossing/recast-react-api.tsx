@@ -10,7 +10,8 @@ import {
     useRef,
     useState,
 } from 'react'
-import { Crowd, CrowdAgent, CrowdAgentParams, NavMesh, SoloNavMeshGeneratorConfig, init, vec3 } from 'recast-navigation'
+import { Crowd, CrowdAgent, CrowdAgentParams, NavMesh, init, vec3 } from 'recast-navigation'
+import type { SoloNavMeshGeneratorConfig } from 'recast-navigation/generators'
 import { NavMeshHelper, threeToSoloNavMesh } from 'recast-navigation/three'
 import { suspend } from 'suspend-react'
 import { Group, Mesh, MeshStandardMaterial, Vector3Tuple } from 'three'
