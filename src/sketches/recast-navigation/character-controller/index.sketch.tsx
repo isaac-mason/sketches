@@ -35,7 +35,6 @@ type EntityType = {
     cameraConfiguration?: {
         offsetBehind: number
         offsetAbove: number
-        lookAtY: number
     }
     three?: THREE.Object3D
     traversable?: true
@@ -282,11 +281,36 @@ const NavigationMesh = () => {
         `${LEVA_KEY}-nav-mesh`,
         {
             showHelper: true,
-            cellSize: 0.1,
-            cellHeight: 0.05,
-            walkableClimb: 0.4,
-            walkableRadius: 0.5,
-            walkableHeight: 1.5,
+            cellSize: {
+                value: 0.1,
+                min: 0.05,
+                max: 0.2,
+                step: 0.05,
+            },
+            cellHeight: {
+                value: 0.05,
+                min: 0.01,
+                max: 0.5,
+                step: 0.01,
+            },
+            walkableClimb: {
+                value: 0.4,
+                min: 0.1,
+                max: 2,
+                step: 0.1,
+            },
+            walkableRadius: {
+                value: 0.7,
+                min: 0.1,
+                max: 1,
+                step: 0.1,
+            },
+            walkableHeight: {
+                value: 1.5,
+                min: 0.1,
+                max: 3,
+                step: 0.1,
+            },
         },
     )
     const [navMeshHelper, setNavMeshHelper] = useState<NavMeshHelper>()
@@ -312,6 +336,7 @@ const NavigationMesh = () => {
             walkableClimb: walkableClimb / cellHeight,
             walkableRadius: walkableRadius / cellSize,
             walkableHeight: walkableHeight / cellHeight,
+            minRegionArea: 12,
         })
 
         if (!success) return
@@ -454,7 +479,6 @@ const Camera = () => {
     const cameraConfiguration = useControls(`${LEVA_KEY}-camera`, {
         offsetBehind: 10,
         offsetAbove: 15,
-        lookAtY: 1.5,
     })
 
     return (
