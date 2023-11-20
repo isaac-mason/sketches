@@ -1318,9 +1318,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-three/fiber@npm:^8.15.9":
-  version: 8.15.9
-  resolution: "@react-three/fiber@npm:8.15.9"
+"@react-three/fiber@npm:^8.15.11":
+  version: 8.15.11
+  resolution: "@react-three/fiber@npm:8.15.11"
   dependencies:
     "@babel/runtime": ^7.17.8
     "@types/react-reconciler": ^0.26.7
@@ -1355,7 +1355,7 @@ __metadata:
       optional: true
     react-native:
       optional: true
-  checksum: 99a05a234e84cf0985dba246864f145a2c7c2dd12fad3a0a6c30bd4cbdd23bc8a3d65350796b0245893b353d14cdaa2d0bccc95797364d0f4e58a3466629c7be
+  checksum: df0e30641e0aaa9f89c8f4770c27aab298b653b1dcb2a47c4c279984ee6e67556c3a043907160f6efc18eabd18b93a44e671af207d890321dbe16f41f38776ee
   languageName: node
   linkType: hard
 
@@ -5022,7 +5022,7 @@ __metadata:
     "@pmndrs/assets": ^1.6.0
     "@react-three/csg": ^3.1.0
     "@react-three/drei": ^9.88.9
-    "@react-three/fiber": ^8.15.9
+    "@react-three/fiber": ^8.15.11
     "@react-three/flex": ^1.0.1
     "@react-three/postprocessing": ^2.15.11
     "@react-three/rapier": ^1.1.1
