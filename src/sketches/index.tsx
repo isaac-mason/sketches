@@ -77,6 +77,12 @@ const sketchList = [
         path: 'recast-navigation/character-controller',
         tags: ['recast-navigation', 'controller'],
     },
+    /* Grid Pathfinding */
+    {
+        title: 'Grid Pathfinding - Basic',
+        path: 'grid-pathfinding/basic',
+        tags: ['pathfinding', 'grid'],
+    },
     /* Character Animation */
     {
         title: 'Character Animation - Basic',
