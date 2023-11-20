@@ -33,7 +33,7 @@
         "react-router-dom": "^6.17.0",
         "recast-navigation": "^0.14.0",
         "simplex-noise": "^4.0.1",
-        "styled-breakpoints": "^12.1.5",
+        "styled-breakpoints": "^12.1.9",
         "styled-components": "^6.1.0",
         "three": "^0.158.0",
         "tunnel-rat": "^0.1.2",

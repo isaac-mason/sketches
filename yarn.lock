@@ -5049,7 +5049,7 @@ __metadata:
     react-router-dom: ^6.17.0
     recast-navigation: ^0.14.0
     simplex-noise: ^4.0.1
-    styled-breakpoints: ^12.1.5
+    styled-breakpoints: ^12.1.9
     styled-components: ^6.1.0
     three: ^0.158.0
     tunnel-rat: ^0.1.2
@@ -5218,14 +5218,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"styled-breakpoints@npm:^12.1.5":
-  version: 12.1.5
-  resolution: "styled-breakpoints@npm:12.1.5"
+"styled-breakpoints@npm:^12.1.9":
+  version: 12.1.9
+  resolution: "styled-breakpoints@npm:12.1.9"
   peerDependencies:
     react: ">= 16.8.0"
     react-dom: ">= 16.8.0"
-    styled-components: ">= 5.0.0"
-  checksum: 8b387a02dca89fe25d4b6e73de680f185912a07262839e8cd04e6722cd189e0e031e6791c2f8132c004f0be2e74d03be3a5f8bc2c611accb1fa86f1777d4bc74
+  checksum: f3ff9e76421a578bef0f48ab6400c82f948b647914ecada3011cf13b52621578870031025f467db3807da383a3412741f370ceff8ff0447d9c73ef88ffe622af
   languageName: node
   linkType: hard
 
