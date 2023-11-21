@@ -38,7 +38,7 @@ class PhysicsSystem extends System<EntityType> {
 
     onInit(): void {
         this.bodies.onEntityAdded.add(({ body }) => {
-            this.bodyInterface.AddBody(body.GetID(), jolt.Activate)
+            this.bodyInterface.AddBody(body.GetID(), jolt.EActivation_Activate)
         })
 
         this.bodies.onEntityRemoved.add(({ body }) => {
@@ -92,7 +92,7 @@ const Ground = () => {
             shape,
             new jolt.Vec3(0, 0, 0),
             new jolt.Quat(0, 0, 0, 1),
-            jolt.Static,
+            jolt.EMotionType_Static,
             jolt.NON_MOVING,
         )
         creationSettings.mRestitution = 0.5
@@ -129,7 +129,7 @@ const Box = ({ args, position, color }: BoxProps) => {
             shape,
             new jolt.Vec3(...position),
             new jolt.Quat(0, 0, 0, 1),
-            jolt.Dynamic,
+            jolt.EMotionType_Dynamic,
             jolt.MOVING,
         )
         creationSettings.mRestitution = 0.5
@@ -173,7 +173,7 @@ const App = () => {
         const y = 40
         const z = (0.5 - Math.random()) * 10
 
-        bodyInterface.SetPosition(bodyId, new jolt.Vec3(x, y, z), jolt.Activate)
+        bodyInterface.SetPosition(bodyId, new jolt.Vec3(x, y, z), jolt.EActivation_Activate)
         body.SetLinearVelocity(new jolt.Vec3(0, 0, 0))
 
         nextToTeleport.current++
