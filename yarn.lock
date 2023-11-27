@@ -1903,14 +1903,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:^18.2.33":
-  version: 18.2.33
-  resolution: "@types/react@npm:18.2.33"
+"@types/react@npm:^18.2.39":
+  version: 18.2.39
+  resolution: "@types/react@npm:18.2.39"
   dependencies:
     "@types/prop-types": "*"
     "@types/scheduler": "*"
     csstype: ^3.0.2
-  checksum: 75903c4d53898c69dd23d0b2730eac4676dc5ade15c25c793dec855f0d7c650cb823832bb1dd881efe8895724f15b06d4bf7081ea0b82391aa3059512ad49ccf
+  checksum: 9bcb1f1f060f1bf8f4730fb1c7772d0323a6e707f274efee3b976c40d92af4677df4d88e9135faaacf34e13e02f92ef24eb7d0cbcf7fb75c1883f5623ccb19f4
   languageName: node
   linkType: hard
 
@@ -5029,7 +5029,7 @@ __metadata:
     "@react-three/xr": ^5.7.1
     "@types/d3": ^7.4.3
     "@types/node": ^20.9.0
-    "@types/react": ^18.2.33
+    "@types/react": ^18.2.39
     "@types/react-dom": ^18.2.14
     "@types/three": ^0.158.2
     "@vitejs/plugin-basic-ssl": ^1.0.1
