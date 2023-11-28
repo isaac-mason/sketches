@@ -50,7 +50,7 @@
         "@vitejs/plugin-basic-ssl": "^1.0.1",
         "@vitejs/plugin-react": "^4.0.4",
         "prettier": "^3.1.0",
-        "typescript": "^5.2.2",
+        "typescript": "^5.3.2",
         "vite": "^4.5.0",
         "vite-imagetools": "^6.2.5",
         "vite-plugin-html": "^3.2.0"
