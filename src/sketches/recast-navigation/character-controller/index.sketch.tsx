@@ -277,7 +277,7 @@ world.init()
 const { Entity, Component, useQuery } = createReactAPI(world)
 
 const NavigationMesh = () => {
-    const { showHelper, cellSize, cellHeight, walkableClimb, walkableRadius, walkableHeight } = useControls(
+    const { showHelper, cellSize, cellHeight, walkableSlopeAngle, walkableClimb, walkableRadius, walkableHeight } = useControls(
         `${LEVA_KEY}-nav-mesh`,
         {
             showHelper: {
@@ -304,6 +304,13 @@ const NavigationMesh = () => {
                 min: 0.1,
                 max: 1,
                 step: 0.1,
+            },
+            walkableSlopeAngle: {
+                label: 'Walkable Slope Angle',
+                value: 45,
+                min: 0,
+                max: 90,
+                step: 1,
             },
             walkableClimb: {
                 label: 'Walkable Climb',
@@ -341,6 +348,7 @@ const NavigationMesh = () => {
         const { success, navMesh } = threeToSoloNavMesh(meshes, {
             cs: cellSize,
             ch: cellHeight,
+            walkableSlopeAngle,
             walkableClimb: walkableClimb / cellHeight,
             walkableRadius: walkableRadius / cellSize,
             walkableHeight: walkableHeight / cellHeight,
@@ -371,7 +379,7 @@ const NavigationMesh = () => {
             navMesh.destroy()
             navMeshQuery.destroy()
         }
-    }, [traversable.version, cellSize, cellHeight, walkableClimb, walkableRadius, walkableHeight])
+    }, [traversable.version, cellSize, cellHeight, walkableSlopeAngle, walkableClimb, walkableRadius, walkableHeight])
 
     return <>{navMeshHelper && showHelper && <primitive object={navMeshHelper} />}</>
 }
