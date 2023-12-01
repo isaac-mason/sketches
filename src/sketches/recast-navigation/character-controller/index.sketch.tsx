@@ -53,10 +53,6 @@ class MovementSystem extends System<EntityType> {
 
     private tmpMovementTarget = new THREE.Vector3()
 
-    private tmpPlayerEuler = new THREE.Euler()
-
-    private tmpPlayerQuaternion = new THREE.Quaternion()
-
     onUpdate(delta: number): void {
         const player = this.playerQuery.first
 
@@ -119,15 +115,6 @@ class MovementSystem extends System<EntityType> {
             this.firstPositionUpdate = false
         }
 
-        /* update rotation */
-        if (movementVector.length() > 0) {
-            const rotation = Math.atan2(movementVector.x, movementVector.z) - Math.PI
-
-            const targetQuaternion = this.tmpPlayerQuaternion.setFromEuler(this.tmpPlayerEuler.set(0, rotation, 0))
-
-            playerObject.quaternion.slerp(targetQuaternion, t * 5)
-        }
-
         movement.sprinting = sprint
     }
 }
@@ -143,6 +130,10 @@ class AnimationSystem extends System<EntityType> {
 
     private tmpRaycasterDirection = new THREE.Vector3()
 
+    private tmpPlayerEuler = new THREE.Euler()
+
+    private tmpPlayerQuaternion = new THREE.Quaternion()
+
     constructor(world: World) {
         super(world)
 
@@ -157,7 +148,18 @@ class AnimationSystem extends System<EntityType> {
 
         if (!player) return
 
+        const t = 1.0 - Math.pow(0.01, delta)
+
         const { three: playerObject, playerMovement, playerAnimation } = player
+
+        /* update rotation */
+        if (playerMovement.vector.length() > 0) {
+            const rotation = Math.atan2(playerMovement.vector.x, playerMovement.vector.z) - Math.PI
+
+            const targetQuaternion = this.tmpPlayerQuaternion.setFromEuler(this.tmpPlayerEuler.set(0, rotation, 0))
+
+            playerObject.quaternion.slerp(targetQuaternion, t * 5)
+        }
 
         const speed = playerMovement.vector.length()
 
@@ -179,8 +181,6 @@ class AnimationSystem extends System<EntityType> {
             walkWeight = 1
             runWeight = 0
         }
-
-        const t = 1.0 - Math.pow(0.01, delta)
 
         playerAnimation.idle.weight = THREE.MathUtils.lerp(playerAnimation.idle.weight, idleWeight, t)
         playerAnimation.walk.weight = THREE.MathUtils.lerp(playerAnimation.walk.weight, walkWeight, t)
