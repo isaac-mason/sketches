@@ -52,6 +52,8 @@ export class VoxelChunkMesh {
 
     mesh!: Mesh
 
+    initialised = false
+
     constructor() {
         this.mesh = new Mesh(new BufferGeometry(), voxelChunkShaderMaterial)
         this.geometry = this.mesh.geometry as BufferGeometry
@@ -71,6 +73,8 @@ export class VoxelChunkMesherSystem extends System<CorePluginEntity & CulledMesh
     voxelWorldActor = this.singleton('voxelWorldActor')!
 
     dirtyChunks = new Set<With<CorePluginEntity & CulledMesherPluginEntity, 'voxelChunk'>>()
+
+    dirtyUnloadedChunks = new Set<With<CorePluginEntity & CulledMesherPluginEntity, 'voxelChunk'>>()
 
     private workers: InstanceType<typeof VoxelChunkMesherWorker>[] = []
 
@@ -110,7 +114,12 @@ export class VoxelChunkMesherSystem extends System<CorePluginEntity & CulledMesh
         })
 
         this.loadedChunks.onEntityAdded.add((chunk) => {
-            this.dirtyChunks.add(chunk)
+            if (!chunk.voxelChunkMesh?.initialised) {
+                this.dirtyChunks.add(chunk)
+            } else if (this.dirtyUnloadedChunks.has(chunk)) {
+                this.dirtyChunks.add(chunk)
+                this.dirtyUnloadedChunks.delete(chunk)
+            }
         })
 
         this.loadedChunks.onEntityRemoved.add((chunk) => {
@@ -120,7 +129,7 @@ export class VoxelChunkMesherSystem extends System<CorePluginEntity & CulledMesh
 
     onUpdate(): void {
         const prioritisedChunks = Array.from(this.dirtyChunks).sort((a, b) => {
-            return a.voxelChunk!.priority - b.voxelChunk!.priority
+            return b.voxelChunk!.priority - a.voxelChunk!.priority
         })
 
         for (const chunk of prioritisedChunks) {
@@ -142,7 +151,10 @@ export class VoxelChunkMesherSystem extends System<CorePluginEntity & CulledMesh
             const chunkEntity = this.voxelWorld.getChunkAt(position)!
             const { voxelChunk, voxelChunkLoaded } = chunkEntity
 
-            if (!voxelChunkLoaded) return
+            if (!voxelChunkLoaded) {
+                this.dirtyUnloadedChunks.add(chunkEntity)
+                continue
+            }
 
             this.dirtyChunks.add(chunkEntity)
 
@@ -222,6 +234,8 @@ export class VoxelChunkMesherSystem extends System<CorePluginEntity & CulledMesh
         const entity = this.voxelWorld.chunkEntities.get(id)! as CorePluginEntity & CulledMesherPluginEntity
         const voxelChunk = entity.voxelChunk!
         const voxelChunkMesh = entity.voxelChunkMesh!
+
+        voxelChunkMesh.initialised = true
 
         voxelChunkMesh.geometry.setIndex(new BufferAttribute(indices, 1))
         voxelChunkMesh.geometry.setAttribute('position', new BufferAttribute(positions, 3))

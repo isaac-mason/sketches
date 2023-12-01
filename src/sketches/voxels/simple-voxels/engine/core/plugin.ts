@@ -86,7 +86,10 @@ export class VoxelWorld {
     static objectPooled = true
 }
 
-const ACTOR_CHUNK_LOADED_RADIUS = 10
+// todo: make this configurable
+const VIEW_DISTANCE = 200
+
+const CHUNK_VIEW_DISTANCE = Math.floor(VIEW_DISTANCE / CHUNK_SIZE)
 
 export class VoxelWorldCoreSystem extends System<CorePluginEntity> {
     voxelWorld = this.singleton('voxelWorld')!
@@ -100,6 +103,8 @@ export class VoxelWorldCoreSystem extends System<CorePluginEntity> {
     setBlockRequests: SetBlockRequest[] = []
 
     static PRIORITY = 100
+
+    private tmpVec3 = new THREE.Vector3()
 
     onInit() {
         this.events.onSetBlockRequest.add((request) => {
@@ -131,9 +136,11 @@ export class VoxelWorldCoreSystem extends System<CorePluginEntity> {
         for (const chunkEntity of this.chunks) {
             const { voxelChunk } = chunkEntity
 
-            const distance = voxelChunk.position.distanceTo(this.actor.position) / CHUNK_SIZE
+            const playerCurrentChunk = this.tmpVec3.set(...worldPositionToChunkPosition(this.actor.position.toArray()))
 
-            const shouldBeLoaded = distance < ACTOR_CHUNK_LOADED_RADIUS
+            const chunkDistance = playerCurrentChunk.distanceTo(voxelChunk.position)
+
+            const shouldBeLoaded = chunkDistance <= CHUNK_VIEW_DISTANCE
             const loaded = chunkEntity.voxelChunkLoaded
 
             if (shouldBeLoaded && !loaded) {
@@ -142,7 +149,7 @@ export class VoxelWorldCoreSystem extends System<CorePluginEntity> {
                 this.world.remove(chunkEntity, 'voxelChunkLoaded')
             }
 
-            voxelChunk.priority = -distance
+            voxelChunk.priority = -chunkDistance
         }
 
         /* handle set block requests */

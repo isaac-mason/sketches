@@ -1,5 +1,5 @@
 import { Bounds, OrbitControls } from '@react-three/drei'
-import { ThreeEvent } from '@react-three/fiber'
+import { ThreeEvent, useFrame, useThree } from '@react-three/fiber'
 import { useLayoutEffect } from 'react'
 import { HexColorPicker } from 'react-colorful'
 import { Color } from 'three'
@@ -95,17 +95,32 @@ const Level = () => {
     return null
 }
 
+const CameraVoxelWorldActor = () => {
+    const { voxelWorldActor } = useVoxelEngine()
+
+    const camera = useThree((s) => s.camera)
+
+    useFrame(() => {
+        voxelWorldActor.position.copy(camera.position)
+    })
+
+    return null
+}
+
 export default () => {
     return (
         <>
             <Canvas camera={{ position: [20, 20, 20], near: 0.001 }}>
                 <VoxelEngine>
                     <Level />
+
                     <PointerBuildTool>
                         <Bounds fit margin={1.5}>
                             <VoxelChunkCulledMeshes />
                         </Bounds>
                     </PointerBuildTool>
+
+                    <CameraVoxelWorldActor />
                 </VoxelEngine>
 
                 <ambientLight intensity={0.6} />

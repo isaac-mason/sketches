@@ -30,6 +30,8 @@ const Player = () => {
     const camera = useThree((s) => s.camera)
 
     useFrame((_, delta) => {
+        const t = 1.0 - Math.pow(0.01, delta)
+
         const { forward, backward, left, right } = getControls() as {
             forward: boolean
             backward: boolean
@@ -39,13 +41,14 @@ const Player = () => {
 
         frontVector.set(0, 0, Number(backward) - Number(forward))
         sideVector.set(Number(left) - Number(right), 0, 0)
+
         direction
             .subVectors(frontVector, sideVector)
             .normalize()
-            .multiplyScalar(1000 * delta)
+            .multiplyScalar(5 * t)
             .applyEuler(camera.rotation)
 
-        position.current.add(direction.multiplyScalar(delta))
+        position.current.add(direction)
 
         camera.position.lerp(position.current, 10 * delta)
 
@@ -106,23 +109,30 @@ const CameraBuildTool = () => {
     return null
 }
 
-const App = () => {
+const Level = () => {
     const { setBlock } = useVoxelEngine()
 
     useEffect(() => {
-        // ground
-        for (let x = -50; x < 50; x++) {
-            for (let z = -50; z < 50; z++) {
-                setBlock([x, 0, z], {
-                    solid: true,
-                    color: Math.random() > 0.5 ? green1 : green2,
-                })
+        for (let x = -100; x < 100; x++) {
+            for (let z = -100; z < 100; z++) {
+                for (let y = -10; y < 0; y++) {
+                    setBlock([x, y, z], {
+                        solid: true,
+                        color: Math.random() > 0.5 ? green1 : green2,
+                    })
+                }
             }
         }
     })
 
+    return null
+}
+
+const App = () => {
     return (
         <>
+            <Level />
+
             <Player />
 
             <CameraBuildTool />
