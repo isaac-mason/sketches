@@ -18,13 +18,13 @@ const LEVA_KEY = 'recast-navigation-character-controller'
 type EntityType = {
     player?: true
     playerSpeed?: { walking: number; running: number }
-    playerMovement?: { vector: THREE.Vector3; sneaking: boolean }
+    playerMovement?: { vector: THREE.Vector3; sprinting: boolean }
     playerInput?: {
         forward: boolean
         back: boolean
         left: boolean
         right: boolean
-        sneak: boolean
+        sprint: boolean
     }
     playerAnimation?: {
         idle: THREE.AnimationAction
@@ -65,7 +65,7 @@ class MovementSystem extends System<EntityType> {
         if (!player.playerMovement) {
             this.world.add(player, 'playerMovement', {
                 vector: new THREE.Vector3(),
-                sneaking: false,
+                sprinting: false,
             })
         }
 
@@ -76,7 +76,7 @@ class MovementSystem extends System<EntityType> {
             playerSpeed: speed,
         } = player as With<typeof player, 'playerMovement'>
 
-        const { left, right, forward, back, sneak } = input
+        const { left, right, forward, back, sprint } = input
 
         /* movement */
         const movementVector = movement.vector.set(0, 0, 0)
@@ -91,7 +91,7 @@ class MovementSystem extends System<EntityType> {
             if (right) movementVector.x += 1
         }
 
-        const movementScalar = sneak ? speed.walking : speed.running
+        const movementScalar = sprint ? speed.running : speed.walking
 
         const t = 1.0 - Math.pow(0.01, delta)
 
@@ -128,7 +128,7 @@ class MovementSystem extends System<EntityType> {
             playerObject.quaternion.slerp(targetQuaternion, t * 5)
         }
 
-        movement.sneaking = sneak
+        movement.sprinting = sprint
     }
 }
 
@@ -170,14 +170,14 @@ class AnimationSystem extends System<EntityType> {
             idleWeight = 1
             walkWeight = 0
             runWeight = 0
-        } else if (playerMovement.sneaking) {
-            idleWeight = 0
-            walkWeight = 1
-            runWeight = 0
-        } else {
+        } else if (playerMovement.sprinting) {
             idleWeight = 0
             walkWeight = 0
             runWeight = 1
+        } else {
+            idleWeight = 0
+            walkWeight = 1
+            runWeight = 0
         }
 
         const t = 1.0 - Math.pow(0.01, delta)
@@ -280,32 +280,40 @@ const NavigationMesh = () => {
     const { showHelper, cellSize, cellHeight, walkableClimb, walkableRadius, walkableHeight } = useControls(
         `${LEVA_KEY}-nav-mesh`,
         {
-            showHelper: true,
+            showHelper: {
+                label: 'Show Helper',
+                value: true,
+            },
             cellSize: {
+                label: 'Cell Size',
                 value: 0.1,
                 min: 0.05,
                 max: 0.2,
                 step: 0.05,
             },
             cellHeight: {
+                label: 'Cell Height',
                 value: 0.05,
                 min: 0.01,
                 max: 0.5,
                 step: 0.01,
             },
-            walkableClimb: {
-                value: 0.4,
-                min: 0.1,
-                max: 2,
-                step: 0.1,
-            },
             walkableRadius: {
+                label: 'Walkable Radius',
                 value: 0.7,
                 min: 0.1,
                 max: 1,
                 step: 0.1,
             },
+            walkableClimb: {
+                label: 'Walkable Climb',
+                value: 0.4,
+                min: 0.1,
+                max: 1,
+                step: 0.1,
+            },
             walkableHeight: {
+                label: 'Walkable Height',
                 value: 1.5,
                 min: 0.1,
                 max: 3,
@@ -404,7 +412,7 @@ const KEYBOARD_CONTROLS_MAP = [
     { name: 'back', keys: ['ArrowDown', 's', 'S'] },
     { name: 'left', keys: ['ArrowLeft', 'a', 'A'] },
     { name: 'right', keys: ['ArrowRight', 'd', 'D'] },
-    { name: 'sneak', keys: ['ShiftLeft', 'ShiftRight'] },
+    { name: 'sprint', keys: ['ShiftLeft', 'ShiftRight'] },
 ]
 
 const PlayerInputComponent = () => {
@@ -412,9 +420,9 @@ const PlayerInputComponent = () => {
     const back = useKeyboardControls((s) => s.back)
     const left = useKeyboardControls((s) => s.left)
     const right = useKeyboardControls((s) => s.right)
-    const sneak = useKeyboardControls((s) => s.sneak)
+    const sprint = useKeyboardControls((s) => s.sprint)
 
-    return <Component name="playerInput" value={{ forward, back, left, right, sneak }} />
+    return <Component name="playerInput" value={{ forward, back, left, right, sprint }} />
 }
 
 type PlayerProps = {
@@ -428,8 +436,14 @@ const Player = ({ initialPosition }: PlayerProps) => {
     const [actions, setActions] = useState<EntityType['playerAnimation']>()
 
     const playerSpeed = useControls(`${LEVA_KEY}-player-speed`, {
-        walking: 0.5,
-        running: 1.5,
+        walking: {
+            label: 'Walking Speed',
+            value: 0.8,
+        },
+        running: {
+            label: 'Running Speed',
+            value: 1.5,
+        },
     })
 
     useEffect(() => {
@@ -441,6 +455,7 @@ const Player = ({ initialPosition }: PlayerProps) => {
         const walkAction = gltfActions['Walk']!
         walkAction.loop = THREE.LoopRepeat
         walkAction.weight = 0
+        walkAction.timeScale = 1.5
         walkAction.play()
 
         const runAction = gltfActions['Run']!
@@ -477,8 +492,14 @@ const Player = ({ initialPosition }: PlayerProps) => {
 
 const Camera = () => {
     const cameraConfiguration = useControls(`${LEVA_KEY}-camera`, {
-        offsetBehind: 10,
-        offsetAbove: 15,
+        offsetBehind: {
+            label: 'Offset Behind',
+            value: 10,
+        },
+        offsetAbove: {
+            label: 'Offset Above',
+            value: 15,
+        },
     })
 
     return (
