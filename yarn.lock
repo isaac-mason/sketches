@@ -1935,15 +1935,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/three@npm:^0.158.2":
-  version: 0.158.2
-  resolution: "@types/three@npm:0.158.2"
+"@types/three@npm:^0.159.0":
+  version: 0.159.0
+  resolution: "@types/three@npm:0.159.0"
   dependencies:
     "@types/stats.js": "*"
     "@types/webxr": "*"
     fflate: ~0.6.10
     meshoptimizer: ~0.18.1
-  checksum: 043accb8067ef6adba283c07fa87025fe5718943c6048c170368c2582d82a8fb454d3ad75b9d26a386410c57b6ec1a309804f9f698f4554eb1df45b999d6cb26
+  checksum: 409495d27e70cce06bdc64e80b22685d1a1f8c327052a78b62166f71dca1f49077f1ecda9ff3440447096c9e5c520e5e158a8605207b74827af3c33c10020883
   languageName: node
   linkType: hard
 
@@ -5031,7 +5031,7 @@ __metadata:
     "@types/node": ^20.9.0
     "@types/react": ^18.2.39
     "@types/react-dom": ^18.2.14
-    "@types/three": ^0.158.2
+    "@types/three": ^0.159.0
     "@vitejs/plugin-basic-ssl": ^1.0.1
     "@vitejs/plugin-react": ^4.0.4
     arancini: ^4.1.2
@@ -5051,7 +5051,7 @@ __metadata:
     simplex-noise: ^4.0.1
     styled-breakpoints: ^12.1.9
     styled-components: ^6.1.0
-    three: ^0.158.0
+    three: ^0.159.0
     tunnel-rat: ^0.1.2
     typescript: ^5.3.2
     vite: ^4.5.0
@@ -5432,10 +5432,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"three@npm:^0.158.0":
-  version: 0.158.0
-  resolution: "three@npm:0.158.0"
-  checksum: 30decfb78125732ffc287946208d11b3ba8b6d765d7e806c1e0149f6edc3671e69e2cc680082486858bcd123a1ba24f6dbc8222e88b6edb9e17d9487ae4ed821
+"three@npm:^0.159.0":
+  version: 0.159.0
+  resolution: "three@npm:0.159.0"
+  checksum: 41f03abf140d7872f64d3f980eb8cf05ef15385914969435a0b60f006f4ed846c6473aaa992e9e770baac4b4e8fdfc288c6276a74b75977cef6a5b9e76f40eb3
   languageName: node
   linkType: hard
 
