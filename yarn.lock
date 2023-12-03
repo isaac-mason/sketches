@@ -4005,21 +4005,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"meshline@npm:^3.1.6":
+"meshline@npm:3.1.6, meshline@npm:^3.1.6":
   version: 3.1.6
   resolution: "meshline@npm:3.1.6"
   peerDependencies:
     three: ">=0.137"
   checksum: 72b79908315650a57b5c97b846191ab73d1ee1551211154283a951eac7b08f9129adb6ce1b84d887b30b47617a52ff0878f9695037491c4d8350712c6655489a
-  languageName: node
-  linkType: hard
-
-"meshline@npm:^3.1.7":
-  version: 3.1.7
-  resolution: "meshline@npm:3.1.7"
-  peerDependencies:
-    three: ">=0.137"
-  checksum: a72f3e51311136f786a3782df27a99f052283ecea15a005e1b140c8a43cc8a0ffa75ae82bd538f26064b563a19bf32bf2949a5a9195b41bc0ab11f3cd2281410
   languageName: node
   linkType: hard
 
@@ -5038,7 +5029,7 @@ __metadata:
     d3: ^7.8.5
     jolt-physics: ^0.8.0
     leva: ^0.9.35
-    meshline: ^3.1.7
+    meshline: 3.1.6
     nipplejs: ^0.10.1
     p2-es: ^1.1.8
     prettier: ^3.1.0
