@@ -17,8 +17,11 @@ type EntityType = {
 
 const jolt = await Jolt()
 
+const LAYER_NON_MOVING = 0;
+const LAYER_MOVING = 1;
+const NUM_OBJECT_LAYERS = 2;
+
 class PhysicsSystem extends System<EntityType> {
-    settings: Jolt.JoltSettings
     joltInterface: Jolt.JoltInterface
     physicsSystem: Jolt.PhysicsSystem
     bodyInterface: Jolt.BodyInterface
@@ -28,8 +31,30 @@ class PhysicsSystem extends System<EntityType> {
     constructor(world: World) {
         super(world)
 
-        this.settings = new jolt.JoltSettings()
-        this.joltInterface = new jolt.JoltInterface(this.settings)
+        let objectFilter = new jolt.ObjectLayerPairFilterTable(NUM_OBJECT_LAYERS)
+        objectFilter.EnableCollision(LAYER_NON_MOVING, LAYER_MOVING)
+        objectFilter.EnableCollision(LAYER_MOVING, LAYER_MOVING)
+
+        const BP_LAYER_NON_MOVING = new jolt.BroadPhaseLayer(0)
+        const BP_LAYER_MOVING = new jolt.BroadPhaseLayer(1)
+        const NUM_BROAD_PHASE_LAYERS = 2
+        let bpInterface = new jolt.BroadPhaseLayerInterfaceTable(NUM_OBJECT_LAYERS, NUM_BROAD_PHASE_LAYERS)
+        bpInterface.MapObjectToBroadPhaseLayer(LAYER_NON_MOVING, BP_LAYER_NON_MOVING)
+        bpInterface.MapObjectToBroadPhaseLayer(LAYER_MOVING, BP_LAYER_MOVING)
+
+        const settings = new jolt.JoltSettings()
+        settings.mObjectLayerPairFilter = objectFilter
+        settings.mBroadPhaseLayerInterface = bpInterface
+        settings.mObjectVsBroadPhaseLayerFilter = new jolt.ObjectVsBroadPhaseLayerFilterTable(
+            settings.mBroadPhaseLayerInterface,
+            NUM_BROAD_PHASE_LAYERS,
+            settings.mObjectLayerPairFilter,
+            NUM_OBJECT_LAYERS,
+        )
+
+        this.joltInterface = new jolt.JoltInterface(settings)
+        jolt.destroy(settings)
+
         this.physicsSystem = this.joltInterface.GetPhysicsSystem()
         this.bodyInterface = this.physicsSystem.GetBodyInterface()
 
@@ -93,7 +118,7 @@ const Ground = () => {
             new jolt.Vec3(0, 0, 0),
             new jolt.Quat(0, 0, 0, 1),
             jolt.EMotionType_Static,
-            jolt.NON_MOVING,
+            LAYER_NON_MOVING,
         )
         creationSettings.mRestitution = 0.5
         creationSettings.mFriction = 1
@@ -130,7 +155,7 @@ const Box = ({ args, position, color }: BoxProps) => {
             new jolt.Vec3(...position),
             new jolt.Quat(0, 0, 0, 1),
             jolt.EMotionType_Dynamic,
-            jolt.MOVING,
+            LAYER_MOVING,
         )
         creationSettings.mRestitution = 0.5
 
