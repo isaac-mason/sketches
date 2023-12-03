@@ -15,22 +15,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@arancini/core@npm:4.1.2":
-  version: 4.1.2
-  resolution: "@arancini/core@npm:4.1.2"
-  checksum: 96e70176c360e6be6b6e73b15c0a1048fda99d4526b97d7601c36dbb0144a274febd3e5f874a75810283388f36e494378bf1333a9f5d4af4af863f3d0fdf927f
+"@arancini/core@npm:4.2.0":
+  version: 4.2.0
+  resolution: "@arancini/core@npm:4.2.0"
+  checksum: 4f88238c9889f39b04bb801142758e283ff4cf57f02c069d27ac325bb835e7342d69b76feb176f58cfc2898bbdb94153d786b6015ac3b6627cfe2a2c3da30ad4
   languageName: node
   linkType: hard
 
-"@arancini/react@npm:4.1.2":
-  version: 4.1.2
-  resolution: "@arancini/react@npm:4.1.2"
+"@arancini/react@npm:4.2.0":
+  version: 4.2.0
+  resolution: "@arancini/react@npm:4.2.0"
   dependencies:
-    "@arancini/core": 4.1.2
+    "@arancini/core": 4.2.0
   peerDependencies:
     react: ^18.0.0
     react-dom: ^18.0.0
-  checksum: 850123cd1fcb61bfa038b93a1c27a5823e60d8399063f8d0f8d9ff4f84879a6de82e13b52ed656dfabf9c1a1807b9c8d0a496d957674b5501b5e8ab92a30ea95
+  checksum: ca16c6a83e4bae7a829f453c4f38c6ba88953bdc329f80607238e78b088fb1f58907686cd66565013c2398238c3473114253547d4f3b1d0d5fd5df4e6c50d340
   languageName: node
   linkType: hard
 
@@ -2107,16 +2107,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"arancini@npm:^4.1.2":
-  version: 4.1.2
-  resolution: "arancini@npm:4.1.2"
+"arancini@npm:^4.2.0":
+  version: 4.2.0
+  resolution: "arancini@npm:4.2.0"
   dependencies:
-    "@arancini/core": 4.1.2
-    "@arancini/react": 4.1.2
+    "@arancini/core": 4.2.0
+    "@arancini/react": 4.2.0
   peerDependencies:
     react: ^18.0.0
     react-dom: ^18.0.0
-  checksum: 4f59847e35d60c2a93b8fe665167f780cf0f1a4844d216c57a58b6a92588aae477f039235dff322ca179178f8cad03807178ce0a77390a8fb2972628a806746a
+  checksum: 6207322f8a737787b507ee5d8727fb0751e8868edc00e4e03b5ca4c928cff77e99ef021a6587d0cf827943a9c3efc837afe214d6b080c7e445ff8a21481f9d0e
   languageName: node
   linkType: hard
 
@@ -4236,13 +4236,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nipplejs@npm:^0.10.1":
-  version: 0.10.1
-  resolution: "nipplejs@npm:0.10.1"
-  checksum: ba7e5252e643c4fba601dd562a9f89455a4a8a3675094c348465e155278a0ff867142f87ec4ee2f35c1929529b92774167368d8089b7e8a8c0352350b2f9d769
-  languageName: node
-  linkType: hard
-
 "no-case@npm:^3.0.4":
   version: 3.0.4
   resolution: "no-case@npm:3.0.4"
@@ -5025,12 +5018,11 @@ __metadata:
     "@types/three": ^0.159.0
     "@vitejs/plugin-basic-ssl": ^1.0.1
     "@vitejs/plugin-react": ^4.0.4
-    arancini: ^4.1.2
+    arancini: ^4.2.0
     d3: ^7.8.5
     jolt-physics: ^0.8.0
     leva: ^0.9.35
     meshline: 3.1.6
-    nipplejs: ^0.10.1
     p2-es: ^1.1.8
     prettier: ^3.1.0
     r3f-perf: ^7.1.2

@@ -140,7 +140,6 @@ class AnimationSystem extends System<EntityType> {
         this.raycaster = new THREE.Raycaster()
         this.raycaster.near = 0.01
         this.raycaster.far = 10
-        this.raycaster.firstHitOnly = true
     }
 
     onUpdate(delta: number): void {
@@ -197,7 +196,10 @@ class AnimationSystem extends System<EntityType> {
             this.traversableQuery.entities.map((e) => e.three),
             false,
         )
-        const characterRayHit = characterRayHits.find((hit) => hit.object.userData.walkable)
+        const characterRayHit = characterRayHits
+            .filter((hit) => hit.object.userData.walkable)
+            .sort((a, b) => a.distance - b.distance)[0]
+
         const characterRayHitPoint = characterRayHit ? characterRayHit.point : undefined
 
         if (characterRayHitPoint) {

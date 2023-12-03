@@ -1,5 +1,5 @@
 import { useFrame } from '@react-three/fiber'
-import { AnyEntity, World } from 'arancini'
+import { World } from 'arancini'
 import { ReactAPI, createReactAPI } from 'arancini/react'
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { VoxelEngineEntity, VoxelEnginePlugin, VoxelEnginePluginsApi } from './voxel-engine-types'

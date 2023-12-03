@@ -6,7 +6,6 @@ import { useControls as useLevaControls } from 'leva'
 import { RefObject, useEffect, useMemo, useRef } from 'react'
 import styled from 'styled-components'
 import { Group, MathUtils, PerspectiveCamera, Vector3 } from 'three'
-import { clamp } from 'three/src/math/MathUtils'
 import { Canvas, useLoadingAssets, usePageVisible } from '../../../common'
 import { GameLevel, Shield, Sword } from './models'
 
@@ -208,7 +207,7 @@ const useKinematicCharacterController = ({
                 return
             }
 
-            const rotationScalar = clamp(currentSpeed / 10, 0, 1)
+            const rotationScalar = MathUtils.clamp(currentSpeed / 10, 0, 1)
 
             const yRot = Math.sin((currentSpeed > 0.1 ? 1 : 0) * state.clock.elapsedTime * handRotationSpeed) / 6
 
@@ -222,7 +221,7 @@ const useKinematicCharacterController = ({
 
             group.position.copy(camera.position).add(camera.getWorldDirection(rotation).multiplyScalar(1))
 
-            const bobScalar = clamp(horizontalSpeed / 10, 0, 1)
+            const bobScalar = MathUtils.clamp(horizontalSpeed / 10, 0, 1)
 
             const yPos = (Math.sin((movingHorizontally ? 1 : 0) * state.clock.elapsedTime * handBobSpeed) / 6) * handBobHeight
 
