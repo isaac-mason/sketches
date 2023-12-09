@@ -1,6 +1,7 @@
 import { Billboard, KeyboardControls, Text, useKeyboardControls } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
-import { System, World } from 'arancini'
+import { World } from 'arancini'
+import { System, Executor } from 'arancini/systems'
 import { createReactAPI } from 'arancini/react'
 import * as p2 from 'p2-es'
 import { useMemo } from 'react'
@@ -64,12 +65,14 @@ class PhysicsSystem extends System<EntityType> {
 class KinematicCharacterControllerSystem extends System<EntityType> {
     playerQuery = this.query((e) => e.has('playerInput', 'physicsBody'))
 
+    physicsSystem = this.attach(PhysicsSystem)!
+
     onInit(): void {
         this.playerQuery.onEntityAdded.add((entity) => {
             const { physicsBody } = entity
 
             const controller = new KinematicCharacterController({
-                world: this.world.getSystem(PhysicsSystem)!.physicsWorld,
+                world: this.physicsSystem.physicsWorld,
                 body: physicsBody,
                 collisionMask: SCENERY_GROUP,
                 velocityXSmoothing: 0.0001,
@@ -168,18 +171,20 @@ const world = new World<EntityType>({
     components: ['isPlayer', 'camera', 'object3D', 'physicsBody', 'playerInput', 'kinematicCharacterController'],
 })
 
-world.registerSystem(KinematicCharacterControllerSystem)
-world.registerSystem(PhysicsSystem)
-world.registerSystem(CameraSystem)
-world.registerSystem(PlayerModelSystem)
+const executor = new Executor(world)
 
-world.init()
+executor.add(KinematicCharacterControllerSystem)
+executor.add(PhysicsSystem)
+executor.add(CameraSystem)
+executor.add(PlayerModelSystem)
+
+executor.init()
 
 const { Entity, Component } = createReactAPI(world)
 
 const Loop = () => {
     useFrame((_, delta) => {
-        world.step(delta)
+        executor.update(delta)
     })
 
     return null

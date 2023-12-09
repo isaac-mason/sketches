@@ -19,7 +19,7 @@ const green2 = new Color('green').addScalar(0.02).getHex()
 const orange = new Color('orange').getHex()
 
 const Player = () => {
-    const { ecs } = useVoxelEngine()
+    const { world, react: { Entity, Component } } = useVoxelEngine()
 
     const camera = useThree((s) => s.camera)
 
@@ -32,7 +32,7 @@ const Player = () => {
             value: 'first-person',
             options: ['first-person', 'third-person'],
             onChange: (v) => {
-                ecs.world
+                world
                     .filter((e) => e.has('boxCharacterController'))
                     .forEach((e) => {
                         e.boxCharacterController.cameraMode = v
@@ -82,18 +82,18 @@ const Player = () => {
     }, [])
 
     return (
-        <ecs.Entity
+        <Entity
             boxCharacterControllerCamera={camera as PerspectiveCamera}
             boxCharacterControllerInput={input}
             boxCharacterController={boxCharacterController}
         >
-            <ecs.Component name="object3D">
+            <Component name="object3D">
                 <mesh>
                     <boxGeometry args={[width, height, width]} />
                     <meshStandardMaterial color="red" />
                 </mesh>
-            </ecs.Component>
-        </ecs.Entity>
+            </Component>
+        </Entity>
     )
 }
 

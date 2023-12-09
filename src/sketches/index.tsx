@@ -48,34 +48,34 @@ const sketchList = [
     {
         title: 'p2-es - Marching Cubes Goo',
         path: 'p2-es/marching-cubes-goo',
-        tags: ['physics', 'p2-es', 'marching-cubes'],
+        tags: ['physics', 'p2-es', 'marching-cubes', 'arancini'],
     },
     {
         title: 'p2-es - Pixelated Text',
         path: 'p2-es/pixelated-text',
-        tags: ['physics', 'p2-es', 'text'],
+        tags: ['physics', 'p2-es', 'text', 'arancini'],
     },
     {
         title: 'p2-es - Kinematic Character Controller',
         path: 'p2-es/kinematic-character-controller',
-        tags: ['physics', 'p2-es', 'controller'],
+        tags: ['physics', 'p2-es', 'controller', 'arancini'],
     },
     /* Jolt Physics */
     {
         title: 'Jolt Physics - Cube Heap',
         path: 'jolt-physics/cube-heap',
-        tags: ['physics', 'jolt-physics'],
+        tags: ['physics', 'jolt-physics', 'arancini'],
     },
     /* Recast Navigation */
     {
         title: 'Recast Navigation - Busy Street Crossing',
         path: 'recast-navigation/busy-street-crossing',
-        tags: ['ai', 'navigation', 'pathfinding', 'recast-navigation'],
+        tags: ['recast-navigation', 'ai', 'navigation', 'pathfinding', 'arancini'],
     },
     {
         title: 'Recast Navigation - Character Controller',
         path: 'recast-navigation/character-controller',
-        tags: ['recast-navigation', 'controller'],
+        tags: ['recast-navigation', 'controller', 'arancini'],
     },
     /* Grid Pathfinding */
     {
@@ -98,27 +98,27 @@ const sketchList = [
     {
         title: 'Simple Voxels - Sphere',
         path: 'voxels/simple-voxels/sphere',
-        tags: ['voxels', 'vertex-colors', 'culled-mesher'],
+        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'arancini'],
     },
     {
         title: 'Simple Voxels - Building',
         path: 'voxels/simple-voxels/building',
-        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'building'],
+        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'building', 'arancini'],
     },
     {
         title: 'Simple Voxels - Fly Controls',
         path: 'voxels/simple-voxels/fly-controls',
-        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'controller'],
+        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'controller', 'arancini'],
     },
     {
         title: 'Simple Voxels - Box Character Controller',
         path: 'voxels/simple-voxels/box-character-controller',
-        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'controller'],
+        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'controller', 'arancini'],
     },
     {
         title: 'Simple Voxels - Rapier Physics',
         path: 'voxels/simple-voxels/rapier-physics',
-        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'physics', 'rapier'],
+        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'physics', 'rapier', 'arancini'],
     },
     /* Nature */
     {

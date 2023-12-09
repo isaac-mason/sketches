@@ -38,8 +38,6 @@ const world = new World<EntityType>({
     components: ['agent', 'object3D', 'target'],
 })
 
-world.init()
-
 const { useQuery, Entity, Entities, Component } = createReactAPI(world)
 
 const App = () => {

@@ -1,4 +1,5 @@
-import { System, With } from 'arancini'
+import { With } from 'arancini'
+import { System } from 'arancini/systems'
 import { BufferAttribute, BufferGeometry, Mesh, MeshStandardMaterial } from 'three'
 import { CHUNK_SIZE, ChunkEntity, CorePlugin, CorePluginEntity, Vec3, VoxelWorldCoreSystem, chunkId } from '../core'
 import { useVoxelEngine } from '../voxel-engine'
@@ -255,16 +256,16 @@ export class VoxelChunkMesherSystem extends System<CorePluginEntity & CulledMesh
 }
 
 export const VoxelChunkCulledMeshes = () => {
-    const { ecs } = useVoxelEngine<[CorePlugin, CulledMesherPlugin]>()
+    const { react: { Entities } } = useVoxelEngine<[CorePlugin, CulledMesherPlugin]>()
 
     return (
-        <ecs.Entities where={(e) => e.has('voxelChunkMesh', 'voxelChunkLoaded')}>
+        <Entities where={(e) => e.has('voxelChunkMesh', 'voxelChunkLoaded')}>
             {(entity) => {
                 const { voxelChunkMesh } = entity
 
                 return <primitive object={voxelChunkMesh.mesh} />
             }}
-        </ecs.Entities>
+        </Entities>
     )
 }
 

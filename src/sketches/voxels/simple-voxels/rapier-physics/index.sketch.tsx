@@ -21,7 +21,7 @@ const orange = new Color('orange').getHex()
 const brown = new Color('brown').getHex()
 
 const Tools = ({ children }: { children: React.ReactNode }) => {
-    const { ecs, voxelWorld, physicsWorld, setBlock } = useVoxelEngine()
+    const { world, voxelWorld, physicsWorld, setBlock } = useVoxelEngine()
 
     const camera = useThree((s) => s.camera)
 
@@ -49,7 +49,7 @@ const Tools = ({ children }: { children: React.ReactNode }) => {
         impulse.z *= impulseScale
         body.applyImpulse(impulse, true)
 
-        ecs.world.create({ rigidBody: body })
+        world.create({ rigidBody: body })
     }
 
     const handleBuild = (event: ThreeEvent<MouseEvent>) => {
@@ -147,7 +147,7 @@ const Level = () => {
 }
 
 const Snow = () => {
-    const { ecs, physicsWorld } = useVoxelEngine()
+    const {  world, physicsWorld } = useVoxelEngine()
 
     useEffect(() => {
         const timeouts: NodeJS.Timeout[] = []
@@ -159,12 +159,12 @@ const Snow = () => {
             const body = physicsWorld.createRigidBody(Rapier.RigidBodyDesc.dynamic().setTranslation(x, 80, z))
             physicsWorld.createCollider(Rapier.ColliderDesc.cuboid(0.5, 0.5, 0.5), body)
 
-            const entity = ecs.world.create({
+            const entity = world.create({
                 rigidBody: body,
             })
 
             const timeout = setTimeout(() => {
-                ecs.world.destroy(entity)
+                world.destroy(entity)
                 physicsWorld.removeRigidBody(body)
             }, 15000)
 
@@ -181,17 +181,17 @@ const Snow = () => {
 }
 
 const PhysicsVoxelCubeRenderer = () => {
-    const { ecs } = useVoxelEngine()
+    const { react: { Entities, Component} } = useVoxelEngine()
 
     return (
-        <ecs.Entities where={(e) => e.has('rigidBody')}>
-            <ecs.Component name="object3D">
+        <Entities where={(e) => e.has('rigidBody')}>
+            <Component name="object3D">
                 <mesh>
                     <meshStandardMaterial color="white" />
                     <boxGeometry args={[1, 1, 1]} />
                 </mesh>
-            </ecs.Component>
-        </ecs.Entities>
+            </Component>
+        </Entities>
     )
 }
 

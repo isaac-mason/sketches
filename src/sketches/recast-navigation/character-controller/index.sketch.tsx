@@ -1,8 +1,9 @@
 import sunsetEnvironment from '@pmndrs/assets/hdri/sunset.exr'
 import { Environment, KeyboardControls, PerspectiveCamera, useAnimations, useGLTF, useKeyboardControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
-import { System, With, World } from 'arancini'
+import { With, World } from 'arancini'
 import { createReactAPI } from 'arancini/react'
+import { Executor, System } from 'arancini/systems'
 import { useControls } from 'leva'
 import { useEffect, useState } from 'react'
 import { NavMesh, NavMeshQuery, init as initRecast } from 'recast-navigation'
@@ -134,8 +135,8 @@ class AnimationSystem extends System<EntityType> {
 
     private tmpPlayerQuaternion = new THREE.Quaternion()
 
-    constructor(world: World) {
-        super(world)
+    constructor(executor: Executor<EntityType>) {
+        super(executor)
 
         this.raycaster = new THREE.Raycaster()
         this.raycaster.near = 0.01
@@ -270,11 +271,13 @@ const world = new World<EntityType>({
     ],
 })
 
-world.registerSystem(MovementSystem)
-world.registerSystem(AnimationSystem)
-world.registerSystem(CameraSystem)
+const executor = new Executor(world)
 
-world.init()
+executor.add(MovementSystem)
+executor.add(AnimationSystem)
+executor.add(CameraSystem)
+
+executor.init()
 
 const { Entity, Component, useQuery } = createReactAPI(world)
 
@@ -523,7 +526,7 @@ const Camera = () => {
 
 const App = () => {
     useFrame((_, delta) => {
-        world.step(delta)
+        executor.update(delta)
     })
 
     return (

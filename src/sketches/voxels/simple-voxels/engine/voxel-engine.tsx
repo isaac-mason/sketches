@@ -1,6 +1,7 @@
 import { useFrame } from '@react-three/fiber'
 import { World } from 'arancini'
 import { ReactAPI, createReactAPI } from 'arancini/react'
+import { Executor } from 'arancini/systems'
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { VoxelEngineEntity, VoxelEnginePlugin, VoxelEnginePluginsApi } from './voxel-engine-types'
 
@@ -8,7 +9,8 @@ const voxelEngineContext = createContext<unknown>(null!)
 
 type VoxelEngineContext<Plugins extends ReadonlyArray<VoxelEnginePlugin<any>>> = VoxelEnginePluginsApi<Plugins> & {
     world: World<VoxelEngineEntity<Plugins>>
-    ecs: ReactAPI<VoxelEngineEntity<Plugins>>
+    executor: Executor<VoxelEngineEntity<Plugins>>
+    react: ReactAPI<VoxelEngineEntity<Plugins>>
     step: (delta: number) => void
 }
 
@@ -29,7 +31,8 @@ export const createVoxelEngine = <Plugins extends ReadonlyArray<VoxelEnginePlugi
             initialised.current = true
 
             const world = new World<Entity>()
-            const ecs = createReactAPI(world)
+            const executor = new Executor(world)
+            const react = createReactAPI(world)
 
             for (const plugin of plugins) {
                 if (!plugin.components) continue
@@ -39,25 +42,25 @@ export const createVoxelEngine = <Plugins extends ReadonlyArray<VoxelEnginePlugi
             for (const plugin of plugins) {
                 if (!plugin.systems) continue
                 for (const system of plugin.systems) {
-                    world.registerSystem(system, { priority: system?.PRIORITY })
+                    executor.add(system, { priority: system?.PRIORITY })
                 }
             }
 
             let voxelEngine: Partial<Api> = {}
 
             for (const plugin of plugins) {
-                const pluginApi = plugin.setup?.(world, ecs)
+                const pluginApi = plugin.setup?.(world, executor, react)
 
                 if (pluginApi) {
                     voxelEngine = { ...voxelEngine, ...pluginApi }
                 }
             }
 
-            voxelEngine = { ...voxelEngine, world, ecs }
+            voxelEngine = { ...voxelEngine, world, executor, react }
 
             setEngine(voxelEngine as VoxelEngineContext<Plugins>)
 
-            world.init()
+            executor.init()
         }
 
         if (!initialised.current) {
@@ -75,21 +78,21 @@ export const createVoxelEngine = <Plugins extends ReadonlyArray<VoxelEnginePlugi
             }
         }, [])
 
-        const step = (delta: number) => {
-            if (!engine?.world.initialised) return
+        const update = (delta: number) => {
+            if (!engine?.executor.initialised) return
 
-            engine.world.step(delta)
+            engine.executor.update(delta)
         }
 
         useFrame((_, delta) => {
-            step(delta)
+            update(delta)
         })
 
         return (
             <voxelEngineContext.Provider
                 value={{
                     ...engine,
-                    step,
+                    step: update,
                 }}
             >
                 {children}

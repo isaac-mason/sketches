@@ -1,4 +1,6 @@
-import { System, Topic, World, type With } from 'arancini'
+import { World, type With } from 'arancini'
+import { Topic } from 'arancini/events'
+import { System } from 'arancini/systems'
 import * as THREE from 'three'
 import { VoxelEnginePlugin } from '../voxel-engine-types'
 import {

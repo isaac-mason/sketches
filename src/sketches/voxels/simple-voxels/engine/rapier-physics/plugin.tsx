@@ -1,5 +1,6 @@
 import Rapier from '@dimforge/rapier3d-compat'
-import { System, World } from 'arancini'
+import { World } from 'arancini'
+import { System } from 'arancini/systems'
 import { suspend } from 'suspend-react'
 import { Quaternion, Vector3 } from 'three'
 import { CHUNK_SIZE, ChunkEntity, CorePluginEntity, Vec3, chunkPositionToWorldPosition, positionToChunkIndex } from '../core'

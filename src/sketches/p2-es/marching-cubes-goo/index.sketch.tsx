@@ -1,7 +1,8 @@
 import { Bounds, MarchingCube, MarchingCubes, OrbitControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
-import { System, World } from 'arancini'
+import { World } from 'arancini'
 import { createReactAPI } from 'arancini/react'
+import { Executor, System } from 'arancini/systems'
 import * as p2 from 'p2-es'
 import { useMemo } from 'react'
 import { Canvas } from '../../../common'
@@ -42,7 +43,7 @@ class RotateSystem extends System<EntityType> {
     }
 }
 
-class PhysicsSystem extends System {
+class PhysicsSystem extends System<EntityType> {
     physicsWorld = new p2.World({ gravity: [0, -5] })
 
     physicsBodies = this.query((e) => e.has('physicsBody', 'object3D'))
@@ -79,10 +80,12 @@ const world = new World<EntityType>({
     components: ['isRotating', 'object3D', 'physicsBody'],
 })
 
-world.registerSystem(RotateSystem)
-world.registerSystem(PhysicsSystem)
+const executor = new Executor(world)
 
-world.init()
+executor.add(RotateSystem)
+executor.add(PhysicsSystem)
+
+executor.init()
 
 const { Entity, Component } = createReactAPI(world)
 
@@ -171,7 +174,7 @@ const Container = () => {
 
 const Loop = () => {
     useFrame((_, delta) => {
-        world.step(Math.min(delta, 0.1))
+        executor.update(Math.min(delta, 0.1))
     })
 
     return null

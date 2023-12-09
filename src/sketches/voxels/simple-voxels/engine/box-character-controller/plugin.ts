@@ -1,4 +1,4 @@
-import { System } from 'arancini'
+import { System } from 'arancini/systems'
 import { Object3D, Vector3 } from 'three'
 import { CorePluginEntity, VoxelWorldCoreSystem } from '../core'
 import { VoxelEnginePlugin } from '../voxel-engine-types'

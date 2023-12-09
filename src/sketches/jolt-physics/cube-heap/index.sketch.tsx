@@ -1,8 +1,9 @@
 import cityEnvironment from '@pmndrs/assets/hdri/city.exr'
 import { Environment, OrbitControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
-import { System, World } from 'arancini'
+import { World } from 'arancini'
 import { createReactAPI } from 'arancini/react'
+import { Executor, System } from 'arancini/systems'
 import Jolt from 'jolt-physics'
 import { useControls } from 'leva'
 import { useMemo, useRef } from 'react'
@@ -28,8 +29,8 @@ class PhysicsSystem extends System<EntityType> {
 
     bodies = this.query((e) => e.has('body', 'object3D'))
 
-    constructor(world: World) {
-        super(world)
+    constructor(executor: Executor<EntityType>) {
+        super(executor)
 
         let objectFilter = new jolt.ObjectLayerPairFilterTable(NUM_OBJECT_LAYERS)
         objectFilter.EnableCollision(LAYER_NON_MOVING, LAYER_MOVING)
@@ -97,14 +98,16 @@ const world = new World<EntityType>({
     components: ['body', 'object3D', 'teleporting'],
 })
 
-world.registerSystem(PhysicsSystem)
+const executor = new Executor(world)
 
-world.init()
+executor.add(PhysicsSystem)
+
+executor.init()
 
 const { Entity, Component } = createReactAPI(world)
 
 const usePhysics = () => {
-    return useMemo(() => world.getSystem(PhysicsSystem), [])!
+    return useMemo(() => executor.get(PhysicsSystem), [])!
 }
 
 const Ground = () => {
@@ -182,7 +185,7 @@ const App = () => {
     const { bodyInterface } = usePhysics()
 
     useFrame((_, delta) => {
-        world.step(delta)
+        executor.update(delta)
     })
 
     const bodiesToTeleport = world.query((e) => e.has('body').and.is('teleporting'))

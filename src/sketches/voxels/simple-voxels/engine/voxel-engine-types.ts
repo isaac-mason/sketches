@@ -1,5 +1,6 @@
-import { AnyEntity, SystemClass, World } from 'arancini'
+import { AnyEntity, World } from 'arancini'
 import { ReactAPI } from 'arancini/react'
+import { Executor, SystemClass } from 'arancini/systems'
 
 type UnionToIntersection<U> = ((U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never) & {}
 
@@ -11,7 +12,11 @@ type Pretty<T> = T extends unknown
 
 export type Api = Record<string, unknown>
 
-export type VoxelEnginePluginSetup<E extends AnyEntity> = (world: World<E>, ecs: ReactAPI<E>) => Api | void
+export type VoxelEnginePluginSetup<E extends AnyEntity> = (
+    world: World<E>,
+    executor: Executor<E>,
+    react: ReactAPI<E>,
+) => Api | void
 
 export type VoxelEnginePlugin<E extends AnyEntity> = {
     E?: E

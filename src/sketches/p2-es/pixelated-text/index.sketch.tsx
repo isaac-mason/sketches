@@ -1,6 +1,7 @@
 import { Bounds } from '@react-three/drei'
 import { Color, useFrame } from '@react-three/fiber'
-import { System, World } from 'arancini'
+import { World } from 'arancini'
+import { Executor, System } from 'arancini/systems'
 import { createReactAPI } from 'arancini/react'
 import { button, useControls } from 'leva'
 import * as p2 from 'p2-es'
@@ -57,9 +58,11 @@ const world = new World<EntityType>({
     components: ['isBox', 'physicsBody', 'object3D', 'color'],
 })
 
-world.registerSystem(PhysicsSystem)
+const executor = new Executor(world)
 
-world.init()
+executor.add(PhysicsSystem)
+
+executor.init()
 
 const { Entity, Entities, Component } = createReactAPI(world)
 
@@ -67,7 +70,7 @@ const MAX_DELTA = (1 / 60) * 10
 
 const Loop = () => {
     useFrame((_, delta) => {
-        world.step(MathUtils.clamp(delta, 0, MAX_DELTA))
+        executor.update(MathUtils.clamp(delta, 0, MAX_DELTA))
     })
 
     return null
