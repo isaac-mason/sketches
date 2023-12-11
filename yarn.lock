@@ -1600,9 +1600,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-three/rapier@npm:^1.1.1":
-  version: 1.1.1
-  resolution: "@react-three/rapier@npm:1.1.1"
+"@react-three/rapier@npm:^1.2.1":
+  version: 1.2.1
+  resolution: "@react-three/rapier@npm:1.2.1"
   dependencies:
     "@dimforge/rapier3d-compat": "npm:0.11.2"
     three-stdlib: "npm:2.23.9"
@@ -1611,7 +1611,7 @@ __metadata:
     "@react-three/fiber": ">=8.9.0"
     react: ">=18.0.0"
     three: ">=0.139.0"
-  checksum: 206923b14692369bfe676ff887098626e197b671b78c6858c0852bf260be77d356fc55fab59bcb8c2f2c817b64890321b489a9cacb972d0e504f4871cde5dff8
+  checksum: ee783a542ccd27dbf37c32f10a9b10ebcccbb3a4abe748e5dde0fba08c3cedcc1e8035acf07f7f5a6acb91bb4cae44cc5d37a7a791120e893b55a336a788de9c
   languageName: node
   linkType: hard
 
@@ -5061,7 +5061,7 @@ __metadata:
     "@react-three/fiber": "npm:^8.15.12"
     "@react-three/flex": "npm:^1.0.1"
     "@react-three/postprocessing": "npm:^2.15.11"
-    "@react-three/rapier": "npm:^1.1.1"
+    "@react-three/rapier": "npm:^1.2.1"
     "@react-three/xr": "npm:^5.7.1"
     "@types/d3": "npm:^7.4.3"
     "@types/node": "npm:^20.9.0"
