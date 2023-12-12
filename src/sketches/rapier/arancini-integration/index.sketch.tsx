@@ -7,7 +7,7 @@ import { useRef } from 'react'
 import { Canvas, usePageVisible } from '../../../common'
 
 type EntityType = {
-    rigidBody: RapierRigidBody
+    rigidBody?: RapierRigidBody
 }
 
 const world = new World<EntityType>({
