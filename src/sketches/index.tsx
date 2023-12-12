@@ -44,6 +44,11 @@ const sketchList = [
         path: 'rapier/ball-pit-mixer',
         tags: ['physics', 'rapier'],
     },
+    {
+        title: 'Rapier - Arancini Integration',
+        path: 'rapier/arancini-integration',
+        tags: ['physics', 'rapier', 'arancini']
+    },
     /* p2-es */
     {
         title: 'p2-es - Marching Cubes Goo',
