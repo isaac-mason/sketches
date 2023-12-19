@@ -991,6 +991,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@mediapipe/tasks-vision@npm:0.10.8":
+  version: 0.10.8
+  resolution: "@mediapipe/tasks-vision@npm:0.10.8"
+  checksum: bc053148b3e656c6860fad150e7b2d46f73cbef1ae5d68ef02fa2110e18420ed36b8a75dd6cc28cda5a49fff94adc2af20af624bb6d41da4640752d8c27636f7
+  languageName: node
+  linkType: hard
+
 "@nodelib/fs.scandir@npm:2.1.5":
   version: 2.1.5
   resolution: "@nodelib/fs.scandir@npm:2.1.5"
@@ -1536,12 +1543,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-three/drei@npm:^9.88.9":
-  version: 9.88.9
-  resolution: "@react-three/drei@npm:9.88.9"
+"@react-three/drei@npm:^9.92.4":
+  version: 9.92.4
+  resolution: "@react-three/drei@npm:9.92.4"
   dependencies:
     "@babel/runtime": "npm:^7.11.2"
-    "@mediapipe/tasks-vision": "npm:0.10.2"
+    "@mediapipe/tasks-vision": "npm:0.10.8"
     "@react-spring/three": "npm:~9.6.1"
     "@use-gesture/react": "npm:^10.2.24"
     camera-controls: "npm:^2.4.2"
@@ -1551,11 +1558,11 @@ __metadata:
     lodash.clamp: "npm:^4.0.3"
     lodash.omit: "npm:^4.5.0"
     lodash.pick: "npm:^4.4.0"
-    maath: "npm:^0.9.0"
+    maath: "npm:^0.10.7"
     meshline: "npm:^3.1.6"
     react-composer: "npm:^5.0.3"
     react-merge-refs: "npm:^1.1.0"
-    stats-gl: "npm:^1.0.4"
+    stats-gl: "npm:^2.0.0"
     stats.js: "npm:^0.17.0"
     suspend-react: "npm:^0.1.3"
     three-mesh-bvh: "npm:^0.6.7"
@@ -1572,7 +1579,7 @@ __metadata:
   peerDependenciesMeta:
     react-dom:
       optional: true
-  checksum: 7a542557e50a34c7f4c5d5b30f204162e7ceaf10d02184fb9b18730e711c9f48401549b6523225bc6fd58743f19113dedd1c09b3427dae112e99d4096f021133
+  checksum: 8552941eaf7ad8f69b303f34d0eebd817c0dfc67b63d1eee7bee448b42573686e54df405d5a267083a40dfa419b64b2ed1efb740a26541bf2fc29fa2a2aab784
   languageName: node
   linkType: hard
 
@@ -4108,6 +4115,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"maath@npm:^0.10.7":
+  version: 0.10.7
+  resolution: "maath@npm:0.10.7"
+  peerDependencies:
+    "@types/three": ">=0.144.0"
+    three: ">=0.144.0"
+  checksum: b020c11507ccd314b4a0869d1039ee63f1bd773dbb40db68121468b50795fc377860104d4b99acd7080bfe911a3ffb1e820234d701b2f9a77a414f815b9ec86f
+  languageName: node
+  linkType: hard
+
 "maath@npm:^0.6.0":
   version: 0.6.0
   resolution: "maath@npm:0.6.0"
@@ -5105,7 +5122,7 @@ __metadata:
     "@dimforge/rapier3d-compat": "npm:0.11.2"
     "@pmndrs/assets": "npm:^1.6.0"
     "@react-three/csg": "npm:^3.1.0"
-    "@react-three/drei": "npm:^9.88.9"
+    "@react-three/drei": "npm:^9.92.4"
     "@react-three/fiber": "npm:^8.15.12"
     "@react-three/flex": "npm:^1.0.1"
     "@react-three/postprocessing": "npm:^2.15.11"
@@ -5218,6 +5235,13 @@ __metadata:
   version: 1.0.5
   resolution: "stats-gl@npm:1.0.5"
   checksum: 3ff5be8150d6418b2e65b959b79698d9f514e594b0328f9d9dd759ffe9ef4309521a0dc22e61ad3d650ab1fa79c03f09a53a6436257c80aea2e7abec4db53afa
+  languageName: node
+  linkType: hard
+
+"stats-gl@npm:^2.0.0":
+  version: 2.0.1
+  resolution: "stats-gl@npm:2.0.1"
+  checksum: 46d7fde045f3861b4f1fd8efbe419e518d3febb8da3864eb96e2f158203dfc07d39b5f83d86fc4e678be61a3e22275dc457822ecd8cecda6f94c907319bc6dc5
   languageName: node
   linkType: hard
 
