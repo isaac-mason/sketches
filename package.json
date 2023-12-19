@@ -19,6 +19,7 @@
         "@react-three/postprocessing": "^2.15.11",
         "@react-three/rapier": "^1.2.1",
         "@react-three/xr": "^5.7.1",
+        "@use-gesture/react": "^10.3.0",
         "arancini": "^5.0.2",
         "d3": "^7.8.5",
         "jolt-physics": "^0.11.0",

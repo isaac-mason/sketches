@@ -3,6 +3,7 @@ import { useThree } from '@react-three/fiber'
 import { useEffect, useRef } from 'react'
 import { Vector2 } from 'three'
 import { Canvas } from '../../../../common'
+import { useResolution } from '../../../../common/hooks/use-resolution'
 
 const vertexShader = /* glsl */ `
 varying vec2 vUvs;
@@ -83,21 +84,7 @@ void main() {
 `
 
 const App = () => {
-    const gl = useThree((s) => s.gl)
-
-    const resolution = useRef({ value: new Vector2(gl.domElement.clientWidth, gl.domElement.clientHeight) })
-
-    useEffect(() => {
-        const onResize = () => {
-            resolution.current.value.set(gl.domElement.clientWidth, gl.domElement.clientHeight)
-        }
-
-        window.addEventListener('resize', onResize)
-
-        return () => {
-            window.removeEventListener('resize', onResize)
-        }
-    }, [])
+    const resolution = useResolution()
 
     return (
         <mesh position={[0.5, 0.5, 0]}>

@@ -165,6 +165,13 @@ const sketchList = [
         path: 'postprocessing/emissive-bloom',
         tags: ['postprocessing', 'bloom'],
     },
+    /* Fractals */
+    {
+        title: 'Fractals - Mandelbrot Set',
+        path: 'fractals/mandelbrot-set',
+        tags: ['fractals', 'mandelbrot', 'tsl'],
+        hidden: true,
+    },
     /* GLSL Shaders From Scratch */
     {
         title: 'GLSL Shaders From Scratch - Intro - Varyings',
