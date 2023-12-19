@@ -58,6 +58,8 @@ const world = new World<EntityType>({
     components: ['isBox', 'physicsBody', 'object3D', 'color'],
 })
 
+const boxQuery = world.query((e) => e.is('isBox', 'physicsBody'))
+
 const executor = new Executor(world)
 
 executor.add(PhysicsSystem)
@@ -98,7 +100,7 @@ const Box = ({ position, velocity, color }: BoxProps) => {
 }
 
 const BoxRenderer = () => (
-    <Entities where={(e) => e.has('isBox', 'color')}>
+    <Entities in={boxQuery}>
         {({ color }) => {
             return (
                 <Component name="object3D">

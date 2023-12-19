@@ -38,6 +38,11 @@ const world = new World<EntityType>({
     components: ['agent', 'object3D', 'target'],
 })
 
+const queries = {
+    agents: world.query((e) => e.is('agent')),
+    agentsWithObject3D: world.query((e) => e.is('agent', 'object3D')),
+}
+
 const { useQuery, Entity, Entities, Component } = createReactAPI(world)
 
 const App = () => {
@@ -45,7 +50,7 @@ const App = () => {
         debugNavMesh: false,
     })
 
-    const agents = useQuery((e) => e.has('agent', 'object3D'))
+    const agents = useQuery(queries.agentsWithObject3D)
 
     /* update agent positions */
     useFrame(() => {
@@ -124,7 +129,7 @@ const App = () => {
             </AI>
 
             {/* render agents */}
-            <Entities where={(e) => e.has('agent')}>
+            <Entities in={queries.agents}>
                 <Component name="object3D">
                     <group>
                         <mesh position-y={0.5}>

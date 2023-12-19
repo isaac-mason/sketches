@@ -271,6 +271,10 @@ const world = new World<EntityType>({
     ],
 })
 
+const queries = {
+    traversableThreeObjects: world.query((e) => e.has('traversable', 'three')),
+}
+
 const executor = new Executor(world)
 
 executor.add(MovementSystem)
@@ -335,7 +339,7 @@ const NavigationMesh = () => {
     )
     const [navMeshHelper, setNavMeshHelper] = useState<NavMeshHelper>()
 
-    const traversable = useQuery((e) => e.has('three', 'traversable'))
+    const traversable = useQuery(queries.traversableThreeObjects)
 
     useEffect(() => {
         if (traversable.entities.length === 0) return

@@ -6,6 +6,7 @@ import { useVoxelEngine } from '../voxel-engine'
 import { VoxelEnginePlugin } from '../voxel-engine-types'
 import VoxelChunkMesherWorker from './culled-mesher.worker.ts?worker'
 import { ChunkMeshUpdateMessage, RegisterChunkMessage, RequestChunkMeshUpdateMessage, WorkerMessage } from './types'
+import { useMemo } from 'react'
 
 const voxelChunkShaderMaterial = new MeshStandardMaterial({
     vertexColors: true,
@@ -256,10 +257,15 @@ export class VoxelChunkMesherSystem extends System<CorePluginEntity & CulledMesh
 }
 
 export const VoxelChunkCulledMeshes = () => {
-    const { react: { Entities } } = useVoxelEngine<[CorePlugin, CulledMesherPlugin]>()
+    const {
+        world,
+        react: { Entities },
+    } = useVoxelEngine<[CorePlugin, CulledMesherPlugin]>()
+
+    const loadedVoxelChunkMeshes = useMemo(() => world.query((e) => e.has('voxelChunkMesh', 'voxelChunkLoaded')), [])
 
     return (
-        <Entities where={(e) => e.has('voxelChunkMesh', 'voxelChunkLoaded')}>
+        <Entities in={loadedVoxelChunkMeshes}>
             {(entity) => {
                 const { voxelChunkMesh } = entity
 

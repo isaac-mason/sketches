@@ -2,7 +2,7 @@ import Rapier from '@dimforge/rapier3d-compat'
 import { Bounds, OrbitControls } from '@react-three/drei'
 import { ThreeEvent, useThree } from '@react-three/fiber'
 import { useControls } from 'leva'
-import { useEffect, useLayoutEffect } from 'react'
+import { useEffect, useLayoutEffect, useMemo } from 'react'
 import { Color } from 'three'
 import { Canvas } from '../../../../common'
 import { CorePlugin, Vec3 } from '../engine/core'
@@ -147,7 +147,7 @@ const Level = () => {
 }
 
 const Snow = () => {
-    const {  world, physicsWorld } = useVoxelEngine()
+    const { world, physicsWorld } = useVoxelEngine()
 
     useEffect(() => {
         const timeouts: NodeJS.Timeout[] = []
@@ -181,10 +181,15 @@ const Snow = () => {
 }
 
 const PhysicsVoxelCubeRenderer = () => {
-    const { react: { Entities, Component} } = useVoxelEngine()
+    const {
+        world,
+        react: { Entities, Component },
+    } = useVoxelEngine()
+
+    const rigidBodyQuery = useMemo(() => world.query((e) => e.has('rigidBody')), [])
 
     return (
-        <Entities where={(e) => e.has('rigidBody')}>
+        <Entities in={rigidBodyQuery}>
             <Component name="object3D">
                 <mesh>
                     <meshStandardMaterial color="white" />
