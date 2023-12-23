@@ -169,8 +169,7 @@ const sketchList = [
     {
         title: 'Fractals - Mandelbrot Set',
         path: 'fractals/mandelbrot-set',
-        tags: ['fractals', 'mandelbrot', 'tsl'],
-        hidden: true,
+        tags: ['fractals', 'mandelbrot-set'],
     },
     /* GLSL Shaders From Scratch */
     {
