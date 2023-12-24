@@ -1,4 +1,4 @@
-import { Addition, Base, Difference, Geometry, Intersection } from '@react-three/csg'
+import { Addition, Base, Geometry } from '@react-three/csg'
 import { RigidBody } from '@react-three/rapier'
 
 export const TrafficCone = (props: JSX.IntrinsicElements['group']) => {

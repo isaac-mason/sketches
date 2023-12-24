@@ -1,7 +1,7 @@
 import { Environment, Float, OrbitControls, useCubeTexture, useTexture } from '@react-three/drei'
 import { Vector3 } from '@react-three/fiber'
 import { Box, Flex } from '@react-three/flex'
-import { useEffect, useLayoutEffect, useRef } from 'react'
+import { useLayoutEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { BufferAttribute } from 'three'
 import { Canvas } from '../../../common'

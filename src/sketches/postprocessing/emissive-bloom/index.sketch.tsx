@@ -6,7 +6,7 @@ import { Canvas } from '../../../common'
 extend({ UnrealBloomPass })
 
 declare global {
-    namespace JSX {
+    namespace React.JSX {
         interface IntrinsicElements {
             unrealBloomPass: Object3DNode<UnrealBloomPass, typeof UnrealBloomPass>
         }

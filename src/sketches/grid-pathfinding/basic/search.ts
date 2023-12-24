@@ -157,7 +157,7 @@ export function bestFirstGraphSearch<Problem extends ProblemType, ProblemDef ext
     problem: ProblemDef,
     f: (problemDefinition: ProblemDef, node: Node<Problem>) => number,
 ): Node<Problem> | undefined {
-    let initialNode = new Node<Problem>({ state: problem.initial() })
+    const initialNode = new Node<Problem>({ state: problem.initial() })
 
     if (problem.goalTest(initialNode.state)) {
         return initialNode

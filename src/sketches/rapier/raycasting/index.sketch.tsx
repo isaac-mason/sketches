@@ -26,7 +26,7 @@ const Scene = () => {
 
     const [raycastHit, setRaycastHit] = useState<ShapeRapierUserData['shape'] | null>(null)
 
-    useFrame(({ clock: { elapsedTime } }, delta) => {
+    useFrame(({ clock: { elapsedTime } }) => {
         const laser = laserRef.current
         const line = lineRef.current
         if (!laser || !line) return

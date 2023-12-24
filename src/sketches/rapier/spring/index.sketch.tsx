@@ -1,12 +1,11 @@
+import { OrbitControls, Text } from '@react-three/drei'
 import { Physics, RapierRigidBody, RigidBody, useAfterPhysicsStep, useBeforePhysicsStep } from '@react-three/rapier'
 import { useControls } from 'leva'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { Vector3 } from 'three'
+import { create } from 'zustand'
 import { Canvas, usePageVisible } from '../../../common'
 import { Spring } from './spring'
-import { OrbitControls, Text } from '@react-three/drei'
-import { useThree } from '@react-three/fiber'
-import { create } from 'zustand'
 
 const LEVA_KEY = 'rapier-spring'
 
@@ -16,12 +15,11 @@ const usePointer = create<{ pointerDown: boolean; setPointerDown: (pointerDown: 
 }))
 
 const SpringDemo = () => {
-    const viewport = useThree((s) => s.viewport)
-
     const { pointerDown } = usePointer()
 
     const { springRestLength, springStiffness, springDamping } = useControls(LEVA_KEY, {
         postPosition: {
+            
             value: [0, 2],
             onChange: (value) => {
                 postRigidBody.current?.setTranslation(
@@ -55,7 +53,6 @@ const SpringDemo = () => {
         spring.current.stiffness = pointerDown ? springStiffness * 5 : springStiffness
         spring.current.restLength = pointerDown ? 0 : springRestLength
         spring.current.damping = springDamping
-        
     }, [pointerDown, springRestLength, springStiffness, springDamping])
 
     useBeforePhysicsStep(() => {

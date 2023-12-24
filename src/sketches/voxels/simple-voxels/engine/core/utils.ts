@@ -1,6 +1,5 @@
 import * as THREE from 'three'
 import { Vec3, VoxelChunk } from './plugin'
-import { Vector3Object } from '@react-three/rapier'
 
 export const CHUNK_BITS = 4
 export const CHUNK_SIZE = Math.pow(2, 4)

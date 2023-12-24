@@ -1,7 +1,4 @@
 import { OrthographicCamera } from '@react-three/drei'
-import { useThree } from '@react-three/fiber'
-import { useEffect, useRef } from 'react'
-import { Vector2 } from 'three'
 import { Canvas } from '../../../../common'
 import { useResolution } from '../../../../common/hooks/use-resolution'
 

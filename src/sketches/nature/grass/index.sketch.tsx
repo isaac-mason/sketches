@@ -47,8 +47,8 @@ const computeGrassAttributes = (instances: number, width: number) => {
 
     const tmpColor = new THREE.Color()
 
-    let tmpQuaternion_0 = new THREE.Quaternion()
-    let tmpQuaternion_1 = new THREE.Quaternion()
+    const tmpQuaternion_0 = new THREE.Quaternion()
+    const tmpQuaternion_1 = new THREE.Quaternion()
 
     // The min and max angle for the growth direction (in radians)
     const min = -0.25

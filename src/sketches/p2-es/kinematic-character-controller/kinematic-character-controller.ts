@@ -336,7 +336,7 @@ export class Controller extends RaycastController {
         }
 
         if (collisions.climbingSlope) {
-            let directionX = sign(velocity[0])
+            const directionX = sign(velocity[0])
             rayLength = Math.abs(velocity[0]) + skinWidth
 
             ray.collisionMask = this.collisionMask

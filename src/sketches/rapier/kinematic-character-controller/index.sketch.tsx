@@ -166,7 +166,7 @@ const useKinematicCharacterController = ({
         // todo: handle hitting ceiling
 
         // compute movement direction
-        let movementDirection = {
+        const movementDirection = {
             x: horizontalVelocity.current.x,
             y: jumpVelocity.current * factor,
             z: horizontalVelocity.current.z,

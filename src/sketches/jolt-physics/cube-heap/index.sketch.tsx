@@ -32,14 +32,14 @@ class PhysicsSystem extends System<EntityType> {
     constructor(executor: Executor<EntityType>) {
         super(executor)
 
-        let objectFilter = new jolt.ObjectLayerPairFilterTable(NUM_OBJECT_LAYERS)
+        const objectFilter = new jolt.ObjectLayerPairFilterTable(NUM_OBJECT_LAYERS)
         objectFilter.EnableCollision(LAYER_NON_MOVING, LAYER_MOVING)
         objectFilter.EnableCollision(LAYER_MOVING, LAYER_MOVING)
 
         const BP_LAYER_NON_MOVING = new jolt.BroadPhaseLayer(0)
         const BP_LAYER_MOVING = new jolt.BroadPhaseLayer(1)
         const NUM_BROAD_PHASE_LAYERS = 2
-        let bpInterface = new jolt.BroadPhaseLayerInterfaceTable(NUM_OBJECT_LAYERS, NUM_BROAD_PHASE_LAYERS)
+        const bpInterface = new jolt.BroadPhaseLayerInterfaceTable(NUM_OBJECT_LAYERS, NUM_BROAD_PHASE_LAYERS)
         bpInterface.MapObjectToBroadPhaseLayer(LAYER_NON_MOVING, BP_LAYER_NON_MOVING)
         bpInterface.MapObjectToBroadPhaseLayer(LAYER_MOVING, BP_LAYER_MOVING)
 
@@ -86,8 +86,8 @@ class PhysicsSystem extends System<EntityType> {
 
         // Update body transforms
         for (const { body, object3D } of this.bodies) {
-            let p = body.GetPosition()
-            let q = body.GetRotation()
+            const p = body.GetPosition()
+            const q = body.GetRotation()
             object3D.position.set(p.GetX(), p.GetY(), p.GetZ())
             object3D.quaternion.set(q.GetX(), q.GetY(), q.GetZ(), q.GetW())
         }

@@ -24,7 +24,7 @@ const diamondStep = (map: number[][], size: number, sideLength: number, range: n
         // For each column of squares
         for (let x = 0; x < Math.floor(size / (sideLength - 1)); x++) {
             // Find the average corners value
-            let average =
+            const average =
                 (map[y * (sideLength - 1)][x * (sideLength - 1)] +
                     map[(y + 1) * (sideLength - 1)][x * (sideLength - 1)] +
                     map[y * (sideLength - 1)][(x + 1) * (sideLength - 1)] +

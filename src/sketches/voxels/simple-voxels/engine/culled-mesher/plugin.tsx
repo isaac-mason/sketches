@@ -107,7 +107,7 @@ export class VoxelChunkMesherSystem extends System<CorePluginEntity & CulledMesh
             this.registerChunk(chunk)
         })
 
-        this.chunks.onEntityRemoved.add((e) => {
+        this.chunks.onEntityRemoved.add(() => {
             // todo
         })
 
