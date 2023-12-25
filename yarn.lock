@@ -1548,7 +1548,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-three/drei@npm:^9.56.10, @react-three/drei@npm:^9.92.4":
+"@react-three/drei@npm:^9.56.10":
   version: 9.92.4
   resolution: "@react-three/drei@npm:9.92.4"
   dependencies:
@@ -1585,6 +1585,46 @@ __metadata:
     react-dom:
       optional: true
   checksum: 8552941eaf7ad8f69b303f34d0eebd817c0dfc67b63d1eee7bee448b42573686e54df405d5a267083a40dfa419b64b2ed1efb740a26541bf2fc29fa2a2aab784
+  languageName: node
+  linkType: hard
+
+"@react-three/drei@npm:^9.92.6":
+  version: 9.92.6
+  resolution: "@react-three/drei@npm:9.92.6"
+  dependencies:
+    "@babel/runtime": "npm:^7.11.2"
+    "@mediapipe/tasks-vision": "npm:0.10.8"
+    "@react-spring/three": "npm:~9.6.1"
+    "@use-gesture/react": "npm:^10.2.24"
+    camera-controls: "npm:^2.4.2"
+    cross-env: "npm:^7.0.3"
+    detect-gpu: "npm:^5.0.28"
+    glsl-noise: "npm:^0.0.0"
+    lodash.clamp: "npm:^4.0.3"
+    lodash.omit: "npm:^4.5.0"
+    lodash.pick: "npm:^4.4.0"
+    maath: "npm:^0.10.7"
+    meshline: "npm:^3.1.6"
+    react-composer: "npm:^5.0.3"
+    react-merge-refs: "npm:^1.1.0"
+    stats-gl: "npm:^2.0.0"
+    stats.js: "npm:^0.17.0"
+    suspend-react: "npm:^0.1.3"
+    three-mesh-bvh: "npm:^0.6.7"
+    three-stdlib: "npm:^2.28.0"
+    troika-three-text: "npm:^0.47.2"
+    utility-types: "npm:^3.10.0"
+    uuid: "npm:^9.0.1"
+    zustand: "npm:^3.5.13"
+  peerDependencies:
+    "@react-three/fiber": ">=8.0"
+    react: ">=18.0"
+    react-dom: ">=18.0"
+    three: ">=0.137"
+  peerDependenciesMeta:
+    react-dom:
+      optional: true
+  checksum: 149e09ef341b5f7fa5846f0fa8d13c1145928f5dad6fb1d2496c1ffffb5cda4a801c31c45727f6abf72e0825d552770f52fcd9531865a1bab695278a6f63245e
   languageName: node
   linkType: hard
 
@@ -6298,7 +6338,7 @@ __metadata:
     "@isaac-mason/eslint-config-typescript": "npm:0.0.1"
     "@pmndrs/assets": "npm:^1.6.0"
     "@react-three/csg": "npm:^3.1.0"
-    "@react-three/drei": "npm:^9.92.4"
+    "@react-three/drei": "npm:^9.92.6"
     "@react-three/fiber": "npm:^8.15.12"
     "@react-three/flex": "npm:^1.0.1"
     "@react-three/postprocessing": "npm:^2.15.11"
