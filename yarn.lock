@@ -945,15 +945,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@isaac-mason/eslint-config-typescript@npm:0.0.1":
-  version: 0.0.1
-  resolution: "@isaac-mason/eslint-config-typescript@npm:0.0.1"
+"@isaac-mason/eslint-config-typescript@npm:0.0.2":
+  version: 0.0.2
+  resolution: "@isaac-mason/eslint-config-typescript@npm:0.0.2"
   dependencies:
     "@typescript-eslint/eslint-plugin": "npm:^6.15.0"
     "@typescript-eslint/parser": "npm:^6.7.3"
     eslint-plugin-import: "npm:^2.29.1"
-    typescript: "npm:^5.3.3"
-  checksum: e1da9407625cad003b7faee914aefdf81ca982c618e7011cdbe5188e40e8d8ab7659295eb32787c99fd0e8a172c1916ddeda56bd8f6e4266ddd5515b80ec111a
+  peerDependencies:
+    eslint: ^8.56.0
+    typescript: ^5.3.3
+  checksum: e637dbf98a1adaee08d4bbba15c2fb63be341b6e4ca65a7f3f6eb9fd072e0ccdc0b3c2ef9e701129fe366e22daf799440fc59a23a4b01cca6944cd94c8446bed
   languageName: node
   linkType: hard
 
@@ -6295,7 +6297,7 @@ __metadata:
     "@babel/plugin-proposal-class-properties": "npm:^7.18.6"
     "@babel/plugin-proposal-decorators": "npm:^7.23.2"
     "@dimforge/rapier3d-compat": "npm:0.11.2"
-    "@isaac-mason/eslint-config-typescript": "npm:0.0.1"
+    "@isaac-mason/eslint-config-typescript": "npm:0.0.2"
     "@pmndrs/assets": "npm:^1.6.0"
     "@react-three/csg": "npm:^3.1.0"
     "@react-three/drei": "npm:^9.92.4"
@@ -6847,7 +6849,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^5.3.2, typescript@npm:^5.3.3":
+"typescript@npm:^5.3.2":
   version: 5.3.3
   resolution: "typescript@npm:5.3.3"
   bin:
@@ -6857,7 +6859,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A^5.3.2#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.3.3#optional!builtin<compat/typescript>":
+"typescript@patch:typescript@npm%3A^5.3.2#optional!builtin<compat/typescript>":
   version: 5.3.3
   resolution: "typescript@patch:typescript@npm%3A5.3.3#optional!builtin<compat/typescript>::version=5.3.3&hash=e012d7"
   bin:
