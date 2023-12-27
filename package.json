@@ -36,7 +36,7 @@
         "simplex-noise": "^4.0.1",
         "styled-breakpoints": "^12.1.9",
         "styled-components": "^6.1.0",
-        "three": "^0.159.0",
+        "three": "^0.160.0",
         "tunnel-rat": "^0.1.2",
         "zustand": "^4.4.7"
     },
@@ -49,7 +49,7 @@
         "@types/node": "^20.9.0",
         "@types/react": "^18.2.39",
         "@types/react-dom": "^18.2.17",
-        "@types/three": "^0.159.0",
+        "@types/three": "^0.160.0",
         "@vitejs/plugin-basic-ssl": "^1.0.2",
         "@vitejs/plugin-react": "^4.2.1",
         "eslint": "^8.56.0",
