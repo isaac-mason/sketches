@@ -22,48 +22,48 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@arancini/core@npm:6.0.0":
-  version: 6.0.0
-  resolution: "@arancini/core@npm:6.0.0"
+"@arancini/core@npm:6.0.2":
+  version: 6.0.2
+  resolution: "@arancini/core@npm:6.0.2"
   dependencies:
-    "@arancini/events": "npm:6.0.0"
-    "@arancini/pool": "npm:6.0.0"
-  checksum: 2df52d6f4a080eae974c56854d9870e333244f8e16ddac48d31a10ba9c87d4d3695af72e974f2d287eade1c64ffad9b758f4073a4d095d7889901d7bee40ac93
+    "@arancini/events": "npm:6.0.2"
+    "@arancini/pool": "npm:6.0.2"
+  checksum: 0ff1b6dcb2127b4d29e2ebedb6e9a7e465aeb145d651ac068de465bf8586ad725750ef87a74e439db5fc5a7dd033b45a34b8a0be10efee9674872ac77150656a
   languageName: node
   linkType: hard
 
-"@arancini/events@npm:6.0.0":
-  version: 6.0.0
-  resolution: "@arancini/events@npm:6.0.0"
-  checksum: 285b74b2a0c8f4fa20a0e10cf53a86a99d21e3e9aa08644c31908edfe6167115657b9f77924d5282f2eb0864c15bbb66de4a2f7e8bbf967683bac5e6920594a1
+"@arancini/events@npm:6.0.2":
+  version: 6.0.2
+  resolution: "@arancini/events@npm:6.0.2"
+  checksum: 77b567cf910da939f54f8304bb6a6edecb2fa98d4786eac534304e200fb60363bd860ad9d8e1e169b72b1296ef9d38233f819751d2d35ca7e078c01a5067e688
   languageName: node
   linkType: hard
 
-"@arancini/pool@npm:6.0.0":
-  version: 6.0.0
-  resolution: "@arancini/pool@npm:6.0.0"
-  checksum: 7fccbbac9c07e9a4b4b36050b3cee6f974f7f1fc9ac9166137aecb0ffafe8946017d7ad2d8d2e1fa93479a007e6d41e06312c2cdc7723d0fa68d04569d13d498
+"@arancini/pool@npm:6.0.2":
+  version: 6.0.2
+  resolution: "@arancini/pool@npm:6.0.2"
+  checksum: 5cf0016b2afa71db244b419353fbc53ea12c296efae39cd2a0b670cf1831ae67f32a570e49ce3aea0c22a557fb11dcdf01104314a0807e16bc852ad401f3fe5a
   languageName: node
   linkType: hard
 
-"@arancini/react@npm:6.0.0":
-  version: 6.0.0
-  resolution: "@arancini/react@npm:6.0.0"
+"@arancini/react@npm:6.0.2":
+  version: 6.0.2
+  resolution: "@arancini/react@npm:6.0.2"
   dependencies:
-    "@arancini/core": "npm:6.0.0"
+    "@arancini/core": "npm:6.0.2"
   peerDependencies:
     react: ^18.0.0
     react-dom: ^18.0.0
-  checksum: 5963e9345c04f68f4a43cbecf9e9e959be5a186bfae28e8d19df50762a56c1e1dde56e55d5b2b38721327e0fb66724aec1223493a299e9bf526acea7071a3d32
+  checksum: 63606feb0d3d58c0bae9501d4d4d0e5c2ae3d7f839f29d4581a6f180947048a5bc6d2326af808bc9bd4f4862292f2519e0135d4bd757b76f2f23c967cc50737b
   languageName: node
   linkType: hard
 
-"@arancini/systems@npm:6.0.0":
-  version: 6.0.0
-  resolution: "@arancini/systems@npm:6.0.0"
+"@arancini/systems@npm:6.0.2":
+  version: 6.0.2
+  resolution: "@arancini/systems@npm:6.0.2"
   dependencies:
-    "@arancini/core": "npm:6.0.0"
-  checksum: 5b12b18749cf9a8ab8e2a3283c626dbd8d8f0b7e0f98554663e713eb1e13878b5923043fbe6cff080e03448fef7c338ca9598b0251459e52ad299b0931c07e53
+    "@arancini/core": "npm:6.0.2"
+  checksum: f7d5774ac316acc3c33d6af4340a5285a0b58e9f317bf5c861a718b26258242e05c5e8eccaf2f259b65067878b77d717f11f7768580ff86315f00a3fbd553644
   languageName: node
   linkType: hard
 
@@ -2566,18 +2566,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"arancini@npm:^6.0.0":
-  version: 6.0.0
-  resolution: "arancini@npm:6.0.0"
+"arancini@npm:^6.0.2":
+  version: 6.0.2
+  resolution: "arancini@npm:6.0.2"
   dependencies:
-    "@arancini/core": "npm:6.0.0"
-    "@arancini/events": "npm:6.0.0"
-    "@arancini/react": "npm:6.0.0"
-    "@arancini/systems": "npm:6.0.0"
+    "@arancini/core": "npm:6.0.2"
+    "@arancini/events": "npm:6.0.2"
+    "@arancini/react": "npm:6.0.2"
+    "@arancini/systems": "npm:6.0.2"
   peerDependencies:
     react: ^18.0.0
     react-dom: ^18.0.0
-  checksum: f6f2b31735e5669e87748291b62a84d4c59c9d896d3c241cd753064aba2297cd177ed5892e2d059ef5175b49c809e34c1740150f4096aa44d4c0772f8c7f9d6e
+  checksum: c28abe26349516c34bda6fad3dbdcd563aeb3eaafb2bbb25a83f7eb14c063e6e063a0252e948e196404c6811ccc3eb247a5fd51e50db270d267fb7e4751ab295
   languageName: node
   linkType: hard
 
@@ -6355,7 +6355,7 @@ __metadata:
     "@use-gesture/react": "npm:^10.3.0"
     "@vitejs/plugin-basic-ssl": "npm:^1.0.2"
     "@vitejs/plugin-react": "npm:^4.2.1"
-    arancini: "npm:^6.0.0"
+    arancini: "npm:^6.0.2"
     d3: "npm:^7.8.5"
     eslint: "npm:^8.56.0"
     jolt-physics: "npm:^0.11.0"
