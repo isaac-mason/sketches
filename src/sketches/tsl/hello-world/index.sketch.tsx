@@ -1,6 +1,6 @@
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei'
 import { MeshBasicNodeMaterial, mix, positionLocal, sin, timerLocal, vec3 } from 'three/examples/jsm/nodes/Nodes.js'
-import { WebGPUCanvas } from '../../../common/components/webgpu-canvas'
+import { WebGPUCanvas } from '../../../common'
 
 const material = new MeshBasicNodeMaterial()
 
