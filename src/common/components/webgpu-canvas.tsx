@@ -24,7 +24,7 @@ const UnsupportedNotice = styled.div`
     padding: 3em;
 `
 
-export const WebGPUCanvas = (props: React.PropsWithChildren<any>) => {
+export const WebGPUCanvas = ({ children, ...props }: React.PropsWithChildren<any>) => {
     if (!WebGPUCapabilities.isAvailable()) {
         return (
             <UnsupportedNoticeWrapper>
@@ -37,10 +37,13 @@ export const WebGPUCanvas = (props: React.PropsWithChildren<any>) => {
 
     return (
         <Canvas
+            id="gl"
             gl={(canvas: HTMLCanvasElement) => {
                 return new WebGPURenderer({ canvas })
             }}
             {...props}
-        />
+        >
+            {children}
+        </Canvas>
     )
 }
