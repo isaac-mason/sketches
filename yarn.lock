@@ -2319,7 +2319,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:^18.2.39":
+"@types/react@npm:*":
   version: 18.2.45
   resolution: "@types/react@npm:18.2.45"
   dependencies:
@@ -2327,6 +2327,17 @@ __metadata:
     "@types/scheduler": "npm:*"
     csstype: "npm:^3.0.2"
   checksum: bd27fd8a959fa776965997af89cb04e43e7868416850fdff421b5539f389efa35acae3d55915c9f32d7b00fb388550302bf8a7f06010abf9ad431e5bf58cb774
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:^18.2.47":
+  version: 18.2.47
+  resolution: "@types/react@npm:18.2.47"
+  dependencies:
+    "@types/prop-types": "npm:*"
+    "@types/scheduler": "npm:*"
+    csstype: "npm:^3.0.2"
+  checksum: 0a98c2ef8303909f78c973ac9731cb671f3a0b96bc5213b538d1a50cbaae6e51b6befd64845a9cb95af8528767315d5bd99a85608eb716c020393c7d33a9b477
   languageName: node
   linkType: hard
 
@@ -6489,7 +6500,7 @@ __metadata:
     "@types/d3": "npm:^7.4.3"
     "@types/eslint": "npm:^8"
     "@types/node": "npm:^20.9.0"
-    "@types/react": "npm:^18.2.39"
+    "@types/react": "npm:^18.2.47"
     "@types/react-dom": "npm:^18.2.17"
     "@types/three": "npm:^0.160.0"
     "@use-gesture/react": "npm:^10.3.0"
