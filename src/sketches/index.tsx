@@ -171,6 +171,12 @@ const sketchList = [
         path: 'fractals/mandelbrot-set',
         tags: ['fractals', 'mandelbrot-set'],
     },
+    /* TSL */
+    {
+        title: 'TSL - Hello World',
+        path: 'tsl/hello-world',
+        tags: ['tsl'],
+    },
     /* GLSL Shaders From Scratch */
     {
         title: 'GLSL Shaders From Scratch - Intro - Varyings',

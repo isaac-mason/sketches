@@ -62,6 +62,9 @@ export default defineConfig(() => {
             basicSsl(),
         ],
         optimizeDeps: {
+            esbuildOptions: {
+                target: 'esnext',
+            },
             exclude: [
                 // these packages do not play nicely with vite pre-bundling
                 'recast-navigation',
