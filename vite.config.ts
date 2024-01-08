@@ -58,7 +58,16 @@ export default defineConfig(() => {
                     })
                 },
             },
-            // for easy local development of xr sketches
+            // hack: work around issues with WebGPURenderer
+            {
+                name: 'no-treeshake-three-examples-jsm-renderers',
+                transform(_code, id) {
+                    if (id.includes('three/examples/jsm/renderers')) {
+                        return { moduleSideEffects: 'no-treeshake' }
+                    }
+                },
+            },
+            // for easy local development using features that require a secure context
             basicSsl(),
         ],
         optimizeDeps: {
