@@ -24,8 +24,14 @@ const UnsupportedNotice = styled.div`
     padding: 3em;
 `
 
-export const WebGPUCanvas = ({ children, ...props }: React.PropsWithChildren<any>) => {
-    if (!WebGPUCapabilities.isAvailable()) {
+export type WebGPUCanvasProps = React.PropsWithChildren<{
+    /**
+     * @default true
+     */
+    webglFallback?: boolean
+}>
+export const WebGPUCanvas = ({ children, webglFallback = true, ...props }: React.PropsWithChildren<any>) => {
+    if (!webglFallback && !WebGPUCapabilities.isAvailable()) {
         return (
             <UnsupportedNoticeWrapper>
                 <UnsupportedNotice>
