@@ -1778,10 +1778,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@remix-run/router@npm:1.14.0":
-  version: 1.14.0
-  resolution: "@remix-run/router@npm:1.14.0"
-  checksum: cc46150f087695ba9da9aa905bcbe1d53d7e3ae4de37645c206b4bcb57a4605ebf3bdc87b9eff299562e7d68ddf80d412ac64cc60ecd2116d4aeb39cf8a0e358
+"@remix-run/router@npm:1.14.1":
+  version: 1.14.1
+  resolution: "@remix-run/router@npm:1.14.1"
+  checksum: caed61639006444a66ca832f1e500bac2fcf02695183e967ff1452d3172f888f2bb40591b239c85f9003b9628383cfd4c8ef55cde800d14276905c7031c9f0b9
   languageName: node
   linkType: hard
 
@@ -6023,27 +6023,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router-dom@npm:^6.20.1":
-  version: 6.21.0
-  resolution: "react-router-dom@npm:6.21.0"
+"react-router-dom@npm:^6.21.1":
+  version: 6.21.1
+  resolution: "react-router-dom@npm:6.21.1"
   dependencies:
-    "@remix-run/router": "npm:1.14.0"
-    react-router: "npm:6.21.0"
+    "@remix-run/router": "npm:1.14.1"
+    react-router: "npm:6.21.1"
   peerDependencies:
     react: ">=16.8"
     react-dom: ">=16.8"
-  checksum: 7448674817971c8138a96cef05331fb45cb6ef1f71450db9da87e3e0d0586bb55ba85fd3ca741ed7a22a40b6b6e544c11cff9e2fe3fa5957faf7b8ab74a0dcf3
+  checksum: 2d75bd889828fa5516ad076b44506656d826c365645e7079138cd0ef899db28a1b212f708a6c6e3b543ae11b96b2031f01201cc2fe1733dd4d9c5cbdd4d734ef
   languageName: node
   linkType: hard
 
-"react-router@npm:6.21.0":
-  version: 6.21.0
-  resolution: "react-router@npm:6.21.0"
+"react-router@npm:6.21.1":
+  version: 6.21.1
+  resolution: "react-router@npm:6.21.1"
   dependencies:
-    "@remix-run/router": "npm:1.14.0"
+    "@remix-run/router": "npm:1.14.1"
   peerDependencies:
     react: ">=16.8"
-  checksum: 10c58589d804b823caf3fd46403662769375618ae39ebae99f8df167c43440bb8ebf853548ba2bf96f21027c72c234d4fc37042643c91c9920f1cdfda5e03fab
+  checksum: 1220cc75e0c915a26dde9dbb6509a8f0b0163d96e5ad591af91d9bb5a92a18401718f8d872a03d1cb366e7a6216c165a5cadd12375adf97943f37d7f5c487a90
   languageName: node
   linkType: hard
 
@@ -6518,7 +6518,7 @@ __metadata:
     react: "npm:^18.2.0"
     react-colorful: "npm:^5.6.1"
     react-dom: "npm:^18.2.0"
-    react-router-dom: "npm:^6.20.1"
+    react-router-dom: "npm:^6.21.1"
     recast-navigation: "npm:^0.16.1"
     simplex-noise: "npm:^4.0.1"
     styled-breakpoints: "npm:^12.1.9"
