@@ -141,7 +141,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/helper-create-class-features-plugin@npm:^7.18.6, @babel/helper-create-class-features-plugin@npm:^7.23.6":
+"@babel/helper-create-class-features-plugin@npm:^7.18.6":
   version: 7.23.6
   resolution: "@babel/helper-create-class-features-plugin@npm:7.23.6"
   dependencies:
@@ -157,6 +157,25 @@ __metadata:
   peerDependencies:
     "@babel/core": ^7.0.0
   checksum: 5e0cff67a6809d2285215057be45de9dd8900b91e3526fad5eac79023c1d6bee32aed1a04fcdf0e4d99ee4bd49ea5459cb98260c13222edf3bb983621bb452f4
+  languageName: node
+  linkType: hard
+
+"@babel/helper-create-class-features-plugin@npm:^7.23.7":
+  version: 7.23.7
+  resolution: "@babel/helper-create-class-features-plugin@npm:7.23.7"
+  dependencies:
+    "@babel/helper-annotate-as-pure": "npm:^7.22.5"
+    "@babel/helper-environment-visitor": "npm:^7.22.20"
+    "@babel/helper-function-name": "npm:^7.23.0"
+    "@babel/helper-member-expression-to-functions": "npm:^7.23.0"
+    "@babel/helper-optimise-call-expression": "npm:^7.22.5"
+    "@babel/helper-replace-supers": "npm:^7.22.20"
+    "@babel/helper-skip-transparent-expression-wrappers": "npm:^7.22.5"
+    "@babel/helper-split-export-declaration": "npm:^7.22.6"
+    semver: "npm:^6.3.1"
+  peerDependencies:
+    "@babel/core": ^7.0.0
+  checksum: c8b3ef58fca399a25f00d703b0fb2ac1d86642d9e3bd7af04df77857641ed08aaca042ffb271ef93771f9272481fd1cf102a9bddfcee407fb126c927deeef6a7
   languageName: node
   linkType: hard
 
@@ -339,19 +358,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/plugin-proposal-decorators@npm:^7.23.2":
-  version: 7.23.6
-  resolution: "@babel/plugin-proposal-decorators@npm:7.23.6"
+"@babel/plugin-proposal-decorators@npm:^7.23.7":
+  version: 7.23.7
+  resolution: "@babel/plugin-proposal-decorators@npm:7.23.7"
   dependencies:
-    "@babel/helper-create-class-features-plugin": "npm:^7.23.6"
+    "@babel/helper-create-class-features-plugin": "npm:^7.23.7"
     "@babel/helper-plugin-utils": "npm:^7.22.5"
-    "@babel/helper-replace-supers": "npm:^7.22.20"
-    "@babel/helper-skip-transparent-expression-wrappers": "npm:^7.22.5"
-    "@babel/helper-split-export-declaration": "npm:^7.22.6"
     "@babel/plugin-syntax-decorators": "npm:^7.23.3"
   peerDependencies:
     "@babel/core": ^7.0.0-0
-  checksum: 091796967ad728c7a00ae60c978d20f17cea08fa37bf977568880324b2619f8ce11b4a3797ef1b3137085fcb890639c49462f6be19f7cc3707e17e057df11c75
+  checksum: 1fc506b113fa204323537b3299686641c29b7626f05aa098c68a818da65ce657d2398c49aea69af91c45bbdfca6086424e28d283729dba401eb93c8a16826c95
   languageName: node
   linkType: hard
 
@@ -6486,7 +6502,7 @@ __metadata:
   resolution: "sketches@workspace:."
   dependencies:
     "@babel/plugin-proposal-class-properties": "npm:^7.18.6"
-    "@babel/plugin-proposal-decorators": "npm:^7.23.2"
+    "@babel/plugin-proposal-decorators": "npm:^7.23.7"
     "@dimforge/rapier3d-compat": "npm:0.11.2"
     "@isaac-mason/eslint-config-typescript": "npm:0.0.2"
     "@pmndrs/assets": "npm:^1.6.0"
