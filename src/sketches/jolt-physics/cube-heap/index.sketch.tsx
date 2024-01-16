@@ -3,176 +3,89 @@ import { Environment, OrbitControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { World } from 'arancini'
 import { createReactAPI } from 'arancini/react'
-import { Executor, System } from 'arancini/systems'
-import Jolt from 'jolt-physics'
+import { Executor } from 'arancini/systems'
 import { useControls } from 'leva'
 import { useMemo, useRef } from 'react'
 import { SpotLightHelper, Vector3Tuple } from 'three'
 import { Canvas, Helper, useInterval } from '../../../common'
+import { JoltEntity, PhysicsSystem, createBodyUtils, jolt, joltComponents } from '../jolt-common'
 
-type EntityType = {
-    body?: Jolt.Body
-    object3D?: THREE.Object3D
+type EntityType = JoltEntity & {
     teleporting?: boolean
 }
 
-const jolt = await Jolt()
-
-const LAYER_NON_MOVING = 0;
-const LAYER_MOVING = 1;
-const NUM_OBJECT_LAYERS = 2;
-
-class PhysicsSystem extends System<EntityType> {
-    joltInterface: Jolt.JoltInterface
-    physicsSystem: Jolt.PhysicsSystem
-    bodyInterface: Jolt.BodyInterface
-
-    bodies = this.query((e) => e.has('body', 'object3D'))
-
-    constructor(executor: Executor<EntityType>) {
-        super(executor)
-
-        const objectFilter = new jolt.ObjectLayerPairFilterTable(NUM_OBJECT_LAYERS)
-        objectFilter.EnableCollision(LAYER_NON_MOVING, LAYER_MOVING)
-        objectFilter.EnableCollision(LAYER_MOVING, LAYER_MOVING)
-
-        const BP_LAYER_NON_MOVING = new jolt.BroadPhaseLayer(0)
-        const BP_LAYER_MOVING = new jolt.BroadPhaseLayer(1)
-        const NUM_BROAD_PHASE_LAYERS = 2
-        const bpInterface = new jolt.BroadPhaseLayerInterfaceTable(NUM_OBJECT_LAYERS, NUM_BROAD_PHASE_LAYERS)
-        bpInterface.MapObjectToBroadPhaseLayer(LAYER_NON_MOVING, BP_LAYER_NON_MOVING)
-        bpInterface.MapObjectToBroadPhaseLayer(LAYER_MOVING, BP_LAYER_MOVING)
-
-        const settings = new jolt.JoltSettings()
-        settings.mObjectLayerPairFilter = objectFilter
-        settings.mBroadPhaseLayerInterface = bpInterface
-        settings.mObjectVsBroadPhaseLayerFilter = new jolt.ObjectVsBroadPhaseLayerFilterTable(
-            settings.mBroadPhaseLayerInterface,
-            NUM_BROAD_PHASE_LAYERS,
-            settings.mObjectLayerPairFilter,
-            NUM_OBJECT_LAYERS,
-        )
-
-        this.joltInterface = new jolt.JoltInterface(settings)
-        jolt.destroy(settings)
-
-        this.physicsSystem = this.joltInterface.GetPhysicsSystem()
-        this.bodyInterface = this.physicsSystem.GetBodyInterface()
-
-        this.physicsSystem.SetGravity(new jolt.Vec3(0, -10, 0))
-    }
-
-    onInit(): void {
-        this.bodies.onEntityAdded.add(({ body }) => {
-            this.bodyInterface.AddBody(body.GetID(), jolt.EActivation_Activate)
-        })
-
-        this.bodies.onEntityRemoved.add(({ body }) => {
-            if (body) {
-                this.bodyInterface.RemoveBody(body.GetID())
-            }
-        })
-    }
-
-    onUpdate(delta: number): void {
-        // Don't go below 30 Hz to prevent spiral of death
-        const deltaTime = Math.min(delta, 1.0 / 30.0)
-
-        // When running below 55 Hz, do 2 steps instead of 1
-        const numSteps = deltaTime > 1.0 / 55.0 ? 2 : 1
-
-        // Step the physics world
-        this.joltInterface.Step(deltaTime, numSteps)
-
-        // Update body transforms
-        for (const { body, object3D } of this.bodies) {
-            const p = body.GetPosition()
-            const q = body.GetRotation()
-            object3D.position.set(p.GetX(), p.GetY(), p.GetZ())
-            object3D.quaternion.set(q.GetX(), q.GetY(), q.GetZ(), q.GetW())
-        }
-    }
-}
-
 const world = new World<EntityType>({
-    components: ['body', 'object3D', 'teleporting'],
+    components: [...joltComponents, 'teleporting'],
 })
 
+world.create({ physicsConfig: { gravity: [0, -9.81, 0] } })
+
 const executor = new Executor(world)
-
 executor.add(PhysicsSystem)
-
 executor.init()
+
+const { bodyInterface } = executor.get(PhysicsSystem)!
+
+const { createBoxBody } = createBodyUtils(bodyInterface)
 
 const { Entity, Component } = createReactAPI(world)
 
-const usePhysics = () => {
-    return useMemo(() => executor.get(PhysicsSystem), [])!
+type GroundProps = {
+    args: Vector3Tuple
+    position: Vector3Tuple
 }
 
-const Ground = () => {
-    const { bodyInterface } = usePhysics()
-
-    const body = useMemo(() => {
-        const shape = new jolt.BoxShape(new jolt.Vec3(100, 1, 100))
-
-        const creationSettings = new jolt.BodyCreationSettings(
-            shape,
-            new jolt.Vec3(0, 0, 0),
-            new jolt.Quat(0, 0, 0, 1),
-            jolt.EMotionType_Static,
-            LAYER_NON_MOVING,
-        )
-        creationSettings.mRestitution = 0.5
-        creationSettings.mFriction = 1
-
-        return bodyInterface.CreateBody(creationSettings)
-    }, [])
+const Ground = ({ args, position }: GroundProps) => {
+    const body = useMemo(
+        () =>
+            createBoxBody({
+                args,
+                position,
+                motionType: 'static',
+                layer: 'nonMoving',
+                restitution: 0.5,
+                friction: 1,
+            }),
+        [],
+    )
 
     return (
         <Entity body={body}>
-            <Component name="object3D">
+            <Component name="three">
                 <mesh receiveShadow castShadow>
                     <meshStandardMaterial color="#333" />
-                    <boxGeometry args={[200, 2, 200]} />
+                    <boxGeometry args={args.map((v) => v * 2) as Vector3Tuple} />
                 </mesh>
             </Component>
         </Entity>
     )
 }
 
-type BoxProps = {
-    args: [number, number, number]
-    position: [number, number, number]
+type FallingBoxProps = {
+    args: Vector3Tuple
+    position: Vector3Tuple
     color?: string
 }
 
-const Box = ({ args, position, color }: BoxProps) => {
-    const { bodyInterface } = usePhysics()
-
-    const body = useMemo(() => {
-        const shape = new jolt.BoxShape(new jolt.Vec3(...args))
-
-        const creationSettings = new jolt.BodyCreationSettings(
-            shape,
-            new jolt.Vec3(...position),
-            new jolt.Quat(0, 0, 0, 1),
-            jolt.EMotionType_Dynamic,
-            LAYER_MOVING,
-        )
-        creationSettings.mRestitution = 0.5
-
-        return bodyInterface.CreateBody(creationSettings)
-    }, [])
-
-    const boxGeometryArgs = useMemo(() => args.map((v) => v * 2) as Vector3Tuple, [args])
+const FallingBox = ({ args, position, color }: FallingBoxProps) => {
+    const body = useMemo(
+        () =>
+            createBoxBody({
+                args,
+                position,
+                motionType: 'dynamic',
+                layer: 'moving',
+                restitution: 0.5,
+            }),
+        [],
+    )
 
     return (
         <Entity body={body} teleporting>
-            <Component name="object3D">
+            <Component name="three">
                 <mesh receiveShadow castShadow>
                     <meshStandardMaterial color={color} />
-                    <boxGeometry args={boxGeometryArgs} />
+                    <boxGeometry args={args.map((v) => v * 2) as Vector3Tuple} />
                 </mesh>
             </Component>
         </Entity>
@@ -181,8 +94,10 @@ const Box = ({ args, position, color }: BoxProps) => {
 
 const COLORS = ['orange', 'white', 'pink', 'skyblue']
 
-const App = () => {
-    const { bodyInterface } = usePhysics()
+const Scene = () => {
+    const { spotLightHelper } = useControls('jolt-physics-cube-heap', {
+        spotLightHelper: false,
+    })
 
     useFrame((_, delta) => {
         executor.update(delta)
@@ -192,6 +107,8 @@ const App = () => {
     const nextToTeleport = useRef(0)
 
     useInterval(() => {
+        if (bodiesToTeleport.entities.length <= 0) return
+
         const index = nextToTeleport.current % bodiesToTeleport.entities.length
 
         const body = bodiesToTeleport.entities[index].body
@@ -210,37 +127,25 @@ const App = () => {
     return (
         <>
             {Array.from({ length: 500 }).map((_, idx) => (
-                <Box key={idx} args={[1, 1, 1]} position={[0, -100 - idx, 0]} color={COLORS[idx % COLORS.length]} />
+                <FallingBox key={idx} args={[1, 1, 1]} position={[0, -100 - idx * 2, 0]} color={COLORS[idx % COLORS.length]} />
             ))}
 
-            <Ground />
+            <Ground args={[200, 2, 200]} position={[0, 0, 0]} />
+
+            <spotLight position={[50, 50, 50]} angle={0.3} intensity={100} distance={1000} decay={1} penumbra={0.5} castShadow>
+                {spotLightHelper && <Helper type={SpotLightHelper} />}
+            </spotLight>
+
+            <Environment files={cityEnvironment} />
         </>
     )
 }
 
 export default () => {
-    const { spotLightHelper } = useControls('jolt-physics-cube-heap', {
-        spotLightHelper: false,
-    })
-
     return (
         <>
             <Canvas shadows camera={{ position: [-10, 30, 40] }}>
-                <App />
-
-                <spotLight
-                    position={[50, 50, 50]}
-                    angle={0.3}
-                    intensity={100}
-                    distance={1000}
-                    decay={1}
-                    penumbra={0.5}
-                    castShadow
-                >
-                    {spotLightHelper && <Helper type={SpotLightHelper} />}
-                </spotLight>
-
-                <Environment files={cityEnvironment} />
+                <Scene />
 
                 <OrbitControls target={[0, 10, 0]} />
             </Canvas>
