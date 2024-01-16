@@ -5884,12 +5884,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^3.1.0":
-  version: 3.1.1
-  resolution: "prettier@npm:3.1.1"
+"prettier@npm:^3.2.2":
+  version: 3.2.2
+  resolution: "prettier@npm:3.2.2"
   bin:
     prettier: bin/prettier.cjs
-  checksum: 26a249f321b97d26c04483f1bf2eeb22e082a76f4222a2c922bebdc60111691aad4ec3979610e83942e0b956058ec361d9e9c81c185172264eb6db9aa678082b
+  checksum: ab9470ff6cfd19f28bc424f22e58f2fc4a488d148b9384f6c3739235017c8350cae82b3697392c23d9b098b9d8dfaa1cc9ff4ef25fd45f54c97b95f9cc7a1f7d
   languageName: node
   linkType: hard
 
@@ -6529,7 +6529,7 @@ __metadata:
     leva: "npm:^0.9.35"
     meshline: "npm:3.1.6"
     p2-es: "npm:^1.2.3"
-    prettier: "npm:^3.1.0"
+    prettier: "npm:^3.2.2"
     r3f-perf: "npm:^7.1.2"
     react: "npm:^18.2.0"
     react-colorful: "npm:^5.6.1"
