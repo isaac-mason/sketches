@@ -407,9 +407,11 @@ const LazySketch = ({ displayMode }: LazySketchProps) => {
     const { sketch, options } = useAsyncValue() as SketchData
 
     useEffect(() => {
-        if (sketch) {
-            gtag('event', 'sketch_navigation', { route: sketch.route, title: sketch.title })
-        }
+        if (!sketch) return
+
+        document.title = sketch.route === 'intro' ? 'Sketches | Isaac Mason' : `${sketch.title} | Sketches`
+
+        gtag('event', 'sketch_navigation', { route: sketch.route, title: sketch.title })
     }, [sketch])
 
     return (
