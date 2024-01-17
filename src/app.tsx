@@ -408,7 +408,7 @@ const LazySketch = ({ displayMode }: LazySketchProps) => {
 
     useEffect(() => {
         if (sketch) {
-            gtag({ event: 'sketch_navigation', route: sketch })
+            gtag('event', 'sketch_navigation', { route: sketch.route, title: sketch.title })
         }
     }, [sketch])
 
