@@ -132,7 +132,7 @@ class PlayerModelSystem extends System<EntityType> {
     }
 }
 
-class CameraSystem extends System {
+class CameraSystem extends System<EntityType> {
     camera = this.singleton('camera', { required: true })!
 
     players = this.query((e) => e.has('isPlayer', 'physicsBody', 'object3D'))
