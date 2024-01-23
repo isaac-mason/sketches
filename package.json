@@ -57,7 +57,7 @@
         "typescript": "^5.3.2",
         "vite": "^5.0.12",
         "vite-imagetools": "^6.2.8",
-        "vite-plugin-html": "^3.2.1"
+        "vite-plugin-html": "^3.2.2"
     },
     "packageManager": "yarn@4.0.2"
 }
