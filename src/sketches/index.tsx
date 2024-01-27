@@ -3,6 +3,12 @@ import { Sketch, SketchOptions } from './types'
 
 const sketchList = [
     { title: 'Intro', path: 'intro' },
+    /* Lines */
+    {
+        title: 'Lines - Image',
+        path: 'lines/image',
+        tags: ['lines', 'image'],
+    },
     /* Rapier */
     {
         title: 'Rapier - Raycasting',
