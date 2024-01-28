@@ -1,16 +1,16 @@
 import sunsetEnvironment from '@pmndrs/assets/hdri/sunset.exr'
-import { Bounds, Environment, Html, OrbitControls } from '@react-three/drei'
+import { Environment, Html, OrbitControls } from '@react-three/drei'
 import { useControls } from 'leva'
 import { useCallback, useEffect, useMemo } from 'react'
 import styled from 'styled-components'
 import { create } from 'zustand'
 import { Canvas } from '../../../common'
+import { Flag } from './components/flag'
 import { Floor } from './components/floor'
 import { Rocks } from './components/rocks'
 import { GridPathfindingProblem, GridPathfindingProblemDefinition, fScore } from './grid-pathfinding-problem'
 import { Node, bestFirstGraphSearch } from './search'
 import { Vec2 } from './vec2'
-import { Flag } from './components/flag'
 
 type PathfindingState = {
     start: Vec2
@@ -247,10 +247,8 @@ export default () => {
 
     return (
         <>
-            <Canvas camera={{ position: [0, 8, 5] }}>
-                <Bounds fit observe margin={1.5} key={levelSize}>
-                    <Level />
-                </Bounds>
+            <Canvas camera={{ position: [0, 5, 3] }}>
+                <Level />
 
                 <Path />
 
@@ -258,7 +256,7 @@ export default () => {
 
                 <Environment files={sunsetEnvironment} />
 
-                <OrbitControls makeDefault />
+                <OrbitControls makeDefault target={[-0.5, 0, 0]} />
             </Canvas>
 
             <Info>
