@@ -1613,9 +1613,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-three/drei@npm:^9.93.1":
-  version: 9.93.1
-  resolution: "@react-three/drei@npm:9.93.1"
+"@react-three/drei@npm:^9.96.5":
+  version: 9.96.5
+  resolution: "@react-three/drei@npm:9.96.5"
   dependencies:
     "@babel/runtime": "npm:^7.11.2"
     "@mediapipe/tasks-vision": "npm:0.10.8"
@@ -1625,9 +1625,6 @@ __metadata:
     cross-env: "npm:^7.0.3"
     detect-gpu: "npm:^5.0.28"
     glsl-noise: "npm:^0.0.0"
-    lodash.clamp: "npm:^4.0.3"
-    lodash.omit: "npm:^4.5.0"
-    lodash.pick: "npm:^4.4.0"
     maath: "npm:^0.10.7"
     meshline: "npm:^3.1.6"
     react-composer: "npm:^5.0.3"
@@ -1635,12 +1632,13 @@ __metadata:
     stats-gl: "npm:^2.0.0"
     stats.js: "npm:^0.17.0"
     suspend-react: "npm:^0.1.3"
-    three-mesh-bvh: "npm:^0.6.7"
-    three-stdlib: "npm:^2.28.0"
+    three-mesh-bvh: "npm:^0.7.0"
+    three-stdlib: "npm:^2.29.4"
     troika-three-text: "npm:^0.47.2"
+    tunnel-rat: "npm:^0.1.2"
     utility-types: "npm:^3.10.0"
     uuid: "npm:^9.0.1"
-    zustand: "npm:^3.5.13"
+    zustand: "npm:^3.7.1"
   peerDependencies:
     "@react-three/fiber": ">=8.0"
     react: ">=18.0"
@@ -1649,13 +1647,13 @@ __metadata:
   peerDependenciesMeta:
     react-dom:
       optional: true
-  checksum: a4079b9d776a7cf9b59a938a540ccdc3faf9421836901374191c5f4ff9214cba77bc215b028ebb7971f57e96fd4a94cf8aff7427c39be6c09e85d14ef56c1ea3
+  checksum: 6f12f448e32173d93daf072afaf5145b748be6bdb27c656d9e6b840e13eea16f51b599fa371da8201bef0d622dab13740db65daeabd59a1775249573d02a4faf
   languageName: node
   linkType: hard
 
-"@react-three/fiber@npm:^8.15.13":
-  version: 8.15.13
-  resolution: "@react-three/fiber@npm:8.15.13"
+"@react-three/fiber@npm:^8.15.15":
+  version: 8.15.15
+  resolution: "@react-three/fiber@npm:8.15.15"
   dependencies:
     "@babel/runtime": "npm:^7.17.8"
     "@types/react-reconciler": "npm:^0.26.7"
@@ -1690,7 +1688,7 @@ __metadata:
       optional: true
     react-native:
       optional: true
-  checksum: 4169b020ac49d2d8df54739373e0ccaef5994381122fe2a8455aaf94b5dbf1d7ccda831ecb8d05fd40c6b97e0c339528d6336d1a5947500db5d3edd58f004b86
+  checksum: 98719eed7f8827ba3317b27bb0c07f0c89ab3713280b8f7ad976416704de7b7b55b8848587f6768caeb317af5598be15379882fa20dbd4eeea203b45f87816df
   languageName: node
   linkType: hard
 
@@ -1708,9 +1706,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-three/postprocessing@npm:^2.15.11":
-  version: 2.15.11
-  resolution: "@react-three/postprocessing@npm:2.15.11"
+"@react-three/postprocessing@npm:^2.15.12":
+  version: 2.15.12
+  resolution: "@react-three/postprocessing@npm:2.15.12"
   dependencies:
     buffer: "npm:^6.0.3"
     maath: "npm:^0.6.0"
@@ -1721,7 +1719,7 @@ __metadata:
     "@react-three/fiber": ">=8.0"
     react: ">=18.0"
     three: ">= 0.138.0"
-  checksum: bcbf6c797d80065463d72c509eb004a7b06fd71260986835c898f93520e4a6e14f0104571ff9cb142d5e334f5589661c90d281952260f7d1f392bf03e395e70b
+  checksum: c1d0267e7e158e12ba58e30c20b3d9602805fc96f8833f7aaa03136a165405eb86fb3cb567def12771728dc421bcade174f8a8d8283d9b065ef2b6af577789df
   languageName: node
   linkType: hard
 
@@ -2547,7 +2545,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@use-gesture/react@npm:^10.2.24, @use-gesture/react@npm:^10.2.5, @use-gesture/react@npm:^10.3.0":
+"@use-gesture/react@npm:^10.2.24, @use-gesture/react@npm:^10.2.5":
   version: 10.3.0
   resolution: "@use-gesture/react@npm:10.3.0"
   dependencies:
@@ -5034,10 +5032,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jolt-physics@npm:^0.15.0":
-  version: 0.15.0
-  resolution: "jolt-physics@npm:0.15.0"
-  checksum: bb7ed2b1c3a43588d74bb42d98ccb4d008cad6eb405ce42b583c94e1e1bcdb25d876cc6f2453a1058af53c6412241da82b81d2473009a5f3314f366e93cd716f
+"jolt-physics@npm:^0.16.0":
+  version: 0.16.0
+  resolution: "jolt-physics@npm:0.16.0"
+  checksum: afc0269f0cb4d53b0c0081fc59d4190b9d21a212b767bcfb1ed23a7f2fc6b1b56636ff3203401f279f85bb7ca56645afb874fdbd1d316d5071640b00545cd4d1
   languageName: node
   linkType: hard
 
@@ -6525,10 +6523,10 @@ __metadata:
     "@isaac-mason/eslint-config-typescript": "npm:0.0.2"
     "@pmndrs/assets": "npm:^1.6.0"
     "@react-three/csg": "npm:^3.2.0"
-    "@react-three/drei": "npm:^9.93.1"
-    "@react-three/fiber": "npm:^8.15.13"
+    "@react-three/drei": "npm:^9.96.5"
+    "@react-three/fiber": "npm:^8.15.15"
     "@react-three/flex": "npm:^1.0.1"
-    "@react-three/postprocessing": "npm:^2.15.11"
+    "@react-three/postprocessing": "npm:^2.15.12"
     "@react-three/rapier": "npm:^1.2.1"
     "@react-three/xr": "npm:^5.7.1"
     "@types/d3": "npm:^7.4.3"
@@ -6537,13 +6535,12 @@ __metadata:
     "@types/react": "npm:^18.2.47"
     "@types/react-dom": "npm:^18.2.17"
     "@types/three": "npm:^0.160.0"
-    "@use-gesture/react": "npm:^10.3.0"
     "@vitejs/plugin-basic-ssl": "npm:^1.0.2"
     "@vitejs/plugin-react": "npm:^4.2.1"
     arancini: "npm:^6.0.3"
     d3: "npm:^7.8.5"
     eslint: "npm:^8.56.0"
-    jolt-physics: "npm:^0.15.0"
+    jolt-physics: "npm:^0.16.0"
     leva: "npm:^0.9.35"
     meshline: "npm:3.1.6"
     p2-es: "npm:^1.2.3"
@@ -6877,6 +6874,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"three-mesh-bvh@npm:^0.7.0":
+  version: 0.7.0
+  resolution: "three-mesh-bvh@npm:0.7.0"
+  peerDependencies:
+    three: ">= 0.151.0"
+  checksum: cf5a3edecbc6cf6bda7f1bc5f73eb284607aa9e2d025d27606b814f0c17e642720fe141e3b1464b6c9e9d6d5d30956f8f27cbe2e67e9a0be8bd694c872c068a5
+  languageName: node
+  linkType: hard
+
 "three-stdlib@npm:2.23.9":
   version: 2.23.9
   resolution: "three-stdlib@npm:2.23.9"
@@ -6911,6 +6917,22 @@ __metadata:
   peerDependencies:
     three: ">=0.128.0"
   checksum: 408b81b42e53a99f7fa438d0f49cca95c6a10b749b5942b050516f4a171d716e9097eddf190c1cf422f1c5981bcd5cf3b20da98f378c8927151de7a02d471c5e
+  languageName: node
+  linkType: hard
+
+"three-stdlib@npm:^2.29.4":
+  version: 2.29.4
+  resolution: "three-stdlib@npm:2.29.4"
+  dependencies:
+    "@types/draco3d": "npm:^1.4.0"
+    "@types/offscreencanvas": "npm:^2019.6.4"
+    "@types/webxr": "npm:^0.5.2"
+    draco3d: "npm:^1.4.1"
+    fflate: "npm:^0.6.9"
+    potpack: "npm:^1.0.1"
+  peerDependencies:
+    three: ">=0.128.0"
+  checksum: ba54e2e334ca86e71a025337e0239a943de22af42dda2f664c2aea2bf6c65d343c995ea1182a3b7c6513fc1dc5c401f218be6cb77eddfc0e6ab5b0c3b3339ddc
   languageName: node
   linkType: hard
 
