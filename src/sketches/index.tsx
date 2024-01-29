@@ -9,6 +9,61 @@ const sketchList = [
         path: 'lines/image',
         tags: ['lines', 'image'],
     },
+    /* Jolt Physics */
+    {
+        title: 'Jolt Physics - Cube Heap',
+        path: 'jolt-physics/cube-heap',
+        tags: ['physics', 'jolt-physics', 'arancini'],
+    },
+    /* Recast Navigation */
+    {
+        title: 'Recast Navigation - Busy Street Crossing',
+        path: 'recast-navigation/busy-street-crossing',
+        tags: ['recast-navigation', 'ai', 'navigation', 'pathfinding', 'arancini'],
+    },
+    {
+        title: 'Recast Navigation - Character Controller',
+        path: 'recast-navigation/character-controller',
+        tags: ['recast-navigation', 'controller', 'arancini'],
+    },
+    /* Voxels */
+    {
+        title: 'Simple Voxels - Sphere',
+        path: 'voxels/simple-voxels/sphere',
+        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'arancini'],
+    },
+    {
+        title: 'Simple Voxels - Building',
+        path: 'voxels/simple-voxels/building',
+        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'building', 'arancini'],
+    },
+    {
+        title: 'Simple Voxels - Fly Controls',
+        path: 'voxels/simple-voxels/fly-controls',
+        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'controller', 'arancini'],
+    },
+    {
+        title: 'Simple Voxels - Box Character Controller',
+        path: 'voxels/simple-voxels/box-character-controller',
+        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'controller', 'arancini'],
+    },
+    {
+        title: 'Simple Voxels - Rapier Physics',
+        path: 'voxels/simple-voxels/rapier-physics',
+        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'physics', 'rapier', 'arancini'],
+    },
+    /* Grid Pathfinding */
+    {
+        title: 'Grid Pathfinding - Basic',
+        path: 'grid-pathfinding/basic',
+        tags: ['pathfinding', 'grid'],
+    },
+    /* Fractals */
+    {
+        title: 'Fractals - Mandelbrot Set',
+        path: 'fractals/mandelbrot-set',
+        tags: ['fractals', 'mandelbrot-set'],
+    },
     /* Rapier */
     {
         title: 'Rapier - Raycasting',
@@ -71,29 +126,6 @@ const sketchList = [
         path: 'p2-es/kinematic-character-controller',
         tags: ['physics', 'p2-es', 'controller', 'arancini'],
     },
-    /* Jolt Physics */
-    {
-        title: 'Jolt Physics - Cube Heap',
-        path: 'jolt-physics/cube-heap',
-        tags: ['physics', 'jolt-physics', 'arancini'],
-    },
-    /* Recast Navigation */
-    {
-        title: 'Recast Navigation - Busy Street Crossing',
-        path: 'recast-navigation/busy-street-crossing',
-        tags: ['recast-navigation', 'ai', 'navigation', 'pathfinding', 'arancini'],
-    },
-    {
-        title: 'Recast Navigation - Character Controller',
-        path: 'recast-navigation/character-controller',
-        tags: ['recast-navigation', 'controller', 'arancini'],
-    },
-    /* Grid Pathfinding */
-    {
-        title: 'Grid Pathfinding - Basic',
-        path: 'grid-pathfinding/basic',
-        tags: ['pathfinding', 'grid'],
-    },
     /* Character Animation */
     {
         title: 'Character Animation - Basic',
@@ -104,32 +136,6 @@ const sketchList = [
         title: 'Character Animation - Mixamo Animations',
         path: 'character-animation/mixamo-animations',
         tags: ['animation', 'character', 'mixamo'],
-    },
-    /* Voxels */
-    {
-        title: 'Simple Voxels - Sphere',
-        path: 'voxels/simple-voxels/sphere',
-        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'arancini'],
-    },
-    {
-        title: 'Simple Voxels - Building',
-        path: 'voxels/simple-voxels/building',
-        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'building', 'arancini'],
-    },
-    {
-        title: 'Simple Voxels - Fly Controls',
-        path: 'voxels/simple-voxels/fly-controls',
-        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'controller', 'arancini'],
-    },
-    {
-        title: 'Simple Voxels - Box Character Controller',
-        path: 'voxels/simple-voxels/box-character-controller',
-        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'controller', 'arancini'],
-    },
-    {
-        title: 'Simple Voxels - Rapier Physics',
-        path: 'voxels/simple-voxels/rapier-physics',
-        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'physics', 'rapier', 'arancini'],
     },
     /* Nature */
     {
@@ -170,12 +176,6 @@ const sketchList = [
         title: 'Postprocessing - Emissive Bloom',
         path: 'postprocessing/emissive-bloom',
         tags: ['postprocessing', 'bloom'],
-    },
-    /* Fractals */
-    {
-        title: 'Fractals - Mandelbrot Set',
-        path: 'fractals/mandelbrot-set',
-        tags: ['fractals', 'mandelbrot-set'],
     },
     /* TSL */
     {
