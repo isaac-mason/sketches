@@ -1,30 +1,6 @@
 import Rapier from '@dimforge/rapier3d-compat'
 import { Matrix3, Object3D, Quaternion, Vector3 } from 'three'
 
-// Multiply a quaternion by a vector
-export const multiplyQuaternionByVector = (q: Quaternion, v: Vector3, target = new Vector3()): Vector3 => {
-    const x = v.x
-    const y = v.y
-    const z = v.z
-    const qx = q.x
-    const qy = q.y
-    const qz = q.z
-    const qw = q.w
-
-    // q*v
-    const ix = qw * x + qy * z - qz * y
-
-    const iy = qw * y + qz * x - qx * z
-    const iz = qw * z + qx * y - qy * x
-    const iw = -qx * x - qy * y - qz * z
-
-    target.x = ix * qw + iw * -qx + iy * -qz - iz * -qy
-    target.y = iy * qw + iw * -qy + iz * -qx - ix * -qz
-    target.z = iz * qw + iw * -qz + ix * -qy - iy * -qx
-
-    return target
-}
-
 const getVelocityAtWorldPoint_r = new Vector3()
 const getVelocityAtWorldPoint_position = new Vector3()
 const getVelocityAtWorldPoint_angvel = new Vector3()
@@ -55,7 +31,7 @@ export const pointToWorldFrame = (object: Rapier.RigidBody | Object3D, localPoin
 
     const position = object instanceof Object3D ? object.position : (object.translation() as Vector3)
 
-    return multiplyQuaternionByVector(quaternion, localPoint, target).add(position)
+    return target.copy(localPoint).applyQuaternion(quaternion).add(position)
 }
 
 const vectorToLocalFrame_quaternion = new Quaternion()
@@ -71,7 +47,7 @@ export const vectorToLocalFrame = (
 
     quaternion.conjugate()
 
-    return multiplyQuaternionByVector(quaternion, worldVector, target)
+    return target.copy(worldVector).applyQuaternion(quaternion)
 }
 
 const vectorToWorldFrame_quaternion = new Quaternion()
@@ -85,7 +61,7 @@ export const vectorToWorldFrame = (
         object instanceof Object3D ? object.quaternion : (object.rotation() as Quaternion),
     )
 
-    return multiplyQuaternionByVector(quaternion, localVector, target)
+    return target.copy(localVector).applyQuaternion(quaternion)
 }
 
 // get one of the wheel axes, world-oriented

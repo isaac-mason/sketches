@@ -1,6 +1,20 @@
 import { RigidBody } from '@dimforge/rapier3d-compat'
-import { Quaternion, Vector3 } from 'three'
-import { pointToWorldFrame } from '../raycast-vehicle/lib/utils'
+import { Object3D, Quaternion, Vector3 } from 'three'
+
+const pointToWorldFrame_quaternion = new Quaternion()
+
+const pointToWorldFrame = (object: RigidBody | Object3D, localPoint: Vector3, target = new Vector3()): Vector3 => {
+    target.copy(localPoint)
+
+    const quaternion = pointToWorldFrame_quaternion.copy(
+        object instanceof Object3D ? object.quaternion : (object.rotation() as Quaternion),
+    )
+
+    const position = object instanceof Object3D ? object.position : (object.translation() as Vector3)
+
+    return target.copy(localPoint).applyQuaternion(quaternion).add(position)
+}
+
 
 const vectorToLocalFrame_quaternion = new Quaternion()
 
