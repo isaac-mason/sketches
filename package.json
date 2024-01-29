@@ -36,7 +36,7 @@
         "simplex-noise": "^4.0.1",
         "styled-breakpoints": "^12.1.9",
         "styled-components": "^6.1.8",
-        "three": "^0.160.0",
+        "three": "^0.160.1",
         "tunnel-rat": "^0.1.2",
         "zustand": "^4.5.0"
     },
