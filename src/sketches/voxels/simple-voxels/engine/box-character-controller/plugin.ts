@@ -11,7 +11,7 @@ export type VoxelBoxCharacterControllerInput = {
     jump: boolean
 }
 
-export type BoxCharacterControllerCameraType = 'first-person' | 'third-person'
+export type BoxCharacterControllerCameraMode = 'first-person' | 'third-person'
 
 export type VoxelBoxCharacterControllerOptions = {
     height: number
@@ -23,8 +23,6 @@ export class BoxCharacterController {
     transform: Object3D
     position: Vector3
     velocity: Vector3
-
-    cameraMode: BoxCharacterControllerCameraType
 
     jumping: boolean
     jumpTime: number
@@ -47,29 +45,29 @@ export class BoxCharacterController {
         this.characterHalfWidth = this.options.width / 2
         this.horizontalSensorOffset = this.characterHalfWidth - 0.05
 
-        this.cameraMode = 'first-person'
-
         this.jumping = false
         this.jumpTime = 0
     }
 }
 
+const tmpThirdPersonCameraOffset = new Vector3()
+
 export class BoxCharacterControllerSystem extends System<BoxChararacterControllerPluginEntity & CorePluginEntity> {
     controller = this.query((e) => e.has('boxCharacterController', 'boxCharacterControllerInput', 'object3D'), { required: true })
 
-    controllerCamera = this.query((e) => e.has('boxCharacterControllerCamera'), { required: true })
+    camera = this.query((e) => e.has('boxCharacterControllerCamera'), { required: true })
+
+    cameraConfiguration = this.singleton('boxCharacterControllerCameraConfiguration')!
 
     voxelWorld = this.singleton('voxelWorld')!
 
     voxelWorldActor = this.singleton('voxelWorldActor')!
 
-    tmpThirdPersonCameraOffset = new Vector3()
-
     static PRIORITY = VoxelWorldCoreSystem.PRIORITY - 1
 
     onUpdate(delta: number, time: number): void {
         const { boxCharacterController: controller, boxCharacterControllerInput: input, object3D } = this.controller.first!
-        const { boxCharacterControllerCamera: camera } = this.controllerCamera.first!
+        const { boxCharacterControllerCamera: camera } = this.camera.first!
 
         const { forward, backward, left, right, jump } = input
 
@@ -199,7 +197,7 @@ export class BoxCharacterControllerSystem extends System<BoxChararacterControlle
             controller.velocity.y = 0
 
             // snap to the ground
-            controller.position.y = Math.floor(controller.position.y) + controller.characterHalfHeight
+            controller.position.y = Math.ceil(controller.position.y - controller.characterHalfHeight) + controller.characterHalfHeight
         } else {
             controller.position.y = ny
         }
@@ -207,12 +205,10 @@ export class BoxCharacterControllerSystem extends System<BoxChararacterControlle
         /* update camera position */
         camera.position.copy(controller.position)
 
-        if (controller.cameraMode === 'first-person') {
+        if (this.cameraConfiguration.mode === 'first-person') {
             camera.position.y += controller.options.height / 4
-        }
-
-        if (controller.cameraMode === 'third-person') {
-            const thirdPersonOffset = this.tmpThirdPersonCameraOffset.set(0, 0, 10)
+        } else if (this.cameraConfiguration.mode === 'third-person') {
+            const thirdPersonOffset = tmpThirdPersonCameraOffset.set(0, 0, 10)
             thirdPersonOffset.applyQuaternion(camera.quaternion)
             camera.position.add(thirdPersonOffset)
             camera.position.y += 2
@@ -266,13 +262,19 @@ export class BoxCharacterControllerSystem extends System<BoxChararacterControlle
 
 export type BoxChararacterControllerPluginEntity = {
     boxCharacterControllerCamera?: THREE.PerspectiveCamera
+    boxCharacterControllerCameraConfiguration?: { mode: BoxCharacterControllerCameraMode }
     boxCharacterControllerInput?: VoxelBoxCharacterControllerInput
     boxCharacterController?: BoxCharacterController
 }
 
 export const BoxCharacterControllerPlugin = {
     E: {} as BoxChararacterControllerPluginEntity,
-    components: ['boxCharacterController', 'boxCharacterControllerInput', 'boxCharacterControllerCamera'],
+    components: [
+        'boxCharacterController',
+        'boxCharacterControllerInput',
+        'boxCharacterControllerCamera',
+        'boxCharacterControllerCameraConfiguration',
+    ],
     systems: [BoxCharacterControllerSystem],
 } satisfies VoxelEnginePlugin<BoxChararacterControllerPluginEntity>
 

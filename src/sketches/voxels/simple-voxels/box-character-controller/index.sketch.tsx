@@ -5,7 +5,11 @@ import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import { styled } from 'styled-components'
 import { Color, PerspectiveCamera, Vector3 } from 'three'
 import { Canvas } from '../../../../common'
-import { BoxCharacterController, BoxCharacterControllerPlugin } from '../engine/box-character-controller'
+import {
+    BoxCharacterController,
+    BoxCharacterControllerCameraMode,
+    BoxCharacterControllerPlugin,
+} from '../engine/box-character-controller'
 import { CorePlugin, Vec3 } from '../engine/core'
 import { CulledMesherPlugin, VoxelChunkCulledMeshes } from '../engine/culled-mesher'
 import { createVoxelEngine } from '../engine/voxel-engine'
@@ -18,82 +22,32 @@ const green1 = new Color('green').addScalar(-0.02).getHex()
 const green2 = new Color('green').addScalar(0.02).getHex()
 const orange = new Color('orange').getHex()
 
-const Player = () => {
-    const { world, react: { Entity, Component } } = useVoxelEngine()
+const Camera = () => {
+    const {
+        react: { Entity },
+    } = useVoxelEngine()
 
     const camera = useThree((s) => s.camera)
 
-    const [, getControls] = useKeyboardControls()
+    const cameraConfiguration = useMemo(() => {
+        return { mode: 'first-person' as BoxCharacterControllerCameraMode }
+    }, [])
 
-    const { width, height } = useControls('voxel-box-character-controller', {
-        width: 0.8,
-        height: 2,
+    useControls('voxel-box-character-controller-camera', {
         cameraMode: {
-            value: 'first-person',
+            value: cameraConfiguration.mode,
             options: ['first-person', 'third-person'],
-            onChange: (v) => {
-                world
-                    .filter((e) => e.has('boxCharacterController'))
-                    .forEach((e) => {
-                        e.boxCharacterController.cameraMode = v
-                    })
+            onChange: (value: BoxCharacterControllerCameraMode) => {
+                cameraConfiguration.mode = value
             },
         },
     })
 
-    const options = useMemo(
-        () => ({
-            width,
-            height,
-            initialPosition: new Vector3(0, 1, 0),
-        }),
-        [width, height],
-    )
-
-    const input = useMemo(
-        () => ({
-            forward: false,
-            backward: false,
-            left: false,
-            right: false,
-            jump: false,
-        }),
-        [],
-    )
-
-    useFrame(() => {
-        const { forward, backward, left, right, jump } = getControls() as {
-            forward: boolean
-            backward: boolean
-            left: boolean
-            right: boolean
-            jump: boolean
-        }
-
-        input.forward = forward
-        input.backward = backward
-        input.left = left
-        input.right = right
-        input.jump = jump
-    })
-
-    const boxCharacterController = useMemo(() => {
-        return new BoxCharacterController(options)
-    }, [])
-
     return (
         <Entity
             boxCharacterControllerCamera={camera as PerspectiveCamera}
-            boxCharacterControllerInput={input}
-            boxCharacterController={boxCharacterController}
-        >
-            <Component name="object3D">
-                <mesh>
-                    <boxGeometry args={[width, height, width]} />
-                    <meshStandardMaterial color="red" />
-                </mesh>
-            </Component>
-        </Entity>
+            boxCharacterControllerCameraConfiguration={cameraConfiguration}
+        />
     )
 }
 
@@ -148,6 +102,70 @@ const CameraBuildTool = () => {
     return null
 }
 
+const Player = () => {
+    const {
+        react: { Entity, Component },
+    } = useVoxelEngine()
+
+    const [, getControls] = useKeyboardControls()
+
+    const { width, height } = useControls('voxel-box-character-controller', {
+        width: 0.8,
+        height: 2,
+    })
+
+    const options = useMemo(
+        () => ({
+            width,
+            height,
+            initialPosition: new Vector3(0, 1, 0),
+        }),
+        [width, height],
+    )
+
+    const input = useMemo(
+        () => ({
+            forward: false,
+            backward: false,
+            left: false,
+            right: false,
+            jump: false,
+        }),
+        [],
+    )
+
+    useFrame(() => {
+        const { forward, backward, left, right, jump } = getControls() as {
+            forward: boolean
+            backward: boolean
+            left: boolean
+            right: boolean
+            jump: boolean
+        }
+
+        input.forward = forward
+        input.backward = backward
+        input.left = left
+        input.right = right
+        input.jump = jump
+    })
+
+    const boxCharacterController = useMemo(() => {
+        return new BoxCharacterController(options)
+    }, [width, height])
+
+    return (
+        <Entity boxCharacterControllerInput={input} boxCharacterController={boxCharacterController}>
+            <Component name="object3D">
+                <mesh>
+                    <boxGeometry args={[width, height, width]} />
+                    <meshStandardMaterial color="red" />
+                </mesh>
+            </Component>
+        </Entity>
+    )
+}
+
 const App = () => {
     const { world, setBlock } = useVoxelEngine()
 
@@ -172,6 +190,8 @@ const App = () => {
     return (
         <>
             {levelReady && <Player />}
+
+            <Camera />
 
             <CameraBuildTool />
 
