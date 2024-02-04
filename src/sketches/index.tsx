@@ -183,6 +183,11 @@ const sketchList = [
         path: 'tsl/hello-world',
         tags: ['tsl'],
     },
+    {
+        title: 'TSL - Gradient',
+        path: 'tsl/gradient',
+        tags: ['tsl', 'gradient'],
+    },
     /* GLSL Shaders From Scratch */
     {
         title: 'GLSL Shaders From Scratch - Intro - Varyings',

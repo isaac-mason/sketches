@@ -1,4 +1,4 @@
-import { Canvas } from '@react-three/fiber'
+import { Canvas, CanvasProps } from '@react-three/fiber'
 import * as React from 'react'
 import styled from 'styled-components'
 import WebGPUCapabilities from 'three/examples/jsm/capabilities/WebGPU.js'
@@ -24,12 +24,15 @@ const UnsupportedNotice = styled.div`
     padding: 3em;
 `
 
-export type WebGPUCanvasProps = React.PropsWithChildren<{
-    /**
-     * @default true
-     */
-    webglFallback?: boolean
-}>
+export type WebGPUCanvasProps = React.PropsWithChildren<
+    {
+        /**
+         * @default true
+         */
+        webglFallback?: boolean
+    } & CanvasProps
+>
+
 export const WebGPUCanvas = ({ children, webglFallback = true, ...props }: React.PropsWithChildren<any>) => {
     if (!webglFallback && !WebGPUCapabilities.isAvailable()) {
         return (
