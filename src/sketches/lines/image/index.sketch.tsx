@@ -1,7 +1,7 @@
 import { OrbitControls, useTexture } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { useControls } from 'leva'
-import { Suspense, useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { Canvas } from '../../../common'
 import plantImageUrl from './plant.png?url'
@@ -193,9 +193,7 @@ export default function Main() {
 
     return (
         <Canvas camera={{ position: [0, 0.5, 10] }}>
-            <Suspense fallback={null}>
-                <LineImage src={plantImageUrl} {...config} key={Object.values(config).join('-')} />
-            </Suspense>
+            <LineImage src={plantImageUrl} {...config} key={Object.values(config).join('-')} />
 
             <OrbitControls makeDefault target={[0, 0.5, 0]} />
         </Canvas>
