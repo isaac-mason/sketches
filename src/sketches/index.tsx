@@ -52,6 +52,12 @@ const sketchList = [
         path: 'voxels/simple-voxels/rapier-physics',
         tags: ['voxels', 'vertex-colors', 'culled-mesher', 'physics', 'rapier', 'arancini'],
     },
+    /* Reflectors */
+    {
+        title: 'Reflectors',
+        path: 'reflectors',
+        tags: ['reflector', 'mirror'],
+    },
     /* Grid Pathfinding */
     {
         title: 'Grid Pathfinding - Basic',
