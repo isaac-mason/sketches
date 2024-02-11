@@ -72,6 +72,31 @@ const sketchList = [
     },
     /* Rapier */
     {
+        title: 'Rapier - Raycast Vehicle',
+        path: 'rapier/raycast-vehicle',
+        tags: ['physics', 'rapier', 'vehicle', 'controller'],
+    },
+    {
+        title: 'Rapier - Revolute Joint Vehicle',
+        path: 'rapier/revolute-joint-vehicle',
+        tags: ['physics', 'rapier', 'vehicle', 'controller'],
+    },
+    {
+        title: 'Rapier - Kinematic Character Controller',
+        path: 'rapier/kinematic-character-controller',
+        tags: ['physics', 'rapier', 'controller'],
+    },
+    {
+        title: 'Rapier - Pointer Controls',
+        path: 'rapier/pointer-controls',
+        tags: ['physics', 'rapier'],
+    },
+    {
+        title: 'Rapier - Ball Pit Mixer',
+        path: 'rapier/ball-pit-mixer',
+        tags: ['physics', 'rapier'],
+    },
+    {
         title: 'Rapier - Raycasting',
         path: 'rapier/raycasting',
         tags: ['physics', 'rapier', 'raycasting'],
@@ -84,31 +109,6 @@ const sketchList = [
     {
         title: 'Rapier - Spring',
         path: 'rapier/spring',
-        tags: ['physics', 'rapier'],
-    },
-    {
-        title: 'Rapier - Pointer Controls',
-        path: 'rapier/pointer-controls',
-        tags: ['physics', 'rapier'],
-    },
-    {
-        title: 'Rapier - Revolute Joint Vehicle',
-        path: 'rapier/revolute-joint-vehicle',
-        tags: ['physics', 'rapier', 'vehicle', 'controller'],
-    },
-    {
-        title: 'Rapier - Raycast Vehicle',
-        path: 'rapier/raycast-vehicle',
-        tags: ['physics', 'rapier', 'vehicle', 'controller'],
-    },
-    {
-        title: 'Rapier - Kinematic Character Controller',
-        path: 'rapier/kinematic-character-controller',
-        tags: ['physics', 'rapier', 'controller'],
-    },
-    {
-        title: 'Rapier - Ball Pit Mixer',
-        path: 'rapier/ball-pit-mixer',
         tags: ['physics', 'rapier'],
     },
     {
