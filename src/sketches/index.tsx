@@ -9,6 +9,12 @@ const sketchList = [
         path: 'lines/image',
         tags: ['lines', 'image'],
     },
+    /* Game of life */
+    {
+        title: 'Game of Life',
+        path: 'game-of-life',
+        tags: ['game-of-life', 'cellular-automata'],
+    },
     /* Jolt Physics */
     {
         title: 'Jolt Physics - Cube Heap',
