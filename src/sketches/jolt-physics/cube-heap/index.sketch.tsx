@@ -1,117 +1,34 @@
 import cityEnvironment from '@pmndrs/assets/hdri/city.exr'
 import { Environment, OrbitControls } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
 import { World } from 'arancini'
 import { createReactAPI } from 'arancini/react'
-import { Executor } from 'arancini/systems'
-import { useControls } from 'leva'
-import { useMemo, useRef } from 'react'
-import { SpotLightHelper, Vector3Tuple } from 'three'
-import { Canvas, Helper, useInterval } from '../../../common'
-import { JoltEntity, PhysicsSystem, createBodyUtils, jolt, joltComponents } from '../jolt-common'
+import Jolt from 'jolt-physics'
+import { useRef } from 'react'
+import { Canvas, useInterval } from '../../../common'
+import { Physics, RigidBody, usePhysics } from '../jolt-react-api'
 
-type EntityType = JoltEntity & {
-    teleporting?: boolean
-}
-
-const world = new World<EntityType>({
-    components: [...joltComponents, 'teleporting'],
-})
-
-world.create({ physicsConfig: { gravity: [0, -9.81, 0] } })
-
-const executor = new Executor(world)
-executor.add(PhysicsSystem)
-executor.init()
-
-const { bodyInterface } = executor.get(PhysicsSystem)!
-
-const { createBoxBody } = createBodyUtils(bodyInterface)
+const world = new World<{
+    body: Jolt.Body
+    teleport: true
+}>()
 
 const { Entity, Component } = createReactAPI(world)
 
-type GroundProps = {
-    args: Vector3Tuple
-    position: Vector3Tuple
-}
-
-const Ground = ({ args, position }: GroundProps) => {
-    const body = useMemo(
-        () =>
-            createBoxBody({
-                args,
-                position,
-                motionType: 'static',
-                layer: 'nonMoving',
-                restitution: 0.5,
-                friction: 1,
-            }),
-        [],
-    )
-
-    return (
-        <Entity body={body}>
-            <Component name="three">
-                <mesh receiveShadow castShadow>
-                    <meshStandardMaterial color="#333" />
-                    <boxGeometry args={args.map((v) => v * 2) as Vector3Tuple} />
-                </mesh>
-            </Component>
-        </Entity>
-    )
-}
-
-type FallingBoxProps = {
-    args: Vector3Tuple
-    position: Vector3Tuple
-    color?: string
-}
-
-const FallingBox = ({ args, position, color }: FallingBoxProps) => {
-    const body = useMemo(
-        () =>
-            createBoxBody({
-                args,
-                position,
-                motionType: 'dynamic',
-                layer: 'moving',
-                restitution: 0.5,
-            }),
-        [],
-    )
-
-    return (
-        <Entity body={body} teleporting>
-            <Component name="three">
-                <mesh receiveShadow castShadow>
-                    <meshStandardMaterial color={color} />
-                    <boxGeometry args={args.map((v) => v * 2) as Vector3Tuple} />
-                </mesh>
-            </Component>
-        </Entity>
-    )
-}
+const teleportingBodies = world.query((e) => e.has('body', 'teleport'))
 
 const COLORS = ['orange', 'white', 'pink', 'skyblue']
 
 const Scene = () => {
-    const { spotLightHelper } = useControls('jolt-physics-cube-heap', {
-        spotLightHelper: false,
-    })
-
-    useFrame((_, delta) => {
-        executor.update(delta)
-    })
-
-    const bodiesToTeleport = world.query((e) => e.has('body').and.is('teleporting'))
     const nextToTeleport = useRef(0)
 
+    const { jolt, bodyInterface } = usePhysics()
+
     useInterval(() => {
-        if (bodiesToTeleport.entities.length <= 0) return
+        if (teleportingBodies.entities.length <= 0) return
 
-        const index = nextToTeleport.current % bodiesToTeleport.entities.length
+        const index = nextToTeleport.current % teleportingBodies.entities.length
 
-        const body = bodiesToTeleport.entities[index].body
+        const body = teleportingBodies.entities[index].body
         const bodyId = body.GetID()
 
         const x = (0.5 - Math.random()) * 10
@@ -127,14 +44,27 @@ const Scene = () => {
     return (
         <>
             {Array.from({ length: 500 }).map((_, idx) => (
-                <FallingBox key={idx} args={[1, 1, 1]} position={[0, -100 - idx * 2, 0]} color={COLORS[idx % COLORS.length]} />
+                <Entity teleport>
+                    <Component name="body">
+                        <RigidBody key={idx} shape="box" position={[0, -100 - idx * 3, 0]}>
+                            <mesh receiveShadow castShadow>
+                                <meshStandardMaterial color={COLORS[idx % COLORS.length]} />
+                                <boxGeometry args={[2, 2, 2]} />
+                            </mesh>
+                        </RigidBody>
+                    </Component>
+                </Entity>
             ))}
 
-            <Ground args={[200, 2, 200]} position={[0, 0, 0]} />
+            {/* ground */}
+            <RigidBody type="static" shape="box">
+                <mesh receiveShadow castShadow>
+                    <meshStandardMaterial color="#333" />
+                    <boxGeometry args={[100, 1, 100]} />
+                </mesh>
+            </RigidBody>
 
-            <spotLight position={[50, 50, 50]} angle={0.3} intensity={100} distance={1000} decay={1} penumbra={0.5} castShadow>
-                {spotLightHelper && <Helper type={SpotLightHelper} />}
-            </spotLight>
+            <spotLight position={[50, 50, 50]} angle={0.3} intensity={100} distance={1000} decay={1} penumbra={0.5} castShadow />
 
             <Environment files={cityEnvironment} />
         </>
@@ -145,7 +75,9 @@ export default () => {
     return (
         <>
             <Canvas shadows camera={{ position: [-10, 30, 40] }}>
-                <Scene />
+                <Physics gravity={[0, -9.81, 0]}>
+                    <Scene />
+                </Physics>
 
                 <OrbitControls target={[0, 10, 0]} />
             </Canvas>
