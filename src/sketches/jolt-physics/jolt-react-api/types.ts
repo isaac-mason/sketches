@@ -24,3 +24,8 @@ export type BodyEvents = {
     ) => void
     onContactRemoved?: (subShapePair: Jolt.SubShapeIDPair) => void
 }
+
+export type WorldEvents = {
+    beforeStep?: () => void
+    afterStep?: () => void
+}

@@ -17,7 +17,7 @@ export const useECS = () => {
     return useContext(physicsContext)
 }
 
-export const usePhysics = () => {
+export const useJolt = () => {
     const context = useContext(physicsContext)
 
     const publicApi = {

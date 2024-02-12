@@ -7,7 +7,7 @@ import { useConst } from '../../../../common'
 import { physicsContext } from '../context'
 import { JoltEntity, joltComponents } from '../ecs'
 import { Raw, initJolt } from '../raw'
-import { BodyContactSystem, BodySystem, ConstraintSystem, PhysicsSystem } from '../systems'
+import { BodyContactSystem, ConstraintSystem, PhysicsSystem } from '../systems'
 import { PhysicsConfig, Vector3Tuple } from '../types'
 
 export type PhysicsProps = {
@@ -69,8 +69,6 @@ export const Physics = ({
 
     const world = useConst(() => {
         const world = new World<JoltEntity>({ components: joltComponents })
-        world.create({ physicsConfig })
-
         return world
     })
 
@@ -78,7 +76,6 @@ export const Physics = ({
         const executor = new Executor(world)
 
         executor.add(PhysicsSystem)
-        executor.add(BodySystem)
         executor.add(BodyContactSystem)
         executor.add(ConstraintSystem)
 
@@ -88,6 +85,17 @@ export const Physics = ({
 
         return { executor, physicsSystem }
     })
+
+    useEffect(() => {
+        world.create({ physicsConfig })
+
+        if (!executor.initialised) executor.init()
+
+        return () => {
+            world.reset();
+            executor.destroy();
+        }
+    }, [])
 
     useEffect(() => {
         physicsSystem.physicsSystem.SetGravity(new Raw.module.Vec3(...gravity))

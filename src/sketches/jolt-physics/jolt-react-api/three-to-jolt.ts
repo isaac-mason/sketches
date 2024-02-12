@@ -29,7 +29,13 @@ export const getShapeSettingsFromObject = (object: Object3D, colliders: AutoRigi
     const compoundShapeSettings = new Raw.module.StaticCompoundShapeSettings()
 
     for (const { shapeSettings, offset } of shapes) {
-        compoundShapeSettings.AddShape(vec3.threeToJolt(offset), new Raw.module.Quat(), shapeSettings, 0)
+        const position = vec3.threeToJolt(offset)
+        const quat = new Raw.module.Quat()
+
+        compoundShapeSettings.AddShape(position, quat, shapeSettings, 0)
+
+        Raw.module.destroy(position)
+        Raw.module.destroy(quat)
     }
 
     return compoundShapeSettings
@@ -48,7 +54,9 @@ export const getShapeSettingsFromGeometry = (
 
             const size = boundingBox!.getSize(new Vector3())
 
-            const shapeSettings = new jolt.BoxShapeSettings(new jolt.Vec3(size.x / 2, size.y / 2, size.z / 2))
+            const shapeSize = new jolt.Vec3(size.x / 2, size.y / 2, size.z / 2)
+            const shapeSettings = new jolt.BoxShapeSettings(shapeSize)
+            jolt.destroy(shapeSize)
 
             return {
                 shapeSettings,
