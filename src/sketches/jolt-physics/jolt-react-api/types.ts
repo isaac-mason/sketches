@@ -24,20 +24,3 @@ export type BodyEvents = {
     ) => void
     onContactRemoved?: (subShapePair: Jolt.SubShapeIDPair) => void
 }
-
-export type JoltEntity = {
-    physicsConfig?: PhysicsConfig
-    body?: Jolt.Body
-    bodyEvents?: BodyEvents
-    constraint?: Jolt.Constraint
-    three?: THREE.Object3D
-}
-
-export const joltComponents: Array<keyof JoltEntity> = ['physicsConfig', 'body', 'bodyEvents', 'constraint', 'three']
-
-export const Layer = {
-    NON_MOVING: 0,
-    MOVING: 1,
-}
-
-export const NUM_OBJECT_LAYERS = 2
