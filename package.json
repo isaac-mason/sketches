@@ -17,7 +17,7 @@
         "@react-three/drei": "^9.97.1",
         "@react-three/fiber": "^8.15.15",
         "@react-three/flex": "^1.0.1",
-        "@react-three/postprocessing": "^2.15.12",
+        "@react-three/postprocessing": "^2.16.0",
         "@react-three/rapier": "^1.2.1",
         "@react-three/xr": "^5.7.1",
         "arancini": "^6.1.3",
