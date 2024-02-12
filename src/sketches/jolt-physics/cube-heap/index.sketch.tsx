@@ -10,7 +10,9 @@ import { Physics, RigidBody, usePhysics } from '../jolt-react-api'
 const world = new World<{
     body: Jolt.Body
     teleport: true
-}>()
+}>({
+    components: ['body', 'teleport'],
+})
 
 const { Entity, Component } = createReactAPI(world)
 
