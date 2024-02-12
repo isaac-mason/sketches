@@ -13,8 +13,9 @@ import {
 import { Crowd, CrowdAgent, CrowdAgentParams, NavMesh, init, vec3 } from 'recast-navigation'
 import type { SoloNavMeshGeneratorConfig } from 'recast-navigation/generators'
 import { NavMeshHelper, threeToSoloNavMesh } from 'recast-navigation/three'
-import { suspend } from 'suspend-react'
 import { Group, Mesh, MeshStandardMaterial, Vector3Tuple } from 'three'
+
+await init()
 
 type AIContextType = {
     navMesh: NavMesh | undefined
@@ -33,8 +34,6 @@ export type AIProps = {
 }
 
 export const AI = ({ children, debug, generatorConfig }: AIProps) => {
-    suspend(() => init(), [])
-
     const active = useRef(false)
 
     const [navMesh, setNavMesh] = useState<NavMesh | undefined>()
