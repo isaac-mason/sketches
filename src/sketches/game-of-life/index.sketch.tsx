@@ -5,7 +5,8 @@ import { Bloom, EffectComposer } from '@react-three/postprocessing'
 import { easing } from 'maath'
 import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
-import { Canvas, usePageVisible } from '../../common'
+import { Canvas, useMutableCallback, usePageVisible } from '../../common'
+import { FixedTimeStep } from '../../common/utils/fixed-time-step'
 
 const gameOfLifeStep = (current: Uint8Array, next: Uint8Array, width: number, height: number) => {
     for (let y = 1; y < height - 1; y++) {
@@ -80,27 +81,7 @@ const GameOfLifeMaterial = ({ width, height }: { width: number; height: number }
 
     const pageVisibile = usePageVisible()
 
-    const countdown = useRef(0)
-
-    useEffect(() => {
-        state.fill(0)
-        nextState.fill(0)
-
-        for (let i = 0; i < width * height; i++) {
-            state[i] = Math.random() > 0.4 ? 1 : 0
-        }
-    }, [])
-
-    useFrame(({ clock: { elapsedTime } }, delta) => {
-        if (!pageVisibile) return
-
-        time.current.value = elapsedTime
-        countdown.current -= delta
-
-        if (countdown.current > 0) return
-
-        countdown.current += 0.1 // seconds
-
+    const step = useMutableCallback(() => {
         /* update game state */
         gameOfLifeStep(state, nextState, width, height)
         state.set(nextState)
@@ -115,6 +96,29 @@ const GameOfLifeMaterial = ({ width, height }: { width: number; height: number }
 
             dataTexture.texture.needsUpdate = true
         }
+    })
+
+    useEffect(() => {
+        state.fill(0)
+        nextState.fill(0)
+
+        for (let i = 0; i < width * height; i++) {
+            state[i] = Math.random() > 0.4 ? 1 : 0
+        }
+
+        step.current()
+    }, [])
+
+    const fixedTimeStep = useMemo(() => {
+        return new FixedTimeStep({ timeStep: 1 / 5, maxSubSteps: 5, step: () => step.current() })
+    }, [])
+
+    useFrame(({ clock: { elapsedTime } }, delta) => {
+        if (!pageVisibile) return
+
+        fixedTimeStep.update(delta)
+
+        time.current.value = elapsedTime
     })
 
     return (
@@ -209,7 +213,7 @@ export default function Sketch() {
                 <MeshReflectorMaterial
                     mirror={0}
                     blur={[300, 30]}
-                    resolution={2048}
+                    resolution={1024}
                     mixBlur={1}
                     mixStrength={80}
                     roughness={1}
