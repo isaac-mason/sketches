@@ -21,11 +21,6 @@ const sketchList = [
         path: 'jolt-physics/cube-heap',
         tags: ['physics', 'jolt-physics', 'arancini'],
     },
-    {
-        title: 'Jolt Physics - test',
-        path: 'jolt-physics/test',
-        tags: ['physics', 'jolt-physics', 'arancini'],
-    },
     /* Recast Navigation */
     {
         title: 'Recast Navigation - Busy Street Crossing',
