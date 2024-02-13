@@ -2344,14 +2344,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:^18.2.48":
-  version: 18.2.48
-  resolution: "@types/react@npm:18.2.48"
+"@types/react@npm:^18.2.55":
+  version: 18.2.55
+  resolution: "@types/react@npm:18.2.55"
   dependencies:
     "@types/prop-types": "npm:*"
     "@types/scheduler": "npm:*"
     csstype: "npm:^3.0.2"
-  checksum: 2e56ea6bd821ae96bd943f727a59d85384eaf5f8a3e6fce4fa1d34453e32d8eedda742432b3857fa0de7a4214bf84ce4239757eb52918e76452c00384731e585
+  checksum: bf8fe19e73575489e63c0726355f164157cd69e75f2a862436ad2c0586e732cb953a7255a6bc73145e8f9506ee7a723f9a569ca9a39c53984e5b12b84e1c718a
   languageName: node
   linkType: hard
 
@@ -6533,7 +6533,7 @@ __metadata:
     "@types/d3": "npm:^7.4.3"
     "@types/eslint": "npm:^8"
     "@types/node": "npm:^20.9.0"
-    "@types/react": "npm:^18.2.48"
+    "@types/react": "npm:^18.2.55"
     "@types/react-dom": "npm:^18.2.17"
     "@types/three": "npm:^0.161.2"
     "@vitejs/plugin-basic-ssl": "npm:^1.1.0"
