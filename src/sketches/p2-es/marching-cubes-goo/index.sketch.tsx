@@ -76,9 +76,7 @@ class PhysicsSystem extends System<EntityType> {
     }
 }
 
-const world = new World<EntityType>({
-    components: ['isRotating', 'object3D', 'physicsBody'],
-})
+const world = new World<EntityType>()
 
 const executor = new Executor(world)
 

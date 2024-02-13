@@ -20,7 +20,6 @@ export type VoxelEnginePluginSetup<E extends AnyEntity> = (
 
 export type VoxelEnginePlugin<E extends AnyEntity> = {
     E?: E
-    components?: (keyof E)[]
     systems?: (SystemClass & { PRIORITY?: number })[]
     setup?: VoxelEnginePluginSetup<E>
 }

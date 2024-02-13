@@ -281,7 +281,6 @@ export type CulledMesherPluginEntity = {
 
 export const CulledMesherPlugin = {
     E: {} as CulledMesherPluginEntity,
-    components: ['voxelChunkMesh'],
     systems: [VoxelChunkMesherSystem],
 } satisfies VoxelEnginePlugin<CulledMesherPluginEntity>
 

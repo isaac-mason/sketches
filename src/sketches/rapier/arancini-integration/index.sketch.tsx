@@ -10,9 +10,7 @@ type EntityType = {
     rigidBody?: RapierRigidBody
 }
 
-const world = new World<EntityType>({
-    components: ['rigidBody'],
-})
+const world = new World<EntityType>()
 
 const rigidBodyQuery = world.query((e) => e.has('rigidBody'))
 

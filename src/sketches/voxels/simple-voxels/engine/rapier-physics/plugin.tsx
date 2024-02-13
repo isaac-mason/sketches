@@ -412,7 +412,6 @@ export const RapierInit = ({ children }: { children: React.ReactNode }) => {
 
 export const RapierPhysicsPlugin = {
     E: {} as RapierPhysicsPluginEntity,
-    components: ['rigidBody', 'physicsWorld', 'voxelChunkPhysics'],
     systems: [PhysicsSystem, VoxelPhysicsSystem],
     setup: (world: World<RapierPhysicsPluginEntity>) => {
         const physicsWorld = new Rapier.World(new Rapier.Vector3(0, -9.81, 0))

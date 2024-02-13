@@ -167,9 +167,7 @@ class CameraSystem extends System<EntityType> {
     }
 }
 
-const world = new World<EntityType>({
-    components: ['isPlayer', 'camera', 'object3D', 'physicsBody', 'playerInput', 'kinematicCharacterController'],
-})
+const world = new World<EntityType>()
 
 const executor = new Executor(world)
 

@@ -10,9 +10,7 @@ import { Physics, RigidBody, useJolt } from '../jolt-react-api'
 const world = new World<{
     body: Jolt.Body
     teleport: true
-}>({
-    components: ['body', 'teleport'],
-})
+}>()
 
 const teleportingBodies = world.query((e) => e.has('body', 'teleport'))
 

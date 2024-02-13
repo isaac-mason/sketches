@@ -35,11 +35,6 @@ export const createVoxelEngine = <Plugins extends ReadonlyArray<VoxelEnginePlugi
             const react = createReactAPI(world)
 
             for (const plugin of plugins) {
-                if (!plugin.components) continue
-                world.registerComponents(plugin.components as (keyof Entity)[])
-            }
-
-            for (const plugin of plugins) {
                 if (!plugin.systems) continue
                 for (const system of plugin.systems) {
                     executor.add(system, { priority: system?.PRIORITY })

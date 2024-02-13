@@ -34,9 +34,7 @@ type EntityType = {
     target?: Vector3
 }
 
-const world = new World<EntityType>({
-    components: ['agent', 'object3D', 'target'],
-})
+const world = new World<EntityType>()
 
 const queries = {
     agents: world.query((e) => e.is('agent')),

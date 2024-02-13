@@ -256,20 +256,7 @@ class CameraSystem extends System<EntityType> {
     }
 }
 
-const world = new World<EntityType>({
-    components: [
-        'player',
-        'playerInput',
-        'playerSpeed',
-        'playerMovement',
-        'playerAnimation',
-        'camera',
-        'cameraConfiguration',
-        'traversable',
-        'three',
-        'navigationMesh',
-    ],
-})
+const world = new World<EntityType>()
 
 const queries = {
     traversableThreeObjects: world.query((e) => e.has('traversable', 'three')),

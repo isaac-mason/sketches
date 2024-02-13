@@ -5,7 +5,7 @@ import { useEffect, useMemo } from 'react'
 import { suspend } from 'suspend-react'
 import { useConst } from '../../../../common'
 import { physicsContext } from '../context'
-import { JoltEntity, joltComponents } from '../ecs'
+import { JoltEntity } from '../ecs'
 import { Raw, initJolt } from '../raw'
 import { BodyContactSystem, ConstraintSystem, PhysicsSystem } from '../systems'
 import { PhysicsConfig, Vector3Tuple } from '../types'
@@ -68,8 +68,7 @@ export const Physics = ({
     })
 
     const world = useConst(() => {
-        const world = new World<JoltEntity>({ components: joltComponents })
-        return world
+        return new World<JoltEntity>()
     })
 
     const { executor, physicsSystem } = useConst(() => {

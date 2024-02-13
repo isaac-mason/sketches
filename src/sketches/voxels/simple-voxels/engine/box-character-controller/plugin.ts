@@ -269,12 +269,6 @@ export type BoxChararacterControllerPluginEntity = {
 
 export const BoxCharacterControllerPlugin = {
     E: {} as BoxChararacterControllerPluginEntity,
-    components: [
-        'boxCharacterController',
-        'boxCharacterControllerInput',
-        'boxCharacterControllerCamera',
-        'boxCharacterControllerCameraConfiguration',
-    ],
     systems: [BoxCharacterControllerSystem],
 } satisfies VoxelEnginePlugin<BoxChararacterControllerPluginEntity>
 

@@ -202,7 +202,6 @@ export type CorePluginEntity = {
 
 export const CorePlugin = {
     E: {} as CorePluginEntity,
-    components: ['voxelWorld', 'voxelWorldEvents', 'voxelChunk', 'voxelChunkLoaded', 'voxelWorldActor', 'object3D'],
     systems: [VoxelWorldCoreSystem],
     setup: (world: World<CorePluginEntity>) => {
         const voxelWorldEntity = world.create({

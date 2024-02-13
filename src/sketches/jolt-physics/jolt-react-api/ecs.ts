@@ -9,5 +9,3 @@ export type JoltEntity = {
     three?: THREE.Object3D
     worldEvents?: WorldEvents
 }
-
-export const joltComponents: Array<keyof JoltEntity> = ['physicsConfig', 'body', 'bodyEvents', 'constraint', 'three', 'worldEvents']

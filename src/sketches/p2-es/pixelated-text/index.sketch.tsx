@@ -54,9 +54,7 @@ class PhysicsSystem extends System<EntityType> {
     }
 }
 
-const world = new World<EntityType>({
-    components: ['isBox', 'physicsBody', 'object3D', 'color'],
-})
+const world = new World<EntityType>()
 
 const boxQuery = world.query((e) => e.is('isBox', 'physicsBody'))
 
