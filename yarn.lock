@@ -22,38 +22,42 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@arancini/core@portal:/Users/isaacmason/Development/arancini/packages/arancini-core::locator=sketches%40workspace%3A.":
-  version: 0.0.0-use.local
-  resolution: "@arancini/core@portal:/Users/isaacmason/Development/arancini/packages/arancini-core::locator=sketches%40workspace%3A."
+"@arancini/core@npm:6.3.0":
+  version: 6.3.0
+  resolution: "@arancini/core@npm:6.3.0"
   dependencies:
-    "@arancini/events": "npm:6.1.3"
+    "@arancini/events": "npm:6.3.0"
+  checksum: 60f74b57c0001a7e22d35ef8ff9aa99e822316e8fd01cbb8eef13ab875241435e3a1be30af85ce3531a14c57fbc1e284ac2870fe17b0897b69b472e6a096cd9e
   languageName: node
-  linkType: soft
+  linkType: hard
 
-"@arancini/events@portal:/Users/isaacmason/Development/arancini/packages/arancini-events::locator=sketches%40workspace%3A.":
-  version: 0.0.0-use.local
-  resolution: "@arancini/events@portal:/Users/isaacmason/Development/arancini/packages/arancini-events::locator=sketches%40workspace%3A."
+"@arancini/events@npm:6.3.0":
+  version: 6.3.0
+  resolution: "@arancini/events@npm:6.3.0"
+  checksum: 0600c12220208fb44af8caf38588eaac5391748e342562a19808711e55900884f47ef598b544fdee58f7c0a1a53e20e6fa393842dc4fb0be3ccfb5d833f45f8a
   languageName: node
-  linkType: soft
+  linkType: hard
 
-"@arancini/react@portal:/Users/isaacmason/Development/arancini/packages/arancini-react::locator=sketches%40workspace%3A.":
-  version: 0.0.0-use.local
-  resolution: "@arancini/react@portal:/Users/isaacmason/Development/arancini/packages/arancini-react::locator=sketches%40workspace%3A."
+"@arancini/react@npm:6.3.0":
+  version: 6.3.0
+  resolution: "@arancini/react@npm:6.3.0"
   dependencies:
-    "@arancini/core": "npm:6.1.3"
+    "@arancini/core": "npm:6.3.0"
   peerDependencies:
     react: ^18.0.0
     react-dom: ^18.0.0
+  checksum: 17537fc500273a93fe21a8056598c6757cc5bf213b23f2e3ce83584500f244e76423cfa77d1af3bf8aced01e9a19deb739bd1d978bd8034f760df74e4ccf0909
   languageName: node
-  linkType: soft
+  linkType: hard
 
-"@arancini/systems@portal:/Users/isaacmason/Development/arancini/packages/arancini-systems::locator=sketches%40workspace%3A.":
-  version: 0.0.0-use.local
-  resolution: "@arancini/systems@portal:/Users/isaacmason/Development/arancini/packages/arancini-systems::locator=sketches%40workspace%3A."
+"@arancini/systems@npm:6.3.0":
+  version: 6.3.0
+  resolution: "@arancini/systems@npm:6.3.0"
   dependencies:
-    "@arancini/core": "npm:6.1.3"
+    "@arancini/core": "npm:6.3.0"
+  checksum: 32311f23a2f2ca3813c2e47eb449420bd8884bf5c87534336ca907a2c062e0ac4ad061b58a95a5d1994eb239f23ba9affccf302693406361d057d27292278312
   languageName: node
-  linkType: soft
+  linkType: hard
 
 "@babel/code-frame@npm:^7.22.13, @babel/code-frame@npm:^7.23.5":
   version: 7.23.5
@@ -2678,19 +2682,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"arancini@portal:/Users/isaacmason/Development/arancini/packages/arancini::locator=sketches%40workspace%3A.":
-  version: 0.0.0-use.local
-  resolution: "arancini@portal:/Users/isaacmason/Development/arancini/packages/arancini::locator=sketches%40workspace%3A."
+"arancini@npm:^6.3.0":
+  version: 6.3.0
+  resolution: "arancini@npm:6.3.0"
   dependencies:
-    "@arancini/core": "npm:6.1.3"
-    "@arancini/events": "npm:6.1.3"
-    "@arancini/react": "npm:6.1.3"
-    "@arancini/systems": "npm:6.1.3"
+    "@arancini/core": "npm:6.3.0"
+    "@arancini/events": "npm:6.3.0"
+    "@arancini/react": "npm:6.3.0"
+    "@arancini/systems": "npm:6.3.0"
   peerDependencies:
     react: ^18.0.0
     react-dom: ^18.0.0
+  checksum: 37dcdfbb8e2d0abac4648c4c9d6a86327c2b62d98ca4f00c063f2784ba1d134964b5f5bc497077f63bd36da104ac51221646f5c427f3cdece3d7e7051f43de33
   languageName: node
-  linkType: soft
+  linkType: hard
 
 "argparse@npm:^2.0.1":
   version: 2.0.1
@@ -6525,7 +6530,7 @@ __metadata:
     "@types/three": "npm:^0.161.2"
     "@vitejs/plugin-basic-ssl": "npm:^1.1.0"
     "@vitejs/plugin-react": "npm:^4.2.1"
-    arancini: "npm:^6.1.3"
+    arancini: "npm:^6.3.0"
     d3: "npm:^7.8.5"
     eslint: "npm:^8.56.0"
     jolt-physics: "npm:^0.16.0"
