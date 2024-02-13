@@ -97,7 +97,9 @@ export const Physics = ({
     }, [])
 
     useEffect(() => {
-        physicsSystem.physicsSystem.SetGravity(new Raw.module.Vec3(...gravity))
+        const gravityVec = new Raw.module.Vec3(...gravity)
+        physicsSystem.physicsSystem.SetGravity(gravityVec)
+        Raw.module.destroy(gravityVec)
     }, [gravity.join(',')])
 
     useEffect(() => {
