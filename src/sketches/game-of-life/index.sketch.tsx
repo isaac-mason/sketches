@@ -1,6 +1,6 @@
 import bunny from '@pmndrs/assets/models/bunny.glb'
 import { Instance, Instances, MeshReflectorMaterial, PerspectiveCamera, useGLTF } from '@react-three/drei'
-import { ThreeElements, useFrame } from '@react-three/fiber'
+import { ThreeElements, ThreeEvent, useFrame } from '@react-three/fiber'
 import { Bloom, EffectComposer } from '@react-three/postprocessing'
 import { easing } from 'maath'
 import { useEffect, useMemo, useRef } from 'react'
@@ -44,7 +44,6 @@ const gameOfLifeFragmentShader = /* glsl */ `
     uniform sampler2D uState;
     uniform float uGameWidth;
     uniform float uGameHeight;
-    uniform float uTime;
 
     varying vec2 vUv;
 
@@ -59,36 +58,38 @@ const gameOfLifeFragmentShader = /* glsl */ `
 
         bool isAlive = textureSample.r > 0.5;
 
-        vec4 color = vec4(0.0, 0.0, 0.0, 0.5);
-
-        if (isAlive) {
-            color = vec4(1.0, 1.0, 1.0, 1.0);
-        }
+        vec4 color = isAlive ? vec4(1.0, 1.0, 1.0, 1.0) : vec4(0.0, 0.0, 0.0, 0.5);
 
         gl_FragColor = color;
     }
 `
 
-const GameOfLifeMaterial = ({ width, height }: { width: number; height: number }) => {
-    const time = useRef({ value: 0 })
-    const state = useMemo(() => new Uint8Array(width * height), [])
-    const nextState = useMemo(() => new Uint8Array(width * height), [])
+type GameOfLifeProps = {
+    gameSize: [number, number]
+    planeSize: [number, number]
+} & ThreeElements['mesh']
+
+const GameOfLife = ({
+    gameSize: [gameWidth, gameHeight],
+    planeSize: [planeWidth, planeHeight],
+    ...meshProps
+}: GameOfLifeProps) => {
+    const meshRef = useRef<THREE.Mesh>(null!)
+    const drawing = useRef(false)
+    const dirty = useRef(false)
+
+    const state = useMemo(() => new Uint8Array(gameWidth * gameHeight), [])
+    const nextState = useMemo(() => new Uint8Array(gameWidth * gameHeight), [])
     const dataTexture = useMemo(() => {
-        const data = new Uint8Array(width * height * 4)
-        const texture = new THREE.DataTexture(data, width, height, THREE.RGBAFormat)
+        const data = new Uint8Array(gameWidth * gameHeight * 4)
+        const texture = new THREE.DataTexture(data, gameWidth, gameHeight, THREE.RGBAFormat)
         return { data, texture }
     }, [])
 
     const pageVisibile = usePageVisible()
 
-    const step = useMutableCallback(() => {
-        /* update game state */
-        gameOfLifeStep(state, nextState, width, height)
-        state.set(nextState)
-        nextState.fill(0)
-
-        /* update texture */
-        for (let i = 0; i < width * height; i++) {
+    const updateTexture = () => {
+        for (let i = 0; i < gameWidth * gameHeight; i++) {
             dataTexture.data[i * 4] = state[i] * 255
             dataTexture.data[i * 4 + 1] = 0
             dataTexture.data[i * 4 + 2] = 0
@@ -96,13 +97,21 @@ const GameOfLifeMaterial = ({ width, height }: { width: number; height: number }
 
             dataTexture.texture.needsUpdate = true
         }
+    }
+
+    const step = useMutableCallback(() => {
+        gameOfLifeStep(state, nextState, gameWidth, gameHeight)
+        state.set(nextState)
+        nextState.fill(0)
+
+        dirty.current = true
     })
 
     useEffect(() => {
         state.fill(0)
         nextState.fill(0)
 
-        for (let i = 0; i < width * height; i++) {
+        for (let i = 0; i < gameWidth * gameHeight; i++) {
             state[i] = Math.random() > 0.4 ? 1 : 0
         }
 
@@ -113,25 +122,74 @@ const GameOfLifeMaterial = ({ width, height }: { width: number; height: number }
         return new FixedTimeStep({ timeStep: 1 / 5, maxSubSteps: 5, step: () => step.current() })
     }, [])
 
-    useFrame(({ clock: { elapsedTime } }, delta) => {
+    useFrame((_, delta) => {
         if (!pageVisibile) return
 
         fixedTimeStep.update(delta)
 
-        time.current.value = elapsedTime
+        if (dirty.current) {
+            dirty.current = false
+            updateTexture()
+        }
     })
 
+    const draw = (world: THREE.Vector3) => {
+        const meshPosition = meshRef.current.position
+        const meshRotation = meshRef.current.rotation
+
+        const local = world.clone().sub(meshPosition).applyEuler(meshRotation)
+
+        const cellX = Math.floor(((local.x + planeWidth / 2) / planeWidth) * gameWidth)
+        const cellY = Math.floor(((local.y + planeHeight / 2) / planeHeight) * gameHeight)
+
+        if (cellX < 0 || cellX >= gameWidth || cellY < 0 || cellY >= gameHeight) return
+
+        const radius = 1
+        for (let dy = -radius; dy <= radius; dy++) {
+            for (let dx = -radius; dx <= radius; dx++) {
+                const x = cellX + dx
+                const y = cellY + dy
+
+                if (x < 0 || x >= gameWidth || y < 0 || y >= gameHeight) continue
+
+                const index = y * gameWidth + x
+                const current = state[index]
+                state[index] = current ? 0 : 1
+            }
+        }
+
+        dirty.current = true
+    }
+
+    const onPointerDown = (event: ThreeEvent<PointerEvent>) => {
+        drawing.current = true
+
+        draw(event.point)
+    }
+
+    const onPointerMove = (event: ThreeEvent<PointerEvent>) => {
+        if (!drawing.current) return
+
+        draw(event.point)
+    }
+
+    const onPointerUp = () => {
+        drawing.current = false
+    }
+
     return (
-        <shaderMaterial
-            uniforms={{
-                uState: { value: dataTexture.texture },
-                uGameWidth: { value: width },
-                uGameHeight: { value: height },
-                uTime: time.current,
-            }}
-            vertexShader={gameOfLifeVertexShader}
-            fragmentShader={gameOfLifeFragmentShader}
-        />
+        <mesh {...meshProps} ref={meshRef} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp}>
+            <planeGeometry args={[planeWidth, planeHeight]} />
+            <shaderMaterial
+                uniforms={{
+                    uState: { value: dataTexture.texture },
+                    uGameWidth: { value: gameWidth },
+                    uGameHeight: { value: gameHeight },
+                }}
+                vertexShader={gameOfLifeVertexShader}
+                fragmentShader={gameOfLifeFragmentShader}
+            />
+        </mesh>
     )
 }
 
@@ -226,10 +284,7 @@ export default function Sketch() {
             </mesh>
 
             {/* screen */}
-            <mesh position={[0, 74.5, -25]}>
-                <planeGeometry args={[225, 150]} />
-                <GameOfLifeMaterial width={200} height={150} />
-            </mesh>
+            <GameOfLife gameSize={[200, 150]} planeSize={[225, 150]} position={[0, 74.5, -25]} />
 
             {/* lights */}
             <hemisphereLight intensity={0.15} groundColor="black" />
