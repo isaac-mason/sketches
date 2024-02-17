@@ -200,6 +200,12 @@ const sketchList = [
         path: 'tsl/gradient',
         tags: ['tsl', 'gradient'],
     },
+    /* Box Edge Outline */
+    {
+        title: 'Box Edge Outline',
+        path: 'box-edge-outline',
+        tags: ['outline', 'glsl'],
+    },
     /* GLSL Shaders From Scratch */
     {
         title: 'GLSL Shaders From Scratch - Intro - Varyings',
