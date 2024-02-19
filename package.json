@@ -45,7 +45,7 @@
         "@isaac-mason/eslint-config-typescript": "0.0.4",
         "@types/d3": "^7.4.3",
         "@types/eslint": "^8",
-        "@types/node": "^20.9.0",
+        "@types/node": "^20.11.19",
         "@types/react": "^18.2.55",
         "@types/react-dom": "^18.2.17",
         "@types/three": "^0.161.2",
