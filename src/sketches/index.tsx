@@ -206,6 +206,11 @@ const sketchList = [
         path: 'box-edge-outline',
         tags: ['outline', 'glsl'],
     },
+    /* z-fighting */
+    {
+        title: 'z-fighting mitigations',
+        path: 'z-fighting-mitigations',
+    },
     /* GLSL Shaders From Scratch */
     {
         title: 'GLSL Shaders From Scratch - Intro - Varyings',
@@ -359,7 +364,7 @@ const sketchList = [
         path: 'xr/basic-vr',
         tags: ['xr', 'vr'],
         hidden: true,
-    }
+    },
 ]
 
 export const renamedSketches: { from: string; to: string }[] = [
