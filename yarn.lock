@@ -22,40 +22,40 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@arancini/core@npm:6.3.2":
-  version: 6.3.2
-  resolution: "@arancini/core@npm:6.3.2"
+"@arancini/core@npm:6.4.0":
+  version: 6.4.0
+  resolution: "@arancini/core@npm:6.4.0"
   dependencies:
-    "@arancini/events": "npm:6.3.2"
-  checksum: cfed981d767eefeca3a250384270b09f416fd1449b7944fb63ca364a28ff82646208a7b8f0a558d539fc838620afc59321e549d91f073444fcc9c2adcde21b04
+    "@arancini/events": "npm:6.4.0"
+  checksum: e9cab772edcd05b926be93520106f1c89f62b7773909d2fdd5a4a438cade4f9cf2334fd76c5cd0a9d9497ef6b5be759a8921bf22ba8a99b46009062d61cd8ff5
   languageName: node
   linkType: hard
 
-"@arancini/events@npm:6.3.2":
-  version: 6.3.2
-  resolution: "@arancini/events@npm:6.3.2"
-  checksum: 6610b38703b5e604dcfa577ea386b353e592c09050449eedd8c166d2db709db7c6c700ca39407a5697d07455be3ac7a0e8ff7be0b68acf343ee7cdbaf4bfbb37
+"@arancini/events@npm:6.4.0":
+  version: 6.4.0
+  resolution: "@arancini/events@npm:6.4.0"
+  checksum: f41d186b06df9b5353587b43dd6e2442c2dd7df33e343af2edc73774e5bc70c03aab64acaf6a83fd918dd1624d91805f41cfc8b0e2782e3733df4f6028492d3b
   languageName: node
   linkType: hard
 
-"@arancini/react@npm:6.3.2":
-  version: 6.3.2
-  resolution: "@arancini/react@npm:6.3.2"
+"@arancini/react@npm:6.4.0":
+  version: 6.4.0
+  resolution: "@arancini/react@npm:6.4.0"
   dependencies:
-    "@arancini/core": "npm:6.3.2"
+    "@arancini/core": "npm:6.4.0"
   peerDependencies:
     react: ^18.0.0
     react-dom: ^18.0.0
-  checksum: 3ecfeaad6fe9d378369c7dc78b3d592dd14ba3e08430d879d304acaa28eeffe8f501a89fb8201d168e0576346b913d142b61e0a9d66e033ea44506b108c423f5
+  checksum: 92beb1a38cef3e587f1ca1149287d72412cd57b1c94a0b65f615963fd4d768788235d5ea409f4c23292d8bf874d0d4e65f76ac11567c0a8431163a046518a165
   languageName: node
   linkType: hard
 
-"@arancini/systems@npm:6.3.2":
-  version: 6.3.2
-  resolution: "@arancini/systems@npm:6.3.2"
+"@arancini/systems@npm:6.4.0":
+  version: 6.4.0
+  resolution: "@arancini/systems@npm:6.4.0"
   dependencies:
-    "@arancini/core": "npm:6.3.2"
-  checksum: 46a1caaeb345efbe8b18debaf64ec9cec48358d958aeb2b0e2905e5dda653aa12c54807734426cbc5648c6dcf7877f809b07e00ceb0c6ef884028d3e95c351c9
+    "@arancini/core": "npm:6.4.0"
+  checksum: e681e4afb5f898c9a61717927f593fc4945601860420ea0eb98de4fad6c00fb039be62862eeb24a261ed14bf9cf940b3d26ba5f748b0f9caf5fbc71a237d471a
   languageName: node
   linkType: hard
 
@@ -480,10 +480,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@dimforge/rapier3d-compat@npm:0.11.2":
-  version: 0.11.2
-  resolution: "@dimforge/rapier3d-compat@npm:0.11.2"
-  checksum: d206d8357539526ec153ba1c1e687bf63d896d5530259f9b5e0acdf1ca77833f6e2238381f7b4f95a59bff331ce39b7d839b7627071431b812078eb94cc31490
+"@dimforge/rapier3d-compat@npm:0.12.0":
+  version: 0.12.0
+  resolution: "@dimforge/rapier3d-compat@npm:0.12.0"
+  checksum: 56cd538b59d534d2ed91de3eb7efd804af5defe146f65294e8ce81982a4bd6c27d61c1014c15a77bb5f5eff0de7a12fbc9b16bf895a2ec56ea5496fd80c78e26
   languageName: node
   linkType: hard
 
@@ -1715,18 +1715,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-three/rapier@npm:^1.2.1":
-  version: 1.2.1
-  resolution: "@react-three/rapier@npm:1.2.1"
+"@react-three/rapier@npm:^1.3.0":
+  version: 1.3.0
+  resolution: "@react-three/rapier@npm:1.3.0"
   dependencies:
-    "@dimforge/rapier3d-compat": "npm:0.11.2"
+    "@dimforge/rapier3d-compat": "npm:0.12.0"
     three-stdlib: "npm:2.23.9"
     use-asset: "npm:1.0.4"
   peerDependencies:
     "@react-three/fiber": ">=8.9.0"
     react: ">=18.0.0"
     three: ">=0.139.0"
-  checksum: ee783a542ccd27dbf37c32f10a9b10ebcccbb3a4abe748e5dde0fba08c3cedcc1e8035acf07f7f5a6acb91bb4cae44cc5d37a7a791120e893b55a336a788de9c
+  checksum: d1a39de3a6a8b348f51d28cd6a2b3a17d9a3c4212003d71de9779deab75d399acfa869dd3d9ba6db9d7d8f0f147377da7c580a2b45fb0d6005a60a9d224508b8
   languageName: node
   linkType: hard
 
@@ -2682,18 +2682,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"arancini@npm:^6.3.2":
-  version: 6.3.2
-  resolution: "arancini@npm:6.3.2"
+"arancini@npm:^6.4.0":
+  version: 6.4.0
+  resolution: "arancini@npm:6.4.0"
   dependencies:
-    "@arancini/core": "npm:6.3.2"
-    "@arancini/events": "npm:6.3.2"
-    "@arancini/react": "npm:6.3.2"
-    "@arancini/systems": "npm:6.3.2"
+    "@arancini/core": "npm:6.4.0"
+    "@arancini/events": "npm:6.4.0"
+    "@arancini/react": "npm:6.4.0"
+    "@arancini/systems": "npm:6.4.0"
   peerDependencies:
     react: ^18.0.0
     react-dom: ^18.0.0
-  checksum: 81a8a7772521489946d4ee3cd47f4eea4addeca5143735143aac67609a17b530fc967cf6d8593f41af24b9c1105500ca0f1dc14de3ea95433b536f10d0f2e066
+  checksum: f0b3858704d1344c3e24d464f26a2ff4dbf6040c0f593b67124c37cb100717c9468392a73340b961331050f42bf9af123469c05495b8d7284ffcc0e5f869e759
   languageName: node
   linkType: hard
 
@@ -6512,7 +6512,7 @@ __metadata:
   dependencies:
     "@babel/plugin-proposal-class-properties": "npm:^7.18.6"
     "@babel/plugin-proposal-decorators": "npm:^7.23.7"
-    "@dimforge/rapier3d-compat": "npm:0.11.2"
+    "@dimforge/rapier3d-compat": "npm:0.12.0"
     "@isaac-mason/eslint-config-typescript": "npm:0.0.4"
     "@pmndrs/assets": "npm:^1.6.0"
     "@react-three/csg": "npm:^3.2.0"
@@ -6520,7 +6520,7 @@ __metadata:
     "@react-three/fiber": "npm:^8.15.15"
     "@react-three/flex": "npm:^1.0.1"
     "@react-three/postprocessing": "npm:^2.16.0"
-    "@react-three/rapier": "npm:^1.2.1"
+    "@react-three/rapier": "npm:^1.3.0"
     "@react-three/xr": "npm:^5.7.1"
     "@types/d3": "npm:^7.4.3"
     "@types/eslint": "npm:^8"
@@ -6530,7 +6530,7 @@ __metadata:
     "@types/three": "npm:^0.161.2"
     "@vitejs/plugin-basic-ssl": "npm:^1.1.0"
     "@vitejs/plugin-react": "npm:^4.2.1"
-    arancini: "npm:^6.3.2"
+    arancini: "npm:^6.4.0"
     d3: "npm:^7.8.5"
     eslint: "npm:^8.56.0"
     jolt-physics: "npm:^0.16.0"

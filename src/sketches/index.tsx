@@ -113,8 +113,8 @@ const sketchList = [
         tags: ['physics', 'rapier', 'raycasting'],
     },
     {
-        title: 'Rapier - Spring',
-        path: 'rapier/spring',
+        title: 'Rapier - Custom Spring',
+        path: 'rapier/custom-spring',
         tags: ['physics', 'rapier'],
     },
     {
@@ -359,7 +359,7 @@ const sketchList = [
         path: 'xr/basic-vr',
         tags: ['xr', 'vr'],
         hidden: true,
-    },
+    }
 ]
 
 export const renamedSketches: { from: string; to: string }[] = [

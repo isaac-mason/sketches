@@ -7,7 +7,7 @@ import { create } from 'zustand'
 import { Canvas, usePageVisible } from '../../../common'
 import { Spring } from './spring'
 
-const LEVA_KEY = 'rapier-spring'
+const LEVA_KEY = 'rapier-custom-spring'
 
 const usePointer = create<{ pointerDown: boolean; setPointerDown: (pointerDown: boolean) => void }>((set) => ({
     pointerDown: false,

@@ -6,15 +6,12 @@ import {
     RapierRigidBody,
     RigidBody,
     RigidBodyProps,
-    useAfterPhysicsStep,
-    useBeforePhysicsStep,
-    useRapier,
+    useRapier
 } from '@react-three/rapier'
 import { useControls } from 'leva'
 import { useEffect, useRef, useState } from 'react'
 import { Mesh, Quaternion, Raycaster, Vector3 } from 'three'
 import { Canvas, usePageVisible } from '../../../common'
-import { Spring } from '../spring/spring'
 import { getQueryParamOrDefault } from '../../../common/utils/url-query-param'
 
 const LEVA_KEY = 'rapier-pointer-constraint'
@@ -29,7 +26,8 @@ type PointerConstraintControlsProps = {
 
 const SPHERICAL_CONSTRAINT = 'spherical constraint'
 const SPRING = 'spring'
-const OPTIONS = [SPHERICAL_CONSTRAINT, SPRING]
+const ROPE_JOINT = 'rope joint'
+const OPTIONS = [SPHERICAL_CONSTRAINT, SPRING, ROPE_JOINT]
 
 const PointerControls = ({ target }: PointerConstraintControlsProps) => {
     const { type, pointerRigidBodyVisible, movementPlaneVisible } = useControls(LEVA_KEY, {
@@ -56,8 +54,7 @@ const PointerControls = ({ target }: PointerConstraintControlsProps) => {
     const pointerRigidBody = useRef<RapierRigidBody>(null!)
     const movementPlane = useRef<Mesh>(null!)
 
-    const joint = useRef<Rapier.ImpulseJoint | null>(null)
-    const spring = useRef<Spring | null>(null)
+    const joint = useRef<Rapier.ImpulseJoint | Rapier.SpringImpulseJoint | null>(null)
 
     const [rayDirection] = useState(() => new Vector3())
     const [raycaster] = useState(() => new Raycaster())
@@ -77,7 +74,7 @@ const PointerControls = ({ target }: PointerConstraintControlsProps) => {
         const { world } = rapier
 
         const onPointerDown = () => {
-            if (joint.current || spring.current) {
+            if (joint.current) {
                 onPointerUp()
             }
 
@@ -104,12 +101,37 @@ const PointerControls = ({ target }: PointerConstraintControlsProps) => {
                 .applyQuaternion(new Quaternion().copy(rigidBody.rotation() as Quaternion).conjugate())
 
             if (type === SPRING) {
-                spring.current = new Spring(pointerRigidBody.current, rigidBody, {
-                    damping: 5,
-                    stiffness: 20,
-                    restLength: 0,
-                    localAnchorB: rayHitPositionBodyLocalFrame,
-                })
+                joint.current = world.createImpulseJoint(
+                    Rapier.JointData.spring(
+                        0, // rest length
+                        20, // stiffness
+                        5, // damping
+                        new Rapier.Vector3(0, 0, 0),
+                        new Rapier.Vector3(
+                            rayHitPositionBodyLocalFrame.x,
+                            rayHitPositionBodyLocalFrame.y,
+                            rayHitPositionBodyLocalFrame.z,
+                        ),
+                    ),
+                    pointerRigidBody.current,
+                    rigidBody,
+                    true,
+                )
+            } else if (type === ROPE_JOINT) {
+                joint.current = world.createImpulseJoint(
+                    Rapier.JointData.rope(
+                        0.5, // length
+                        new Rapier.Vector3(0, 0, 0),
+                        new Rapier.Vector3(
+                            rayHitPositionBodyLocalFrame.x,
+                            rayHitPositionBodyLocalFrame.y,
+                            rayHitPositionBodyLocalFrame.z,
+                        ),
+                    ),
+                    pointerRigidBody.current,
+                    rigidBody,
+                    true,
+                )
             } else {
                 joint.current = world.createImpulseJoint(
                     Rapier.JointData.spherical(new Rapier.Vector3(0, 0, 0), rayHitPositionBodyLocalFrame),
@@ -125,18 +147,15 @@ const PointerControls = ({ target }: PointerConstraintControlsProps) => {
         const onPointerUp = () => {
             if (joint.current) {
                 world.removeImpulseJoint(joint.current, true)
-                joint.current = null
             }
 
-            if (spring.current) {
-                spring.current = null
-            }
-
+            joint.current = null
+            
             setDragging(false)
         }
 
         const onPointerMove = () => {
-            if (!joint.current && !spring.current) return
+            if (!joint.current) return
             updatePointerRigidBody()
         }
 
@@ -152,16 +171,6 @@ const PointerControls = ({ target }: PointerConstraintControlsProps) => {
             domElement.removeEventListener('pointermove', onPointerMove)
         }
     }, [type, camera, mouse, gl])
-
-    useBeforePhysicsStep(() => {
-        if (!spring.current) return
-        spring.current.preStep()
-    })
-
-    useAfterPhysicsStep(() => {
-        if (!spring.current) return
-        spring.current.postStep()
-    })
 
     return (
         <>
@@ -241,7 +250,7 @@ export default () => {
     return (
         <>
             <Canvas camera={{ position: [4, 4, 4] }} shadows>
-                <Physics paused={!visible} debug={debug}>
+                <Physics paused={!visible} debug={debug} numSolverIterations={1}>
                     <PointerControls target={[0, 1, 0]} />
 
                     <Torus position={[-2, 5, 2]} />

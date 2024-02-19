@@ -68,7 +68,7 @@ export const createVoxelEngine = <Plugins extends ReadonlyArray<VoxelEnginePlugi
             }
 
             return () => {
-                engine?.world.reset()
+                engine?.world.clear()
                 initialised.current = false
             }
         }, [])

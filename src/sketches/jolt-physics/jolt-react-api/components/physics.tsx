@@ -91,7 +91,7 @@ export const Physics = ({
         if (!executor.initialised) executor.init()
 
         return () => {
-            world.reset();
+            world.clear();
             executor.destroy();
         }
     }, [])

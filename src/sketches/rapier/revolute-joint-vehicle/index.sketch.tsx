@@ -1,3 +1,4 @@
+import { MotorModel } from '@dimforge/rapier3d-compat'
 import { KeyboardControls, OrbitControls, useKeyboardControls } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
 import { CylinderCollider, Physics, RapierRigidBody, RigidBody, useFixedJoint, useRevoluteJoint } from '@react-three/rapier'
@@ -28,11 +29,13 @@ const CONTROLS_MAP = [
 const RAPIER_UPDATE_PRIORITY = -50
 const AFTER_RAPIER_UPDATE = RAPIER_UPDATE_PRIORITY - 1
 
-const AXLE_TO_CHASSIS_JOINT_STIFFNESS = 150000
-const AXLE_TO_CHASSIS_JOINT_DAMPING = 20
+const AXLE_TO_CHASSIS_JOINT_STIFFNESS = 100
+const AXLE_TO_CHASSIS_JOINT_DAMPING = 10
 
-const DRIVEN_WHEEL_FORCE = 600
-const DRIVEN_WHEEL_DAMPING = 5
+const DRIVEN_WHEEL_TARGET_VELOCITY = 1000
+const DRIVEN_WHEEL_FACTOR = 10
+
+const TURN_ANGLE = 0.6
 
 type FixedJointProps = {
     body: RefObject<RapierRigidBody>
@@ -71,13 +74,14 @@ const AxleJoint = ({ body, wheel, bodyAnchor, wheelAnchor, rotationAxis, isDrive
         if (forwardPressed) forward += 1
         if (backwardPressed) forward -= 1
 
-        forward *= DRIVEN_WHEEL_FORCE
+        forward *= DRIVEN_WHEEL_TARGET_VELOCITY
 
         if (forward !== 0) {
             wheel.current?.wakeUp()
         }
 
-        joint.current?.configureMotorVelocity(forward, DRIVEN_WHEEL_DAMPING)
+        joint.current?.configureMotorModel(MotorModel.AccelerationBased)
+        joint.current?.configureMotorVelocity(forward, DRIVEN_WHEEL_FACTOR)
     }, [forwardPressed, backwardPressed])
 
     return null
@@ -96,9 +100,12 @@ const SteeredJoint = ({ body, wheel, bodyAnchor, wheelAnchor, rotationAxis }: St
 
     const left = useKeyboardControls((state) => state.left)
     const right = useKeyboardControls((state) => state.right)
-    const targetPos = left ? 0.2 : right ? -0.2 : 0
+    let targetPos = 0
+    if (left) targetPos += TURN_ANGLE
+    if (right) targetPos -= TURN_ANGLE
 
     useEffect(() => {
+        joint.current?.configureMotorModel(MotorModel.ForceBased)
         joint.current?.configureMotorPosition(targetPos, AXLE_TO_CHASSIS_JOINT_STIFFNESS, AXLE_TO_CHASSIS_JOINT_DAMPING)
     }, [left, right])
 
@@ -113,7 +120,48 @@ type WheelInfo = {
     isDriven: boolean
 }
 
-const RevoluteJointVehicle = () => {
+const axleY = -0.6
+const wheelY = -0.6
+const wheels: WheelInfo[] = [
+    {
+        axlePosition: [-1.2, axleY, 0.7],
+        wheelPosition: [-1.2, wheelY, 1],
+        isSteered: true,
+        side: 'left',
+        isDriven: false,
+    },
+    {
+        axlePosition: [-1.2, axleY, -0.7],
+        wheelPosition: [-1.2, wheelY, -1],
+        isSteered: true,
+        side: 'right',
+        isDriven: false,
+    },
+    {
+        axlePosition: [1.2, axleY, 0.7],
+        wheelPosition: [1.2, wheelY, 1],
+        isSteered: false,
+        side: 'left',
+        isDriven: true,
+    },
+    {
+        axlePosition: [1.2, axleY, -0.7],
+        wheelPosition: [1.2, wheelY, -1],
+        isSteered: false,
+        side: 'right',
+        isDriven: true,
+    },
+]
+
+const vec3 = {
+    add: (a: Vector3Tuple, b: Vector3Tuple) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]] as Vector3Tuple,
+}
+
+type RevoluteJointVehicleProps = {
+    position: Vector3Tuple
+}
+
+const RevoluteJointVehicle = ({ position }: RevoluteJointVehicleProps) => {
     const { cameraMode } = useControls(`${LEVA_KEY}-camera`, {
         cameraMode: {
             value: 'follow',
@@ -126,37 +174,6 @@ const RevoluteJointVehicle = () => {
     const currentCameraLookAt = useRef(new Vector3())
 
     const chassisRef = useRef<RapierRigidBody>(null)
-
-    const wheels: WheelInfo[] = [
-        {
-            axlePosition: [-1.2, -0.6, 0.7],
-            wheelPosition: [-1.2, -0.4, 1],
-            isSteered: true,
-            side: 'left',
-            isDriven: false,
-        },
-        {
-            axlePosition: [-1.2, -0.6, -0.7],
-            wheelPosition: [-1.2, -0.4, -1],
-            isSteered: true,
-            side: 'right',
-            isDriven: false,
-        },
-        {
-            axlePosition: [1.2, -0.6, 0.7],
-            wheelPosition: [1.2, -0.4, 1],
-            isSteered: false,
-            side: 'left',
-            isDriven: true,
-        },
-        {
-            axlePosition: [1.2, -0.6, -0.7],
-            wheelPosition: [1.2, -0.4, -1],
-            isSteered: false,
-            side: 'right',
-            isDriven: true,
-        },
-    ]
 
     const wheelRefs = useRef<RefObject<RapierRigidBody>[]>(wheels.map(() => createRef()))
 
@@ -193,7 +210,7 @@ const RevoluteJointVehicle = () => {
 
             <group>
                 {/* chassis */}
-                <RigidBody ref={chassisRef} colliders="cuboid" mass={1}>
+                <RigidBody ref={chassisRef} position={position} colliders="cuboid" mass={5}>
                     <mesh castShadow receiveShadow>
                         <boxGeometry args={[3.5, 0.5, 1.5]} />
                         <meshStandardMaterial color="#333" />
@@ -204,7 +221,12 @@ const RevoluteJointVehicle = () => {
                 {wheels.map((wheel, i) => (
                     <React.Fragment key={i}>
                         {/* axle */}
-                        <RigidBody ref={axleRefs.current[i]} position={wheel.axlePosition} colliders="cuboid">
+                        <RigidBody
+                            ref={axleRefs.current[i]}
+                            position={vec3.add(wheel.axlePosition, position)}
+                            colliders="cuboid"
+                            mass={0.2}
+                        >
                             <mesh rotation={[Math.PI / 2, 0, 0]} castShadow receiveShadow>
                                 <boxGeometry args={[0.3, 0.3, 0.3]} />
                                 <meshStandardMaterial color="#999" />
@@ -212,7 +234,13 @@ const RevoluteJointVehicle = () => {
                         </RigidBody>
 
                         {/* wheel */}
-                        <RigidBody ref={wheelRefs.current[i]} position={wheel.wheelPosition} colliders={false}>
+                        <RigidBody
+                            ref={wheelRefs.current[i]}
+                            position={vec3.add(wheel.wheelPosition, position)}
+                            colliders={false}
+                            mass={0.2}
+                            restitution={0}
+                        >
                             <mesh rotation-x={-Math.PI / 2} castShadow receiveShadow>
                                 <cylinderGeometry args={[0.25, 0.25, 0.24, 32]} />
                                 <meshStandardMaterial color="#666" />
@@ -285,8 +313,8 @@ const Scene = () => {
             ))}
 
             {/* boxes */}
-            {Array.from({ length: 6 }).map((_, idx) => (
-                <RigidBody key={idx} colliders="cuboid" mass={0.2} position={[-28, 0.5 + idx * 2.2, Math.floor(idx / 2) - 1]}>
+            {Array.from({ length: 12 }).map((_, idx) => (
+                <RigidBody key={idx} colliders="cuboid" mass={0.2} position={[-28, 0.2, 11 - idx * 2]}>
                     <mesh>
                         <boxGeometry args={[1, 2, 1]} />
                         <meshStandardMaterial color="orange" />
@@ -347,12 +375,12 @@ export default () => {
                     updatePriority={RAPIER_UPDATE_PRIORITY}
                     paused={!visible}
                     debug={debug}
-                    maxStabilizationIterations={50}
-                    maxVelocityFrictionIterations={50}
-                    maxVelocityIterations={100}
+                    numSolverIterations={10}
+                    numAdditionalFrictionIterations={10}
+                    numInternalPgsIterations={10}
                 >
                     <KeyboardControls map={CONTROLS_MAP}>
-                        <RevoluteJointVehicle />
+                        <RevoluteJointVehicle position={[0, 1, 0]} />
                     </KeyboardControls>
 
                     <Scene />
