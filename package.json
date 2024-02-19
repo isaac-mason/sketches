@@ -47,7 +47,7 @@
         "@types/eslint": "^8",
         "@types/node": "^20.9.0",
         "@types/react": "^18.2.55",
-        "@types/react-dom": "^18.2.17",
+        "@types/react-dom": "^18.2.19",
         "@types/three": "^0.161.2",
         "@vitejs/plugin-basic-ssl": "^1.1.0",
         "@vitejs/plugin-react": "^4.2.1",
