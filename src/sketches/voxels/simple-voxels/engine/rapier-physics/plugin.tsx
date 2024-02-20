@@ -7,6 +7,11 @@ import { CHUNK_SIZE, ChunkEntity, CorePluginEntity, Vec3, chunkPositionToWorldPo
 import { VoxelEnginePlugin } from '../voxel-engine-types'
 import { worldVoxelPositionToPhysicsPosition } from './utils'
 
+// type VoxelChunkPhysics = {
+//     rigidBody: Rapier.RigidBody
+//     colliders: Map<string, Rapier.Collider>
+// }
+
 export type RapierPhysicsPluginEntity = {
     physicsWorld?: Rapier.World
     rigidBody?: Rapier.RigidBody
@@ -14,7 +19,6 @@ export type RapierPhysicsPluginEntity = {
 }
 
 export type VoxelChunkPhysicsBox = {
-    body: Rapier.RigidBody
     nx: number
     ny: number
     nz: number
@@ -24,22 +28,29 @@ export type VoxelChunkPhysicsBox = {
 }
 
 export class VoxelChunkPhysics {
-    offset!: Vec3
+    rigidBody: Rapier.RigidBody
 
-    nx!: number
-    ny!: number
-    nz!: number
+    colliders: Rapier.Collider[]
 
-    sx!: number
-    sy!: number
-    sz!: number
+    offset: Vec3
 
-    map!: boolean[]
-    boxified!: boolean[]
-    boxes!: VoxelChunkPhysicsBox[]
+    nx: number
+    ny: number
+    nz: number
 
-    constructor(offset: Vec3) {
+    sx: number
+    sy: number
+    sz: number
+
+    map: boolean[]
+    boxified: boolean[]
+    boxes: VoxelChunkPhysicsBox[]
+
+    constructor(rigidBody: Rapier.RigidBody, offset: Vec3) {
+        this.rigidBody = rigidBody
         this.offset = offset
+
+        this.colliders = []
 
         this.nx = CHUNK_SIZE
         this.ny = CHUNK_SIZE
@@ -137,13 +148,15 @@ export class VoxelPhysicsSystem extends System<CorePluginEntity & RapierPhysicsP
         const { voxelChunk } = chunkEntity
 
         if (!chunkEntity.voxelChunkPhysics) {
-            this.world.add(
-                chunkEntity,
-                'voxelChunkPhysics',
-                new VoxelChunkPhysics(
-                    worldVoxelPositionToPhysicsPosition(chunkPositionToWorldPosition(voxelChunk.position.toArray())),
-                ),
-            )
+            const rigidBody = this.physicsWorld.createRigidBody(Rapier.RigidBodyDesc.fixed())
+
+            const offset = worldVoxelPositionToPhysicsPosition(chunkPositionToWorldPosition(voxelChunk.position.toArray()))
+
+            rigidBody.setTranslation(new Rapier.Vector3(...offset), true)
+
+            const voxelChunkPhysics = new VoxelChunkPhysics(rigidBody, offset)
+
+            this.world.add(chunkEntity, 'voxelChunkPhysics', voxelChunkPhysics)
         }
 
         const chunkPhysics = chunkEntity.voxelChunkPhysics!
@@ -159,13 +172,6 @@ export class VoxelPhysicsSystem extends System<CorePluginEntity & RapierPhysicsP
 
         const { nx, ny, nz } = chunkPhysics
 
-        // Remove all old boxes
-        for (let i = 0; i < chunkPhysics.boxes.length; i++) {
-            const { body } = chunkPhysics.boxes[i]
-            this.physicsWorld.removeRigidBody(body)
-        }
-        chunkPhysics.boxes.length = 0
-
         // Set whole map to unboxified
         for (let i = 0; i < chunkPhysics.boxified.length; i++) {
             chunkPhysics.boxified[i] = false
@@ -179,7 +185,7 @@ export class VoxelPhysicsSystem extends System<CorePluginEntity & RapierPhysicsP
                 for (let j = 0; !box && j < ny; j++) {
                     for (let k = 0; !box && k < nz; k++) {
                         if (chunkPhysics.isFilled(i, j, k) && !chunkPhysics.isBoxified(i, j, k)) {
-                            const bodyDesc = Rapier.RigidBodyDesc.fixed()
+                            // const bodyDesc = Rapier.RigidBodyDesc.fixed()
 
                             box = {
                                 xi: i,
@@ -188,7 +194,7 @@ export class VoxelPhysicsSystem extends System<CorePluginEntity & RapierPhysicsP
                                 nx: 0,
                                 ny: 0,
                                 nz: 0,
-                                body: this.physicsWorld.createRigidBody(bodyDesc),
+                                // body: this.physicsWorld.createRigidBody(bodyDesc),
                             }
 
                             chunkPhysics.boxes.push(box)
@@ -270,26 +276,26 @@ export class VoxelPhysicsSystem extends System<CorePluginEntity & RapierPhysicsP
             }
         }
 
-        // Set box positions
         const { sx, sy, sz } = chunkPhysics
 
-        const [ox, oy, oz] = chunkPhysics.offset
+        // remove previous colliders
+        for (const collider of chunkPhysics.colliders) {
+            this.physicsWorld.removeCollider(collider, false)
+        }
 
+        // add new colliders
         for (let i = 0; i < chunkPhysics.boxes.length; i++) {
             const box = chunkPhysics.boxes[i]
-            box.body.setTranslation(
-                new Rapier.Vector3(
-                    ox + box.xi * sx + box.nx * sx * 0.5 - 0.5,
-                    oy + box.yi * sy + box.ny * sy * 0.5 - 0.5,
-                    oz + box.zi * sz + box.nz * sz * 0.5 - 0.5,
-                ),
-                false,
-            )
 
-            // Replace box shapes
             const colliderDesc = Rapier.ColliderDesc.cuboid(box.nx * sx * 0.5, box.ny * sy * 0.5, box.nz * sz * 0.5)
 
-            this.physicsWorld.createCollider(colliderDesc, box.body)
+            colliderDesc.setTranslation(
+                box.xi * sx + box.nx * sx * 0.5 - 0.5,
+                box.yi * sy + box.ny * sy * 0.5 - 0.5,
+                box.zi * sz + box.nz * sz * 0.5 - 0.5,
+            )
+
+            this.physicsWorld.createCollider(colliderDesc, chunkPhysics.rigidBody)
         }
     }
 }

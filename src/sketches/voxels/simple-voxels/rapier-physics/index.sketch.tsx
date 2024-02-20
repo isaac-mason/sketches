@@ -127,8 +127,8 @@ const Level = () => {
             }
         }
 
-        for (let x = -50; x < 50; x++) {
-            for (let z = -50; z < 50; z++) {
+        for (let x = -100; x < 100; x++) {
+            for (let z = -100; z < 100; z++) {
                 const y = Math.floor(Math.sin(x / 10) * Math.cos(z / 10) * 5)
                 setBlock([x, y, z], {
                     solid: true,
@@ -136,7 +136,7 @@ const Level = () => {
                 })
 
                 // random chance to place a tree
-                if (Math.abs(x) < 40 && Math.abs(z) < 40 && Math.random() < 0.002) {
+                if (Math.random() < 0.002) {
                     tree(x, y, z)
                 }
             }
@@ -153,8 +153,8 @@ const Snow = () => {
         const timeouts: NodeJS.Timeout[] = []
 
         const interval = setInterval(() => {
-            const x = Math.floor((Math.random() - 0.5) * 100)
-            const z = Math.floor((Math.random() - 0.5) * 100)
+            const x = Math.floor((Math.random() - 0.5) * 200)
+            const z = Math.floor((Math.random() - 0.5) * 200)
 
             const body = physicsWorld.createRigidBody(Rapier.RigidBodyDesc.dynamic().setTranslation(x, 80, z))
             physicsWorld.createCollider(Rapier.ColliderDesc.cuboid(0.5, 0.5, 0.5), body)
