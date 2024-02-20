@@ -20,7 +20,7 @@
         "@react-three/postprocessing": "^2.16.0",
         "@react-three/rapier": "^1.3.0",
         "@react-three/xr": "^5.7.1",
-        "arancini": "^6.4.0",
+        "arancini": "^6.5.0",
         "d3": "^7.8.5",
         "jolt-physics": "^0.16.0",
         "leva": "^0.9.35",
