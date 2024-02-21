@@ -6548,6 +6548,7 @@ __metadata:
     styled-breakpoints: "npm:^14.0.0"
     styled-components: "npm:^6.1.8"
     three: "npm:^0.161.0"
+    three-bvh-csg: "npm:^0.0.16"
     tunnel-rat: "npm:^0.1.2"
     typescript: "npm:^5.3.2"
     vite: "npm:^5.0.12"

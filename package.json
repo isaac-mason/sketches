@@ -36,6 +36,7 @@
         "styled-breakpoints": "^14.0.0",
         "styled-components": "^6.1.8",
         "three": "^0.161.0",
+        "three-bvh-csg": "^0.0.16",
         "tunnel-rat": "^0.1.2",
         "zustand": "^4.5.0"
     },

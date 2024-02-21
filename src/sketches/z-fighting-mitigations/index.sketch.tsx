@@ -1,7 +1,7 @@
 import { CameraShake, OrbitControls, PerspectiveCamera } from '@react-three/drei'
 import { ThreeElements, useFrame } from '@react-three/fiber'
 import { useMemo, useRef, useState } from 'react'
-import { BoxGeometry, BufferAttribute, BufferGeometry, Vector3 } from 'three'
+import { BufferAttribute, BufferGeometry, Float32BufferAttribute, TorusKnotGeometry, Vector3 } from 'three'
 import { Canvas } from '../../common'
 import { useButtonGroupControls } from '../../common/hooks/use-button-group-controls'
 
@@ -114,77 +114,150 @@ const PlanesSeparateRenderPasses = () => {
     )
 }
 
-const BoxesZFighting = (props: ThreeElements['group']) => {
+const createTorusKnotGeometry = () => {
+    return new TorusKnotGeometry(0.3, 0.05, 100, 16)
+}
+
+const TorusKnotZFighting = (props: ThreeElements['group']) => {
+    const geometry = useMemo(() => createTorusKnotGeometry(), [])
+
     return (
         <group {...props}>
-            <mesh position={[0.3, 0, 0]} rotation-x={-Math.PI / 2}>
-                <boxGeometry args={[1, 1, 1]} />
+            <mesh position={[0, 0, 0]}>
+                <primitive attach="geometry" object={geometry} />
                 <meshBasicMaterial color="red" />
             </mesh>
-            <mesh position={[-0.3, 0, 0]} rotation-x={-Math.PI / 2}>
-                <boxGeometry args={[1, 1, 1]} />
-                <meshBasicMaterial color="green" />
+            <mesh position={[0.001, 0, 0]}>
+                <primitive attach="geometry" object={geometry} />
+                <meshBasicMaterial color="blue" transparent opacity={0.5} />
             </mesh>
         </group>
     )
 }
 
-const BoxesScale = (props: ThreeElements['group']) => {
+const TorusKnotScale = (props: ThreeElements['group']) => {
+    const geometry = useMemo(() => createTorusKnotGeometry(), [])
+
     return (
         <group {...props}>
-            <mesh position={[0.3, 0, 0]} rotation-x={-Math.PI / 2}>
-                <boxGeometry args={[1, 1, 1]} />
+            <mesh position={[0, 0, 0]}>
+                <primitive attach="geometry" object={geometry} />
                 <meshBasicMaterial color="red" />
             </mesh>
-            <mesh position={[-0.3, 0, 0]} rotation-x={-Math.PI / 2} scale={[1.001, 1.001, 1.001]}>
-                <boxGeometry args={[1, 1, 1]} />
-                <meshBasicMaterial color="green" />
+            <mesh position={[0, 0, 0]} scale={[1.01, 1.01, 1.01]}>
+                <primitive attach="geometry" object={geometry} />
+                <meshBasicMaterial color="blue" transparent opacity={0.5} />
             </mesh>
         </group>
     )
 }
 
-const BoxesScaleByNormals = (props: ThreeElements['group']) => {
-    const scaledByNormalsBoxGeometry = useMemo(() => {
-        const geometry = new BoxGeometry(1, 1, 1).toNonIndexed()
+const _vector3 = new Vector3()
 
-        const positions = geometry.getAttribute('position')
-        const scaledPositions = new Float32Array(positions.count * 3)
-        const scaleFactor = 0.001
+function getMergedGeometry(geometry: BufferGeometry, tolerance: number): BufferGeometry {
+    const positionAttribute = geometry.attributes.position as BufferAttribute
 
-        const vertex = new Vector3()
-        const normal = new Vector3()
+    if (!positionAttribute || positionAttribute.itemSize !== 3) {
+        throw new Error('Invalid geometry: position attribute missing or incorrect itemSize')
+    }
 
-        for (let i = 0; i < positions.count; i++) {
-            vertex.fromBufferAttribute(positions, i)
-            normal.fromBufferAttribute(positions, i).normalize()
+    let index: ArrayLike<number> | undefined = geometry.getIndex()?.array
 
-            const scaledVertex = new Vector3(
-                vertex.x + normal.x * scaleFactor,
-                vertex.y + normal.y * scaleFactor,
-                vertex.z + normal.z * scaleFactor,
-            )
-
-            scaledPositions[i * 3] = scaledVertex.x
-            scaledPositions[i * 3 + 1] = scaledVertex.y
-            scaledPositions[i * 3 + 2] = scaledVertex.z
+    if (!index) {
+        // this will become indexed when merging with other meshes
+        const ascendingIndex: number[] = []
+        for (let i = 0; i < positionAttribute.count; i++) {
+            ascendingIndex.push(i)
         }
 
-        const scaledGeometry = new BufferGeometry()
-        scaledGeometry.setAttribute('position', new BufferAttribute(scaledPositions, 3))
+        geometry.setIndex(ascendingIndex)
+        index = ascendingIndex
+    }
 
-        return scaledGeometry
+    const mergedPositions: number[] = []
+    const mergedIndices: number[] = []
+
+    const positionToIndex: { [hash: string]: number } = {}
+    let indexCounter = 0
+
+    const positions = positionAttribute.array
+
+    for (let i = 0; i < index.length; i++) {
+        const pt = index[i] * 3
+
+        const pos = _vector3.set(positions[pt], positions[pt + 1], positions[pt + 2])
+
+        // round pos to tolerance
+        pos.x = Math.round(pos.x / tolerance) * tolerance
+        pos.y = Math.round(pos.y / tolerance) * tolerance
+        pos.z = Math.round(pos.z / tolerance) * tolerance
+
+        const key = `${pos.x}_${pos.y}_${pos.z}`
+
+        let idx = positionToIndex[key]
+
+        if (idx === undefined) {
+            positionToIndex[key] = idx = indexCounter
+            mergedPositions.push(pos.x, pos.y, pos.z)
+            indexCounter++
+        }
+
+        mergedIndices.push(idx)
+    }
+
+    const mergedGeometry = new BufferGeometry()
+    mergedGeometry.setAttribute('position', new BufferAttribute(new Float32Array(mergedPositions), 3))
+    mergedGeometry.setIndex(mergedIndices)
+
+    mergedGeometry.computeVertexNormals()
+
+    return mergedGeometry
+}
+
+function scaleIndexedGeometryAlongNormals(geometry: BufferGeometry, scaleFactor: number) {
+    const positions = geometry.getAttribute('position')
+    const normals = geometry.getAttribute('normal')
+
+    const scaledPositions = new Float32Array(positions.count * 3)
+
+    for (let i = 0; i < positions.count; i++) {
+        const vertexNormal = new Vector3().fromBufferAttribute(normals, i).normalize()
+
+        scaledPositions[i * 3] = positions.array[i * 3] + vertexNormal.x * scaleFactor
+        scaledPositions[i * 3 + 1] = positions.array[i * 3 + 1] + vertexNormal.y * scaleFactor
+        scaledPositions[i * 3 + 2] = positions.array[i * 3 + 2] + vertexNormal.z * scaleFactor
+    }
+
+    const scaledGeometry = new BufferGeometry()
+    scaledGeometry.setAttribute('position', new Float32BufferAttribute(scaledPositions, 3))
+    scaledGeometry.setIndex(geometry.index) // Copy original indices
+
+    // just for visualization
+    scaledGeometry.computeVertexNormals()
+
+    return scaledGeometry
+}
+
+const TorusKnotScaleByNormals = (props: ThreeElements['group']) => {
+    const geometry = useMemo(() => createTorusKnotGeometry(), [])
+
+    const mergedGeometry = useMemo(() => {
+        return getMergedGeometry(geometry, 0.001)
     }, [])
+
+    const scaledByNormalsBoxGeometry = useMemo(() => {
+        return scaleIndexedGeometryAlongNormals(mergedGeometry, 0.01)
+    }, [mergedGeometry])
 
     return (
         <group {...props}>
-            <mesh position={[0.3, 0, 0]} rotation-x={-Math.PI / 2}>
-                <boxGeometry args={[1, 1, 1]} />
+            <mesh position={[0, 0, 0]}>
+                <primitive attach="geometry" object={geometry} />
                 <meshBasicMaterial color="red" />
             </mesh>
-            <mesh position={[-0.3, 0, 0]} rotation-x={-Math.PI / 2}>
+            <mesh position={[0, 0, 0]}>
                 <primitive attach="geometry" object={scaledByNormalsBoxGeometry} />
-                <meshBasicMaterial color="green" />
+                <meshBasicMaterial color="blue" transparent opacity={0.5} />
             </mesh>
         </group>
     )
@@ -196,9 +269,9 @@ const Scenes = {
     PLANES_POLYGON_OFFSET: 'planes polygon offset fix',
     PLANES_RENDER_ORDER: 'planes render order fix',
     PLANES_SEPARATE_RENDER_PASSES: 'planes separate renders fix',
-    BOXES_Z_FIGHTING: 'boxes z-fighting',
-    BOXES_SCALE: 'boxes scale fix',
-    BOXES_SCALE_BY_NORMALS: 'boxes scale by normals fix',
+    TORUS_KNOT_Z_FIGHTING: 'torus knot z-fighting',
+    TORUS_KNOT_SCALE: 'torus knot scale fix',
+    TORUS_KNOT_SCALE_BY_NORMALS: 'torus knot scale by normals fix',
 }
 
 export default function Sketch() {
@@ -219,9 +292,9 @@ export default function Sketch() {
                 {scene === Scenes.PLANES_RENDER_ORDER && <PlanesRenderOrder />}
                 {scene === Scenes.PLANES_SEPARATE_RENDER_PASSES && <PlanesSeparateRenderPasses />}
 
-                {scene === Scenes.BOXES_Z_FIGHTING && <BoxesZFighting />}
-                {scene === Scenes.BOXES_SCALE && <BoxesScale />}
-                {scene === Scenes.BOXES_SCALE_BY_NORMALS && <BoxesScaleByNormals />}
+                {scene === Scenes.TORUS_KNOT_Z_FIGHTING && <TorusKnotZFighting />}
+                {scene === Scenes.TORUS_KNOT_SCALE && <TorusKnotScale />}
+                {scene === Scenes.TORUS_KNOT_SCALE_BY_NORMALS && <TorusKnotScaleByNormals />}
 
                 <CameraShake maxPitch={0.01} maxRoll={0.01} maxYaw={0.01} />
                 <PerspectiveCamera makeDefault near={0.1} far={100} position={[-0.1, 4, 2]} />
