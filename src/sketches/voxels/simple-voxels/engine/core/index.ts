@@ -1,2 +1,4 @@
+export * from './chunk'
+export * from './constants'
 export * from './plugin'
-export * from './utils'
+export * from './vec3'

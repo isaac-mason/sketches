@@ -3,38 +3,15 @@ import { Topic } from 'arancini/events'
 import { System } from 'arancini/systems'
 import * as THREE from 'three'
 import { VoxelEnginePlugin } from '../voxel-engine-types'
-import {
-    CHUNK_SIZE,
-    TraceRayResult,
-    chunkId,
-    emptyChunk,
-    isSolid,
-    positionToChunkIndex,
-    traceRay,
-    worldPositionToChunkPosition,
-} from './utils'
+import { Vec3, vec3 } from './vec3'
+import { BlockValue, VoxelChunk, chunkId, emptyChunk, isSolid } from './chunk'
+import { TraceRayResult, traceRay } from './trace-ray'
+import { CHUNK_SIZE } from './constants'
 
-export type Vec3 = [number, number, number]
-
-export type BlockValue = { solid: false } | { solid: true; color: number }
 
 export type VoxelWorldEvents = {
     onSetBlockRequest: Topic<[SetBlockRequest]>
     onChunkChange: Topic<[changes: VoxelWorldChange[]]>
-}
-
-export type VoxelChunk = {
-    id: string
-    position: THREE.Vector3
-
-    solid: Uint8Array
-    solidBuffer: SharedArrayBuffer
-
-    color: Uint32Array
-    colorBuffer: SharedArrayBuffer
-
-    // based on distance from player
-    priority: number
 }
 
 export const createVoxelChunk = (id: string, position: THREE.Vector3): VoxelChunk => {
@@ -75,12 +52,12 @@ export class VoxelWorld {
         return isSolid(position, this.chunks)
     }
 
-    traceRay = (origin: Vec3, direction: Vec3): TraceRayResult => {
-        return traceRay(this.isSolid, origin, direction)
+    traceRay = (origin: Vec3, direction: Vec3, maxDistance = 500): TraceRayResult => {
+        return traceRay(this.isSolid, origin, direction, maxDistance)
     }
 
     getChunkAt = (position: Vec3) => {
-        return this.chunkEntities.get(chunkId(worldPositionToChunkPosition(position))) as
+        return this.chunkEntities.get(chunkId(vec3.worldPositionToChunkPosition(position))) as
             | With<CorePluginEntity, 'voxelChunk'>
             | undefined
     }
@@ -138,7 +115,7 @@ export class VoxelWorldCoreSystem extends System<CorePluginEntity> {
         for (const chunkEntity of this.chunks) {
             const { voxelChunk } = chunkEntity
 
-            const playerCurrentChunk = this.tmpVec3.set(...worldPositionToChunkPosition(this.actor.position.toArray()))
+            const playerCurrentChunk = this.tmpVec3.set(...vec3.worldPositionToChunkPosition(this.actor.position.toArray()))
 
             const chunkDistance = playerCurrentChunk.distanceTo(voxelChunk.position)
 
@@ -161,7 +138,7 @@ export class VoxelWorldCoreSystem extends System<CorePluginEntity> {
         this.setBlockRequests = []
 
         for (const { position, value } of setBlockRequests) {
-            const chunkPosition = worldPositionToChunkPosition(position)
+            const chunkPosition = vec3.worldPositionToChunkPosition(position)
             const id = chunkId(chunkPosition)
 
             let chunkEntity = this.voxelWorld.chunkEntities.get(id)
@@ -170,7 +147,7 @@ export class VoxelWorldCoreSystem extends System<CorePluginEntity> {
                 chunkEntity = this.addChunk(id, new THREE.Vector3(...chunkPosition))
             }
 
-            const index = positionToChunkIndex(position)
+            const index = vec3.toChunkIndex(position)
 
             const { voxelChunk } = chunkEntity
             voxelChunk!.solid[index] = value.solid ? 1 : 0

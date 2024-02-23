@@ -1,6 +1,5 @@
 import { Color, Vector3 } from 'three'
-import { Vec3, VoxelChunk, isSolid, positionToChunkIndex } from '../core'
-import { CHUNK_SIZE } from '../core/utils'
+import { CHUNK_SIZE, Vec3, VoxelChunk, isSolid, vec3 } from '../core'
 import { ChunkMeshUpdateMessage, RegisterChunkMessage, WorkerMessage } from './types'
 
 const vertexAmbientOcclusion = (side1: number, side2: number, corner: number) => {
@@ -226,7 +225,7 @@ class VoxelChunkMesher {
         for (let localX = 0; localX < CHUNK_SIZE; localX++) {
             for (let localY = 0; localY < CHUNK_SIZE; localY++) {
                 for (let localZ = 0; localZ < CHUNK_SIZE; localZ++) {
-                    const chunkDataIndex = positionToChunkIndex([localX, localY, localZ])
+                    const chunkDataIndex = vec3.toChunkIndex([localX, localY, localZ])
 
                     if (this.chunk.solid[chunkDataIndex] === 0) continue
 
@@ -252,7 +251,7 @@ class VoxelChunkMesher {
                         ) {
                             solid = isSolid([worldX + dx, worldY + dy, worldZ + dz], this.chunks)
                         } else {
-                            const index = positionToChunkIndex([localX + dx, localY + dy, localZ + dz])
+                            const index = vec3.toChunkIndex([localX + dx, localY + dy, localZ + dz])
                             solid = this.chunk.solid[index] === 1
                         }
 

@@ -1,6 +1,6 @@
 import { System } from 'arancini/systems'
 import { Object3D, Vector3 } from 'three'
-import { CorePluginEntity, VoxelWorldCoreSystem } from '../core'
+import { CorePluginEntity, Vec3, VoxelWorldCoreSystem } from '../core'
 import { VoxelEnginePlugin } from '../voxel-engine-types'
 
 export type VoxelBoxCharacterControllerInput = {
@@ -9,6 +9,7 @@ export type VoxelBoxCharacterControllerInput = {
     left: boolean
     right: boolean
     jump: boolean
+    sprint: boolean
 }
 
 export type BoxCharacterControllerCameraMode = 'first-person' | 'third-person'
@@ -50,7 +51,13 @@ export class BoxCharacterController {
     }
 }
 
-const tmpThirdPersonCameraOffset = new Vector3()
+const tmpThirdPersonOffset = new Vector3()
+const tmpVerticalRayOrigin = new Vector3()
+const tmpVerticalRayOffset = new Vector3()
+
+const tmpFrontVector = new Vector3()
+const tmpSideVector = new Vector3()
+const tmpDirection = new Vector3()
 
 export class BoxCharacterControllerSystem extends System<BoxChararacterControllerPluginEntity & CorePluginEntity> {
     controller = this.query((e) => e.has('boxCharacterController', 'boxCharacterControllerInput', 'object3D'), { required: true })
@@ -66,6 +73,8 @@ export class BoxCharacterControllerSystem extends System<BoxChararacterControlle
     static PRIORITY = VoxelWorldCoreSystem.PRIORITY - 1
 
     onUpdate(delta: number, time: number): void {
+        const t = 1 - Math.pow(0.01, delta)
+
         const { boxCharacterController: controller, boxCharacterControllerInput: input, object3D } = this.controller.first!
         const { boxCharacterControllerCamera: camera } = this.camera.first!
 
@@ -76,7 +85,7 @@ export class BoxCharacterControllerSystem extends System<BoxChararacterControlle
         /* desired vertical velocity */
         // jumping
         if (jump && time > controller.jumpTime + 0.1 && grounded) {
-            controller.velocity.y = 0.6
+            controller.velocity.y = 2
             controller.jumping = true
             if (time > controller.jumpTime + 0.1) {
                 controller.jumpTime = time
@@ -86,12 +95,12 @@ export class BoxCharacterControllerSystem extends System<BoxChararacterControlle
         }
 
         // gravity
-        controller.velocity.y -= (delta + 1) * delta
+        controller.velocity.y -= t * 0.8 // todo: make this configurable
 
         /* desired horizontal velocity */
-        const frontVector = new Vector3()
-        const sideVector = new Vector3()
-        const direction = new Vector3()
+        const frontVector = tmpFrontVector.set(0, 0, 0)
+        const sideVector = tmpSideVector.set(0, 0, 0)
+        const direction = tmpDirection.set(0, 0, 0)
 
         frontVector.set(0, 0, Number(backward) - Number(forward))
         sideVector.set(Number(left) - Number(right), 0, 0)
@@ -101,91 +110,85 @@ export class BoxCharacterControllerSystem extends System<BoxChararacterControlle
         controller.velocity.x = direction.x
         controller.velocity.z = direction.z
 
+        const horizontalDims = ['x', 'z'] as const
+
         // the desired x and z positions of the character
-        const factor = 10 * delta
-        const horizontalSpeed = 0.5
-        const nx = controller.velocity.x * factor * horizontalSpeed + controller.position.x
-        const nz = controller.velocity.z * factor * horizontalSpeed + controller.position.z
+        const horizontalSpeed = 1.2 + (input.sprint ? 0.6 : 0)
+        const nx = controller.velocity.x * t * horizontalSpeed + controller.position.x
+        const nz = controller.velocity.z * t * horizontalSpeed + controller.position.z
 
         // the lower y value to use for x and z collision detection
         const characterLowerY = controller.position.y - controller.characterHalfHeight
 
-        // check for x collision along the height of the character, starting from the bottom and moving up
-        // if no collision, set the new position to the desired new x position
-        // otherwise, don't update the position and set the x velocity to 0
-        const xDirection = controller.velocity.x < 0 ? -controller.characterHalfWidth : controller.characterHalfWidth
-        let xCollision = false
+        for (const dim of horizontalDims) {
+            // check for horizontal collision along the height of the character, starting from the bottom and moving up
+            // if no collision, set the new position to the desired new x position
+            // otherwise, don't update the position and set the x velocity to 0
+            const direction = controller.velocity[dim] < 0 ? -controller.characterHalfWidth : controller.characterHalfWidth
 
-        for (let characterY = 0; characterY <= controller.options.height; characterY += 1) {
-            // if the character is standing on the ground, offset the lower y collision check by a
-            // small amount so that the character doesn't get stuck
-            const offset = characterY === 0 && grounded ? 0.1 : 0
+            // the new desired position for the current dimension
+            const desired = dim === 'x' ? nx : nz
 
-            const y = characterY + offset
+            let collision = false
 
-            xCollision =
-                this.voxelWorld.intersectsVoxel([
-                    nx + xDirection,
-                    characterLowerY + y,
-                    controller.position.z - controller.horizontalSensorOffset,
-                ]) ||
-                this.voxelWorld.intersectsVoxel([
-                    nx + xDirection,
-                    characterLowerY + y,
-                    controller.position.z + controller.horizontalSensorOffset,
-                ])
+            for (let characterY = 0; characterY <= controller.options.height; characterY += 1) {
+                // if the character is standing on the ground, offset the lower y collision check by a
+                // small amount so that the character doesn't get stuck
+                // const offset = characterY === 0 && grounded ? 0.1 : 0
+                let offset = 0
+                if (characterY === 0 && grounded) {
+                    offset = 0.1
+                } else if (characterY === controller.options.height) {
+                    offset = -0.1
+                }
 
-            if (xCollision) break
-        }
+                const y = characterY + offset
 
-        if (!xCollision) {
-            controller.position.x = nx
-        } else {
-            controller.velocity.x = 0
-        }
+                if (dim === 'x') {
+                    collision =
+                        this.voxelWorld.intersectsVoxel([
+                            nx + direction,
+                            characterLowerY + y,
+                            controller.position.z - controller.horizontalSensorOffset,
+                        ]) ||
+                        this.voxelWorld.intersectsVoxel([
+                            nx + direction,
+                            characterLowerY + y,
+                            controller.position.z + controller.horizontalSensorOffset,
+                        ])
+                } else {
+                    collision =
+                        this.voxelWorld.intersectsVoxel([
+                            controller.position.x - controller.horizontalSensorOffset,
+                            characterLowerY + y,
+                            nz + direction,
+                        ]) ||
+                        this.voxelWorld.intersectsVoxel([
+                            controller.position.x + controller.horizontalSensorOffset,
+                            characterLowerY + y,
+                            nz + direction,
+                        ])
+                }
 
-        // check for z collision along the height of the character, starting from the bottom and moving up
-        // if no collision, set the new position to the desired new z position
-        // otherwise, don't update the position and set the z velocity to 0
-        const zDirection = controller.velocity.z < 0 ? -controller.characterHalfWidth : controller.characterHalfWidth
-        let zCollision = false
+                if (collision) break
+            }
 
-        for (let characterY = 0; characterY <= controller.options.height; characterY += 1) {
-            // if the character is standing on the ground, offset the lower y collision check by a
-            // small amount so that the character doesn't get stuck
-            const offset = characterY === 0 && grounded ? 0.1 : 0
-
-            const y = characterY + offset
-
-            zCollision =
-                this.voxelWorld.intersectsVoxel([
-                    nx - controller.horizontalSensorOffset,
-                    characterLowerY + y,
-                    controller.position.z + zDirection,
-                ]) ||
-                this.voxelWorld.intersectsVoxel([
-                    nx + controller.horizontalSensorOffset,
-                    characterLowerY + y,
-                    controller.position.z + zDirection,
-                ])
-
-            if (zCollision) break
-        }
-
-        if (!zCollision) {
-            controller.position.z = nz
-        } else {
-            controller.velocity.z = 0
+            if (!collision) {
+                controller.position[dim] = desired
+            } else {
+                controller.velocity[dim] = 0
+            }
         }
 
         // desired y position
-        const ny = controller.velocity.y * factor + controller.position.y
+        const ny = controller.velocity.y * t + controller.position.y
 
         // if jumping, check for collision with the ceiling
         if (controller.velocity.y > 0) {
             const hitCeiling = this.checkHitCeiling(controller)
 
             if (hitCeiling) {
+                // todo: set velocity, or reduce velocity + clamp position?
                 controller.velocity.y = 0
             }
         }
@@ -197,7 +200,8 @@ export class BoxCharacterControllerSystem extends System<BoxChararacterControlle
             controller.velocity.y = 0
 
             // snap to the ground
-            controller.position.y = Math.ceil(controller.position.y - controller.characterHalfHeight) + controller.characterHalfHeight
+            controller.position.y =
+                Math.ceil(controller.position.y - controller.characterHalfHeight) + controller.characterHalfHeight
         } else {
             controller.position.y = ny
         }
@@ -208,7 +212,7 @@ export class BoxCharacterControllerSystem extends System<BoxChararacterControlle
         if (this.cameraConfiguration.mode === 'first-person') {
             camera.position.y += controller.options.height / 4
         } else if (this.cameraConfiguration.mode === 'third-person') {
-            const thirdPersonOffset = tmpThirdPersonCameraOffset.set(0, 0, 10)
+            const thirdPersonOffset = tmpThirdPersonOffset.set(0, 0, 10)
             thirdPersonOffset.applyQuaternion(camera.quaternion)
             camera.position.add(thirdPersonOffset)
             camera.position.y += 2
@@ -221,42 +225,52 @@ export class BoxCharacterControllerSystem extends System<BoxChararacterControlle
         this.voxelWorldActor.position.copy(controller.position)
     }
 
-    private checkGrounded(controller: BoxCharacterController) {
-        const feetOffset = -controller.characterHalfHeight
+    private checkGrounded(controller: BoxCharacterController): boolean {
+        const offsets: Vec3[] = [
+            [controller.horizontalSensorOffset, 0, controller.horizontalSensorOffset],
+            [-controller.horizontalSensorOffset, 0, controller.horizontalSensorOffset],
+            [controller.horizontalSensorOffset, 0, -controller.horizontalSensorOffset],
+            [-controller.horizontalSensorOffset, 0, -controller.horizontalSensorOffset],
+        ]
 
-        return this.checkVerticalCollision(controller, feetOffset)
+        for (const offset of offsets) {
+            const origin = tmpVerticalRayOrigin.copy(controller.position).add(tmpVerticalRayOffset.set(...offset))
+            const ray = this.voxelWorld.traceRay(origin.toArray(), [0, -1, 0])
+
+            if (ray.hit) {
+                const distance = controller.position.y - ray.hitPosition[1]
+
+                if (distance < controller.characterHalfHeight + 0.001) {
+                    return true
+                }
+            }
+        }
+
+        return false
     }
 
-    private checkHitCeiling(controller: BoxCharacterController) {
-        const headOffset = controller.characterHalfHeight
+    private checkHitCeiling(controller: BoxCharacterController): boolean {
+        const offsets: Vec3[] = [
+            [controller.horizontalSensorOffset, 0, controller.horizontalSensorOffset],
+            [-controller.horizontalSensorOffset, 0, controller.horizontalSensorOffset],
+            [controller.horizontalSensorOffset, 0, -controller.horizontalSensorOffset],
+            [-controller.horizontalSensorOffset, 0, -controller.horizontalSensorOffset],
+        ]
 
-        return this.checkVerticalCollision(controller, headOffset)
-    }
+        for (const offset of offsets) {
+            const origin = tmpVerticalRayOrigin.copy(controller.position).add(tmpVerticalRayOffset.set(...offset))
+            const ray = this.voxelWorld.traceRay(origin.toArray(), [0, 1, 0])
 
-    private checkVerticalCollision(controller: BoxCharacterController, yOffset: number): boolean {
-        const y = controller.position.y + yOffset
-        return (
-            this.voxelWorld.intersectsVoxel([
-                controller.position.x - controller.horizontalSensorOffset,
-                y,
-                controller.position.z - controller.horizontalSensorOffset,
-            ]) ||
-            this.voxelWorld.intersectsVoxel([
-                controller.position.x - controller.horizontalSensorOffset,
-                y,
-                controller.position.z + controller.horizontalSensorOffset,
-            ]) ||
-            this.voxelWorld.intersectsVoxel([
-                controller.position.x + controller.horizontalSensorOffset,
-                y,
-                controller.position.z - controller.horizontalSensorOffset,
-            ]) ||
-            this.voxelWorld.intersectsVoxel([
-                controller.position.x + controller.horizontalSensorOffset,
-                y,
-                controller.position.z + controller.horizontalSensorOffset,
-            ])
-        )
+            if (ray.hit) {
+                const distance = ray.hitPosition[1] - controller.position.y
+
+                if (distance < controller.characterHalfHeight - 0.001) {
+                    return true
+                }
+            }
+        }
+
+        return false
     }
 }
 

@@ -1,8 +1,4 @@
-import * as THREE from 'three'
-import { Vec3, VoxelChunk } from './plugin'
-
-export const CHUNK_BITS = 4
-export const CHUNK_SIZE = Math.pow(2, 4)
+import { Vec3 } from './vec3'
 
 const traceRayImpl = (
     isSolid: (position: Vec3) => boolean,
@@ -204,77 +200,6 @@ const traceRayImpl = (
         hitNormal[0] = hitNormal[1] = hitNormal[2] = 0
     }
     return false
-}
-
-export const positionToChunkIndex = ([x, y, z]: Vec3): number => {
-    const mask = (1 << CHUNK_BITS) - 1
-
-    return (x & mask) + ((y & mask) << CHUNK_BITS) + ((z & mask) << (CHUNK_BITS * 2))
-}
-
-export const isSolid = (position: Vec3, chunks: Map<string, VoxelChunk>) => {
-    const chunk = chunks.get(chunkId(worldPositionToChunkPosition(position)))
-
-    if (!chunk) {
-        return false
-    }
-
-    const chunkDataIndex = positionToChunkIndex(position)
-    return chunk.solid[chunkDataIndex] === 1
-}
-
-export const worldPositionToLocalChunkPosition = ([x, y, z]: Vec3): Vec3 => {
-    const chunkX = Math.floor(x / CHUNK_SIZE)
-    const chunkY = Math.floor(y / CHUNK_SIZE)
-    const chunkZ = Math.floor(z / CHUNK_SIZE)
-
-    const localX = x - chunkX * CHUNK_SIZE
-    const localY = y - chunkY * CHUNK_SIZE
-    const localZ = z - chunkZ * CHUNK_SIZE
-
-    return [localX, localY, localZ]
-}
-
-export const worldPositionToChunkPosition = ([x, y, z]: Vec3): Vec3 => {
-    // Using signed right shift to convert to chunk vec
-    // Shifts right by pushing copies of the leftmost bit in from the left, and let the rightmost bits fall off
-    // e.g.
-    // 15 >> 4 = 0
-    // 16 >> 4 = 1
-    const cx = x >> CHUNK_BITS
-    const cy = y >> CHUNK_BITS
-    const cz = z >> CHUNK_BITS
-
-    return [cx, cy, cz]
-}
-
-export const chunkPositionToWorldPosition = ([x, y, z]: Vec3): Vec3 => {
-    return [x * CHUNK_SIZE, y * CHUNK_SIZE, z * CHUNK_SIZE]
-}
-
-export const chunkId = ([x, y, z]: Vec3): string => {
-    return `${x},${y},${z}`
-}
-
-export const emptyChunk = (): VoxelChunk => {
-    const solidBuffer = new SharedArrayBuffer(Uint8Array.BYTES_PER_ELEMENT * CHUNK_SIZE ** 3)
-    const colorBuffer = new SharedArrayBuffer(Uint32Array.BYTES_PER_ELEMENT * CHUNK_SIZE ** 3)
-
-    const solid = new Uint8Array(solidBuffer)
-    solid.fill(0)
-
-    const color = new Uint32Array(colorBuffer)
-    color.fill(0)
-
-    return {
-        id: '',
-        position: new THREE.Vector3(),
-        solid,
-        color,
-        solidBuffer,
-        colorBuffer,
-        priority: 0,
-    }
 }
 
 export type TraceRayResult =

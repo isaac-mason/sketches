@@ -1,7 +1,7 @@
 import { KeyboardControls, PointerLockControls, useKeyboardControls } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
 import { useControls } from 'leva'
-import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { styled } from 'styled-components'
 import { Color, PerspectiveCamera, Vector3 } from 'three'
 import { Canvas } from '../../../../common'
@@ -13,13 +13,21 @@ import {
 import { CorePlugin, Vec3 } from '../engine/core'
 import { CulledMesherPlugin, VoxelChunkCulledMeshes } from '../engine/culled-mesher'
 import { createVoxelEngine } from '../engine/voxel-engine'
+import { useSimpleLevel } from '../simple-level'
 
 const PLUGINS = [CorePlugin, CulledMesherPlugin, BoxCharacterControllerPlugin] as const
 
 const { VoxelEngine, useVoxelEngine } = createVoxelEngine(PLUGINS)
 
-const green1 = new Color('green').addScalar(-0.02).getHex()
-const green2 = new Color('green').addScalar(0.02).getHex()
+type Input = {
+    forward: boolean
+    backward: boolean
+    left: boolean
+    right: boolean
+    jump: boolean
+    sprint: boolean
+}
+
 const orange = new Color('orange').getHex()
 
 const Camera = () => {
@@ -111,43 +119,39 @@ const Player = () => {
 
     const { width, height } = useControls('voxel-box-character-controller', {
         width: 0.8,
-        height: 2,
+        height: 3,
     })
 
     const options = useMemo(
         () => ({
             width,
             height,
-            initialPosition: new Vector3(0, 1, 0),
+            initialPosition: new Vector3(0, 30, 0), // fall from the sky!
         }),
         [width, height],
     )
 
-    const input = useMemo(
+    const input: Input = useMemo(
         () => ({
             forward: false,
             backward: false,
             left: false,
             right: false,
             jump: false,
+            sprint: false,
         }),
         [],
     )
 
     useFrame(() => {
-        const { forward, backward, left, right, jump } = getControls() as {
-            forward: boolean
-            backward: boolean
-            left: boolean
-            right: boolean
-            jump: boolean
-        }
+        const { forward, backward, left, right, jump, sprint } = getControls() as Input
 
         input.forward = forward
         input.backward = backward
         input.left = left
         input.right = right
         input.jump = jump
+        input.sprint = sprint
     })
 
     const boxCharacterController = useMemo(() => {
@@ -167,25 +171,7 @@ const Player = () => {
 }
 
 const App = () => {
-    const { world, setBlock } = useVoxelEngine()
-
-    const [levelReady, setLevelReady] = useState(false)
-
-    useLayoutEffect(() => {
-        // ground
-        for (let x = -50; x < 50; x++) {
-            for (let y = -10; y < -5; y++) {
-                for (let z = -50; z < 50; z++) {
-                    setBlock([x, y, z], {
-                        solid: true,
-                        color: Math.random() > 0.5 ? green1 : green2,
-                    })
-                }
-            }
-        }
-
-        setLevelReady(true)
-    }, [world])
+    const levelReady = useSimpleLevel()
 
     return (
         <>
@@ -228,6 +214,7 @@ export default () => {
                     { name: 'left', keys: ['ArrowLeft', 'a', 'A'] },
                     { name: 'right', keys: ['ArrowRight', 'd', 'D'] },
                     { name: 'jump', keys: ['Space'] },
+                    { name: 'sprint', keys: ['ShiftLeft'] },
                 ]}
             >
                 <Canvas>

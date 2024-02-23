@@ -7,23 +7,31 @@ import { Canvas } from '../../../../common'
 import { CorePlugin, Vec3 } from '../engine/core'
 import { CulledMesherPlugin, VoxelChunkCulledMeshes } from '../engine/culled-mesher'
 import { createVoxelEngine } from '../engine/voxel-engine'
+import { SimpleLevel } from '../simple-level'
 
 const PLUGINS = [CorePlugin, CulledMesherPlugin] as const
 
 const { VoxelEngine, useVoxelEngine } = createVoxelEngine(PLUGINS)
 
-const green1 = new Color('green').addScalar(-0.02).getHex()
-const green2 = new Color('green').addScalar(0.02).getHex()
 const orange = new Color('orange').getHex()
 
 const frontVector = new Vector3()
 const sideVector = new Vector3()
 const direction = new Vector3()
 
+type Input = {
+    forward: boolean
+    backward: boolean
+    left: boolean
+    right: boolean
+    ascend: boolean
+    descend: boolean
+}
+
 const Player = () => {
     const { voxelWorldActor } = useVoxelEngine()
 
-    const position = useRef<Vector3>(new Vector3(0, 5, 0))
+    const position = useRef<Vector3>(new Vector3(0, 30, 0))
 
     const [, getControls] = useKeyboardControls()
 
@@ -32,25 +40,18 @@ const Player = () => {
     useFrame((_, delta) => {
         const t = 1.0 - Math.pow(0.01, delta)
 
-        const { forward, backward, left, right } = getControls() as {
-            forward: boolean
-            backward: boolean
-            left: boolean
-            right: boolean
-        }
+        const { forward, backward, left, right, ascend, descend } = getControls() as Input
 
         frontVector.set(0, 0, Number(backward) - Number(forward))
         sideVector.set(Number(left) - Number(right), 0, 0)
 
-        direction
-            .subVectors(frontVector, sideVector)
-            .normalize()
-            .multiplyScalar(5 * t)
-            .applyEuler(camera.rotation)
+        direction.subVectors(frontVector, sideVector).normalize().applyEuler(camera.rotation)
+        direction.y += Number(ascend) - Number(descend)
+        direction.multiplyScalar(5 * t)
 
         position.current.add(direction)
 
-        camera.position.lerp(position.current, 10 * delta)
+        camera.position.lerp(position.current, t * 2)
 
         voxelWorldActor.position.copy(position.current)
     })
@@ -109,29 +110,10 @@ const CameraBuildTool = () => {
     return null
 }
 
-const Level = () => {
-    const { setBlock } = useVoxelEngine()
-
-    useEffect(() => {
-        for (let x = -100; x < 100; x++) {
-            for (let z = -100; z < 100; z++) {
-                for (let y = -10; y < 0; y++) {
-                    setBlock([x, y, z], {
-                        solid: true,
-                        color: Math.random() > 0.5 ? green1 : green2,
-                    })
-                }
-            }
-        }
-    })
-
-    return null
-}
-
 const App = () => {
     return (
         <>
-            <Level />
+            <SimpleLevel />
 
             <Player />
 
@@ -169,6 +151,8 @@ export default () => {
                     { name: 'backward', keys: ['ArrowDown', 's', 'S'] },
                     { name: 'left', keys: ['ArrowLeft', 'a', 'A'] },
                     { name: 'right', keys: ['ArrowRight', 'd', 'D'] },
+                    { name: 'ascend', keys: [' '] },
+                    { name: 'descend', keys: ['Shift'] },
                 ]}
             >
                 <Canvas camera={{ near: 0.001 }}>

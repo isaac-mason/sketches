@@ -153,8 +153,8 @@ const GameOfLife = ({
                 if (x < 0 || x >= gameWidth || y < 0 || y >= gameHeight) continue
 
                 const index = y * gameWidth + x
-                const current = state[index]
-                state[index] = current ? 0 : 1
+
+                state[index] = 1
             }
         }
 

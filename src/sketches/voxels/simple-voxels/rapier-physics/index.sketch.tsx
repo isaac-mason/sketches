@@ -2,23 +2,20 @@ import Rapier from '@dimforge/rapier3d-compat'
 import { Bounds, OrbitControls } from '@react-three/drei'
 import { ThreeEvent, useThree } from '@react-three/fiber'
 import { useControls } from 'leva'
-import { useEffect, useLayoutEffect, useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Color } from 'three'
 import { Canvas } from '../../../../common'
 import { CorePlugin, Vec3 } from '../engine/core'
 import { CulledMesherPlugin, VoxelChunkCulledMeshes } from '../engine/culled-mesher'
 import { PhysicsDebug, RapierInit, RapierPhysicsPlugin } from '../engine/rapier-physics'
 import { createVoxelEngine } from '../engine/voxel-engine'
+import { SimpleLevel } from '../simple-level'
 
 const PLUGINS = [CorePlugin, CulledMesherPlugin, RapierPhysicsPlugin] as const
 
 const { VoxelEngine, useVoxelEngine } = createVoxelEngine(PLUGINS)
 
-const green1 = new Color('green').addScalar(-0.02).getHex()
-const green2 = new Color('green').addScalar(0.02).getHex()
-
 const orange = new Color('orange').getHex()
-const brown = new Color('brown').getHex()
 
 const Tools = ({ children }: { children: React.ReactNode }) => {
     const { world, voxelWorld, physicsWorld, setBlock } = useVoxelEngine()
@@ -89,61 +86,6 @@ const Tools = ({ children }: { children: React.ReactNode }) => {
     }
 
     return <group onPointerDown={onPointerDown}>{children}</group>
-}
-
-const Level = () => {
-    const { setBlock } = useVoxelEngine()
-
-    useLayoutEffect(() => {
-        const tree = (treeX: number, treeY: number, treeZ: number) => {
-            // trunk
-            for (let y = 0; y < 10; y++) {
-                setBlock([treeX, treeY + y, treeZ], {
-                    solid: true,
-                    color: brown,
-                })
-            }
-
-            // leaves
-            const radius = 5
-            const center = [0, radius, 0]
-
-            for (let x = -radius; x < radius; x++) {
-                for (let y = -radius; y < radius; y++) {
-                    for (let z = -radius; z < radius; z++) {
-                        const position: Vec3 = [x, y, z]
-                        const distance = Math.sqrt(position[0] ** 2 + position[1] ** 2 + position[2] ** 2)
-
-                        if (distance < radius) {
-                            const block: Vec3 = [center[0] + x + treeX, center[1] + y + 5 + treeY, center[2] + z + treeZ]
-
-                            setBlock(block, {
-                                solid: true,
-                                color: Math.random() > 0.5 ? green1 : green2,
-                            })
-                        }
-                    }
-                }
-            }
-        }
-
-        for (let x = -100; x < 100; x++) {
-            for (let z = -100; z < 100; z++) {
-                const y = Math.floor(Math.sin(x / 10) * Math.cos(z / 10) * 5)
-                setBlock([x, y, z], {
-                    solid: true,
-                    color: Math.random() > 0.5 ? green1 : green2,
-                })
-
-                // random chance to place a tree
-                if (Math.random() < 0.002) {
-                    tree(x, y, z)
-                }
-            }
-        }
-    }, [])
-
-    return null
 }
 
 const Snow = () => {
@@ -229,7 +171,7 @@ export default () => {
             <Canvas camera={{ position: [20, 50, 50] }}>
                 <VoxelEngine>
                     <Tools>
-                        <Level />
+                        <SimpleLevel />
 
                         <Snow />
 
