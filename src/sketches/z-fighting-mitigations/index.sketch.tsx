@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from 'react'
 import { BufferAttribute, BufferGeometry, Float32BufferAttribute, TorusKnotGeometry, Vector3 } from 'three'
 import { Canvas } from '../../common'
 import { useButtonGroupControls } from '../../common/hooks/use-button-group-controls'
+import { SketchOptions } from '../types'
 
 const PlanesZFighting = (props: ThreeElements['group']) => {
     return (
@@ -302,4 +303,10 @@ export default function Sketch() {
             </Canvas>
         </>
     )
+}
+
+export const options: SketchOptions = {
+    controls: {
+        expanded: true,
+    },
 }

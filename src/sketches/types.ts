@@ -9,4 +9,7 @@ export type Sketch = {
 
 export type SketchOptions = {
     noTitle?: boolean
+    controls?: {
+        expanded?: boolean
+    }
 }

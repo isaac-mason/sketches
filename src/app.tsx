@@ -1,5 +1,3 @@
-import { Leva } from 'leva'
-import { Perf } from 'r3f-perf'
 import { Component, ReactNode, Suspense, memo, useEffect, useMemo, useState } from 'react'
 import {
     Await,
@@ -15,8 +13,11 @@ import {
 import { createStyledBreakpointsTheme } from 'styled-breakpoints'
 import styled, { ThemeProvider } from 'styled-components'
 import { create } from 'zustand'
-import { DebugTunnel, Spinner } from './common'
+import { Spinner } from './common'
 import { useDebounce } from './common/hooks/use-debounce'
+import { Controls } from './controls'
+import { DebugKeyboardControls, useDebug } from './debug'
+import { ScreenshotKeyboardControls, useScreenshot } from './screenshot'
 import { findSketchByRoute, renamedSketches, sketchModules, sketches, visibleSketches } from './sketches'
 import { Sketch, SketchOptions } from './sketches/types'
 
@@ -310,53 +311,6 @@ const SketchWrapper = styled.div`
     }
 `
 
-const modes = ['default', 'debug', 'screenshot'] as const
-type DisplayMode = (typeof modes)[number]
-
-const useDisplayMode = (): DisplayMode => {
-    const [displayMode, setDisplayMode] = useState<DisplayMode>('default')
-
-    useEffect(() => {
-        const handler = (e: WindowEventMap['keyup']): void => {
-            if (e.key === '?') {
-                const currentIndex = modes.findIndex((m) => m === displayMode)
-                const nextModeIndex = (currentIndex + 1) % modes.length
-                setDisplayMode(modes[nextModeIndex])
-            }
-        }
-
-        window.addEventListener('keyup', handler)
-
-        return () => {
-            window.removeEventListener('keyup', handler)
-        }
-    }, [displayMode])
-
-    return displayMode
-}
-
-const useIsSmallScreen = () => {
-    const [smallScreen, setSmallScreen] = useState(false)
-
-    useEffect(() => {
-        const media = window.matchMedia('(max-width: 500px)')
-
-        if (media.matches !== smallScreen) {
-            setSmallScreen(media.matches)
-        }
-
-        const listener = () => {
-            setSmallScreen(media.matches)
-        }
-
-        window.addEventListener('resize', listener)
-
-        return () => window.removeEventListener('resize', listener)
-    }, [smallScreen])
-
-    return smallScreen
-}
-
 type SketchData = {
     sketch: Sketch
     options?: SketchOptions
@@ -399,12 +353,10 @@ const SketchModule = memo(({ route }: { route: string }) => {
     return <SketchModuleComponent key={route} />
 })
 
-type LazySketchProps = {
-    displayMode: DisplayMode
-}
-
-const LazySketch = ({ displayMode }: LazySketchProps) => {
+const LazySketch = () => {
     const { sketch, options } = useAsyncValue() as SketchData
+
+    const { screenshotMode } = useScreenshot()
 
     useEffect(() => {
         if (!sketch) return
@@ -415,11 +367,15 @@ const LazySketch = ({ displayMode }: LazySketchProps) => {
     }, [sketch])
 
     return (
-        <SketchWrapper>
-            {displayMode !== 'screenshot' && !options?.noTitle && <h1>{sketch?.title}</h1>}
+        <>
+            <SketchWrapper>
+                {!screenshotMode && !options?.noTitle && <h1>{sketch?.title}</h1>}
 
-            <SketchModule route={sketch.route} />
-        </SketchWrapper>
+                <SketchModule route={sketch.route} />
+            </SketchWrapper>
+
+            <Controls key={sketch.route} expanded={options?.controls?.expanded} />
+        </>
     )
 }
 
@@ -452,16 +408,24 @@ const NavItem = ({ sketch, currentSketchPath, closeNav }: NavItemProps) => {
     )
 }
 
-const App = () => {
-    const { sketchPath, sketchData } = useLoaderData() as SketchLoaderData
+type NavState = {
+    open: boolean
+    toggleNav: () => void
+    closeNav: () => void
+}
 
-    const [navOpen, setNavOpen] = useState(false)
+const useNav = create<NavState>((set, get) => ({
+    open: true,
+    toggleNav: () => set({ open: !get().open }),
+    closeNav: () => set({ open: false }),
+}))
+
+const SideNav = () => {
+    const { sketchPath } = useLoaderData() as SketchLoaderData
+    const { open: navOpen, closeNav } = useNav()
 
     const [searchTerm, setSearchTerm] = useState('')
     const debouncedSearchTerm = useDebounce(searchTerm)
-
-    const displayMode = useDisplayMode()
-    const isSmallScreen = useIsSmallScreen()
 
     const filteredSketches = useMemo(() => {
         if (searchTerm.trim() === '') return visibleSketches
@@ -477,65 +441,61 @@ const App = () => {
 
     return (
         <>
-            <PageLayout>
-                <Nav open={navOpen}>
-                    <NavTop>
-                        <NavSearchBar
-                            placeholder="Search for a sketch..."
-                            onInput={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-                        />
-                    </NavTop>
+            <Nav open={navOpen}>
+                <NavTop>
+                    <NavSearchBar
+                        placeholder="Search for a sketch..."
+                        onInput={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+                    />
+                </NavTop>
 
-                    <NavItems>
-                        {filteredSketches.map((s) => (
-                            <NavItem key={s.route} sketch={s} currentSketchPath={sketchPath} closeNav={() => setNavOpen(false)} />
-                        ))}
-                    </NavItems>
-                </Nav>
+                <NavItems>
+                    {filteredSketches.map((s) => (
+                        <NavItem key={s.route} sketch={s} currentSketchPath={sketchPath} closeNav={closeNav} />
+                    ))}
+                </NavItems>
+            </Nav>
+        </>
+    )
+}
+
+const App = () => {
+    const { sketchPath, sketchData } = useLoaderData() as SketchLoaderData
+
+    const { open: navOpen, toggleNav, closeNav } = useNav()
+    const { screenshotMode } = useScreenshot()
+    const { debugMode } = useDebug()
+
+    return (
+        <>
+            <PageLayout>
+                <SideNav />
 
                 <ErrorBoundary>
                     <Suspense fallback={<Spinner />}>
                         <Await resolve={sketchData}>
-                            <LazySketch displayMode={displayMode} />
+                            <LazySketch />
                         </Await>
                     </Suspense>
                 </ErrorBoundary>
             </PageLayout>
 
-            <NavBackground open={navOpen} onClick={() => setNavOpen(false)} />
+            <NavBackground open={navOpen} onClick={() => closeNav()} />
 
-            {displayMode !== 'screenshot' ? (
-                <NavToggle className="material-symbols-outlined" onClick={() => setNavOpen((v) => !v)}>
+            {!screenshotMode ? (
+                <NavToggle className="material-symbols-outlined" onClick={toggleNav}>
                     menu
                 </NavToggle>
             ) : undefined}
 
-            {displayMode === 'default' ? (
+            <ScreenshotKeyboardControls />
+            <DebugKeyboardControls />
+
+            {!debugMode && !screenshotMode ? (
                 <GithubLink target="_blank" href={`https://github.com/isaac-mason/sketches/tree/main/src/sketches/${sketchPath}`}>
                     GitHub
                 </GithubLink>
             ) : undefined}
-
-            {displayMode === 'debug' ? (
-                <DebugTunnel.In>
-                    <Perf position="bottom-right" />
-                </DebugTunnel.In>
-            ) : undefined}
-
-            <Leva
-                collapsed
-                hidden={displayMode === 'screenshot'}
-                theme={
-                    isSmallScreen
-                        ? {}
-                        : {
-                              sizes: {
-                                  rootWidth: '450px',
-                                  controlWidth: '160px',
-                              },
-                          }
-                }
-            />
         </>
     )
 }
