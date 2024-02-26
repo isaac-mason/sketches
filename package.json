@@ -31,7 +31,7 @@
         "react-colorful": "^5.6.1",
         "react-dom": "^18.2.0",
         "react-router-dom": "^6.21.3",
-        "recast-navigation": "^0.16.2",
+        "recast-navigation": "^0.16.3",
         "simplex-noise": "^4.0.1",
         "styled-breakpoints": "^14.0.0",
         "styled-components": "^6.1.8",
