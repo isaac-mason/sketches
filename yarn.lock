@@ -5025,10 +5025,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jolt-physics@npm:^0.16.0":
-  version: 0.16.0
-  resolution: "jolt-physics@npm:0.16.0"
-  checksum: afc0269f0cb4d53b0c0081fc59d4190b9d21a212b767bcfb1ed23a7f2fc6b1b56636ff3203401f279f85bb7ca56645afb874fdbd1d316d5071640b00545cd4d1
+"jolt-physics@npm:^0.18.0":
+  version: 0.18.0
+  resolution: "jolt-physics@npm:0.18.0"
+  checksum: 42b9e43f5d6418d560d30d48de73686a4786b0966fd65143cb7653e2f1b780be489ceaabf29ea1c141b306c047e7f83ebf410cda6d7060c3719f37a9d80ea22f
   languageName: node
   linkType: hard
 
@@ -6533,7 +6533,7 @@ __metadata:
     arancini: "npm:^6.5.0"
     d3: "npm:^7.8.5"
     eslint: "npm:^8.56.0"
-    jolt-physics: "npm:^0.16.0"
+    jolt-physics: "npm:^0.18.0"
     leva: "npm:^0.9.35"
     meshline: "npm:3.1.6"
     p2-es: "npm:^1.2.3"
