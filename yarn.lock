@@ -5308,12 +5308,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"meshline@npm:3.1.6":
-  version: 3.1.6
-  resolution: "meshline@npm:3.1.6"
+"meshline@npm:3.2.0":
+  version: 3.2.0
+  resolution: "meshline@npm:3.2.0"
   peerDependencies:
     three: ">=0.137"
-  checksum: cc164f1c9468e40c7e93074152eecc0a6c10339bc8455679a10d00ce394da37f4f37da3d085044795473b0fa0f9e52b4963ea531dffe2ec6740a63f0e094dcad
+  checksum: 60b05c53048ddf3d2ba006d176ff997f0e25cbbbee7e3e21e8a0766690a96b547094c4ca639bff23660aeb2757b9e7949983cce3f69cf299506ec012eb29d4a1
   languageName: node
   linkType: hard
 
@@ -6535,7 +6535,7 @@ __metadata:
     eslint: "npm:^8.57.0"
     jolt-physics: "npm:^0.18.0"
     leva: "npm:^0.9.35"
-    meshline: "npm:3.1.6"
+    meshline: "npm:3.2.0"
     p2-es: "npm:^1.2.3"
     prettier: "npm:^3.2.4"
     r3f-perf: "npm:^7.1.2"
