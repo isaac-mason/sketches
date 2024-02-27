@@ -6,8 +6,10 @@ import { Vector3Tuple } from './types'
 export const vec3 = {
     tupleToJolt: (tuple: Vector3Tuple) => new Raw.module.Vec3(...tuple),
     threeToJolt: (vector: THREE.Vector3) => new Raw.module.Vec3(vector.x, vector.y, vector.z),
-    joltToThree: (vec: Jolt.Vec3, out = new THREE.Vector3()) => out.set(vec.GetX(), vec.GetY(), vec.GetZ()),
-    joltToTuple: (vec: Jolt.Vec3) => [vec.GetX(), vec.GetY(), vec.GetZ()]
+    tupleToJoltR: (tuple: Vector3Tuple) => new Raw.module.RVec3(...tuple),
+    threeToJoltR: (vector: THREE.Vector3) => new Raw.module.RVec3(vector.x, vector.y, vector.z),
+    joltToThree: (vec: Jolt.Vec3 | Jolt.RVec3, out = new THREE.Vector3()) => out.set(vec.GetX(), vec.GetY(), vec.GetZ()),
+    joltToTuple: (vec: Jolt.Vec3 | Jolt.RVec3) => [vec.GetX(), vec.GetY(), vec.GetZ()]
 }
 
 export const quat = {
