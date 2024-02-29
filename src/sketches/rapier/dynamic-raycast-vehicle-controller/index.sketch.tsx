@@ -5,9 +5,10 @@ import { useControls } from 'leva'
 import { RefObject, useRef, useState } from 'react'
 import styled from 'styled-components'
 import * as THREE from 'three'
-import { Canvas, usePageVisible } from '../../../common'
+import { Canvas, useLoadingAssets, usePageVisible } from '../../../common'
 import racetrackGlbUrl from './racetrack.glb?url'
 import { WheelInfo, useVehicleController } from './use-vehicle-controller'
+import { Collider } from '@dimforge/rapier3d-compat'
 
 // https://github.com/michael-go/raphcar
 // https://sketchfab.com/3d-models/low-poly-race-track-b40628339fde4b2fbe41711edc7c7a93
@@ -56,7 +57,8 @@ const cameraOffset = new THREE.Vector3(7, 3, 0)
 const cameraTargetOffset = new THREE.Vector3(0, 1.5, 0)
 
 const _bodyPosition = new THREE.Vector3()
-const _cameraOffset = new THREE.Vector3()
+const _airControlAngVel = new THREE.Vector3()
+const _cameraPosition = new THREE.Vector3()
 const _cameraTarget = new THREE.Vector3()
 
 type VehicleProps = {
@@ -84,12 +86,42 @@ const Vehicle = ({ position, rotation }: VehicleProps) => {
     const [smoothedCameraPosition] = useState(new THREE.Vector3(100, 50, 0))
     const [smoothedCameraTarget] = useState(new THREE.Vector3())
 
-    useFrame(() => {
-        if (!vehicleController.current) return
+    const ground = useRef<Collider>()
+
+    useFrame((state, delta) => {
+        if (!chasisMeshRef.current || !vehicleController.current || !!threeControls) return
+
+        const t = 1.0 - Math.pow(0.01, delta)
+
+        /* controls */
 
         const controller = vehicleController.current
+        const chassisRigidBody = controller.chassis()
 
         const controls = getKeyboardControls()
+
+        // rough ground check
+        let outOfBounds = false
+
+        const raycastResult = world.castRay(
+            new rapier.Ray(chassisRigidBody.translation(), { x: 0, y: -1, z: 0 }),
+            1,
+            false,
+            undefined,
+            undefined,
+            undefined,
+            chassisRigidBody,
+        )
+
+        ground.current = undefined
+
+        if (raycastResult) {
+            const collider = raycastResult.collider
+            const userData = collider.parent()?.userData as any
+            outOfBounds = userData?.outOfBounds
+
+            ground.current = collider
+        }
 
         const engineForce = Number(controls.forward) * accelerateForce - Number(controls.back)
 
@@ -110,23 +142,16 @@ const Vehicle = ({ position, rotation }: VehicleProps) => {
         controller.setWheelSteering(0, steering)
         controller.setWheelSteering(1, steering)
 
-        let outOfBounds = false
+        // air control
+        if (!ground.current) {
+            const forwardAngVel = Number(controls.forward) - Number(controls.back)
+            const sideAngVel = Number(controls.left) - Number(controls.right)
 
-        const chassisRigidBody = controller.chassis()
-        const raycastResult = world.castRay(
-            new rapier.Ray(chassisRigidBody.translation(), { x: 0, y: -1, z: 0 }),
-            1,
-            false,
-            undefined,
-            undefined,
-            undefined,
-            chassisRigidBody,
-        )
+            const angvel = _airControlAngVel.set(0, sideAngVel * t, forwardAngVel * t)
+            angvel.applyQuaternion(chassisRigidBody.rotation())
+            angvel.add(chassisRigidBody.angvel())
 
-        if (raycastResult) {
-            const collider = raycastResult.collider
-            const userData = collider.parent()?.userData as any
-            outOfBounds = userData?.outOfBounds
+            chassisRigidBody.setAngvel(new rapier.Vector3(angvel.x, angvel.y, angvel.z), true)
         }
 
         if (controls.reset || outOfBounds) {
@@ -138,18 +163,26 @@ const Vehicle = ({ position, rotation }: VehicleProps) => {
             chassis.setLinvel(new rapier.Vector3(0, 0, 0), true)
             chassis.setAngvel(new rapier.Vector3(0, 0, 0), true)
         }
-    })
 
-    useFrame((state, delta) => {
-        if (!chasisMeshRef.current || !!threeControls) return
-
-        const t = 1.0 - Math.pow(0.01, delta)
+        /* camera */
 
         // camera position
-        const bodyWorldMatrix = chasisMeshRef.current.matrixWorld
+        const cameraPosition = _cameraPosition
 
-        const cameraPosition = _cameraOffset.copy(cameraOffset)
-        cameraPosition.applyMatrix4(bodyWorldMatrix)
+        if (!!ground.current) {
+            // camera behind chassis
+            cameraPosition.copy(cameraOffset)
+            const bodyWorldMatrix = chasisMeshRef.current.matrixWorld
+            cameraPosition.applyMatrix4(bodyWorldMatrix)
+        } else {
+            // camera behind velocity
+            const velocity = chassisRigidBody.linvel()
+            cameraPosition.copy(velocity)
+            cameraPosition.normalize()
+            cameraPosition.multiplyScalar(-10)
+            cameraPosition.add(chassisRigidBody.translation())
+        }
+
         cameraPosition.y = Math.max(cameraPosition.y, (vehicleController.current?.chassis().translation().y ?? 0) + 1)
 
         smoothedCameraPosition.lerp(cameraPosition, t)
@@ -232,6 +265,7 @@ const Instructions = styled.div`
 
 export default function Sketch() {
     const pageVisible = usePageVisible()
+    const loading = useLoadingAssets()
 
     const { debug, orbitControls } = useControls('rapier-dynamic-raycast-vehicle-controller/physics', {
         debug: false,
@@ -241,7 +275,7 @@ export default function Sketch() {
     return (
         <>
             <Canvas>
-                <Physics debug={debug} paused={!pageVisible}>
+                <Physics debug={debug} paused={!pageVisible || loading}>
                     <KeyboardControls map={controls}>
                         <Vehicle position={spawn.position} rotation={spawn.rotation} />
                     </KeyboardControls>

@@ -36,19 +36,13 @@ export const useVehicleController = (
 
         const suspensionDirection = new THREE.Vector3(0, -1, 0)
 
-        wheels.forEach((wheel, i) => {
-            vehicle.addWheel(
-                wheelsInfo[i].position,
-                suspensionDirection,
-                wheelsInfo[i].axleCs,
-                wheelsInfo[i].suspensionRestLength,
-                wheelsInfo[i].radius,
-            )
+        wheelsInfo.forEach((wheel) => {
+            vehicle.addWheel(wheel.position, suspensionDirection, wheel.axleCs, wheel.suspensionRestLength, wheel.radius)
         })
 
-        wheels.forEach((_wheel, index) => {
-            vehicle.setWheelSuspensionStiffness(index, wheelsInfo[index].suspensionStiffness)
-            vehicle.setWheelMaxSuspensionTravel(index, wheelsInfo[index].maxSuspensionTravel)
+        wheelsInfo.forEach((wheel, index) => {
+            vehicle.setWheelSuspensionStiffness(index, wheel.suspensionStiffness)
+            vehicle.setWheelMaxSuspensionTravel(index, wheel.maxSuspensionTravel)
         })
 
         vehicleController.current = vehicle
