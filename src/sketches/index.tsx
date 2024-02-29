@@ -58,24 +58,6 @@ const sketchList = [
         path: 'voxels/simple-voxels/rapier-physics',
         tags: ['voxels', 'vertex-colors', 'culled-mesher', 'physics', 'rapier', 'arancini'],
     },
-    /* Reflectors */
-    {
-        title: 'Reflectors',
-        path: 'reflectors',
-        tags: ['reflector', 'mirror'],
-    },
-    /* Grid Pathfinding */
-    {
-        title: 'Grid Pathfinding - Basic',
-        path: 'grid-pathfinding/basic',
-        tags: ['pathfinding', 'grid'],
-    },
-    /* Fractals */
-    {
-        title: 'Fractals - Mandelbrot Set',
-        path: 'fractals/mandelbrot-set',
-        tags: ['fractals', 'mandelbrot-set'],
-    },
     /* Rapier */
     {
         title: 'Rapier - Custom Raycast Vehicle',
@@ -142,6 +124,24 @@ const sketchList = [
         title: 'p2-es - Kinematic Character Controller',
         path: 'p2-es/kinematic-character-controller',
         tags: ['physics', 'p2-es', 'controller', 'arancini'],
+    },
+    /* Reflectors */
+    {
+        title: 'Reflectors',
+        path: 'reflectors',
+        tags: ['reflector', 'mirror'],
+    },
+    /* Grid Pathfinding */
+    {
+        title: 'Grid Pathfinding - Basic',
+        path: 'grid-pathfinding/basic',
+        tags: ['pathfinding', 'grid'],
+    },
+    /* Fractals */
+    {
+        title: 'Fractals - Mandelbrot Set',
+        path: 'fractals/mandelbrot-set',
+        tags: ['fractals', 'mandelbrot-set'],
     },
     /* Character Animation */
     {
