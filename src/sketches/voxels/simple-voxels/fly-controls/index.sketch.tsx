@@ -76,7 +76,7 @@ const CameraBuildTool = () => {
 
             if (!ray.hit) return
 
-            if (event.button === 2) {
+            if (event.button === 0) {
                 const block: Vec3 = [
                     Math.floor(ray.hitPosition[0]),
                     Math.floor(ray.hitPosition[1]),

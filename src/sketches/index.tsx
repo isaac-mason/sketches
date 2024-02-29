@@ -78,13 +78,18 @@ const sketchList = [
     },
     /* Rapier */
     {
-        title: 'Rapier - Raycast Vehicle',
-        path: 'rapier/raycast-vehicle',
+        title: 'Rapier - Custom Raycast Vehicle',
+        path: 'rapier/custom-raycast-vehicle',
         tags: ['physics', 'rapier', 'vehicle', 'controller'],
     },
     {
         title: 'Rapier - Revolute Joint Vehicle',
         path: 'rapier/revolute-joint-vehicle',
+        tags: ['physics', 'rapier', 'vehicle', 'controller'],
+    },
+    {
+        title: 'Rapier - Dynamic Raycast Vehicle Controller',
+        path: 'rapier/dynamic-raycast-vehicle-controller',
         tags: ['physics', 'rapier', 'vehicle', 'controller'],
     },
     {
@@ -165,6 +170,12 @@ const sketchList = [
         title: 'Procedural Generation - Pixelated Planet',
         path: 'procedural-generation/pixelated-planet',
         tags: ['procedural-generation', 'simplex-noise', 'space', 'planet'],
+    },
+    /* Sand */
+    {
+        title: 'Sand - Basic',
+        path: 'sand/basic',
+        tags: ['sand'],
     },
     /* d3.js */
     {
