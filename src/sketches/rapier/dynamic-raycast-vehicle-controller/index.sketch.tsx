@@ -14,7 +14,7 @@ import { Collider } from '@dimforge/rapier3d-compat'
 // https://sketchfab.com/3d-models/low-poly-race-track-b40628339fde4b2fbe41711edc7c7a93
 
 const spawn = {
-    position: [-7, 3, -130] as THREE.Vector3Tuple,
+    position: [-7, 2, -130] as THREE.Vector3Tuple,
     rotation: [0, Math.PI / 2, 0] as THREE.Vector3Tuple,
 }
 
@@ -83,7 +83,7 @@ const Vehicle = ({ position, rotation }: VehicleProps) => {
         steerAngle: { value: Math.PI / 24, min: 0, max: Math.PI / 12 },
     })
 
-    const [smoothedCameraPosition] = useState(new THREE.Vector3(100, 50, 0))
+    const [smoothedCameraPosition] = useState(new THREE.Vector3(0, 100, -300))
     const [smoothedCameraTarget] = useState(new THREE.Vector3())
 
     const ground = useRef<Collider>()
