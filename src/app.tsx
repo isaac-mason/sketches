@@ -415,7 +415,7 @@ type NavState = {
 }
 
 const useNav = create<NavState>((set, get) => ({
-    open: true,
+    open: false,
     toggleNav: () => set({ open: !get().open }),
     closeNav: () => set({ open: false }),
 }))
