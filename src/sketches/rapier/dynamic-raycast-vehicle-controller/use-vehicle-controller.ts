@@ -80,6 +80,5 @@ export const useVehicleController = (
 
     return {
         vehicleController,
-        wheels: [],
     }
 }
