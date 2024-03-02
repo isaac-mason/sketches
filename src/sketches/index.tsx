@@ -131,6 +131,11 @@ const sketchList = [
         path: 'game-ui/button',
         tags: ['game-ui', 'button'],
     },
+    {
+        title: 'Game UI - Unlock Pointer Lock',
+        path: 'game-ui/unlock-pointer-lock',
+        tags: ['game-ui', 'pointer-lock'],
+    },
     /* Reflectors */
     {
         title: 'Reflectors',
