@@ -177,12 +177,6 @@ const sketchList = [
         path: 'procedural-generation/pixelated-planet',
         tags: ['procedural-generation', 'simplex-noise', 'space', 'planet'],
     },
-    /* Sand */
-    {
-        title: 'Sand - Basic',
-        path: 'sand/basic',
-        tags: ['sand'],
-    },
     /* d3.js */
     {
         title: 'D3 - Force Directed Graph',
