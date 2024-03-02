@@ -2,9 +2,8 @@ import { animated, useSpring } from '@react-spring/three'
 import { PerspectiveCamera, PointerLockControls, Text } from '@react-three/drei'
 import { Canvas, ThreeElements } from '@react-three/fiber'
 import { useEffect, useRef, useState } from 'react'
-import styled from 'styled-components'
 import { PointerLockControls as PointerLockControlsImpl } from 'three-stdlib'
-import { Crosshair } from '../../../common'
+import { Crosshair, Instructions } from '../../../common'
 
 const Controls = () => {
     const controls = useRef<PointerLockControlsImpl | null>(null!)
@@ -91,19 +90,11 @@ const Button = (props: ThreeElements['group']) => {
             </Text>
             <mesh position-y={0.1}>
                 <planeGeometry args={[5, 2]} />
-                <meshBasicMaterial color={clicked ? 'orange' : '#fff'} />
+                <meshStandardMaterial color={clicked ? 'orange' : '#fff'} />
             </mesh>
         </animated.group>
     )
 }
-
-const Instructions = styled.div`
-    color: white;
-    font-size: 1.2em;
-    left: 50px;
-    position: absolute;
-    bottom: 30px;
-`
 
 export default function Sketch() {
     return (
@@ -122,9 +113,7 @@ export default function Sketch() {
                 <PerspectiveCamera makeDefault position={[0, 0, 5]} />
             </Canvas>
 
-            <Instructions>
-                <pre>* hold 'c' to unlock the pointer</pre>
-            </Instructions>
+            <Instructions>* hold 'c' to unlock the pointer</Instructions>
 
             <Crosshair />
         </>

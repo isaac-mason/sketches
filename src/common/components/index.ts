@@ -1,5 +1,6 @@
 export * from './canvas'
 export * from './crosshair'
 export * from './helper'
+export * from './instructions'
 export * from './spinner'
 export * from './webgpu-canvas'
