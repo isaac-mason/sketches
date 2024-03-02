@@ -125,6 +125,12 @@ const sketchList = [
         path: 'p2-es/kinematic-character-controller',
         tags: ['physics', 'p2-es', 'controller', 'arancini'],
     },
+    /* Game UI */
+    {
+        title: 'Game UI - Button',
+        path: 'game-ui/button',
+        tags: ['game-ui', 'button'],
+    },
     /* Reflectors */
     {
         title: 'Reflectors',
