@@ -1,13 +1,15 @@
-import { KeyboardControls, OrbitControls, PerspectiveCamera, useKeyboardControls } from '@react-three/drei'
+import { KeyboardControls, useKeyboardControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { World } from 'arancini'
 import { createReactAPI } from 'arancini/react'
-import { useControls } from 'leva'
 import * as p2 from 'p2-es'
 import { useMemo } from 'react'
 import * as THREE from 'three'
-import { Canvas, Instructions, useConst } from '../../../common'
+import { Canvas, ExcludeFromCameraCollision, Instructions, ThirdPersonControls, useThirdPersonControls } from '../../../common'
 import { Duck } from './duck'
+
+const _euler = new THREE.Euler()
+const _quat = new THREE.Quaternion()
 
 type KeyControls = {
     up: boolean
@@ -49,30 +51,19 @@ bodyQuery.onEntityRemoved.add(({ body }) => {
     if (body) physicsWorld.removeBody(body)
 })
 
-const playerSystem = (input: KeyControls) => {
+const playerSystem = (input: KeyControls, camera: THREE.PerspectiveCamera) => {
     const player = playerQuery.first
 
     if (!player) return
 
-    const velocity = [0, 0]
-
-    if (input.left) {
-        velocity[0] -= 1
-    }
-
-    if (input.right) {
-        velocity[0] += 1
-    }
-
-    if (input.up) {
-        velocity[1] -= 1
-    }
-
-    if (input.down) {
-        velocity[1] += 1
-    }
+    const velocity = [Number(input.right) - Number(input.left), Number(input.down) - Number(input.up)]
 
     p2.vec2.normalize(velocity, velocity)
+
+    const cameraWorldDirection = camera.getWorldDirection(new THREE.Vector3())
+    const yaw = Math.atan2(cameraWorldDirection.x, cameraWorldDirection.z)
+
+    p2.vec2.rotate(velocity, velocity, -yaw + Math.PI)
 
     if (p2.vec2.length(velocity) > 0) {
         player.body.angle = Math.atan2(velocity[1], velocity[0]) - Math.PI / 2
@@ -85,9 +76,12 @@ const playerSystem = (input: KeyControls) => {
     p2.vec2.copy(player.body.velocity, velocity)
 }
 
-const _box3 = new THREE.Box3()
-const _euler = new THREE.Euler()
-const _quat = new THREE.Quaternion()
+const cameraSystem = (cameraTarget: THREE.Vector3) => {
+    const player = playerQuery.first
+    if (!player) return
+
+    cameraTarget.copy(player.three.position)
+}
 
 const physicsSystem = (delta: number) => {
     physicsWorld.step(delta)
@@ -96,15 +90,10 @@ const physicsSystem = (delta: number) => {
 
     for (const { body, three, slerpRotation } of bodyQuery) {
         if (three) {
-            _box3.setFromObject(three)
-
-            const height = _box3.max.y - _box3.min.y
-            const y = height / 2
-
             const position = body.position
             const angle = -body.angle
 
-            three.position.set(position[0], y, position[1])
+            three.position.set(position[0], three.position.y, position[1])
 
             if (body.mass === 0 || !slerpRotation) {
                 three.rotation.y = angle
@@ -151,13 +140,15 @@ const MAX_DELTA = (1 / 60) * 2
 
 const Loop = () => {
     const [, getKeyboardControls] = useKeyboardControls<keyof KeyControls>()
+    const { target } = useThirdPersonControls()
 
-    useFrame((_, delta) => {
+    useFrame((state, delta) => {
         const clampedDelta = THREE.MathUtils.clamp(delta, 0, MAX_DELTA)
 
         const input = getKeyboardControls()
 
-        playerSystem(input)
+        playerSystem(input, state.camera as THREE.PerspectiveCamera)
+        cameraSystem(target)
         physicsSystem(clampedDelta)
         playerWaddleSystem(clampedDelta)
     })
@@ -165,9 +156,8 @@ const Loop = () => {
     return null
 }
 
-const useBody = (fn: () => p2.Body, deps: any[] = []) => {
-    const body = useMemo(fn, deps)
-    return body
+const useBody = (fn: () => p2.Body, deps: unknown[] = []) => {
+    return useMemo(fn, deps)
 }
 
 type PlayerProps = {
@@ -189,8 +179,10 @@ const Player = ({ position }: PlayerProps) => {
         <Entity isPlayer body={body} slerpRotation>
             <Component name="three">
                 <group>
-                    <group name="waddleTarget">
-                        <Duck />
+                    <group name="waddleTarget" position-y={0.85}>
+                        <ExcludeFromCameraCollision>
+                            <Duck />
+                        </ExcludeFromCameraCollision>
                     </group>
                 </group>
             </Component>
@@ -218,12 +210,10 @@ const Crate = (props: CrateProps) => {
     return (
         <Entity body={body}>
             <Component name="three">
-                <group>
-                    <mesh>
-                        <boxGeometry args={[1, 1, 1]} />
-                        <meshStandardMaterial color={props.color} />
-                    </mesh>
-                </group>
+                <mesh position-y={0.5}>
+                    <boxGeometry args={[1, 1, 1]} />
+                    <meshStandardMaterial color={props.color} />
+                </mesh>
             </Component>
         </Entity>
     )
@@ -249,7 +239,7 @@ const Wall = (props: WallProps) => {
     return (
         <Entity body={body}>
             <Component name="three">
-                <mesh>
+                <mesh position-y={0.5}>
                     <boxGeometry args={[props.length, 1, 1]} />
                     <meshStandardMaterial color="#555" />
                 </mesh>
@@ -258,57 +248,22 @@ const Wall = (props: WallProps) => {
     )
 }
 
-const CameraRig = () => {
-    const targetPosition = useConst(() => new THREE.Vector3(0, 0, 0))
-    const targetLookAt = useConst(() => new THREE.Vector3(0, 0, 0))
-
-    useFrame((state, delta) => {
-        const player = playerQuery.first
-        if (!player) return
-
-        const t = 1 - Math.pow(0.01, delta)
-
-        const { three } = player
-
-        const { x, z } = three.position
-
-        const yOffset = 15
-        const zOffset = 10
-
-        targetPosition.set(x, yOffset, z + zOffset)
-
-        state.camera.position.lerp(targetPosition, t)
-
-        targetLookAt.copy(state.camera.position)
-        targetLookAt.y -= yOffset
-        targetLookAt.z -= zOffset
-
-        state.camera.lookAt(targetLookAt)
-    })
-
-    return null
-}
-
 export default () => {
-    const { orbitControls } = useControls('p2-es-top-down-camera-controller', {
-        orbitControls: false,
-    })
-
     return (
         <>
             <Canvas>
                 <KeyboardControls map={controls}>
-                    <Loop />
+                    <ThirdPersonControls targetOffset={[0, 0.8, 0]}>
+                        <Loop />
+                    </ThirdPersonControls>
 
                     <Player position={[0, 0]} />
 
-                    {/* scattered crates */}
                     <Crate position={[5, 5]} color="orange" />
                     <Crate position={[-5, 5]} color="hotpink" />
                     <Crate position={[5, -5]} color="lightblue" />
                     <Crate position={[-5, -5]} color="magenta" />
 
-                    {/* walls */}
                     <Wall position={[-10, 0]} angle={-90} length={20} />
                     <Wall position={[0, -10]} angle={0} length={20} />
 
@@ -316,11 +271,6 @@ export default () => {
 
                     <ambientLight intensity={1} />
                     <directionalLight intensity={1.5} position={[10, 10, 5]} />
-
-                    {!orbitControls && <CameraRig />}
-                    {orbitControls && <OrbitControls />}
-
-                    <PerspectiveCamera makeDefault position={[0, 50, 0]} />
                 </KeyboardControls>
             </Canvas>
 
