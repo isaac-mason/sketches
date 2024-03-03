@@ -111,6 +111,11 @@ const sketchList = [
     },
     /* p2-es */
     {
+        title: 'p2-es - Top Down Character Controller',
+        path: 'p2-es/top-down-character-controller',
+        tags: ['physics', 'p2-es', 'controller', 'arancini'],
+    },
+    {
         title: 'p2-es - Marching Cubes Goo',
         path: 'p2-es/marching-cubes-goo',
         tags: ['physics', 'p2-es', 'marching-cubes', 'arancini'],
