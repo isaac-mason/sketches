@@ -13,7 +13,6 @@ const InstructionsWrapper = styled.div`
 
     pre {
         margin: 0;
-    
     }
 `
 

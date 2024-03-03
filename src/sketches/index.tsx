@@ -60,6 +60,11 @@ const sketchList = [
     },
     /* Rapier */
     {
+        title: 'Rapier - Cluster',
+        path: 'rapier/cluster',
+        tags: ['rapier', 'cluster'],
+    },
+    {
         title: 'Rapier - Custom Raycast Vehicle',
         path: 'rapier/custom-raycast-vehicle',
         tags: ['physics', 'rapier', 'vehicle', 'controller'],
