@@ -112,12 +112,17 @@ const sketchList = [
     {
         title: 'Rapier - Arancini Integration',
         path: 'rapier/arancini-integration',
-        tags: ['physics', 'rapier', 'arancini']
+        tags: ['physics', 'rapier', 'arancini'],
     },
     /* p2-es */
     {
         title: 'p2-es - Top Down Character Controller',
         path: 'p2-es/top-down-character-controller',
+        tags: ['physics', 'p2-es', 'controller', 'arancini'],
+    },
+    {
+        title: 'p2-es - Kinematic Character Controller',
+        path: 'p2-es/kinematic-character-controller',
         tags: ['physics', 'p2-es', 'controller', 'arancini'],
     },
     {
@@ -129,11 +134,6 @@ const sketchList = [
         title: 'p2-es - Pixelated Text',
         path: 'p2-es/pixelated-text',
         tags: ['physics', 'p2-es', 'text', 'arancini'],
-    },
-    {
-        title: 'p2-es - Kinematic Character Controller',
-        path: 'p2-es/kinematic-character-controller',
-        tags: ['physics', 'p2-es', 'controller', 'arancini'],
     },
     /* Game UI */
     {
