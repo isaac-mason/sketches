@@ -132,7 +132,7 @@ export default function Sketch() {
 
                     <Pointer />
 
-                    <ambientLight intensity={1.5} />
+                    <ambientLight intensity={1.75} />
 
                     <EffectComposer disableNormalPass multisampling={8}>
                         <N8AO distanceFalloff={1} aoRadius={1} intensity={1} />
