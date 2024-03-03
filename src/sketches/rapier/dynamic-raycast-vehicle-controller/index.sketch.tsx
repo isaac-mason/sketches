@@ -46,11 +46,11 @@ const wheelInfo: Omit<WheelInfo, 'position'> = {
 
 const wheels: WheelInfo[] = [
     // front
-    { position: new THREE.Vector3(-0.65, -0.15, -0.35), ...wheelInfo },
-    { position: new THREE.Vector3(-0.65, -0.15, 0.35), ...wheelInfo },
+    { position: new THREE.Vector3(-0.65, -0.15, -0.45), ...wheelInfo },
+    { position: new THREE.Vector3(-0.65, -0.15, 0.45), ...wheelInfo },
     // rear
-    { position: new THREE.Vector3(0.65, -0.15, -0.35), ...wheelInfo },
-    { position: new THREE.Vector3(0.65, -0.15, 0.35), ...wheelInfo },
+    { position: new THREE.Vector3(0.65, -0.15, -0.45), ...wheelInfo },
+    { position: new THREE.Vector3(0.65, -0.15, 0.45), ...wheelInfo },
 ]
 
 const cameraOffset = new THREE.Vector3(7, 3, 0)
@@ -209,11 +209,11 @@ const Vehicle = ({ position, rotation }: VehicleProps) => {
                 colliders={false}
                 type="dynamic"
             >
-                <CuboidCollider args={[0.8, 0.2, 0.375]} />
+                <CuboidCollider args={[0.8, 0.2, 0.4]} />
 
                 {/* chassis */}
                 <mesh ref={chasisMeshRef}>
-                    <boxGeometry args={[1.6, 0.4, 0.75]} />
+                    <boxGeometry args={[1.6, 0.4, 0.8]} />
                 </mesh>
 
                 {/* wheels */}
