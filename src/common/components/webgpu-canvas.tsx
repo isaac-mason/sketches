@@ -33,7 +33,7 @@ export type WebGPUCanvasProps = React.PropsWithChildren<
     } & CanvasProps
 >
 
-export const WebGPUCanvas = ({ children, webglFallback = true, ...props }: React.PropsWithChildren<any>) => {
+export const WebGPUCanvas = ({ children, webglFallback = true, ...props }: React.PropsWithChildren<WebGPUCanvasProps>) => {
     if (!webglFallback && !WebGPUCapabilities.isAvailable()) {
         return (
             <UnsupportedNoticeWrapper>
@@ -47,8 +47,8 @@ export const WebGPUCanvas = ({ children, webglFallback = true, ...props }: React
     return (
         <Canvas
             id="gl"
-            gl={(canvas: HTMLCanvasElement) => {
-                return new WebGPURenderer({ canvas })
+            gl={(canvas) => {
+                return new WebGPURenderer({ canvas: canvas as HTMLCanvasElement })
             }}
             {...props}
         >

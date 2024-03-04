@@ -1,6 +1,5 @@
 import { OrbitControls } from '@react-three/drei'
 import { Box, Flex } from '@react-three/flex'
-import * as THREE from 'three'
 import { Canvas } from '../../../common'
 
 const padding = 1
@@ -53,7 +52,7 @@ const App = () => (
 
 export default () => (
     <>
-        <Canvas camera={{ position: [0, 0, 10], fov: 60 }} gl={{ outputEncoding: THREE.sRGBEncoding }}>
+        <Canvas camera={{ position: [0, 0, 10], fov: 60 }}>
             <App />
             <OrbitControls />
         </Canvas>

@@ -67,17 +67,23 @@ const sketchList = [
     {
         title: 'Rapier - Custom Raycast Vehicle',
         path: 'rapier/custom-raycast-vehicle',
-        tags: ['physics', 'rapier', 'vehicle', 'controller'],
+        tags: ['physics', 'rapier', 'vehicle', 'car', 'controller'],
     },
     {
         title: 'Rapier - Revolute Joint Vehicle',
         path: 'rapier/revolute-joint-vehicle',
-        tags: ['physics', 'rapier', 'vehicle', 'controller'],
+        tags: ['physics', 'rapier', 'vehicle', 'car','controller'],
     },
     {
-        title: 'Rapier - Dynamic Raycast Vehicle Controller',
+        title: 'Rapier - Dynamic Raycast Vehicle',
         path: 'rapier/dynamic-raycast-vehicle-controller',
-        tags: ['physics', 'rapier', 'vehicle', 'controller'],
+        tags: ['physics', 'rapier', 'vehicle', 'car','controller'],
+    },
+    {
+        title: 'Rapier - Arcade Vehicle',
+        path: 'rapier/arcade-vehicle-controller',
+        tags: ['physics', 'rapier', 'vehicle', 'car','controller'],
+        hidden: true,
     },
     {
         title: 'Rapier - Kinematic Character Controller',
@@ -225,6 +231,11 @@ const sketchList = [
         title: 'TSL - Gradient',
         path: 'tsl/gradient',
         tags: ['tsl', 'gradient'],
+    },
+    {
+        title: 'TSL - Raging Sea',
+        path: 'tsl/raging-sea',
+        tags: ['tsl', 'perlin-noise'],
     },
     /* Box Edge Outline */
     {
