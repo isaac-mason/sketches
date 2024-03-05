@@ -3,32 +3,14 @@ import { Topic } from 'arancini/events'
 import { System } from 'arancini/systems'
 import * as THREE from 'three'
 import { VoxelEnginePlugin } from '../voxel-engine-types'
-import { Vec3, vec3 } from './vec3'
-import { BlockValue, VoxelChunk, chunkId, emptyChunk, isSolid } from './chunk'
-import { TraceRayResult, traceRay } from './trace-ray'
+import { BlockValue, VoxelChunk, chunkId, createVoxelChunk, isSolid } from './chunk'
 import { CHUNK_SIZE } from './constants'
-
+import { TraceRayResult, traceRay } from './trace-ray'
+import { Vec3, vec3 } from './vec3'
 
 export type VoxelWorldEvents = {
     onSetBlockRequest: Topic<[SetBlockRequest]>
     onChunkChange: Topic<[changes: VoxelWorldChange[]]>
-}
-
-export const createVoxelChunk = (id: string, position: THREE.Vector3): VoxelChunk => {
-    const chunk = emptyChunk()
-
-    return {
-        id,
-        position,
-
-        solid: chunk.solid,
-        solidBuffer: chunk.solidBuffer,
-
-        color: chunk.color,
-        colorBuffer: chunk.colorBuffer,
-
-        priority: 0,
-    }
 }
 
 export type SetBlockRequest = { position: Vec3; value: BlockValue }
@@ -44,25 +26,23 @@ export class VoxelWorld {
 
     chunkEntitiesReverse = new Map<ChunkEntity, string>()
 
-    intersectsVoxel = (position: Vec3): boolean => {
+    intersectsVoxel(position: Vec3): boolean {
         return this.isSolid(position.map(Math.floor) as Vec3)
     }
 
-    isSolid = (position: Vec3): boolean => {
-        return isSolid(position, this.chunks)
-    }
-
-    traceRay = (origin: Vec3, direction: Vec3, maxDistance = 500): TraceRayResult => {
+    traceRay(origin: Vec3, direction: Vec3, maxDistance = 500): TraceRayResult {
         return traceRay(this.isSolid, origin, direction, maxDistance)
     }
 
-    getChunkAt = (position: Vec3) => {
+    getChunkAt(position: Vec3) {
         return this.chunkEntities.get(chunkId(vec3.worldPositionToChunkPosition(position))) as
             | With<CorePluginEntity, 'voxelChunk'>
             | undefined
     }
 
-    static objectPooled = true
+    isSolid = (position: Vec3): boolean => {
+        return isSolid(position, this.chunks)
+    }
 }
 
 // todo: make this configurable
@@ -190,14 +170,14 @@ export const CorePlugin = {
         })
 
         const setBlock = (position: Vec3, value: BlockValue) => {
-            voxelWorldEntity.voxelWorldEvents!.onSetBlockRequest.emit({ position, value })
+            voxelWorldEntity.voxelWorldEvents.onSetBlockRequest.emit({ position, value })
         }
 
         const voxelWorldActorEntity = world.create({ voxelWorldActor: { position: new THREE.Vector3() } })
 
         return {
-            voxelWorld: voxelWorldEntity.voxelWorld!,
-            voxelWorldActor: voxelWorldActorEntity.voxelWorldActor!,
+            voxelWorld: voxelWorldEntity.voxelWorld,
+            voxelWorldActor: voxelWorldActorEntity.voxelWorldActor,
             setBlock,
         }
     },

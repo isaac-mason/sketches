@@ -14,15 +14,6 @@ export type RapierPhysicsPluginEntity = {
     voxelChunkPhysics?: VoxelChunkPhysics
 }
 
-export type VoxelChunkPhysicsBox = {
-    nx: number
-    ny: number
-    nz: number
-    xi: number
-    yi: number
-    zi: number
-}
-
 export type VoxelChunkPhysics = {
     rigidBody: Rapier.RigidBody
     collider?: Rapier.Collider
@@ -71,7 +62,7 @@ export class VoxelPhysicsSystem extends System<CorePluginEntity & RapierPhysicsP
 
             rigidBody.setTranslation(new Rapier.Vector3(...offset), true)
 
-            const chunkColliderGenerator = new VoxelChunkColliderGenerator(this.voxelWorld.chunks, voxelChunk)
+            const chunkColliderGenerator = new VoxelChunkColliderGenerator(this.voxelWorld, voxelChunk)
 
             const voxelChunkPhysics: VoxelChunkPhysics = {
                 rigidBody,

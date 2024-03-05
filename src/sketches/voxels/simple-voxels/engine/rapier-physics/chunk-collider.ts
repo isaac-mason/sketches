@@ -1,4 +1,4 @@
-import { CHUNK_SIZE, VoxelChunk, isSolid, vec3 } from "../core"
+import { CHUNK_SIZE, VoxelChunk, VoxelWorld, vec3 } from "../core"
 
 const VOXEL_FACE_DIRECTIONS: {
     // direction of the neighbour voxel
@@ -114,7 +114,7 @@ const VOXEL_FACE_DIRECTIONS: {
 export class VoxelChunkCollider {
 
     constructor(
-        public chunks: Map<string, VoxelChunk>,
+        public world: VoxelWorld,
         public chunk: VoxelChunk,
     ) {}
 
@@ -150,7 +150,7 @@ export class VoxelChunkCollider {
                             localZ + dz < 0 ||
                             localZ + dz >= CHUNK_SIZE
                         ) {
-                            solid = isSolid([worldX + dx, worldY + dy, worldZ + dz], this.chunks)
+                            solid = this.world.isSolid([worldX + dx, worldY + dy, worldZ + dz])
                         } else {
                             const index = vec3.toChunkIndex([localX + dx, localY + dy, localZ + dz])
                             solid = this.chunk.solid[index] === 1

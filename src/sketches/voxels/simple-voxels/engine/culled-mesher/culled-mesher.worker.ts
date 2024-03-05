@@ -233,8 +233,7 @@ class VoxelChunkMesher {
                     const worldY = chunkY + localY
                     const worldZ = chunkZ + localZ
 
-                    const col = this.chunk.color[chunkDataIndex]
-                    this.tmpColor.set(col)
+                    const color = this.tmpColor.set(this.chunk.color[chunkDataIndex])
 
                     for (const voxelFaceDirection of VOXEL_FACE_DIRECTIONS) {
                         const { dx, dy, dz, lx, ly, lz, ux, uy, uz, vx, vy, vz, nx, ny, nz } = voxelFaceDirection
@@ -269,18 +268,18 @@ class VoxelChunkMesher {
                         normals.push(nx, ny, nz, nx, ny, nz, nx, ny, nz, nx, ny, nz)
 
                         colors.push(
-                            this.tmpColor.r,
-                            this.tmpColor.g,
-                            this.tmpColor.b,
-                            this.tmpColor.r,
-                            this.tmpColor.g,
-                            this.tmpColor.b,
-                            this.tmpColor.r,
-                            this.tmpColor.g,
-                            this.tmpColor.b,
-                            this.tmpColor.r,
-                            this.tmpColor.g,
-                            this.tmpColor.b,
+                            color.r,
+                            color.g,
+                            color.b,
+                            color.r,
+                            color.g,
+                            color.b,
+                            color.r,
+                            color.g,
+                            color.b,
+                            color.r,
+                            color.g,
+                            color.b,
                         )
 
                         const ao = voxelFaceAmbientOcclusion(state.chunks, [worldX, worldY, worldZ], voxelFaceDirection)

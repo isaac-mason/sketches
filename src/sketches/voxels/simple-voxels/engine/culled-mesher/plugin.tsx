@@ -1,67 +1,13 @@
 import { With } from 'arancini'
 import { System } from 'arancini/systems'
-import { BufferAttribute, BufferGeometry, Mesh, MeshStandardMaterial } from 'three'
+import { useMemo } from 'react'
+import { BufferAttribute } from 'three'
 import { CHUNK_SIZE, ChunkEntity, CorePlugin, CorePluginEntity, Vec3, VoxelWorldCoreSystem, chunkId } from '../core'
 import { useVoxelEngine } from '../voxel-engine'
 import { VoxelEnginePlugin } from '../voxel-engine-types'
 import VoxelChunkMesherWorker from './culled-mesher.worker.ts?worker'
 import { ChunkMeshUpdateMessage, RegisterChunkMessage, RequestChunkMeshUpdateMessage, WorkerMessage } from './types'
-import { useMemo } from 'react'
-
-const voxelChunkShaderMaterial = new MeshStandardMaterial({
-    vertexColors: true,
-})
-
-voxelChunkShaderMaterial.onBeforeCompile = (shader) => {
-    shader.vertexShader = `
-        attribute float ambientOcclusion;
-        varying float vAmbientOcclusion;
-
-        ${shader.vertexShader}
-    `
-
-    shader.vertexShader = shader.vertexShader.replace(
-        '#include <uv_vertex>',
-        `
-        #include <uv_vertex>
-
-        vAmbientOcclusion = ambientOcclusion;
-        `,
-    )
-
-    shader.fragmentShader = `
-        varying float vAmbientOcclusion;
-
-        ${shader.fragmentShader}
-    `
-
-    shader.fragmentShader = shader.fragmentShader.replace(
-        '#include <dithering_fragment>',
-        `
-        #include <dithering_fragment>
-
-        float ambientOcclusion = 1.0 - (1.0 - vAmbientOcclusion) * 0.5;
-
-        gl_FragColor = vec4(gl_FragColor.rgb * ambientOcclusion, 1.0);
-    `,
-    )
-}
-
-export class VoxelChunkMesh {
-    geometry!: BufferGeometry
-
-    material!: MeshStandardMaterial
-
-    mesh!: Mesh
-
-    initialised = false
-
-    constructor() {
-        this.mesh = new Mesh(new BufferGeometry(), voxelChunkShaderMaterial)
-        this.geometry = this.mesh.geometry as BufferGeometry
-        this.material = this.mesh.material as MeshStandardMaterial
-    }
-}
+import { VoxelChunkMesh } from './voxel-chunk-mesh'
 
 export class VoxelChunkMesherSystem extends System<CorePluginEntity & CulledMesherPluginEntity> {
     chunks = this.query((e) => e.has('voxelChunk'))
@@ -188,12 +134,12 @@ export class VoxelChunkMesherSystem extends System<CorePluginEntity & CulledMesh
         }
     }
 
-    private registerChunk(e: ChunkEntity & CulledMesherPluginEntity): void {
-        if (e.voxelChunkMesh) return
+    private registerChunk(entity: ChunkEntity & CulledMesherPluginEntity): void {
+        if (entity.voxelChunkMesh) return
 
-        const { voxelChunk } = e
+        const { voxelChunk } = entity
 
-        this.world.add(e, 'voxelChunkMesh', new VoxelChunkMesh())
+        this.world.add(entity, 'voxelChunkMesh', new VoxelChunkMesh())
 
         const data: RegisterChunkMessage = {
             type: 'register-chunk',

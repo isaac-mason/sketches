@@ -53,3 +53,20 @@ export const emptyChunk = (): VoxelChunk => {
         priority: 0,
     }
 }
+
+export const createVoxelChunk = (id: string, position: THREE.Vector3): VoxelChunk => {
+    const chunk = emptyChunk()
+
+    return {
+        id,
+        position,
+
+        solid: chunk.solid,
+        solidBuffer: chunk.solidBuffer,
+
+        color: chunk.color,
+        colorBuffer: chunk.colorBuffer,
+
+        priority: 0,
+    }
+}

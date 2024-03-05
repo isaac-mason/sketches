@@ -97,8 +97,6 @@ export const createVoxelEngine = <Plugins extends ReadonlyArray<VoxelEnginePlugi
 
     return {
         VoxelEngine,
-        useVoxelEngine: () => {
-            return useVoxelEngine<Plugins>()
-        },
+        useVoxelEngine: useVoxelEngine as () => VoxelEngineContext<Plugins>,
     }
 }
