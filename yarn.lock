@@ -1949,6 +1949,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tweenjs/tween.js@npm:~23.1.1":
+  version: 23.1.1
+  resolution: "@tweenjs/tween.js@npm:23.1.1"
+  checksum: 8833907d9d6adb584879fb743c3d1f6f37ea8a6a2750c06383040cba03cd284a8bbd9f173b50ee7636f56d242e1090b28335b29eb9c44ddf7ca0bb534c4b697e
+  languageName: node
+  linkType: hard
+
 "@types/babel__core@npm:^7.20.5":
   version: 7.20.5
   resolution: "@types/babel__core@npm:7.20.5"
@@ -2407,15 +2414,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/three@npm:^0.161.0":
-  version: 0.161.2
-  resolution: "@types/three@npm:0.161.2"
+"@types/three@npm:^0.162.0":
+  version: 0.162.0
+  resolution: "@types/three@npm:0.162.0"
   dependencies:
+    "@tweenjs/tween.js": "npm:~23.1.1"
     "@types/stats.js": "npm:*"
     "@types/webxr": "npm:*"
     fflate: "npm:~0.6.10"
     meshoptimizer: "npm:~0.18.1"
-  checksum: 4395d86db71c9be9ec04de048d2fbeb2ae43e7f66938a505950cb2c320b735431c7e6d88e1f7c776844efb079dc9b5788f81d0d4e7532baf4b0eb7bf38b433a0
+  checksum: 02101a0631adee750e7be3efc0c76cb805565353d200a9cfc3f5b741bc5564129e2e9eb37c57544d9cb7e27608196972b755c6f7829b163155bec530641a0595
   languageName: node
   linkType: hard
 
@@ -6540,7 +6548,7 @@ __metadata:
     "@types/node": "npm:^20.11.19"
     "@types/react": "npm:^18.2.55"
     "@types/react-dom": "npm:^18.2.19"
-    "@types/three": "npm:^0.161.0"
+    "@types/three": "npm:^0.162.0"
     "@vitejs/plugin-basic-ssl": "npm:^1.1.0"
     "@vitejs/plugin-react": "npm:^4.2.1"
     arancini: "npm:^6.5.0"
@@ -6560,7 +6568,7 @@ __metadata:
     simplex-noise: "npm:^4.0.1"
     styled-breakpoints: "npm:^14.0.0"
     styled-components: "npm:^6.1.8"
-    three: "npm:^0.161.0"
+    three: "npm:^0.162.0"
     three-bvh-csg: "npm:^0.0.16"
     tunnel-rat: "npm:^0.1.2"
     typescript: "npm:^5.3.2"
@@ -6943,10 +6951,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"three@npm:^0.161.0":
-  version: 0.161.0
-  resolution: "three@npm:0.161.0"
-  checksum: 0e3b80b0848e0f7539b9408d1032aaef9d2386a3d9ce949803c8ce6eed47bfd13b4e22a5ce21016693601aee976887336521dc273859c5cbb95e2ff5f54837f1
+"three@npm:^0.162.0":
+  version: 0.162.0
+  resolution: "three@npm:0.162.0"
+  checksum: 08b1925583ab84f45c2358a0935e0c63b94e7ff4c3a9d759c993c12ef63124ab813c37e1df884f70ef8f44b1d2a2c0b8e515d56e0944d8d7df4fcdf01aec116f
   languageName: node
   linkType: hard
 
