@@ -12,7 +12,7 @@ import {
     vec4,
 } from 'three/examples/jsm/nodes/Nodes.js'
 import { WebGPUCanvas } from '../../../common'
-import { perlinNoise3d } from '../../../common/tsl/wgsl/noise/perlinNoise3d'
+import { perlinNoise3d } from '../../../common/tsl/noise/perlinNoise3d'
 
 const waterMaterial = new MeshBasicNodeMaterial()
 
@@ -43,7 +43,7 @@ waterMaterial.positionNode = positionLocal.add(vec3(0, 0, elevation))
 const wavesLowColor = color('#02314d')
 const wavesHighColor = color('#9bd8ff')
 const wavesColorOffset = 0.5
-const wavesColorMultiplier = 1.2
+const wavesColorMultiplier = 1.22
 
 const waterColor = mix(wavesLowColor, wavesHighColor, elevation.mul(wavesColorMultiplier).add(wavesColorOffset).clamp())
 
