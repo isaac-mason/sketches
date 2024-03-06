@@ -33,7 +33,7 @@ let elevation = sin(modelPosition.x.mul(wavesFrequency.x).add(time.mul(wavesSpee
     .mul(wavesElevation)
 
 for (let i = 1; i <= wavesNoiseIterations; i++) {
-    const noise = perlinNoise3d({ P: vec3(modelPosition.xz.mul(smallWavesFrequency).mul(i), time.mul(smallWavesSpeed)) })
+    const noise = perlinNoise3d({ position: vec3(modelPosition.xz.mul(smallWavesFrequency).mul(i), time.mul(smallWavesSpeed)) })
     const iter = abs(noise.mul(smallWavesElevation).div(i))
     elevation = elevation.sub(iter)
 }
@@ -43,7 +43,7 @@ waterMaterial.positionNode = positionLocal.add(vec3(0, 0, elevation))
 const wavesLowColor = color('#02314d')
 const wavesHighColor = color('#9bd8ff')
 const wavesColorOffset = 0.5
-const wavesColorMultiplier = 1.22
+const wavesColorMultiplier = 1.2
 
 const waterColor = mix(wavesLowColor, wavesHighColor, elevation.mul(wavesColorMultiplier).add(wavesColorOffset).clamp())
 
