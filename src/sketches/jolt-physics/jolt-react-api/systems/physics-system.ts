@@ -1,7 +1,7 @@
 import { invalidate } from '@react-three/fiber'
 import { System } from 'arancini/systems'
 import Jolt from 'jolt-physics'
-import { MathUtils, Quaternion, Vector3 } from 'three'
+import * as THREE from 'three'
 import { Layer, NUM_OBJECT_LAYERS } from '../constants'
 import { JoltEntity } from '../ecs'
 import { Raw } from '../raw'
@@ -228,7 +228,7 @@ export class PhysicsSystem extends System<JoltEntity> {
 
     private variableStep(delta: number): void {
         // Max of 0.5 to prevent tunneling / instability
-        const deltaTime = MathUtils.clamp(delta, 0, 0.5)
+        const deltaTime = THREE.MathUtils.clamp(delta, 0, 0.5)
 
         // When running below 55 Hz, do 2 steps instead of 1
         const numSteps = deltaTime > 1.0 / 55.0 ? 2 : 1
@@ -269,8 +269,8 @@ export class PhysicsSystem extends System<JoltEntity> {
 
                     if (!previousState) {
                         previousState = {
-                            position: new Vector3(),
-                            quaternion: new Quaternion(),
+                            position: new THREE.Vector3(),
+                            quaternion: new THREE.Quaternion(),
                         }
                         this.steppingState.previousState.set(body, previousState)
                     }

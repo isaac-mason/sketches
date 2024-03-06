@@ -6,7 +6,7 @@ import { createReactAPI } from 'arancini/react'
 import { button, useControls } from 'leva'
 import * as p2 from 'p2-es'
 import { ReactNode, useMemo, useState } from 'react'
-import { MathUtils } from 'three'
+import * as THREE from 'three'
 import { Canvas } from '../../../common'
 import { createTextShape } from './font'
 
@@ -70,7 +70,7 @@ const MAX_DELTA = (1 / 60) * 10
 
 const Loop = () => {
     useFrame((_, delta) => {
-        executor.update(MathUtils.clamp(delta, 0, MAX_DELTA))
+        executor.update(THREE.MathUtils.clamp(delta, 0, MAX_DELTA))
     })
 
     return null

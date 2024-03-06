@@ -5,7 +5,7 @@ import { createReactAPI } from 'arancini/react'
 import { Executor, System } from 'arancini/systems'
 import * as p2 from 'p2-es'
 import { useMemo } from 'react'
-import { Box3, Vector3 } from 'three'
+import * as THREE from 'three'
 import { Canvas } from '../../../common'
 import { Duck } from './duck'
 import { KinematicCharacterController } from './kinematic-character-controller'
@@ -137,21 +137,21 @@ class CameraSystem extends System<EntityType> {
 
     players = this.query((e) => e.has('isPlayer', 'physicsBody', 'object3D'))
 
-    box3 = new Box3()
+    box3 = new THREE.Box3()
 
-    vec3 = new Vector3()
+    vec3 = new THREE.Vector3()
 
-    cameraTargetPosition = new Vector3()
+    cameraTargetPosition = new THREE.Vector3()
 
     onUpdate(delta: number): void {
         this.box3.min.set(0, 0, 0)
         this.box3.max.set(0, 0, 0)
 
-        const points: Vector3[] = []
+        const points: THREE.Vector3[] = []
         for (const entity of this.players) {
             const { physicsBody } = entity
 
-            points.push({ x: physicsBody.interpolatedPosition[0], y: physicsBody.interpolatedPosition[1], z: 0 } as Vector3)
+            points.push({ x: physicsBody.interpolatedPosition[0], y: physicsBody.interpolatedPosition[1], z: 0 } as THREE.Vector3)
         }
 
         this.box3.setFromPoints(points)

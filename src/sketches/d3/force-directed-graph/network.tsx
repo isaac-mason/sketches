@@ -2,13 +2,13 @@ import { useThree } from '@react-three/fiber'
 import * as d3 from 'd3'
 import { MeshLineGeometry, MeshLineMaterial } from 'meshline'
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
-import { Group, Mesh, Vector2, Vector3 } from 'three'
+import * as THREE from 'three'
 
-const vec = new Vector3()
+const vec = new THREE.Vector3()
 
 export type NetworkNode = {
     id: string
-    group: Group
+    group: THREE.Group
 } & d3.SimulationNodeDatum
 
 export type NetworkLink = d3.SimulationLinkDatum<NetworkNode>
@@ -60,7 +60,7 @@ export const Network = ({ children, ...groupProps }: NetworkProps) => {
     const [nodes, setNodes] = useState<NetworkNode[]>([])
     const [links, setLinks] = useState<NetworkLink[]>([])
 
-    const lineMeshes = useMemo<Map<string, Mesh>>(() => new Map(), [])
+    const lineMeshes = useMemo<Map<string, THREE.Mesh>>(() => new Map(), [])
 
     const dedupedLinks = useMemo(() => {
         const linkMap = new Map<string, DedupedLink>()
@@ -99,12 +99,12 @@ export const Network = ({ children, ...groupProps }: NetworkProps) => {
                 const geometry = new MeshLineGeometry()
 
                 const material = new MeshLineMaterial({
-                    resolution: new Vector2(10, 10),
+                    resolution: new THREE.Vector2(10, 10),
                     lineWidth: 0.1,
                     color: '#fff',
                 })
 
-                const mesh = new Mesh(geometry, material)
+                const mesh = new THREE.Mesh(geometry, material)
 
                 scene.add(mesh)
                 lineMeshes.set(key, mesh)

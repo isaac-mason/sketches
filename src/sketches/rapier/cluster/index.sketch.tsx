@@ -134,7 +134,7 @@ export default function Sketch() {
 
                     <ambientLight intensity={1.75} />
 
-                    <EffectComposer disableNormalPass multisampling={8}>
+                    <EffectComposer enableNormalPass={false} multisampling={8}>
                         <N8AO distanceFalloff={1} aoRadius={1} intensity={1} />
                     </EffectComposer>
 

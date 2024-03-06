@@ -1624,9 +1624,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-three/drei@npm:^9.99.6":
-  version: 9.99.6
-  resolution: "@react-three/drei@npm:9.99.6"
+"@react-three/drei@npm:^9.56.10, @react-three/drei@npm:^9.99.7":
+  version: 9.99.7
+  resolution: "@react-three/drei@npm:9.99.7"
   dependencies:
     "@babel/runtime": "npm:^7.11.2"
     "@mediapipe/tasks-vision": "npm:0.10.8"
@@ -1657,7 +1657,7 @@ __metadata:
   peerDependenciesMeta:
     react-dom:
       optional: true
-  checksum: 7e95546d2c41ee6fd0582529191a8ada9e690e010cd7422eab9f0954ccd929e43576514e7f9e3e33a201374caf84509b33ae778152867e324764679c6ba42b9a
+  checksum: f00a211a49a80f974918ced6f158cb343a66a8c836365227572af6687ecd7f4e64cfc19060fec374e0747ebd7b84d146ad9940dd3ed20e7867bf21fc9bad9349
   languageName: node
   linkType: hard
 
@@ -1716,9 +1716,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-three/postprocessing@npm:^2.16.0":
-  version: 2.16.0
-  resolution: "@react-three/postprocessing@npm:2.16.0"
+"@react-three/postprocessing@npm:^2.16.2":
+  version: 2.16.2
+  resolution: "@react-three/postprocessing@npm:2.16.2"
   dependencies:
     buffer: "npm:^6.0.3"
     maath: "npm:^0.6.0"
@@ -1729,7 +1729,7 @@ __metadata:
     "@react-three/fiber": ">=8.0"
     react: ">=18.0"
     three: ">= 0.138.0"
-  checksum: b65ea5c994b830f3ead7252774da25af2db30bee412eb4c1e0a50f40f2fcd1c1f4402bc8ab9f1741b11ee83cbc7bd859fe3f412ec18ca4cd32876d25d7afe579
+  checksum: 44367f737cb091760d90393a4022bd96db0b3b5cc32b611752f0db60b75bfcfbc1668b75a16b29169458623adacfb7e53e4367c6dce6580a6ad077cf629d218c
   languageName: node
   linkType: hard
 
@@ -1946,6 +1946,13 @@ __metadata:
   peerDependencies:
     react: ">= 16.3.0"
   checksum: b9b8ecdd1e4012af4876f0fcd3702b2f881ab736f86cc3f0f7dd792c3eafe522e47d3fe3ab2fe8e7bf3c78b43cc6e4eb4c7a05d2b513b3aee015788094ab2527
+  languageName: node
+  linkType: hard
+
+"@tweenjs/tween.js@npm:~23.1.1":
+  version: 23.1.1
+  resolution: "@tweenjs/tween.js@npm:23.1.1"
+  checksum: 8833907d9d6adb584879fb743c3d1f6f37ea8a6a2750c06383040cba03cd284a8bbd9f173b50ee7636f56d242e1090b28335b29eb9c44ddf7ca0bb534c4b697e
   languageName: node
   linkType: hard
 
@@ -2330,12 +2337,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:^18.2.19":
-  version: 18.2.19
-  resolution: "@types/react-dom@npm:18.2.19"
+"@types/react-dom@npm:^18.2.20":
+  version: 18.2.20
+  resolution: "@types/react-dom@npm:18.2.20"
   dependencies:
     "@types/react": "npm:*"
-  checksum: 98eb760ce78f1016d97c70f605f0b1a53873a548d3c2192b40c897f694fd9c8bb12baeada16581a9c7b26f5022c1d2613547be98284d8f1b82d1611b1e3e7df0
+  checksum: 841afdd03a9ec1717f1dbcc934552e3e14e75b17b9fff549fc9f6cf0ae7520304c163a549478a00c2341e607bd2550bddb16b963986b746ae5b9af41f8035591
   languageName: node
   linkType: hard
 
@@ -2407,15 +2414,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/three@npm:^0.161.0":
-  version: 0.161.2
-  resolution: "@types/three@npm:0.161.2"
+"@types/three@npm:^0.162.0":
+  version: 0.162.0
+  resolution: "@types/three@npm:0.162.0"
   dependencies:
+    "@tweenjs/tween.js": "npm:~23.1.1"
     "@types/stats.js": "npm:*"
     "@types/webxr": "npm:*"
     fflate: "npm:~0.6.10"
     meshoptimizer: "npm:~0.18.1"
-  checksum: 4395d86db71c9be9ec04de048d2fbeb2ae43e7f66938a505950cb2c320b735431c7e6d88e1f7c776844efb079dc9b5788f81d0d4e7532baf4b0eb7bf38b433a0
+  checksum: 02101a0631adee750e7be3efc0c76cb805565353d200a9cfc3f5b741bc5564129e2e9eb37c57544d9cb7e27608196972b755c6f7829b163155bec530641a0595
   languageName: node
   linkType: hard
 
@@ -5881,12 +5889,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postprocessing@npm:^6.35.0":
-  version: 6.35.0
-  resolution: "postprocessing@npm:6.35.0"
+"postprocessing@npm:^6.32.1":
+  version: 6.35.1
+  resolution: "postprocessing@npm:6.35.1"
   peerDependencies:
     three: ">= 0.152.0 < 0.163.0"
-  checksum: 5e089607a14065cff1e2b7c0639159bcc3f10e17440c1dd29c5509d09cb8b7b14be857c2824636a4c4f322f268dd134e6afb4dee64d026897f411d3207fc4181
+  checksum: 0543594658aca162b46ba3e95abd05d551ab30dae1394a7c5c042eecab565370913d28e2f05da2392d759731b717276a76fee936cc654e5b20f0ea545e36752e
   languageName: node
   linkType: hard
 
@@ -6531,7 +6539,7 @@ __metadata:
     "@react-three/drei": "npm:^9.99.7"
     "@react-three/fiber": "npm:^8.15.19"
     "@react-three/flex": "npm:^1.0.1"
-    "@react-three/postprocessing": "npm:^2.16.0"
+    "@react-three/postprocessing": "npm:^2.16.2"
     "@react-three/rapier": "npm:^1.3.0"
     "@react-three/rapier-addons": "npm:^4.0.0"
     "@react-three/xr": "npm:^5.7.1"
@@ -6539,8 +6547,8 @@ __metadata:
     "@types/eslint": "npm:^8.56.3"
     "@types/node": "npm:^20.11.19"
     "@types/react": "npm:^18.2.55"
-    "@types/react-dom": "npm:^18.2.19"
-    "@types/three": "npm:^0.161.0"
+    "@types/react-dom": "npm:^18.2.20"
+    "@types/three": "npm:^0.162.0"
     "@vitejs/plugin-basic-ssl": "npm:^1.1.0"
     "@vitejs/plugin-react": "npm:^4.2.1"
     arancini: "npm:^6.5.0"
@@ -6560,7 +6568,7 @@ __metadata:
     simplex-noise: "npm:^4.0.1"
     styled-breakpoints: "npm:^14.0.0"
     styled-components: "npm:^6.1.8"
-    three: "npm:^0.161.0"
+    three: "npm:^0.162.0"
     three-bvh-csg: "npm:^0.0.16"
     tunnel-rat: "npm:^0.1.2"
     typescript: "npm:^5.3.2"
@@ -6943,10 +6951,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"three@npm:^0.161.0":
-  version: 0.161.0
-  resolution: "three@npm:0.161.0"
-  checksum: 0e3b80b0848e0f7539b9408d1032aaef9d2386a3d9ce949803c8ce6eed47bfd13b4e22a5ce21016693601aee976887336521dc273859c5cbb95e2ff5f54837f1
+"three@npm:^0.162.0":
+  version: 0.162.0
+  resolution: "three@npm:0.162.0"
+  checksum: 08b1925583ab84f45c2358a0935e0c63b94e7ff4c3a9d759c993c12ef63124ab813c37e1df884f70ef8f44b1d2a2c0b8e515d56e0944d8d7df4fcdf01aec116f
   languageName: node
   linkType: hard
 

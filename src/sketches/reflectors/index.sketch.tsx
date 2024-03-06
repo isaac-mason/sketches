@@ -3,13 +3,13 @@ import { useGLTF } from '@react-three/drei'
 import { ThreeElements, useFrame } from '@react-three/fiber'
 import { easing } from 'maath'
 import { useMemo } from 'react'
-import { Mesh, PlaneGeometry, Vector2Tuple } from 'three'
+import * as THREE from 'three'
 import { MeshStandardNodeMaterial, reflector } from 'three/examples/jsm/nodes/Nodes.js'
 import { WebGPUCanvas } from '../../common'
 
-const Mirror = (props: ThreeElements['group'] & { size: Vector2Tuple }) => {
+const Mirror = (props: ThreeElements['group'] & { size: THREE.Vector2Tuple }) => {
     const mirror = useMemo(() => {
-        const geometry = new PlaneGeometry(...props.size)
+        const geometry = new THREE.PlaneGeometry(...props.size)
 
         const reflection = reflector({ resolution: 1 })
 
@@ -17,7 +17,7 @@ const Mirror = (props: ThreeElements['group'] & { size: Vector2Tuple }) => {
 
         mirrorMaterial.colorNode = reflection
 
-        const mesh = new Mesh(geometry, mirrorMaterial)
+        const mesh = new THREE.Mesh(geometry, mirrorMaterial)
 
         mesh.add(reflection.target)
 

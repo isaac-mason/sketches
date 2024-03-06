@@ -77,7 +77,7 @@ const House = (props: JSX.IntrinsicElements['group']) => {
                     <boxGeometry ref={wallsBoxGeometryRef} args={[4, 2.5, 4]} />
                     <meshStandardMaterial
                         {...bricksTextureProps}
-                        normalMap-encoding={THREE.LinearEncoding}
+                        normalMap-encoding={THREE.LinearSRGBColorSpace}
                         normalScale={new THREE.Vector2(0.01, 0.01)}
                     />
                 </mesh>
@@ -204,7 +204,7 @@ const Grass = () => {
                 normalMap-repeat={[20, 20]}
                 normalMap-wrapS={THREE.RepeatWrapping}
                 normalMap-wrapT={THREE.RepeatWrapping}
-                normalMap-encoding={THREE.LinearEncoding}
+                normalMap-encoding={THREE.LinearSRGBColorSpace}
                 roughnessMap-repeat={[20, 20]}
                 roughnessMap-wrapS={THREE.RepeatWrapping}
                 roughnessMap-wrapT={THREE.RepeatWrapping}

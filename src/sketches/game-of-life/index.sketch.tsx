@@ -293,7 +293,7 @@ export default function Sketch() {
             <color attach="background" args={['black']} />
 
             {/* effects */}
-            <EffectComposer disableNormalPass>
+            <EffectComposer enableNormalPass={false}>
                 <Bloom luminanceThreshold={0} mipmapBlur luminanceSmoothing={5.0} intensity={3} />
             </EffectComposer>
 

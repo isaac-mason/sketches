@@ -1,5 +1,5 @@
 import { System } from 'arancini/systems'
-import { Object3D, Vector3 } from 'three'
+import * as THREE from 'three'
 import { CorePluginEntity, Vec3, VoxelWorldCoreSystem } from '../core'
 import { VoxelEnginePlugin } from '../voxel-engine-types'
 
@@ -17,13 +17,13 @@ export type BoxCharacterControllerCameraMode = 'first-person' | 'third-person'
 export type VoxelBoxCharacterControllerOptions = {
     height: number
     width: number
-    initialPosition: Vector3
+    initialPosition: THREE.Vector3
 }
 
 export class BoxCharacterController {
-    transform: Object3D
-    position: Vector3
-    velocity: Vector3
+    transform: THREE.Object3D
+    position: THREE.Vector3
+    velocity: THREE.Vector3
 
     jumping: boolean
     jumpTime: number
@@ -37,10 +37,10 @@ export class BoxCharacterController {
     constructor(options: VoxelBoxCharacterControllerOptions) {
         this.options = options
 
-        this.transform = new Object3D()
+        this.transform = new THREE.Object3D()
         this.transform.position.copy(options.initialPosition)
         this.position = this.transform.position
-        this.velocity = new Vector3()
+        this.velocity = new THREE.Vector3()
 
         this.characterHalfHeight = this.options.height / 2
         this.characterHalfWidth = this.options.width / 2
@@ -51,13 +51,13 @@ export class BoxCharacterController {
     }
 }
 
-const tmpThirdPersonOffset = new Vector3()
-const tmpVerticalRayOrigin = new Vector3()
-const tmpVerticalRayOffset = new Vector3()
+const tmpThirdPersonOffset = new THREE.Vector3()
+const tmpVerticalRayOrigin = new THREE.Vector3()
+const tmpVerticalRayOffset = new THREE.Vector3()
 
-const tmpFrontVector = new Vector3()
-const tmpSideVector = new Vector3()
-const tmpDirection = new Vector3()
+const tmpFrontVector = new THREE.Vector3()
+const tmpSideVector = new THREE.Vector3()
+const tmpDirection = new THREE.Vector3()
 
 export class BoxCharacterControllerSystem extends System<BoxChararacterControllerPluginEntity & CorePluginEntity> {
     controller = this.query((e) => e.has('boxCharacterController', 'boxCharacterControllerInput', 'object3D'), { required: true })

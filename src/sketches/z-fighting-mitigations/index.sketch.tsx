@@ -1,7 +1,7 @@
 import { CameraShake, OrbitControls, PerspectiveCamera } from '@react-three/drei'
 import { ThreeElements, useFrame } from '@react-three/fiber'
 import { useMemo, useRef, useState } from 'react'
-import { BufferAttribute, BufferGeometry, Float32BufferAttribute, TorusKnotGeometry, Vector3 } from 'three'
+import * as THREE from 'three'
 import { Canvas } from '../../common'
 import { useButtonGroupControls } from '../../common/hooks/use-button-group-controls'
 import { SketchOptions } from '../types'
@@ -116,7 +116,7 @@ const PlanesSeparateRenderPasses = () => {
 }
 
 const createTorusKnotGeometry = () => {
-    return new TorusKnotGeometry(0.3, 0.05, 100, 16)
+    return new THREE.TorusKnotGeometry(0.3, 0.05, 100, 16)
 }
 
 const TorusKnotZFighting = (props: ThreeElements['group']) => {
@@ -153,10 +153,10 @@ const TorusKnotScale = (props: ThreeElements['group']) => {
     )
 }
 
-const _vector3 = new Vector3()
+const _vector3 = new THREE.Vector3()
 
-function getMergedGeometry(geometry: BufferGeometry, tolerance: number): BufferGeometry {
-    const positionAttribute = geometry.attributes.position as BufferAttribute
+function getMergedGeometry(geometry: THREE.BufferGeometry, tolerance: number): THREE.BufferGeometry {
+    const positionAttribute = geometry.attributes.position as THREE.BufferAttribute
 
     if (!positionAttribute || positionAttribute.itemSize !== 3) {
         throw new Error('Invalid geometry: position attribute missing or incorrect itemSize')
@@ -206,8 +206,8 @@ function getMergedGeometry(geometry: BufferGeometry, tolerance: number): BufferG
         mergedIndices.push(idx)
     }
 
-    const mergedGeometry = new BufferGeometry()
-    mergedGeometry.setAttribute('position', new BufferAttribute(new Float32Array(mergedPositions), 3))
+    const mergedGeometry = new THREE.BufferGeometry()
+    mergedGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(mergedPositions), 3))
     mergedGeometry.setIndex(mergedIndices)
 
     mergedGeometry.computeVertexNormals()
@@ -215,22 +215,22 @@ function getMergedGeometry(geometry: BufferGeometry, tolerance: number): BufferG
     return mergedGeometry
 }
 
-function scaleIndexedGeometryAlongNormals(geometry: BufferGeometry, scaleFactor: number) {
+function scaleIndexedGeometryAlongNormals(geometry: THREE.BufferGeometry, scaleFactor: number) {
     const positions = geometry.getAttribute('position')
     const normals = geometry.getAttribute('normal')
 
     const scaledPositions = new Float32Array(positions.count * 3)
 
     for (let i = 0; i < positions.count; i++) {
-        const vertexNormal = new Vector3().fromBufferAttribute(normals, i).normalize()
+        const vertexNormal = new THREE.Vector3().fromBufferAttribute(normals, i).normalize()
 
         scaledPositions[i * 3] = positions.array[i * 3] + vertexNormal.x * scaleFactor
         scaledPositions[i * 3 + 1] = positions.array[i * 3 + 1] + vertexNormal.y * scaleFactor
         scaledPositions[i * 3 + 2] = positions.array[i * 3 + 2] + vertexNormal.z * scaleFactor
     }
 
-    const scaledGeometry = new BufferGeometry()
-    scaledGeometry.setAttribute('position', new Float32BufferAttribute(scaledPositions, 3))
+    const scaledGeometry = new THREE.BufferGeometry()
+    scaledGeometry.setAttribute('position', new THREE.Float32BufferAttribute(scaledPositions, 3))
     scaledGeometry.setIndex(geometry.index) // Copy original indices
 
     // just for visualization
