@@ -15,11 +15,7 @@ import {
 } from 'three/examples/jsm/nodes/Nodes.js'
 
 const permute = tslFn((input: { x: ShaderNodeObject<Node> }) => {
-    return fract(
-        add(mul(input.x, float(34)), float(1))
-            .mul(input.x)
-            .div(float(289)),
-    ).mul(float(289))
+    return fract(add(mul(input.x, 34), 1).mul(input.x).div(289)).mul(289)
 })
 
 const taylorInvSqrt = tslFn((input: { r: ShaderNodeObject<Node> }) => {
@@ -31,13 +27,13 @@ const fade = tslFn((input: { t: ShaderNodeObject<Node> }) => {
     return t
         .mul(t)
         .mul(t)
-        .mul(t.mul(t.mul(float(6)).sub(float(15))).add(float(10)))
+        .mul(t.mul(t.mul(6).sub(15)).add(10))
 })
 
-export const perlinNoise3d = tslFn((input: { position: ShaderNodeObject<Node> }) => {
-    const Pi0 = vec3(input.position.floor())
+export const perlinNoise3d = tslFn(([position]: [position: ShaderNodeObject<Node>]) => {
+    const Pi0 = vec3(position.floor())
     const Pi1 = Pi0.add(vec3(1))
-    const Pf0 = fract(input.position)
+    const Pf0 = fract(position)
     const Pf1 = Pf0.sub(vec3(1))
 
     const ix = vec4(Pi0.x, Pi1.x, Pi0.x, Pi1.x)
@@ -49,21 +45,21 @@ export const perlinNoise3d = tslFn((input: { position: ShaderNodeObject<Node> })
     const ixy0 = permute({ x: ixy.add(iz0) })
     const ixy1 = permute({ x: ixy.add(iz1) })
 
-    let gx0: ShaderNodeObject<Node> = ixy0.div(float(7))
-    let gy0 = fract(floor(gx0).div(float(7))).sub(float(0.5))
+    let gx0: ShaderNodeObject<Node> = ixy0.div(7)
+    let gy0 = fract(floor(gx0).div(7)).sub(0.5)
     gx0 = fract(gx0)
     const gz0 = vec4(0.5).sub(gx0.abs()).sub(gy0.abs())
     const sz0 = step(gz0, vec4(0))
-    gx0 = gx0.sub(sz0.mul(step(vec4(0), gx0).sub(float(0.5))))
-    gy0 = gy0.sub(sz0.mul(step(vec4(0), gy0).sub(float(0.5))))
+    gx0 = gx0.sub(sz0.mul(step(vec4(0), gx0).sub(0.5)))
+    gy0 = gy0.sub(sz0.mul(step(vec4(0), gy0).sub(0.5)))
 
-    let gx1: ShaderNodeObject<Node> = ixy1.div(float(7))
-    let gy1 = fract(floor(gx1).div(float(7))).sub(float(0.5))
+    let gx1: ShaderNodeObject<Node> = ixy1.div(7)
+    let gy1 = fract(floor(gx1).div(7)).sub(0.5)
     gx1 = fract(gx1)
     const gz1 = vec4(0.5).sub(gx1.abs()).sub(gy1.abs())
     const sz1 = step(gz1, vec4(0))
-    gx1 = gx1.sub(sz1.mul(step(vec4(0), gx1).sub(float(0.5))))
-    gy1 = gy1.sub(sz1.mul(step(vec4(0), gy1).sub(float(0.5))))
+    gx1 = gx1.sub(sz1.mul(step(vec4(0), gx1).sub(0.5)))
+    gy1 = gy1.sub(sz1.mul(step(vec4(0), gy1).sub(0.5)))
 
     let g000 = vec3(gx0.x, gy0.x, gz0.x)
     let g100 = vec3(gx0.y, gy0.y, gz0.y)

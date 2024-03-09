@@ -33,7 +33,7 @@ let elevation = sin(modelPosition.x.mul(wavesFrequency.x).add(time.mul(wavesSpee
     .mul(wavesElevation)
 
 for (let i = 1; i <= wavesNoiseIterations; i++) {
-    const noise = perlinNoise3d({ position: vec3(modelPosition.xz.mul(smallWavesFrequency).mul(i), time.mul(smallWavesSpeed)) })
+    const noise = perlinNoise3d(vec3(modelPosition.xz.mul(smallWavesFrequency).mul(i), time.mul(smallWavesSpeed)))
     const iter = abs(noise.mul(smallWavesElevation).div(i))
     elevation = elevation.sub(iter)
 }
