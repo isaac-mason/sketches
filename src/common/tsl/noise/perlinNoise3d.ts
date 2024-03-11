@@ -30,7 +30,7 @@ const fade = tslFn((input: { t: ShaderNodeObject<Node> }) => {
         .mul(t.mul(t.mul(6).sub(15)).add(10))
 })
 
-export const perlinNoise3d = tslFn(([position]: [position: ShaderNodeObject<Node>]) => {
+export const perlinNoise3d = tslFn(({ position }: { position: ShaderNodeObject<Node> }) => {
     const Pi0 = vec3(position.floor())
     const Pi1 = Pi0.add(vec3(1))
     const Pf0 = fract(position)
