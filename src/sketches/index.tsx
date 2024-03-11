@@ -15,12 +15,6 @@ const sketchList = [
         path: 'game-of-life',
         tags: ['game-of-life', 'cellular-automata'],
     },
-    /* Jolt Physics */
-    {
-        title: 'Jolt Physics - Cube Heap',
-        path: 'jolt-physics/cube-heap',
-        tags: ['physics', 'jolt-physics', 'arancini'],
-    },
     /* Recast Navigation */
     {
         title: 'Recast Navigation - Busy Street Crossing',
@@ -119,6 +113,12 @@ const sketchList = [
         title: 'Rapier - Arancini Integration',
         path: 'rapier/arancini-integration',
         tags: ['physics', 'rapier', 'arancini'],
+    },
+    /* Jolt Physics */
+    {
+        title: 'Jolt Physics - Cube Heap',
+        path: 'jolt-physics/cube-heap',
+        tags: ['physics', 'jolt-physics', 'arancini'],
     },
     /* p2-es */
     {
