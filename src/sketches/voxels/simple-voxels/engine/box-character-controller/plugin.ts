@@ -58,6 +58,7 @@ const tmpVerticalRayOffset = new THREE.Vector3()
 const tmpFrontVector = new THREE.Vector3()
 const tmpSideVector = new THREE.Vector3()
 const tmpDirection = new THREE.Vector3()
+const tmpCameraWorldDirection = new THREE.Vector3()
 
 export class BoxCharacterControllerSystem extends System<BoxChararacterControllerPluginEntity & CorePluginEntity> {
     controller = this.query((e) => e.has('boxCharacterController', 'boxCharacterControllerInput', 'object3D'), { required: true })
@@ -105,7 +106,12 @@ export class BoxCharacterControllerSystem extends System<BoxChararacterControlle
         frontVector.set(0, 0, Number(backward) - Number(forward))
         sideVector.set(Number(left) - Number(right), 0, 0)
 
-        direction.subVectors(frontVector, sideVector).normalize().applyQuaternion(camera.quaternion)
+        direction.subVectors(frontVector, sideVector)
+        direction.normalize()
+
+        const worldDirection = camera.getWorldDirection(tmpCameraWorldDirection)
+        const yaw = Math.atan2(worldDirection.x, worldDirection.z)
+        direction.applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw).multiplyScalar(-1)
 
         controller.velocity.x = direction.x
         controller.velocity.z = direction.z
