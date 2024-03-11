@@ -35,7 +35,7 @@
         "react-router-dom": "^6.21.3",
         "recast-navigation": "^0.16.3",
         "simplex-noise": "^4.0.1",
-        "styled-breakpoints": "^14.0.0",
+        "styled-breakpoints": "^14.1.0",
         "styled-components": "^6.1.8",
         "suspend-react": "^0.1.3",
         "three": "^0.162.0",
