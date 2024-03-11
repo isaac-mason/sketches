@@ -141,6 +141,12 @@ const sketchList = [
         path: 'p2-es/pixelated-text',
         tags: ['physics', 'p2-es', 'text', 'arancini'],
     },
+    /* Particles */
+    {
+        title: 'Particles - Instanced Particles',
+        path: 'particles/instanced-particles',
+        tags: ['particles', 'instanced'],
+    },
     /* Game UI */
     {
         title: 'Game UI - Button',
