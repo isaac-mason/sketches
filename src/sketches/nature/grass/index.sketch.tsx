@@ -9,7 +9,7 @@ import { Canvas } from '../../../common'
 import cloudUrl from './cloud.jpg?url'
 import grassBladeAlphaUrl from './grass-blade-alpha.jpg?url'
 
-const GROUND_COLOR = '#073806'
+const GROUND_COLOR = '#001700'
 
 const GRASS_BLADE_COLORS = [
     {
