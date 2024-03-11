@@ -1,13 +1,14 @@
-import { KeyboardControls, useKeyboardControls } from '@react-three/drei'
+import { KeyboardControls, PerspectiveCamera, useKeyboardControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { World } from 'arancini'
 import { createReactAPI } from 'arancini/react'
 import * as p2 from 'p2-es'
 import { useMemo } from 'react'
 import * as THREE from 'three'
-import { Canvas, ExcludeFromCameraCollision, Instructions, ThirdPersonControls, useThirdPersonControls } from '../../../common'
+import { Canvas, ExcludeFromCameraCollision, Instructions, ThirdPersonControls } from '../../../common'
 import { Duck } from './duck'
 
+const _vector3 = new THREE.Vector3()
 const _euler = new THREE.Euler()
 const _quat = new THREE.Quaternion()
 
@@ -60,9 +61,8 @@ const playerSystem = (input: KeyControls, camera: THREE.PerspectiveCamera) => {
 
     p2.vec2.normalize(velocity, velocity)
 
-    const cameraWorldDirection = camera.getWorldDirection(new THREE.Vector3())
+    const cameraWorldDirection = camera.getWorldDirection(_vector3)
     const yaw = Math.atan2(cameraWorldDirection.x, cameraWorldDirection.z)
-
     p2.vec2.rotate(velocity, velocity, -yaw + Math.PI)
 
     if (p2.vec2.length(velocity) > 0) {
@@ -81,6 +81,7 @@ const cameraSystem = (cameraTarget: THREE.Vector3) => {
     if (!player) return
 
     cameraTarget.copy(player.three.position)
+    cameraTarget.y += 0.8
 }
 
 const physicsSystem = (delta: number) => {
@@ -138,9 +139,11 @@ const playerWaddleSystem = (delta: number) => {
 
 const MAX_DELTA = (1 / 60) * 2
 
-const Loop = () => {
+const Systems = () => {
     const [, getKeyboardControls] = useKeyboardControls<keyof KeyControls>()
-    const { target } = useThirdPersonControls()
+    const target = useMemo(() => {
+        return new THREE.Vector3()
+    }, [])
 
     useFrame((state, delta) => {
         const clampedDelta = THREE.MathUtils.clamp(delta, 0, MAX_DELTA)
@@ -153,7 +156,7 @@ const Loop = () => {
         playerWaddleSystem(clampedDelta)
     })
 
-    return null
+    return <ThirdPersonControls target={target} />
 }
 
 const useBody = (fn: () => p2.Body, deps: unknown[] = []) => {
@@ -253,9 +256,9 @@ export default () => {
         <>
             <Canvas>
                 <KeyboardControls map={controls}>
-                    <ThirdPersonControls targetOffset={[0, 0.8, 0]}>
-                        <Loop />
-                    </ThirdPersonControls>
+                    <Systems />
+
+                    <PerspectiveCamera makeDefault fov={90} position={[0, 3, 5]} />
 
                     <Player position={[0, 0]} />
 

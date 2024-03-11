@@ -2414,18 +2414,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/three@npm:^0.162.0":
-  version: 0.162.0
-  resolution: "@types/three@npm:0.162.0"
+"@types/three@portal:/Users/isaacmason/Development/three-ts-types/types/three::locator=sketches%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "@types/three@portal:/Users/isaacmason/Development/three-ts-types/types/three::locator=sketches%40workspace%3A."
   dependencies:
     "@tweenjs/tween.js": "npm:~23.1.1"
     "@types/stats.js": "npm:*"
     "@types/webxr": "npm:*"
-    fflate: "npm:~0.6.10"
+    fflate: "npm:~0.8.2"
     meshoptimizer: "npm:~0.18.1"
-  checksum: 02101a0631adee750e7be3efc0c76cb805565353d200a9cfc3f5b741bc5564129e2e9eb37c57544d9cb7e27608196972b755c6f7829b163155bec530641a0595
   languageName: node
-  linkType: hard
+  linkType: soft
 
 "@types/webxr@npm:*, @types/webxr@npm:^0.5.2":
   version: 0.5.10
@@ -4254,10 +4253,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fflate@npm:^0.6.9, fflate@npm:~0.6.10":
+"fflate@npm:^0.6.9":
   version: 0.6.10
   resolution: "fflate@npm:0.6.10"
   checksum: 9f2fd7224bccdb28102adc7c55c262b584571426eb9e0b91b13088884f45700232b51e034e300b74abf64e5449596d5c37d0a802673e25edb17c6742e4a4a0bd
+  languageName: node
+  linkType: hard
+
+"fflate@npm:~0.8.2":
+  version: 0.8.2
+  resolution: "fflate@npm:0.8.2"
+  checksum: 2bd26ba6d235d428de793c6a0cd1aaa96a06269ebd4e21b46c8fd1bd136abc631acf27e188d47c3936db090bf3e1ede11d15ce9eae9bffdc4bfe1b9dc66ca9cb
   languageName: node
   linkType: hard
 

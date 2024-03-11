@@ -115,7 +115,7 @@ const Pointer = ({ vec = new THREE.Vector3() }) => {
     }, [])
 
     return (
-        <RigidBody position={[0, 0, 0]} type="kinematicPosition" colliders={false} mass={2} ref={rigidBody}>
+        <RigidBody position={[1000, 1000, 1000]} type="kinematicPosition" colliders={false} mass={2} ref={rigidBody}>
             <BallCollider args={[4]} />
 
             <animated.pointLight decay={1} intensity={intensity} castShadow />
