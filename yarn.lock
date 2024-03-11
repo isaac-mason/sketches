@@ -2276,13 +2276,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/eslint@npm:^8.56.3":
-  version: 8.56.3
-  resolution: "@types/eslint@npm:8.56.3"
+"@types/eslint@npm:^8.56.5":
+  version: 8.56.5
+  resolution: "@types/eslint@npm:8.56.5"
   dependencies:
     "@types/estree": "npm:*"
     "@types/json-schema": "npm:*"
-  checksum: b5a006c24b5d3a2dba5acc12f21f96c960836beb08544cfedbbbd5b7770b6c951b41204d676b73d7d9065bef3435e5b4cb3796c57f66df21c12fd86018993a16
+  checksum: 548aab6ea34ca14452bf6e9212c76bb22cdf3b725d47e25591c20651af3f47fb62c59c4e80ed8ea3f7d1d7374d907cbba980af910e4c0f0cb29f73b9a6a9226f
   languageName: node
   linkType: hard
 
@@ -6544,7 +6544,7 @@ __metadata:
     "@react-three/rapier-addons": "npm:^4.0.0"
     "@react-three/xr": "npm:^5.7.1"
     "@types/d3": "npm:^7.4.3"
-    "@types/eslint": "npm:^8.56.3"
+    "@types/eslint": "npm:^8.56.5"
     "@types/node": "npm:^20.11.19"
     "@types/react": "npm:^18.2.55"
     "@types/react-dom": "npm:^18.2.20"
