@@ -316,6 +316,16 @@ const sketchList = [
         path: 'glsl-shaders-from-scratch/vector-operations-and-math/shaping-functions',
         tags: ['shaders-from-scratch', 'shaders'],
     },
+    {
+        title: 'GLSL Shaders From Scratch - Lighting Models',
+        path: 'glsl-shaders-from-scratch/lighting-models',
+        tags: ['shaders-from-scratch', 'shaders', 'ambient', 'hemi', 'lights'],
+    },
+    {
+        title: 'GLSL Shaders From Scratch - Toon Shading',
+        path: 'glsl-shaders-from-scratch/toon-shading',
+        tags: ['shaders-from-scratch', 'shaders', 'toon', 'shading'],
+    },
     /* Three.js Journey */
     {
         title: 'Journey Lesson 3 - Basic',
