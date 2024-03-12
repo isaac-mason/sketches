@@ -336,6 +336,16 @@ const sketchList = [
         path: 'glsl-shaders-from-scratch/vertex-shaders/warped-sphere',
         tags: ['shaders-from-scratch', 'shaders', 'vertex-shader', 'warped-sphere'],
     },
+    {
+        title: 'GLSL Shaders From Scratch - Raymarching - Basic',
+        path: 'glsl-shaders-from-scratch/raymarching/basic',
+        tags: ['shaders-from-scratch', 'shaders', 'raymarching'],
+    },
+    {
+        title: 'GLSL Shaders From Scratch - Raymarching - Terrain',
+        path: 'glsl-shaders-from-scratch/raymarching/terrain',
+        tags: ['shaders-from-scratch', 'shaders', 'raymarching', 'terrain'],
+    },
     /* Three.js Journey */
     {
         title: 'Journey Lesson 3 - Basic',
