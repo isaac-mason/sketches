@@ -1,7 +1,7 @@
-import { useGLTF } from '@react-three/drei'
+import { Helper, useGLTF } from '@react-three/drei'
 import { CuboidCollider, RapierRigidBody, RigidBody, RigidBodyProps, useRapier } from '@react-three/rapier'
 import { useControls as useLeva } from 'leva'
-import { forwardRef, Fragment, RefObject, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
+import { Fragment, RefObject, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { Color, Group, Mesh, MeshStandardMaterial, Object3D, SpotLightHelper, Vector3, Vector3Tuple } from 'three'
 import { GLTF } from 'three-stdlib'
 import chassisDracoUrl from '../assets/chassis-draco.glb?url'
@@ -9,7 +9,6 @@ import { LEVA_KEY } from '../constants'
 import { RapierRaycastVehicle, WheelOptions } from '../lib/rapier-raycast-vehicle'
 
 import wheelGlbUrl from '../assets/wheel-draco.glb?url'
-import { Helper } from '@/common'
 
 type WheelGLTF = GLTF & {
     nodes: {

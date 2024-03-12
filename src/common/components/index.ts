@@ -1,6 +1,5 @@
 export * from './canvas'
 export * from './crosshair'
-export * from './helper'
 export * from './instructions'
 export * from './interaction-barrier'
 export * from './spinner'

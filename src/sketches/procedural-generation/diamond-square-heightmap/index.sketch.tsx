@@ -1,9 +1,9 @@
-import { Bounds, OrbitControls } from '@react-three/drei'
+import { Canvas } from '@/common'
+import { Bounds, Helper, OrbitControls } from '@react-three/drei'
 import { useControls } from 'leva'
 import { useMemo } from 'react'
 import { PlaneGeometry, PointLightHelper } from 'three'
 import { VertexNormalsHelper } from 'three/addons'
-import { Canvas, Helper } from '@/common'
 
 const randomInRange = (min: number, max: number): number => {
     return Math.random() * (max - min) + min
