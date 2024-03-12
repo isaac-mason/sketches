@@ -19,6 +19,9 @@ const fragmentShader = /* glsl */ `
     
     varying vec2 vUvs;
 
+    // The MIT License
+    // Copyright (c) 2017 Inigo Quilez
+    // https://www.shadertoy.com/view/lsf3WH
     float Math_Random(vec2 p) {
         p = 50.0 * fract(p * 0.3183099 + vec2(0.71, 0.133));
         return -1.0 + 2.0 * fract(p.x * p.y * (p.x + p.y));
