@@ -33,7 +33,7 @@ const fragmentShader = /* glsl */ `
         vec3 normal = normalize(vNormal);
         vec3 viewDir = normalize(cameraPosition - vPosition);
 
-        // Hemi lioght
+        // Hemi light
         vec3 skyColor = vec3(0.0, 0.3, 0.6);
         vec3 groundColor = vec3(0.6, 0.3, 0.1);
 

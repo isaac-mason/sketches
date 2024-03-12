@@ -44,7 +44,7 @@ const fragmentShader = /* glsl */ `
         // Ambient
         vec3 ambient = vec3(0.2);
 
-        // Hemi lioght
+        // Hemi light
         vec3 skyColor = vec3(0.0, 0.3, 0.6);
         vec3 groundColor = vec3(0.6, 0.3, 0.1);
 

@@ -326,6 +326,16 @@ const sketchList = [
         path: 'glsl-shaders-from-scratch/toon-shading',
         tags: ['shaders-from-scratch', 'shaders', 'toon', 'shading'],
     },
+    {
+        title: 'GLSL Shaders From Scratch - Vertex Shaders - Pop In',
+        path: 'glsl-shaders-from-scratch/vertex-shaders/pop-in',
+        tags: ['shaders-from-scratch', 'shaders', 'vertex-shader', 'pop-in'],
+    },
+    {
+        title: 'GLSL Shaders From Scratch - Vertex Shaders - Warped Sphere',
+        path: 'glsl-shaders-from-scratch/vertex-shaders/warped-sphere',
+        tags: ['shaders-from-scratch', 'shaders', 'vertex-shader', 'warped-sphere'],
+    },
     /* Three.js Journey */
     {
         title: 'Journey Lesson 3 - Basic',
