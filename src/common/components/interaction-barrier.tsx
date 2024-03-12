@@ -9,11 +9,11 @@ const FullscreenLayout = styled.div`
     width: 100%;
 `
 
-export type ClickToStartProps = {
+export type InteractionBarrierProps = {
     children: React.ReactNode
 }
 
-export const InteractionBarrier = ({ children }: ClickToStartProps) => {
+export const InteractionBarrier = ({ children }: InteractionBarrierProps) => {
     const [clicked, setClicked] = useState(false)
     const onClick = () => setClicked(true)
 
