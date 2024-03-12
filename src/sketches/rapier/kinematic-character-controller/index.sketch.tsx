@@ -6,7 +6,7 @@ import { useControls as useLevaControls } from 'leva'
 import { RefObject, useEffect, useMemo, useRef } from 'react'
 import styled from 'styled-components'
 import { Group, MathUtils, PerspectiveCamera, Vector3 } from 'three'
-import { Canvas, useLoadingAssets, usePageVisible } from '../../../common'
+import { Canvas, useLoadingAssets, usePageVisible } from '@/common'
 import { GameLevel, Shield, Sword } from './models'
 
 const LEVA_KEY = 'rapier-kinematic-character-controller'

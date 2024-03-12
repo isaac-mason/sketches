@@ -1,6 +1,6 @@
 import { OrthographicCamera } from '@react-three/drei'
-import { Canvas } from '../../../../common'
-import { useResolution } from '../../../../common/hooks/use-resolution'
+import { Canvas } from '@/common'
+import { useResolution } from '@/common/hooks/use-resolution'
 
 const vertexShader = /* glsl */ `
 varying vec2 vUvs;

@@ -4,7 +4,7 @@ import { useControls } from 'leva'
 import { useEffect, useRef } from 'react'
 import { Vector3 } from 'three'
 import { create } from 'zustand'
-import { Canvas, usePageVisible } from '../../../common'
+import { Canvas, usePageVisible } from '@/common'
 import { Spring } from './spring'
 
 const LEVA_KEY = 'rapier-custom-spring'

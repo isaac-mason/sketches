@@ -4,7 +4,7 @@ import { Bloom, EffectComposer } from '@react-three/postprocessing'
 import { With, World } from 'arancini'
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
-import { Canvas, useConst, useInterval } from '../../../common'
+import { Canvas, useConst, useInterval } from '@/common'
 
 const _vector3 = new THREE.Vector3()
 const _emptyMatrix4 = new THREE.Matrix4()

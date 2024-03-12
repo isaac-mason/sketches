@@ -5,7 +5,7 @@ import { Physics, RigidBody, useRapier } from '@react-three/rapier'
 import { useControls as useLevaControls } from 'leva'
 import { useState } from 'react'
 import { Vector3 } from 'three'
-import { Canvas } from '../../../common'
+import { Canvas } from '@/common'
 
 const Shapes = {
     TORUS: 'TORUS',

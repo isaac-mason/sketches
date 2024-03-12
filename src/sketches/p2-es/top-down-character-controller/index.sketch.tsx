@@ -5,7 +5,7 @@ import { createReactAPI } from 'arancini/react'
 import * as p2 from 'p2-es'
 import { useMemo } from 'react'
 import * as THREE from 'three'
-import { Canvas, ExcludeFromCameraCollision, Instructions, ThirdPersonControls } from '../../../common'
+import { Canvas, ExcludeFromCameraCollision, Instructions, ThirdPersonControls } from '@/common'
 import { Duck } from './duck'
 
 const _vector3 = new THREE.Vector3()

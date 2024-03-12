@@ -11,8 +11,8 @@ import {
 import { useControls } from 'leva'
 import { useEffect, useRef, useState } from 'react'
 import { Mesh, Quaternion, Raycaster, Vector3 } from 'three'
-import { Canvas, usePageVisible } from '../../../common'
-import { getQueryParamOrDefault } from '../../../common/utils/url-query-param'
+import { Canvas, usePageVisible } from '@/common'
+import { getQueryParamOrDefault } from '@/common/utils/url-query-param'
 
 const LEVA_KEY = 'rapier-pointer-constraint'
 

@@ -1,7 +1,7 @@
 import suziGlbUrl from '@pmndrs/assets/models/suzi.glb'
 import { OrbitControls, PerspectiveCamera, useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
-import { Canvas } from '../../../common'
+import { Canvas } from '@/common'
 
 const vertexShader = /* glsl */ `
     varying vec3 vNormal;

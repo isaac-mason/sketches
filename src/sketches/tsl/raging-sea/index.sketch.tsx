@@ -11,8 +11,8 @@ import {
     vec3,
     vec4,
 } from 'three/examples/jsm/nodes/Nodes.js'
-import { WebGPUCanvas } from '../../../common'
-import { perlinNoise3d } from '../../../common/tsl/noise/perlinNoise3d'
+import { WebGPUCanvas } from '@/common'
+import { perlinNoise3d } from '@/common/tsl/noise/perlinNoise3d'
 
 const waterMaterial = new MeshBasicNodeMaterial()
 

@@ -7,7 +7,7 @@ import { button, useControls } from 'leva'
 import * as p2 from 'p2-es'
 import { ReactNode, useMemo, useState } from 'react'
 import * as THREE from 'three'
-import { Canvas } from '../../../common'
+import { Canvas } from '@/common'
 import { createTextShape } from './font'
 
 type EntityType = {

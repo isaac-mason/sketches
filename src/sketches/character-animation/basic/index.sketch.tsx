@@ -2,7 +2,7 @@ import cityEnvironment from '@pmndrs/assets/hdri/city.exr'
 import { Environment, OrbitControls, useAnimations, useGLTF } from '@react-three/drei'
 import { useEffect, useState } from 'react'
 import { LoopRepeat } from 'three'
-import { Canvas } from '../../../common'
+import { Canvas } from '@/common'
 import characterGltfUrl from './guard.glb?url'
 
 const ANIMATION_NAMES = ['Idle', 'Walk', 'Run', 'Attack', 'Dance', 'Death']

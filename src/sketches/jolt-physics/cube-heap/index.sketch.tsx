@@ -4,7 +4,7 @@ import { World } from 'arancini'
 import { createReactAPI } from 'arancini/react'
 import Jolt from 'jolt-physics'
 import { useRef } from 'react'
-import { Canvas, useInterval } from '../../../common'
+import { Canvas, useInterval } from '@/common'
 import { Physics, RigidBody, useJolt } from '../jolt-react-api'
 
 const world = new World<{

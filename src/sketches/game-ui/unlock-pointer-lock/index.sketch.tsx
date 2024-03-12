@@ -3,7 +3,7 @@ import { PerspectiveCamera, PointerLockControls, Text } from '@react-three/drei'
 import { Canvas, ThreeElements } from '@react-three/fiber'
 import { useEffect, useRef, useState } from 'react'
 import { PointerLockControls as PointerLockControlsImpl } from 'three-stdlib'
-import { Crosshair, Instructions } from '../../../common'
+import { Crosshair, Instructions } from '@/common'
 
 const Controls = () => {
     const controls = useRef<PointerLockControlsImpl | null>(null!)

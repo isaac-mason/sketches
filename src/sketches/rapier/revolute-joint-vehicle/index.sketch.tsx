@@ -6,7 +6,7 @@ import { useControls } from 'leva'
 import React, { RefObject, createRef, useEffect, useMemo, useRef } from 'react'
 import styled from 'styled-components'
 import { Quaternion, Vector3, Vector3Tuple, Vector4Tuple } from 'three'
-import { Canvas, usePageVisible } from '../../../common'
+import { Canvas, usePageVisible } from '@/common'
 
 const LEVA_KEY = 'rapier-revolute-joint-vehicle'
 

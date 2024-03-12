@@ -9,7 +9,7 @@ import { LEVA_KEY } from '../constants'
 import { RapierRaycastVehicle, WheelOptions } from '../lib/rapier-raycast-vehicle'
 
 import wheelGlbUrl from '../assets/wheel-draco.glb?url'
-import { Helper } from '../../../../common'
+import { Helper } from '@/common'
 
 type WheelGLTF = GLTF & {
     nodes: {

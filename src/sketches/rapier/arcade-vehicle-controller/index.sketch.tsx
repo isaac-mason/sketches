@@ -4,7 +4,7 @@ import { BallCollider, Physics, RapierRigidBody, RigidBody } from '@react-three/
 import { useControls } from 'leva'
 import { useRef } from 'react'
 import * as THREE from 'three'
-import { Canvas } from '../../../common'
+import { Canvas } from '@/common'
 
 type KeyControls = {
     accelerate: boolean

@@ -5,8 +5,8 @@ import { Bloom, EffectComposer } from '@react-three/postprocessing'
 import { easing } from 'maath'
 import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
-import { Canvas, useMutableCallback, usePageVisible } from '../../common'
-import { FixedTimeStep } from '../../common/utils/fixed-time-step'
+import { Canvas, useMutableCallback, usePageVisible } from '@/common'
+import { FixedTimeStep } from '@/common/utils/fixed-time-step'
 
 const gameOfLifeStep = (current: Uint8Array, next: Uint8Array, width: number, height: number) => {
     for (let y = 1; y < height - 1; y++) {

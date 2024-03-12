@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { useControls } from 'leva'
 import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
-import { Canvas } from '../../../common'
+import { Canvas } from '@/common'
 import plantImageUrl from './plant.png?url'
 
 const vertexShader = /* glsl */ `

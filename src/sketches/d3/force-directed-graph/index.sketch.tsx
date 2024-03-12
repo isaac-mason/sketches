@@ -1,6 +1,6 @@
 import { Html, OrbitControls } from '@react-three/drei'
 import { ReactNode } from 'react'
-import { Canvas } from '../../../common'
+import { Canvas } from '@/common'
 
 import { Link, Network, Node } from './network'
 

@@ -1,6 +1,6 @@
 import { Bounds, Edges, Float, MeshPortalMaterial, OrbitControls, Text } from '@react-three/drei'
 import { ThreeElements } from '@react-three/fiber'
-import { Canvas } from '../../../common'
+import { Canvas } from '@/common'
 
 const Label = ({ children }: { children: string }) => (
     <Text color="white" position={[0, -2.6, 0]} fontSize={0.4}>

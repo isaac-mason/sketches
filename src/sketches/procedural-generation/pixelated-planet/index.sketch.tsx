@@ -4,7 +4,7 @@ import { button, useControls } from 'leva'
 import { useMemo, useState } from 'react'
 import { createNoise3D } from 'simplex-noise'
 import * as THREE from 'three'
-import { Canvas } from '../../../common'
+import { Canvas } from '@/common'
 import { useThree } from '@react-three/fiber'
 
 type PlanetLayer = {

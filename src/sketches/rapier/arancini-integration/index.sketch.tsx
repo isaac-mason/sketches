@@ -4,7 +4,7 @@ import { Physics, RapierRigidBody, RigidBody, quat, vec3 } from '@react-three/ra
 import { World } from 'arancini'
 import { createReactAPI } from 'arancini/react'
 import { useRef } from 'react'
-import { Canvas, usePageVisible } from '../../../common'
+import { Canvas, usePageVisible } from '@/common'
 
 type EntityType = {
     rigidBody?: RapierRigidBody

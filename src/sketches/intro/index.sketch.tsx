@@ -2,7 +2,7 @@ import { Html } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
 import { Group } from 'three'
-import { Canvas } from '../../common'
+import { Canvas } from '@/common'
 import { SketchOptions } from '../types'
 
 const Home = () => {

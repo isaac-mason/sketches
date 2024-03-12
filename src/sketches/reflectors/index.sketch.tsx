@@ -5,7 +5,7 @@ import { easing } from 'maath'
 import { useMemo } from 'react'
 import * as THREE from 'three'
 import { MeshStandardNodeMaterial, reflector } from 'three/examples/jsm/nodes/Nodes.js'
-import { WebGPUCanvas } from '../../common'
+import { WebGPUCanvas } from '@/common'
 
 const Mirror = (props: ThreeElements['group'] & { size: THREE.Vector2Tuple }) => {
     const mirror = useMemo(() => {

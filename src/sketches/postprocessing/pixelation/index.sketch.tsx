@@ -4,7 +4,7 @@ import { useControls } from 'leva'
 import { useEffect, useMemo, useRef } from 'react'
 import { Group, OrthographicCamera, Quaternion, Vector2, Vector3 } from 'three'
 import { EffectComposer, RenderPixelatedPass } from 'three/addons'
-import { Canvas } from '../../../common'
+import { Canvas } from '@/common'
 
 // https://threejs.org/examples/#webgl_postprocessing_pixel
 function pixelAlignFrustum(

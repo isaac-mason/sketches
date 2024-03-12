@@ -1,7 +1,7 @@
 import { OrbitControls } from '@react-three/drei'
 import { Physics, RapierRigidBody, RigidBody, Vector3Tuple } from '@react-three/rapier'
 import { useControls } from 'leva'
-import { Canvas, usePageVisible } from '../../../common'
+import { Canvas, usePageVisible } from '@/common'
 import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Euler, Quaternion } from 'three'

@@ -1,8 +1,8 @@
+import { Canvas } from '@/common'
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
 import * as THREE from 'three'
-import { Canvas } from '../../../../common'
 
 const remap = /* glsl */ `
 float inverseLerp(float v, float minValue, float maxValue) {

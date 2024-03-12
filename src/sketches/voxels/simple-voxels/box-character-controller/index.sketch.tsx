@@ -4,7 +4,7 @@ import { useControls } from 'leva'
 import { useEffect, useMemo } from 'react'
 import { styled } from 'styled-components'
 import { Color, PerspectiveCamera, Vector3 } from 'three'
-import { Canvas } from '../../../../common'
+import { Canvas } from '@/common'
 import {
     BoxCharacterController,
     BoxCharacterControllerCameraMode,

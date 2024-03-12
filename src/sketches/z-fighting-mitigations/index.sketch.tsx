@@ -2,8 +2,8 @@ import { CameraShake, OrbitControls, PerspectiveCamera } from '@react-three/drei
 import { ThreeElements, useFrame } from '@react-three/fiber'
 import { useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
-import { Canvas } from '../../common'
-import { useButtonGroupControls } from '../../common/hooks/use-button-group-controls'
+import { Canvas } from '@/common'
+import { useButtonGroupControls } from '@/common/hooks/use-button-group-controls'
 import { SketchOptions } from '../types'
 
 const PlanesZFighting = (props: ThreeElements['group']) => {

@@ -5,7 +5,7 @@ import { useControls } from 'leva'
 import { useMemo, useRef } from 'react'
 import { createNoise2D } from 'simplex-noise'
 import * as THREE from 'three'
-import { Canvas } from '../../../common'
+import { Canvas } from '@/common'
 import cloudUrl from './cloud.jpg?url'
 import grassBladeAlphaUrl from './grass-blade-alpha.jpg?url'
 

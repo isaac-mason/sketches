@@ -2,7 +2,7 @@ import { Grid, OrbitControls, useTexture } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
 import { useRef } from 'react'
 import { Mesh, NearestFilter } from 'three'
-import { Canvas } from '../../../common'
+import { Canvas } from '@/common'
 import playerUrl from './sprite.png'
 
 const Sprite = () => {

@@ -6,7 +6,7 @@ import { createReactAPI } from 'arancini/react'
 import { useControls } from 'leva'
 import { CrowdAgent, Vector3, vec3 } from 'recast-navigation'
 import { Object3D } from 'three'
-import { Canvas } from '../../../common'
+import { Canvas } from '@/common'
 import { AI, Agent, Traversable } from './recast-react-api'
 
 const targets = [

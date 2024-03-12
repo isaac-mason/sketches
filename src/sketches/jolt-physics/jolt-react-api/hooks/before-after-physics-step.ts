@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useMutableCallback } from '../../../../common'
+import { useMutableCallback } from '@/common'
 import { useECS } from '../context'
 import { JoltEntity } from '../ecs'
 

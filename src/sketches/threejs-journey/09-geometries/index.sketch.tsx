@@ -1,6 +1,6 @@
 import { OrbitControls } from '@react-three/drei'
 import { Box, Flex } from '@react-three/flex'
-import { Canvas } from '../../../common'
+import { Canvas } from '@/common'
 
 const padding = 1
 const color = '#ff8888'

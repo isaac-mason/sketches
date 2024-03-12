@@ -6,7 +6,7 @@ import { Executor, System } from 'arancini/systems'
 import * as p2 from 'p2-es'
 import { useMemo } from 'react'
 import * as THREE from 'three'
-import { Canvas } from '../../../common'
+import { Canvas } from '@/common'
 
 const defaultMaterial = new p2.Material()
 

@@ -16,6 +16,10 @@
         "noEmit": true,
         "jsx": "react-jsx",
         "experimentalDecorators": true,
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["src/*"]
+        }
     },
     "include": ["src"],
     "references": [{ "path": "./tsconfig.node.json" }]

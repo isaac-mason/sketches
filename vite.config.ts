@@ -3,6 +3,7 @@ import { defineConfig } from 'vite'
 import { imagetools } from 'vite-imagetools'
 import { createHtmlPlugin } from 'vite-plugin-html'
 import basicSsl from '@vitejs/plugin-basic-ssl'
+import * as path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig(() => {
@@ -82,6 +83,11 @@ export default defineConfig(() => {
         },
         build: {
             target: 'esnext',
+        },
+        resolve: {
+            alias: {
+                '@': path.resolve(__dirname, './src'),
+            }
         },
     }
 })

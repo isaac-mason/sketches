@@ -1,5 +1,5 @@
 import { Controllers, Hands, VRButton, XR } from '@react-three/xr'
-import { Canvas } from '../../../common'
+import { Canvas } from '@/common'
 
 export default () => (
     <>

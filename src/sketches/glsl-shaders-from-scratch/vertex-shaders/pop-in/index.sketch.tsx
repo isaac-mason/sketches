@@ -1,9 +1,9 @@
+import { Canvas } from '@/common'
 import suziGlbUrl from '@pmndrs/assets/models/suzi.glb'
 import { OrbitControls, useGLTF } from '@react-three/drei'
-import * as THREE from 'three'
-import { Canvas } from '../../../../common'
-import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
+import { useRef } from 'react'
+import * as THREE from 'three'
 
 const vertexShader = /* glsl */ `
     varying vec3 vPosition;

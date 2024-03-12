@@ -1,7 +1,7 @@
 import { Effects, OrbitControls } from '@react-three/drei'
 import { Object3DNode, extend } from '@react-three/fiber'
 import { UnrealBloomPass } from 'three/addons'
-import { Canvas } from '../../../common'
+import { Canvas } from '@/common'
 
 extend({ UnrealBloomPass })
 

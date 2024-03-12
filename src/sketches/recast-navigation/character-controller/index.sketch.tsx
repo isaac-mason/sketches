@@ -10,7 +10,7 @@ import { NavMesh, NavMeshQuery, init as initRecast } from 'recast-navigation'
 import { NavMeshHelper, threeToSoloNavMesh } from 'recast-navigation/three'
 import { suspend } from 'suspend-react'
 import * as THREE from 'three'
-import { Canvas } from '../../../common'
+import { Canvas } from '@/common'
 import characterGltfUrl from './character.glb?url'
 import levelGlbUrl from './game-level-transformed.glb?url'
 

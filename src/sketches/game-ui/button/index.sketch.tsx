@@ -2,7 +2,7 @@ import { animated, useSpring } from '@react-spring/three'
 import { PointerLockControls, Text } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
 import { useRef, useState } from 'react'
-import { Crosshair } from '../../../common'
+import { Crosshair } from '@/common'
 
 const Button = () => {
     const [clicked, setClicked] = useState(false)
