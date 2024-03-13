@@ -15,6 +15,12 @@ const sketchList = [
         path: 'game-of-life',
         tags: ['game-of-life', 'cellular-automata'],
     },
+    /* Sticky Notes */
+    {
+        title: 'Sticky Notes',
+        path: 'sticky-notes',
+        tags: ['sticky-notes', 'ui', 'html'],
+    },
     /* Recast Navigation */
     {
         title: 'Recast Navigation - Busy Street Crossing',

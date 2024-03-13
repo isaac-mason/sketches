@@ -2615,7 +2615,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@use-gesture/react@npm:^10.2.24, @use-gesture/react@npm:^10.2.5":
+"@use-gesture/react@npm:^10.2.24, @use-gesture/react@npm:^10.2.5, @use-gesture/react@npm:^10.3.0":
   version: 10.3.0
   resolution: "@use-gesture/react@npm:10.3.0"
   dependencies:
@@ -6586,6 +6586,7 @@ __metadata:
     "@types/react": "npm:^18.2.55"
     "@types/react-dom": "npm:^18.2.20"
     "@types/three": "npm:^0.162.0"
+    "@use-gesture/react": "npm:^10.3.0"
     "@vitejs/plugin-basic-ssl": "npm:^1.1.0"
     "@vitejs/plugin-react": "npm:^4.2.1"
     arancini: "npm:^6.5.0"
