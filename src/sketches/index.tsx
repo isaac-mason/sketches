@@ -147,6 +147,12 @@ const sketchList = [
         path: 'p2-es/pixelated-text',
         tags: ['physics', 'p2-es', 'text', 'arancini'],
     },
+    /* Raytracing */
+    {
+        title: 'Raytracing - Hello World',
+        path: 'raytracing/hello-world',
+        tags: ['raytracing'],
+    },
     /* Particles */
     {
         title: 'Particles - Instanced Particles',
