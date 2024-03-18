@@ -32,6 +32,11 @@ const sketchList = [
         path: 'recast-navigation/character-controller',
         tags: ['recast-navigation', 'controller', 'arancini'],
     },
+    {
+        title: 'Recast Navigation - Follower',
+        path: 'recast-navigation/follower',
+        tags: ['recast-navigation', 'navmesh', 'follower', 'arancini'],
+    },
     /* Voxels */
     {
         title: 'Simple Voxels - Sphere',
@@ -72,17 +77,17 @@ const sketchList = [
     {
         title: 'Rapier - Revolute Joint Vehicle',
         path: 'rapier/revolute-joint-vehicle',
-        tags: ['physics', 'rapier', 'vehicle', 'car','controller'],
+        tags: ['physics', 'rapier', 'vehicle', 'car', 'controller'],
     },
     {
         title: 'Rapier - Dynamic Raycast Vehicle',
         path: 'rapier/dynamic-raycast-vehicle-controller',
-        tags: ['physics', 'rapier', 'vehicle', 'car','controller'],
+        tags: ['physics', 'rapier', 'vehicle', 'car', 'controller'],
     },
     {
         title: 'Rapier - Arcade Vehicle',
         path: 'rapier/arcade-vehicle-controller',
-        tags: ['physics', 'rapier', 'vehicle', 'car','controller'],
+        tags: ['physics', 'rapier', 'vehicle', 'car', 'controller'],
         hidden: true,
     },
     {
@@ -169,7 +174,7 @@ const sketchList = [
         title: 'Game UI - Unlock Pointer Lock',
         path: 'game-ui/unlock-pointer-lock',
         tags: ['game-ui', 'pointer-lock'],
-    }, 
+    },
     /* Sound */
     {
         title: 'Sound - Spatial',

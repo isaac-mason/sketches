@@ -1,0 +1,1 @@
+export const SKETCH = 'recast-navigation-dynamic-navmesh'
