@@ -1,10 +1,11 @@
 import { useConst, useInterval } from '@/common'
-import { useFrame, useThree } from '@react-three/fiber'
+import { useFrame } from '@react-three/fiber'
+import { useRapier } from '@react-three/rapier'
 import { useEffect, useRef, useState } from 'react'
 import { NavMesh, NavMeshQuery, RecastConfig, importNavMesh, init } from 'recast-navigation'
 import { NavMeshHelper, getPositionsAndIndices } from 'recast-navigation/three'
 import * as THREE from 'three'
-import { Entity, NavComponent, navQuery } from '../ecs'
+import { Entity, NavComponent, navQuery, traversableQuery } from '../ecs'
 import NavMeshGeneratorWorker from './navmesh-generator.worker?worker'
 
 await init()
@@ -13,35 +14,28 @@ export type TraversableProps = {
     children: React.ReactNode
 }
 
-export const Traversable = ({ children }: TraversableProps) => {
-    return <group userData={{ traversable: true }}>{children}</group>
-}
+export const getTraversableMeshes = () => {
+    const traversable = traversableQuery.entities.map((e) => e.three)
 
-export const getTraversableMeshes = (scene: THREE.Scene) => {
-    const traversableMeshes: Set<THREE.Mesh> = new Set()
+    const traversableMeshes = new Set<THREE.Mesh>()
 
-    const traverse = (obj: THREE.Object3D, parentIsTraversable = false) => {
-        if (parentIsTraversable) {
-            if (obj instanceof THREE.Mesh) {
-                traversableMeshes.add(obj)
+    for (const obj of traversable) {
+        obj?.traverse((child) => {
+            if (child instanceof THREE.Mesh) {
+                traversableMeshes.add(child)
             }
-        }
-
-        obj.children.forEach((child) => {
-            const isTraversable = (child as any).userData?.traversable
-            traverse(child, parentIsTraversable || isTraversable)
         })
     }
-
-    traverse(scene)
 
     return Array.from(traversableMeshes)
 }
 
 export const NavMeshGenerator = () => {
-    const scene = useThree((s) => s.scene)
+    const { rapier } = useRapier()
+
     const navMeshWorker = useRef<InstanceType<typeof NavMeshGeneratorWorker>>()
     const inProgress = useRef(false)
+    const first = useRef(true)
 
     const nav = useConst<NavComponent>(() => ({
         navMesh: undefined,
@@ -64,6 +58,8 @@ export const NavMeshGenerator = () => {
 
             prev.navMesh?.destroy()
             prev.navMeshQuery?.destroy()
+
+            first.current = false
         }
 
         navMeshWorker.current = worker
@@ -79,7 +75,16 @@ export const NavMeshGenerator = () => {
     useInterval(() => {
         if (inProgress.current) return
 
-        const traversableMeshes = getTraversableMeshes(scene)
+        if (!first.current) {
+            const dynamicRigidBodiesSleepStates = traversableQuery.entities
+                .filter((e) => e.rigidBody)
+                .filter((e) => e.rigidBody!.bodyType() === rapier.RigidBodyType.Dynamic)
+                .map(({ rigidBody }) => rigidBody!.isSleeping())
+
+            if (dynamicRigidBodiesSleepStates.length === 0 || dynamicRigidBodiesSleepStates.every((x) => x)) return
+        }
+
+        const traversableMeshes = getTraversableMeshes()
 
         // filter out meshes outside of some bounds
         const bounds = new THREE.Box3()
@@ -130,24 +135,23 @@ export const NavMeshDebug = () => {
 
         const navMesh = nav.nav.navMesh
 
-        if (!prevNavMesh.current) {
-            prevNavMesh.current = navMesh
-        }
-
         if (navMesh !== prevNavMesh.current) {
             prevNavMesh.current = navMesh
 
             const helper = new NavMeshHelper({
                 navMesh,
                 navMeshMaterial: new THREE.MeshStandardMaterial({
-                    color: 'orange',
+                    color: 'lightblue',
                     opacity: 0.3,
                     transparent: true,
                     depthWrite: false,
                 }),
             })
+
             setHelper(helper)
         }
+
+        prevNavMesh.current = navMesh
     })
 
     return <>{helper && <primitive object={helper} />}</>

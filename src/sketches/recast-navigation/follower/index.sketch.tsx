@@ -8,46 +8,55 @@ import { useEffect, useState } from 'react'
 import * as THREE from 'three'
 import { Agent } from './agent/agent'
 import { SKETCH } from './const'
-import { NavMeshDebug, NavMeshGenerator, Traversable, getTraversableMeshes } from './navmesh/navmesh'
+import { Component, Entity } from './ecs'
+import { NavMeshDebug, NavMeshGenerator, getTraversableMeshes } from './navmesh/navmesh'
 import { Player, PlayerControls } from './player'
 
 const Scene = () => {
     return (
         <>
-            <RigidBody type="fixed" position={[0, -1, 0]}>
-                <Traversable>
-                    <mesh rotation={[-Math.PI / 2, 0, 0]}>
-                        <planeGeometry args={[50, 50]} />
-                        <MeshReflectorMaterial
-                            mirror={0}
-                            blur={[300, 30]}
-                            resolution={1024}
-                            mixBlur={1}
-                            mixStrength={80}
-                            roughness={0.8}
-                            depthScale={0.5}
-                            minDepthThreshold={0.4}
-                            maxDepthThreshold={1.4}
-                            color="#111"
-                            metalness={0.2}
-                        />
-                    </mesh>
-                </Traversable>
-            </RigidBody>
+            <Entity traversable>
+                <Component name="rigidBody">
+                    <RigidBody type="fixed" position={[0, -1, 0]}>
+                        <Component name="three">
+                            <mesh rotation={[-Math.PI / 2, 0, 0]}>
+                                <planeGeometry args={[50, 50]} />
+                                <MeshReflectorMaterial
+                                    mirror={0}
+                                    blur={[300, 30]}
+                                    resolution={1024}
+                                    mixBlur={1}
+                                    mixStrength={80}
+                                    roughness={0.8}
+                                    depthScale={0.5}
+                                    minDepthThreshold={0.4}
+                                    maxDepthThreshold={1.4}
+                                    color="#111"
+                                    metalness={0.2}
+                                />
+                            </mesh>
+                        </Component>
+                    </RigidBody>
+                </Component>
+            </Entity>
         </>
     )
 }
 
 const Box = (props: RigidBodyProps) => {
     return (
-        <RigidBody {...props}>
-            <Traversable>
-                <mesh>
-                    <boxGeometry args={[1, 1, 1]} />
-                    <meshStandardMaterial color="hotpink" />
-                </mesh>
-            </Traversable>
-        </RigidBody>
+        <Entity traversable>
+            <Component name="rigidBody">
+                <RigidBody {...props}>
+                    <Component name="three">
+                        <mesh>
+                            <boxGeometry args={[1, 1, 1]} />
+                            <meshStandardMaterial color="hotpink" />
+                        </mesh>
+                    </Component>
+                </RigidBody>
+            </Component>
+        </Entity>
     )
 }
 
@@ -63,7 +72,7 @@ const BoxTool = () => {
 
         const raycaster = new THREE.Raycaster(camera.position, camera.getWorldDirection(new THREE.Vector3()).normalize())
 
-        const traversableMeshes = getTraversableMeshes(scene)
+        const traversableMeshes = getTraversableMeshes()
         const intersects = raycaster.intersectObjects(traversableMeshes, true)
 
         if (intersects.length > 0) {
@@ -94,7 +103,7 @@ export default function Sketch() {
 
     const { physicsDebug, navMeshDebug } = useControls(`${SKETCH}-physics`, {
         physicsDebug: false,
-        navMeshDebug: false,
+        navMeshDebug: true,
     })
 
     return (
@@ -110,9 +119,10 @@ export default function Sketch() {
                     <Scene />
 
                     <BoxTool />
+                    
+                    <NavMeshGenerator />
                 </Physics>
 
-                <NavMeshGenerator />
                 {navMeshDebug && <NavMeshDebug />}
 
                 <Environment files={cityEnvironment} />
