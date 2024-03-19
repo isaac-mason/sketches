@@ -1,3 +1,4 @@
+import { Canvas } from '@/common'
 import cityEnvironment from '@pmndrs/assets/hdri/city.exr'
 import { Environment, OrbitControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
@@ -6,8 +7,7 @@ import { createReactAPI } from 'arancini/react'
 import { useControls } from 'leva'
 import { CrowdAgent, Vector3, vec3 } from 'recast-navigation'
 import { Object3D } from 'three'
-import { Canvas } from '@/common'
-import { AI, Agent, Traversable } from './recast-react-api'
+import { Agent, Navigation, Traversable } from './recast-react-api'
 
 const targets = [
     // top left
@@ -79,7 +79,7 @@ const App = () => {
 
     return (
         <>
-            <AI debug={debugNavMesh} generatorConfig={{ walkableRadius: 2 }}>
+            <Navigation debug={debugNavMesh} generatorConfig={{ walkableRadius: 2 }}>
                 {/* create some agents */}
                 {Array.from({ length: 200 }).map((_, idx) => (
                     <Entity key={idx}>
@@ -124,7 +124,7 @@ const App = () => {
                         <boxGeometry args={[30, 40, 30]} />
                     </mesh>
                 </Traversable>
-            </AI>
+            </Navigation>
 
             {/* render agents */}
             <Entities in={queries.agents}>

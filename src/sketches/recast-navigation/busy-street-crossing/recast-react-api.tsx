@@ -17,23 +17,23 @@ import { Group, Mesh, MeshStandardMaterial, Vector3Tuple } from 'three'
 
 await init()
 
-type AIContextType = {
+type NavigationContextType = {
     navMesh: NavMesh | undefined
     crowd: Crowd | undefined
     active: { current: boolean }
 }
 
-const aiContext = createContext<AIContextType>(null!)
+const navigationContext = createContext<NavigationContextType>(null!)
 
-export const useAI = () => useContext(aiContext)
+export const useNavigation = () => useContext(navigationContext)
 
-export type AIProps = {
+export type NavigationProps = {
     children: ReactNode
     debug?: boolean
     generatorConfig?: Partial<SoloNavMeshGeneratorConfig>
 }
 
-export const AI = ({ children, debug, generatorConfig }: AIProps) => {
+export const Navigation = ({ children, debug, generatorConfig }: NavigationProps) => {
     const active = useRef(false)
 
     const [navMesh, setNavMesh] = useState<NavMesh | undefined>()
@@ -108,10 +108,10 @@ export const AI = ({ children, debug, generatorConfig }: AIProps) => {
     }
 
     return (
-        <aiContext.Provider value={context}>
+        <navigationContext.Provider value={context}>
             <group ref={group}>{children}</group>
             {navMeshHelper && <primitive object={navMeshHelper} />}
-        </aiContext.Provider>
+        </navigationContext.Provider>
     )
 }
 
@@ -124,7 +124,7 @@ export type AgentProps = {
 } & Partial<CrowdAgentParams>
 
 export const Agent = forwardRef<CrowdAgent | undefined, AgentProps>(({ initialPosition, ...crowdAgentParams }, ref) => {
-    const { navMesh, crowd, active } = useAI()
+    const { navMesh, crowd, active } = useNavigation()
 
     const [agent, setAgent] = useState<CrowdAgent | undefined>()
 
