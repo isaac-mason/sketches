@@ -19,13 +19,13 @@ const process = () => {
     self.postMessage({ navMeshExport })
 }
 
-await init()
-
-ready = true
-process()
-
 self.onmessage = (msg) => {
     message = msg.data
 
     if (ready) process()
 }
+
+init().then(() => {
+    ready = true
+    process()
+})
