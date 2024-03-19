@@ -24,7 +24,7 @@
         "@react-three/xr": "^5.7.1",
         "@use-gesture/react": "^10.3.0",
         "arancini": "^6.5.0",
-        "d3": "^7.8.5",
+        "d3": "^7.9.0",
         "jolt-physics": "^0.19.0",
         "leva": "^0.9.35",
         "meshline": "3.1.6",
