@@ -51,7 +51,7 @@ waterMaterial.colorNode = waterColor
 
 export default function Sketch() {
     return (
-        <WebGPUCanvas webglFallback={false}>
+        <WebGPUCanvas>
             <mesh rotation-x={-Math.PI / 2}>
                 <planeGeometry args={[4, 4, 512, 512]} />
                 <primitive object={waterMaterial} />
