@@ -46,9 +46,9 @@ export class DynamicTiledNavMesh {
         const navMeshBounds: [min: Vector3Tuple, max: Vector3Tuple] = [navMeshBoundsMin.toArray(), navMeshBoundsMax.toArray()]
         const navMeshOrigin = props.navMeshBounds.min
 
-        this.navMeshBounds = navMeshBounds
         this.navMeshBoundsMin = navMeshBoundsMin
         this.navMeshBoundsMax = navMeshBoundsMax
+        this.navMeshBounds = navMeshBounds
         this.navMeshOrigin = navMeshOrigin
 
         const recastConfig = {

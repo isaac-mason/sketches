@@ -143,7 +143,7 @@ export default function Sketch() {
     return (
         <>
             <Canvas>
-                <Physics paused={loading} debug={physicsDebug} colliders={false}>
+                <Physics paused={loading} debug={physicsDebug}>
                     <Navigation />
 
                     <Scene />
