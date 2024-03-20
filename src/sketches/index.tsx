@@ -277,6 +277,12 @@ const sketchList = [
         title: 'z-fighting mitigations',
         path: 'z-fighting-mitigations',
     },
+    /* Tris In Box */
+    {
+        title: 'Tris In Box',
+        path: 'tris-in-box',
+        tags: ['tris', 'util'],
+    },
     /* GLSL Shaders From Scratch */
     {
         title: 'GLSL Shaders From Scratch - Intro - Varyings',
