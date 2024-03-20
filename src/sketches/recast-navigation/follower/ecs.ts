@@ -4,7 +4,7 @@ import { createReactAPI } from 'arancini/react'
 import { NavMesh, NavMeshQuery } from 'recast-navigation'
 import * as THREE from 'three'
 
-export type NavComponent = { navMesh?: NavMesh; navMeshQuery?: NavMeshQuery }
+export type NavComponent = { navMesh?: NavMesh; navMeshQuery?: NavMeshQuery; navMeshVersion: number }
 
 export type EntityType = {
     isPlayer?: true

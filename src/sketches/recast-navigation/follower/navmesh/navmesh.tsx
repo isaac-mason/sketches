@@ -2,17 +2,13 @@ import { useConst, useInterval } from '@/common'
 import { useFrame } from '@react-three/fiber'
 import { useRapier } from '@react-three/rapier'
 import { useEffect, useRef, useState } from 'react'
-import { NavMesh, NavMeshQuery, RecastConfig, importNavMesh, init } from 'recast-navigation'
+import { Arrays, NavMesh, NavMeshQuery, RecastConfig, init } from 'recast-navigation'
 import { NavMeshHelper, getPositionsAndIndices } from 'recast-navigation/three'
 import * as THREE from 'three'
 import { Entity, NavComponent, navQuery, traversableQuery } from '../ecs'
 import NavMeshGeneratorWorker from './navmesh-generator.worker?worker'
 
 await init()
-
-export type TraversableProps = {
-    children: React.ReactNode
-}
 
 export const getTraversableMeshes = () => {
     const traversable = traversableQuery.entities.map((e) => e.three)
@@ -40,25 +36,27 @@ export const NavMeshGenerator = () => {
     const nav = useConst<NavComponent>(() => ({
         navMesh: undefined,
         navMeshQuery: undefined,
+        navMeshVersion: 0,
     }))
 
     useEffect(() => {
+        const navMesh = new NavMesh()
+        const navMeshQuery = new NavMeshQuery({ navMesh })
+
+        nav.navMesh = navMesh
+        nav.navMeshQuery = navMeshQuery
+
         const worker = new NavMeshGeneratorWorker()
 
-        worker.onmessage = ({ data: { navMeshExport } }) => {
+        worker.onmessage = ({ data: { navMeshData: serialisedNavMeshData } }) => {
             inProgress.current = false
 
-            const prev = { ...nav }
+            const navMeshData = new Arrays.UnsignedCharArray()
+            navMeshData.copy(serialisedNavMeshData, serialisedNavMeshData.length)
 
-            const { navMesh } = importNavMesh(navMeshExport)
-            const navMeshQuery = new NavMeshQuery({ navMesh })
+            navMesh.initSolo(navMeshData)
 
-            nav.navMesh = navMesh
-            nav.navMeshQuery = navMeshQuery
-
-            prev.navMesh?.destroy()
-            prev.navMeshQuery?.destroy()
-
+            nav.navMeshVersion++
             first.current = false
         }
 
@@ -69,6 +67,8 @@ export const NavMeshGenerator = () => {
             navMeshWorker.current = undefined
             inProgress.current = false
             worker.terminate()
+            navMesh.destroy()
+            navMeshQuery.destroy()
         }
     }, [])
 
@@ -120,7 +120,7 @@ export const NavMeshGenerator = () => {
 
 export const NavMeshDebug = () => {
     const [helper, setHelper] = useState<NavMeshHelper>()
-    const prevNavMesh = useRef<NavMesh>()
+    const prevNavMeshVersion = useRef<number>(0)
 
     useFrame(() => {
         const nav = navQuery.first
@@ -134,9 +134,10 @@ export const NavMeshDebug = () => {
         }
 
         const navMesh = nav.nav.navMesh
+        const navMeshVersion = nav.nav.navMeshVersion
 
-        if (navMesh !== prevNavMesh.current) {
-            prevNavMesh.current = navMesh
+        if (navMeshVersion !== prevNavMeshVersion.current) {
+            prevNavMeshVersion.current = navMeshVersion
 
             const helper = new NavMeshHelper({
                 navMesh,
@@ -150,8 +151,6 @@ export const NavMeshDebug = () => {
 
             setHelper(helper)
         }
-
-        prevNavMesh.current = navMesh
     })
 
     return <>{helper && <primitive object={helper} />}</>

@@ -1,5 +1,5 @@
-import { RecastConfig, exportNavMesh, init } from 'recast-navigation'
-import { generateSoloNavMesh } from 'recast-navigation/generators'
+import { RecastConfig, init } from 'recast-navigation'
+import { createSoloNavMeshData } from './create-solo-nav-mesh-data'
 
 let ready = false
 
@@ -10,13 +10,16 @@ const process = () => {
 
     const { positions, indices, recastConfig } = message
 
-    const { success, navMesh } = generateSoloNavMesh(positions, indices, recastConfig)
+    const { success, navMeshData } = createSoloNavMeshData(positions, indices, recastConfig)
 
     if (!success) return
 
-    const navMeshExport = exportNavMesh(navMesh)
+    const ser = new Uint8Array(navMeshData.size)
+    for (let i = 0; i < navMeshData.size; i++) {
+        ser[i] = navMeshData.get(i)
+    }
 
-    self.postMessage({ navMeshExport }, [navMeshExport.buffer] as never) // todo: type woes
+    self.postMessage({ navMeshData: ser }, [ser.buffer] as never) // todo: type woes
 }
 
 self.onmessage = (msg) => {
