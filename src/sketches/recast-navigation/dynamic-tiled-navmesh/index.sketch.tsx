@@ -1,4 +1,4 @@
-import { Canvas, Crosshair, useInterval, useLoadingAssets } from '@/common'
+import { Canvas, Crosshair, Instructions, useInterval, useLoadingAssets } from '@/common'
 import cityEnvironment from '@pmndrs/assets/hdri/city.exr'
 import { Environment } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
@@ -38,15 +38,18 @@ type FollowerProps = {
 }
 
 const Follower = (props: FollowerProps) => {
+    const radius = 0.2
+    const height = 0.5 
+
     return (
         <Entity followPlayer>
             <Component name="crowdAgent">
-                <Agent initialPosition={props.position} />
+                <Agent initialPosition={props.position} radius={radius} height={height} />
             </Component>
             <Component name="three">
                 <group>
                     <mesh position-y={1}>
-                        <capsuleGeometry args={[0.5, 1, 2]} />
+                        <capsuleGeometry args={[radius, height, 12]} />
                         <meshStandardMaterial color="red" />
                     </mesh>
                 </group>
@@ -56,7 +59,7 @@ const Follower = (props: FollowerProps) => {
 }
 
 const Followers = () => {
-    const n = 5
+    const n = 50
 
     const followers = []
 
@@ -144,6 +147,12 @@ export default function Sketch() {
             </Canvas>
 
             <Crosshair />
+
+            <Instructions>
+                * wasd and mouse to move
+                <br />
+                click to place boxes
+            </Instructions>
         </>
     )
 }

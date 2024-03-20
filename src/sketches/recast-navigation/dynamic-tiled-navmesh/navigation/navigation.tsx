@@ -31,9 +31,9 @@ const recastConfig: Partial<RecastConfig> = {
     tileSize: 64,
     cs: cellSize,
     ch: cellHeight,
-    walkableRadius: 1 / cellSize,
+    walkableRadius: 0.4 / cellSize,
     walkableClimb: 1.5 / cellHeight,
-    walkableHeight: 4 / cellHeight,
+    walkableHeight: 2.5 / cellHeight,
 }
 
 const maxTiles = 100
