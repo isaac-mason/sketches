@@ -34,7 +34,7 @@ export const getTrianglesInBox = (positions: ArrayLike<number>, indices: ArrayLi
 }
 
 const Slice = () => {
-    const { scene, nodes } = useGLTF(navTestGlbUrl)
+    const { nodes } = useGLTF(navTestGlbUrl)
     const mesh = useMemo(() => {
         const m = nodes.Cube as THREE.Mesh
         m.geometry.computeVertexNormals()
@@ -70,7 +70,7 @@ const Slice = () => {
 
     useEffect(() => {
         updateSlice()
-    }, [scene])
+    }, [nodes])
 
     return (
         <>

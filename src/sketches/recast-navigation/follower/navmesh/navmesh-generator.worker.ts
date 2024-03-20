@@ -16,7 +16,7 @@ const process = () => {
 
     const navMeshExport = exportNavMesh(navMesh)
 
-    self.postMessage({ navMeshExport })
+    self.postMessage({ navMeshExport }, [navMeshExport.buffer] as never) // todo: type woes
 }
 
 self.onmessage = (msg) => {

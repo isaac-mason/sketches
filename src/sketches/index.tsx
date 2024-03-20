@@ -37,6 +37,11 @@ const sketchList = [
         path: 'recast-navigation/follower',
         tags: ['recast-navigation', 'navmesh', 'follower', 'arancini'],
     },
+    {
+        title: 'Recast Navigation - Dynamic Tiled NavMesh',
+        path: 'recast-navigation/dynamic-tiled-navmesh',
+        tags: ['recast-navigation', 'navmesh', 'arancini'],
+    },
     /* Voxels */
     {
         title: 'Simple Voxels - Sphere',
