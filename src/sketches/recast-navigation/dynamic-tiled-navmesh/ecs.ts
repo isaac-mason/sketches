@@ -16,7 +16,7 @@ export type EntityType = {
 export const world = new World<EntityType>()
 
 export const playerQuery = world.query((e) => e.has('player', 'rigidBody'))
-export const traversableQuery = world.query((e) => e.has('traversable'))
+export const traversableQuery = world.query((e) => e.has('traversable', 'three'))
 export const crowdAgentQuery = world.query((e) => e.has('crowdAgent'))
 export const followersQuery = world.query((e) => e.has('crowdAgent', 'followPlayer'))
 

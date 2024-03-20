@@ -115,7 +115,7 @@ export class DynamicTiledNavMesh {
         }
     }
 
-    buildTileAt(positions: Float32Array, indices: Uint32Array, [tileX, tileY]: [x: number, y: number]) {
+    buildTile(positions: Float32Array, indices: Uint32Array, [tileX, tileY]: [x: number, y: number]) {
         const clonedPositions = new Float32Array(positions)
         const clonedIndices = new Uint32Array(indices)
 
@@ -154,9 +154,31 @@ export class DynamicTiledNavMesh {
 
         for (let y = 0; y < tileHeight; y++) {
             for (let x = 0; x < tileWidth; x++) {
-                this.buildTileAt(positions, indices, [x, y])
+                this.buildTile(positions, indices, [x, y])
             }
         }
+    }
+
+    getTileForWorldPosition(worldPosition: THREE.Vector3) {
+        const x = Math.floor((worldPosition.x - this.navMeshBoundsMin.x) / this.tcs)
+        const y = Math.floor((worldPosition.z - this.navMeshBoundsMin.z) / this.tcs)
+
+        return [x, y] as [x: number, y: number]
+    }
+
+    getTilesForBounds(bounds: THREE.Box3) {
+        const min = this.getTileForWorldPosition(bounds.min)
+        const max = this.getTileForWorldPosition(bounds.max)
+
+        const tiles: [x: number, y: number][] = []
+
+        for (let y = min[1]; y <= max[1]; y++) {
+            for (let x = min[0]; x <= max[0]; x++) {
+                tiles.push([x, y])
+            }
+        }
+
+        return tiles
     }
 
     destroy() {

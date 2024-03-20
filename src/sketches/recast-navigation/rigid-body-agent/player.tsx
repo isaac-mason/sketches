@@ -1,5 +1,5 @@
 import Rapier from '@dimforge/rapier3d-compat'
-import { KeyboardControls, PointerLockControls, useKeyboardControls } from '@react-three/drei'
+import { KeyboardControls, PerspectiveCamera, PointerLockControls, useKeyboardControls } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
 import { CapsuleCollider, RigidBody, RigidBodyProps, useBeforePhysicsStep, useRapier } from '@react-three/rapier'
 import { useEffect, useRef } from 'react'
@@ -34,7 +34,7 @@ const minJumpVelocity = Math.sqrt(2 * Math.abs(jumpGravity) * minJumpHeight)
 const up = new THREE.Vector3(0, 1, 0)
 
 export const Player = (props: RigidBodyProps) => {
-    const player = useRef<EntityType>(null!)
+    const playerRef = useRef<EntityType>(null!)
 
     const rapier = useRapier()
     const camera = useThree((state) => state.camera)
@@ -66,13 +66,13 @@ export const Player = (props: RigidBodyProps) => {
     }, [])
 
     useBeforePhysicsStep(() => {
-        const characterRigidBody = player?.current.rigidBody
+        const characterRigidBody = playerRef.current.rigidBody
 
         if (!characterRigidBody) return
 
         // teleport if falling off map
         if (characterRigidBody.translation().y < -50) {
-            characterRigidBody.setTranslation(new THREE.Vector3(0, 5, 0), true)
+            characterRigidBody.setTranslation(new THREE.Vector3(0, 25, 0), true)
             return
         }
 
@@ -153,7 +153,7 @@ export const Player = (props: RigidBodyProps) => {
     })
 
     useFrame((_, delta) => {
-        const characterRigidBody = player.current.rigidBody
+        const characterRigidBody = playerRef.current.rigidBody
         if (!characterRigidBody) {
             return
         }
@@ -164,8 +164,8 @@ export const Player = (props: RigidBodyProps) => {
         const { sprint } = getKeyboardControls() as KeyControls
 
         const translation = characterRigidBody.translation()
-        _cameraPosition.set(translation.x, translation.y + 1, translation.z)
-        camera.position.lerp(_cameraPosition, delta * 20)
+        const cameraPosition = _cameraPosition.set(translation.x, translation.y + 1, translation.z)
+        camera.position.lerp(cameraPosition, delta * 30)
         if (camera instanceof THREE.PerspectiveCamera) {
             camera.fov = THREE.MathUtils.lerp(camera.fov, sprint && currentSpeed > 0.1 ? sprintFov : normalFov, 10 * delta)
             camera.updateProjectionMatrix()
@@ -174,7 +174,7 @@ export const Player = (props: RigidBodyProps) => {
 
     return (
         <>
-            <Entity isPlayer ref={player}>
+            <Entity isPlayer ref={playerRef}>
                 <Component name="rigidBody">
                     <RigidBody
                         {...props}
@@ -187,6 +187,8 @@ export const Player = (props: RigidBodyProps) => {
                     </RigidBody>
                 </Component>
             </Entity>
+
+            <PerspectiveCamera makeDefault position={props.position} />
         </>
     )
 }

@@ -4,11 +4,12 @@ import { Environment } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { Physics, RigidBody } from '@react-three/rapier'
 import { useControls } from 'leva'
-import { init } from 'recast-navigation'
+import { NavMeshQuery, init } from 'recast-navigation'
 import * as THREE from 'three'
 import { Vector3Tuple } from 'three'
 import { BoxTool } from './box-tool'
 import { SKETCH } from './const'
+import { Duck } from './duck'
 import { Component, Entity, crowdAgentQuery, followersQuery, playerQuery } from './ecs'
 import { Level } from './level/level'
 import { Agent } from './navigation/crowd-agent'
@@ -38,20 +39,30 @@ type FollowerProps = {
 }
 
 const Follower = (props: FollowerProps) => {
-    const radius = 0.2
-    const height = 0.5 
+    const radius = 0.5
+    const height = 0.5
+
+    const agentProps = {
+        initialPosition: props.position,
+        radius,
+        height,
+        maxAcceleration: 5.5,
+        maxSpeed: 5.5,
+    }
 
     return (
         <Entity followPlayer>
             <Component name="crowdAgent">
-                <Agent initialPosition={props.position} radius={radius} height={height} />
+                <Agent {...agentProps} />
             </Component>
             <Component name="three">
                 <group>
-                    <mesh position-y={1}>
+                    <Duck position-y={0.5} scale={0.5} />
+
+                    {/* <mesh position-y={1}>
                         <capsuleGeometry args={[radius, height, 12]} />
                         <meshStandardMaterial color="red" />
-                    </mesh>
+                    </mesh> */}
                 </group>
             </Component>
         </Entity>
@@ -59,7 +70,7 @@ const Follower = (props: FollowerProps) => {
 }
 
 const Followers = () => {
-    const n = 50
+    const n = 20
 
     const followers = []
 
@@ -67,54 +78,59 @@ const Followers = () => {
         followers.push(<Follower key={i} position={[3, 17, -0.55]} />)
     }
 
-    return <>{followers}</>
-}
-
-const CrowdAgentSystem = () => {
     const { navMeshQuery } = useNav()
+
     useFrame(() => {
-        if (!navMeshQuery) return
-
-        for (const entity of crowdAgentQuery) {
-            if (!entity.three) continue
-
-            const agent = entity.crowdAgent
-
-            if (agent.state() === 0) {
-                const { isOverPoly } = navMeshQuery.findNearestPoly(agent.position())
-
-                if (isOverPoly) {
-                    const closest = navMeshQuery.getClosestPoint(agent.position())
-                    agent.teleport(closest)
-                }
-            }
-
-            entity.three.position.copy(agent.position())
-
-            const velocity = agent.velocity()
-            const direction = new THREE.Vector3(velocity.x, velocity.y, velocity.z)
-            const yaw = Math.atan2(direction.x, direction.z)
-
-            entity.three.rotation.y = yaw
-        }
+        updateCrowdAgents(navMeshQuery)
     })
 
     useInterval(() => {
-        if (!navMeshQuery) return
+        updateFollowers(navMeshQuery)
+    }, 2000)
 
-        const player = playerQuery.first
-        if (!player) return
+    return <>{followers}</>
+}
 
-        const playerPosition = player.rigidBody.translation()
+const updateCrowdAgents = (navMeshQuery: NavMeshQuery | undefined) => {
+    if (!navMeshQuery) return
 
-        const target = navMeshQuery.getClosestPoint(playerPosition, { halfExtents: { x: 10, y: 10, z: 10 } })
+    for (const entity of crowdAgentQuery) {
+        if (!entity.three) continue
 
-        for (const follower of followersQuery) {
-            follower.crowdAgent.goto(target)
+        const agent = entity.crowdAgent
+
+        if (agent.state() === 0) {
+            const { isOverPoly } = navMeshQuery.findNearestPoly(agent.position())
+
+            if (isOverPoly) {
+                const closest = navMeshQuery.getClosestPoint(agent.position())
+                agent.teleport(closest)
+            }
         }
-    }, 100)
 
-    return null
+        entity.three.position.copy(agent.position())
+
+        const velocity = agent.velocity()
+        const direction = new THREE.Vector3(velocity.x, velocity.y, velocity.z)
+        const yaw = Math.atan2(direction.x, direction.z)
+
+        entity.three.rotation.y = yaw
+    }
+}
+
+const updateFollowers = (navMeshQuery: NavMeshQuery | undefined) => {
+    if (!navMeshQuery) return
+
+    const player = playerQuery.first
+    if (!player) return
+
+    const playerPosition = player.rigidBody.translation()
+
+    for (const follower of followersQuery) {
+        const target = navMeshQuery.getClosestPoint(playerPosition, { halfExtents: { x: 10, y: 10, z: 10 } })
+        const pointAround = navMeshQuery.getRandomPointAround(target, 1)
+        follower.crowdAgent.goto(pointAround)
+    }
 }
 
 export default function Sketch() {
@@ -140,8 +156,6 @@ export default function Sketch() {
                 </Physics>
 
                 <Followers />
-
-                <CrowdAgentSystem />
 
                 <Environment files={cityEnvironment} />
             </Canvas>

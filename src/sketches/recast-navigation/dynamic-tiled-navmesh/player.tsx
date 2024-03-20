@@ -72,7 +72,7 @@ export const Player = (props: RigidBodyProps) => {
 
         // teleport if falling off map
         if (characterRigidBody.translation().y < -50) {
-            characterRigidBody.setTranslation(new THREE.Vector3(0, 5, 0), true)
+            characterRigidBody.setTranslation(new THREE.Vector3(0, 25, 0), true)
             return
         }
 
@@ -164,8 +164,8 @@ export const Player = (props: RigidBodyProps) => {
         const { sprint } = getKeyboardControls() as KeyControls
 
         const translation = characterRigidBody.translation()
-        _cameraPosition.set(translation.x, translation.y + 1, translation.z)
-        camera.position.lerp(_cameraPosition, delta * 20)
+        const cameraPosition = _cameraPosition.set(translation.x, translation.y + 1, translation.z)
+        camera.position.lerp(cameraPosition, delta * 30)
         if (camera instanceof THREE.PerspectiveCamera) {
             camera.fov = THREE.MathUtils.lerp(camera.fov, sprint && currentSpeed > 0.1 ? sprintFov : normalFov, 10 * delta)
             camera.updateProjectionMatrix()

@@ -7,6 +7,8 @@ import * as THREE from 'three'
 import { create } from 'zustand'
 import { traversableQuery } from '../ecs'
 import { DynamicTiledNavMesh } from './dynamic-tiled-navmesh'
+import { useControls } from 'leva'
+import { SKETCH } from '../const'
 
 export type NavState = {
     dynamicTiledNavMesh?: DynamicTiledNavMesh
@@ -25,20 +27,20 @@ export const useNav = create<NavState>(() => ({
 const navMeshBounds = new THREE.Box3(new THREE.Vector3(-50, -10, -50), new THREE.Vector3(70, 30, 40))
 
 const cellSize = 0.3
-const cellHeight = 0.3
+const cellHeight = 0.45
 
 const recastConfig: Partial<RecastConfig> = {
-    tileSize: 64,
+    tileSize: 128,
     cs: cellSize,
     ch: cellHeight,
-    walkableRadius: 0.4 / cellSize,
+    walkableRadius: 0.8 / cellSize,
     walkableClimb: 1.5 / cellHeight,
-    walkableHeight: 2.5 / cellHeight,
+    walkableHeight: 3 / cellHeight,
 }
 
-const maxTiles = 100
+const maxTiles = 512
 
-const navMeshWorkers = 3
+const navMeshWorkers = navigator.hardwareConcurrency ?? 3
 
 const maxAgents = 50
 const maxAgentRadius = 0.5
@@ -60,22 +62,55 @@ export const getTraversableMeshes = () => {
 }
 
 export const Navigation = () => {
+    const { boundsDebug, navMeshDebug } = useControls(`${SKETCH}-navigation`, {
+        boundsDebug: false,
+        navMeshDebug: true,
+    })
     const [navMeshVersion, setNavMeshVersion] = useState(0)
 
     const [dynamicTiledNavMesh, setDynamicTiledNavMesh] = useState<DynamicTiledNavMesh>()
 
+    const getTraversablePositionsAndIndices = (): [positions: Float32Array, indices: Uint32Array] => {
+        const traversableMeshes = getTraversableMeshes()
+        const [positions, indices] = getPositionsAndIndices(traversableMeshes)
+
+        return [positions, indices]
+    }
+
     useEffect(() => {
         const dynamicTiledNavMesh = new DynamicTiledNavMesh({ navMeshBounds, recastConfig, maxTiles, workers: navMeshWorkers })
-        dynamicTiledNavMesh.onNavMeshUpdate.add((version) => setNavMeshVersion(version))
-
         const navMeshQuery = new NavMeshQuery({ navMesh: dynamicTiledNavMesh.navMesh })
         const crowd = new Crowd({ maxAgents, maxAgentRadius, navMesh: dynamicTiledNavMesh.navMesh })
 
-        setDynamicTiledNavMesh(dynamicTiledNavMesh)
+        dynamicTiledNavMesh.onNavMeshUpdate.add((version) => setNavMeshVersion(version))
 
+        setDynamicTiledNavMesh(dynamicTiledNavMesh)
         useNav.setState({ dynamicTiledNavMesh, navMesh: dynamicTiledNavMesh.navMesh, navMeshQuery, crowd })
 
+        /* build tiles where traversable entities are added */
+        const unsubTraversableQueryAdd = traversableQuery.onEntityAdded.add((entity) => {
+            const bounds = new THREE.Box3()
+
+            const meshes: THREE.Mesh[] = []
+            entity.three.traverse((child) => {
+                if (child instanceof THREE.Mesh) {
+                    meshes.push(child)
+                    bounds.expandByObject(child)
+                }
+            })
+
+            const [positions, indices] = getTraversablePositionsAndIndices()
+
+            const tiles = dynamicTiledNavMesh.getTilesForBounds(bounds)
+
+            for (const tile of tiles) {
+                dynamicTiledNavMesh.buildTile(positions, indices, tile)
+            }
+        })
+
         return () => {
+            unsubTraversableQueryAdd()
+
             useNav.setState({ dynamicTiledNavMesh: undefined, navMesh: undefined, navMeshQuery: undefined, crowd: undefined })
 
             dynamicTiledNavMesh.destroy()
@@ -84,15 +119,33 @@ export const Navigation = () => {
         }
     }, [])
 
+    /* rebuild tiles with active rigid bodies */
     useInterval(() => {
         if (!dynamicTiledNavMesh) return
 
-        // todo: smarts for what tiles need regenerating!
-        const traversableMeshes = getTraversableMeshes()
+        const [positions, indices] = getTraversablePositionsAndIndices()
 
-        const [positions, indices] = getPositionsAndIndices(traversableMeshes)
-        dynamicTiledNavMesh.buildAllTiles(positions, indices)
-    }, 100)
+        const tiles = new Map<string, [x: number, y: number]>()
+
+        for (const entity of traversableQuery) {
+            if (!entity.rigidBody) continue
+            if (entity.rigidBody.isSleeping()) continue
+
+            const box3 = new THREE.Box3()
+            box3.expandByObject(entity.three)
+
+            const entityTiles = dynamicTiledNavMesh.getTilesForBounds(box3)
+
+            for (const tile of entityTiles) {
+                const key = `${tile[0]},${tile[1]}`
+                tiles.set(key, tile)
+            }
+        }
+
+        for (const [, tileCoords] of tiles) {
+            dynamicTiledNavMesh.buildTile(positions, indices, tileCoords)
+        }
+    }, 200)
 
     useFrame((_, delta) => {
         const crowd = useNav.getState().crowd
@@ -109,7 +162,7 @@ export const Navigation = () => {
             navMeshMaterial: new THREE.MeshBasicMaterial({
                 color: 'orange',
                 transparent: true,
-                opacity: 0.4,
+                opacity: 0.5,
                 depthWrite: false,
             }),
         })
@@ -117,8 +170,8 @@ export const Navigation = () => {
 
     return (
         <>
-            {navMeshHelper && <primitive object={navMeshHelper} />}
-            <box3Helper args={[navMeshBounds]} />
+            {navMeshDebug && navMeshHelper && <primitive object={navMeshHelper} />}
+            {boundsDebug && <box3Helper args={[navMeshBounds]} />}
         </>
     )
 }
