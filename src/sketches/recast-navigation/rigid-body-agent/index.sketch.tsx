@@ -1,7 +1,7 @@
 import { Canvas, Crosshair, Instructions, useLoadingAssets } from '@/common'
 import cityEnvironment from '@pmndrs/assets/hdri/city.exr'
 import { Environment, MeshReflectorMaterial, PerspectiveCamera } from '@react-three/drei'
-import { Physics, RigidBody } from '@react-three/rapier'
+import { CuboidCollider, Physics, RigidBody } from '@react-three/rapier'
 import { useControls } from 'leva'
 import { Agent } from './agent/agent'
 import { BoxTool } from './box-tool'
@@ -14,7 +14,10 @@ const Scene = () => {
     return (
         <>
             <Entity traversable>
-                <RigidBody type="fixed" position={[0, -1, 0]}>
+                <RigidBody type="fixed" position={[0, -1, 0]} colliders={false}>
+
+                    <CuboidCollider args={[25, 1, 25]} position={[0, -1, 0]} />
+
                     <Component name="three">
                         <mesh rotation={[-Math.PI / 2, 0, 0]}>
                             <planeGeometry args={[50, 50]} />

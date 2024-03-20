@@ -9,7 +9,7 @@ const Box = (props: RigidBodyProps) => {
     return (
         <Entity traversable>
             <Component name="rigidBody">
-                <RigidBody {...props} colliders="cuboid" ccd>
+                <RigidBody {...props} colliders="cuboid">
                     <Component name="three">
                         <mesh>
                             <boxGeometry args={[1, 1, 1]} />
@@ -26,7 +26,7 @@ export const BoxTool = () => {
     const camera = useThree((s) => s.camera)
     const scene = useThree((s) => s.scene)
 
-    const [boxes, setBoxes] = useState<{ position: THREE.Vector3; quaternion: THREE.Quaternion }[]>([])
+    const [boxes, setBoxes] = useState<{ position: THREE.Vector3; rotation: THREE.Euler }[]>([])
 
     const onPointerDown = () => {
         const pointerLocked = document.pointerLockElement !== null
@@ -42,11 +42,10 @@ export const BoxTool = () => {
             const position = intersect.point
             position.y += 1
 
-            const quaternion = new THREE.Quaternion()
             const yaw = Math.atan2(camera.position.x - position.x, camera.position.z - position.z)
-            quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), yaw)
+            const rotation = new THREE.Euler(0, yaw, 0)
 
-            setBoxes((prev) => [...prev, { position, quaternion }])
+            setBoxes((prev) => [...prev, { position, rotation }])
         }
     }
 
@@ -57,8 +56,8 @@ export const BoxTool = () => {
 
     return (
         <>
-            {boxes.map(({ position, quaternion }, index) => (
-                <Box key={index} position={position} quaternion={quaternion} />
+            {boxes.map(({ position, rotation }, index) => (
+                <Box key={index} position={position} rotation={rotation} />
             ))}
         </>
     )
