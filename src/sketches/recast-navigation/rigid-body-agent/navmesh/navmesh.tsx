@@ -98,7 +98,7 @@ export const NavMeshGenerator = () => {
 
         const [positions, indices] = getPositionsAndIndices(meshes)
 
-        const cs = 0.1
+        const cs = 0.2
         const ch = 0.2
         const recastConfig: Partial<RecastConfig> = {
             cs,

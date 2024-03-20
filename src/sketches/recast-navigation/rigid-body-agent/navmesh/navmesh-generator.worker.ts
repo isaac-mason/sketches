@@ -19,6 +19,8 @@ const process = () => {
         ser[i] = navMeshData.get(i)
     }
 
+    navMeshData.free()
+
     self.postMessage({ navMeshData: ser }, [ser.buffer] as never) // todo: type woes
 }
 
