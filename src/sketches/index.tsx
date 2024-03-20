@@ -33,14 +33,14 @@ const sketchList = [
         tags: ['recast-navigation', 'controller', 'arancini'],
     },
     {
-        title: 'Recast Navigation - Follower',
-        path: 'recast-navigation/follower',
-        tags: ['recast-navigation', 'navmesh', 'follower', 'arancini'],
+        title: 'Recast Navigation - Rigid Body Agent',
+        path: 'recast-navigation/rigid-body-agent',
+        tags: ['recast-navigation', 'navmesh', 'physics', 'rapier', 'arancini'],
     },
     {
         title: 'Recast Navigation - Dynamic Tiled NavMesh',
         path: 'recast-navigation/dynamic-tiled-navmesh',
-        tags: ['recast-navigation', 'navmesh', 'arancini'],
+        tags: ['recast-navigation', 'navmesh', 'physics', 'rapier', 'arancini'],
     },
     /* Voxels */
     {
