@@ -2,36 +2,29 @@ import { With } from 'arancini'
 import { System } from 'arancini/systems'
 import { useMemo } from 'react'
 import { BufferAttribute } from 'three'
-import { CHUNK_SIZE, ChunkEntity, CorePlugin, CorePluginEntity, Vec3, VoxelWorldCoreSystem, chunkId } from '../core'
+import { CHUNK_SIZE, CorePlugin, CorePluginEntity, Vec3, VoxelWorldCoreSystem, chunkId } from '../core'
 import { useVoxelEngine } from '../voxel-engine'
 import { VoxelEnginePlugin } from '../voxel-engine-types'
 import VoxelChunkMesherWorker from './culled-mesher.worker.ts?worker'
 import { ChunkMeshUpdateMessage, RegisterChunkMessage, RequestChunkMeshUpdateMessage, WorkerMessage } from './types'
 import { VoxelChunkMesh } from './voxel-chunk-mesh'
 
+type ChunkEntity = With<CorePluginEntity & CulledMesherPluginEntity, 'voxelChunk'>
+
 export class VoxelChunkMesherSystem extends System<CorePluginEntity & CulledMesherPluginEntity> {
-    chunks = this.query((e) => e.has('voxelChunk'))
-
-    loadedChunks = this.query((e) => e.has('voxelChunk', 'voxelChunkLoaded'))
-
     voxelWorld = this.singleton('voxelWorld')!
 
-    voxelWorldEvents = this.singleton('voxelWorldEvents')!
+    chunks = this.query((e) => e.has('voxelChunk'))
+    loadedChunks = this.query((e) => e.has('voxelChunk', 'voxelChunkLoaded'))
 
-    voxelWorldActor = this.singleton('voxelWorldActor')!
-
-    dirtyChunks = new Set<With<CorePluginEntity & CulledMesherPluginEntity, 'voxelChunk'>>()
-
-    dirtyUnloadedChunks = new Set<With<CorePluginEntity & CulledMesherPluginEntity, 'voxelChunk'>>()
+    dirtyChunks = new Set<ChunkEntity>()
+    dirtyUnloadedChunks = new Set<ChunkEntity>()
 
     private workers: InstanceType<typeof VoxelChunkMesherWorker>[] = []
-
+    private workerRoundRobin = 0
     private pendingMeshUpdates: Map<string, number> = new Map()
 
-    private workerRoundRobin = 0
-
     static WORKER_POOL_SIZE = 3
-
     static PRIORITY = VoxelWorldCoreSystem.PRIORITY - 1
 
     onInit() {
@@ -53,12 +46,9 @@ export class VoxelChunkMesherSystem extends System<CorePluginEntity & CulledMesh
             this.registerChunk(chunk)
         })
 
-        this.chunks.onEntityRemoved.add(() => {
-            // todo
-        })
-
-        this.voxelWorldEvents.onChunkChange.add((updates) => {
-            this.handleBlockUpdates(updates.map((update) => update.position))
+        this.voxelWorld.onChunkChange.add((updates) => {
+            const positions = new Set(updates.map((update) => update.position))
+            this.handleBlockUpdates([...positions])
         })
 
         this.loadedChunks.onEntityAdded.add((chunk) => {
@@ -96,7 +86,7 @@ export class VoxelChunkMesherSystem extends System<CorePluginEntity & CulledMesh
 
     private handleBlockUpdates(positions: Vec3[]): void {
         for (const position of positions) {
-            const chunkEntity = this.voxelWorld.getChunkAt(position)!
+            const chunkEntity = this.voxelWorld.getChunk(position)!
             const { voxelChunk, voxelChunkLoaded } = chunkEntity
 
             if (!voxelChunkLoaded) {

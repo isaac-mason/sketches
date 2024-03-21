@@ -47,7 +47,7 @@ const tree = (set: SetBlockFn, base: Vec3) => {
 export const useSimpleLevel = () => {
     const [ready, setReady] = useState(false)
 
-    const { setBlock } = useVoxelEngine<[CorePlugin]>()
+    const { voxelWorld } = useVoxelEngine<[CorePlugin]>()
 
     useEffect(() => {
         const size = 200
@@ -61,7 +61,7 @@ export const useSimpleLevel = () => {
                 const color = Math.random() > 0.5 ? green1 : green2
 
                 for (let i = y; i >= -15; i--) {
-                    setBlock([x, i, z], {
+                    voxelWorld.setBlock([x, i, z], {
                         solid: true,
                         color,
                     })
@@ -69,7 +69,7 @@ export const useSimpleLevel = () => {
 
                 // random chance to place a tree
                 if (Math.random() < 0.002) {
-                    tree(setBlock, [x, y, z])
+                    tree(voxelWorld.setBlock, [x, y, z])
                 }
             }
         }

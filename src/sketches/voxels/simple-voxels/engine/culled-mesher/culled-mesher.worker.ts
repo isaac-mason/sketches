@@ -203,141 +203,132 @@ const VOXEL_FACE_DIRECTIONS: {
     },
 ]
 
-class VoxelChunkMesher {
-    private tmpColor = new Color()
+const _color = new Color()
 
-    constructor(
-        public chunks: Map<string, VoxelChunk>,
-        public chunk: VoxelChunk,
-    ) {}
+const mesh = (chunks: Map<string, VoxelChunk>, chunk: VoxelChunk) => {
+    const chunkX = chunk.position.x * CHUNK_SIZE
+    const chunkY = chunk.position.y * CHUNK_SIZE
+    const chunkZ = chunk.position.z * CHUNK_SIZE
 
-    mesh() {
-        const chunkX = this.chunk.position.x * CHUNK_SIZE
-        const chunkY = this.chunk.position.y * CHUNK_SIZE
-        const chunkZ = this.chunk.position.z * CHUNK_SIZE
+    const positions: number[] = []
+    const indices: number[] = []
+    const normals: number[] = []
+    const colors: number[] = []
+    const ambientOcclusion: number[] = []
 
-        const positions: number[] = []
-        const indices: number[] = []
-        const normals: number[] = []
-        const colors: number[] = []
-        const ambientOcclusion: number[] = []
+    for (let localX = 0; localX < CHUNK_SIZE; localX++) {
+        for (let localY = 0; localY < CHUNK_SIZE; localY++) {
+            for (let localZ = 0; localZ < CHUNK_SIZE; localZ++) {
+                const chunkDataIndex = vec3.toChunkIndex([localX, localY, localZ])
 
-        for (let localX = 0; localX < CHUNK_SIZE; localX++) {
-            for (let localY = 0; localY < CHUNK_SIZE; localY++) {
-                for (let localZ = 0; localZ < CHUNK_SIZE; localZ++) {
-                    const chunkDataIndex = vec3.toChunkIndex([localX, localY, localZ])
+                if (chunk.solid[chunkDataIndex] === 0) continue
 
-                    if (this.chunk.solid[chunkDataIndex] === 0) continue
+                const worldX = chunkX + localX
+                const worldY = chunkY + localY
+                const worldZ = chunkZ + localZ
 
-                    const worldX = chunkX + localX
-                    const worldY = chunkY + localY
-                    const worldZ = chunkZ + localZ
+                const color = _color.set(chunk.color[chunkDataIndex])
 
-                    const color = this.tmpColor.set(this.chunk.color[chunkDataIndex])
+                for (const voxelFaceDirection of VOXEL_FACE_DIRECTIONS) {
+                    const { dx, dy, dz, lx, ly, lz, ux, uy, uz, vx, vy, vz, nx, ny, nz } = voxelFaceDirection
 
-                    for (const voxelFaceDirection of VOXEL_FACE_DIRECTIONS) {
-                        const { dx, dy, dz, lx, ly, lz, ux, uy, uz, vx, vy, vz, nx, ny, nz } = voxelFaceDirection
+                    let solid: boolean
 
-                        let solid: boolean
+                    if (
+                        localX + dx < 0 ||
+                        localX + dx >= CHUNK_SIZE ||
+                        localY + dy < 0 ||
+                        localY + dy >= CHUNK_SIZE ||
+                        localZ + dz < 0 ||
+                        localZ + dz >= CHUNK_SIZE
+                    ) {
+                        solid = isSolid([worldX + dx, worldY + dy, worldZ + dz], chunks)
+                    } else {
+                        const index = vec3.toChunkIndex([localX + dx, localY + dy, localZ + dz])
+                        solid = chunk.solid[index] === 1
+                    }
 
-                        if (
-                            localX + dx < 0 ||
-                            localX + dx >= CHUNK_SIZE ||
-                            localY + dy < 0 ||
-                            localY + dy >= CHUNK_SIZE ||
-                            localZ + dz < 0 ||
-                            localZ + dz >= CHUNK_SIZE
-                        ) {
-                            solid = isSolid([worldX + dx, worldY + dy, worldZ + dz], this.chunks)
-                        } else {
-                            const index = vec3.toChunkIndex([localX + dx, localY + dy, localZ + dz])
-                            solid = this.chunk.solid[index] === 1
-                        }
+                    if (solid) continue
 
-                        if (solid) continue
+                    const voxelFaceLocalX = localX + lx
+                    const voxelFaceLocalY = localY + ly
+                    const voxelFaceLocalZ = localZ + lz
 
-                        const voxelFaceLocalX = localX + lx
-                        const voxelFaceLocalY = localY + ly
-                        const voxelFaceLocalZ = localZ + lz
+                    positions.push(voxelFaceLocalX, voxelFaceLocalY, voxelFaceLocalZ)
+                    positions.push(voxelFaceLocalX + ux, voxelFaceLocalY + uy, voxelFaceLocalZ + uz)
+                    positions.push(voxelFaceLocalX + ux + vx, voxelFaceLocalY + uy + vy, voxelFaceLocalZ + uz + vz)
+                    positions.push(voxelFaceLocalX + vx, voxelFaceLocalY + vy, voxelFaceLocalZ + vz)
 
-                        positions.push(voxelFaceLocalX, voxelFaceLocalY, voxelFaceLocalZ)
-                        positions.push(voxelFaceLocalX + ux, voxelFaceLocalY + uy, voxelFaceLocalZ + uz)
-                        positions.push(voxelFaceLocalX + ux + vx, voxelFaceLocalY + uy + vy, voxelFaceLocalZ + uz + vz)
-                        positions.push(voxelFaceLocalX + vx, voxelFaceLocalY + vy, voxelFaceLocalZ + vz)
+                    normals.push(nx, ny, nz, nx, ny, nz, nx, ny, nz, nx, ny, nz)
 
-                        normals.push(nx, ny, nz, nx, ny, nz, nx, ny, nz, nx, ny, nz)
+                    colors.push(
+                        color.r,
+                        color.g,
+                        color.b,
+                        color.r,
+                        color.g,
+                        color.b,
+                        color.r,
+                        color.g,
+                        color.b,
+                        color.r,
+                        color.g,
+                        color.b,
+                    )
 
-                        colors.push(
-                            color.r,
-                            color.g,
-                            color.b,
-                            color.r,
-                            color.g,
-                            color.b,
-                            color.r,
-                            color.g,
-                            color.b,
-                            color.r,
-                            color.g,
-                            color.b,
-                        )
+                    const ao = voxelFaceAmbientOcclusion(state.chunks, [worldX, worldY, worldZ], voxelFaceDirection)
+                    const ao00 = ao[0]
+                    const ao01 = ao[1]
+                    const ao10 = ao[2]
+                    const ao11 = ao[3]
 
-                        const ao = voxelFaceAmbientOcclusion(state.chunks, [worldX, worldY, worldZ], voxelFaceDirection)
-                        const ao00 = ao[0]
-                        const ao01 = ao[1]
-                        const ao10 = ao[2]
-                        const ao11 = ao[3]
+                    ambientOcclusion.push(ao00, ao01, ao10, ao11)
 
-                        ambientOcclusion.push(ao00, ao01, ao10, ao11)
+                    /*
+                        make two triangles for the face
 
-                        /*
-                            make two triangles for the face
+                        d --- c
+                        |     |
+                        a --- b
+                    */
 
-                            d --- c
-                            |     |
-                            a --- b
-                        */
+                    const index = (positions.length + 1) / 3 - 4
+                    const a = index
+                    const b = index + 1
+                    const c = index + 2
+                    const d = index + 3
 
-                        const index = (positions.length + 1) / 3 - 4
-                        const a = index
-                        const b = index + 1
-                        const c = index + 2
-                        const d = index + 3
-
-                        /**
-                         * @see https://0fps.net/2013/07/03/ambient-occlusion-for-minecraft-like-worlds/
-                         */
-                        if (ao00 + ao10 > ao11 + ao01) {
-                            // generate flipped quad
-                            indices.push(a, b, c, a, c, d)
-                        } else {
-                            // generate normal quad
-                            indices.push(a, b, d, b, c, d)
-                        }
+                    /**
+                     * @see https://0fps.net/2013/07/03/ambient-occlusion-for-minecraft-like-worlds/
+                     */
+                    if (ao00 + ao10 > ao11 + ao01) {
+                        // generate flipped quad
+                        indices.push(a, b, c, a, c, d)
+                    } else {
+                        // generate normal quad
+                        indices.push(a, b, d, b, c, d)
                     }
                 }
             }
         }
+    }
 
-        return {
-            positions: new Float32Array(positions),
-            indices: new Uint32Array(indices),
-            normals: new Float32Array(normals),
-            colors: new Float32Array(colors),
-            ambientOcclusion: new Float32Array(ambientOcclusion),
-        }
+    return {
+        positions: new Float32Array(positions),
+        indices: new Uint32Array(indices),
+        normals: new Float32Array(normals),
+        colors: new Float32Array(colors),
+        ambientOcclusion: new Float32Array(ambientOcclusion),
     }
 }
 
 type WorkerState = {
     chunks: Map<string, VoxelChunk>
-    meshers: Map<string, VoxelChunkMesher>
     jobs: Set<string>
 }
 
 const state: WorkerState = {
     chunks: new Map(),
-    meshers: new Map(),
     jobs: new Set(),
 }
 
@@ -350,11 +341,10 @@ const update = () => {
     state.jobs = new Set()
 
     for (const chunkId of jobs) {
-        const mesher = state.meshers.get(chunkId)
+        const chunk = state.chunks.get(chunkId)
+        if (!chunk) continue
 
-        if (!mesher) continue
-
-        const { positions, indices, normals, colors, ambientOcclusion } = mesher.mesh()
+        const { positions, indices, normals, colors, ambientOcclusion } = mesh(state.chunks, chunk)
 
         incomplete.delete(chunkId)
 
@@ -392,10 +382,6 @@ const registerChunk = ({ id, position, solidBuffer, colorBuffer }: RegisterChunk
     }
 
     state.chunks.set(id, chunk)
-
-    const mesher = new VoxelChunkMesher(state.chunks, chunk)
-
-    state.meshers.set(chunk.id, mesher)
 }
 
 worker.onmessage = (e) => {

@@ -26,7 +26,7 @@ const useColorStore = create<ColorStore>((set) => ({
 }))
 
 const PointerBuildTool = ({ children }: { children: React.ReactNode }) => {
-    const { voxelWorld, setBlock } = useVoxelEngine()
+    const { voxelWorld } = useVoxelEngine()
 
     const { color } = useColorStore()
 
@@ -43,7 +43,7 @@ const PointerBuildTool = ({ children }: { children: React.ReactNode }) => {
         if (event.button === 2) {
             const block: Vec3 = [Math.floor(ray.hitPosition[0]), Math.floor(ray.hitPosition[1]), Math.floor(ray.hitPosition[2])]
 
-            setBlock(block, { solid: false })
+            voxelWorld.setBlock(block, { solid: false })
         } else {
             const block: Vec3 = [
                 Math.floor(ray.hitPosition[0] + ray.hitNormal[0]),
@@ -51,7 +51,7 @@ const PointerBuildTool = ({ children }: { children: React.ReactNode }) => {
                 Math.floor(ray.hitPosition[2] + ray.hitNormal[2]),
             ]
 
-            setBlock(block, {
+            voxelWorld.setBlock(block, {
                 solid: true,
                 color: tmpColor.set(color).getHex(),
             })
@@ -78,13 +78,13 @@ const ColorPicker = () => {
 }
 
 const Level = () => {
-    const { setBlock } = useVoxelEngine()
+    const { voxelWorld } = useVoxelEngine()
 
     useLayoutEffect(() => {
         // ground
         for (let x = -15; x < 15; x++) {
             for (let z = -15; z < 15; z++) {
-                setBlock([x, 0, z], {
+                voxelWorld.setBlock([x, 0, z], {
                     solid: true,
                     color: Math.random() > 0.5 ? green1 : green2,
                 })
@@ -96,12 +96,12 @@ const Level = () => {
 }
 
 const CameraVoxelWorldActor = () => {
-    const { voxelWorldActor } = useVoxelEngine()
+    const { voxelWorld } = useVoxelEngine()
 
     const camera = useThree((s) => s.camera)
 
     useFrame(() => {
-        voxelWorldActor.position.copy(camera.position)
+        voxelWorld.actor.copy(camera.position)
     })
 
     return null

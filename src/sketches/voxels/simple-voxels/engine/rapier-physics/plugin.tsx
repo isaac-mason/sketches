@@ -3,7 +3,7 @@ import { World } from 'arancini'
 import { System } from 'arancini/systems'
 import { suspend } from 'suspend-react'
 import { Quaternion, Vector3 } from 'three'
-import { VoxelChunkCollider as VoxelChunkColliderGenerator } from './chunk-collider'
+import { VoxelChunkCollider } from './chunk-collider'
 import { ChunkEntity, CorePluginEntity, Vec3, vec3 } from '../core'
 import { VoxelEnginePlugin } from '../voxel-engine-types'
 import { worldVoxelPositionToPhysicsPosition } from './utils'
@@ -18,15 +18,13 @@ export type VoxelChunkPhysics = {
     rigidBody: Rapier.RigidBody
     collider?: Rapier.Collider
     offset: Vec3
-    chunkColliderGenerator: VoxelChunkColliderGenerator
+    chunkColliderGenerator: VoxelChunkCollider
 }
 
 export class VoxelPhysicsSystem extends System<CorePluginEntity & RapierPhysicsPluginEntity> {
     physicsWorld = this.singleton('physicsWorld')!
 
     voxelWorld = this.singleton('voxelWorld')!
-
-    voxelWorldEvents = this.singleton('voxelWorldEvents')!
 
     chunks = this.query((e) => e.has('voxelChunk'))
 
@@ -37,7 +35,7 @@ export class VoxelPhysicsSystem extends System<CorePluginEntity & RapierPhysicsP
             this.dirtyChunks.add(e)
         })
 
-        this.voxelWorldEvents.onChunkChange.add((updates) => {
+        this.voxelWorld.onChunkChange.add((updates) => {
             for (const { chunk } of updates) {
                 this.dirtyChunks.add(chunk as ChunkEntity & RapierPhysicsPluginEntity)
             }
@@ -58,11 +56,11 @@ export class VoxelPhysicsSystem extends System<CorePluginEntity & RapierPhysicsP
         if (!chunkEntity.voxelChunkPhysics) {
             const rigidBody = this.physicsWorld.createRigidBody(Rapier.RigidBodyDesc.fixed())
 
-            const offset = worldVoxelPositionToPhysicsPosition(vec3.chunkPositionToWorldPosition(voxelChunk.position.toArray()))
+            const offset = worldVoxelPositionToPhysicsPosition(vec3.chunkToWorld(voxelChunk.position.toArray()))
 
             rigidBody.setTranslation(new Rapier.Vector3(...offset), true)
 
-            const chunkColliderGenerator = new VoxelChunkColliderGenerator(this.voxelWorld, voxelChunk)
+            const chunkColliderGenerator = new VoxelChunkCollider(this.voxelWorld, voxelChunk)
 
             const voxelChunkPhysics: VoxelChunkPhysics = {
                 rigidBody,
@@ -212,9 +210,7 @@ export const RapierPhysicsPlugin = {
     setup: (world: World<RapierPhysicsPluginEntity>) => {
         const physicsWorld = new Rapier.World(new Rapier.Vector3(0, -9.81, 0))
 
-        world.create({
-            physicsWorld,
-        })
+        world.create({ physicsWorld })
 
         return { physicsWorld }
     },

@@ -18,7 +18,7 @@ const { VoxelEngine, useVoxelEngine } = createVoxelEngine(PLUGINS)
 const orange = new Color('orange').getHex()
 
 const Tools = ({ children }: { children: React.ReactNode }) => {
-    const { world, voxelWorld, physicsWorld, setBlock } = useVoxelEngine()
+    const { world, voxelWorld, physicsWorld } = useVoxelEngine()
 
     const camera = useThree((s) => s.camera)
 
@@ -60,7 +60,7 @@ const Tools = ({ children }: { children: React.ReactNode }) => {
         if (event.button === 2) {
             const block: Vec3 = [Math.floor(ray.hitPosition[0]), Math.floor(ray.hitPosition[1]), Math.floor(ray.hitPosition[2])]
 
-            setBlock(block, { solid: false })
+            voxelWorld.setBlock(block, { solid: false })
         } else {
             const block: Vec3 = [
                 Math.floor(ray.hitPosition[0] + ray.hitNormal[0]),
@@ -68,7 +68,7 @@ const Tools = ({ children }: { children: React.ReactNode }) => {
                 Math.floor(ray.hitPosition[2] + ray.hitNormal[2]),
             ]
 
-            setBlock(block, {
+            voxelWorld.setBlock(block, {
                 solid: true,
                 color: orange,
             })

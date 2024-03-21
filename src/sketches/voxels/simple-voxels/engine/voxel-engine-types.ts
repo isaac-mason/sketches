@@ -10,9 +10,9 @@ type Pretty<T> = T extends unknown
       }
     : never
 
-export type Api = Record<string, unknown>
+type Api = Record<string, unknown>
 
-export type VoxelEnginePluginSetup<E extends AnyEntity> = (
+type VoxelEnginePluginSetup<E extends AnyEntity> = (
     world: World<E>,
     executor: Executor<E>,
     react: ReactAPI<E>,

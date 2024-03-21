@@ -69,8 +69,6 @@ export class BoxCharacterControllerSystem extends System<BoxChararacterControlle
 
     voxelWorld = this.singleton('voxelWorld')!
 
-    voxelWorldActor = this.singleton('voxelWorldActor')!
-
     static PRIORITY = VoxelWorldCoreSystem.PRIORITY - 1
 
     onUpdate(delta: number, time: number): void {
@@ -228,7 +226,7 @@ export class BoxCharacterControllerSystem extends System<BoxChararacterControlle
         object3D.position.copy(controller.position)
 
         /* update voxel world actor */
-        this.voxelWorldActor.position.copy(controller.position)
+        this.voxelWorld.actor.copy(controller.position)
     }
 
     private checkGrounded(controller: BoxCharacterController): boolean {

@@ -1,5 +1,5 @@
 
-import { CHUNK_BITS, CHUNK_SIZE } from './constants'
+import { CHUNK_BITS, CHUNK_SIZE } from './chunk'
 
 export type Vec3 = [number, number, number]
 
@@ -34,13 +34,13 @@ const worldToChunk = ([x, y, z]: Vec3): Vec3 => {
     return [cx, cy, cz]
 }
 
-const chunkToWorldPosition = ([x, y, z]: Vec3): Vec3 => {
+const chunkToWorld = ([x, y, z]: Vec3): Vec3 => {
     return [x * CHUNK_SIZE, y * CHUNK_SIZE, z * CHUNK_SIZE]
 }
 
 export const vec3 = {
     toChunkIndex,
-    worldPositionToChunkLocalPosition: worldToChunkLocal,
-    worldPositionToChunkPosition: worldToChunk,
-    chunkPositionToWorldPosition: chunkToWorldPosition,
+    worldToChunk,
+    worldToChunkLocal,
+    chunkToWorld,
 }

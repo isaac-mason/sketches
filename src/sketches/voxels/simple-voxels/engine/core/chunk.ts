@@ -1,6 +1,8 @@
 import * as THREE from 'three'
 import { Vec3, vec3 } from './vec3'
-import { CHUNK_SIZE } from './constants'
+
+export const CHUNK_BITS = 4
+export const CHUNK_SIZE = Math.pow(2, 4)
 
 export type BlockValue = { solid: false } | { solid: true; color: number }
 
@@ -14,7 +16,6 @@ export type VoxelChunk = {
     color: Uint32Array
     colorBuffer: SharedArrayBuffer
 
-    // based on distance from player
     priority: number
 }
 
@@ -23,7 +24,7 @@ export const chunkId = ([x, y, z]: Vec3): string => {
 }
 
 export const isSolid = (position: Vec3, chunks: Map<string, VoxelChunk>) => {
-    const chunk = chunks.get(chunkId(vec3.worldPositionToChunkPosition(position)))
+    const chunk = chunks.get(chunkId(vec3.worldToChunk(position)))
 
     if (!chunk) {
         return false
@@ -33,40 +34,22 @@ export const isSolid = (position: Vec3, chunks: Map<string, VoxelChunk>) => {
     return chunk.solid[chunkDataIndex] === 1
 }
 
-export const emptyChunk = (): VoxelChunk => {
+export const createVoxelChunk = (id: string, position: THREE.Vector3): VoxelChunk => {
     const solidBuffer = new SharedArrayBuffer(Uint8Array.BYTES_PER_ELEMENT * CHUNK_SIZE ** 3)
-    const colorBuffer = new SharedArrayBuffer(Uint32Array.BYTES_PER_ELEMENT * CHUNK_SIZE ** 3)
-
     const solid = new Uint8Array(solidBuffer)
     solid.fill(0)
-
+    
+    const colorBuffer = new SharedArrayBuffer(Uint32Array.BYTES_PER_ELEMENT * CHUNK_SIZE ** 3)
     const color = new Uint32Array(colorBuffer)
     color.fill(0)
 
     return {
-        id: '',
-        position: new THREE.Vector3(),
-        solid,
-        color,
-        solidBuffer,
-        colorBuffer,
-        priority: 0,
-    }
-}
-
-export const createVoxelChunk = (id: string, position: THREE.Vector3): VoxelChunk => {
-    const chunk = emptyChunk()
-
-    return {
         id,
         position,
-
-        solid: chunk.solid,
-        solidBuffer: chunk.solidBuffer,
-
-        color: chunk.color,
-        colorBuffer: chunk.colorBuffer,
-
+        solid,
+        solidBuffer,
+        color,
+        colorBuffer,
         priority: 0,
     }
 }

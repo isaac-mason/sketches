@@ -15,7 +15,7 @@ const orange = new Color('orange').getHex()
 const hotpink = new Color('hotpink').getHex()
 
 const App = () => {
-    const { world, setBlock } = useVoxelEngine()
+    const { world, voxelWorld } = useVoxelEngine()
 
     useLayoutEffect(() => {
         // sphere
@@ -23,7 +23,7 @@ const App = () => {
             for (let y = -10; y < 10; y++) {
                 for (let z = -10; z < 10; z++) {
                     if (x * x + y * y + z * z < 10 * 10) {
-                        setBlock([x, y, z], {
+                        voxelWorld.setBlock([x, y, z], {
                             solid: true,
                             color: Math.random() > 0.5 ? orange : hotpink,
                         })

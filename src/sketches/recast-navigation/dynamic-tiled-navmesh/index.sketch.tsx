@@ -119,10 +119,9 @@ const updateCrowdAgents = (delta: number, navMeshQuery: NavMeshQuery | undefined
 
         const velocity = agent.velocity()
         const direction = _crowdAgentDirection.set(velocity.x, velocity.y, velocity.z)
-        const yaw = Math.atan2(direction.x, direction.z)
-        _crowdAgentQuaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), yaw)
-
-        entity.three.quaternion.slerp(_crowdAgentQuaternion, delta * 30)
+        const yRotation = Math.atan2(direction.x, direction.z)
+        const quaternion = _crowdAgentQuaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), yRotation)
+        entity.three.quaternion.slerp(quaternion, delta * 30)
     }
 }
 

@@ -60,7 +60,7 @@ const Camera = () => {
 }
 
 const CameraBuildTool = () => {
-    const { voxelWorld, setBlock } = useVoxelEngine()
+    const { voxelWorld } = useVoxelEngine()
 
     const gl = useThree((s) => s.gl)
     const camera = useThree((s) => s.camera)
@@ -83,7 +83,7 @@ const CameraBuildTool = () => {
                     Math.floor(ray.hitPosition[2]),
                 ]
 
-                setBlock(block, {
+                voxelWorld.setBlock(block, {
                     solid: false,
                 })
             } else {
@@ -93,7 +93,7 @@ const CameraBuildTool = () => {
                     Math.floor(ray.hitPosition[2] + ray.hitNormal[2]),
                 ]
 
-                setBlock(block, {
+                voxelWorld.setBlock(block, {
                     solid: true,
                     color: orange,
                 })

@@ -29,7 +29,7 @@ type Input = {
 }
 
 const Player = () => {
-    const { voxelWorldActor } = useVoxelEngine()
+    const { voxelWorld } = useVoxelEngine()
 
     const position = useRef<Vector3>(new Vector3(0, 30, 0))
 
@@ -53,24 +53,24 @@ const Player = () => {
 
         camera.position.lerp(position.current, t * 2)
 
-        voxelWorldActor.position.copy(position.current)
+        voxelWorld.actor.copy(position.current)
     })
 
     return null
 }
 
+const _vector3 = new Vector3()
+
 const CameraBuildTool = () => {
-    const { voxelWorld, setBlock } = useVoxelEngine()
+    const { voxelWorld } = useVoxelEngine()
 
     const gl = useThree((s) => s.gl)
     const camera = useThree((s) => s.camera)
 
     useEffect(() => {
-        const vec3 = new Vector3()
-
         const onClick = (event: MouseEvent) => {
             const origin = camera.position.toArray()
-            const direction = camera.getWorldDirection(vec3).toArray()
+            const direction = camera.getWorldDirection(_vector3).toArray()
 
             const ray = voxelWorld.traceRay(origin, direction)
 
@@ -83,7 +83,7 @@ const CameraBuildTool = () => {
                     Math.floor(ray.hitPosition[2]),
                 ]
 
-                setBlock(block, {
+                voxelWorld.setBlock(block, {
                     solid: false,
                 })
             } else {
@@ -93,7 +93,7 @@ const CameraBuildTool = () => {
                     Math.floor(ray.hitPosition[2] + ray.hitNormal[2]),
                 ]
 
-                setBlock(block, {
+                voxelWorld.setBlock(block, {
                     solid: true,
                     color: orange,
                 })
