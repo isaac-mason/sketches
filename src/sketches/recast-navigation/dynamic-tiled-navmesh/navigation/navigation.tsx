@@ -26,7 +26,7 @@ export const useNav = create<NavState>(() => ({
 
 const navMeshBounds = new THREE.Box3(new THREE.Vector3(-50, -10, -50), new THREE.Vector3(70, 30, 40))
 
-const cellSize = 0.3
+const cellSize = 0.15
 const cellHeight = 0.45
 
 const recastConfig: Partial<RecastConfig> = {

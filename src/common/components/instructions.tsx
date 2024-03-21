@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import { useScreenshot } from '../../screenshot'
 
 const InstructionsWrapper = styled.div`
     color: white;
@@ -21,6 +22,10 @@ type InstructionsProps = {
 }
 
 export const Instructions = ({ children }: InstructionsProps) => {
+    const { screenshotMode } = useScreenshot()
+
+    if (screenshotMode) return null
+
     return (
         <InstructionsWrapper>
             <pre>{children}</pre>

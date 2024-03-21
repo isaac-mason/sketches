@@ -80,18 +80,21 @@ const Followers = () => {
 
     const { navMeshQuery } = useNav()
 
-    useFrame(() => {
-        updateCrowdAgents(navMeshQuery)
+    useFrame((_, delta) => {
+        updateCrowdAgents(delta, navMeshQuery)
     })
 
     useInterval(() => {
         updateFollowers(navMeshQuery)
-    }, 2000)
+    }, 1000)
 
     return <>{followers}</>
 }
 
-const updateCrowdAgents = (navMeshQuery: NavMeshQuery | undefined) => {
+const _crowdAgentDirection = new THREE.Vector3()
+const _crowdAgentQuaternion = new THREE.Quaternion()
+
+const updateCrowdAgents = (delta: number, navMeshQuery: NavMeshQuery | undefined) => {
     if (!navMeshQuery) return
 
     for (const entity of crowdAgentQuery) {
@@ -108,13 +111,18 @@ const updateCrowdAgents = (navMeshQuery: NavMeshQuery | undefined) => {
             }
         }
 
-        entity.three.position.copy(agent.position())
+        if (entity.three.position.length() === 0) {
+            entity.three.position.copy(agent.position())
+        } else {
+            entity.three.position.lerp(agent.position(), delta * 40)
+        }
 
         const velocity = agent.velocity()
-        const direction = new THREE.Vector3(velocity.x, velocity.y, velocity.z)
+        const direction = _crowdAgentDirection.set(velocity.x, velocity.y, velocity.z)
         const yaw = Math.atan2(direction.x, direction.z)
+        _crowdAgentQuaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), yaw)
 
-        entity.three.rotation.y = yaw
+        entity.three.quaternion.slerp(_crowdAgentQuaternion, delta * 30)
     }
 }
 
