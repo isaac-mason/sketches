@@ -53,8 +53,9 @@ export class Voxels {
 
     onChunkCreated = new Topic<[chunk: VoxelChunk, mesh: THREE.Mesh<ChunkGeometry, THREE.Material>]>()
 
-    private chunkState = new Map<string, ChunkState>()
-    private chunkMeshes = new Map<string, ChunkMesh>()
+    chunkState = new Map<string, ChunkState>()
+    chunkMeshes = new Map<string, ChunkMesh>()
+
     private dirtyChunks = new Set<string>()
     private dirtyUnloadedChunks = new Set<string>()
 

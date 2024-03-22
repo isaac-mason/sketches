@@ -66,14 +66,30 @@ type VoxelChunkMeshesProps = {
 export const VoxelChunkMeshes = ({ chunkHelper = false }: VoxelChunkMeshesProps) => {
     const { voxels } = useVoxels()
 
-    const [meshes, setMeshes] = useState<{ chunk: VoxelChunk; mesh: THREE.Mesh }[]>([])
+    type ChunkAndMesh = { chunk: VoxelChunk; mesh: THREE.Mesh }
+
+    const [meshes, setMeshes] = useState<ChunkAndMesh[]>([])
 
     useEffect(() => {
+        const meshes: ChunkAndMesh[] = []
+
+        for (const [, chunk] of voxels.world.chunks) {
+            const mesh = voxels.chunkMeshes.get(chunk.id)?.mesh
+
+            if (!mesh) continue
+
+            meshes.push({ chunk, mesh })
+        }
+
+        setMeshes(meshes)
+
         const unsub = voxels.onChunkCreated.add((chunk, mesh) => {
             setMeshes((prev) => [...prev, { chunk, mesh }])
         })
 
         return () => {
+            setMeshes([])
+
             unsub()
         }
     }, [])
