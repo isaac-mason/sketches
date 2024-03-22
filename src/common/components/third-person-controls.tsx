@@ -25,8 +25,8 @@ export const ThirdPersonControls = ({ minDistance = 3, maxDistance = 10, target,
         if (!controls) return
 
         controls.moveTo(target.x, target.y, target.z, false)
-        controls.draggingSmoothTime = 0
-        controls.smoothTime = 0
+        controls.draggingSmoothTime = 0.02
+        controls.smoothTime = 0.02
     })
 
     useEffect(() => {
