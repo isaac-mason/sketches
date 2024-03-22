@@ -1,23 +1,14 @@
-import { KeyboardControls, PointerLockControls, useKeyboardControls } from '@react-three/drei'
-import { useFrame, useThree } from '@react-three/fiber'
+import { Canvas, Crosshair } from '@/common'
+import { KeyboardControls, PerspectiveCamera, PointerLockControls, useKeyboardControls } from '@react-three/drei'
+import { useFrame } from '@react-three/fiber'
 import { useControls } from 'leva'
-import { useEffect, useMemo } from 'react'
-import { styled } from 'styled-components'
-import { Color, PerspectiveCamera, Vector3 } from 'three'
-import { Canvas } from '@/common'
-import {
-    BoxCharacterController,
-    BoxCharacterControllerCameraMode,
-    BoxCharacterControllerPlugin,
-} from '../engine/box-character-controller'
-import { CorePlugin, Vec3 } from '../engine/core'
-import { CulledMesherPlugin, VoxelChunkCulledMeshes } from '../engine/culled-mesher'
-import { createVoxelEngine } from '../engine/voxel-engine'
+import { useRef } from 'react'
+import * as THREE from 'three'
+import { CameraBuildTool } from '../camera-build-tool'
+import { VoxelChunkMeshes, Voxels, useVoxels } from '../lib/react'
 import { useSimpleLevel } from '../simple-level'
 
-const PLUGINS = [CorePlugin, CulledMesherPlugin, BoxCharacterControllerPlugin] as const
-
-const { VoxelEngine, useVoxelEngine } = createVoxelEngine(PLUGINS)
+const SKETCH = 'simple-voxels/box-character-controller'
 
 type Input = {
     forward: boolean
@@ -28,202 +19,294 @@ type Input = {
     sprint: boolean
 }
 
-const orange = new Color('orange').getHex()
+const controls = [
+    { name: 'forward', keys: ['ArrowUp', 'w', 'W'] },
+    { name: 'backward', keys: ['ArrowDown', 's', 'S'] },
+    { name: 'left', keys: ['ArrowLeft', 'a', 'A'] },
+    { name: 'right', keys: ['ArrowRight', 'd', 'D'] },
+    { name: 'jump', keys: ['Space'] },
+    { name: 'sprint', keys: ['ShiftLeft'] },
+]
 
-const Camera = () => {
-    const {
-        react: { Entity },
-    } = useVoxelEngine()
+type PlayerProps = {
+    position: THREE.Vector3Tuple
+    width: number
+    height: number
+}
 
-    const camera = useThree((s) => s.camera)
+const tmpThirdPersonOffset = new THREE.Vector3()
+const tmpVerticalRayOrigin = new THREE.Vector3()
+const tmpVerticalRayOffset = new THREE.Vector3()
 
-    const cameraConfiguration = useMemo(() => {
-        return { mode: 'first-person' as BoxCharacterControllerCameraMode }
-    }, [])
+const tmpFrontVector = new THREE.Vector3()
+const tmpSideVector = new THREE.Vector3()
+const tmpDirection = new THREE.Vector3()
+const tmpCameraWorldDirection = new THREE.Vector3()
 
-    useControls('voxel-box-character-controller-camera', {
+const down = { x: 0, y: -1, z: 0 } 
+const up = { x: 0, y: 1, z: 0 }
+
+const Player = ({ position: initialPosition, width, height }: PlayerProps) => {
+    const { cameraMode } = useControls(`${SKETCH}-player`, {
         cameraMode: {
-            value: cameraConfiguration.mode,
+            value: 'first-person',
             options: ['first-person', 'third-person'],
-            onChange: (value: BoxCharacterControllerCameraMode) => {
-                cameraConfiguration.mode = value
-            },
         },
     })
 
-    return (
-        <Entity
-            boxCharacterControllerCamera={camera as PerspectiveCamera}
-            boxCharacterControllerCameraConfiguration={cameraConfiguration}
-        />
-    )
-}
+    const { voxels } = useVoxels()
 
-const CameraBuildTool = () => {
-    const { voxelWorld } = useVoxelEngine()
+    const groupRef = useRef<THREE.Group>(null!)
+    const [, getControls] = useKeyboardControls()
 
-    const gl = useThree((s) => s.gl)
-    const camera = useThree((s) => s.camera)
+    const position = useRef(new THREE.Vector3(...initialPosition))
+    const velocity = useRef(new THREE.Vector3())
+    const jumping = useRef(false)
+    const jumpTime = useRef(0)
 
-    useEffect(() => {
-        const vec3 = new Vector3()
+    const characterHalfHeight = height / 2
+    const characterHalfWidth = width / 2
+    const horizontalSensorOffset = characterHalfWidth - 0.05
 
-        const onClick = (event: MouseEvent) => {
-            const origin = camera.position.toArray()
-            const direction = camera.getWorldDirection(vec3).toArray()
+    const _intersectsVoxelPosition = new THREE.Vector3()
 
-            const ray = voxelWorld.traceRay(origin, direction)
+    const intersectsVoxel = (position: THREE.Vector3Like) => {
+        return voxels.world.solid(_intersectsVoxelPosition.copy(position).floor())
+    }
 
-            if (!ray.hit) return
+    const checkGrounded = (): boolean => {
+        const offsets: THREE.Vector3Tuple[] = [
+            [horizontalSensorOffset, 0, horizontalSensorOffset],
+            [-horizontalSensorOffset, 0, horizontalSensorOffset],
+            [horizontalSensorOffset, 0, -horizontalSensorOffset],
+            [-horizontalSensorOffset, 0, -horizontalSensorOffset],
+        ]
 
-            if (event.button === 0) {
-                const block: Vec3 = [
-                    Math.floor(ray.hitPosition[0]),
-                    Math.floor(ray.hitPosition[1]),
-                    Math.floor(ray.hitPosition[2]),
-                ]
+        for (const offset of offsets) {
+            const origin = tmpVerticalRayOrigin.copy(position.current).add(tmpVerticalRayOffset.set(...offset))
+            const ray = voxels.world.raycast({ origin, direction: down } )
 
-                voxelWorld.setBlock(block, {
-                    solid: false,
-                })
-            } else {
-                const block: Vec3 = [
-                    Math.floor(ray.hitPosition[0] + ray.hitNormal[0]),
-                    Math.floor(ray.hitPosition[1] + ray.hitNormal[1]),
-                    Math.floor(ray.hitPosition[2] + ray.hitNormal[2]),
-                ]
+            if (ray.hit) {
+                const distance = position.current.y - ray.hitPosition.y
 
-                voxelWorld.setBlock(block, {
-                    solid: true,
-                    color: orange,
-                })
+                if (distance < characterHalfHeight + 0.001) {
+                    return true
+                }
             }
         }
 
-        gl.domElement.addEventListener('mousedown', onClick)
+        return false
+    }
 
-        return () => {
-            gl.domElement.removeEventListener('mousedown', onClick)
+    const checkHitCeiling = (): boolean => {
+        const offsets: THREE.Vector3Tuple[] = [
+            [horizontalSensorOffset, 0, horizontalSensorOffset],
+            [-horizontalSensorOffset, 0, horizontalSensorOffset],
+            [horizontalSensorOffset, 0, -horizontalSensorOffset],
+            [-horizontalSensorOffset, 0, -horizontalSensorOffset],
+        ]
+
+        for (const offset of offsets) {
+            const origin = tmpVerticalRayOrigin.copy(position.current).add(tmpVerticalRayOffset.set(...offset))
+            const ray = voxels.world.raycast({ origin, direction: up })
+
+            if (ray.hit) {
+                const distance = ray.hitPosition.y - position.current.y
+
+                if (distance < characterHalfHeight - 0.001) {
+                    return true
+                }
+            }
         }
-    }, [gl])
 
-    return null
-}
+        return false
+    }
 
-const Player = () => {
-    const {
-        react: { Entity, Component },
-    } = useVoxelEngine()
-
-    const [, getControls] = useKeyboardControls()
-
-    const { width, height } = useControls('voxel-box-character-controller', {
-        width: 0.8,
-        height: 3,
-    })
-
-    const options = useMemo(
-        () => ({
-            width,
-            height,
-            initialPosition: new Vector3(0, 30, 0), // fall from the sky!
-        }),
-        [width, height],
-    )
-
-    const input: Input = useMemo(
-        () => ({
-            forward: false,
-            backward: false,
-            left: false,
-            right: false,
-            jump: false,
-            sprint: false,
-        }),
-        [],
-    )
-
-    useFrame(() => {
+    useFrame(({ camera, clock: { elapsedTime } }, delta) => {
         const { forward, backward, left, right, jump, sprint } = getControls() as Input
 
-        input.forward = forward
-        input.backward = backward
-        input.left = left
-        input.right = right
-        input.jump = jump
-        input.sprint = sprint
+        const t = 1 - Math.pow(0.01, delta)
+
+        const grounded = checkGrounded()
+
+        /* desired vertical velocity */
+        // jumping
+        if (jump && elapsedTime > jumpTime.current + 0.1 && grounded) {
+            velocity.current.y = 2
+            jumping.current = true
+            if (elapsedTime > jumpTime.current + 0.1) {
+                jumpTime.current = elapsedTime
+            }
+        } else if (!jump) {
+            jumping.current = false
+        }
+
+        // gravity
+        velocity.current.y -= t * 0.8 // todo: make this configurable
+
+        /* desired horizontal velocity */
+        const frontVector = tmpFrontVector.set(0, 0, 0)
+        const sideVector = tmpSideVector.set(0, 0, 0)
+        const direction = tmpDirection.set(0, 0, 0)
+
+        frontVector.set(0, 0, Number(backward) - Number(forward))
+        sideVector.set(Number(left) - Number(right), 0, 0)
+
+        direction.subVectors(frontVector, sideVector)
+        direction.normalize()
+
+        const worldDirection = camera.getWorldDirection(tmpCameraWorldDirection)
+        const yaw = Math.atan2(worldDirection.x, worldDirection.z)
+        direction.applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw).multiplyScalar(-1)
+
+        velocity.current.x = direction.x
+        velocity.current.z = direction.z
+
+        const horizontalDims = ['x', 'z'] as const
+
+        // the desired x and z positions of the character
+        const horizontalSpeed = 1.2 + (sprint ? 0.6 : 0)
+        const nx = velocity.current.x * t * horizontalSpeed + position.current.x
+        const nz = velocity.current.z * t * horizontalSpeed + position.current.z
+
+        // the lower y value to use for x and z collision detection
+        const characterLowerY = position.current.y - characterHalfHeight
+
+        for (const dim of horizontalDims) {
+            // check for horizontal collision along the height of the character, starting from the bottom and moving up
+            // if no collision, set the new position to the desired new horizontal position
+            // otherwise, don't update the position and set the horizontal velocity to 0
+            const direction = velocity.current[dim] < 0 ? -characterHalfWidth : characterHalfWidth
+
+            // the new desired position for the current dimension
+            const desired = dim === 'x' ? nx : nz
+
+            let collision = false
+
+            for (let characterY = 0; characterY <= height; characterY += 1) {
+                // if the character is standing on the ground, offset the lower y collision check by a
+                // small amount so that the character doesn't get stuck
+                // const offset = characterY === 0 && grounded ? 0.1 : 0
+                let offset = 0
+                if (characterY === 0 && grounded) {
+                    offset = 0.1
+                } else if (characterY === height) {
+                    offset = -0.1
+                }
+
+                const y = characterY + offset
+
+                if (dim === 'x') {
+                    collision =
+                        intersectsVoxel({ x: nx + direction, y: characterLowerY + y, z: position.current.z - horizontalSensorOffset}) ||
+                        intersectsVoxel({ x: nx + direction, y: characterLowerY + y, z: position.current.z + horizontalSensorOffset})
+                } else {
+                    collision =
+                        intersectsVoxel({ x: position.current.x - horizontalSensorOffset, y: characterLowerY + y, z: nz + direction }) ||
+                        intersectsVoxel({ x: position.current.x + horizontalSensorOffset, y: characterLowerY + y, z: nz + direction })
+                }
+
+                if (collision) break
+            }
+
+            if (!collision) {
+                position.current[dim] = desired
+            } else {
+                velocity.current[dim] = 0
+            }
+        }
+
+        // desired y position
+        const ny = velocity.current.y * t + position.current.y
+
+        // if jumping, check for collision with the ceiling
+        if (velocity.current.y > 0) {
+            const hitCeiling = checkHitCeiling()
+
+            if (hitCeiling) {
+                // todo: set velocity, or reduce velocity + clamp position?
+                velocity.current.y = 0
+            }
+        }
+
+        // if falling, check for collision with the ground
+        // if there is a collision, set the y velocity to 0
+        // if no collision, set the new position to the desired new y position
+        if (velocity.current.y < 0 && grounded) {
+            velocity.current.y = 0
+
+            // snap to the ground
+            position.current.y = Math.ceil(position.current.y - characterHalfHeight) + characterHalfHeight
+        } else {
+            position.current.y = ny
+        }
+
+        /* update camera position */
+        camera.position.copy(position.current)
+
+        if (cameraMode === 'first-person') {
+            camera.position.y += height / 4
+        } else if (cameraMode === 'third-person') {
+            const thirdPersonOffset = tmpThirdPersonOffset.set(0, 0, 10)
+            thirdPersonOffset.applyQuaternion(camera.quaternion)
+            camera.position.add(thirdPersonOffset)
+            camera.position.y += 2
+        }
+
+        /* update object3D */
+        groupRef.current.position.copy(position.current)
+
+        /* update voxel world actor */
+        voxels.actor.copy(position.current)
     })
 
-    const boxCharacterController = useMemo(() => {
-        return new BoxCharacterController(options)
-    }, [width, height])
-
     return (
-        <Entity boxCharacterControllerInput={input} boxCharacterController={boxCharacterController}>
-            <Component name="object3D">
+        <>
+            <group ref={groupRef}>
                 <mesh>
                     <boxGeometry args={[width, height, width]} />
                     <meshStandardMaterial color="red" />
                 </mesh>
-            </Component>
-        </Entity>
-    )
-}
-
-const App = () => {
-    const levelReady = useSimpleLevel()
-
-    return (
-        <>
-            {levelReady && <Player />}
-
-            <Camera />
-
-            <CameraBuildTool />
-
-            <VoxelChunkCulledMeshes />
-
-            <ambientLight intensity={0.6} />
-            <pointLight decay={0.5} intensity={10} position={[20, 20, 20]} />
-            <pointLight decay={0.5} intensity={10} position={[-20, 20, -20]} />
+            </group>
         </>
     )
 }
 
-const Crosshair = styled.div`
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    transform: translate3d(-50%, -50%, 0);
-    border: 2px solid white;
-    z-index: 100;
-`
+const Scene = () => {
+    const ready = useSimpleLevel()
 
-export default () => {
+    if (!ready) return null
+
+    return (
+        <>
+            <CameraBuildTool />
+
+            <PointerLockControls makeDefault />
+            <KeyboardControls map={controls}>
+                <Player position={[0, 30, 0]} width={0.8} height={3} />
+            </KeyboardControls>
+
+            <PerspectiveCamera makeDefault fov={90} />
+        </>
+    )
+}
+
+export default function Sketch() {
     return (
         <>
             <Crosshair />
 
-            <KeyboardControls
-                map={[
-                    { name: 'forward', keys: ['ArrowUp', 'w', 'W'] },
-                    { name: 'backward', keys: ['ArrowDown', 's', 'S'] },
-                    { name: 'left', keys: ['ArrowLeft', 'a', 'A'] },
-                    { name: 'right', keys: ['ArrowRight', 'd', 'D'] },
-                    { name: 'jump', keys: ['Space'] },
-                    { name: 'sprint', keys: ['ShiftLeft'] },
-                ]}
-            >
-                <Canvas>
-                    <VoxelEngine>
-                        <App />
-                    </VoxelEngine>
-                    <PointerLockControls makeDefault />
-                </Canvas>
-            </KeyboardControls>
+            <Canvas>
+                <Voxels>
+                    <VoxelChunkMeshes />
+
+                    <Scene />
+
+                    <ambientLight intensity={0.6} />
+                    <pointLight decay={0.5} intensity={10} position={[20, 20, 20]} />
+                    <pointLight decay={0.5} intensity={10} position={[-20, 20, -20]} />
+                </Voxels>
+            </Canvas>
         </>
     )
 }

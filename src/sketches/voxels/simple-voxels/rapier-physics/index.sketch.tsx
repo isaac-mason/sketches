@@ -1,194 +1,183 @@
+import { Canvas, useInterval } from '@/common'
 import Rapier from '@dimforge/rapier3d-compat'
 import { Bounds, OrbitControls } from '@react-three/drei'
 import { ThreeEvent, useThree } from '@react-three/fiber'
+import { Physics, RapierRigidBody, RigidBody, useRapier } from '@react-three/rapier'
 import { useControls } from 'leva'
-import { useEffect, useMemo } from 'react'
-import { Color } from 'three'
-import { Canvas } from '@/common'
-import { CorePlugin, Vec3 } from '../engine/core'
-import { CulledMesherPlugin, VoxelChunkCulledMeshes } from '../engine/culled-mesher'
-import { PhysicsDebug, RapierInit, RapierPhysicsPlugin } from '../engine/rapier-physics'
-import { createVoxelEngine } from '../engine/voxel-engine'
+import { ReactElement, createRef, useEffect, useMemo, useRef, useState } from 'react'
+import * as THREE from 'three'
+import { Vector3Tuple } from 'three'
+import { VoxelChunkMeshes, Voxels, useVoxels } from '../lib/react'
+import { vec3 } from '../lib/world'
 import { SimpleLevel } from '../simple-level'
+import { createChunkTrimesh } from './chunk-collider'
 
-const PLUGINS = [CorePlugin, CulledMesherPlugin, RapierPhysicsPlugin] as const
+const SKETCH = 'simple-voxels/rapier-physics'
 
-const { VoxelEngine, useVoxelEngine } = createVoxelEngine(PLUGINS)
+type Box = {
+    position: THREE.Vector3Tuple
+    rotation: THREE.Vector3Tuple
+    linvel: THREE.Vector3Tuple
+}
 
-const orange = new Color('orange').getHex()
-
-const Tools = ({ children }: { children: React.ReactNode }) => {
-    const { world, voxelWorld, physicsWorld } = useVoxelEngine()
+const BoxCannonTool = ({ children }: { children: React.ReactNode }) => {
+    const [box, setBox] = useState<Box[]>([])
 
     const camera = useThree((s) => s.camera)
-
-    const { tool } = useControls('voxels-culled-mesher-physics-tool', {
-        tool: {
-            label: 'Tool',
-            options: ['cannon', 'build'],
-            value: 'cannon',
-        },
-    })
-
-    const handleCannon = (event: ThreeEvent<MouseEvent>) => {
-        const position = camera.position
-        const ray = event.ray
-
-        const body = physicsWorld.createRigidBody(
-            Rapier.RigidBodyDesc.dynamic().setTranslation(position.x, position.y, position.z).setRotation(camera.quaternion),
-        )
-        physicsWorld.createCollider(Rapier.ColliderDesc.cuboid(0.5, 0.5, 0.5), body)
-
-        const impulse = new Rapier.Vector3(ray.direction.x, ray.direction.y, ray.direction.z)
-        const impulseScale = 50
-        impulse.x *= impulseScale
-        impulse.y *= impulseScale
-        impulse.z *= impulseScale
-        body.applyImpulse(impulse, true)
-
-        world.create({ rigidBody: body })
-    }
-
-    const handleBuild = (event: ThreeEvent<MouseEvent>) => {
-        const origin = event.ray.origin.toArray()
-        const direction = event.ray.direction.toArray()
-
-        const ray = voxelWorld.traceRay(origin, direction)
-
-        if (!ray.hit) return
-
-        if (event.button === 2) {
-            const block: Vec3 = [Math.floor(ray.hitPosition[0]), Math.floor(ray.hitPosition[1]), Math.floor(ray.hitPosition[2])]
-
-            voxelWorld.setBlock(block, { solid: false })
-        } else {
-            const block: Vec3 = [
-                Math.floor(ray.hitPosition[0] + ray.hitNormal[0]),
-                Math.floor(ray.hitPosition[1] + ray.hitNormal[1]),
-                Math.floor(ray.hitPosition[2] + ray.hitNormal[2]),
-            ]
-
-            voxelWorld.setBlock(block, {
-                solid: true,
-                color: orange,
-            })
-        }
-    }
 
     const onPointerDown = (event: ThreeEvent<MouseEvent>) => {
         event.stopPropagation()
 
-        if (tool === 'cannon') {
-            handleCannon(event)
-        } else {
-            handleBuild(event)
-        }
+        const ray = event.ray
+
+        const position = camera.position.toArray()
+        const rotation = camera.rotation.toArray() as Vector3Tuple
+        const linvel = ray.direction.multiplyScalar(50).toArray()
+
+        setBox([...box, { position, rotation, linvel }])
     }
 
-    return <group onPointerDown={onPointerDown}>{children}</group>
+    return (
+        <group onPointerDown={onPointerDown}>
+            {children}
+
+            {box.map((box, i) => (
+                <RigidBody key={i} type="dynamic" position={box.position} rotation={box.rotation} linearVelocity={box.linvel}>
+                    <mesh>
+                        <meshStandardMaterial color="orange" />
+                        <boxGeometry args={[1, 1, 1]} />
+                    </mesh>
+                </RigidBody>
+            ))}
+        </group>
+    )
 }
 
-const Snow = () => {
-    const { world, physicsWorld } = useVoxelEngine()
+const VOXEL_PHYSICS_WORLD_OFFSET = 0.5
+
+const worldPositionToPhysicsPosition = (position: THREE.Vector3, out = new THREE.Vector3()) => {
+    return out.copy(position).addScalar(VOXEL_PHYSICS_WORLD_OFFSET)
+}
+
+const ChunkColliders = () => {
+    const { voxels } = useVoxels()
+
+    const { world } = useRapier()
+
+    const chunkRigidBodies = useMemo(() => {
+        return new Map<string, Rapier.RigidBody>()
+    }, [])
 
     useEffect(() => {
-        const timeouts: NodeJS.Timeout[] = []
+        const unsub = voxels.onUpdate.add((changes) => {
+            const chunksIds = new Set<string>(changes.map((change) => change.chunk.id))
 
-        const interval = setInterval(() => {
-            const x = Math.floor((Math.random() - 0.5) * 200)
-            const z = Math.floor((Math.random() - 0.5) * 200)
+            for (const chunkId of chunksIds) {
+                const chunk = voxels.world.getChunkById(chunkId)
+                if (!chunk) continue
 
-            const body = physicsWorld.createRigidBody(Rapier.RigidBodyDesc.dynamic().setTranslation(x, 80, z))
-            physicsWorld.createCollider(Rapier.ColliderDesc.cuboid(0.5, 0.5, 0.5), body)
+                let chunkRigidBody = chunkRigidBodies.get(chunkId)
 
-            const entity = world.create({
-                rigidBody: body,
-            })
+                if (!chunkRigidBody) {
+                    chunkRigidBody = world.createRigidBody(Rapier.RigidBodyDesc.fixed())
 
-            const timeout = setTimeout(() => {
-                world.destroy(entity)
-                physicsWorld.removeRigidBody(body)
-            }, 15000)
+                    const offset = worldPositionToPhysicsPosition(vec3.chunkToWorld(chunk.position))
 
-            timeouts.push(timeout)
-        }, 20)
+                    chunkRigidBody.setTranslation(offset, true)
+
+                    chunkRigidBodies.set(chunkId, chunkRigidBody)
+                }
+
+                while (chunkRigidBody.numColliders() > 0) {
+                    world.removeCollider(chunkRigidBody.collider(0), false)
+                }
+
+                const trimesh = createChunkTrimesh(voxels.world, chunk)
+
+                const colliderDesc = Rapier.ColliderDesc.trimesh(trimesh.positions, trimesh.indices)
+                colliderDesc.setTranslation(-0.5, -0.5, -0.5)
+
+                world.createCollider(colliderDesc, chunkRigidBody)
+            }
+        })
 
         return () => {
-            clearInterval(interval)
-            timeouts.forEach((timeout) => clearTimeout(timeout))
+            unsub()
         }
     }, [])
 
     return null
 }
 
-const PhysicsVoxelCubeRenderer = () => {
-    const {
-        world,
-        react: { Entities, Component },
-    } = useVoxelEngine()
+const Snow = () => {
+    const n = 500
+    const refs = useMemo(() => Array.from({ length: n }, () => createRef<RapierRigidBody>()), [])
 
-    const rigidBodyQuery = useMemo(() => world.query((e) => e.has('rigidBody')), [])
+    const bodies: ReactElement[] = []
 
-    return (
-        <Entities in={rigidBodyQuery}>
-            <Component name="object3D">
+    for (let i = 0; i < n; i++) {
+        const ref = refs[i]
+        bodies.push(
+            <RigidBody key={i} ref={ref} type="dynamic" position={[0, -1000 - i, 0]}>
                 <mesh>
                     <meshStandardMaterial color="white" />
                     <boxGeometry args={[1, 1, 1]} />
                 </mesh>
-            </Component>
-        </Entities>
-    )
-}
+            </RigidBody>,
+        )
+    }
 
-const PhysicsDebugDisplay = () => {
-    const { physicsWorld } = useVoxelEngine()
+    const roundRobin = useRef(0)
 
-    const { physicsDebug } = useControls('voxels-culled-mesher-physics-debug', {
-        physicsDebug: {
-            label: 'Physics Debug',
-            value: false,
-        },
-    })
+    useInterval(() => {
+        const body = refs[roundRobin.current].current
+        if (!body) return
 
-    return physicsDebug && <PhysicsDebug world={physicsWorld} />
-}
+        const translation = {
+            x: (Math.random() - 0.5) * 150,
+            y: 50,
+            z: (Math.random() - 0.5) * 150,
+        }
 
-const Lights = () => {
-    return (
-        <>
-            <ambientLight intensity={0.6} />
-            <pointLight decay={0.5} intensity={10} position={[40, 20, 40]} />
-            <pointLight decay={0.5} intensity={10} position={[-40, 20, -40]} />
-        </>
-    )
+        const linvel = { x: 0, y: 0, z: 0 }
+
+        body.setTranslation(translation, true)
+        body.setLinvel(linvel, true)
+
+        roundRobin.current = (roundRobin.current + 1) % n
+    }, 1000 / 10)
+
+    return bodies
 }
 
 export default () => {
+    const { physicsDebug } = useControls(SKETCH, {
+        physicsDebug: false,
+    })
+
     return (
-        <RapierInit>
-            <Canvas camera={{ position: [20, 50, 50] }}>
-                <VoxelEngine>
-                    <Tools>
-                        <SimpleLevel />
+        <Canvas camera={{ position: [20, 50, 50] }}>
+            <Voxels>
+                <SimpleLevel />
 
-                        <Snow />
+                <Physics debug={physicsDebug}>
+                    <Bounds fit margin={1.5}>
+                        <BoxCannonTool>
+                            <VoxelChunkMeshes />
+                        </BoxCannonTool>
+                    </Bounds>
 
-                        <Bounds fit margin={1.5}>
-                            <VoxelChunkCulledMeshes />
-                        </Bounds>
+                    <ChunkColliders />
 
-                        <PhysicsVoxelCubeRenderer />
+                    <Snow />
+                </Physics>
+            </Voxels>
 
-                        <PhysicsDebugDisplay />
+            <ambientLight intensity={0.6} />
+            <pointLight decay={0.5} intensity={10} position={[20, 20, 20]} />
+            <pointLight decay={0.5} intensity={10} position={[-20, 20, -20]} />
 
-                        <Lights />
-                    </Tools>
-                </VoxelEngine>
-
-                <OrbitControls makeDefault />
-            </Canvas>
-        </RapierInit>
+            <OrbitControls makeDefault />
+        </Canvas>
     )
 }

@@ -1,17 +1,11 @@
+import { Canvas } from '@/common'
 import { Bounds, OrbitControls } from '@react-three/drei'
 import { ThreeEvent, useFrame, useThree } from '@react-three/fiber'
 import { useLayoutEffect } from 'react'
 import { HexColorPicker } from 'react-colorful'
 import { Color } from 'three'
 import { create } from 'zustand'
-import { Canvas } from '@/common'
-import { CorePlugin, Vec3 } from '../engine/core'
-import { CulledMesherPlugin, VoxelChunkCulledMeshes } from '../engine/culled-mesher'
-import { createVoxelEngine } from '../engine/voxel-engine'
-
-const PLUGINS = [CorePlugin, CulledMesherPlugin] as const
-
-const { VoxelEngine, useVoxelEngine } = createVoxelEngine(PLUGINS)
+import { VoxelChunkMeshes, Voxels, useVoxels } from '../lib/react'
 
 const green1 = new Color('green').addScalar(-0.02).getHex()
 const green2 = new Color('green').addScalar(0.02).getHex()
@@ -26,39 +20,35 @@ const useColorStore = create<ColorStore>((set) => ({
 }))
 
 const PointerBuildTool = ({ children }: { children: React.ReactNode }) => {
-    const { voxelWorld } = useVoxelEngine()
+    const { voxels } = useVoxels()
 
     const { color } = useColorStore()
 
     const onClick = (event: ThreeEvent<MouseEvent>) => {
         event.stopPropagation()
 
-        const origin = event.ray.origin.toArray()
-        const direction = event.ray.direction.toArray()
+        const origin = event.ray.origin
+        const direction = event.ray.direction
 
-        const ray = voxelWorld.traceRay(origin, direction)
+        const ray = voxels.world.raycast({ origin, direction })
 
         if (!ray.hit) return
 
         if (event.button === 2) {
-            const block: Vec3 = [Math.floor(ray.hitPosition[0]), Math.floor(ray.hitPosition[1]), Math.floor(ray.hitPosition[2])]
+            const block = ray.hitPosition.floor()
 
-            voxelWorld.setBlock(block, { solid: false })
+            voxels.setBlock(block, { solid: false })
         } else {
-            const block: Vec3 = [
-                Math.floor(ray.hitPosition[0] + ray.hitNormal[0]),
-                Math.floor(ray.hitPosition[1] + ray.hitNormal[1]),
-                Math.floor(ray.hitPosition[2] + ray.hitNormal[2]),
-            ]
+            const block = ray.hitPosition.add(ray.hitNormal).floor()
 
-            voxelWorld.setBlock(block, {
+            voxels.setBlock(block, {
                 solid: true,
                 color: tmpColor.set(color).getHex(),
             })
         }
     }
 
-    return <group onPointerDown={onClick}>{children}</group>
+    return <scene onPointerDown={onClick}>{children}</scene>
 }
 
 const ColorPicker = () => {
@@ -78,16 +68,19 @@ const ColorPicker = () => {
 }
 
 const Level = () => {
-    const { voxelWorld } = useVoxelEngine()
+    const { voxels } = useVoxels()
 
     useLayoutEffect(() => {
         // ground
         for (let x = -15; x < 15; x++) {
             for (let z = -15; z < 15; z++) {
-                voxelWorld.setBlock([x, 0, z], {
-                    solid: true,
-                    color: Math.random() > 0.5 ? green1 : green2,
-                })
+                voxels.setBlock(
+                    { x, y: 0, z },
+                    {
+                        solid: true,
+                        color: Math.random() > 0.5 ? green1 : green2,
+                    },
+                )
             }
         }
     }, [])
@@ -96,12 +89,12 @@ const Level = () => {
 }
 
 const CameraVoxelWorldActor = () => {
-    const { voxelWorld } = useVoxelEngine()
+    const { voxels } = useVoxels()
 
     const camera = useThree((s) => s.camera)
 
     useFrame(() => {
-        voxelWorld.actor.copy(camera.position)
+        voxels.actor.copy(camera.position)
     })
 
     return null
@@ -111,17 +104,17 @@ export default () => {
     return (
         <>
             <Canvas camera={{ position: [20, 20, 20], near: 0.001 }}>
-                <VoxelEngine>
-                    <Level />
+                <Bounds fit margin={1.5}>
+                    <Voxels>
+                        <Level />
 
-                    <PointerBuildTool>
-                        <Bounds fit margin={1.5}>
-                            <VoxelChunkCulledMeshes />
-                        </Bounds>
-                    </PointerBuildTool>
+                        <PointerBuildTool>
+                            <VoxelChunkMeshes />
+                        </PointerBuildTool>
 
-                    <CameraVoxelWorldActor />
-                </VoxelEngine>
+                        <CameraVoxelWorldActor />
+                    </Voxels>
+                </Bounds>
 
                 <ambientLight intensity={0.6} />
                 <pointLight decay={0.5} intensity={10} position={[20, 20, 20]} />

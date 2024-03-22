@@ -1,6 +1,14 @@
-import { Color, Vector3 } from 'three'
-import { CHUNK_SIZE, Vec3, VoxelChunk, isSolid, vec3 } from '../core'
-import { ChunkMeshUpdateMessage, RegisterChunkMessage, WorkerMessage } from './types'
+import { Color, Vector3, Vector3Like } from 'three'
+import { CHUNK_SIZE, VoxelChunk, World, vec3 } from './world'
+
+export type CulledMesherChunkResult = {
+    id: string
+    positions: Float32Array
+    indices: Uint32Array
+    normals: Float32Array
+    colors: Float32Array
+    ambientOcclusion: Float32Array
+}
 
 const vertexAmbientOcclusion = (side1: number, side2: number, corner: number) => {
     if (side1 && side2) {
@@ -10,11 +18,7 @@ const vertexAmbientOcclusion = (side1: number, side2: number, corner: number) =>
     return (3 - (side1 + side2 + corner)) / 3
 }
 
-const voxelFaceAmbientOcclusionGrid = (
-    chunks: Map<string, VoxelChunk>,
-    pos: Vec3,
-    dir: (typeof VOXEL_FACE_DIRECTIONS)[number],
-): number[] => {
+const voxelFaceAmbientOcclusionGrid = (world: World, pos: Vector3Like, dir: (typeof VOXEL_FACE_DIRECTIONS)[number]): number[] => {
     const u = new Vector3(dir.ux, dir.uy, dir.uz)
     const v = new Vector3(dir.vx, dir.vy, dir.vz)
     const normal = new Vector3(dir.nx, dir.ny, dir.nz)
@@ -24,7 +28,7 @@ const voxelFaceAmbientOcclusionGrid = (
 
     for (let q = -1; q < 2; q++) {
         for (let p = -1; p < 2; p++) {
-            vec3.set(...pos)
+            vec3.copy(pos)
 
             vec3.x += normal.x
             vec3.y += normal.y
@@ -38,7 +42,7 @@ const voxelFaceAmbientOcclusionGrid = (
             vec3.y += v.y * q
             vec3.z += v.z * q
 
-            const solid = isSolid(vec3.toArray(), chunks)
+            const solid = world.solid(vec3)
 
             grid.push(solid ? 1 : 0)
         }
@@ -58,8 +62,8 @@ const voxelFaceAmbientOcclusionGrid = (
  *  |  0  |  1  |  2  |
  *  . --- . --- . --- .
  */
-const voxelFaceAmbientOcclusion = (chunks: Map<string, VoxelChunk>, pos: Vec3, dir: (typeof VOXEL_FACE_DIRECTIONS)[number]) => {
-    const grid = voxelFaceAmbientOcclusionGrid(chunks, pos, dir)
+const voxelFaceAmbientOcclusion = (world: World, pos: Vector3Like, dir: (typeof VOXEL_FACE_DIRECTIONS)[number]) => {
+    const grid = voxelFaceAmbientOcclusionGrid(world, pos, dir)
 
     return [
         vertexAmbientOcclusion(grid[3], grid[1], grid[0]),
@@ -205,7 +209,7 @@ const VOXEL_FACE_DIRECTIONS: {
 
 const _color = new Color()
 
-const mesh = (chunks: Map<string, VoxelChunk>, chunk: VoxelChunk) => {
+export const mesh = (world: World, chunk: VoxelChunk): CulledMesherChunkResult => {
     const chunkX = chunk.position.x * CHUNK_SIZE
     const chunkY = chunk.position.y * CHUNK_SIZE
     const chunkZ = chunk.position.z * CHUNK_SIZE
@@ -219,7 +223,7 @@ const mesh = (chunks: Map<string, VoxelChunk>, chunk: VoxelChunk) => {
     for (let localX = 0; localX < CHUNK_SIZE; localX++) {
         for (let localY = 0; localY < CHUNK_SIZE; localY++) {
             for (let localZ = 0; localZ < CHUNK_SIZE; localZ++) {
-                const chunkDataIndex = vec3.toChunkIndex([localX, localY, localZ])
+                const chunkDataIndex = vec3.toChunkIndex({ x: localX, y: localY, z: localZ })
 
                 if (chunk.solid[chunkDataIndex] === 0) continue
 
@@ -242,9 +246,9 @@ const mesh = (chunks: Map<string, VoxelChunk>, chunk: VoxelChunk) => {
                         localZ + dz < 0 ||
                         localZ + dz >= CHUNK_SIZE
                     ) {
-                        solid = isSolid([worldX + dx, worldY + dy, worldZ + dz], chunks)
+                        solid = world.solid({ x: worldX + dx, y: worldY + dy, z: worldZ + dz })
                     } else {
-                        const index = vec3.toChunkIndex([localX + dx, localY + dy, localZ + dz])
+                        const index = vec3.toChunkIndex({ x: localX + dx, y: localY + dy, z: localZ + dz })
                         solid = chunk.solid[index] === 1
                     }
 
@@ -276,7 +280,8 @@ const mesh = (chunks: Map<string, VoxelChunk>, chunk: VoxelChunk) => {
                         color.b,
                     )
 
-                    const ao = voxelFaceAmbientOcclusion(state.chunks, [worldX, worldY, worldZ], voxelFaceDirection)
+                    const worldPosition = { x: worldX, y: worldY, z: worldZ }
+                    const ao = voxelFaceAmbientOcclusion(world, worldPosition, voxelFaceDirection)
                     const ao00 = ao[0]
                     const ao01 = ao[1]
                     const ao10 = ao[2]
@@ -314,6 +319,7 @@ const mesh = (chunks: Map<string, VoxelChunk>, chunk: VoxelChunk) => {
     }
 
     return {
+        id: chunk.id,
         positions: new Float32Array(positions),
         indices: new Uint32Array(indices),
         normals: new Float32Array(normals),
@@ -321,80 +327,3 @@ const mesh = (chunks: Map<string, VoxelChunk>, chunk: VoxelChunk) => {
         ambientOcclusion: new Float32Array(ambientOcclusion),
     }
 }
-
-type WorkerState = {
-    chunks: Map<string, VoxelChunk>
-    jobs: Set<string>
-}
-
-const state: WorkerState = {
-    chunks: new Map(),
-    jobs: new Set(),
-}
-
-const worker = self as unknown as Worker
-
-const update = () => {
-    const incomplete = new Set(state.jobs)
-
-    const jobs = state.jobs
-    state.jobs = new Set()
-
-    for (const chunkId of jobs) {
-        const chunk = state.chunks.get(chunkId)
-        if (!chunk) continue
-
-        const { positions, indices, normals, colors, ambientOcclusion } = mesh(state.chunks, chunk)
-
-        incomplete.delete(chunkId)
-
-        const chunkMeshUpdateNotification: ChunkMeshUpdateMessage = {
-            type: 'chunk-mesh-update',
-            id: chunkId,
-            positions,
-            indices,
-            normals,
-            colors,
-            ambientOcclusion,
-        }
-
-        worker.postMessage(chunkMeshUpdateNotification, [
-            positions.buffer,
-            indices.buffer,
-            normals.buffer,
-            colors.buffer,
-            ambientOcclusion.buffer,
-        ])
-    }
-
-    state.jobs = new Set([...incomplete, ...state.jobs])
-}
-
-const registerChunk = ({ id, position, solidBuffer, colorBuffer }: RegisterChunkMessage) => {
-    const chunk: VoxelChunk = {
-        id,
-        position: new Vector3(...position),
-        solid: new Uint8Array(solidBuffer),
-        solidBuffer,
-        color: new Uint32Array(colorBuffer),
-        colorBuffer,
-        priority: 0,
-    }
-
-    state.chunks.set(id, chunk)
-}
-
-worker.onmessage = (e) => {
-    const data = e.data as WorkerMessage
-    const { type } = data
-
-    if (type === 'register-chunk') {
-        registerChunk(data)
-    } else if (type === 'request-chunk-mesh-update') {
-        state.jobs.add(data.id)
-    }
-}
-
-setInterval(() => {
-    update()
-}, 1 / 60)

@@ -1,3 +1,4 @@
+import { Canvas, Instructions } from '@/common'
 import { animated, useSpring } from '@react-spring/three'
 import { PerspectiveCamera } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
@@ -13,7 +14,6 @@ import {
 import { useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { InstancedMesh } from 'three'
-import { Canvas, Instructions } from '@/common'
 
 const randomBetween = (a: number, b: number) => {
     const min = Math.min(a, b)

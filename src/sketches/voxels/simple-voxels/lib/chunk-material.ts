@@ -1,10 +1,10 @@
-import { BufferGeometry, Mesh, MeshStandardMaterial } from 'three'
+import { MeshStandardMaterial } from 'three'
 
-const voxelChunkShaderMaterial = new MeshStandardMaterial({
+export const chunkMaterial = new MeshStandardMaterial({
     vertexColors: true,
 })
 
-voxelChunkShaderMaterial.onBeforeCompile = (shader) => {
+chunkMaterial.onBeforeCompile = (shader) => {
     shader.vertexShader = `
         attribute float ambientOcclusion;
         varying float vAmbientOcclusion;
@@ -37,20 +37,4 @@ voxelChunkShaderMaterial.onBeforeCompile = (shader) => {
         gl_FragColor = vec4(gl_FragColor.rgb * ambientOcclusion, 1.0);
     `,
     )
-}
-
-export class VoxelChunkMesh {
-    geometry!: BufferGeometry
-
-    material!: MeshStandardMaterial
-
-    mesh!: Mesh
-
-    initialised = false
-
-    constructor() {
-        this.geometry = new BufferGeometry()
-        this.material = voxelChunkShaderMaterial
-        this.mesh = new Mesh(this.geometry, this.material)
-    }
 }

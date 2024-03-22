@@ -1,29 +1,21 @@
-import { Bounds, OrbitControls } from '@react-three/drei'
-import { useControls } from 'leva'
-import { useLayoutEffect } from 'react'
-import { Color } from 'three'
 import { Canvas } from '@/common'
-import { CorePlugin } from '../engine/core'
-import { CulledMesherPlugin, VoxelChunkCulledMeshes } from '../engine/culled-mesher'
-import { createVoxelEngine } from '../engine/voxel-engine'
+import { VoxelChunkMeshes, Voxels, useVoxels } from '../lib/react'
+import { useEffect } from 'react'
+import * as THREE from 'three'
+import { OrbitControls, PerspectiveCamera } from '@react-three/drei'
 
-const PLUGINS = [CorePlugin, CulledMesherPlugin] as const
+const orange = new THREE.Color('orange').getHex()
+const hotpink = new THREE.Color('hotpink').getHex()
 
-const { VoxelEngine, useVoxelEngine } = createVoxelEngine(PLUGINS)
+const Sphere = () => {
+    const { voxels } = useVoxels()
 
-const orange = new Color('orange').getHex()
-const hotpink = new Color('hotpink').getHex()
-
-const App = () => {
-    const { world, voxelWorld } = useVoxelEngine()
-
-    useLayoutEffect(() => {
-        // sphere
+    useEffect(() => {
         for (let x = -10; x < 10; x++) {
             for (let y = -10; y < 10; y++) {
                 for (let z = -10; z < 10; z++) {
                     if (x * x + y * y + z * z < 10 * 10) {
-                        voxelWorld.setBlock([x, y, z], {
+                        voxels.setBlock({ x, y, z }, {
                             solid: true,
                             color: Math.random() > 0.5 ? orange : hotpink,
                         })
@@ -31,43 +23,24 @@ const App = () => {
                 }
             }
         }
-    }, [world])
+    }, [voxels])
 
-    useControls(
-        'voxels-culled-mesher-basic',
-        {
-            wireframe: {
-                value: false,
-                onChange: (value) => {
-                    world
-                        .filter((e) => e.has('voxelChunkMesh'))
-                        .forEach((entity) => {
-                            entity.voxelChunkMesh.material.wireframe = value
-                        })
-                },
-            },
-        },
-        [world],
-    )
-
-    return (
-        <>
-            <Bounds fit margin={1.5}>
-                <VoxelChunkCulledMeshes />
-            </Bounds>
-
-            <ambientLight intensity={0.6} />
-            <pointLight decay={1.5} intensity={200} position={[20, 20, 20]} />
-            <pointLight decay={1.5} intensity={200} position={[-20, 20, -20]} />
-        </>
-    )
+    return null
 }
 
-export default () => (
-    <Canvas camera={{ position: [10, 10, 10] }}>
-        <VoxelEngine>
-            <App />
-        </VoxelEngine>
-        <OrbitControls makeDefault />
-    </Canvas>
-)
+export default function Sketch() {
+    return (
+        <Canvas>
+            <Voxels>
+                <Sphere />
+
+                <VoxelChunkMeshes chunkHelper />
+            </Voxels>
+
+            <PerspectiveCamera makeDefault position={[30, 30, 30]} />
+            <OrbitControls makeDefault />
+
+            <ambientLight intensity={1.5} />
+        </Canvas>
+    )
+}

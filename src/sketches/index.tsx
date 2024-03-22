@@ -42,6 +42,32 @@ const sketchList = [
         path: 'recast-navigation/dynamic-tiled-navmesh',
         tags: ['recast-navigation', 'navmesh', 'physics', 'rapier', 'arancini'],
     },
+    /* Voxels */
+    {
+        title: 'Simple Voxels - Sphere',
+        path: 'voxels/simple-voxels/sphere',
+        tags: ['voxels', 'vertex-colors', 'culled-mesher'],
+    },
+    {
+        title: 'Simple Voxels - Building',
+        path: 'voxels/simple-voxels/building',
+        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'building'],
+    },
+    {
+        title: 'Simple Voxels - Fly Controls',
+        path: 'voxels/simple-voxels/fly-controls',
+        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'controller'],
+    },
+    {
+        title: 'Simple Voxels - Box Character Controller',
+        path: 'voxels/simple-voxels/box-character-controller',
+        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'controller'],
+    },
+    {
+        title: 'Simple Voxels - Rapier Physics',
+        path: 'voxels/simple-voxels/rapier-physics',
+        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'physics', 'rapier'],
+    },
     /* Rapier */
     {
         title: 'Rapier - Cluster',
@@ -130,32 +156,6 @@ const sketchList = [
         title: 'p2-es - Pixelated Text',
         path: 'p2-es/pixelated-text',
         tags: ['physics', 'p2-es', 'text', 'arancini'],
-    },
-    /* Voxels */
-    {
-        title: 'Simple Voxels - Sphere',
-        path: 'voxels/simple-voxels/sphere',
-        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'arancini'],
-    },
-    {
-        title: 'Simple Voxels - Building',
-        path: 'voxels/simple-voxels/building',
-        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'building', 'arancini'],
-    },
-    {
-        title: 'Simple Voxels - Fly Controls',
-        path: 'voxels/simple-voxels/fly-controls',
-        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'controller', 'arancini'],
-    },
-    {
-        title: 'Simple Voxels - Box Character Controller',
-        path: 'voxels/simple-voxels/box-character-controller',
-        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'controller', 'arancini'],
-    },
-    {
-        title: 'Simple Voxels - Rapier Physics',
-        path: 'voxels/simple-voxels/rapier-physics',
-        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'physics', 'rapier', 'arancini'],
     },
     /* Raytracing */
     {

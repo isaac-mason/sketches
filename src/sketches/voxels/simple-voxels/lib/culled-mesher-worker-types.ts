@@ -1,9 +1,9 @@
-import { Vec3 } from '../core'
+import { CulledMesherChunkResult } from './culled-mesher'
 
 export type RegisterChunkMessage = {
     type: 'register-chunk'
     id: string
-    position: Vec3
+    position: [number, number, number]
     solidBuffer: SharedArrayBuffer
     colorBuffer: SharedArrayBuffer
 }
@@ -15,12 +15,6 @@ export type RequestChunkMeshUpdateMessage = {
 
 export type ChunkMeshUpdateMessage = {
     type: 'chunk-mesh-update'
-    id: string
-    positions: Float32Array
-    indices: Uint32Array
-    normals: Float32Array
-    colors: Float32Array
-    ambientOcclusion: Float32Array
-}
+} & CulledMesherChunkResult
 
 export type WorkerMessage = RegisterChunkMessage | RequestChunkMeshUpdateMessage | ChunkMeshUpdateMessage
