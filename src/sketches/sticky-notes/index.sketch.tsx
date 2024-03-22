@@ -5,8 +5,8 @@ import { useDrag } from '@use-gesture/react'
 import { useRef, useState } from 'react'
 import styled from 'styled-components'
 import * as THREE from 'three'
-import catImageUrl from './images/pexels-bekka-mongeau-804475.jpg?url'
-import treeImageUrl from './images/pexels-johannes-plenio-1632790.jpg?url'
+import catImageUrl from './images/pexels-bekka-mongeau-804475.jpg?url&w=300&format=webp&imagetools'
+import treeImageUrl from './images/pexels-johannes-plenio-1632790.jpg?url&w=300&format=webp&imagetools'
 
 const Card = styled.div`
     width: 300px;
