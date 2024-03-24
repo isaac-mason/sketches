@@ -29,11 +29,10 @@ const size = 1
 const colors = ['orange', 'hotpink', '#fff']
 
 const pointOfGravity = new THREE.Vector3(0, 0, 0)
-let pointOfGravityIntensity = 0.2
+let pointOfGravityIntensity = 0.1
 
 const Cluster = () => {
     const api = useRef<RapierRigidBody[]>(null)
-
     const ref = useRef<InstancedMesh>(null)
 
     useBeforePhysicsStep(() => {
@@ -54,18 +53,28 @@ const Cluster = () => {
     }, [])
 
     const instances = useMemo(() => {
-        return Array.from({ length: N }, (_, i) => ({
-            key: i,
-            position: [randomBetween(-100, 100), randomBetween(-100, -200), randomBetween(10, -10)] as THREE.Vector3Tuple,
-            linearVelocity: [randomBetween(0, 0), randomBetween(0, 800), randomBetween(0, 0)] as THREE.Vector3Tuple,
-        }))
+        return Array.from({ length: N }, (_, i) => {
+            const side = Math.random() > 0.5 ? 1 : -1
+
+            return {
+                key: i,
+                position: [side * randomBetween(50, 100), randomBetween(-50, 50), randomBetween(10, -10)] as THREE.Vector3Tuple,
+            }
+        })
     }, [])
 
     return (
         <group>
-            <InstancedRigidBodies ref={api} instances={instances} colliders="ball" linearDamping={4} friction={0.1}>
-                <instancedMesh ref={ref} args={[undefined, undefined, N]} castShadow frustumCulled={false}>
-                    <sphereGeometry args={[size]} />
+            <InstancedRigidBodies
+                ref={api}
+                instances={instances}
+                colliders="cuboid"
+                linearDamping={4}
+                angularDamping={10}
+                friction={0.5}
+            >
+                <instancedMesh ref={ref} args={[undefined, undefined, N]} frustumCulled={false}>
+                    <boxGeometry args={[size, size, size]} />
                     <meshPhysicalMaterial roughness={0.4} />
                 </instancedMesh>
             </InstancedRigidBodies>
@@ -83,6 +92,8 @@ const Pointer = ({ vec = new THREE.Vector3() }) => {
     })
 
     useFrame(({ pointer, viewport }) => {
+        if (pointer.x === 0 && pointer.y === 0) return
+
         if (pointerDown) {
             pointOfGravity.set((pointer.x * viewport.width) / 2, (pointer.y * viewport.height) / 2, 0)
             pointOfGravityIntensity = 0.3
@@ -118,7 +129,7 @@ const Pointer = ({ vec = new THREE.Vector3() }) => {
         <RigidBody position={[1000, 1000, 1000]} type="kinematicPosition" colliders={false} mass={2} ref={rigidBody}>
             <BallCollider args={[4]} />
 
-            <animated.pointLight decay={1} intensity={intensity} castShadow />
+            <animated.pointLight decay={1} intensity={intensity} />
         </RigidBody>
     )
 }
@@ -133,6 +144,7 @@ export default function Sketch() {
                     <Pointer />
 
                     <ambientLight intensity={1.75} />
+                    <pointLight position={[15, -5, 15]} decay={1} intensity={2} />
 
                     <EffectComposer enableNormalPass={false} multisampling={8}>
                         <N8AO distanceFalloff={1} aoRadius={1} intensity={1} />
