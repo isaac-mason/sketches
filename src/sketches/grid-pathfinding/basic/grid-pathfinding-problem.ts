@@ -1,7 +1,9 @@
-import { Node, ProblemDefinition, State } from './search'
+import { Node, ProblemDefinition } from './search'
 import { Vec2, vec2 } from './vec2'
 
-type PositionState = Vec2 & { dedupe: string }
+export type PositionState = Vec2 & { dedupe: string }
+
+export type MovementAction = Vec2
 
 const createPositionState = (position: Vec2): PositionState => {
     return {
@@ -10,14 +12,7 @@ const createPositionState = (position: Vec2): PositionState => {
     }
 }
 
-type MovementAction = Vec2
-
-export type GridPathfindingProblem = {
-    state: PositionState
-    action: MovementAction
-}
-
-export class GridPathfindingProblemDefinition implements ProblemDefinition<GridPathfindingProblem> {
+export class GridPathfindingProblemDefinition implements ProblemDefinition<PositionState, MovementAction> {
     private movementDirections: Vec2[] = [
         { x: -1, y: 0 },
         { x: 1, y: 0 },
@@ -73,20 +68,20 @@ export class GridPathfindingProblemDefinition implements ProblemDefinition<GridP
 
     pathCost(
         cost: number,
-        _start: GridPathfindingProblem['state'],
-        _action: GridPathfindingProblem['action'],
-        _end: GridPathfindingProblem['state'],
+        _start: PositionState,
+        _action: MovementAction,
+        _end: PositionState,
     ) {
         return cost + 1
     }
 }
 
-const cartesianDistanceHeuristic = (state: State<GridPathfindingProblem>, goal: Vec2) => {
+const cartesianDistanceHeuristic = (state: PositionState, goal: Vec2) => {
     const dx = state.x - goal.x
     const dy = state.y - goal.y
     return Math.sqrt(dx * dx + dy * dy)
 }
 
-export const fScore = (problemDefinition: GridPathfindingProblemDefinition, node: Node<GridPathfindingProblem>) => {
+export const fScore = (problemDefinition: GridPathfindingProblemDefinition, node: Node<PositionState, MovementAction>) => {
     return node.pathCost + cartesianDistanceHeuristic(node.state, problemDefinition.goal)
 }

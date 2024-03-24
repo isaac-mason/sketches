@@ -1,3 +1,4 @@
+import { Canvas } from '@/common'
 import sunsetEnvironment from '@pmndrs/assets/hdri/sunset.exr'
 import { Environment, Html, OrbitControls } from '@react-three/drei'
 import { useControls } from 'leva'
@@ -5,11 +6,10 @@ import { useCallback, useEffect, useMemo } from 'react'
 import styled from 'styled-components'
 import * as THREE from 'three'
 import { create } from 'zustand'
-import { Canvas } from '@/common'
 import { Flag } from './components/flag'
 import { Floor } from './components/floor'
 import { Rocks } from './components/rocks'
-import { GridPathfindingProblem, GridPathfindingProblemDefinition, fScore } from './grid-pathfinding-problem'
+import { GridPathfindingProblemDefinition, MovementAction, PositionState, fScore } from './grid-pathfinding-problem'
 import { Node, bestFirstGraphSearch } from './search'
 import { Vec2 } from './vec2'
 
@@ -26,8 +26,8 @@ type PathfindingState = {
     obstacles: Vec2[]
     setObstacles: (obstacles: Vec2[]) => void
 
-    path?: Node<GridPathfindingProblem>[]
-    setPath: (path?: Node<GridPathfindingProblem>[]) => void
+    path?: Node<PositionState, MovementAction>[]
+    setPath: (path?: Node<PositionState, MovementAction>[]) => void
 }
 
 const usePathfindingState = create<PathfindingState>((set) => ({

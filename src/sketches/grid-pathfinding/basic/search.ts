@@ -1,18 +1,11 @@
-export type ProblemType = {
-    state: { dedupe: string }
-    action: unknown
-}
+type BaseState = { dedupe: string }
 
-export type State<Problem extends ProblemType> = Problem['state']
+export class Node<State extends BaseState, Action> {
+    state: State
 
-export type Action<Problem extends ProblemType> = Problem['action']
+    action?: Action
 
-export class Node<Problem extends ProblemType = ProblemType> {
-    state: State<Problem>
-
-    action?: Action<Problem>
-
-    parent?: Node<Problem>
+    parent?: Node<State, Action>
 
     pathCost: number
 
@@ -22,9 +15,9 @@ export class Node<Problem extends ProblemType = ProblemType> {
         parent,
         pathCost,
     }: {
-        state: State<Problem>
-        action?: Action<Problem>
-        parent?: Node<Problem>
+        state: State
+        action?: Action
+        parent?: Node<State, Action>
         pathCost?: number
     }) {
         this.state = state
@@ -33,9 +26,9 @@ export class Node<Problem extends ProblemType = ProblemType> {
         this.pathCost = pathCost ?? 0
     }
 
-    path(): Node<Problem>[] {
-        const nodes: Node<Problem>[] = [this]
-        let node: Node<Problem> = this
+    path(): Node<State, Action>[] {
+        const nodes: Node<State, Action>[] = [this]
+        let node: Node<State, Action> = this
 
         while (node.parent) {
             nodes.push(node.parent)
@@ -45,7 +38,7 @@ export class Node<Problem extends ProblemType = ProblemType> {
         return nodes.reverse()
     }
 
-    actions(): Action<Problem>[] {
+    actions(): Action[] {
         const actions = this.path().map((n) => n.action!)
         actions.shift()
 
@@ -130,16 +123,16 @@ class KeyedPriorityQueue<T> {
     }
 }
 
-export type ProblemDefinition<Problem extends ProblemType> = {
-    initial(): State<Problem>
+export interface ProblemDefinition<State extends BaseState, Action> {
+    initial(): State
 
-    actions(state: State<Problem>): Action<Problem>[]
+    actions(state: State): Action[]
 
-    apply(state: State<Problem>, action: Action<Problem>): State<Problem>
+    apply(state: State, action: Action): State
 
-    goalTest(state: State<Problem>): boolean
+    goalTest(state: State): boolean
 
-    pathCost(cost: number, start: State<Problem>, action: Action<Problem>, end: State<Problem>): number
+    pathCost(cost: number, start: State, action: Action, end: State): number
 }
 
 /**
@@ -153,11 +146,11 @@ export type ProblemDefinition<Problem extends ProblemType> = {
  *
  * @returns a node passing the problem definition's goal test, or undefined if no such node exists
  */
-export function bestFirstGraphSearch<Problem extends ProblemType, ProblemDef extends ProblemDefinition<Problem>>(
+export function bestFirstGraphSearch<State extends BaseState, Action, ProblemDef extends ProblemDefinition<State, Action>>(
     problem: ProblemDef,
-    f: (problemDefinition: ProblemDef, node: Node<Problem>) => number,
-): Node<Problem> | undefined {
-    const initialNode = new Node<Problem>({ state: problem.initial() })
+    f: (problemDefinition: ProblemDef, node: Node<State, Action>) => number,
+): Node<State, Action> | undefined {
+    const initialNode = new Node<State, Action>({ state: problem.initial() })
 
     if (problem.goalTest(initialNode.state)) {
         return initialNode
@@ -165,7 +158,7 @@ export function bestFirstGraphSearch<Problem extends ProblemType, ProblemDef ext
 
     const explored = new Set<string>()
 
-    const frontier = new KeyedPriorityQueue<Node<Problem>>()
+    const frontier = new KeyedPriorityQueue<Node<State, Action>>()
 
     frontier.add(initialNode.state.dedupe, initialNode, 0)
 

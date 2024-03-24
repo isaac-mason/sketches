@@ -68,6 +68,11 @@ const sketchList = [
         path: 'voxels/simple-voxels/rapier-physics',
         tags: ['voxels', 'vertex-colors', 'culled-mesher', 'physics', 'rapier'],
     },
+    {
+        title: 'Simple Voxels - Pathfinding',
+        path: 'voxels/simple-voxels/pathfinding',
+        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'pathfinding'],
+    },
     /* Rapier */
     {
         title: 'Rapier - Cluster',
