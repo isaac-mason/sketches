@@ -99,6 +99,25 @@ export class World {
 
     onChunkCreated = new Topic<[chunk: VoxelChunk]>()
 
+    get(position: THREE.Vector3Like) {
+        const chunk = this.getChunkAtPosition(position)
+
+        if (!chunk) {
+            return {
+                solid: false,
+                chunk: null,
+            }
+        }
+
+        const index = vec3.toChunkIndex(position)
+
+        return {
+            solid: chunk.solid[index] === 1,
+            color: chunk.color[index],
+            chunk,
+        }
+    }
+
     set(position: THREE.Vector3Like, value: BlockValue) {
         const chunkPosition = vec3.worldToChunk(position)
         const id = chunkId(chunkPosition)

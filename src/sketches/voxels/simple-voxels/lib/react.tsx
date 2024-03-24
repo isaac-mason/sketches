@@ -23,9 +23,9 @@ export const useVoxels = () => {
 
 export type VoxelsProps = {
     children: React.ReactNode
-} & ThreeElements['group']
+}
 
-export const Voxels = ({ children, ...groupProps }: VoxelsProps) => {
+export const Voxels = ({ children }: VoxelsProps) => {
     const voxels = useConst(() => new VoxelsImpl())
 
     useEffect(() => {
@@ -42,11 +42,7 @@ export const Voxels = ({ children, ...groupProps }: VoxelsProps) => {
 
     const contextValue = useMemo(() => ({ voxels }), [voxels])
 
-    return (
-        <voxelsContext.Provider value={contextValue}>
-            <group {...groupProps}>{children}</group>
-        </voxelsContext.Provider>
-    )
+    return <voxelsContext.Provider value={contextValue}>{children}</voxelsContext.Provider>
 }
 
 type ChunkHelperProps = { chunk: VoxelChunk }
@@ -61,9 +57,9 @@ const ChunkHelper = ({ chunk }: ChunkHelperProps) => {
 
 type VoxelChunkMeshesProps = {
     chunkHelper?: boolean
-}
+} & ThreeElements['group']
 
-export const VoxelChunkMeshes = ({ chunkHelper = false }: VoxelChunkMeshesProps) => {
+export const VoxelChunkMeshes = ({ chunkHelper = false, ...groupProps }: VoxelChunkMeshesProps) => {
     const { voxels } = useVoxels()
 
     type ChunkAndMesh = { chunk: VoxelChunk; mesh: THREE.Mesh }
@@ -94,13 +90,13 @@ export const VoxelChunkMeshes = ({ chunkHelper = false }: VoxelChunkMeshesProps)
         }
     }, [])
     return (
-        <>
+        <group {...groupProps}>
             {meshes.map(({ chunk, mesh }) => (
                 <Fragment key={chunk.id}>
                     <primitive object={mesh} />
                     {chunkHelper && <ChunkHelper chunk={chunk} />}
                 </Fragment>
             ))}
-        </>
+        </group>
     )
 }
