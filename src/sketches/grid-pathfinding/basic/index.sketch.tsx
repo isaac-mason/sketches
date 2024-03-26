@@ -10,7 +10,7 @@ import { Flag } from './components/flag'
 import { Floor } from './components/floor'
 import { Rocks } from './components/rocks'
 import { GridPathfindingProblemDefinition, MovementAction, PositionState, fScore } from './grid-pathfinding-problem'
-import { Node, bestFirstGraphSearch } from './search'
+import { Node, bestFirstGraphSearch, getPath } from './search'
 import { Vec2 } from './vec2'
 
 type PathfindingState = {
@@ -241,7 +241,7 @@ export default () => {
 
         const node = bestFirstGraphSearch(problem, fScore)
 
-        const path = node?.path() ?? []
+        const path = node ? getPath(node) : []
 
         setPath(path)
     }, [start, goal, levelSize, obstacles])

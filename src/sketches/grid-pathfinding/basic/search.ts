@@ -1,67 +1,34 @@
 type BaseState = { dedupe: string }
 
-export class Node<State extends BaseState, Action> {
+export type Node<State extends BaseState, Action> = {
     state: State
-
     action?: Action
-
     parent?: Node<State, Action>
-
     pathCost: number
-
-    constructor({
-        state,
-        action,
-        parent,
-        pathCost,
-    }: {
-        state: State
-        action?: Action
-        parent?: Node<State, Action>
-        pathCost?: number
-    }) {
-        this.state = state
-        this.action = action
-        this.parent = parent
-        this.pathCost = pathCost ?? 0
-    }
-
-    path(): Node<State, Action>[] {
-        const nodes: Node<State, Action>[] = [this]
-        let node: Node<State, Action> = this
-
-        while (node.parent) {
-            nodes.push(node.parent)
-            node = node.parent
-        }
-
-        return nodes.reverse()
-    }
-
-    actions(): Action[] {
-        const actions = this.path().map((n) => n.action!)
-        actions.shift()
-
-        return actions
-    }
 }
 
-class KeyedPriorityQueue<T> {
-    private values: { key: string; value: T; priority: number }[] = []
+export function getPath<State extends BaseState, Action>(node: Node<State, Action>): Node<State, Action>[] {
+    const path: Node<State, Action>[] = []
+    let currentNode: Node<State, Action> | undefined = node
 
+    while (currentNode) {
+        path.push(currentNode)
+        currentNode = currentNode.parent
+    }
+
+    return path.reverse()
+}
+
+class PriorityQueue<T> {
+    private values: Array<{ key: string; value: T; priority: number }> = []
     private keyToPriority = new Map<string, number>()
-
-    constructor(public order: 'min' | 'max' = 'min') {}
 
     add(key: string, value: T, priority: number): boolean {
         const existingPriority = this.keyToPriority.get(key)
 
         if (existingPriority) {
             // exit if the existing item takes priority
-            if (
-                (this.order === 'min' && existingPriority <= priority) ||
-                (this.order === 'max' && existingPriority >= priority)
-            ) {
+            if (existingPriority <= priority) {
                 return false
             }
 
@@ -70,15 +37,11 @@ class KeyedPriorityQueue<T> {
         }
 
         const item = { key, value, priority }
-
-        // binary search for insertion index
         let low = 0
         let high = this.values.length
 
         while (low < high) {
-            // effectively divides the sum of low and high by 2 and rounds down to the nearest whole number
             const mid = (low + high) >>> 1
-
             if (this.values[mid].priority < priority) {
                 low = mid + 1
             } else {
@@ -87,21 +50,13 @@ class KeyedPriorityQueue<T> {
         }
 
         this.values.splice(low, 0, item)
-
-        this.keyToPriority.set(key, item.priority)
+        this.keyToPriority.set(key, priority)
 
         return true
     }
 
     remove(key: string): void {
-        let index = -1
-
-        for (let i = 0; i < this.values.length; i++) {
-            if (this.values[i]?.key === key) {
-                index = i
-            }
-        }
-
+        const index = this.values.findIndex((item) => item.key === key)
         if (index !== -1) {
             this.values.splice(index, 1)
             this.keyToPriority.delete(key)
@@ -109,13 +64,12 @@ class KeyedPriorityQueue<T> {
     }
 
     next(): T | undefined {
-        const value = this.order === 'min' ? this.values.shift() : this.values.pop()
-
-        if (!value) return undefined
-
-        this.keyToPriority.delete(value.key)
-
-        return value.value
+        const value = this.values.shift()
+        if (value) {
+            this.keyToPriority.delete(value.key)
+            return value.value
+        }
+        return undefined
     }
 
     isEmpty(): boolean {
@@ -125,32 +79,17 @@ class KeyedPriorityQueue<T> {
 
 export interface ProblemDefinition<State extends BaseState, Action> {
     initial(): State
-
     actions(state: State): Action[]
-
     apply(state: State, action: Action): State
-
     goalTest(state: State): boolean
-
     pathCost(cost: number, start: State, action: Action, end: State): number
 }
 
-/**
- * Search nodes with the lowest f scores first
- *
- * @param problem The problem definition
- * @param f a function that returns the f score to minimize
- *
- * If f is a heuristic estimate to the goal, then the search will be a greedy best first search
- * If f is the depth of the node, the search will be breadth first
- *
- * @returns a node passing the problem definition's goal test, or undefined if no such node exists
- */
 export function bestFirstGraphSearch<State extends BaseState, Action, ProblemDef extends ProblemDefinition<State, Action>>(
     problem: ProblemDef,
     f: (problemDefinition: ProblemDef, node: Node<State, Action>) => number,
 ): Node<State, Action> | undefined {
-    const initialNode = new Node<State, Action>({ state: problem.initial() })
+    const initialNode = { state: problem.initial(), pathCost: 0 }
 
     if (problem.goalTest(initialNode.state)) {
         return initialNode
@@ -158,8 +97,7 @@ export function bestFirstGraphSearch<State extends BaseState, Action, ProblemDef
 
     const explored = new Set<string>()
 
-    const frontier = new KeyedPriorityQueue<Node<State, Action>>()
-
+    const frontier = new PriorityQueue<Node<State, Action>>()
     frontier.add(initialNode.state.dedupe, initialNode, 0)
 
     while (!frontier.isEmpty()) {
@@ -171,25 +109,21 @@ export function bestFirstGraphSearch<State extends BaseState, Action, ProblemDef
 
         explored.add(node.state.dedupe)
 
-        const actions = problem.actions(node.state)
-
-        for (const action of actions) {
+        for (const action of problem.actions(node.state)) {
             const state = problem.apply(node.state, action)
 
             if (explored.has(state.dedupe)) {
                 continue
             }
 
-            const child = new Node({
-                parent: node,
+            const child = {
                 state,
                 action,
+                parent: node,
                 pathCost: problem.pathCost(node.pathCost, node.state, action, state),
-            })
+            }
 
-            const fScore = f(problem, child)
-
-            frontier.add(child.state.dedupe, child, fScore)
+            frontier.add(state.dedupe, child, f(problem, child))
         }
     }
 

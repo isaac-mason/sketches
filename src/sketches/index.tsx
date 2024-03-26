@@ -30,17 +30,17 @@ const sketchList = [
     {
         title: 'Recast Navigation - Character Controller',
         path: 'recast-navigation/character-controller',
-        tags: ['recast-navigation', 'controller', 'arancini'],
+        tags: ['recast-navigation', 'navmesh', 'controller', 'arancini'],
     },
     {
         title: 'Recast Navigation - Rigid Body Agent',
         path: 'recast-navigation/rigid-body-agent',
-        tags: ['recast-navigation', 'navmesh', 'physics', 'rapier', 'arancini'],
+        tags: ['recast-navigation', 'navigation', 'pathfinding', 'physics', 'rapier', 'arancini'],
     },
     {
         title: 'Recast Navigation - Dynamic Tiled NavMesh',
         path: 'recast-navigation/dynamic-tiled-navmesh',
-        tags: ['recast-navigation', 'navmesh', 'physics', 'rapier', 'arancini'],
+        tags: ['recast-navigation', 'navigation', 'pathfinding', 'physics', 'rapier', 'arancini'],
     },
     /* Voxels */
     {
@@ -69,9 +69,9 @@ const sketchList = [
         tags: ['voxels', 'vertex-colors', 'culled-mesher', 'physics', 'rapier'],
     },
     {
-        title: 'Simple Voxels - Pathfinding',
-        path: 'voxels/simple-voxels/pathfinding',
-        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'pathfinding'],
+        title: 'Simple Voxels - A* Pathfinding',
+        path: 'voxels/simple-voxels/a-star-pathfinding',
+        tags: ['voxels', 'vertex-colors', 'culled-mesher', 'pathfinding', 'A*'],
     },
     /* Rapier */
     {

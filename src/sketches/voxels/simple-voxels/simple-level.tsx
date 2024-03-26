@@ -1,5 +1,5 @@
-import { noise } from 'maath/random'
-import { useEffect, useState } from 'react'
+import { Generator, noise } from 'maath/random'
+import { useEffect, useMemo, useState } from 'react'
 import * as THREE from 'three'
 import { useVoxels } from './lib/react'
 
@@ -11,9 +11,14 @@ const _groundPosition = new THREE.Vector3()
 const _treeBasePosition = new THREE.Vector3()
 const _treePosition = new THREE.Vector3()
 
+const randomSeed = 42
 export const useSimpleLevel = () => {
-    const [ready, setReady] = useState(false)
     const { voxels } = useVoxels()
+
+    const [ready, setReady] = useState(false)
+    
+    const generator = useMemo(() => new Generator(randomSeed), [])
+    const random = () => generator.value()
 
     const tree = (base: THREE.Vector3Like) => {
         const { x: treeX, y: treeY, z: treeZ } = base
@@ -45,7 +50,7 @@ export const useSimpleLevel = () => {
                         )
                         voxels.setBlock(treeLeavesPosition, {
                             solid: true,
-                            color: Math.random() > 0.5 ? green1 : green2,
+                            color: random() > 0.5 ? green1 : green2,
                         })
                     }
                 }
@@ -54,6 +59,8 @@ export const useSimpleLevel = () => {
     }
 
     useEffect(() => {
+        generator.init(randomSeed)
+
         const size = 200
         const halfSize = size / 2
 
@@ -62,7 +69,7 @@ export const useSimpleLevel = () => {
                 let y = Math.floor(noise.simplex2(x / 150, z / 150) * 10)
                 y += Math.floor(noise.simplex2(x / 75, z / 75) * 5)
 
-                const color = Math.random() > 0.5 ? green1 : green2
+                const color = random() > 0.5 ? green1 : green2
 
                 for (let i = y; i >= -15; i--) {
                     const position = _groundPosition.set(x, i, z)
@@ -74,7 +81,7 @@ export const useSimpleLevel = () => {
                 }
 
                 // random chance to place a tree
-                if (Math.random() < 0.002) {
+                if (random() < 0.002) {
                     const treeBase = _treeBasePosition.set(x, y, z)
                     tree(treeBase)
                 }
