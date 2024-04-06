@@ -1,5 +1,6 @@
 import { Canvas } from '@/common'
 import { Line, OrbitControls, PerspectiveCamera } from '@react-three/drei'
+import { useControls } from 'leva'
 import { Generator, noise } from 'maath/random'
 import { useEffect, useMemo, useState } from 'react'
 import * as THREE from 'three'
@@ -8,11 +9,12 @@ import { PointerBuildTool, PointerBuildToolColorPicker } from '../pointer-build-
 import { computePath } from './compute-path'
 
 type PathProps = {
-    start: THREE.Vector3Tuple
-    end: THREE.Vector3Tuple
+    start: THREE.Vector3
+    goal: THREE.Vector3
+    smooth?: boolean
 }
 
-const Path = ({ start, end }: PathProps) => {
+const Path = ({ start, goal, smooth }: PathProps) => {
     const { voxels } = useVoxels()
 
     const [path, setPath] = useState<THREE.Vector3[]>([])
@@ -29,7 +31,7 @@ const Path = ({ start, end }: PathProps) => {
         const { world } = voxels
 
         console.time('pathfinding')
-        const result = computePath(world, new THREE.Vector3(...start), new THREE.Vector3(...end))
+        const result = computePath({ world, start, goal, smooth, earlyExit: { searchIterations: 1000 } })
         console.timeEnd('pathfinding')
 
         if (!result) {
@@ -46,7 +48,7 @@ const Path = ({ start, end }: PathProps) => {
         }
 
         setPath(path)
-    }, [start.join(','), end.join(','), version])
+    }, [start.toArray().join(','), goal.toArray().join(','), version])
 
     return path.length > 0 && <Line points={path} lineWidth={5} color="orange" />
 }
@@ -56,6 +58,7 @@ const green2 = new THREE.Color('green').addScalar(0.02).getHex()
 const _groundPosition = new THREE.Vector3()
 
 const randomSeed = 42
+
 const useLevel = () => {
     const { voxels } = useVoxels()
 
@@ -95,6 +98,10 @@ const useLevel = () => {
 }
 
 const Scene = () => {
+    const { smooth } = useControls('simple-voxels/a-star-pathfinding', {
+        smooth: true,
+    })
+
     const {
         voxels: { world },
     } = useVoxels()
@@ -102,8 +109,9 @@ const Scene = () => {
 
     if (!ready) return null
 
+    // find y position for start and end
     const start = new THREE.Vector3(10, 50, 10)
-    const end = new THREE.Vector3(-10, 50, -10)
+    const goal = new THREE.Vector3(-10, 50, -10)
 
     while (true) {
         if (world.solid(start)) {
@@ -115,15 +123,15 @@ const Scene = () => {
     }
 
     while (true) {
-        if (world.solid(end)) {
-            end.y++
+        if (world.solid(goal)) {
+            goal.y++
             break
         }
 
-        end.y--
+        goal.y--
     }
 
-    return <Path start={start.toArray()} end={end.toArray()} />
+    return <Path start={start} goal={goal} smooth={smooth} />
 }
 
 export default function Sketch() {
