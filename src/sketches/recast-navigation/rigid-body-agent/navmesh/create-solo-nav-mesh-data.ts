@@ -33,7 +33,6 @@ import {
     rasterizeTriangles,
     recastConfigDefaults,
 } from '@recast-navigation/core'
-import R from '@recast-navigation/wasm'
 import { getBoundingBox } from 'recast-navigation/generators'
 
 export type NavMeshGeneratorConfig = Omit<RecastConfig, 'tileSize'>
@@ -51,7 +50,7 @@ export type SoloNavMeshGeneratorIntermediates = {
 }
 
 type SoloNavMeshGeneratorSuccessResult = {
-    navMeshData: R.UnsignedCharArray
+    navMeshData: InstanceType<typeof Arrays.UnsignedCharArray>
     success: true
     intermediates: SoloNavMeshGeneratorIntermediates
 }

@@ -36,7 +36,6 @@ import {
     vec3,
 } from '@recast-navigation/core'
 import { dtIlog2, dtNextPow2 } from '@recast-navigation/generators'
-import type R from '@recast-navigation/wasm'
 import * as THREE from 'three'
 
 const getTrianglesInBox = (positions: ArrayLike<number>, indices: ArrayLike<number>, box: THREE.Box3): number[] => {
@@ -142,7 +141,10 @@ export type BuildTileMeshProps = {
     keepIntermediates: boolean
 }
 
-export type BuildTileMeshResult = ({ success: true; data?: R.UnsignedCharArray } | { success: false; error: string }) & {
+export type BuildTileMeshResult = (
+    | { success: true; data?: InstanceType<typeof Arrays.UnsignedCharArray> }
+    | { success: false; error: string }
+) & {
     tileIntermediates?: TileIntermediates
     buildContext: RecastBuildContext
 }
