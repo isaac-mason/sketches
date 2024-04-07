@@ -107,7 +107,11 @@ const actions = (world: World, position: THREE.Vector3Like) => {
         const z = tempVector.z
 
         if (canStepAt(world, height, x, y, z)) {
-            const cost = direction.y === 0 ? 1 : 2
+            const cost = 1
+
+            // todo: higher cost for vertical movement? encourage horizontal movement?
+            // const cost = direction.y === 0 ? 1 : 2
+
             const jump = direction.y === 1
             const drop = direction.y === -1
 
@@ -127,15 +131,22 @@ type Node = {
     f: number
 }
 
-const heuristic = (start: THREE.Vector3Like, end: THREE.Vector3Like) => {
-    return Math.abs(start.x - end.x) + Math.abs(start.y - end.y) + Math.abs(start.z - end.z)
+const heuristic = (start: THREE.Vector3Like, goal: THREE.Vector3Like) => {
+    return Math.abs(start.x - goal.x) + Math.abs(start.y - goal.y) + Math.abs(start.z - goal.z)
 }
 
 const hash = (position: THREE.Vector3Like) => {
     return `${position.x},${position.y},${position.z}`
 }
 
-const findPath = (world: World, start: THREE.Vector3, goal: THREE.Vector3, earlyExit?: ComputePathEarlyExit): Node[] | null => {
+type FindPathResult = {
+    success: boolean
+    path: Node[] | null
+    iterations: number
+    explored: Map<string, Node>
+}
+
+const findPath = (world: World, start: THREE.Vector3, goal: THREE.Vector3, earlyExit?: ComputePathEarlyExit): FindPathResult => {
     const frontier = new PriorityQueue<Node>()
     const explored = new Map<string, Node>()
 
@@ -144,8 +155,16 @@ const findPath = (world: World, start: THREE.Vector3, goal: THREE.Vector3, early
 
     let iterations = 0
 
+    const fail = () => {
+        return { success: false, path: null, iterations, explored }
+    }
+
+    const succeed = (path: Node[]) => {
+        return { success: true, path, iterations, explored }
+    }
+
     while (frontier.heap.length > 0) {
-        if (earlyExit && iterations >= earlyExit.searchIterations) return null
+        if (earlyExit && iterations >= earlyExit.searchIterations) return fail()
         iterations++
 
         const currentNode = frontier.dequeue()!
@@ -157,7 +176,8 @@ const findPath = (world: World, start: THREE.Vector3, goal: THREE.Vector3, early
                 path.unshift(current)
                 current = current.parent
             }
-            return path
+
+            return succeed(path)
         }
 
         explored.set(hash(currentNode.position), currentNode)
@@ -186,7 +206,7 @@ const findPath = (world: World, start: THREE.Vector3, goal: THREE.Vector3, early
         }
     }
 
-    return null
+    return fail()
 }
 
 // computes the diagonal path from (0,0) to (x,z)
@@ -275,14 +295,33 @@ export type ComputePathProps = {
     goal: THREE.Vector3
     smooth?: boolean
     earlyExit?: ComputePathEarlyExit
+    keepIntermediates?: boolean
 }
 
-export const computePath = ({ world, start, goal, smooth = true, earlyExit }: ComputePathProps): Node[] | null => {
-    const path = findPath(world, start, goal, earlyExit)
+export type ComputePathResult = {
+    success: boolean
+    path: Node[]
+    intermediates?: {
+        explored: Map<string, Node>
+        iterations: number
+    }
+}
 
-    if (!path) return null
+export const computePath = ({
+    world,
+    start,
+    goal,
+    smooth = true,
+    earlyExit,
+    keepIntermediates = false,
+}: ComputePathProps): ComputePathResult => {
+    const { success, path, iterations, explored } = findPath(world, start, goal, earlyExit)
 
-    if (!smooth) return path
+    const intermediates = keepIntermediates ? { explored, iterations } : undefined
 
-    return smoothPath(world, path)
+    if (!success) return { success: false, path: [], intermediates }
+
+    const resultPath = smooth ? smoothPath(world, path!) : path!
+
+    return { success, path: resultPath, intermediates }
 }

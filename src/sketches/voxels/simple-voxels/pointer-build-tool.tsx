@@ -1,4 +1,5 @@
 import { ThreeEvent } from '@react-three/fiber'
+import { useRef } from 'react'
 import { HexColorPicker } from 'react-colorful'
 import * as THREE from 'three'
 import { create } from 'zustand'
@@ -18,7 +19,18 @@ export const PointerBuildTool = ({ children }: { children: React.ReactNode }) =>
 
     const { color } = useColorStore()
 
-    const onClick = (event: ThreeEvent<MouseEvent>) => {
+    const pointerDownTime = useRef(0)
+
+    const onPointerDown = (event: ThreeEvent<MouseEvent>) => {
+        event.stopPropagation()
+
+        pointerDownTime.current = Date.now()
+    }
+
+    const onPointerUp = (event: ThreeEvent<MouseEvent>) => {
+        // ignore camera manipulation
+        if (Date.now() - pointerDownTime.current > 200) return
+
         event.stopPropagation()
 
         const origin = event.ray.origin
@@ -42,7 +54,11 @@ export const PointerBuildTool = ({ children }: { children: React.ReactNode }) =>
         }
     }
 
-    return <scene onPointerDown={onClick}>{children}</scene>
+    return (
+        <scene onPointerDown={onPointerDown} onPointerUp={onPointerUp}>
+            {children}
+        </scene>
+    )
 }
 
 export const PointerBuildToolColorPicker = () => {
