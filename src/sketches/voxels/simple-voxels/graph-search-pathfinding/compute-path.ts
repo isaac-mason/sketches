@@ -153,7 +153,7 @@ const vector3ToString = (position: THREE.Vector3Like) => {
 
 type FindPathResult = {
     success: boolean
-    path: Node[] | null
+    path: Node[]
     iterations: number
     explored: Map<string, Node>
 }
@@ -168,7 +168,7 @@ const findPath = (world: World, start: THREE.Vector3, goal: THREE.Vector3, early
     let iterations = 0
 
     const fail = () => {
-        return { success: false, path: null, iterations, explored }
+        return { success: false, path: [], iterations, explored }
     }
 
     const succeed = (path: Node[]) => {
@@ -276,6 +276,7 @@ const hasDirectPath = (world: World, source: THREE.Vector3, target: THREE.Vector
         const p = sweep[i]
         const x = dx > 0 ? sx + p.x : sx - p.x
         const z = dz > 0 ? sz + p.z : sz - p.z
+
         if (world.solid(new THREE.Vector3(x, y, z))) return false
         while (y >= target.y && !world.solid(new THREE.Vector3(x, y - 1, z))) y--
 
@@ -285,6 +286,7 @@ const hasDirectPath = (world: World, source: THREE.Vector3, target: THREE.Vector
 
         if (y < target.y) return false
     }
+
     return true
 }
 
