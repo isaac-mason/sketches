@@ -1,6 +1,6 @@
-import * as THREE from 'three';
-import { World } from '../lib/world';
-import { sweep } from './sweep';
+import * as THREE from 'three'
+import { World } from '../lib/world'
+import { sweep } from './sweep'
 
 class PriorityQueue<T> {
     heap: { element: T; priority: number }[] = []
@@ -142,7 +142,8 @@ const heuristic = (start: THREE.Vector3Like, goal: THREE.Vector3Like) => {
     return _heuristicStart.distanceTo(_heuristicGoal)
 }
 
-// alternative heuristics:
+// some alternative heuristics:
+
 // const heuristic = (start: THREE.Vector3Like, goal: THREE.Vector3Like) => {
 //     _heuristicStart.copy(start)
 //     _heuristicGoal.copy(goal)
@@ -164,6 +165,16 @@ const vector3ToString = (position: THREE.Vector3Like) => {
     return `${position.x},${position.y},${position.z}`
 }
 
+export type SearchType = 'greedy' | 'shortest'
+
+type FindPathProps = {
+    world: World
+    start: THREE.Vector3
+    goal: THREE.Vector3
+    searchType: SearchType
+    earlyExit?: ComputePathEarlyExit
+}
+
 type FindPathResult = {
     success: boolean
     path: Node[]
@@ -171,7 +182,7 @@ type FindPathResult = {
     explored: Map<string, Node>
 }
 
-const findPath = (world: World, start: THREE.Vector3, goal: THREE.Vector3, earlyExit?: ComputePathEarlyExit): FindPathResult => {
+const findPath = ({ world, start, goal, searchType, earlyExit }: FindPathProps): FindPathResult => {
     const frontier = new PriorityQueue<Node>()
     const explored = new Map<string, Node>()
 
@@ -214,9 +225,9 @@ const findPath = (world: World, start: THREE.Vector3, goal: THREE.Vector3, early
 
             const g = currentNode.g + action.cost
             const h = heuristic(action.newPosition, goal)
-            const f = h
+            const f = searchType === 'greedy' ? h : g + h
 
-            // todo: make f configurable
+            // todo: f as a parameter
             // shortest path
             // const f = g + h
             // greedy best-first search
@@ -323,6 +334,7 @@ export type ComputePathProps = {
     start: THREE.Vector3
     goal: THREE.Vector3
     smooth?: boolean
+    searchType: 'greedy' | 'shortest'
     earlyExit?: ComputePathEarlyExit
     keepIntermediates?: boolean
 }
@@ -341,10 +353,11 @@ export const computePath = ({
     start,
     goal,
     smooth = true,
+    searchType,
     earlyExit,
     keepIntermediates = false,
 }: ComputePathProps): ComputePathResult => {
-    const { success, path, iterations, explored } = findPath(world, start, goal, earlyExit)
+    const { success, path, iterations, explored } = findPath({ world, start, goal, searchType, earlyExit })
 
     const intermediates = keepIntermediates ? { explored, iterations } : undefined
 

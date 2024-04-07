@@ -73,6 +73,11 @@ const sketchList = [
         path: 'voxels/simple-voxels/graph-search-pathfinding',
         tags: ['voxels', 'vertex-colors', 'culled-mesher', 'pathfinding', 'graph-search'],
     },
+    {
+        title: 'Simple Voxels - Tilt Shift',
+        path: 'voxels/simple-voxels/tilt-shift',
+        tags: ['voxels', 'tilt-shift'],
+    },
     /* Rapier */
     {
         title: 'Rapier - Cluster',

@@ -1,21 +1,23 @@
 import { Canvas } from '@/common'
-import { Line, OrbitControls, PerspectiveCamera } from '@react-three/drei'
+import { Line, OrbitControls, PerspectiveCamera, PivotControls } from '@react-three/drei'
 import { useControls } from 'leva'
 import { Generator, noise } from 'maath/random'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { VoxelChunkMeshes, Voxels, useVoxels } from '../lib/react'
 import { PointerBuildTool, PointerBuildToolColorPicker } from '../pointer-build-tool'
-import { computePath } from './compute-path'
+import { SearchType, computePath } from './compute-path'
 
 type PathProps = {
     start: THREE.Vector3
     goal: THREE.Vector3
-    smooth?: boolean
-    showExplored?: boolean
+    smooth: boolean
+    showExplored: boolean
+    earlyExitSearchIterations: number
+    searchType: 'greedy' | 'shortest'
 }
 
-const Path = ({ start, goal, smooth, showExplored }: PathProps) => {
+const Path = ({ start, goal, smooth, showExplored, earlyExitSearchIterations, searchType }: PathProps) => {
     const { voxels } = useVoxels()
 
     const [path, setPath] = useState<THREE.Vector3[]>([])
@@ -33,7 +35,15 @@ const Path = ({ start, goal, smooth, showExplored }: PathProps) => {
         const { world } = voxels
 
         console.time('pathfinding')
-        const result = computePath({ world, start, goal, smooth, earlyExit: { searchIterations: 1000 }, keepIntermediates: true })
+        const result = computePath({
+            world,
+            start,
+            goal,
+            smooth,
+            earlyExit: { searchIterations: earlyExitSearchIterations },
+            keepIntermediates: true,
+            searchType,
+        })
         console.timeEnd('pathfinding')
 
         if (!result.success) {
@@ -60,7 +70,15 @@ const Path = ({ start, goal, smooth, showExplored }: PathProps) => {
         }
 
         setExplored(explored)
-    }, [start.toArray().join(','), goal.toArray().join(','), version, smooth, showExplored])
+    }, [
+        start.toArray().join(','),
+        goal.toArray().join(','),
+        version,
+        smooth,
+        showExplored,
+        earlyExitSearchIterations,
+        searchType,
+    ])
 
     if (!path.length) return null
 
@@ -115,7 +133,7 @@ const useLevel = () => {
                 y += Math.floor(noise.simplex2(x / 50, z / 50) * 5)
                 y += Math.floor(noise.simplex2(x / 25, z / 25) * 2)
 
-                for (let i = y; i >= -15; i--) {
+                for (let i = y; i >= -20; i--) {
                     const color = _color.set(green)
                     color.addScalar(random() * 0.04 - 0.02)
 
@@ -135,43 +153,114 @@ const useLevel = () => {
     return ready
 }
 
-const Scene = () => {
-    const { smooth, showExplored } = useControls('simple-voxels/a-star-pathfinding', {
-        smooth: true,
-        showExplored: true,
-    })
+type LevelProps = {
+    children: React.ReactNode
+}
 
-    const {
-        voxels: { world },
-    } = useVoxels()
-
+const Level = ({ children }: LevelProps) => {
     const ready = useLevel()
 
     if (!ready) return null
 
+    return <>{children}</>
+}
+
+type PositionPickerProps = {
+    position: THREE.Vector3Tuple
+    onChange: (position: THREE.Vector3) => void
+}
+
+const PositionPicker = ({ position: initial, onChange }: PositionPickerProps) => {
+    const ref = useRef<THREE.Object3D>(null!)
+
+    const [position] = useState<THREE.Vector3Tuple>(initial)
+
+    const onDrag = () => {
+        if (!ref.current) return
+
+        const worldPosition = ref.current.getWorldPosition(new THREE.Vector3())
+        worldPosition.floor()
+
+        onChange(worldPosition)
+    }
+
+    return (
+        <PivotControls offset={position} scale={20} disableRotations activeAxes={[true, false, true]} onDrag={onDrag}>
+            <object3D position={position} ref={ref} />
+        </PivotControls>
+    )
+}
+
+const Scene = () => {
+    const {
+        voxels: { world },
+    } = useVoxels()
+
+    const { smooth, showExplored, earlyExitSearchIterations, searchType } = useControls('simple-voxels/a-star-pathfinding', {
+        smooth: true,
+        showExplored: true,
+        earlyExitSearchIterations: {
+            value: 1000,
+            min: 0,
+            max: 10000,
+            step: 1,
+        },
+        searchType: {
+            value: 'greedy',
+            options: ['greedy', 'shortest'],
+        },
+    })
+
+    const [start, setStart] = useState<THREE.Vector3>(new THREE.Vector3(20, 20, 20))
+    const [goal, setGoal] = useState<THREE.Vector3>(new THREE.Vector3(-20, 20, -20))
+
     // find y position for start and end
-    const start = new THREE.Vector3(20, 50, 20)
-    const goal = new THREE.Vector3(-20, 50, -20)
+    const adjustedStart = start.clone()
+    const adjustedGoal = goal.clone()
 
-    while (true) {
-        if (world.solid(start)) {
-            start.y++
+    for (let i = 0; i < 200; i++) {
+        if (world.solid(adjustedStart)) {
+            adjustedStart.y++
             break
         }
 
-        start.y--
+        adjustedStart.y--
     }
 
-    while (true) {
-        if (world.solid(goal)) {
-            goal.y++
+    for (let i = 0; i < 200; i++) {
+        if (world.solid(adjustedGoal)) {
+            adjustedGoal.y++
             break
         }
 
-        goal.y--
+        adjustedGoal.y--
     }
 
-    return <Path start={start} goal={goal} smooth={smooth} showExplored={showExplored} />
+    return (
+        <>
+            <PositionPicker position={start?.toArray()} onChange={setStart} />
+            <PositionPicker position={goal?.toArray()} onChange={setGoal} />
+
+            <mesh position={adjustedStart}>
+                <meshBasicMaterial color="red" />
+                <sphereGeometry args={[0.5, 16, 16]} />
+            </mesh>
+
+            <mesh position={adjustedGoal}>
+                <meshBasicMaterial color="blue" />
+                <sphereGeometry args={[0.5, 16, 16]} />
+            </mesh>
+
+            <Path
+                start={adjustedStart}
+                goal={adjustedGoal}
+                smooth={smooth}
+                earlyExitSearchIterations={earlyExitSearchIterations}
+                showExplored={showExplored}
+                searchType={searchType as SearchType}
+            />
+        </>
+    )
 }
 
 export default function Sketch() {
@@ -179,14 +268,16 @@ export default function Sketch() {
         <>
             <Canvas>
                 <Voxels>
-                    <Scene />
+                    <Level>
+                        <Scene />
+                    </Level>
 
                     <PointerBuildTool>
                         <VoxelChunkMeshes />
                     </PointerBuildTool>
                 </Voxels>
 
-                <PerspectiveCamera makeDefault position={[50, 30, -10]} />
+                <PerspectiveCamera makeDefault position={[100, 100, -10]} />
                 <OrbitControls makeDefault />
 
                 <ambientLight intensity={1.5} />
