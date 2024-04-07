@@ -43,7 +43,7 @@ const tmpSideVector = new THREE.Vector3()
 const tmpDirection = new THREE.Vector3()
 const tmpCameraWorldDirection = new THREE.Vector3()
 
-const down = { x: 0, y: -1, z: 0 } 
+const down = { x: 0, y: -1, z: 0 }
 const up = { x: 0, y: 1, z: 0 }
 
 const Player = ({ position: initialPosition, width, height }: PlayerProps) => {
@@ -84,7 +84,7 @@ const Player = ({ position: initialPosition, width, height }: PlayerProps) => {
 
         for (const offset of offsets) {
             const origin = tmpVerticalRayOrigin.copy(position.current).add(tmpVerticalRayOffset.set(...offset))
-            const ray = voxels.world.raycast({ origin, direction: down } )
+            const ray = voxels.world.raycast({ origin, direction: down })
 
             if (ray.hit) {
                 const distance = position.current.y - ray.hitPosition.y
@@ -198,12 +198,28 @@ const Player = ({ position: initialPosition, width, height }: PlayerProps) => {
 
                 if (dim === 'x') {
                     collision =
-                        intersectsVoxel({ x: nx + direction, y: characterLowerY + y, z: position.current.z - horizontalSensorOffset}) ||
-                        intersectsVoxel({ x: nx + direction, y: characterLowerY + y, z: position.current.z + horizontalSensorOffset})
+                        intersectsVoxel({
+                            x: nx + direction,
+                            y: characterLowerY + y,
+                            z: position.current.z - horizontalSensorOffset,
+                        }) ||
+                        intersectsVoxel({
+                            x: nx + direction,
+                            y: characterLowerY + y,
+                            z: position.current.z + horizontalSensorOffset,
+                        })
                 } else {
                     collision =
-                        intersectsVoxel({ x: position.current.x - horizontalSensorOffset, y: characterLowerY + y, z: nz + direction }) ||
-                        intersectsVoxel({ x: position.current.x + horizontalSensorOffset, y: characterLowerY + y, z: nz + direction })
+                        intersectsVoxel({
+                            x: position.current.x - horizontalSensorOffset,
+                            y: characterLowerY + y,
+                            z: nz + direction,
+                        }) ||
+                        intersectsVoxel({
+                            x: position.current.x + horizontalSensorOffset,
+                            y: characterLowerY + y,
+                            z: nz + direction,
+                        })
                 }
 
                 if (collision) break

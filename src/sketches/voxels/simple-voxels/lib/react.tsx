@@ -89,6 +89,7 @@ export const VoxelChunkMeshes = ({ chunkHelper = false, ...groupProps }: VoxelCh
             unsub()
         }
     }, [])
+
     return (
         <group {...groupProps}>
             {meshes.map(({ chunk, mesh }) => (
