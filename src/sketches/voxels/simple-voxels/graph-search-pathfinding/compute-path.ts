@@ -1,6 +1,6 @@
-import * as THREE from 'three'
-import { World } from '../lib/world'
-import { sweep } from './sweep'
+import * as THREE from 'three';
+import { World } from '../lib/world';
+import { sweep } from './sweep';
 
 class PriorityQueue<T> {
     heap: { element: T; priority: number }[] = []
@@ -96,10 +96,10 @@ type Action = { cost: number; direction: THREE.Vector3; newPosition: THREE.Vecto
 
 const _actionDirection = new THREE.Vector3()
 
+const agentHeight = 2
+
 const actions = (world: World, position: THREE.Vector3Like) => {
     const actions: Action[] = []
-
-    const height = 2
 
     for (const direction of directions) {
         _actionDirection.copy(position).add(direction)
@@ -107,10 +107,10 @@ const actions = (world: World, position: THREE.Vector3Like) => {
         const y = _actionDirection.y
         const z = _actionDirection.z
 
-        if (canStepAt(world, height, x, y, z)) {
+        if (canStepAt(world, agentHeight, x, y, z)) {
             const cost = 1
 
-            // todo: encourage horizontal movement?
+            // todo: vertical movement cost?
             // const cost = direction.y === 0 ? 1 : 2
 
             const jump = direction.y === 1
@@ -142,7 +142,20 @@ const heuristic = (start: THREE.Vector3Like, goal: THREE.Vector3Like) => {
     return _heuristicStart.distanceTo(_heuristicGoal)
 }
 
-// alternative heuristic:
+// alternative heuristics:
+// const heuristic = (start: THREE.Vector3Like, goal: THREE.Vector3Like) => {
+//     _heuristicStart.copy(start)
+//     _heuristicGoal.copy(goal)
+
+//     const dx = Math.abs(_heuristicGoal.x - _heuristicStart.x);
+//     const dy = Math.abs(_heuristicGoal.y - _heuristicStart.y);
+//     const dz = Math.abs(_heuristicGoal.z - _heuristicStart.z);
+
+//     // Give a lower cost to horizontal movements
+//     const horizontalFactor = 0.5;
+//     return dx * horizontalFactor + dy + dz;
+// }
+
 // const heuristic = (start: THREE.Vector3Like, goal: THREE.Vector3Like) => {
 //     return Math.abs(start.x - goal.x) + Math.abs(start.y - goal.y) + Math.abs(start.z - goal.z)
 // }
@@ -277,12 +290,8 @@ const hasDirectPath = (world: World, source: THREE.Vector3, target: THREE.Vector
         const x = dx > 0 ? sx + p.x : sx - p.x
         const z = dz > 0 ? sz + p.z : sz - p.z
 
-        if (world.solid(new THREE.Vector3(x, y, z))) return false
-        while (y >= target.y && !world.solid(new THREE.Vector3(x, y - 1, z))) y--
-
-        // todo: should canStepAt be used here?
-        // if (!canStepAt(world, 2, x, y, z)) return false
-        // while (y >= target.y && canStepAt(world, 2, x, y - 1, z)) y--
+        if (!canStepAt(world, agentHeight, x, y, z)) return false
+        while (y >= target.y && canStepAt(world, agentHeight, x, y - 1, z)) y--
 
         if (y < target.y) return false
     }
@@ -291,20 +300,20 @@ const hasDirectPath = (world: World, source: THREE.Vector3, target: THREE.Vector
 }
 
 const smoothPath = (world: World, path: Node[]): Node[] => {
-    const result: Node[] = [path[0]]
+    const smoothedPath: Node[] = [path[0]]
 
     for (let i = 2; i < path.length; i++) {
-        const prev = result[result.length - 1]
+        const prev = smoothedPath[smoothedPath.length - 1]
         const next = path[i]
 
         if (!prev.action?.jump && !next.action?.jump && hasDirectPath(world, prev.position, next.position)) continue
 
-        result.push(path[i - 1])
+        smoothedPath.push(path[i - 1])
     }
 
-    if (path.length > 1) result.push(path[path.length - 1])
+    if (path.length > 1) smoothedPath.push(path[path.length - 1])
 
-    return result
+    return smoothedPath
 }
 
 export type ComputePathEarlyExit = { searchIterations: number }
