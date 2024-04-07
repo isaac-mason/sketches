@@ -87,9 +87,10 @@ const Path = ({ start, goal, smooth, showExplored }: PathProps) => {
     )
 }
 
-const green1 = new THREE.Color('green').addScalar(-0.02).getHex()
-const green2 = new THREE.Color('green').addScalar(0.02).getHex()
-const _groundPosition = new THREE.Vector3()
+const green = new THREE.Color('green').getHex()
+const _color = new THREE.Color()
+
+const _cursor = new THREE.Vector3()
 
 const randomSeed = 42
 
@@ -109,17 +110,20 @@ const useLevel = () => {
 
         for (let x = -halfSize; x < halfSize; x++) {
             for (let z = -halfSize; z < halfSize; z++) {
-                let y = Math.floor(noise.simplex2(x / 150, z / 150) * 10)
-                y += Math.floor(noise.simplex2(x / 75, z / 75) * 5)
-                // const y = 0
-                const color = random() > 0.5 ? green1 : green2
+                let y = 0
+                y += Math.floor(noise.simplex2(x / 100, z / 100) * 10)
+                y += Math.floor(noise.simplex2(x / 50, z / 50) * 5)
+                y += Math.floor(noise.simplex2(x / 25, z / 25) * 2)
 
                 for (let i = y; i >= -15; i--) {
-                    const position = _groundPosition.set(x, i, z)
+                    const color = _color.set(green)
+                    color.addScalar(random() * 0.04 - 0.02)
 
-                    voxels.setBlock(position, {
+                    const cursor = _cursor.set(x, i, z)
+
+                    voxels.setBlock(cursor, {
                         solid: true,
-                        color,
+                        color: color.getHex(),
                     })
                 }
             }
@@ -140,13 +144,14 @@ const Scene = () => {
     const {
         voxels: { world },
     } = useVoxels()
+
     const ready = useLevel()
 
     if (!ready) return null
 
     // find y position for start and end
-    const start = new THREE.Vector3(10, 50, 10)
-    const goal = new THREE.Vector3(-10, 50, 12)
+    const start = new THREE.Vector3(20, 50, 20)
+    const goal = new THREE.Vector3(-20, 50, -20)
 
     while (true) {
         if (world.solid(start)) {

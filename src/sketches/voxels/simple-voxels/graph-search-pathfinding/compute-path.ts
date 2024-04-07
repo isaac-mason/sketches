@@ -94,28 +94,29 @@ const directions: THREE.Vector3[] = [
 
 type Action = { cost: number; direction: THREE.Vector3; newPosition: THREE.Vector3; jump: boolean; drop: boolean }
 
+const _actionDirection = new THREE.Vector3()
+
 const actions = (world: World, position: THREE.Vector3Like) => {
     const actions: Action[] = []
-    const tempVector = new THREE.Vector3()
 
     const height = 2
 
     for (const direction of directions) {
-        tempVector.copy(position).add(direction)
-        const x = tempVector.x
-        const y = tempVector.y
-        const z = tempVector.z
+        _actionDirection.copy(position).add(direction)
+        const x = _actionDirection.x
+        const y = _actionDirection.y
+        const z = _actionDirection.z
 
         if (canStepAt(world, height, x, y, z)) {
             const cost = 1
 
-            // todo: higher cost for vertical movement? encourage horizontal movement?
+            // todo: encourage horizontal movement?
             // const cost = direction.y === 0 ? 1 : 2
 
             const jump = direction.y === 1
             const drop = direction.y === -1
 
-            actions.push({ direction, newPosition: tempVector.clone(), cost, jump, drop })
+            actions.push({ direction, newPosition: _actionDirection.clone(), cost, jump, drop })
         }
     }
 
@@ -131,11 +132,22 @@ type Node = {
     f: number
 }
 
+const _heuristicStart = new THREE.Vector3()
+const _heuristicGoal = new THREE.Vector3()
+
 const heuristic = (start: THREE.Vector3Like, goal: THREE.Vector3Like) => {
-    return Math.abs(start.x - goal.x) + Math.abs(start.y - goal.y) + Math.abs(start.z - goal.z)
+    _heuristicStart.copy(start)
+    _heuristicGoal.copy(goal)
+
+    return _heuristicStart.distanceTo(_heuristicGoal)
 }
 
-const hash = (position: THREE.Vector3Like) => {
+// alternative heuristic:
+// const heuristic = (start: THREE.Vector3Like, goal: THREE.Vector3Like) => {
+//     return Math.abs(start.x - goal.x) + Math.abs(start.y - goal.y) + Math.abs(start.z - goal.z)
+// }
+
+const vector3ToString = (position: THREE.Vector3Like) => {
     return `${position.x},${position.y},${position.z}`
 }
 
@@ -180,16 +192,22 @@ const findPath = (world: World, start: THREE.Vector3, goal: THREE.Vector3, early
             return succeed(path)
         }
 
-        explored.set(hash(currentNode.position), currentNode)
+        explored.set(vector3ToString(currentNode.position), currentNode)
 
         for (const action of actions(world, currentNode.position)) {
-            const existingNode = explored.get(hash(action.newPosition))
+            const existingNode = explored.get(vector3ToString(action.newPosition))
 
             if (existingNode) continue
 
             const g = currentNode.g + action.cost
             const h = heuristic(action.newPosition, goal)
-            const f = g + h
+            const f = h
+
+            // todo: make f configurable
+            // shortest path
+            // const f = g + h
+            // greedy best-first search
+            // const f = h
 
             const openNode = frontier.heap.find((item) => item.element.position.equals(action.newPosition))
 
