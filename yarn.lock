@@ -1718,9 +1718,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-three/fiber@npm:^8.15.19":
-  version: 8.15.19
-  resolution: "@react-three/fiber@npm:8.15.19"
+"@react-three/fiber@npm:^8.16.1":
+  version: 8.16.1
+  resolution: "@react-three/fiber@npm:8.16.1"
   dependencies:
     "@babel/runtime": "npm:^7.17.8"
     "@types/react-reconciler": "npm:^0.26.7"
@@ -1755,7 +1755,7 @@ __metadata:
       optional: true
     react-native:
       optional: true
-  checksum: 5cf457003254ac98634fe81d0bb01ae9bb6e001fe9cdec5e3aa9f2afbf9869edae05445ba6ce811264b7791a5467afc9a069f1bb82f43c03c9d2ef04d78b7624
+  checksum: 968d1546a793da06365163de75a235d7459935d0ba8bc18d41a75db1e8cf9b42321505dcfd8ef0a83300d862aecf73f96445eb7ebf930b1dcbcb6a600fec703b
   languageName: node
   linkType: hard
 
@@ -1787,20 +1787,6 @@ __metadata:
     react: ">=18.0"
     three: ">= 0.138.0"
   checksum: 44367f737cb091760d90393a4022bd96db0b3b5cc32b611752f0db60b75bfcfbc1668b75a16b29169458623adacfb7e53e4367c6dce6580a6ad077cf629d218c
-  languageName: node
-  linkType: hard
-
-"@react-three/rapier-addons@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "@react-three/rapier-addons@npm:4.0.0"
-  dependencies:
-    three-stdlib: "npm:2.23.9"
-  peerDependencies:
-    "@react-three/fiber": "*"
-    "@react-three/rapier": 1.3.0
-    react: ">=18.0.0"
-    three: "*"
-  checksum: 63267cf627af7ac8312abe3efa699297f748002976a9e2536f31e54ec570d543cb73005fbc02a2970fc4c609de299767d42575ae608212b006c4c6f9bc37d077
   languageName: node
   linkType: hard
 
@@ -2485,16 +2471,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/three@npm:^0.162.0":
-  version: 0.162.0
-  resolution: "@types/three@npm:0.162.0"
+"@types/three@npm:^0.163.0":
+  version: 0.163.0
+  resolution: "@types/three@npm:0.163.0"
   dependencies:
     "@tweenjs/tween.js": "npm:~23.1.1"
     "@types/stats.js": "npm:*"
     "@types/webxr": "npm:*"
-    fflate: "npm:~0.6.10"
+    fflate: "npm:~0.8.2"
     meshoptimizer: "npm:~0.18.1"
-  checksum: 02101a0631adee750e7be3efc0c76cb805565353d200a9cfc3f5b741bc5564129e2e9eb37c57544d9cb7e27608196972b755c6f7829b163155bec530641a0595
+  checksum: 81320c03aa89b67601cdc7d0a0dca93cf1d59ff564214859f0f87d0314062e3b7cb02f6d15c245cdae6755d1febc54d23432c25df16ff4aac9c65ba2efd9973d
   languageName: node
   linkType: hard
 
@@ -4325,10 +4311,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fflate@npm:^0.6.9, fflate@npm:~0.6.10":
+"fflate@npm:^0.6.9":
   version: 0.6.10
   resolution: "fflate@npm:0.6.10"
   checksum: 9f2fd7224bccdb28102adc7c55c262b584571426eb9e0b91b13088884f45700232b51e034e300b74abf64e5449596d5c37d0a802673e25edb17c6742e4a4a0bd
+  languageName: node
+  linkType: hard
+
+"fflate@npm:~0.8.2":
+  version: 0.8.2
+  resolution: "fflate@npm:0.8.2"
+  checksum: 2bd26ba6d235d428de793c6a0cd1aaa96a06269ebd4e21b46c8fd1bd136abc631acf27e188d47c3936db090bf3e1ede11d15ce9eae9bffdc4bfe1b9dc66ca9cb
   languageName: node
   linkType: hard
 
@@ -5136,10 +5129,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jolt-physics@npm:^0.21.0":
-  version: 0.21.0
-  resolution: "jolt-physics@npm:0.21.0"
-  checksum: 80176f877991333a2553c2697403366b51686d0364f9c5fe32188f87772445df27306e7557b3416f4747514358409ac22dd894b5c130133e9d7764a256a2f9b4
+"jolt-physics@npm:^0.22.0":
+  version: 0.22.0
+  resolution: "jolt-physics@npm:0.22.0"
+  checksum: 2d40679cea6ea7f254b2dcf31d8fcffd4f9e6923dc20581465c39093ec0575ed9bb5e60aaf590378477bf8f1dc5b96afb98ca68d58930c6d44ef5484735442f0
   languageName: node
   linkType: hard
 
@@ -6615,25 +6608,24 @@ __metadata:
     "@react-spring/three": "npm:^9.7.3"
     "@react-three/csg": "npm:^3.2.0"
     "@react-three/drei": "npm:^9.101.0"
-    "@react-three/fiber": "npm:^8.15.19"
+    "@react-three/fiber": "npm:^8.16.1"
     "@react-three/flex": "npm:^1.0.1"
     "@react-three/postprocessing": "npm:^2.16.2"
     "@react-three/rapier": "npm:^1.3.0"
-    "@react-three/rapier-addons": "npm:^4.0.0"
     "@react-three/xr": "npm:^5.7.1"
     "@types/d3": "npm:^7.4.3"
     "@types/eslint": "npm:^8.56.5"
     "@types/node": "npm:^20.12.2"
     "@types/react": "npm:^18.2.55"
     "@types/react-dom": "npm:^18.2.20"
-    "@types/three": "npm:^0.162.0"
+    "@types/three": "npm:^0.163.0"
     "@use-gesture/react": "npm:^10.3.0"
     "@vitejs/plugin-basic-ssl": "npm:^1.1.0"
     "@vitejs/plugin-react": "npm:^4.2.1"
     arancini: "npm:^6.5.0"
     d3: "npm:^7.9.0"
     eslint: "npm:^8.57.0"
-    jolt-physics: "npm:^0.21.0"
+    jolt-physics: "npm:^0.22.0"
     leva: "npm:^0.9.35"
     meshline: "npm:3.1.6"
     p2-es: "npm:^1.2.3"
@@ -6648,7 +6640,7 @@ __metadata:
     styled-breakpoints: "npm:^14.1.0"
     styled-components: "npm:^6.1.8"
     suspend-react: "npm:^0.1.3"
-    three: "npm:^0.162.0"
+    three: "npm:^0.163.0"
     three-bvh-csg: "npm:^0.0.16"
     tunnel-rat: "npm:^0.1.2"
     typescript: "npm:^5.3.2"
@@ -7038,10 +7030,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"three@npm:^0.162.0":
-  version: 0.162.0
-  resolution: "three@npm:0.162.0"
-  checksum: 08b1925583ab84f45c2358a0935e0c63b94e7ff4c3a9d759c993c12ef63124ab813c37e1df884f70ef8f44b1d2a2c0b8e515d56e0944d8d7df4fcdf01aec116f
+"three@npm:^0.163.0":
+  version: 0.163.0
+  resolution: "three@npm:0.163.0"
+  checksum: caf4b681b62b4367242b88e89299f8f5e728636a38af51ccb56c5814ff9d2a59a8116df3d6851238804b23435b4410ba68ae9e70f7d26791345945c094abf011
   languageName: node
   linkType: hard
 

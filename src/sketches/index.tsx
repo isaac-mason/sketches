@@ -196,12 +196,6 @@ const sketchList = [
         path: 'sound/spatial',
         tags: ['sound', 'spatial'],
     },
-    /* Reflectors */
-    {
-        title: 'Reflectors',
-        path: 'reflectors',
-        tags: ['reflector', 'mirror'],
-    },
     /* Grid Pathfinding */
     {
         title: 'Grid Pathfinding - Basic',

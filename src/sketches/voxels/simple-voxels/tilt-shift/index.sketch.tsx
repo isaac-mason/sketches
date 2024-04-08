@@ -28,10 +28,10 @@ export default function Sketch() {
                 <ToneMapping />
             </EffectComposer>
 
-            <PerspectiveCamera makeDefault fov={40} position={[300, 60, 200]} />
+            <PerspectiveCamera makeDefault fov={40} position={[350, 60, 150]} />
             <OrbitControls makeDefault target={[78, -30, 36]} />
 
-            <ambientLight intensity={1.5} />
+            <ambientLight intensity={1.2} />
 
             <color attach="background" args={['#f0f0f0']} />
         </Canvas>
