@@ -15,14 +15,15 @@ class PriorityQueue<T> {
             return undefined
         }
 
-        const root = this.heap[0]
-        this.heap[0] = this.heap.pop()!
+        const first = this.heap[0]
+        const last = this.heap.pop()!
 
         if (this.heap.length > 0) {
+            this.heap[0] = last
             this.heapifyDown(0)
         }
 
-        return root.element
+        return first.element
     }
 
     private heapifyUp(index: number): void {

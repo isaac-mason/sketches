@@ -65,34 +65,32 @@ const sweep = (
             delta[i] -= step
         }
 
-        {
-            const i = best
-            kVoxel[i] = (direction > 0 ? max[i] - 1 : min[i]) >> kSweepShift
+        const i = best
+        kVoxel[i] = (direction > 0 ? max[i] - 1 : min[i]) >> kSweepShift
 
-            const j = i < 2 ? i + 1 : i - 2
-            const k = i < 1 ? i + 2 : i - 1
-            const jlo = min[j] >> kSweepShift
-            const jhi = (max[j] - 1) >> kSweepShift
-            const klo = min[k] >> kSweepShift
-            const khi = (max[k] - 1) >> kSweepShift
+        const j = i < 2 ? i + 1 : i - 2
+        const k = i < 1 ? i + 2 : i - 1
+        const jlo = min[j] >> kSweepShift
+        const jhi = (max[j] - 1) >> kSweepShift
+        const klo = min[k] >> kSweepShift
+        const khi = (max[k] - 1) >> kSweepShift
 
-            let done = false
-            for (kVoxel[j] = jlo; !done && kVoxel[j] <= jhi; kVoxel[j]++) {
-                for (kVoxel[k] = klo; !done && kVoxel[k] <= khi; kVoxel[k]++) {
-                    const x = kVoxel[0],
-                        y = kVoxel[1],
-                        z = kVoxel[2]
-                    if (check(x, y, z)) continue
-                    impacts[i] = direction
-                    min[i] -= direction
-                    max[i] -= direction
-                    delta[i] = 0
-                    done = true
-                }
+        let done = false
+        for (kVoxel[j] = jlo; !done && kVoxel[j] <= jhi; kVoxel[j]++) {
+            for (kVoxel[k] = klo; !done && kVoxel[k] <= khi; kVoxel[k]++) {
+                const x = kVoxel[0],
+                    y = kVoxel[1],
+                    z = kVoxel[2]
+                if (check(x, y, z)) continue
+                impacts[i] = direction
+                min[i] -= direction
+                max[i] -= direction
+                delta[i] = 0
+                done = true
             }
-
-            if (done && stopOnImpact) break
         }
+
+        if (done && stopOnImpact) break
     }
 
     for (let i = 0; i < 3; i++) {
