@@ -1655,44 +1655,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-three/drei@npm:^9.101.0":
-  version: 9.101.0
-  resolution: "@react-three/drei@npm:9.101.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.11.2"
-    "@mediapipe/tasks-vision": "npm:0.10.8"
-    "@react-spring/three": "npm:~9.6.1"
-    "@use-gesture/react": "npm:^10.2.24"
-    camera-controls: "npm:^2.4.2"
-    cross-env: "npm:^7.0.3"
-    detect-gpu: "npm:^5.0.28"
-    glsl-noise: "npm:^0.0.0"
-    maath: "npm:^0.10.7"
-    meshline: "npm:^3.1.6"
-    react-composer: "npm:^5.0.3"
-    stats-gl: "npm:^2.0.0"
-    stats.js: "npm:^0.17.0"
-    suspend-react: "npm:^0.1.3"
-    three-mesh-bvh: "npm:^0.7.0"
-    three-stdlib: "npm:^2.29.4"
-    troika-three-text: "npm:^0.49.0"
-    tunnel-rat: "npm:^0.1.2"
-    utility-types: "npm:^3.10.0"
-    uuid: "npm:^9.0.1"
-    zustand: "npm:^3.7.1"
-  peerDependencies:
-    "@react-three/fiber": ">=8.0"
-    react: ">=18.0"
-    react-dom: ">=18.0"
-    three: ">=0.137"
-  peerDependenciesMeta:
-    react-dom:
-      optional: true
-  checksum: b5a3e5fedf31834ca415315e6e33bfe43390ebf117fa3c1d639b18cd0011b3ea631f17c9ad6c80723f9e784f12cc9a7ffed7202a0a289c213edfb1fdc68d1b8c
-  languageName: node
-  linkType: hard
-
-"@react-three/drei@npm:^9.103.0":
+"@react-three/drei@npm:^9.103.0, @react-three/drei@npm:^9.105.2":
   version: 9.105.2
   resolution: "@react-three/drei@npm:9.105.2"
   dependencies:
@@ -6588,7 +6551,7 @@ __metadata:
     "@pmndrs/assets": "npm:^1.6.0"
     "@react-spring/three": "npm:^9.7.3"
     "@react-three/csg": "npm:^3.2.0"
-    "@react-three/drei": "npm:^9.101.0"
+    "@react-three/drei": "npm:^9.105.2"
     "@react-three/fiber": "npm:^8.16.1"
     "@react-three/flex": "npm:^1.0.1"
     "@react-three/postprocessing": "npm:^2.16.2"
