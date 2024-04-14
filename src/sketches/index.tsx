@@ -103,7 +103,6 @@ const sketchList = [
         title: 'Rapier - Arcade Vehicle',
         path: 'rapier/arcade-vehicle-controller',
         tags: ['physics', 'rapier', 'vehicle', 'car', 'controller'],
-        hidden: true,
     },
     {
         title: 'Rapier - Kinematic Character Controller',
