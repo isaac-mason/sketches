@@ -4741,12 +4741,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"imagetools-core@npm:^6.0.4":
-  version: 6.0.4
-  resolution: "imagetools-core@npm:6.0.4"
+"imagetools-core@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "imagetools-core@npm:7.0.0"
   dependencies:
     sharp: "npm:^0.33.1"
-  checksum: 2be390a76b9c5c137cdda5617cd244d918ac57c0e00f486c69bd97b78072f681559745014bf859a4eb2ac30e54feae9f8094358c66904b4f984f8a1ca0322c57
+  checksum: c04c0d8b6118489c175b10e48e83af897448fdf1402836344c1f678354b6d19f6485ccac38d3df280c6e3b4a57251a04455e99937efed1be1404375aac3ab03e
   languageName: node
   linkType: hard
 
@@ -6589,7 +6589,7 @@ __metadata:
     tunnel-rat: "npm:^0.1.2"
     typescript: "npm:^5.3.2"
     vite: "npm:^5.1.7"
-    vite-imagetools: "npm:^6.2.9"
+    vite-imagetools: "npm:^7.0.1"
     vite-plugin-html: "npm:^3.2.2"
     zustand: "npm:^4.5.2"
   languageName: unknown
@@ -7264,13 +7264,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite-imagetools@npm:^6.2.9":
-  version: 6.2.9
-  resolution: "vite-imagetools@npm:6.2.9"
+"vite-imagetools@npm:^7.0.1":
+  version: 7.0.1
+  resolution: "vite-imagetools@npm:7.0.1"
   dependencies:
     "@rollup/pluginutils": "npm:^5.0.5"
-    imagetools-core: "npm:^6.0.4"
-  checksum: 07bbbfe8a2da384bd0a1531859608f22c0a1bc7681d48d52b3e48898f75b3cf3bd853a71466cc11cc3c439cc964604d0c225d8a38d2ec75d8398454184035b1d
+    imagetools-core: "npm:^7.0.0"
+  checksum: 3eebfdbcb93c611e3c1ff6f121ed6ab712ff826f7f8ec703a58b333da85068b40d6e32c081ee4eaceec82b2c245944ab60d4ba738e0831b132b3b4525da4089d
   languageName: node
   linkType: hard
 
