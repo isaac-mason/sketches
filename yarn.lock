@@ -1796,42 +1796,42 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@recast-navigation/core@npm:0.18.2":
-  version: 0.18.2
-  resolution: "@recast-navigation/core@npm:0.18.2"
+"@recast-navigation/core@npm:0.20.0":
+  version: 0.20.0
+  resolution: "@recast-navigation/core@npm:0.20.0"
   dependencies:
-    "@recast-navigation/wasm": "npm:0.18.2"
-  checksum: 394a6a3502713cb16d53dd29dfb2c1759ae01110ca8cbee0d529291d0ca0fe619803882bdc2eebd7ce7a3baef7077c11e89545f42edce874ae212019f6e991b0
+    "@recast-navigation/wasm": "npm:0.20.0"
+  checksum: ac4e35f8e8fb2d911da19682110bbb7c3462155890e1f6e633eb829617f26eb36e03f497f9e2ee26fa431ba920bb17325aa7b6b5c247cf218474c291624f6856
   languageName: node
   linkType: hard
 
-"@recast-navigation/generators@npm:0.18.2":
-  version: 0.18.2
-  resolution: "@recast-navigation/generators@npm:0.18.2"
+"@recast-navigation/generators@npm:0.20.0":
+  version: 0.20.0
+  resolution: "@recast-navigation/generators@npm:0.20.0"
   dependencies:
-    "@recast-navigation/core": "npm:0.18.2"
-    "@recast-navigation/wasm": "npm:0.18.2"
-  checksum: cb5e73cc42455a7ca57a468160b6accf77e967f5571ae559605a12010a4be5f180f670fba9b3def79576f2b1fbfbba9fd4311d1fce054d10b5eeea2245227296
+    "@recast-navigation/core": "npm:0.20.0"
+    "@recast-navigation/wasm": "npm:0.20.0"
+  checksum: d8f0646487759191fd2aa955cfa2f848184d78fd0d30f7f87124b2bd42168f8a838fd9638dcc15a40669c5c7156547fd5d7ecd6962e8fb6f4c9940f2e880fa06
   languageName: node
   linkType: hard
 
-"@recast-navigation/three@npm:0.18.2":
-  version: 0.18.2
-  resolution: "@recast-navigation/three@npm:0.18.2"
+"@recast-navigation/three@npm:0.20.0":
+  version: 0.20.0
+  resolution: "@recast-navigation/three@npm:0.20.0"
   dependencies:
-    "@recast-navigation/core": "npm:0.18.2"
-    "@recast-navigation/generators": "npm:0.18.2"
+    "@recast-navigation/core": "npm:0.20.0"
+    "@recast-navigation/generators": "npm:0.20.0"
   peerDependencies:
     "@types/three": 0.x.x
     three: 0.x.x
-  checksum: 1dae972a902366eb45879dba2c2131dc25c570440f56e001b13ab64eabd574a975d8521fef10f0b612576b6c1d63045e78c2b3f50048ad147494a909ca9274e6
+  checksum: 0fe2998d0a835c0a4fea76ed2fce14c90e4fe2ee4cc54755426c16917ba1a7f89411a09747eb88717a22e5173dca838d9634fe0d07d52649dd74981c47e676fd
   languageName: node
   linkType: hard
 
-"@recast-navigation/wasm@npm:0.18.2":
-  version: 0.18.2
-  resolution: "@recast-navigation/wasm@npm:0.18.2"
-  checksum: 83bb81bc22d7f25713331ec06a6fabd4ad8cba11bef043a28a691d04891ae5fabdf74f03c294929285850ac6655e19f357b3124f0df2826215fbb33ba9b535eb
+"@recast-navigation/wasm@npm:0.20.0":
+  version: 0.20.0
+  resolution: "@recast-navigation/wasm@npm:0.20.0"
+  checksum: 25d3096acc339cb70e69a13cf96ab961cee16c8d0137f45267b75a1746de93f6f3b42d1353677c9067a3681eae01a3dcaff3dd99372d8ef4b19d5d8cd16400ab
   languageName: node
   linkType: hard
 
@@ -6131,14 +6131,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"recast-navigation@npm:^0.18.2":
-  version: 0.18.2
-  resolution: "recast-navigation@npm:0.18.2"
+"recast-navigation@npm:^0.20.0":
+  version: 0.20.0
+  resolution: "recast-navigation@npm:0.20.0"
   dependencies:
-    "@recast-navigation/core": "npm:0.18.2"
-    "@recast-navigation/generators": "npm:0.18.2"
-    "@recast-navigation/three": "npm:0.18.2"
-  checksum: 8618fac1d4cf1b02ef970b5d21ff86276706f482f8aa0ad59c639a5344db9c90915e97a276212ae15550ad239811b33dab575e83a089330aa1ecc51d9a51f92e
+    "@recast-navigation/core": "npm:0.20.0"
+    "@recast-navigation/generators": "npm:0.20.0"
+    "@recast-navigation/three": "npm:0.20.0"
+  checksum: 85fde8b7d139ddba3bab227443a00f68f8e4bbceffb0ba391278b0a2dd1c25204e9e69dcc7eb5b2cb64efee3afdedb03afbc636f3189a215516ef24f633dc851
   languageName: node
   linkType: hard
 
@@ -6579,7 +6579,7 @@ __metadata:
     react-colorful: "npm:^5.6.1"
     react-dom: "npm:^18.2.0"
     react-router-dom: "npm:^6.22.3"
-    recast-navigation: "npm:^0.18.2"
+    recast-navigation: "npm:^0.20.0"
     simplex-noise: "npm:^4.0.1"
     styled-breakpoints: "npm:^14.1.2"
     styled-components: "npm:^6.1.8"
