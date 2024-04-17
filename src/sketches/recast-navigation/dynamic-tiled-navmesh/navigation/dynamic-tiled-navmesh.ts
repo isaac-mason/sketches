@@ -6,12 +6,12 @@ import {
     Raw,
     RecastConfig,
     Vector3Tuple,
-    dtStatusToReadableString,
     recastConfigDefaults,
+    statusToReadableString,
 } from 'recast-navigation'
 import * as THREE from 'three'
 import { BuildTileMeshProps, buildConfig } from './build-tile'
-import DynaicTiledNavMeshWorker from './dynamic-tiled-navmesh.worker?worker'
+import DynamicTiledNavMeshWorker from './dynamic-tiled-navmesh.worker?worker'
 
 export type DynamicTiledNavMeshProps = {
     navMeshBounds: THREE.Box3
@@ -37,7 +37,7 @@ export class DynamicTiledNavMesh {
 
     recastConfig: RecastConfig
 
-    workers: InstanceType<typeof DynaicTiledNavMeshWorker>[]
+    workers: InstanceType<typeof DynamicTiledNavMeshWorker>[]
     workerRoundRobin = 0
 
     constructor(props: DynamicTiledNavMeshProps) {
@@ -79,7 +79,7 @@ export class DynamicTiledNavMesh {
 
         this.workers = []
         for (let i = 0; i < props.workers; i++) {
-            const worker = new DynaicTiledNavMeshWorker()
+            const worker = new DynamicTiledNavMeshWorker()
 
             worker.onmessage = (e) => {
                 const {
@@ -101,7 +101,7 @@ export class DynamicTiledNavMesh {
                         `Failed to add tile to nav mesh` +
                             '\n\t' +
                             `tx: ${tileX}, ty: ${tileY},` +
-                            `status: ${dtStatusToReadableString(addTileResult.status)} (${addTileResult.status})`,
+                            `status: ${statusToReadableString(addTileResult.status)} (${addTileResult.status})`,
                     )
 
                     navMeshData.free()
