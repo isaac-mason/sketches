@@ -1,13 +1,13 @@
 import { Line } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { CapsuleCollider, RapierRigidBody, RigidBody, useBeforePhysicsStep } from '@react-three/rapier'
+import { useControls } from 'leva'
 import { useRef, useState } from 'react'
 import * as THREE from 'three'
 import { useInterval } from '../../../../common'
+import { SKETCH } from '../const'
 import { navQuery, playerQuery } from '../ecs'
 import { Duck } from './duck'
-import { useControls } from 'leva'
-import { SKETCH } from '../const'
 
 export type AgentProps = {
     position: [number, number, number]
@@ -53,16 +53,15 @@ export const Agent = ({ position }: AgentProps) => {
 
         const rigidBody = ref.current
 
-        const agentPosition = _agentPosition.copy(
-            navMeshQuery.getClosestPoint(rigidBody.translation(), { halfExtents: queryHalfExtents }),
-        )
+        const { point: closestPoint } = navMeshQuery.findClosestPoint(rigidBody.translation(), { halfExtents: queryHalfExtents })
+        const agentPosition = _agentPosition.copy(closestPoint)
 
-        const playerPosition = navMeshQuery.getClosestPoint(player.rigidBody.translation(), { halfExtents: queryHalfExtents })
+        const { point: playerPosition } = navMeshQuery.findClosestPoint(player.rigidBody.translation(), { halfExtents: queryHalfExtents })
 
-        const path = navMeshQuery.computePath(agentPosition, playerPosition).map((p) => new THREE.Vector3(p.x, p.y, p.z))
-
+        const { path } = navMeshQuery.computePath(agentPosition, playerPosition)
         pathIndex.current = 1
-        setPath(path)
+
+        setPath(path.map((p) => new THREE.Vector3(p.x, p.y, p.z)))
     }, 1000 / 10)
 
     /* movement */

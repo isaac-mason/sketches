@@ -106,7 +106,7 @@ const updateCrowdAgents = (delta: number, navMeshQuery: NavMeshQuery | undefined
             const { isOverPoly } = navMeshQuery.findNearestPoly(agent.position())
 
             if (isOverPoly) {
-                const closest = navMeshQuery.getClosestPoint(agent.position())
+                const { point: closest } = navMeshQuery.findClosestPoint(agent.position())
                 agent.teleport(closest)
             }
         }
@@ -134,8 +134,9 @@ const updateFollowers = (navMeshQuery: NavMeshQuery | undefined) => {
     const playerPosition = player.rigidBody.translation()
 
     for (const follower of followersQuery) {
-        const target = navMeshQuery.getClosestPoint(playerPosition, { halfExtents: { x: 10, y: 10, z: 10 } })
-        const pointAround = navMeshQuery.getRandomPointAround(target, 1)
+        const { point: target } = navMeshQuery.findClosestPoint(playerPosition, { halfExtents: { x: 10, y: 10, z: 10 } })
+        const { randomPoint: pointAround } = navMeshQuery.findRandomPointAroundCircle(target, 1)
+
         follower.crowdAgent.goto(pointAround)
     }
 }
