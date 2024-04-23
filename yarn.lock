@@ -6581,7 +6581,7 @@ __metadata:
     react-router-dom: "npm:^6.22.3"
     recast-navigation: "npm:^0.24.1"
     simplex-noise: "npm:^4.0.1"
-    styled-breakpoints: "npm:^14.1.2"
+    styled-breakpoints: "npm:^14.1.3"
     styled-components: "npm:^6.1.8"
     suspend-react: "npm:^0.1.3"
     three: "npm:^0.163.0"
@@ -6787,13 +6787,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"styled-breakpoints@npm:^14.1.2":
-  version: 14.1.2
-  resolution: "styled-breakpoints@npm:14.1.2"
+"styled-breakpoints@npm:^14.1.3":
+  version: 14.1.3
+  resolution: "styled-breakpoints@npm:14.1.3"
   peerDependencies:
     react: ">= 16.8.0"
     react-dom: ">= 16.8.0"
-  checksum: b617fb5148d44c24b841e825fe332eabdd11dc5a5f13d02aa5b88f4593582e446977da3a7b3faab78eef749a12fc52aed148a1f8c95586635705999bbad36951
+  checksum: 22d2101f7e58967a8b2891eb53f73b7c1620a37d2ddd800cf7214717e0a149ed9b8c9ff82b607bf5830fed39019ec0fad3965cdb87064926deda7aa124bf6ec1
   languageName: node
   linkType: hard
 
