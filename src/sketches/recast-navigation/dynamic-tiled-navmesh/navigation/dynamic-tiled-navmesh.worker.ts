@@ -18,15 +18,11 @@ const process = (props: BuildTileMeshProps) => {
 
     if (!result.success || !result.data) return
 
-    // todo: get from heap
-    const ser = new Uint8Array(result.data.size)
-    for (let i = 0; i < result.data.size; i++) {
-        ser[i] = result.data.get(i)
-    }
+    const navMeshData = result.data.toTypedArray();
     
     result.data.free()
 
-    self.postMessage({ tileX: props.tileX, tileY: props.tileY, navMeshData: ser }, [ser.buffer] as never) // todo: type woes
+    self.postMessage({ tileX: props.tileX, tileY: props.tileY, navMeshData: navMeshData }, [navMeshData.buffer] as never) // todo: type woes
 }
 
 init().then(() => {

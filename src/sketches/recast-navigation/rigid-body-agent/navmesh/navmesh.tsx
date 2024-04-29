@@ -2,7 +2,7 @@ import { useConst, useInterval } from '@/common'
 import { useFrame } from '@react-three/fiber'
 import { useRapier } from '@react-three/rapier'
 import { useEffect, useRef, useState } from 'react'
-import { Arrays, NavMesh, NavMeshQuery, RecastConfig, init } from 'recast-navigation'
+import { NavMesh, NavMeshQuery, RecastConfig, UnsignedCharArray, init } from 'recast-navigation'
 import { NavMeshHelper, getPositionsAndIndices } from 'recast-navigation/three'
 import * as THREE from 'three'
 import { Entity, NavComponent, navQuery, traversableQuery } from '../ecs'
@@ -51,8 +51,8 @@ export const NavMeshGenerator = () => {
         worker.onmessage = ({ data: { navMeshData: serialisedNavMeshData } }) => {
             inProgress.current = false
 
-            const navMeshData = new Arrays.UnsignedCharArray()
-            navMeshData.copy(serialisedNavMeshData, serialisedNavMeshData.length)
+            const navMeshData = new UnsignedCharArray()
+            navMeshData.copy(serialisedNavMeshData)
 
             navMesh.initSolo(navMeshData)
 

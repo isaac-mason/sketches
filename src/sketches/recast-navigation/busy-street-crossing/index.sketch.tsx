@@ -62,7 +62,7 @@ const App = () => {
             if (!entity.target) {
                 const target = targets[Math.floor(Math.random() * targets.length)]
 
-                agent.goto(target)
+                agent.requestMoveTarget(target)
                 entity.target = { ...target }
             }
 

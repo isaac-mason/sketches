@@ -14,10 +14,7 @@ const process = () => {
 
     if (!success) return
 
-    const ser = new Uint8Array(navMeshData.size)
-    for (let i = 0; i < navMeshData.size; i++) {
-        ser[i] = navMeshData.get(i)
-    }
+    const ser = navMeshData.toTypedArray()
 
     navMeshData.free()
 

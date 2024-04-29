@@ -1,10 +1,10 @@
 import { Topic } from 'arancini/events'
 import {
-    Arrays,
     NavMesh,
     NavMeshParams,
     Raw,
     RecastConfig,
+    UnsignedCharArray,
     Vector3Tuple,
     recastConfigDefaults,
     statusToReadableString,
@@ -88,8 +88,8 @@ export class DynamicTiledNavMesh {
                     navMeshData: serialisedNavMeshData,
                 } = e.data as { tileX: number; tileY: number; navMeshData: Uint8Array }
 
-                const navMeshData = new Arrays.UnsignedCharArray()
-                navMeshData.copy(serialisedNavMeshData as ArrayLike<number> as number[], serialisedNavMeshData.length)
+                const navMeshData = new UnsignedCharArray()
+                navMeshData.copy(serialisedNavMeshData as ArrayLike<number> as number[])
 
                 navMesh.removeTile(navMesh.getTileRefAt(tileX, tileY, 0))
 

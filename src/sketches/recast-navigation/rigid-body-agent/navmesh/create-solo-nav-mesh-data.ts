@@ -1,5 +1,4 @@
 import {
-    Arrays,
     NavMeshCreateParams,
     Raw,
     RecastBuildContext,
@@ -7,6 +6,10 @@ import {
     RecastConfig,
     RecastContourSet,
     RecastHeightfield,
+    TriangleAreasArray,
+    TrianglesArray,
+    UnsignedCharArray,
+    VerticesArray,
     allocCompactHeightfield,
     allocContourSet,
     allocHeightfield,
@@ -50,7 +53,7 @@ export type SoloNavMeshGeneratorIntermediates = {
 }
 
 type SoloNavMeshGeneratorSuccessResult = {
-    navMeshData: InstanceType<typeof Arrays.UnsignedCharArray>
+    navMeshData: UnsignedCharArray
     success: true
     intermediates: SoloNavMeshGeneratorIntermediates
 }
@@ -114,13 +117,13 @@ export const createSoloNavMeshData = (
 
     const verts = positions as number[]
     const nVerts = indices.length
-    const vertsArray = new Arrays.VertsArray()
-    vertsArray.copy(verts, verts.length)
+    const verticesArray = new VerticesArray()
+    verticesArray.copy(verts)
 
     const tris = indices as number[]
     const nTris = indices.length / 3
-    const trisArray = new Arrays.TrisArray()
-    trisArray.copy(tris, tris.length)
+    const trianglesArray = new TrianglesArray()
+    trianglesArray.copy(tris)
 
     const { bbMin, bbMax } = getBoundingBox(positions, indices)
 
@@ -155,18 +158,18 @@ export const createSoloNavMeshData = (
     // Find triangles which are walkable based on their slope and rasterize them.
     // If your input data is multiple meshes, you can transform them here, calculate
     // the are type for each of the meshes and rasterize them.
-    const triAreasArray = new Arrays.TriAreasArray()
-    triAreasArray.resize(nTris)
+    const triangleAreasArray = new TriangleAreasArray()
+    triangleAreasArray.resize(nTris)
 
-    markWalkableTriangles(buildContext, config.walkableSlopeAngle, vertsArray, nVerts, trisArray, nTris, triAreasArray)
+    markWalkableTriangles(buildContext, config.walkableSlopeAngle, verticesArray, nVerts, trianglesArray, nTris, triangleAreasArray)
 
     if (
-        !rasterizeTriangles(buildContext, vertsArray, nVerts, trisArray, triAreasArray, nTris, heightfield, config.walkableClimb)
+        !rasterizeTriangles(buildContext, verticesArray, nVerts, trianglesArray, triangleAreasArray, nTris, heightfield, config.walkableClimb)
     ) {
         return fail('Could not rasterize triangles')
     }
 
-    triAreasArray.free()
+    triangleAreasArray.free()
 
     //
     // Step 3. Filter walkables surfaces.

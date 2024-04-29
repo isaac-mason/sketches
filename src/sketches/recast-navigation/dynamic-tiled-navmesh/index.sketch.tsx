@@ -137,7 +137,7 @@ const updateFollowers = (navMeshQuery: NavMeshQuery | undefined) => {
         const { point: target } = navMeshQuery.findClosestPoint(playerPosition, { halfExtents: { x: 10, y: 10, z: 10 } })
         const { randomPoint: pointAround } = navMeshQuery.findRandomPointAroundCircle(target, 1)
 
-        follower.crowdAgent.goto(pointAround)
+        follower.crowdAgent.requestMoveTarget(pointAround)
     }
 }
 

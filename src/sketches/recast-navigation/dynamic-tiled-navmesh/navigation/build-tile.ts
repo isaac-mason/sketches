@@ -1,5 +1,4 @@
 import {
-    Arrays,
     NavMeshCreateParams,
     Raw,
     RecastBuildContext,
@@ -7,7 +6,11 @@ import {
     RecastConfig,
     RecastContourSet,
     RecastHeightfield,
+    TriangleAreasArray,
+    TrianglesArray,
+    UnsignedCharArray,
     Vector3Tuple,
+    VerticesArray,
     allocCompactHeightfield,
     allocContourSet,
     allocHeightfield,
@@ -142,7 +145,7 @@ export type BuildTileMeshProps = {
 }
 
 export type BuildTileMeshResult = (
-    | { success: true; data?: InstanceType<typeof Arrays.UnsignedCharArray> }
+    | { success: true; data?: UnsignedCharArray }
     | { success: false; error: string }
 ) & {
     tileIntermediates?: TileIntermediates
@@ -163,15 +166,15 @@ export const buildTile = ({
     const buildContext = new RecastBuildContext()
 
     /* verts and tris */
-    const verts = positions as ArrayLike<number> as number[]
-    const nVerts = indices.length
-    const vertsArray = new Arrays.VertsArray()
-    vertsArray.copy(verts, verts.length)
+    const vertices = positions as ArrayLike<number> as number[]
+    const numVertices = indices.length
+    const verticesArray = new VerticesArray()
+    verticesArray.copy(vertices)
 
-    const tris = indices as ArrayLike<number> as number[]
-    const nTris = indices.length / 3
-    const trisArray = new Arrays.TrisArray()
-    trisArray.copy(tris, tris.length)
+    const triangles = indices as ArrayLike<number> as number[]
+    const numTriangles = indices.length / 3
+    const trianglesArray = new TrianglesArray()
+    trianglesArray.copy(triangles)
 
     const tileIntermediates: TileIntermediates = { tileX, tileY }
 
@@ -249,7 +252,7 @@ export const buildTile = ({
 
     buildContext.log(Raw.Module.RC_LOG_PROGRESS, `Building tile at x: ${tileX}, y: ${tileY}`)
     buildContext.log(Raw.Module.RC_LOG_PROGRESS, ` - ${config.width} x ${config.height} cells`)
-    buildContext.log(Raw.Module.RC_LOG_PROGRESS, ` - ${nVerts / 1000}fK verts, ${nTris / 1000}K tris`)
+    buildContext.log(Raw.Module.RC_LOG_PROGRESS, ` - ${numVertices / 1000}fK verts, ${numTriangles / 1000}K tris`)
 
     // Allocate voxel heightfield where we rasterize our input data to.
     const heightfield = allocHeightfield()
@@ -279,11 +282,11 @@ export const buildTile = ({
     const trianglesInTileBounds = getTrianglesInBox(positions, indices, tileBounds)
     const nTrianglesInTileBounds = trianglesInTileBounds.length / 3
 
-    const trisInBoundsArray = new Arrays.TrisArray()
-    trisInBoundsArray.copy(trianglesInTileBounds, trianglesInTileBounds.length)
+    const trianglessInBoundsArray = new TrianglesArray()
+    trianglessInBoundsArray.copy(trianglesInTileBounds)
 
-    const triAreasArray = new Arrays.TriAreasArray()
-    triAreasArray.resize(nTrianglesInTileBounds)
+    const triangleAreasArray = new TriangleAreasArray()
+    triangleAreasArray.resize(nTrianglesInTileBounds)
 
     // Find triangles which are walkable based on their slope and rasterize them.
     // If your input data is multiple meshes, you can transform them here, calculate
@@ -291,25 +294,25 @@ export const buildTile = ({
     markWalkableTriangles(
         buildContext,
         tileConfig.walkableSlopeAngle,
-        vertsArray,
-        nVerts,
-        trisInBoundsArray,
+        verticesArray,
+        numVertices,
+        trianglessInBoundsArray,
         nTrianglesInTileBounds,
-        triAreasArray,
+        triangleAreasArray,
     )
 
     const success = rasterizeTriangles(
         buildContext,
-        vertsArray,
-        nVerts,
-        trisInBoundsArray,
-        triAreasArray,
+        verticesArray,
+        numVertices,
+        trianglessInBoundsArray,
+        triangleAreasArray,
         nTrianglesInTileBounds,
         heightfield,
         tileConfig.walkableClimb,
     )
 
-    triAreasArray.free()
+    triangleAreasArray.free()
 
     if (!success) {
         return failTileMesh('Could not rasterize triangles')
