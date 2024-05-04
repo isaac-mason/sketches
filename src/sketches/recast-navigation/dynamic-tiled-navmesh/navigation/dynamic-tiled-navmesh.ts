@@ -104,7 +104,7 @@ export class DynamicTiledNavMesh {
                             `status: ${statusToReadableString(addTileResult.status)} (${addTileResult.status})`,
                     )
 
-                    navMeshData.free()
+                    navMeshData.destroy()
                 }
 
                 this.navMeshVersion++

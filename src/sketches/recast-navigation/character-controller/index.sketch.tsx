@@ -353,7 +353,7 @@ const NavigationMesh = () => {
 
         if (!success) return
 
-        const navMeshQuery = new NavMeshQuery({ navMesh })
+        const navMeshQuery = new NavMeshQuery(navMesh)
 
         const navigationMeshEntity = world.create({
             navigationMesh: {

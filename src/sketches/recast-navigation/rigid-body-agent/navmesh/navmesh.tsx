@@ -41,7 +41,7 @@ export const NavMeshGenerator = () => {
 
     useEffect(() => {
         const navMesh = new NavMesh()
-        const navMeshQuery = new NavMeshQuery({ navMesh })
+        const navMeshQuery = new NavMeshQuery(navMesh)
 
         nav.navMesh = navMesh
         nav.navMeshQuery = navMeshQuery

@@ -16,7 +16,7 @@ const process = () => {
 
     const ser = navMeshData.toTypedArray()
 
-    navMeshData.free()
+    navMeshData.destroy()
 
     self.postMessage({ navMeshData: ser }, [ser.buffer] as never) // todo: type woes
 }

@@ -312,7 +312,7 @@ export const buildTile = ({
         tileConfig.walkableClimb,
     )
 
-    triangleAreasArray.free()
+    triangleAreasArray.destroy()
 
     if (!success) {
         return failTileMesh('Could not rasterize triangles')

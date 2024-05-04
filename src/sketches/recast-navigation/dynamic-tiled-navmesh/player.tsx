@@ -60,7 +60,7 @@ export const Player = (props: RigidBodyProps) => {
         characterController.current.setApplyImpulsesToDynamicBodies(true)
 
         return () => {
-            characterController.current.free()
+            world.removeCharacterController(characterController.current)
             characterController.current = null!
         }
     }, [])

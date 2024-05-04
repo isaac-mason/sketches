@@ -93,7 +93,7 @@ const useKinematicCharacterController = ({
         characterController.current.setApplyImpulsesToDynamicBodies(applyImpulsesToDynamicBodies)
 
         return () => {
-            characterController.current.free()
+            world.removeCharacterController(characterController.current)
             characterController.current = null!
         }
     }, [

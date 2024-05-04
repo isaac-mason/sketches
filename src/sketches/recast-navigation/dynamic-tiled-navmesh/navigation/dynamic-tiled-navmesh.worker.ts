@@ -20,7 +20,7 @@ const process = (props: BuildTileMeshProps) => {
 
     const navMeshData = result.data.toTypedArray();
     
-    result.data.free()
+    result.data.destroy()
 
     self.postMessage({ tileX: props.tileX, tileY: props.tileY, navMeshData: navMeshData }, [navMeshData.buffer] as never) // todo: type woes
 }

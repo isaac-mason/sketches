@@ -79,8 +79,8 @@ export const Navigation = () => {
 
     useEffect(() => {
         const dynamicTiledNavMesh = new DynamicTiledNavMesh({ navMeshBounds, recastConfig, maxTiles, workers: navMeshWorkers })
-        const navMeshQuery = new NavMeshQuery({ navMesh: dynamicTiledNavMesh.navMesh })
-        const crowd = new Crowd({ maxAgents, maxAgentRadius, navMesh: dynamicTiledNavMesh.navMesh })
+        const navMeshQuery = new NavMeshQuery(dynamicTiledNavMesh.navMesh)
+        const crowd = new Crowd(dynamicTiledNavMesh.navMesh, { maxAgents, maxAgentRadius })
 
         dynamicTiledNavMesh.onNavMeshUpdate.add((version) => setNavMeshVersion(version))
 

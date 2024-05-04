@@ -6,6 +6,8 @@ import {
     RecastConfig,
     RecastContourSet,
     RecastHeightfield,
+    RecastPolyMesh,
+    RecastPolyMeshDetail,
     TriangleAreasArray,
     TrianglesArray,
     UnsignedCharArray,
@@ -32,6 +34,8 @@ import {
     freeCompactHeightfield,
     freeContourSet,
     freeHeightfield,
+    freePolyMesh,
+    freePolyMeshDetail,
     markWalkableTriangles,
     rasterizeTriangles,
     recastConfigDefaults,
@@ -50,6 +54,8 @@ export type SoloNavMeshGeneratorIntermediates = {
     heightfield?: RecastHeightfield
     compactHeightfield?: RecastCompactHeightfield
     contourSet?: RecastContourSet
+    polyMesh?: RecastPolyMesh
+    polyMeshDetail?: RecastPolyMeshDetail
 }
 
 type SoloNavMeshGeneratorSuccessResult = {
@@ -101,6 +107,16 @@ export const createSoloNavMeshData = (
         if (intermediates.contourSet) {
             freeContourSet(intermediates.contourSet)
             intermediates.contourSet = undefined
+        }
+
+        if (intermediates.polyMesh) {
+            freePolyMesh(intermediates.polyMesh)
+            intermediates.polyMesh = undefined
+        }
+
+        if (intermediates.polyMeshDetail) {
+            freePolyMeshDetail(intermediates.polyMeshDetail)
+            intermediates.polyMeshDetail = undefined
         }
     }
 
@@ -161,15 +177,32 @@ export const createSoloNavMeshData = (
     const triangleAreasArray = new TriangleAreasArray()
     triangleAreasArray.resize(nTris)
 
-    markWalkableTriangles(buildContext, config.walkableSlopeAngle, verticesArray, nVerts, trianglesArray, nTris, triangleAreasArray)
+    markWalkableTriangles(
+        buildContext,
+        config.walkableSlopeAngle,
+        verticesArray,
+        nVerts,
+        trianglesArray,
+        nTris,
+        triangleAreasArray,
+    )
 
     if (
-        !rasterizeTriangles(buildContext, verticesArray, nVerts, trianglesArray, triangleAreasArray, nTris, heightfield, config.walkableClimb)
+        !rasterizeTriangles(
+            buildContext,
+            verticesArray,
+            nVerts,
+            trianglesArray,
+            triangleAreasArray,
+            nTris,
+            heightfield,
+            config.walkableClimb,
+        )
     ) {
         return fail('Could not rasterize triangles')
     }
 
-    triangleAreasArray.free()
+    triangleAreasArray.destroy()
 
     //
     // Step 3. Filter walkables surfaces.
@@ -240,6 +273,7 @@ export const createSoloNavMeshData = (
     // Step 6. Build polygons mesh from contours.
     //
     const polyMesh = allocPolyMesh()
+    intermediates.polyMesh = polyMesh
     if (!buildPolyMesh(buildContext, contourSet, config.maxVertsPerPoly, polyMesh)) {
         return fail('Failed to triangulate contours')
     }
@@ -248,6 +282,7 @@ export const createSoloNavMeshData = (
     // Step 7. Create detail mesh which allows to access approximate height on each polygon.
     //
     const polyMeshDetail = allocPolyMeshDetail()
+    intermediates.polyMeshDetail = polyMeshDetail
     if (
         !buildPolyMeshDetail(
             buildContext,

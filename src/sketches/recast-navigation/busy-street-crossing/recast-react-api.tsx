@@ -60,10 +60,9 @@ export const Navigation = ({ children, debug, generatorConfig }: NavigationProps
 
         if (!success) return
 
-        const crowd = new Crowd({
+        const crowd = new Crowd(navMesh, {
             maxAgents: 1000,
             maxAgentRadius: 0.5,
-            navMesh,
         })
 
         setNavMesh(navMesh)
