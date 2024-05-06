@@ -151,7 +151,7 @@ export const Navigation = () => {
         const crowd = useNav.getState().crowd
         if (!crowd) return
 
-        crowd.update(delta)
+        crowd.update(1 / 60, delta)
     })
 
     const navMeshHelper = useMemo(() => {
