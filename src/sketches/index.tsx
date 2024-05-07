@@ -78,6 +78,11 @@ const sketchList = [
         path: 'voxels/simple-voxels/tilt-shift',
         tags: ['voxels', 'tilt-shift'],
     },
+    {
+        title: 'Simple Voxels - Voxelize',
+        path: 'voxels/simple-voxels/voxelize',
+        tags: ['voxels', 'model'],
+    },
     /* Rapier */
     {
         title: 'Rapier - Cluster',
