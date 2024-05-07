@@ -577,10 +577,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@emotion/unitless@npm:0.8.0":
-  version: 0.8.0
-  resolution: "@emotion/unitless@npm:0.8.0"
-  checksum: 10/176141117ed23c0eb6e53a054a69c63e17ae532ec4210907a20b2208f91771821835f1c63dd2ec63e30e22fcc984026d7f933773ee6526dd038e0850919fae7a
+"@emotion/unitless@npm:0.8.1":
+  version: 0.8.1
+  resolution: "@emotion/unitless@npm:0.8.1"
+  checksum: 10/918f73c46ac0b7161e3c341cc07d651ce87e31ab1695e74b12adb7da6bb98dfbff8c69cf68a4e40d9eb3d820ca055dc1267aeb3007927ce88f98b885bf729b63
   languageName: node
   linkType: hard
 
@@ -7493,7 +7493,7 @@ __metadata:
     recast-navigation: "npm:^0.29.0"
     simplex-noise: "npm:^4.0.1"
     styled-breakpoints: "npm:^14.1.3"
-    styled-components: "npm:^6.1.8"
+    styled-components: "npm:^6.1.9"
     suspend-react: "npm:^0.1.3"
     three: "npm:^0.164.1"
     three-bvh-csg: "npm:^0.0.16"
@@ -7726,12 +7726,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"styled-components@npm:^6.1.8":
-  version: 6.1.8
-  resolution: "styled-components@npm:6.1.8"
+"styled-components@npm:^6.1.9":
+  version: 6.1.9
+  resolution: "styled-components@npm:6.1.9"
   dependencies:
     "@emotion/is-prop-valid": "npm:1.2.1"
-    "@emotion/unitless": "npm:0.8.0"
+    "@emotion/unitless": "npm:0.8.1"
     "@types/stylis": "npm:4.2.0"
     css-to-react-native: "npm:3.2.0"
     csstype: "npm:3.1.2"
@@ -7742,7 +7742,7 @@ __metadata:
   peerDependencies:
     react: ">= 16.8.0"
     react-dom: ">= 16.8.0"
-  checksum: 10/f8fd00556d15940c8276bf05f618fc28a593a2244bf97a2ceb7797325eac78cb8c00ec780811d8d1024edb011a21e9575796b6d7e638cd91c062ddd8d0c4f8a8
+  checksum: 10/e9da0c226753008856f4c533a84471361747c8a13377f05893850651ad5a2c626135d36cf0fa41b23d20f0f288d0de651d7d533829bce353fdd2c9b263748ef6
   languageName: node
   linkType: hard
 
