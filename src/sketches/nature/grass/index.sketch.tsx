@@ -315,7 +315,7 @@ const grassFragmentShader = /* glsl */ `
         gl_FragColor = vec4(bladeColor, 1.0);
 
         #include <tonemapping_fragment>
-        #include <encodings_fragment>
+        #include <colorspace_fragment>
     }
 `
 
