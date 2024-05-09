@@ -1,6 +1,6 @@
 import { useConst } from '@/common'
 import { ThreeElements, useFrame } from '@react-three/fiber'
-import { Fragment, createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { Fragment, createContext, forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react'
 import * as THREE from 'three'
 import { Voxels as VoxelsImpl } from './voxels'
 import { VoxelChunk, getChunkBounds } from './world'
@@ -25,8 +25,12 @@ export type VoxelsProps = {
     children: React.ReactNode
 }
 
-export const Voxels = ({ children }: VoxelsProps) => {
+export type VoxelsRef = VoxelsImpl
+
+export const Voxels = forwardRef<VoxelsImpl, VoxelsProps>(({ children }, ref) => {
     const voxels = useConst(() => new VoxelsImpl())
+
+    useImperativeHandle(ref, () => voxels, [voxels])
 
     useEffect(() => {
         voxels.connect()
@@ -43,7 +47,7 @@ export const Voxels = ({ children }: VoxelsProps) => {
     const contextValue = useMemo(() => ({ voxels }), [voxels])
 
     return <voxelsContext.Provider value={contextValue}>{children}</voxelsContext.Provider>
-}
+})
 
 type ChunkHelperProps = { chunk: VoxelChunk }
 

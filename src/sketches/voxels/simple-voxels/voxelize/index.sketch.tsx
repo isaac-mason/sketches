@@ -2,7 +2,7 @@ import { Canvas } from '@/common'
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei'
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
-import { VoxelChunkMeshes, Voxels, useVoxels } from '../lib/react'
+import { VoxelChunkMeshes, Voxels, VoxelsRef } from '../lib/react'
 
 class Volume<T> {
     private map: Map<number, Map<number, Map<number, T>>> = new Map()
@@ -80,7 +80,7 @@ export const voxelize = (positions: number[], indices: number[], cellSize: numbe
 
                     voxelBox.setFromCenterAndSize(point, voxelSize)
 
-                    if (triangle.intersectsBox(voxelBox)) {
+                    if (voxelBox.intersectsTriangle(triangle)) {
                         volume.set(x, y, z, true)
                     }
                 }
@@ -91,23 +91,22 @@ export const voxelize = (positions: number[], indices: number[], cellSize: numbe
     return volume
 }
 
-const CELL_SIZE = 0.05
-const CELL_HEIGHT = 0.05
-
 type VoxelizeProps = {
     children: React.ReactNode
+    cellSize: number
+    cellHeight: number
 }
 
-const Voxelize = ({ children }: VoxelizeProps) => {
-    const { voxels } = useVoxels()
+const Voxelize = ({ children, cellSize, cellHeight }: VoxelizeProps) => {
+    const voxels = useRef<VoxelsRef>(null!)
 
-    const ref = useRef<THREE.Group>(null!)
+    const group = useRef<THREE.Group>(null!)
 
     useEffect(() => {
         const positions: number[] = []
         const indices: number[] = []
 
-        ref.current.traverse((object) => {
+        group.current.traverse((object) => {
             if (object instanceof THREE.Mesh) {
                 const geometry = object.geometry as THREE.BufferGeometry
 
@@ -124,7 +123,7 @@ const Voxelize = ({ children }: VoxelizeProps) => {
             }
         })
 
-        const volume = voxelize(positions, indices, CELL_SIZE, CELL_HEIGHT)
+        const volume = voxelize(positions, indices, cellSize, cellHeight)
 
         const cursor = new THREE.Vector3()
 
@@ -137,32 +136,31 @@ const Voxelize = ({ children }: VoxelizeProps) => {
             color.copy(orange)
             color.addScalar((Math.random() - 0.5) * 0.12)
 
-            voxels.setBlock(cursor, { solid: true, color: color.getHex() })
+            voxels.current.setBlock(cursor, { solid: true, color: color.getHex() })
         }
     }, [])
 
     return (
-        <group ref={ref} visible={true}>
-            {children}
-        </group>
+        <Voxels ref={voxels}>
+            <group ref={group} visible={true}>
+                {children}
+            </group>
+
+            <group scale={[cellSize, cellHeight, cellSize]}>
+                <VoxelChunkMeshes />
+            </group>
+        </Voxels>
     )
 }
 
 export default function Sketch() {
     return (
         <Canvas>
-            <Voxels>
-                <Voxelize>
-                    <mesh>
-                        <torusKnotGeometry args={[1, 0.2, 128, 16]} />
-                        <meshNormalMaterial depthTest={false} transparent opacity={0.2} />
-                    </mesh>
-                </Voxelize>
-
-                <group scale={[CELL_SIZE, CELL_HEIGHT, CELL_SIZE]}>
-                    <VoxelChunkMeshes />
-                </group>
-            </Voxels>
+            <Voxelize cellSize={0.05} cellHeight={0.05}>
+                <mesh visible={false}>
+                    <torusKnotGeometry args={[1, 0.2, 128, 16]} />
+                </mesh>
+            </Voxelize>
 
             <ambientLight intensity={1.5} />
             <directionalLight position={[10, 10, 10]} intensity={1} />
