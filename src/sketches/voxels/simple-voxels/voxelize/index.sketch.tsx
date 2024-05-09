@@ -48,11 +48,11 @@ export const voxelize = (positions: number[], indices: number[], cellSize: numbe
     const b = new THREE.Vector3()
     const c = new THREE.Vector3()
 
-    const min = new THREE.Vector3()
-    const max = new THREE.Vector3()
-
     const start = new THREE.Vector3()
     const end = new THREE.Vector3()
+
+    const voxelBox = new THREE.Box3()
+    const voxelSize = new THREE.Vector3(cellSize, cellHeight, cellSize)
 
     for (let i = 0; i < indices.length; i += 3) {
         a.set(positions[indices[i] * 3], positions[indices[i] * 3 + 1], positions[indices[i] * 3 + 2])
@@ -61,18 +61,26 @@ export const voxelize = (positions: number[], indices: number[], cellSize: numbe
 
         triangle.set(a, b, c)
 
-        min.set(Math.min(a.x, b.x, c.x), Math.min(a.y, b.y, c.y), Math.min(a.z, b.z, c.z))
-        max.set(Math.max(a.x, b.x, c.x), Math.max(a.y, b.y, c.y), Math.max(a.z, b.z, c.z))
-
-        start.set(Math.floor(min.x / cellSize), Math.floor(min.y / cellHeight), Math.floor(min.z / cellSize))
-        end.set(Math.floor(max.x / cellSize), Math.floor(max.y / cellHeight), Math.floor(max.z / cellSize))
+        start.set(
+            Math.floor(Math.min(a.x, b.x, c.x) / cellSize),
+            Math.floor(Math.min(a.y, b.y, c.y) / cellHeight),
+            Math.floor(Math.min(a.z, b.z, c.z) / cellSize),
+        )
+        end.set(
+            Math.floor(Math.max(a.x, b.x, c.x) / cellSize),
+            Math.floor(Math.max(a.y, b.y, c.y) / cellHeight),
+            Math.floor(Math.max(a.z, b.z, c.z) / cellSize),
+        )
 
         for (let x = start.x; x <= end.x; x++) {
             for (let y = start.y; y <= end.y; y++) {
                 for (let z = start.z; z <= end.z; z++) {
                     point.set(x * cellSize, y * cellHeight, z * cellSize)
+                    point.addScalar(cellSize / 2)
 
-                    if (triangle.containsPoint(point)) {
+                    voxelBox.setFromCenterAndSize(point, voxelSize)
+
+                    if (triangle.intersectsBox(voxelBox)) {
                         volume.set(x, y, z, true)
                     }
                 }
@@ -134,7 +142,7 @@ const Voxelize = ({ children }: VoxelizeProps) => {
     }, [])
 
     return (
-        <group ref={ref} visible={false}>
+        <group ref={ref} visible={true}>
             {children}
         </group>
     )
@@ -147,7 +155,7 @@ export default function Sketch() {
                 <Voxelize>
                     <mesh>
                         <torusKnotGeometry args={[1, 0.2, 128, 16]} />
-                        <meshNormalMaterial />
+                        <meshNormalMaterial depthTest={false} transparent opacity={0.2} />
                     </mesh>
                 </Voxelize>
 
