@@ -171,6 +171,12 @@ const sketchList = [
         path: 'p2-es/pixelated-text',
         tags: ['physics', 'p2-es', 'text', 'arancini'],
     },
+    /* Falling Sand */
+    {
+        title: 'Falling Sand',
+        path: 'falling-sand',
+        tags: ['falling-sand', 'simulation'],
+    },
     /* Raytracing */
     {
         title: 'Raytracing - Hello World',
