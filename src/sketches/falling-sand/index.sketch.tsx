@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { create } from 'zustand'
 
 type Vec2 = [number, number]
-type Particle = { x: number; y: number; type: number }
+type Particle = { x: number; y: number; element: number }
 
 const Element = {
     air: 0,
@@ -64,12 +64,18 @@ const height = 150
 const useFallingSand = create<{
     particles: Set<Particle>
     map: Array<null | Particle>
-    selectedType: number
+    selectedElement: number
+    paused: boolean
+    togglePause: () => void
     reset: () => void
 }>((_, get) => ({
     particles: new Set(),
     map: new Array(width * height).fill(null),
-    selectedType: Element.sand,
+    selectedElement: Element.sand,
+    paused: false,
+    togglePause: () => {
+        useFallingSand.setState({ paused: !get().paused })
+    },
     reset: () => {
         const { particles, map } = get()
         particles.clear()
@@ -80,7 +86,22 @@ const useFallingSand = create<{
 export default function Sketch() {
     const canvasRef = useRef<HTMLCanvasElement>(null!)
 
-    const { selectedType, reset } = useFallingSand()
+    const { selectedElement, paused, togglePause, reset } = useFallingSand()
+
+    useEffect(() => {
+        // space to toggle pause
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === ' ') {
+                togglePause()
+            }
+        }
+
+        window.addEventListener('keydown', onKeyDown)
+
+        return () => {
+            window.removeEventListener('keydown', onKeyDown)
+        }
+    }, [])
 
     useEffect(() => {
         const canvas = canvasRef.current
@@ -96,19 +117,19 @@ export default function Sketch() {
             return map[y * width + x]
         }
 
-        const set = (x: number, y: number, type: number) => {
+        const set = (x: number, y: number, element: number) => {
             const current = get(x, y)
 
             if (current) {
                 particles.delete(current)
             }
 
-            if (type === Element.air) {
+            if (element === Element.air) {
                 map[y * width + x] = null
                 return
             }
 
-            const particle = { x, y, type }
+            const particle = { x, y, element }
 
             particles.add(particle)
             map[y * width + x] = particle
@@ -145,9 +166,9 @@ export default function Sketch() {
             ctx.fillStyle = 'white'
             ctx.fillRect(0, 0, width, height)
 
-            // draw
+            // render particles
             for (const particle of particles.values()) {
-                const { x, y, type } = particle
+                const { x, y, element: type } = particle
 
                 const canvasX = x
                 const canvasY = height - y
@@ -191,7 +212,7 @@ export default function Sketch() {
         const update = () => {
             // draw
             if (pointerDown) {
-                const selectedType = useFallingSand.getState().selectedType
+                const selectedType = useFallingSand.getState().selectedElement
 
                 const x = pointerPosition.x
                 const y = height - pointerPosition.y
@@ -208,6 +229,9 @@ export default function Sketch() {
                 }
             }
 
+            // only update if not paused
+            if (useFallingSand.getState().paused) return
+
             // update particles
             const shuffledParticles = Array.from(particles.values())
                 .map((particle) => [particle, Math.random() - 0.5] as [Particle, number])
@@ -215,7 +239,7 @@ export default function Sketch() {
                 .map(([particle]) => particle)
 
             for (const particle of shuffledParticles) {
-                const { x, y, type } = particle
+                const { x, y, element: type } = particle
 
                 const details = ElementDetails[type]
 
@@ -244,8 +268,8 @@ export default function Sketch() {
                         const particleBelow = get(nx, ny)
                         if (
                             !particleBelow ||
-                            !ElementDetails[particleBelow.type].density ||
-                            ElementDetails[particleBelow.type].density! >= details.density
+                            !ElementDetails[particleBelow.element].density ||
+                            ElementDetails[particleBelow.element].density! >= details.density
                         ) {
                             continue
                         }
@@ -255,7 +279,7 @@ export default function Sketch() {
 
                         // prevent rising columns
                         for (let i = 0; i < 3; i++) {
-                            const directions = ElementDetails[particleBelow.type].directions
+                            const directions = ElementDetails[particleBelow.element].directions
 
                             if (!directions) continue
 
@@ -317,18 +341,18 @@ export default function Sketch() {
                 }}
             >
                 {Object.entries(ElementDetails).map(([type, { name, color }]) => (
-                    <TypeSelector
+                    <ElementSelector
                         key={type}
-                        className={selectedType === Number(type) ? 'selected' : ''}
+                        className={selectedElement === Number(type) ? 'selected' : ''}
                         style={{
                             backgroundColor: color,
                         }}
                         onClick={() => {
-                            useFallingSand.setState({ selectedType: Number(type) })
+                            useFallingSand.setState({ selectedElement: Number(type) })
                         }}
                     >
                         {name}
-                    </TypeSelector>
+                    </ElementSelector>
                 ))}
 
                 <Button
@@ -339,6 +363,16 @@ export default function Sketch() {
                     }}
                 >
                     Reset
+                </Button>
+
+                <Button
+                    onClick={togglePause}
+                    style={{
+                        width: '100%',
+                        marginTop: '1em',
+                    }}
+                >
+                    {paused ? 'Play' : 'Pause'}
                 </Button>
             </div>
 
@@ -352,7 +386,7 @@ export default function Sketch() {
     )
 }
 
-const TypeSelector = styled.div`
+const ElementSelector = styled.div`
     width: 80px;
     height: 80px;
     padding: 5px;
