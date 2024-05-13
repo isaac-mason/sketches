@@ -99,14 +99,12 @@ export default function Sketch() {
         const set = (x: number, y: number, type: number) => {
             const current = get(x, y)
 
-            if (type === Element.air) {
-                map[y * width + x] = null
-                if (current) particles.delete(current)
-                return
+            if (current) {
+                particles.delete(current)
             }
 
-            if (current) {
-                current.type = type
+            if (type === Element.air) {
+                map[y * width + x] = null
                 return
             }
 
@@ -211,7 +209,10 @@ export default function Sketch() {
             }
 
             // update particles
-            const shuffledParticles = Array.from(particles.values()).sort(() => Math.random() - 0.5)
+            const shuffledParticles = Array.from(particles.values())
+                .map((particle) => [particle, Math.random() - 0.5] as [Particle, number])
+                .sort((a, b) => a[1] - b[1])
+                .map(([particle]) => particle)
 
             for (const particle of shuffledParticles) {
                 const { x, y, type } = particle
