@@ -7539,7 +7539,7 @@ __metadata:
     tunnel-rat: "npm:^0.1.2"
     typescript: "npm:^5.4.5"
     vite: "npm:^5.1.7"
-    vite-imagetools: "npm:^7.0.1"
+    vite-imagetools: "npm:^7.0.2"
     vite-plugin-html: "npm:^3.2.2"
     zustand: "npm:^4.5.2"
   languageName: unknown
@@ -8312,13 +8312,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite-imagetools@npm:^7.0.1":
-  version: 7.0.1
-  resolution: "vite-imagetools@npm:7.0.1"
+"vite-imagetools@npm:^7.0.2":
+  version: 7.0.2
+  resolution: "vite-imagetools@npm:7.0.2"
   dependencies:
     "@rollup/pluginutils": "npm:^5.0.5"
     imagetools-core: "npm:^7.0.0"
-  checksum: 10/3eebfdbcb93c611e3c1ff6f121ed6ab712ff826f7f8ec703a58b333da85068b40d6e32c081ee4eaceec82b2c245944ab60d4ba738e0831b132b3b4525da4089d
+  checksum: 10/bdd9767985cf8e7943c9e61b1d07a67de8995d900cc3302c51368a8fb7eba2d69cee86744f24ebe103dd58f906aaf0c637bb4b9f346816240df5db61d7c72e52
   languageName: node
   linkType: hard
 
