@@ -1,5 +1,6 @@
 
-import { CHUNK_SIZE, VoxelChunk, World, vec3 } from '../lib/world'
+import { Vector3 } from 'three'
+import { CHUNK_SIZE, Chunk, World } from '../lib/world'
 
 const VOXEL_FACE_DIRECTIONS: {
     // direction of the neighbour voxel
@@ -112,7 +113,7 @@ const VOXEL_FACE_DIRECTIONS: {
     },
 ]
 
-export const createChunkTrimesh = (world: World, chunk: VoxelChunk) => {
+export const createChunkTrimesh = (world: World, chunk: Chunk) => {
     const chunkX = chunk.position.x * CHUNK_SIZE
     const chunkY = chunk.position.y * CHUNK_SIZE
     const chunkZ = chunk.position.z * CHUNK_SIZE
@@ -120,12 +121,14 @@ export const createChunkTrimesh = (world: World, chunk: VoxelChunk) => {
     const positions: number[] = []
     const indices: number[] = []
 
+    const chunkLocalPosition = new Vector3()
+
     for (let localX = 0; localX < CHUNK_SIZE; localX++) {
         for (let localY = 0; localY < CHUNK_SIZE; localY++) {
             for (let localZ = 0; localZ < CHUNK_SIZE; localZ++) {
-                const chunkDataIndex = vec3.toChunkIndex({ x: localX, y: localY, z: localZ })
+                chunkLocalPosition.set(localX, localY, localZ)
 
-                if (chunk.solid[chunkDataIndex] === 0) continue
+                if (!chunk.getSolid(chunkLocalPosition)) continue
 
                 const worldX = chunkX + localX
                 const worldY = chunkY + localY
@@ -134,7 +137,7 @@ export const createChunkTrimesh = (world: World, chunk: VoxelChunk) => {
                 for (const voxelFaceDirection of VOXEL_FACE_DIRECTIONS) {
                     const { dx, dy, dz, lx, ly, lz, ux, uy, uz, vx, vy, vz } = voxelFaceDirection
 
-                    const solid = world.solid({ x: worldX + dx, y: worldY + dy, z: worldZ + dz })
+                    const solid = world.getSolid({ x: worldX + dx, y: worldY + dy, z: worldZ + dz })
 
                     if (solid) continue
 

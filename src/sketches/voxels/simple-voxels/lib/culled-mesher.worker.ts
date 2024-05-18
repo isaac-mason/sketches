@@ -1,6 +1,11 @@
 import { Vector3 } from 'three'
-import { ChunkMeshUpdateMessage, RegisterChunkMessage, WorkerMessage } from './culled-mesher-worker-types'
-import { VoxelChunk, World } from './world'
+import {
+    ChunkMeshUpdateResultMessage,
+    CulledMesherWorkerMessageType,
+    RegisterChunkMessage,
+    WorkerMessage,
+} from './culled-mesher-worker-types'
+import { Chunk, World } from './world'
 import { mesh } from './culled-mesher'
 
 const remoteWorld = new World()
@@ -18,15 +23,15 @@ const update = () => {
     state.jobs = new Set()
 
     for (const chunkId of jobs) {
-        const chunk = remoteWorld.getChunkById(chunkId)
+        const chunk = remoteWorld.chunks.get(chunkId)
 
         if (!chunk) continue
 
         try {
-            const { positions, indices, normals, colors, ambientOcclusion } = mesh(remoteWorld, chunk)
+            const { positions, indices, normals, colors, ambientOcclusion } = mesh(chunk, remoteWorld)
 
-            const chunkMeshUpdateNotification: ChunkMeshUpdateMessage = {
-                type: 'chunk-mesh-update',
+            const chunkMeshUpdateNotification: ChunkMeshUpdateResultMessage = {
+                type: CulledMesherWorkerMessageType.CHUNK_MESH_UPDATE_RESULT,
                 id: chunkId,
                 positions,
                 indices,
@@ -35,13 +40,9 @@ const update = () => {
                 ambientOcclusion,
             }
 
-            worker.postMessage(chunkMeshUpdateNotification, [
-                positions.buffer,
-                indices.buffer,
-                normals.buffer,
-                colors.buffer,
-                ambientOcclusion.buffer,
-            ])
+            worker.postMessage(chunkMeshUpdateNotification, {
+                transfer: [positions.buffer, indices.buffer, normals.buffer, colors.buffer, ambientOcclusion.buffer],
+            })
 
             incomplete.delete(chunkId)
         } catch (e) {
@@ -53,14 +54,7 @@ const update = () => {
 }
 
 const registerChunk = ({ id, position, solidBuffer, colorBuffer }: RegisterChunkMessage) => {
-    const chunk: VoxelChunk = {
-        id,
-        position: new Vector3(...position),
-        solid: new Uint8Array(solidBuffer),
-        solidBuffer,
-        color: new Uint32Array(colorBuffer),
-        colorBuffer,
-    }
+    const chunk = new Chunk(id, new Vector3(...position), solidBuffer, colorBuffer)
 
     remoteWorld.chunks.set(id, chunk)
 }
@@ -69,13 +63,19 @@ worker.onmessage = (e) => {
     const data = e.data as WorkerMessage
     const { type } = data
 
-    if (type === 'register-chunk') {
+    if (type === CulledMesherWorkerMessageType.REGISTER_CHUNK) {
         registerChunk(data)
-    } else if (type === 'request-chunk-mesh-update') {
+    } else if (type === CulledMesherWorkerMessageType.REQUEST_CHUNK_MESH_UPDATE) {
         state.jobs.add(data.id)
     }
 }
 
-setInterval(() => {
-    update()
-}, 1 / 60)
+// const loop = () => {
+//     update()
+
+//     setTimeout(loop)
+// }
+
+// setTimeout(loop)
+
+setInterval(update, 1000 / 120)

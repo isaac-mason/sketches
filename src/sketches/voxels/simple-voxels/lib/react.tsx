@@ -3,7 +3,7 @@ import { ThreeElements, useFrame } from '@react-three/fiber'
 import { Fragment, createContext, forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react'
 import * as THREE from 'three'
 import { Voxels as VoxelsImpl } from './voxels'
-import { VoxelChunk, getChunkBounds } from './world'
+import { Chunk, getChunkBounds } from './world'
 
 type VoxelsContextType = {
     voxels: VoxelsImpl
@@ -49,7 +49,7 @@ export const Voxels = forwardRef<VoxelsImpl, VoxelsProps>(({ children }, ref) =>
     return <voxelsContext.Provider value={contextValue}>{children}</voxelsContext.Provider>
 })
 
-type ChunkHelperProps = { chunk: VoxelChunk }
+type ChunkHelperProps = { chunk: Chunk }
 
 const ChunkHelper = ({ chunk }: ChunkHelperProps) => {
     const { min, max } = getChunkBounds(chunk)
@@ -66,7 +66,7 @@ type VoxelChunkMeshesProps = {
 export const VoxelChunkMeshes = ({ chunkHelper = false, ...groupProps }: VoxelChunkMeshesProps) => {
     const { voxels } = useVoxels()
 
-    type ChunkAndMesh = { chunk: VoxelChunk; mesh: THREE.Mesh }
+    type ChunkAndMesh = { chunk: Chunk; mesh: THREE.Mesh }
 
     const [meshes, setMeshes] = useState<ChunkAndMesh[]>([])
 

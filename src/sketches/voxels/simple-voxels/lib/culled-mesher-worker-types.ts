@@ -1,7 +1,13 @@
 import { CulledMesherChunkResult } from './culled-mesher'
 
+export const CulledMesherWorkerMessageType = {
+    REGISTER_CHUNK: 0,
+    REQUEST_CHUNK_MESH_UPDATE: 1,
+    CHUNK_MESH_UPDATE_RESULT: 2,
+} as const
+
 export type RegisterChunkMessage = {
-    type: 'register-chunk'
+    type: typeof CulledMesherWorkerMessageType.REGISTER_CHUNK
     id: string
     position: [number, number, number]
     solidBuffer: SharedArrayBuffer
@@ -9,12 +15,12 @@ export type RegisterChunkMessage = {
 }
 
 export type RequestChunkMeshUpdateMessage = {
-    type: 'request-chunk-mesh-update'
+    type: typeof CulledMesherWorkerMessageType.REQUEST_CHUNK_MESH_UPDATE
     id: string
 }
 
-export type ChunkMeshUpdateMessage = {
-    type: 'chunk-mesh-update'
+export type ChunkMeshUpdateResultMessage = {
+    type: typeof CulledMesherWorkerMessageType.CHUNK_MESH_UPDATE_RESULT
 } & CulledMesherChunkResult
 
-export type WorkerMessage = RegisterChunkMessage | RequestChunkMeshUpdateMessage | ChunkMeshUpdateMessage
+export type WorkerMessage = RegisterChunkMessage | RequestChunkMeshUpdateMessage | ChunkMeshUpdateResultMessage

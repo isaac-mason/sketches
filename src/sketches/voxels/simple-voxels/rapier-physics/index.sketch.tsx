@@ -8,9 +8,9 @@ import { ReactElement, createRef, useEffect, useMemo, useRef, useState } from 'r
 import * as THREE from 'three'
 import { Vector3Tuple } from 'three'
 import { VoxelChunkMeshes, Voxels, useVoxels } from '../lib/react'
-import { vec3 } from '../lib/world'
 import { SimpleLevel } from '../simple-level'
 import { createChunkTrimesh } from './chunk-collider'
+import { chunkPositionToWorldPosition } from '../lib/world'
 
 const SKETCH = 'simple-voxels/rapier-physics'
 
@@ -73,7 +73,7 @@ const ChunkColliders = () => {
             const chunksIds = new Set<string>(changes.map((change) => change.chunk.id))
 
             for (const chunkId of chunksIds) {
-                const chunk = voxels.world.getChunkById(chunkId)
+                const chunk = voxels.world.chunks.get(chunkId)
                 if (!chunk) continue
 
                 let chunkRigidBody = chunkRigidBodies.get(chunkId)
@@ -81,7 +81,7 @@ const ChunkColliders = () => {
                 if (!chunkRigidBody) {
                     chunkRigidBody = world.createRigidBody(Rapier.RigidBodyDesc.fixed())
 
-                    const offset = worldPositionToPhysicsPosition(vec3.chunkToWorld(chunk.position))
+                    const offset = worldPositionToPhysicsPosition(chunkPositionToWorldPosition(chunk.position))
 
                     chunkRigidBody.setTranslation(offset, true)
 

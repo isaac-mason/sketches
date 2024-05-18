@@ -41,7 +41,7 @@ const traceRay = (
         fx = ox - ix
         fy = oy - iy
         fz = oz - iz
-        b = world.solid({ x: ix, y: iy, z: iz })
+        b = world.getSolid({ x: ix, y: iy, z: iz })
 
         if (b) {
             if (hitPosition) {
@@ -65,7 +65,7 @@ const traceRay = (
             ey = ny < 0 ? fy <= minStep : fy >= 1.0 - minStep
             ez = nz < 0 ? fz <= minStep : fz >= 1.0 - minStep
             if (ex && ey && ez) {
-                b = world.solid({ x: ix + nx, y: iy + ny, z: iz }) || world.solid({ x: ix, y: iy + ny, z: iz + nz }) || world.solid({ x: ix + nx, y: iy, z: iz + nz })
+                b = world.getSolid({ x: ix + nx, y: iy + ny, z: iz }) || world.getSolid({ x: ix, y: iy + ny, z: iz + nz }) || world.getSolid({ x: ix + nx, y: iy, z: iz + nz })
                 if (b) {
                     if (hitPosition) {
                         hitPosition.x = nx < 0 ? ix - epsilon : ix + 1.0 - epsilon
@@ -81,7 +81,7 @@ const traceRay = (
                 }
             }
             if (ex && (ey || ez)) {
-                b = world.solid({ x: ix + nx, y: iy, z: iz })
+                b = world.getSolid({ x: ix + nx, y: iy, z: iz })
                 if (b) {
                     if (hitPosition) {
                         hitPosition.x = nx < 0 ? ix - epsilon : ix + 1.0 - epsilon
@@ -97,7 +97,7 @@ const traceRay = (
                 }
             }
             if (ey && (ex || ez)) {
-                b = world.solid({ x: ix, y: iy + ny, z: iz })
+                b = world.getSolid({ x: ix, y: iy + ny, z: iz })
                 if (b) {
                     if (hitPosition) {
                         hitPosition.x = fx < epsilon ? +ix : ox
@@ -113,7 +113,7 @@ const traceRay = (
                 }
             }
             if (ez && (ex || ey)) {
-                b = world.solid({x: ix, y: iy, z: iz + nz })
+                b = world.getSolid({x: ix, y: iy, z: iz + nz })
                 if (b) {
                     if (hitPosition) {
                         hitPosition.x = fx < epsilon ? +ix : ox

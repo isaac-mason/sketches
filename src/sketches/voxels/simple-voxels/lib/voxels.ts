@@ -3,13 +3,14 @@ import * as THREE from 'three'
 import { ChunkGeometry } from './chunk-geometry'
 import { chunkMaterial } from './chunk-material'
 import {
-    ChunkMeshUpdateMessage,
+    ChunkMeshUpdateResultMessage,
+    CulledMesherWorkerMessageType,
     RegisterChunkMessage,
     RequestChunkMeshUpdateMessage,
     WorkerMessage,
 } from './culled-mesher-worker-types'
 import CulledMesherWorker from './culled-mesher.worker?worker'
-import { BlockValue, CHUNK_SIZE, VoxelChunk, World, chunkId, vec3 } from './world'
+import { BlockValue, CHUNK_SIZE, Chunk, World, chunkId, worldPositionToChunkLocalPosition, worldPositionToChunkPosition } from './world'
 
 const _vector3 = new THREE.Vector3()
 
@@ -36,7 +37,7 @@ type ChunkMesh = {
     mesh: THREE.Mesh<ChunkGeometry, THREE.Material>
 }
 
-export type VoxelsChange = { position: THREE.Vector3Like; value: BlockValue; chunk: VoxelChunk }
+export type VoxelsChange = { position: THREE.Vector3Like; value: BlockValue; chunk: Chunk }
 
 export class Voxels {
     actor = new THREE.Vector3()
@@ -51,7 +52,7 @@ export class Voxels {
 
     onUpdate = new Topic<[changes: VoxelsChange[]]>()
 
-    onChunkCreated = new Topic<[chunk: VoxelChunk, mesh: THREE.Mesh<ChunkGeometry, THREE.Material>]>()
+    onChunkCreated = new Topic<[chunk: Chunk, mesh: THREE.Mesh<ChunkGeometry, THREE.Material>]>()
 
     chunkState = new Map<string, ChunkState>()
     chunkMeshes = new Map<string, ChunkMesh>()
@@ -81,7 +82,7 @@ export class Voxels {
 
             /* register chunk with mesher workers */
             const data: RegisterChunkMessage = {
-                type: 'register-chunk',
+                type: CulledMesherWorkerMessageType.REGISTER_CHUNK,
                 id: chunk.id,
                 position: chunk.position.toArray(),
                 solidBuffer: chunk.solidBuffer,
@@ -104,7 +105,7 @@ export class Voxels {
 
             worker.onmessage = (e) => {
                 const { data: message } = e as { data: WorkerMessage }
-                if (message.type === 'chunk-mesh-update') {
+                if (message.type === CulledMesherWorkerMessageType.CHUNK_MESH_UPDATE_RESULT) {
                     this.processMesherResult(message)
                 }
             }
@@ -138,7 +139,7 @@ export class Voxels {
         this.setBlockRequests = []
 
         for (const { position, value } of setBlockRequests) {
-            const { chunk } = this.world.set(position, value)
+            const { chunk } = this.world.setBlock(position, value)
 
             changes.push({ position, value, chunk })
         }
@@ -152,7 +153,7 @@ export class Voxels {
 
     private updateChunkStates() {
         for (const [, chunk] of this.world.chunks) {
-            const playerCurrentChunk = vec3.worldToChunk(this.actor, _vector3)
+            const playerCurrentChunk = worldPositionToChunkPosition(this.actor, _vector3)
 
             const chunkDistance = playerCurrentChunk.distanceTo(chunk.position)
 
@@ -206,7 +207,7 @@ export class Voxels {
                 // check if we need to make neighbour chunks dirty
                 // we need to check corners as well for AO
                 for (const { x: dx, y: dy, z: dz } of neighbourDirections) {
-                    const chunkLocal = vec3.worldToChunkLocal(position, _chunkLocal)
+                    const chunkLocal = worldPositionToChunkLocalPosition(position, _chunkLocal)
                     if (
                         chunkLocal.x !== 0 &&
                         chunkLocal.x !== CHUNK_SIZE - 1 &&
@@ -220,7 +221,7 @@ export class Voxels {
 
                     const neighbour = _neighbourPosition.set(position.x + dx, position.y + dy, position.z + dz)
 
-                    const neighbourChunkId = chunkId(vec3.worldToChunk(neighbour, _neighbourChunk))
+                    const neighbourChunkId = chunkId(worldPositionToChunkPosition(neighbour, _neighbourChunk))
 
                     if (neighbourChunkId !== chunk.id) {
                         this.dirtyChunks.add(neighbourChunkId)
@@ -261,7 +262,7 @@ export class Voxels {
 
     private remesh(chunkId: string): void {
         const data: RequestChunkMeshUpdateMessage = {
-            type: 'request-chunk-mesh-update',
+            type: CulledMesherWorkerMessageType.REQUEST_CHUNK_MESH_UPDATE,
             id: chunkId,
         }
 
@@ -281,7 +282,7 @@ export class Voxels {
         this.workerRoundRobin = (this.workerRoundRobin + 1) % this.workers.length
     }
 
-    private processMesherResult(chunkMesherData: ChunkMeshUpdateMessage) {
+    private processMesherResult(chunkMesherData: ChunkMeshUpdateResultMessage) {
         const { id } = chunkMesherData
 
         this.pendingMeshUpdates.delete(id)

@@ -63,7 +63,7 @@ class PriorityQueue<T> {
 
 const canGoThrough = (world: World, height: number, x: number, y: number, z: number): boolean => {
     for (let h = 0; h < height; h++) {
-        if (world.solid({ x, y: y + h, z })) {
+        if (world.getSolid({ x, y: y + h, z })) {
             return false
         }
     }
@@ -71,7 +71,7 @@ const canGoThrough = (world: World, height: number, x: number, y: number, z: num
 }
 
 const canStepAt = (world: World, height: number, x: number, y: number, z: number): boolean => {
-    if (!world.solid({ x, y: y - 1, z })) {
+    if (!world.getSolid({ x, y: y - 1, z })) {
         return false
     }
 

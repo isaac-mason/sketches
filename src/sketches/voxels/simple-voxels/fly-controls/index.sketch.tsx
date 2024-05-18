@@ -7,6 +7,7 @@ import { CameraBuildTool } from '../camera-build-tool'
 import { VoxelChunkMeshes, Voxels, useVoxels } from '../lib/react'
 import { SimpleLevel } from '../simple-level'
 import { useControls } from 'leva'
+import { EffectComposer } from '@react-three/postprocessing'
 
 const SKETCH = 'simple-voxels/fly-controls'
 

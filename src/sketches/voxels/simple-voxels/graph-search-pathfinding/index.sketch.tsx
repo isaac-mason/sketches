@@ -219,7 +219,7 @@ const Scene = () => {
     const adjustedGoal = goal.clone()
 
     for (let i = 0; i < 200; i++) {
-        if (world.solid(adjustedStart)) {
+        if (world.getSolid(adjustedStart)) {
             adjustedStart.y++
             break
         }
@@ -228,7 +228,7 @@ const Scene = () => {
     }
 
     for (let i = 0; i < 200; i++) {
-        if (world.solid(adjustedGoal)) {
+        if (world.getSolid(adjustedGoal)) {
             adjustedGoal.y++
             break
         }
