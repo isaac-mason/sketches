@@ -74,16 +74,16 @@ export const VoxelChunkMeshes = ({ chunkHelper = false, ...groupProps }: VoxelCh
         const meshes: ChunkAndMesh[] = []
 
         for (const [, chunk] of voxels.world.chunks) {
-            const mesh = voxels.chunkMeshes.get(chunk.id)?.mesh
+            const { mesh, initialised } = voxels.chunkMeshes.get(chunk.id) ?? {}
 
-            if (!mesh) continue
+            if (!mesh || !initialised) continue
 
             meshes.push({ chunk, mesh })
         }
 
         setMeshes(meshes)
 
-        const unsub = voxels.onChunkCreated.add((chunk, mesh) => {
+        const unsub = voxels.onChunkMeshInitialised.add((chunk, mesh) => {
             setMeshes((prev) => [...prev, { chunk, mesh }])
         })
 

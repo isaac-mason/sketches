@@ -52,7 +52,7 @@ export class Voxels {
 
     onUpdate = new Topic<[changes: VoxelsChange[]]>()
 
-    onChunkCreated = new Topic<[chunk: Chunk, mesh: THREE.Mesh<ChunkGeometry, THREE.Material>]>()
+    onChunkMeshInitialised = new Topic<[chunk: Chunk, mesh: THREE.Mesh<ChunkGeometry, THREE.Material>]>()
 
     chunkState = new Map<string, ChunkState>()
     chunkMeshes = new Map<string, ChunkMesh>()
@@ -92,9 +92,6 @@ export class Voxels {
             for (const worker of this.workers) {
                 worker.postMessage(data)
             }
-
-            /* emit event */
-            this.onChunkCreated.emit(chunk, mesh.mesh)
         })
     }
 
@@ -287,21 +284,25 @@ export class Voxels {
 
         this.pendingMeshUpdates.delete(id)
 
-        const voxelChunk = this.world.chunks.get(id)
-        const voxelChunkMesh = this.chunkMeshes.get(id)
+        const chunk = this.world.chunks.get(id)
+        const chunkMesh = this.chunkMeshes.get(id)
 
-        if (!voxelChunk || !voxelChunkMesh) return
+        if (!chunk || !chunkMesh) return
 
-        voxelChunkMesh.initialised = true
-
-        const geometry = voxelChunkMesh.mesh.geometry
+        const geometry = chunkMesh.mesh.geometry
 
         geometry.updateChunk(chunkMesherData)
 
-        voxelChunkMesh.mesh.position.set(
-            voxelChunk.position.x * CHUNK_SIZE,
-            voxelChunk.position.y * CHUNK_SIZE,
-            voxelChunk.position.z * CHUNK_SIZE,
+        chunkMesh.mesh.position.set(
+            chunk.position.x * CHUNK_SIZE,
+            chunk.position.y * CHUNK_SIZE,
+            chunk.position.z * CHUNK_SIZE,
         )
+
+        if (!chunkMesh.initialised) {
+            chunkMesh.initialised = true
+
+            this.onChunkMeshInitialised.emit(chunk, chunkMesh.mesh)
+        }
     }
 }
