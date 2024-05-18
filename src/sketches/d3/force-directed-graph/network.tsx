@@ -1,8 +1,8 @@
 import { useThree } from '@react-three/fiber'
 import * as d3 from 'd3'
-import { MeshLineGeometry, MeshLineMaterial } from 'meshline'
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
+import { Line2, LineGeometry, LineMaterial } from 'three/examples/jsm/Addons.js'
 
 const vec = new THREE.Vector3()
 
@@ -60,7 +60,7 @@ export const Network = ({ children, ...groupProps }: NetworkProps) => {
     const [nodes, setNodes] = useState<NetworkNode[]>([])
     const [links, setLinks] = useState<NetworkLink[]>([])
 
-    const lineMeshes = useMemo<Map<string, THREE.Mesh>>(() => new Map(), [])
+    const lineMeshes = useMemo<Map<string, Line2>>(() => new Map(), [])
 
     const dedupedLinks = useMemo(() => {
         const linkMap = new Map<string, DedupedLink>()
@@ -96,18 +96,19 @@ export const Network = ({ children, ...groupProps }: NetworkProps) => {
             if (lineMeshes.has(key)) {
                 unseenLineMeshes.delete(key)
             } else {
-                const geometry = new MeshLineGeometry()
+                const geometry = new LineGeometry()
 
-                const material = new MeshLineMaterial({
-                    resolution: new THREE.Vector2(10, 10),
-                    lineWidth: 0.1,
+                const material = new LineMaterial({
+                    resolution: new THREE.Vector2(window.innerWidth, window.innerHeight),
+                    linewidth: 0.1,
+                    worldUnits: true,
                     color: '#fff',
                 })
 
-                const mesh = new THREE.Mesh(geometry, material)
+                const line = new Line2(geometry, material)
 
-                scene.add(mesh)
-                lineMeshes.set(key, mesh)
+                scene.add(line)
+                lineMeshes.set(key, line)
             }
         })
 
@@ -138,7 +139,7 @@ export const Network = ({ children, ...groupProps }: NetworkProps) => {
                 const key = `${link.source.id}-${link.target.id}`
                 const line = lineMeshes.get(key)!
 
-                const geometry = line.geometry as MeshLineGeometry
+                const geometry = line.geometry
 
                 const points = [
                     link.source.group.position.x,
@@ -149,7 +150,7 @@ export const Network = ({ children, ...groupProps }: NetworkProps) => {
                     0,
                 ]
 
-                geometry.setPoints(points)
+                geometry.setPositions(points)
             })
         })
 

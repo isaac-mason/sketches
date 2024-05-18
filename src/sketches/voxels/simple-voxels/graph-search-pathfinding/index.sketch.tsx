@@ -123,7 +123,7 @@ const useLevel = () => {
     useEffect(() => {
         generator.init(randomSeed)
 
-        const size = 200
+        const size = 500
         const halfSize = size / 2
 
         for (let x = -halfSize; x < halfSize; x++) {
