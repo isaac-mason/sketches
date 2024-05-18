@@ -83,6 +83,10 @@ const sketchList = [
         path: 'voxels/simple-voxels/voxelize',
         tags: ['voxels', 'model'],
     },
+    {
+        title: 'Textured Voxels - Texture Atlas',
+        path: 'voxels/textured-voxels/texture-atlas',
+    },
     /* Rapier */
     {
         title: 'Rapier - Cluster',
