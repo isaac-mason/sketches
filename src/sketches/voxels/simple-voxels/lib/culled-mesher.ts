@@ -1,4 +1,4 @@
-import { Color, Vector3, Vector3Like } from 'three'
+import { Color, Vector3 } from 'three'
 import { CHUNK_SIZE, Chunk, World } from './world'
 
 export type CulledMesherChunkResult = {
@@ -10,91 +10,8 @@ export type CulledMesherChunkResult = {
     ambientOcclusion: Float32Array
 }
 
-const vertexAmbientOcclusion = (side1: number, side2: number, corner: number) => {
-    if (side1 && side2) {
-        return 0
-    }
-
-    return (3 - (side1 + side2 + corner)) / 3
-}
-
-const _voxelFaceAmbientOcclusionGrid_u = new Vector3()
-const _voxelFaceAmbientOcclusionGrid_v = new Vector3()
-const _voxelFaceAmbientOcclusionGrid_normal = new Vector3()
-
-const _voxelFaceAmbientOcclusionGrid_vec3 = new Vector3()
-
-const createVoxelFaceAmbientOcclusionGrid = (
-    world: World,
-    pos: Vector3Like,
-    dir: (typeof VOXEL_FACE_DIRECTIONS)[number],
-    outGrid: Uint32Array,
-) => {
-    const u = _voxelFaceAmbientOcclusionGrid_u.set(dir.ux, dir.uy, dir.uz)
-    const v = _voxelFaceAmbientOcclusionGrid_v.set(dir.vx, dir.vy, dir.vz)
-    const normal = _voxelFaceAmbientOcclusionGrid_normal.set(dir.nx, dir.ny, dir.nz)
-
-    const vec3 = _voxelFaceAmbientOcclusionGrid_vec3
-
-    let index = 0
-
-    for (let q = -1; q < 2; q++) {
-        for (let p = -1; p < 2; p++) {
-            vec3.copy(pos)
-
-            // vec3.x += normal.x
-            // vec3.y += normal.y
-            // vec3.z += normal.z
-
-            // vec3.x += u.x * p
-            // vec3.y += u.y * p
-            // vec3.z += u.z * p
-
-            // vec3.x += v.x * q
-            // vec3.y += v.y * q
-            // vec3.z += v.z * q
-
-            vec3.x += normal.x + u.x * p + v.x * q
-            vec3.y += normal.y + u.y * p + v.y * q
-            vec3.z += normal.z + u.z * p + v.z * q
-
-            const solid = world.getSolid(vec3)
-
-            outGrid[index] = solid ? 1 : 0
-
-            index++
-        }
-    }
-}
-
-/**
- * Calculates ambient occlusion for a voxel face quad
- *
- *  . --- . --- . --- .
- *  |  6  |  7  |  8  |
- *  . --- d --- c --- .
- *  |  3  |  4  |  5  |
- *  . --- a --- b --- .
- *  |  0  |  1  |  2  |
- *  . --- . --- . --- .
- */
-const voxelFaceAmbientOcclusion_grid = new Uint32Array(9)
-
-const voxelFaceAmbientOcclusion = (world: World, pos: Vector3Like, dir: (typeof VOXEL_FACE_DIRECTIONS)[number]) => {
-    const grid = voxelFaceAmbientOcclusion_grid
-
-    createVoxelFaceAmbientOcclusionGrid(world, pos, dir, grid)
-
-    return [
-        vertexAmbientOcclusion(grid[3], grid[1], grid[0]),
-        vertexAmbientOcclusion(grid[1], grid[5], grid[2]),
-        vertexAmbientOcclusion(grid[5], grid[7], grid[8]),
-        vertexAmbientOcclusion(grid[3], grid[7], grid[6]),
-    ]
-}
-
 const VOXEL_FACE_DIRECTIONS: {
-    // direction of the neighbour voxel
+    // direction of the face / normal
     dx: number
     dy: number
     dz: number
@@ -104,18 +21,13 @@ const VOXEL_FACE_DIRECTIONS: {
     ly: number
     lz: number
 
-    // uvs of the neighbour faces
+    // uvs of the faces
     ux: number
     uy: number
     uz: number
     vx: number
     vy: number
     vz: number
-
-    // normal of the neighbour face
-    nx: number
-    ny: number
-    nz: number
 }[] = [
     // top
     {
@@ -131,9 +43,6 @@ const VOXEL_FACE_DIRECTIONS: {
         vx: 0,
         vy: 0,
         vz: 1,
-        nx: 0,
-        ny: 1,
-        nz: 0,
     },
     // bottom
     {
@@ -149,9 +58,6 @@ const VOXEL_FACE_DIRECTIONS: {
         vx: 0,
         vy: 0,
         vz: 1,
-        nx: 0,
-        ny: -1,
-        nz: 0,
     },
     // left
     {
@@ -167,9 +73,6 @@ const VOXEL_FACE_DIRECTIONS: {
         vx: 0,
         vy: 0,
         vz: -1,
-        nx: -1,
-        ny: 0,
-        nz: 0,
     },
     // right
     {
@@ -185,9 +88,6 @@ const VOXEL_FACE_DIRECTIONS: {
         vx: 0,
         vy: 0,
         vz: 1,
-        nx: 1,
-        ny: 0,
-        nz: 0,
     },
     // front
     {
@@ -203,9 +103,6 @@ const VOXEL_FACE_DIRECTIONS: {
         vx: 1,
         vy: 0,
         vz: 0,
-        nx: 0,
-        ny: 0,
-        nz: -1,
     },
     // back
     {
@@ -221,9 +118,6 @@ const VOXEL_FACE_DIRECTIONS: {
         vx: -1,
         vy: 0,
         vz: 0,
-        nx: 0,
-        ny: 0,
-        nz: 1,
     },
 ]
 
@@ -233,6 +127,17 @@ const _mesh_chunkLocalPosition = new Vector3()
 const _mesh_worldPosition = new Vector3()
 const _mesh_worldNeighbourPosition = new Vector3()
 const _mesh_localNeighbourPosition = new Vector3()
+
+const _ao_worldPosition = new Vector3()
+const _ao_grid = new Uint32Array(9)
+
+const vertexAmbientOcclusion = (side1: number, side2: number, corner: number) => {
+    if (side1 && side2) {
+        return 0
+    }
+
+    return (3 - (side1 + side2 + corner)) / 3
+}
 
 export const mesh = (chunk: Chunk, world: World): CulledMesherChunkResult => {
     const chunkX = chunk.position.x * CHUNK_SIZE
@@ -247,22 +152,20 @@ export const mesh = (chunk: Chunk, world: World): CulledMesherChunkResult => {
 
     const chunkLocalPosition = _mesh_chunkLocalPosition
     const worldPosition = _mesh_worldPosition
-    const worldNeighbourPosition = _mesh_worldNeighbourPosition
     const localNeighbourPosition = _mesh_localNeighbourPosition
+    const worldNeighbourPosition = _mesh_worldNeighbourPosition
 
     const colorCache = new Map<number, [r: number, g: number, b: number]>()
 
     for (let localX = 0; localX < CHUNK_SIZE; localX++) {
         for (let localZ = 0; localZ < CHUNK_SIZE; localZ++) {
             for (let localY = 0; localY < CHUNK_SIZE; localY++) {
-                /* check if solid */
+                /* skip air */
                 chunkLocalPosition.set(localX, localY, localZ)
 
-                const solid = chunk.getSolid(chunkLocalPosition)
+                if (!chunk.getSolid(chunkLocalPosition)) continue
 
-                if (!solid) continue
-
-                /* get color */
+                /* get voxel color */
                 const colorHex = chunk.getColor(chunkLocalPosition)
 
                 let color = colorCache.get(colorHex)
@@ -275,58 +178,91 @@ export const mesh = (chunk: Chunk, world: World): CulledMesherChunkResult => {
 
                 const [colorR, colorG, colorB] = color
 
-                /* check neighbours */
+                /* check which faces are visible */
                 const worldX = chunkX + localX
                 const worldY = chunkY + localY
                 const worldZ = chunkZ + localZ
 
                 for (const voxelFaceDirection of VOXEL_FACE_DIRECTIONS) {
-                    const { dx, dy, dz, lx, ly, lz, ux, uy, uz, vx, vy, vz, nx, ny, nz } = voxelFaceDirection
+                    const { dx, dy, dz, lx, ly, lz, ux, uy, uz, vx, vy, vz } = voxelFaceDirection
 
+                    localNeighbourPosition.set(localX + dx, localY + dy, localZ + dz)
+
+                    /* skip creating faces when neighbour is solid */
                     let solid: boolean
-
-                    /* prefer chunk.getSolid() when possible */
                     if (
-                        localX + dx < 0 ||
-                        localX + dx >= CHUNK_SIZE ||
-                        localY + dy < 0 ||
-                        localY + dy >= CHUNK_SIZE ||
-                        localZ + dz < 0 ||
-                        localZ + dz >= CHUNK_SIZE
+                        localNeighbourPosition.x < 0 ||
+                        localNeighbourPosition.x >= CHUNK_SIZE ||
+                        localNeighbourPosition.y < 0 ||
+                        localNeighbourPosition.y >= CHUNK_SIZE ||
+                        localNeighbourPosition.z < 0 ||
+                        localNeighbourPosition.z >= CHUNK_SIZE
                     ) {
                         worldNeighbourPosition.set(worldX + dx, worldY + dy, worldZ + dz)
-
                         solid = world.getSolid(worldNeighbourPosition)
                     } else {
-                        localNeighbourPosition.set(localX + dx, localY + dy, localZ + dz)
-
                         solid = chunk.getSolid(localNeighbourPosition)
                     }
 
-                    /* skip creating faces when neighbour is solid */
                     if (solid) continue
+
+                    worldPosition.set(worldX, worldY, worldZ)
 
                     /* create face */
                     const voxelFaceLocalX = localX + lx
                     const voxelFaceLocalY = localY + ly
                     const voxelFaceLocalZ = localZ + lz
 
-                    positions.push(voxelFaceLocalX, voxelFaceLocalY, voxelFaceLocalZ)
-                    positions.push(voxelFaceLocalX + ux, voxelFaceLocalY + uy, voxelFaceLocalZ + uz)
-                    positions.push(voxelFaceLocalX + ux + vx, voxelFaceLocalY + uy + vy, voxelFaceLocalZ + uz + vz)
-                    positions.push(voxelFaceLocalX + vx, voxelFaceLocalY + vy, voxelFaceLocalZ + vz)
+                    // prettier-ignore
+                    positions.push(
+                        voxelFaceLocalX, voxelFaceLocalY, voxelFaceLocalZ,
+                        voxelFaceLocalX + ux, voxelFaceLocalY + uy, voxelFaceLocalZ + uz,
+                        voxelFaceLocalX + ux + vx, voxelFaceLocalY + uy + vy, voxelFaceLocalZ + uz + vz,
+                        voxelFaceLocalX + vx, voxelFaceLocalY + vy, voxelFaceLocalZ + vz
+                    )
 
-                    normals.push(nx, ny, nz, nx, ny, nz, nx, ny, nz, nx, ny, nz)
+                    normals.push(dx, dy, dz, dx, dy, dz, dx, dy, dz, dx, dy, dz)
 
                     colors.push(colorR, colorG, colorB, colorR, colorG, colorB, colorR, colorG, colorB, colorR, colorG, colorB)
 
-                    worldPosition.set(worldX, worldY, worldZ)
+                    /**
+                     * Calculate ambient occlusion for each vertex
+                     *
+                     *  . --- . --- . --- .
+                     *  |  6  |  7  |  8  |
+                     *  . --- d --- c --- .
+                     *  |  3  |  4  |  5  |
+                     *  . --- a --- b --- .
+                     *  |  0  |  1  |  2  |
+                     *  . --- . --- . --- .
+                     */
 
-                    const ao = voxelFaceAmbientOcclusion(world, worldPosition, voxelFaceDirection)
-                    const ao00 = ao[0]
-                    const ao01 = ao[1]
-                    const ao10 = ao[2]
-                    const ao11 = ao[3]
+                    // calculate ambient occlusion grid
+                    const aoGridWorldPosition = _ao_worldPosition
+                    const aoGrid = _ao_grid
+
+                    let aoGridIndex = 0
+                    for (let q = -1; q < 2; q++) {
+                        for (let p = -1; p < 2; p++) {
+                            aoGridWorldPosition.copy(worldPosition)
+
+                            aoGridWorldPosition.x += dx + ux * p + vx * q
+                            aoGridWorldPosition.y += dy + uy * p + vy * q
+                            aoGridWorldPosition.z += dz + uz * p + vz * q
+
+                            const solid = world.getSolid(aoGridWorldPosition)
+
+                            aoGrid[aoGridIndex] = solid ? 1 : 0
+
+                            aoGridIndex++
+                        }
+                    }
+
+                    // calculate ambient occlusion for each vertex
+                    const ao00 = vertexAmbientOcclusion(aoGrid[3], aoGrid[1], aoGrid[0])
+                    const ao01 = vertexAmbientOcclusion(aoGrid[1], aoGrid[5], aoGrid[2])
+                    const ao10 = vertexAmbientOcclusion(aoGrid[5], aoGrid[7], aoGrid[8])
+                    const ao11 = vertexAmbientOcclusion(aoGrid[3], aoGrid[7], aoGrid[6])
 
                     ambientOcclusion.push(ao00, ao01, ao10, ao11)
 
@@ -337,7 +273,6 @@ export const mesh = (chunk: Chunk, world: World): CulledMesherChunkResult => {
                         |     |
                         a --- b
                     */
-
                     const index = (positions.length + 1) / 3 - 4
                     const a = index
                     const b = index + 1

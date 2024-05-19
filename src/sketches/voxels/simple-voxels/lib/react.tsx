@@ -83,14 +83,14 @@ export const VoxelChunkMeshes = ({ chunkHelper = false, ...groupProps }: VoxelCh
 
         setMeshes(meshes)
 
-        const unsub = voxels.onChunkMeshInitialised.add((chunk, mesh) => {
+        const unsubOnChunkMeshInitialised = voxels.onChunkMeshInitialised.add((chunk, mesh) => {
             setMeshes((prev) => [...prev, { chunk, mesh }])
         })
 
         return () => {
             setMeshes([])
 
-            unsub()
+            unsubOnChunkMeshInitialised()
         }
     }, [])
 

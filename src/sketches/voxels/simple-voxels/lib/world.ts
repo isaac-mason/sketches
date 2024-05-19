@@ -125,7 +125,7 @@ export class World {
             }
         }
 
-        const chunkLocalPosition = worldPositionToChunkLocalPosition(position)
+        const chunkLocalPosition = worldPositionToChunkLocalPosition(position, _chunkLocalPosition)
 
         return chunk.getBlock(chunkLocalPosition)
     }
@@ -137,7 +137,7 @@ export class World {
             return false
         }
 
-        const chunkLocalPosition = worldPositionToChunkLocalPosition(position)
+        const chunkLocalPosition = worldPositionToChunkLocalPosition(position, _chunkLocalPosition)
 
         return chunk.getSolid(chunkLocalPosition)
     }
@@ -159,7 +159,7 @@ export class World {
             this.onChunkCreated.emit(chunk)
         }
 
-        const chunkLocalPosition = worldPositionToChunkLocalPosition(position)
+        const chunkLocalPosition = worldPositionToChunkLocalPosition(position, _chunkLocalPosition)
 
         chunk.setBlock(chunkLocalPosition, value)
 
@@ -181,3 +181,4 @@ export class World {
 }
 
 const _chunkPosition = new THREE.Vector3()
+const _chunkLocalPosition = new THREE.Vector3()

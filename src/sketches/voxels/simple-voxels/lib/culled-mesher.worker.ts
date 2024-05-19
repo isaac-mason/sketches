@@ -70,12 +70,4 @@ worker.onmessage = (e) => {
     }
 }
 
-// const loop = () => {
-//     update()
-
-//     setTimeout(loop)
-// }
-
-// setTimeout(loop)
-
 setInterval(update, 1000 / 120)
