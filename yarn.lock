@@ -552,6 +552,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@dimforge/rapier3d-compat@npm:0.13.1":
+  version: 0.13.1
+  resolution: "@dimforge/rapier3d-compat@npm:0.13.1"
+  checksum: 10/cf84d674b59e9ecefac0ec0b0dc6b9b57edabd64552a6f299c94d0d3859e79330978228ea3e3f01d2439c47773bc68084bc6e7fcd082431d992c48ada0432132
+  languageName: node
+  linkType: hard
+
 "@emnapi/runtime@npm:^0.45.0":
   version: 0.45.0
   resolution: "@emnapi/runtime@npm:0.45.0"
@@ -7478,7 +7485,7 @@ __metadata:
   dependencies:
     "@babel/plugin-proposal-class-properties": "npm:^7.18.6"
     "@babel/plugin-proposal-decorators": "npm:^7.24.1"
-    "@dimforge/rapier3d-compat": "npm:0.12.0"
+    "@dimforge/rapier3d-compat": "npm:0.13.1"
     "@isaac-mason/eslint-config-typescript": "npm:0.0.7"
     "@pmndrs/assets": "npm:^1.6.0"
     "@react-spring/three": "npm:^9.7.3"
