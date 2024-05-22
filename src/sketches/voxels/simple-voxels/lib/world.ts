@@ -143,7 +143,7 @@ export class World {
     }
 
     setBlock(position: THREE.Vector3Like, value: BlockValue) {
-        const chunkPosition = worldPositionToChunkPosition(position)
+        const chunkPosition = worldPositionToChunkPosition(position, _chunkPosition)
         const id = chunkId(chunkPosition)
 
         let chunk = this.chunks.get(id)
@@ -152,7 +152,7 @@ export class World {
             const solidBuffer = new SharedArrayBuffer(Uint16Array.BYTES_PER_ELEMENT * CHUNK_SIZE ** 2)
             const colorBuffer = new SharedArrayBuffer(Uint32Array.BYTES_PER_ELEMENT * CHUNK_SIZE ** 3)
 
-            chunk = new Chunk(id, chunkPosition, solidBuffer, colorBuffer)
+            chunk = new Chunk(id, chunkPosition.clone(), solidBuffer, colorBuffer)
 
             this.chunks.set(id, chunk)
 

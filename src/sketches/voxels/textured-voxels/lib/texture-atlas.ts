@@ -8,7 +8,7 @@ class TextureAtlasNode {
     height: number = 0
 }
 
-type TexturePosition = {
+type TextureUvInfo = {
     x: number
     y: number
     width: number
@@ -17,8 +17,10 @@ type TexturePosition = {
 
 export class TextureAtlas {
     canvas: HTMLCanvasElement
+
     context: CanvasRenderingContext2D
-    root: TextureAtlasNode
+
+    private root: TextureAtlasNode
 
     constructor(initialWidth: number = 512, initialHeight: number = 512) {
         this.canvas = document.createElement('canvas')
@@ -31,13 +33,14 @@ export class TextureAtlas {
         this.root.height = initialHeight
     }
 
-    add(image: HTMLImageElement): TexturePosition {
+    add(image: HTMLImageElement): TextureUvInfo {
         const node = this.findNode(this.root, image.width, image.height)
 
         if (node) {
             this.splitNode(node, image.width, image.height)
             this.context.drawImage(image, node.x, node.y)
-            return { x: node.x, y: node.y, width: image.width, height: image.height }
+
+            return { x: node.x, y: image.height - node.y, width: image.width, height: image.height }
         } else {
             this.expandCanvas(image.width, image.height)
             return this.add(image)

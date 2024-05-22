@@ -87,6 +87,10 @@ const sketchList = [
         title: 'Textured Voxels - Texture Atlas',
         path: 'voxels/textured-voxels/texture-atlas',
     },
+    {
+        title: 'Textured Voxels - Sphere',
+        path: 'voxels/textured-voxels/sphere',
+    },
     /* Rapier */
     {
         title: 'Rapier - Cluster',
