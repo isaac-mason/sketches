@@ -94,7 +94,9 @@ const Example = () => {
         const meshes: THREE.Mesh[] = []
 
         for (const chunk of world.chunks.values()) {
+            console.time('mesh')
             const mesherResult = CulledMesher.mesh(chunk, world, blockRegistry)
+            console.timeEnd('mesh')
 
             const geometry = new ChunkGeometry()
             geometry.setMesherData(mesherResult)
