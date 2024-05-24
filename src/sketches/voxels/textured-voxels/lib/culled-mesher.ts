@@ -1,5 +1,5 @@
 import { BlockRegistry } from './block-registry'
-import { CHUNK_SIZE, Chunk, World } from './world'
+import { CHUNK_SIZE, Chunk, World, worldPositionToChunkLocalPosition } from './world'
 import * as THREE from 'three'
 
 export type CulledMesherResult = {
@@ -62,8 +62,8 @@ const FACE_NORMALS: { [face: number]: [number, number, number] } = {
     [Face.EAST]: [1, 0, 0],
     [Face.SOUTH]: [0, 0, 1],
     [Face.WEST]: [-1, 0, 0],
-    [Face.UP]: [0, -1, 0],
-    [Face.DOWN]: [0, 1, 0],
+    [Face.UP]: [0, 1, 0],
+    [Face.DOWN]: [0, -1, 0],
 }
 
 const AIR = { type: 0, solid: false }
@@ -88,15 +88,6 @@ export class CulledMesher {
         const nyWorldPosition = new THREE.Vector3()
         const nzWorldPosition = new THREE.Vector3()
 
-        const neighbourChunks = [
-            world.chunks.get(Chunk.id({ x: chunk.position.x - 1, y: chunk.position.y, z: chunk.position.z })),
-            world.chunks.get(Chunk.id({ x: chunk.position.x + 1, y: chunk.position.y, z: chunk.position.z })),
-            world.chunks.get(Chunk.id({ x: chunk.position.x, y: chunk.position.y - 1, z: chunk.position.z })),
-            world.chunks.get(Chunk.id({ x: chunk.position.x, y: chunk.position.y + 1, z: chunk.position.z })),
-            world.chunks.get(Chunk.id({ x: chunk.position.x, y: chunk.position.y, z: chunk.position.z - 1 })),
-            world.chunks.get(Chunk.id({ x: chunk.position.x, y: chunk.position.y, z: chunk.position.z + 1 })),
-        ];
-
         for (let x = -1; x < CHUNK_SIZE; x++) {
             for (let z = -1; z < CHUNK_SIZE; z++) {
                 for (let y = -1; y < CHUNK_SIZE; y++) {
@@ -109,23 +100,16 @@ export class CulledMesher {
                     nyWorldPosition.set(currentWorldPosition.x, currentWorldPosition.y + 1, currentWorldPosition.z)
                     nzWorldPosition.set(currentWorldPosition.x, currentWorldPosition.y, currentWorldPosition.z + 1)
 
-                    const current =
-                        x >= 0 && y >= 0 && z >= 0
-                            ? chunk.getBlock({ x, y, z })
-                            : (x < 0
-                                  ? neighbourChunks[0]?.getBlock({ x: CHUNK_SIZE - 1, y, z })
-                                  : y < 0
-                                    ? neighbourChunks[2]?.getBlock({ x, y: CHUNK_SIZE - 1, z })
-                                    : neighbourChunks[4]?.getBlock({ x, y, z: CHUNK_SIZE - 1 })) ?? AIR
+                    const current = world.getBlock(currentWorldPosition)
 
                     const neighbours = [
-                        (x + 1 < CHUNK_SIZE) ? chunk.getBlock({ x: x + 1, y, z }) : neighbourChunks[1]?.getBlock({ x: 0, y, z }) ?? AIR,
-                        (y + 1 < CHUNK_SIZE) ? chunk.getBlock({ x, y: y + 1, z }) : neighbourChunks[3]?.getBlock({ x, y: 0, z }) ?? AIR,
-                        (z + 1 < CHUNK_SIZE) ? chunk.getBlock({ x, y, z: z + 1 }) : neighbourChunks[5]?.getBlock({ x, y, z: 0 }) ?? AIR,
+                        world.getBlock(nxWorldPosition),
+                        world.getBlock(nyWorldPosition),
+                        world.getBlock(nzWorldPosition),
                     ]
 
                     for (let dir = 0; dir < 3; dir++) {
-                        const nei = neighbours[dir]
+                        const nei = neighbours[dir] 
 
                         if (current.solid === nei.solid) continue
 

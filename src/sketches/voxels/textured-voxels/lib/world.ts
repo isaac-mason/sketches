@@ -94,19 +94,67 @@ export class Chunk {
     }
 }
 
+class Vector3Map<T> {
+    map = new Map<number, Map<number, Map<number, T>>>()
+
+    get({ x, y, z }: THREE.Vector3Like) {
+        const xMap = this.map.get(x)
+
+        if (!xMap) {
+            return
+        }
+
+        const yMap = xMap.get(y)
+
+        if (!yMap) {
+            return
+        }
+
+        return yMap.get(z)
+    }
+
+    set({ x, y, z }: THREE.Vector3Like, value: T) {
+        let xMap = this.map.get(x)
+
+        if (!xMap) {
+            xMap = new Map()
+            this.map.set(x, xMap)
+        }
+
+        let yMap = xMap.get(y)
+
+        if (!yMap) {
+            yMap = new Map()
+            xMap.set(y, yMap)
+        }
+
+        yMap.set(z, value)
+    }
+
+    *[Symbol.iterator]() {
+        for (const xMap of this.map.values()) {
+            for (const yMap of xMap.values()) {
+                for (const value of yMap.values()) {
+                    yield value
+                }
+            }
+        }
+    
+    }
+}
+
 export class World {
-    chunks = new Map<string, Chunk>()
+    chunks = new Vector3Map<Chunk>()
 
     onChunkCreated = new Topic<[chunk: Chunk]>()
 
     getBlock(position: THREE.Vector3Like) {
-        const chunk = this.chunks.get(Chunk.id(worldPositionToChunkPosition(position, _chunkPosition)))
+        const chunk = this.chunks.get(worldPositionToChunkPosition(position, _chunkPosition))
 
         if (!chunk) {
             return {
                 solid: false,
                 type: 0,
-                chunk: null,
             }
         }
 
@@ -116,7 +164,7 @@ export class World {
     }
 
     getSolid(position: THREE.Vector3Like) {
-        const chunk = this.chunks.get(Chunk.id(worldPositionToChunkPosition(position, _chunkPosition)))
+        const chunk = this.chunks.get(worldPositionToChunkPosition(position, _chunkPosition))
 
         if (!chunk) {
             return false
@@ -129,17 +177,17 @@ export class World {
 
     setBlock(position: THREE.Vector3Like, solid: boolean, type: number = 0) {
         const chunkPosition = worldPositionToChunkPosition(position, _chunkPosition)
-        const id = Chunk.id(chunkPosition)
+        
 
-        let chunk = this.chunks.get(id)
+        let chunk = this.chunks.get(worldPositionToChunkPosition(position, _chunkPosition))
 
         if (!chunk) {
             const solidBuffer = new SharedArrayBuffer(Uint16Array.BYTES_PER_ELEMENT * CHUNK_SIZE ** 2)
             const typeBuffer = new SharedArrayBuffer(Uint16Array.BYTES_PER_ELEMENT * CHUNK_SIZE ** 3)
 
-            chunk = new Chunk(id, chunkPosition.clone(), solidBuffer, typeBuffer)
+            chunk = new Chunk(Chunk.id(chunkPosition), chunkPosition.clone(), solidBuffer, typeBuffer)
 
-            this.chunks.set(id, chunk)
+            this.chunks.set(worldPositionToChunkPosition(position, _chunkPosition), chunk)
 
             this.onChunkCreated.emit(chunk)
         }

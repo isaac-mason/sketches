@@ -32,10 +32,6 @@ export const getChunkBounds = (chunk: Chunk): THREE.Box3 => {
     return new THREE.Box3(min, max)
 }
 
-export const chunkId = ({ x, y, z }: THREE.Vector3Like): string => {
-    return `${x},${y},${z}`
-}
-
 export class Chunk {
     id: string
     position: THREE.Vector3
@@ -98,6 +94,10 @@ export class Chunk {
     static colorIndex(chunkLocalPosition: THREE.Vector3Like) {
         return chunkLocalPosition.x + chunkLocalPosition.z * CHUNK_SIZE + chunkLocalPosition.y * CHUNK_SIZE * CHUNK_SIZE
     }
+
+    static id({ x, y, z }: THREE.Vector3Like): string {
+        return `${x},${y},${z}`
+    }
 }
 
 export type BlockValue = { solid: false } | { solid: true; color: number }
@@ -116,7 +116,7 @@ export class World {
     onChunkCreated = new Topic<[chunk: Chunk]>()
 
     getBlock(position: THREE.Vector3Like) {
-        const chunk = this.chunks.get(chunkId(worldPositionToChunkPosition(position, _chunkPosition)))
+        const chunk = this.chunks.get(Chunk.id(worldPositionToChunkPosition(position, _chunkPosition)))
 
         if (!chunk) {
             return {
@@ -131,7 +131,7 @@ export class World {
     }
 
     getSolid(position: THREE.Vector3Like) {
-        const chunk = this.chunks.get(chunkId(worldPositionToChunkPosition(position, _chunkPosition)))
+        const chunk = this.chunks.get(Chunk.id(worldPositionToChunkPosition(position, _chunkPosition)))
 
         if (!chunk) {
             return false
@@ -144,7 +144,7 @@ export class World {
 
     setBlock(position: THREE.Vector3Like, value: BlockValue) {
         const chunkPosition = worldPositionToChunkPosition(position, _chunkPosition)
-        const id = chunkId(chunkPosition)
+        const id = Chunk.id(chunkPosition)
 
         let chunk = this.chunks.get(id)
 
