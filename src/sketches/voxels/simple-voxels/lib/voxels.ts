@@ -10,7 +10,7 @@ import {
     WorkerMessage,
 } from './culled-mesher-worker-types'
 import CulledMesherWorker from './culled-mesher.worker?worker'
-import { BlockValue, CHUNK_SIZE, Chunk, World, chunkId, worldPositionToChunkLocalPosition, worldPositionToChunkPosition } from './world'
+import { BlockValue, CHUNK_SIZE, Chunk, World, worldPositionToChunkLocalPosition, worldPositionToChunkPosition } from './world'
 
 const _vector3 = new THREE.Vector3()
 
@@ -192,7 +192,7 @@ export class Voxels {
                         z: chunk.position.z + dz,
                     }
 
-                    const neighbourChunkId = chunkId(neighbour)
+                    const neighbourChunkId = Chunk.id(neighbour)
 
                     this.dirtyChunks.add(neighbourChunkId)
                 }
@@ -218,7 +218,7 @@ export class Voxels {
 
                     const neighbour = _neighbourPosition.set(position.x + dx, position.y + dy, position.z + dz)
 
-                    const neighbourChunkId = chunkId(worldPositionToChunkPosition(neighbour, _neighbourChunk))
+                    const neighbourChunkId = Chunk.id(worldPositionToChunkPosition(neighbour, _neighbourChunk))
 
                     if (neighbourChunkId !== chunk.id) {
                         this.dirtyChunks.add(neighbourChunkId)
