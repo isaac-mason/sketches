@@ -1,5 +1,6 @@
 import { Topic } from 'arancini/events'
 import * as THREE from 'three'
+import { Vector3Map } from './utils'
 
 export const CHUNK_BITS = 4
 export const CHUNK_SIZE = Math.pow(2, CHUNK_BITS)
@@ -94,54 +95,7 @@ export class Chunk {
     }
 }
 
-class Vector3Map<T> {
-    map = new Map<number, Map<number, Map<number, T>>>()
 
-    get({ x, y, z }: THREE.Vector3Like) {
-        const xMap = this.map.get(x)
-
-        if (!xMap) {
-            return
-        }
-
-        const yMap = xMap.get(y)
-
-        if (!yMap) {
-            return
-        }
-
-        return yMap.get(z)
-    }
-
-    set({ x, y, z }: THREE.Vector3Like, value: T) {
-        let xMap = this.map.get(x)
-
-        if (!xMap) {
-            xMap = new Map()
-            this.map.set(x, xMap)
-        }
-
-        let yMap = xMap.get(y)
-
-        if (!yMap) {
-            yMap = new Map()
-            xMap.set(y, yMap)
-        }
-
-        yMap.set(z, value)
-    }
-
-    *[Symbol.iterator]() {
-        for (const xMap of this.map.values()) {
-            for (const yMap of xMap.values()) {
-                for (const value of yMap.values()) {
-                    yield value
-                }
-            }
-        }
-    
-    }
-}
 
 export class World {
     chunks = new Vector3Map<Chunk>()
@@ -182,7 +136,7 @@ export class World {
         let chunk = this.chunks.get(worldPositionToChunkPosition(position, _chunkPosition))
 
         if (!chunk) {
-            const solidBuffer = new SharedArrayBuffer(Uint16Array.BYTES_PER_ELEMENT * CHUNK_SIZE ** 2)
+            const solidBuffer = new SharedArrayBuffer(Uint16Array.BYTES_PER_ELEMENT * CHUNK_SIZE ** 3)
             const typeBuffer = new SharedArrayBuffer(Uint16Array.BYTES_PER_ELEMENT * CHUNK_SIZE ** 3)
 
             chunk = new Chunk(Chunk.id(chunkPosition), chunkPosition.clone(), solidBuffer, typeBuffer)

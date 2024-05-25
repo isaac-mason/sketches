@@ -1,7 +1,6 @@
 import { CanvasTexture, NearestFilter, SRGBColorSpace } from 'three'
-import { MeshStandardNodeMaterial, attribute, texture, uv, vec2, vec4 } from 'three/examples/jsm/nodes/Nodes.js'
+import { MeshStandardNodeMaterial, attribute, texture, uv, vec2 } from 'three/examples/jsm/nodes/Nodes.js'
 import { TextureAtlas } from './texture-atlas'
-import { vec3 } from 'recast-navigation'
 
 export class ChunkMaterial extends MeshStandardNodeMaterial {
     constructor(textureAtlas: TextureAtlas) {
