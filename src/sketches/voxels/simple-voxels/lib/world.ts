@@ -75,14 +75,14 @@ export class Chunk {
         return this.color[Chunk.colorIndex(chunkLocalPosition)]
     }
 
-    getBlock(chunkLocalPosition: THREE.Vector3Like) {
+    getBlock(chunkLocalPosition: THREE.Vector3Like): BlockValue {
         const solidColumnMask = 1 << chunkLocalPosition.y
         const solid = this.solid[Chunk.solidIndex(chunkLocalPosition)] & solidColumnMask
 
         const color = this.color[Chunk.colorIndex(chunkLocalPosition)]
 
         return {
-            solid,
+            solid: !!solid,
             color,
         }
     }
@@ -100,7 +100,7 @@ export class Chunk {
     }
 }
 
-export type BlockValue = { solid: false } | { solid: true; color: number }
+export type BlockValue = { solid: false; color?: number } | { solid: true; color: number }
 
 export type RaycastProps = {
     origin: THREE.Vector3Like
@@ -115,13 +115,13 @@ export class World {
 
     onChunkCreated = new Topic<[chunk: Chunk]>()
 
-    getBlock(position: THREE.Vector3Like) {
+    getBlock(position: THREE.Vector3Like): BlockValue {
         const chunk = this.chunks.get(Chunk.id(worldPositionToChunkPosition(position, _chunkPosition)))
 
         if (!chunk) {
             return {
                 solid: false,
-                chunk: null,
+                color: undefined,
             }
         }
 
