@@ -61,6 +61,7 @@ const sortFacesByCameraDistance = (geometry: THREE.BufferGeometry, camera: THREE
             faceDistances[j + 1] = current
         }
     } else {
+        // if camera has moved a lot, or this is the first frame, use `sort`
         faceDistances.sort((a, b) => b.distance - a.distance)
     }
 
