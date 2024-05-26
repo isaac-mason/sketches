@@ -95,8 +95,6 @@ export class Chunk {
     }
 }
 
-
-
 export class World {
     chunks = new Vector3Map<Chunk>()
 

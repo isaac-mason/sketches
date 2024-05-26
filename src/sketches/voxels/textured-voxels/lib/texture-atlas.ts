@@ -40,7 +40,7 @@ export class TextureAtlas {
             this.splitNode(node, image.width, image.height)
             this.context.drawImage(image, node.x, node.y)
 
-            return { x: node.x, y: image.height - node.y, width: image.width, height: image.height }
+            return { x: node.x, y: node.y, width: image.width, height: image.height }
         } else {
             this.expandCanvas(image.width, image.height)
             return this.add(image)

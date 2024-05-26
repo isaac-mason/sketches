@@ -1,15 +1,18 @@
-import { BlockRegistry } from './block-registry'
-import { CHUNK_SIZE, Chunk, World, worldPositionToChunkLocalPosition } from './world'
 import * as THREE from 'three'
+import { BlockRegistry } from './block-registry'
+import { CHUNK_SIZE, Chunk, World } from './world'
 
-export type CulledMesherResult = {
-    id: string
+export type ChunkGeometryData = {
     positions: Float32Array
     indices: Uint32Array
     normals: Float32Array
-    light: Float32Array
     uv: Float32Array
     tex: Float32Array
+}
+
+export type CulledMesherResult = {
+    id: string
+    opaque: ChunkGeometryData
 }
 
 const DIRECTION_VECTORS: number[][][] = new Array(3)
@@ -68,20 +71,28 @@ const FACE_NORMALS: { [face: number]: [number, number, number] } = {
 
 const AIR = { type: 0, solid: false }
 
+type BlockData = {
+    // [x1, y1, z1, x2, y2, z2, ...]
+    positions: number[]
+    // [a, b, c, ...]
+    indices: number[]
+    // [x, y, z, ...]
+    normals: number[]
+    // [u1, v1, u2, v2, ...]
+    uv: number[]
+    // [x, y, w, h, ...]
+    tex: number[]
+}
+
 export class CulledMesher {
     static mesh(chunk: Chunk, world: World, blockRegistry: BlockRegistry): CulledMesherResult {
-        // [x1, y1, z1, x2, y2, z2, ...]
-        const positions: number[] = []
-        // [a, b, c, ...]
-        const indices: number[] = []
-        // [x, y, z, ...]
-        const normals: number[] = []
-        // [r, g, b, ...]
-        const lighting: number[] = []
-        // [u1, v1, u2, v2, ...]
-        const uv: number[] = []
-        // [x, y, w, h, ...]
-        const tex: number[] = []
+        const buffer: BlockData = {
+            positions: [],
+            indices: [],
+            normals: [],
+            uv: [],
+            tex: [],
+        }
 
         const currentWorldPosition = new THREE.Vector3()
         const nxWorldPosition = new THREE.Vector3()
@@ -109,7 +120,7 @@ export class CulledMesher {
                     ]
 
                     for (let dir = 0; dir < 3; dir++) {
-                        const nei = neighbours[dir] 
+                        const nei = neighbours[dir]
 
                         if (current.solid === nei.solid) continue
 
@@ -120,27 +131,46 @@ export class CulledMesher {
                         const v = DIRECTION_VECTORS[dir][side ^ 1]
                         ++localChunkPosition[dir]
 
-                        positions.push(localChunkPosition[0], localChunkPosition[1], localChunkPosition[2])
-                        positions.push(localChunkPosition[0] + u[0], localChunkPosition[1] + u[1], localChunkPosition[2] + u[2])
-                        positions.push(
+                        // Skip face generation for positions outside the current chunk
+                        if (
+                            localChunkPosition[0] < 0 ||
+                            localChunkPosition[0] >= CHUNK_SIZE ||
+                            localChunkPosition[1] < 0 ||
+                            localChunkPosition[1] >= CHUNK_SIZE ||
+                            localChunkPosition[2] < 0 ||
+                            localChunkPosition[2] >= CHUNK_SIZE
+                        )
+                            continue
+
+                        buffer.positions.push(localChunkPosition[0], localChunkPosition[1], localChunkPosition[2])
+                        buffer.positions.push(
+                            localChunkPosition[0] + u[0],
+                            localChunkPosition[1] + u[1],
+                            localChunkPosition[2] + u[2],
+                        )
+                        buffer.positions.push(
                             localChunkPosition[0] + u[0] + v[0],
                             localChunkPosition[1] + u[1] + v[1],
                             localChunkPosition[2] + u[2] + v[2],
                         )
-                        positions.push(localChunkPosition[0] + v[0], localChunkPosition[1] + v[1], localChunkPosition[2] + v[2])
+                        buffer.positions.push(
+                            localChunkPosition[0] + v[0],
+                            localChunkPosition[1] + v[1],
+                            localChunkPosition[2] + v[2],
+                        )
 
-                        const a = positions.length / 3 - 4
-                        const b = positions.length / 3 - 3
-                        const c = positions.length / 3 - 2
-                        const d = positions.length / 3 - 1
-                        indices.push(a, b, d, b, c, d)
-
-                        const normal = FACE_NORMALS[FACES[dir][side]]
-                        normals.push(...normal, ...normal, ...normal, ...normal)
+                        const a = buffer.positions.length / 3 - 4
+                        const b = buffer.positions.length / 3 - 3
+                        const c = buffer.positions.length / 3 - 2
+                        const d = buffer.positions.length / 3 - 1
+                        buffer.indices.push(a, b, d, b, c, d)
 
                         const face = FACES[dir][side]
 
-                        uv.push(...FACE_TEXTURE_UVS[face])
+                        const normal = FACE_NORMALS[face]
+                        buffer.normals.push(...normal, ...normal, ...normal, ...normal)
+
+                        buffer.uv.push(...FACE_TEXTURE_UVS[face])
 
                         const block = side ? nei : current
                         const blockType = blockRegistry.getBlock(block.type)
@@ -148,11 +178,11 @@ export class CulledMesher {
                         if (blockType) {
                             const texture = blockType.texture
                             for (let i = 0; i < 4; i++) {
-                                tex.push(texture.x, texture.y, texture.width, texture.height)
+                                buffer.tex.push(texture.x, texture.y, texture.width, texture.height)
                             }
                         } else {
                             for (let i = 0; i < 4; i++) {
-                                tex.push(0, 0, 0, 0) // todo: error texture
+                                buffer.tex.push(0, 0, 0, 0) // todo: error texture
                             }
                         }
                     }
@@ -162,12 +192,13 @@ export class CulledMesher {
 
         return {
             id: chunk.id,
-            positions: new Float32Array(positions),
-            indices: new Uint32Array(indices),
-            normals: new Float32Array(normals),
-            light: new Float32Array(lighting),
-            uv: new Float32Array(uv),
-            tex: new Float32Array(tex),
+            opaque: {
+                positions: new Float32Array(buffer.positions),
+                indices: new Uint32Array(buffer.indices),
+                normals: new Float32Array(buffer.normals),
+                uv: new Float32Array(buffer.uv),
+                tex: new Float32Array(buffer.tex),
+            },
         }
     }
 }

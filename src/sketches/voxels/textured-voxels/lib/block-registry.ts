@@ -16,8 +16,16 @@ export class BlockRegistry {
 
     blockNameToId: Map<string, number> = new Map()
 
-    register(name: string, texture: BlockInfo['texture']): BlockInfo {
-        const id = this.idCounter++
+    register({
+        name,
+        texture,
+    }: {
+        name: string
+        texture: BlockInfo['texture']
+    }): BlockInfo {
+        const id = this.idCounter;
+        this.idCounter++
+
         const block = { id, name, texture }
 
         this.blocks.set(id, block)

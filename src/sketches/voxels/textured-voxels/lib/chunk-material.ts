@@ -1,9 +1,9 @@
 import { CanvasTexture, NearestFilter, SRGBColorSpace } from 'three'
-import { MeshStandardNodeMaterial, attribute, texture, uv, vec2 } from 'three/examples/jsm/nodes/Nodes.js'
+import { MeshStandardNodeMaterial, attribute, float, texture, uv, vec2, vec4 } from 'three/examples/jsm/nodes/Nodes.js'
 import { TextureAtlas } from './texture-atlas'
 
 export class ChunkMaterial extends MeshStandardNodeMaterial {
-    constructor(textureAtlas: TextureAtlas) {
+    constructor(textureAtlas: TextureAtlas, options?: { translucent: boolean }) {
         super()
 
         const atlas = new CanvasTexture(textureAtlas.canvas)
@@ -13,10 +13,15 @@ export class ChunkMaterial extends MeshStandardNodeMaterial {
 
         const tex = attribute('tex', 'vec4') // x, y, w, h
 
-        const coord = uv().mul(vec2(tex.z, tex.w)).add(vec2(tex.x, tex.y)).div(vec2(atlas.image.width, atlas.image.height))
+        const atlasHeight = float(atlas.image.height)
+        const adjustedY = atlasHeight.sub(tex.y).sub(tex.w)
+
+        const coord = uv().mul(vec2(tex.z, tex.w)).add(vec2(tex.x, adjustedY)).div(vec2(atlas.image.width, atlas.image.height))
 
         const color = texture(atlas, coord)
 
         this.colorNode = color
+
+        this.transparent = options?.translucent ?? false
     }
 }
