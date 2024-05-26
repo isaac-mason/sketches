@@ -14,8 +14,8 @@ import { loadImage } from '../lib/load-image'
 import { TextureAtlas } from '../lib/texture-atlas'
 import { CHUNK_SIZE, World } from '../lib/world'
 import diamondTextureUrl from './textures/diamond.png?url'
-import stoneTextureUrl from './textures/stone.png?url'
 import greyTextureUrl from './textures/grey.png?url'
+import stoneTextureUrl from './textures/stone.png?url'
 
 const Example = () => {
     const { vertexNormalsHelper } = useControls('textured-voxels-sphere', {
@@ -94,8 +94,7 @@ const Example = () => {
         }
 
         // create chunk meshes
-        const chunkMaterial = new ChunkMaterial(textureAtlas, { translucent: true })
-        const translucentChunkMaterial = new ChunkMaterial(textureAtlas, { translucent: true })
+        const chunkMaterial = new ChunkMaterial(textureAtlas)
 
         const meshes: THREE.Mesh[] = []
 
