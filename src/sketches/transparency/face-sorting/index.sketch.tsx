@@ -14,9 +14,18 @@ const _triangleB = new THREE.Vector3()
 const _triangleC = new THREE.Vector3()
 const _triangleCenter = new THREE.Vector3()
 
-const sortFacesByCameraDistance = (geometry: THREE.BufferGeometry, camera: THREE.Camera) => {
+const indexBufferAttributes = new WeakMap<THREE.BufferGeometry, THREE.BufferAttribute>()
+
+const sortFacesByCameraDistance = (geometry: THREE.BufferGeometry, camera: THREE.Camera, cameraDistanceTravelled: number) => {
     const positions = geometry.attributes.position.array
     const indices = geometry.index!.array
+
+    // get or create index buffer attribute to store sorted indices
+    let nextIndexBufferAttribute = indexBufferAttributes.get(geometry)
+    if (!nextIndexBufferAttribute) {
+        nextIndexBufferAttribute = new THREE.BufferAttribute(new Uint32Array(indices.length), 1)
+        indexBufferAttributes.set(geometry, nextIndexBufferAttribute)
+    }
 
     // calculate distance from camera to each face
     const faceDistances: { index: number; distance: number }[] = []
@@ -39,52 +48,72 @@ const sortFacesByCameraDistance = (geometry: THREE.BufferGeometry, camera: THREE
         faceDistances.push({ index: i, distance })
     }
 
-    // insertion sort
-    for (let i = 1; i < faceDistances.length; i++) {
-        const current = faceDistances[i]
-        let j = i - 1
-        while (j >= 0 && faceDistances[j].distance < current.distance) {
-            faceDistances[j + 1] = faceDistances[j]
-            j--
+    if (cameraDistanceTravelled < 0.5) {
+        // if camera has not moved much, use insertion sort,
+        // insertion sort should be faster for mostly sorted arrays
+        for (let i = 1; i < faceDistances.length; i++) {
+            const current = faceDistances[i]
+            let j = i - 1
+            while (j >= 0 && faceDistances[j].distance < current.distance) {
+                faceDistances[j + 1] = faceDistances[j]
+                j--
+            }
+            faceDistances[j + 1] = current
         }
-        faceDistances[j + 1] = current
+    } else {
+        faceDistances.sort((a, b) => b.distance - a.distance)
     }
 
-    // create re-ordered indices
-    const sortedIndices = new Uint16Array(indices.length)
+    // re-order indices based on sorted face distances
     for (let i = 0; i < faceDistances.length; i++) {
         const face = faceDistances[i]
-        sortedIndices[i * 3] = indices[face.index]
-        sortedIndices[i * 3 + 1] = indices[face.index + 1]
-        sortedIndices[i * 3 + 2] = indices[face.index + 2]
+        nextIndexBufferAttribute.array[i * 3] = indices[face.index]
+        nextIndexBufferAttribute.array[i * 3 + 1] = indices[face.index + 1]
+        nextIndexBufferAttribute.array[i * 3 + 2] = indices[face.index + 2]
     }
 
-    geometry.setIndex(new THREE.BufferAttribute(sortedIndices, 1))
+    // swap index buffer attributes
+    indexBufferAttributes.set(geometry, geometry.index!)
+
+    nextIndexBufferAttribute.needsUpdate = true
+    geometry.setIndex(nextIndexBufferAttribute)
 }
 
 type SortFacesProps = {
     children: React.ReactNode
+    sortCameraDistance?: number
 }
 
-const SortFaces = ({ children }: SortFacesProps) => {
+const SortFaces = ({ children, sortCameraDistance = 0.2 }: SortFacesProps) => {
     const groupRef = useRef<THREE.Group>(null!)
 
+    const initial = useRef(true)
     const previousCameraPosition = useRef<THREE.Vector3 | null>(null)
 
     useFrame(({ camera }) => {
         if (!previousCameraPosition.current) {
             previousCameraPosition.current = camera.position.clone()
-        } else if (previousCameraPosition.current.distanceTo(camera.position) < 0.2) {
-            return
         }
 
-        previousCameraPosition.current.copy(camera.position)
+        let cameraDistanceTravelled = Infinity
+
+        if (initial.current) {
+            initial.current = false
+        } else {
+            cameraDistanceTravelled = previousCameraPosition.current.distanceTo(camera.position)
+
+            if (cameraDistanceTravelled < sortCameraDistance) {
+                return
+            }
+        }
 
         groupRef.current.children.forEach((child) => {
             if (child instanceof THREE.Mesh) {
-                sortFacesByCameraDistance(child.geometry, camera)
+                sortFacesByCameraDistance(child.geometry, camera, cameraDistanceTravelled)
             }
         })
+
+        previousCameraPosition.current.copy(camera.position)
     })
 
     return <group ref={groupRef}>{children}</group>
