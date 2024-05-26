@@ -124,7 +124,7 @@ const TransparentTorusKnot = () => {
         opacity: { value: 0.6, min: 0, max: 1 },
     })
 
-    const geometry = useMemo(() => {
+    const torusKnotGeometry = useMemo(() => {
         const geometry = new THREE.TorusKnotGeometry(3, 0.6, 100, 16)
 
         const color = new THREE.Color()
@@ -146,7 +146,7 @@ const TransparentTorusKnot = () => {
     return (
         <mesh>
             <meshStandardMaterial vertexColors transparent opacity={opacity} depthWrite={false} />
-            <primitive object={geometry} />
+            <primitive object={torusKnotGeometry} />
         </mesh>
     )
 }
