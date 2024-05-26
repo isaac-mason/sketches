@@ -293,6 +293,11 @@ const sketchList = [
         path: 'tsl/raging-sea',
         tags: ['tsl', 'perlin-noise'],
     },
+    {
+        title: 'TSL - Postprocessing',
+        path: 'tsl/postprocessing',
+        tags: ['tsl', 'postprocessing'],
+    },
     /* Box Edge Outline */
     {
         title: 'Box Edge Outline',
