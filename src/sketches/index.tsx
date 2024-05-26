@@ -304,6 +304,12 @@ const sketchList = [
         title: 'z-fighting mitigations',
         path: 'z-fighting-mitigations',
     },
+    /* Transparency */
+    {
+        title: 'Transparency - Face Sorting',
+        path: 'transparency/face-sorting',
+        tags: ['transparency', 'face-sorting'],
+    },
     /* Tris In Box */
     {
         title: 'Tris In Box',
