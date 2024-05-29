@@ -9,6 +9,7 @@ import {
     redirect,
     useAsyncValue,
     useLoaderData,
+    useSearchParams,
 } from 'react-router-dom'
 import { createStyledBreakpointsTheme } from 'styled-breakpoints'
 import styled, { ThemeProvider } from 'styled-components'
@@ -274,8 +275,10 @@ const SketchWrapper = styled.div`
 
     position: relative;
 
-    ${({ theme }) => theme.breakpoints.up('md')} {
-        width: calc(100% - 350px);
+    &:not(.fullscreen) {
+        ${({ theme }) => theme.breakpoints.up('md')} {
+            width: calc(100% - 350px);
+        }
     }
 
     h1 {
@@ -353,10 +356,18 @@ const SketchModule = memo(({ route }: { route: string }) => {
     return <SketchModuleComponent key={route} />
 })
 
+const useIsFullscreen = () => {
+    const [fullscreen] = useState(() => document.location.search.includes('fullscreen'))
+
+    return fullscreen
+}
+
 const LazySketch = () => {
     const { sketch, options } = useAsyncValue() as SketchData
 
     const { screenshotMode } = useScreenshot()
+
+    const isFullscreen = useIsFullscreen()
 
     useEffect(() => {
         if (!sketch) return
@@ -368,7 +379,7 @@ const LazySketch = () => {
 
     return (
         <>
-            <SketchWrapper>
+            <SketchWrapper className={isFullscreen ? "fullscreen" : ""}>
                 {!screenshotMode && !options?.noTitle && <h1>{sketch?.title}</h1>}
 
                 <SketchModule route={sketch.route} />
@@ -466,10 +477,12 @@ const App = () => {
     const { screenshotMode } = useScreenshot()
     const { debugMode } = useDebug()
 
+    const isFullscreen = useIsFullscreen()
+
     return (
         <>
             <PageLayout>
-                <SideNav />
+                {!isFullscreen && <SideNav />}
 
                 <ErrorBoundary>
                     <Suspense fallback={<Spinner />}>
@@ -482,7 +495,7 @@ const App = () => {
 
             <NavBackground open={navOpen} onClick={() => closeNav()} />
 
-            {!screenshotMode ? (
+            {!screenshotMode && !isFullscreen ? (
                 <NavToggle className="material-symbols-outlined" onClick={toggleNav}>
                     menu
                 </NavToggle>
@@ -491,7 +504,7 @@ const App = () => {
             <ScreenshotKeyboardControls />
             <DebugKeyboardControls />
 
-            {!debugMode && !screenshotMode ? (
+            {!debugMode && !screenshotMode && !isFullscreen ? (
                 <GithubLink target="_blank" href={`https://github.com/isaac-mason/sketches/tree/main/src/sketches/${sketchPath}`}>
                     GitHub
                 </GithubLink>

@@ -3,60 +3,90 @@ import {
     ChunkMeshUpdateResultMessage,
     CulledMesherWorkerMessageType,
     RegisterChunkMessage,
+    RequestChunkMeshUpdateMessage,
     WorkerMessage,
 } from './culled-mesher-worker-types'
 import { Chunk, World } from './world'
 import { mesh } from './culled-mesher'
 
-const remoteWorld = new World()
-
 const state = {
-    jobs: new Set<string>(),
+    worlds: new Map<number, World>(),
+    worldChunkMeshJobs: new Map<number, Set<string>>(),
 }
 
 const worker = self as unknown as Worker
 
 const update = () => {
-    const incomplete = new Set(state.jobs)
+    for (const [worldId, chunkIds] of state.worldChunkMeshJobs) {
+        const remoteWorld = state.worlds.get(worldId)
 
-    const jobs = state.jobs
-    state.jobs = new Set()
+        if (!remoteWorld) {
+            continue
+        }
 
-    for (const chunkId of jobs) {
-        const chunk = remoteWorld.chunks.get(chunkId)
+        const incomplete = new Set(chunkIds)
 
-        if (!chunk) continue
+        const chunksToProcess = chunkIds
 
-        try {
-            const { positions, indices, normals, colors, ambientOcclusion } = mesh(chunk, remoteWorld)
+        state.worldChunkMeshJobs.set(worldId, new Set())
 
-            const chunkMeshUpdateNotification: ChunkMeshUpdateResultMessage = {
-                type: CulledMesherWorkerMessageType.CHUNK_MESH_UPDATE_RESULT,
-                id: chunkId,
-                positions,
-                indices,
-                normals,
-                colors,
-                ambientOcclusion,
+        for (const chunkId of chunksToProcess) {
+            const chunk = remoteWorld.chunks.get(chunkId)
+
+            if (!chunk) {
+                continue
             }
 
-            worker.postMessage(chunkMeshUpdateNotification, {
-                transfer: [positions.buffer, indices.buffer, normals.buffer, colors.buffer, ambientOcclusion.buffer],
-            })
+            try {
+                const { positions, indices, normals, colors, ambientOcclusion } = mesh(chunk, remoteWorld)
 
-            incomplete.delete(chunkId)
-        } catch (e) {
-            // swallow
+                const chunkMeshUpdateNotification: ChunkMeshUpdateResultMessage = {
+                    type: CulledMesherWorkerMessageType.CHUNK_MESH_UPDATE_RESULT,
+                    worldId,
+                    chunkId: chunkId,
+                    positions,
+                    indices,
+                    normals,
+                    colors,
+                    ambientOcclusion,
+                }
+
+                worker.postMessage(chunkMeshUpdateNotification, {
+                    transfer: [positions.buffer, indices.buffer, normals.buffer, colors.buffer, ambientOcclusion.buffer],
+                })
+
+                incomplete.delete(chunkId)
+            } catch (e) {
+                // swallow
+            }
+
+            state.worldChunkMeshJobs.set(worldId, new Set([...incomplete, ...state.worldChunkMeshJobs.get(worldId)!]))
         }
     }
-
-    state.jobs = new Set([...incomplete, ...state.jobs])
 }
 
-const registerChunk = ({ id, position, solidBuffer, colorBuffer }: RegisterChunkMessage) => {
-    const chunk = new Chunk(id, new Vector3(...position), solidBuffer, colorBuffer)
+const registerChunk = ({ worldId, chunkId, position, solidBuffer, colorBuffer }: RegisterChunkMessage) => {
+    let remoteWorld = state.worlds.get(worldId)
 
-    remoteWorld.chunks.set(id, chunk)
+    if (!remoteWorld) {
+        remoteWorld = new World()
+        state.worlds.set(worldId, remoteWorld)
+    }
+
+    const chunk = new Chunk(chunkId, new Vector3(...position), solidBuffer, colorBuffer)
+
+    remoteWorld.chunks.set(chunkId, chunk)
+}
+
+const requestChunkMeshUpdate = ({ worldId, chunkId }: RequestChunkMeshUpdateMessage) => {
+    let jobs = state.worldChunkMeshJobs.get(worldId)
+
+    if (!jobs) {
+        jobs = new Set()
+        state.worldChunkMeshJobs.set(worldId, jobs)
+    }
+
+    jobs.add(chunkId)
 }
 
 worker.onmessage = (e) => {
@@ -66,7 +96,7 @@ worker.onmessage = (e) => {
     if (type === CulledMesherWorkerMessageType.REGISTER_CHUNK) {
         registerChunk(data)
     } else if (type === CulledMesherWorkerMessageType.REQUEST_CHUNK_MESH_UPDATE) {
-        state.jobs.add(data.id)
+        requestChunkMeshUpdate(data)
     }
 }
 

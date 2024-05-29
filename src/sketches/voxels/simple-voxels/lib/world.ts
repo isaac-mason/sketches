@@ -110,7 +110,11 @@ export type RaycastProps = {
     outHitNormal?: THREE.Vector3
 }
 
+let worldId = 0
+
 export class World {
+    id = worldId++
+    
     chunks = new Map<string, Chunk>()
 
     onChunkCreated = new Topic<[chunk: Chunk]>()

@@ -39,6 +39,98 @@ type ChunkMesh = {
 
 export type VoxelsChange = { position: THREE.Vector3Like; value: BlockValue; chunk: Chunk }
 
+export type VoxelsWorkerPoolParams = {
+    workerPoolSize?: number
+}
+
+export class VoxelsWorkerPool {
+    private workers: InstanceType<typeof CulledMesherWorker>[] = []
+    private workerRoundRobin = 0
+    private pendingMeshUpdates: Map<string, number> = new Map()
+    private workerPoolSize: number
+
+    constructor(params?: VoxelsWorkerPoolParams) {
+        this.workerPoolSize = params?.workerPoolSize ?? 3
+    }
+
+    onMesherResult = new Topic<[ChunkMeshUpdateResultMessage]>()
+
+    remesh(world: World, chunkId: string) {
+        const data: RequestChunkMeshUpdateMessage = {
+            type: CulledMesherWorkerMessageType.REQUEST_CHUNK_MESH_UPDATE,
+            worldId: world.id,
+            chunkId,
+        }
+
+        const jobId = VoxelsWorkerPool.jobId(world.id, chunkId)
+        const workerWithPendingMeshUpdate = this.pendingMeshUpdates.get(jobId)
+
+        if (workerWithPendingMeshUpdate) {
+            this.workers[workerWithPendingMeshUpdate].postMessage(data)
+            return
+        }
+
+        const workerIndex = this.workerRoundRobin
+        const worker = this.workers[workerIndex]
+        this.pendingMeshUpdates.set(jobId, workerIndex)
+
+        worker.postMessage(data)
+
+        this.workerRoundRobin = (this.workerRoundRobin + 1) % this.workers.length
+    }
+
+    registerChunk(world: World, chunk: Chunk) {
+        const data: RegisterChunkMessage = {
+            type: CulledMesherWorkerMessageType.REGISTER_CHUNK,
+            worldId: world.id,
+            chunkId: chunk.id,
+            position: chunk.position.toArray(),
+            solidBuffer: chunk.solidBuffer,
+            colorBuffer: chunk.colorBuffer,
+        }
+
+        for (const worker of this.workers) {
+            worker.postMessage(data)
+        }
+    }
+
+    connect() {
+        /* create workers */
+        for (let i = 0; i < this.workerPoolSize; i++) {
+            const worker = new CulledMesherWorker()
+
+            worker.onmessage = (e) => {
+                const { data: message } = e as { data: WorkerMessage }
+                if (message.type === CulledMesherWorkerMessageType.CHUNK_MESH_UPDATE_RESULT) {
+                    this.onMesherResult.emit(message)
+                    this.pendingMeshUpdates.delete(VoxelsWorkerPool.jobId(message.worldId, message.chunkId))
+                }
+            }
+
+            this.workers.push(worker)
+        }
+    }
+
+    disconnect() {
+        this.workerRoundRobin = 0
+        this.pendingMeshUpdates.clear()
+
+        for (const worker of this.workers) {
+            worker.terminate()
+        }
+
+        this.workers = []
+    }
+
+    static jobId(worldId: number, chunkId: string) {
+        return `${worldId}:${chunkId}`
+    }
+}
+
+type VoxelsParams = {
+    voxelsWorkerPool: VoxelsWorkerPool
+}
+
 export class Voxels {
     actor = new THREE.Vector3()
 
@@ -53,6 +145,7 @@ export class Voxels {
     onUpdate = new Topic<[changes: VoxelsChange[]]>()
 
     onChunkMeshInitialised = new Topic<[chunk: Chunk, mesh: THREE.Mesh<ChunkGeometry, THREE.Material>]>()
+    onChunkMeshUpdated = new Topic<[chunk: Chunk, mesh: THREE.Mesh<ChunkGeometry, THREE.Material>]>()
 
     chunkState = new Map<string, ChunkState>()
     chunkMeshes = new Map<string, ChunkMesh>()
@@ -62,12 +155,17 @@ export class Voxels {
 
     private setBlockRequests: { position: THREE.Vector3Like; value: BlockValue }[] = []
 
-    private workers: InstanceType<typeof CulledMesherWorker>[] = []
-    private workerRoundRobin = 0
-    private pendingMeshUpdates: Map<string, number> = new Map()
-    private workerPoolSize = 3
+    private voxelsWorkerPool: VoxelsWorkerPool
 
-    constructor() {
+    constructor({ voxelsWorkerPool }: VoxelsParams) {
+        this.voxelsWorkerPool = voxelsWorkerPool
+
+        this.voxelsWorkerPool.onMesherResult.add((message) => {
+            if (message.worldId !== this.world.id) return
+
+            this.processMesherResult(message)
+        })
+
         this.world.onChunkCreated.add((chunk) => {
             /* init chunk */
             this.chunkState.set(chunk.id, { loaded: false, priority: 0 })
@@ -81,42 +179,8 @@ export class Voxels {
             this.dirtyChunks.add(chunk.id)
 
             /* register chunk with mesher workers */
-            const data: RegisterChunkMessage = {
-                type: CulledMesherWorkerMessageType.REGISTER_CHUNK,
-                id: chunk.id,
-                position: chunk.position.toArray(),
-                solidBuffer: chunk.solidBuffer,
-                colorBuffer: chunk.colorBuffer,
-            }
-
-            for (const worker of this.workers) {
-                worker.postMessage(data)
-            }
+            this.voxelsWorkerPool.registerChunk(this.world, chunk)
         })
-    }
-
-    connect() {
-        /* create workers */
-        for (let i = 0; i < this.workerPoolSize; i++) {
-            const worker = new CulledMesherWorker()
-
-            worker.onmessage = (e) => {
-                const { data: message } = e as { data: WorkerMessage }
-                if (message.type === CulledMesherWorkerMessageType.CHUNK_MESH_UPDATE_RESULT) {
-                    this.processMesherResult(message)
-                }
-            }
-
-            this.workers.push(worker)
-        }
-    }
-
-    disconnect() {
-        for (const worker of this.workers) {
-            worker.terminate()
-        }
-
-        this.workers = []
     }
 
     update() {
@@ -253,36 +317,12 @@ export class Voxels {
         })
 
         for (const chunkId of prioritised) {
-            this.remesh(chunkId)
+            this.voxelsWorkerPool.remesh(this.world, chunkId)
         }
-    }
-
-    private remesh(chunkId: string): void {
-        const data: RequestChunkMeshUpdateMessage = {
-            type: CulledMesherWorkerMessageType.REQUEST_CHUNK_MESH_UPDATE,
-            id: chunkId,
-        }
-
-        const workerWithPendingMeshUpdate = this.pendingMeshUpdates.get(chunkId)
-
-        if (workerWithPendingMeshUpdate) {
-            this.workers[workerWithPendingMeshUpdate].postMessage(data)
-            return
-        }
-
-        const workerIndex = this.workerRoundRobin
-        const worker = this.workers[workerIndex]
-        this.pendingMeshUpdates.set(chunkId, workerIndex)
-
-        worker.postMessage(data)
-
-        this.workerRoundRobin = (this.workerRoundRobin + 1) % this.workers.length
     }
 
     private processMesherResult(chunkMesherData: ChunkMeshUpdateResultMessage) {
-        const { id } = chunkMesherData
-
-        this.pendingMeshUpdates.delete(id)
+        const { chunkId: id } = chunkMesherData
 
         const chunk = this.world.chunks.get(id)
         const chunkMesh = this.chunkMeshes.get(id)
@@ -293,16 +333,14 @@ export class Voxels {
 
         geometry.updateChunk(chunkMesherData)
 
-        chunkMesh.mesh.position.set(
-            chunk.position.x * CHUNK_SIZE,
-            chunk.position.y * CHUNK_SIZE,
-            chunk.position.z * CHUNK_SIZE,
-        )
+        chunkMesh.mesh.position.set(chunk.position.x * CHUNK_SIZE, chunk.position.y * CHUNK_SIZE, chunk.position.z * CHUNK_SIZE)
 
         if (!chunkMesh.initialised) {
             chunkMesh.initialised = true
 
             this.onChunkMeshInitialised.emit(chunk, chunkMesh.mesh)
         }
+
+        this.onChunkMeshUpdated.emit(chunk, chunkMesh.mesh)
     }
 }

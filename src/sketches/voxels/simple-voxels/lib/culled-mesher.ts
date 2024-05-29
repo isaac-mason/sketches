@@ -2,7 +2,7 @@ import { Color, Vector3 } from 'three'
 import { CHUNK_SIZE, Chunk, World } from './world'
 
 export type CulledMesherChunkResult = {
-    id: string
+    chunkId: string
     positions: Float32Array
     indices: Uint32Array
     normals: Float32Array
@@ -295,7 +295,7 @@ export const mesh = (chunk: Chunk, world: World): CulledMesherChunkResult => {
     }
 
     return {
-        id: chunk.id,
+        chunkId: chunk.id,
         positions: new Float32Array(positions),
         indices: new Uint32Array(indices),
         normals: new Float32Array(normals),

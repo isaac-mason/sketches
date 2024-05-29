@@ -84,6 +84,12 @@ const sketchList = [
         tags: ['voxels', 'model'],
     },
     {
+        title: 'Simple Voxels - Multiple Worlds',
+        path: 'voxels/simple-voxels/multiple-worlds',
+        tags: ['voxels', 'model'],
+        hidden: true,
+    },
+    {
         title: 'Textured Voxels - Texture Atlas',
         path: 'voxels/textured-voxels/texture-atlas',
     },

@@ -2,8 +2,10 @@ import { useConst } from '@/common'
 import { ThreeElements, useFrame } from '@react-three/fiber'
 import { Fragment, createContext, forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react'
 import * as THREE from 'three'
-import { Voxels as VoxelsImpl } from './voxels'
+import { Voxels as VoxelsImpl, VoxelsWorkerPool } from './voxels'
 import { Chunk, getChunkBounds } from './world'
+import { Helper } from '@react-three/drei'
+import { VertexNormalsHelper } from 'three/examples/jsm/Addons.js'
 
 type VoxelsContextType = {
     voxels: VoxelsImpl
@@ -22,32 +24,40 @@ export const useVoxels = () => {
 }
 
 export type VoxelsProps = {
+    voxels?: VoxelsImpl
+    voxelsWorkerPool?: VoxelsWorkerPool
     children: React.ReactNode
 }
 
 export type VoxelsRef = VoxelsImpl
 
-export const Voxels = forwardRef<VoxelsImpl, VoxelsProps>(({ children }, ref) => {
-    const voxels = useConst(() => new VoxelsImpl())
+export const Voxels = forwardRef<VoxelsImpl, VoxelsProps>(
+    ({ voxels: existingVoxels, voxelsWorkerPool: existingVoxelsWorkerPool, children }, ref) => {
+        const voxelsWorkerPool = useConst(() => existingVoxelsWorkerPool ?? new VoxelsWorkerPool())
 
-    useImperativeHandle(ref, () => voxels, [voxels])
+        const voxels = useConst(() => existingVoxels ?? new VoxelsImpl({ voxelsWorkerPool }))
 
-    useEffect(() => {
-        voxels.connect()
+        useImperativeHandle(ref, () => voxels, [voxels])
 
-        return () => {
-            voxels.disconnect()
-        }
-    }, [])
+        useEffect(() => {
+            if (existingVoxelsWorkerPool) return
 
-    useFrame(() => {
-        voxels.update()
-    })
+            voxelsWorkerPool.connect()
 
-    const contextValue = useMemo(() => ({ voxels }), [voxels])
+            return () => {
+                voxelsWorkerPool.disconnect()
+            }
+        }, [])
 
-    return <voxelsContext.Provider value={contextValue}>{children}</voxelsContext.Provider>
-})
+        useFrame(() => {
+            voxels.update()
+        })
+
+        const contextValue = useMemo(() => ({ voxels }), [voxels])
+
+        return <voxelsContext.Provider value={contextValue}>{children}</voxelsContext.Provider>
+    },
+)
 
 type ChunkHelperProps = { chunk: Chunk }
 

@@ -37,6 +37,7 @@ export const WebGPUCanvas = ({
     children,
     webglFallback = true,
     frameloop = 'always',
+    gl,
     ...props
 }: React.PropsWithChildren<WebGPUCanvasProps>) => {
     const [canvasFrameloop, setCanvasFrameloop] = React.useState<CanvasProps['frameloop']>('never')
@@ -60,16 +61,16 @@ export const WebGPUCanvas = ({
 
     return (
         <Canvas
+            {...props}
             id="gl"
             frameloop={canvasFrameloop}
             gl={(canvas) => {
-                const renderer = new WebGPURenderer({ canvas: canvas as HTMLCanvasElement })
+                const renderer = new WebGPURenderer({ ...gl, canvas: canvas as HTMLCanvasElement })
                 renderer.init().then(() => {
                     setInitialising(false)
                 })
                 return renderer
             }}
-            {...props}
         >
             {children}
         </Canvas>

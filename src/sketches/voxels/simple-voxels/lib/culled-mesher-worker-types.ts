@@ -8,7 +8,8 @@ export const CulledMesherWorkerMessageType = {
 
 export type RegisterChunkMessage = {
     type: typeof CulledMesherWorkerMessageType.REGISTER_CHUNK
-    id: string
+    worldId: number
+    chunkId: string
     position: [number, number, number]
     solidBuffer: SharedArrayBuffer
     colorBuffer: SharedArrayBuffer
@@ -16,11 +17,13 @@ export type RegisterChunkMessage = {
 
 export type RequestChunkMeshUpdateMessage = {
     type: typeof CulledMesherWorkerMessageType.REQUEST_CHUNK_MESH_UPDATE
-    id: string
+    worldId: number
+    chunkId: string
 }
 
 export type ChunkMeshUpdateResultMessage = {
     type: typeof CulledMesherWorkerMessageType.CHUNK_MESH_UPDATE_RESULT
+    worldId: number
 } & CulledMesherChunkResult
 
 export type WorkerMessage = RegisterChunkMessage | RequestChunkMeshUpdateMessage | ChunkMeshUpdateResultMessage

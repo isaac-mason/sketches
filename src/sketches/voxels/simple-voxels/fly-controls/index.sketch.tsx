@@ -1,13 +1,12 @@
 import { Canvas, Crosshair } from '@/common'
 import { KeyboardControls, PointerLockControls, useKeyboardControls } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
+import { useControls } from 'leva'
 import { useRef } from 'react'
 import { Vector3 } from 'three'
 import { CameraBuildTool } from '../camera-build-tool'
 import { VoxelChunkMeshes, Voxels, useVoxels } from '../lib/react'
 import { SimpleLevel } from '../simple-level'
-import { useControls } from 'leva'
-import { EffectComposer } from '@react-three/postprocessing'
 
 const SKETCH = 'simple-voxels/fly-controls'
 
