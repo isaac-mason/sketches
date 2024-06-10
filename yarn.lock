@@ -7519,7 +7519,7 @@ __metadata:
     three-bvh-csg: "npm:^0.0.16"
     tunnel-rat: "npm:^0.1.2"
     typescript: "npm:^5.4.5"
-    vite: "npm:^5.1.7"
+    vite: "npm:^5.2.13"
     vite-imagetools: "npm:^7.0.2"
     vite-plugin-html: "npm:^3.2.2"
     zustand: "npm:^4.5.2"
@@ -8311,9 +8311,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^5.1.7":
-  version: 5.2.8
-  resolution: "vite@npm:5.2.8"
+"vite@npm:^5.2.13":
+  version: 5.2.13
+  resolution: "vite@npm:5.2.13"
   dependencies:
     esbuild: "npm:^0.20.1"
     fsevents: "npm:~2.3.3"
@@ -8347,7 +8347,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 10/caa40343c2c4e6d8e257fccb4c3029f62909c319a86063ce727ed550925c0a834460b0d1ca20c4d6c915f35302aa1052f6ec5193099a47ce21d74b9b817e69e1
+  checksum: 10/eee65eebff8c839935fdf1a6f2bbc90b923d53a447cc0949abea71577166e7ad7ceb41f3ea42c79a54997319eacfa45445509da371a8ba0699fce8f7de137882
   languageName: node
   linkType: hard
 
