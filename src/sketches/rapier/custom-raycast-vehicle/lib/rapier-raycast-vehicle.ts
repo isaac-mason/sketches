@@ -330,10 +330,10 @@ export class RapierRaycastVehicle {
                 wheel.state.hitNormalWorld.copy(rayColliderIntersection.normal as Vector3)
 
                 // store hit point
-                wheel.state.hitPointWorld.copy(ray.pointAt(rayColliderIntersection.toi) as Vector3)
+                wheel.state.hitPointWorld.copy(ray.pointAt(rayColliderIntersection.timeOfImpact) as Vector3)
 
                 // compute suspension length
-                const hitDistance = rayColliderIntersection.toi
+                const hitDistance = rayColliderIntersection.timeOfImpact
                 wheel.state.suspensionLength = hitDistance - wheel.options.radius
 
                 // clamp on max suspension travel

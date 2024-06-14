@@ -44,7 +44,7 @@ const Scene = () => {
                 setRaycastHit(null)
             }
         } else {
-            line.scale.x = raycastResult.toi
+            line.scale.x = raycastResult.timeOfImpact
 
             const rigidBody = raycastResult.collider.parent()
             if (!rigidBody) return

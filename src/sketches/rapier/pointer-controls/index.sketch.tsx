@@ -87,7 +87,7 @@ const PointerControls = ({ target }: PointerConstraintControlsProps) => {
 
             const rayHitPosition = new Vector3()
                 .copy(camera.position)
-                .add(rayDirection.multiplyScalar(rayColliderIntersection!.toi))
+                .add(rayDirection.multiplyScalar(rayColliderIntersection!.timeOfImpact))
 
             movementPlane.current.position.copy(rayHitPosition)
             movementPlane.current.quaternion.copy(camera.quaternion)
