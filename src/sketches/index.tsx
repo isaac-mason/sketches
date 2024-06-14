@@ -249,6 +249,11 @@ const sketchList = [
         path: 'nature/grass',
         tags: ['nature', 'grass'],
     },
+    {
+        title: 'Nature - Grass 2',
+        path: 'nature/grass-2',
+        tags: ['nature', 'grass'],
+    },
     /* Procedural Generation */
     {
         title: 'Procedural Generation - Diamond Square Heightmap',
