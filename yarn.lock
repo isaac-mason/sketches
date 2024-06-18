@@ -2898,12 +2898,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^20.12.11":
-  version: 20.12.11
-  resolution: "@types/node@npm:20.12.11"
+"@types/node@npm:^20.14.4":
+  version: 20.14.4
+  resolution: "@types/node@npm:20.14.4"
   dependencies:
     undici-types: "npm:~5.26.4"
-  checksum: 10/c6afe7c2c4504a4f488814d7b306ebad16bf42cbb43bf9db9fe1aed8c5fb99235593c3be5088979a64526b106cf022256688e2f002811be8273d87dc2e0d484f
+  checksum: 10/ed4a4c0d66853f0d1735956caa9bb7b38e859506539367de5d01d425d0d6415d7de236d564aad88b36599d4224fb510ac1bc6e29d4d0e45530ad253239a181f5
   languageName: node
   linkType: hard
 
@@ -7709,7 +7709,7 @@ __metadata:
     "@react-three/xr": "npm:^5.7.1"
     "@types/d3": "npm:^7.4.3"
     "@types/eslint": "npm:^8.56.5"
-    "@types/node": "npm:^20.12.11"
+    "@types/node": "npm:^20.14.4"
     "@types/react": "npm:^18.3.1"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.165.0"
