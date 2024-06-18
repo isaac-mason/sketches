@@ -214,6 +214,11 @@ const sketchList = [
         path: 'game-ui/unlock-pointer-lock',
         tags: ['game-ui', 'pointer-lock'],
     },
+    {
+        title: 'Game UI - Transform',
+        path: 'game-ui/transform',
+        tags: ['game-ui', 'transform'],
+    },
     /* Sound */
     {
         title: 'Sound - Spatial',
