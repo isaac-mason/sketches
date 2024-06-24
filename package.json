@@ -47,7 +47,7 @@
         "@babel/plugin-proposal-decorators": "^7.24.7",
         "@isaac-mason/eslint-config-typescript": "0.0.7",
         "@types/d3": "^7.4.3",
-        "@types/eslint": "^8.56.5",
+        "@types/eslint": "^8.56.10",
         "@types/node": "^20.14.4",
         "@types/react": "^18.3.1",
         "@types/react-dom": "^18.3.0",
