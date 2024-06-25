@@ -219,6 +219,11 @@ const sketchList = [
         path: 'game-ui/transform',
         tags: ['game-ui', 'transform'],
     },
+    {
+        title: 'Game UI - Zoom',
+        path: 'game-ui/zoom',
+        tags: ['game-ui', 'zoom'],
+    },
     /* Sound */
     {
         title: 'Sound - Spatial',
