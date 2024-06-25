@@ -205,24 +205,19 @@ const sketchList = [
     },
     /* Game UI */
     {
-        title: 'Game UI - Button',
-        path: 'game-ui/button',
-        tags: ['game-ui', 'button'],
+        title: 'Game UI/UX - Unlock Pointer Lock',
+        path: 'game-ui-ux/unlock-pointer-lock',
+        tags: ['game-ui-ux', 'pointer-lock'],
     },
     {
-        title: 'Game UI - Unlock Pointer Lock',
-        path: 'game-ui/unlock-pointer-lock',
-        tags: ['game-ui', 'pointer-lock'],
+        title: 'Game UI/UX - Transform',
+        path: 'game-ui-ux/transform',
+        tags: ['game-ui-ux', 'transform'],
     },
     {
-        title: 'Game UI - Transform',
-        path: 'game-ui/transform',
-        tags: ['game-ui', 'transform'],
-    },
-    {
-        title: 'Game UI - Zoom',
-        path: 'game-ui/zoom',
-        tags: ['game-ui', 'zoom'],
+        title: 'Game UI/UX - Zoom',
+        path: 'game-ui-ux/zoom',
+        tags: ['game-ui-ux', 'zoom'],
     },
     /* Sound */
     {

@@ -1,4 +1,4 @@
-import { Crosshair } from '@/common'
+import { Crosshair, Instructions } from '@/common'
 import { KeyboardControls, PointerLockControls, useKeyboardControls } from '@react-three/drei'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { ReactNode, useEffect } from 'react'
@@ -128,7 +128,6 @@ const ZoomHUD = () => {
             Zoom: {zoomValues[zoomIndex].zoom}x
         </div>
     )
-
 }
 
 export default function Sketch() {
@@ -151,7 +150,14 @@ export default function Sketch() {
             </Canvas>
 
             <ZoomHUD />
+
             <Crosshair />
+
+            <Instructions>
+                <div>WASD to move</div>
+                <div>Space / Shift to ascend / descend</div>
+                <div>[ and ] to zoom</div>
+            </Instructions>
         </>
     )
 }
