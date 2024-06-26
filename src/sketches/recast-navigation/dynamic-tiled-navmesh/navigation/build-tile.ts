@@ -1,6 +1,7 @@
 import {
     NavMeshCreateParams,
     Raw,
+    Recast,
     RecastBuildContext,
     RecastCompactHeightfield,
     RecastConfig,
@@ -195,7 +196,7 @@ export const buildTile = ({
     }
 
     const failTileMesh = (error: string) => {
-        buildContext.log(Raw.Module.RC_LOG_ERROR, error)
+        buildContext.log(Recast.RC_LOG_ERROR, error)
 
         cleanup()
 
@@ -248,11 +249,11 @@ export const buildTile = ({
     buildContext.resetTimers()
 
     // Start the build process
-    buildContext.startTimer(Raw.Module.RC_TIMER_TOTAL)
+    buildContext.startTimer(Recast.RC_TIMER_TOTAL)
 
-    buildContext.log(Raw.Module.RC_LOG_PROGRESS, `Building tile at x: ${tileX}, y: ${tileY}`)
-    buildContext.log(Raw.Module.RC_LOG_PROGRESS, ` - ${config.width} x ${config.height} cells`)
-    buildContext.log(Raw.Module.RC_LOG_PROGRESS, ` - ${numVertices / 1000}fK verts, ${numTriangles / 1000}K tris`)
+    buildContext.log(Recast.RC_LOG_PROGRESS, `Building tile at x: ${tileX}, y: ${tileY}`)
+    buildContext.log(Recast.RC_LOG_PROGRESS, ` - ${config.width} x ${config.height} cells`)
+    buildContext.log(Recast.RC_LOG_PROGRESS, ` - ${numVertices / 1000}fK verts, ${numTriangles / 1000}K tris`)
 
     // Allocate voxel heightfield where we rasterize our input data to.
     const heightfield = allocHeightfield()
@@ -387,7 +388,7 @@ export const buildTile = ({
             tileConfig.maxSimplificationError,
             tileConfig.maxEdgeLen,
             contourSet,
-            Raw.Module.RC_CONTOUR_TESS_WALL_EDGES,
+            Recast.RC_CONTOUR_TESS_WALL_EDGES,
         )
     ) {
         return failTileMesh('Failed to create contours')
@@ -459,7 +460,7 @@ export const buildTile = ({
         return failTileMesh('Failed to create Detour navmesh data')
     }
 
-    buildContext.log(Raw.Module.RC_LOG_PROGRESS, `>> Polymesh: ${polyMesh.nverts()} vertices  ${polyMesh.npolys()} polygons`)
+    buildContext.log(Recast.RC_LOG_PROGRESS, `>> Polymesh: ${polyMesh.nverts()} vertices  ${polyMesh.npolys()} polygons`)
 
     cleanup()
 

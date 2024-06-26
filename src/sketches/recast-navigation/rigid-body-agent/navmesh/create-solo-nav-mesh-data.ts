@@ -1,6 +1,7 @@
 import {
     NavMeshCreateParams,
     Raw,
+    Recast,
     RecastBuildContext,
     RecastCompactHeightfield,
     RecastConfig,
@@ -263,7 +264,7 @@ export const createSoloNavMeshData = (
             config.maxSimplificationError,
             config.maxEdgeLen,
             contourSet,
-            Raw.Module.RC_CONTOUR_TESS_WALL_EDGES,
+            Recast.RC_CONTOUR_TESS_WALL_EDGES,
         )
     ) {
         return fail('Failed to create contours')

@@ -1,8 +1,10 @@
 import { Topic } from 'arancini/events'
 import {
+    Detour,
     NavMesh,
     NavMeshParams,
     Raw,
+    Recast,
     RecastConfig,
     UnsignedCharArray,
     Vector3Tuple,
@@ -93,11 +95,11 @@ export class DynamicTiledNavMesh {
 
                 navMesh.removeTile(navMesh.getTileRefAt(tileX, tileY, 0))
 
-                const addTileResult = navMesh.addTile(navMeshData, Raw.Module.DT_TILE_FREE_DATA, 0)
+                const addTileResult = navMesh.addTile(navMeshData, Detour.DT_TILE_FREE_DATA, 0)
 
                 if (Raw.Detour.statusFailed(addTileResult.status)) {
                     console.error(
-                        Raw.Module.RC_LOG_WARNING,
+                        Recast.RC_LOG_WARNING,
                         `Failed to add tile to nav mesh` +
                             '\n\t' +
                             `tx: ${tileX}, ty: ${tileY},` +

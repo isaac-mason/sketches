@@ -2058,42 +2058,42 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@recast-navigation/core@npm:0.31.1":
-  version: 0.31.1
-  resolution: "@recast-navigation/core@npm:0.31.1"
+"@recast-navigation/core@npm:0.32.0":
+  version: 0.32.0
+  resolution: "@recast-navigation/core@npm:0.32.0"
   dependencies:
-    "@recast-navigation/wasm": "npm:0.31.1"
-  checksum: 10/32be11aa269d3e54091475eefead6479974957e1d3477ac6454e5d68297084170b0d5dcc382ebe7da1fadbb32c4e31c45caa5f17bb2e99c615db26d899424086
+    "@recast-navigation/wasm": "npm:0.32.0"
+  checksum: 10/ad172973b80b5c462471ceed7357143ea5dd3ad442eb9b632af8f2c3fb2e616be7603bacae2bbc3236303d47eda37b5d1daf5afbaaa8de49863172c0401197fb
   languageName: node
   linkType: hard
 
-"@recast-navigation/generators@npm:0.31.1":
-  version: 0.31.1
-  resolution: "@recast-navigation/generators@npm:0.31.1"
+"@recast-navigation/generators@npm:0.32.0":
+  version: 0.32.0
+  resolution: "@recast-navigation/generators@npm:0.32.0"
   dependencies:
-    "@recast-navigation/core": "npm:0.31.1"
-    "@recast-navigation/wasm": "npm:0.31.1"
-  checksum: 10/4ea1bdaa3b4f39195f3bae5975de8782a609837f4f7a9587cfdfa554f96c1aa8f4119d65ae5f0db16b0416d57e48f4efb1ba67abd92f910b383b480afa53110c
+    "@recast-navigation/core": "npm:0.32.0"
+    "@recast-navigation/wasm": "npm:0.32.0"
+  checksum: 10/cf5f3d735549b99c406e3b91f4913d3cd98a3c6a3fa48bf6a42cc99ce596fb35365853f319604c79b49e5817c545b23c8d9f6bfb2594909509fdce797af433cd
   languageName: node
   linkType: hard
 
-"@recast-navigation/three@npm:0.31.1":
-  version: 0.31.1
-  resolution: "@recast-navigation/three@npm:0.31.1"
+"@recast-navigation/three@npm:0.32.0":
+  version: 0.32.0
+  resolution: "@recast-navigation/three@npm:0.32.0"
   dependencies:
-    "@recast-navigation/core": "npm:0.31.1"
-    "@recast-navigation/generators": "npm:0.31.1"
+    "@recast-navigation/core": "npm:0.32.0"
+    "@recast-navigation/generators": "npm:0.32.0"
   peerDependencies:
     "@types/three": 0.x.x
     three: 0.x.x
-  checksum: 10/3e51c34cff5b2837950b4ae4e4dd6d4dd0fb29a958f5887158e3536f4a9a054ac51f1639e0ba5f30aaf47bd5b8de340f2a51865e4aab98a145ce4a043e414aef
+  checksum: 10/f8b79b438fc50f377ffe32911fe5c138ded7e33f93dca5c3a05bc23ea1bec959f78444a7b70633f514d3bdc8bd425c820ad0d89c11b81f30135f1c6f5d6c6062
   languageName: node
   linkType: hard
 
-"@recast-navigation/wasm@npm:0.31.1":
-  version: 0.31.1
-  resolution: "@recast-navigation/wasm@npm:0.31.1"
-  checksum: 10/5d228f5d9ad042de84fca0deb2e2263c1d5ce37cf34670fd9b64684756c13d6282794308e36b750e1c5908cfd7f3469c2b14f96a825c838255accd6c433a9229
+"@recast-navigation/wasm@npm:0.32.0":
+  version: 0.32.0
+  resolution: "@recast-navigation/wasm@npm:0.32.0"
+  checksum: 10/01b6e09461c7f88a6c9993b2dff655fa8f7ef2d3edce0a8646e74eaaa1a9ced6ee090bef48518f6ecf7a9c6224b101a819fd25a6c1ee1842d9a87937f18400a9
   languageName: node
   linkType: hard
 
@@ -7196,14 +7196,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"recast-navigation@npm:^0.31.1":
-  version: 0.31.1
-  resolution: "recast-navigation@npm:0.31.1"
+"recast-navigation@npm:^0.32.0":
+  version: 0.32.0
+  resolution: "recast-navigation@npm:0.32.0"
   dependencies:
-    "@recast-navigation/core": "npm:0.31.1"
-    "@recast-navigation/generators": "npm:0.31.1"
-    "@recast-navigation/three": "npm:0.31.1"
-  checksum: 10/70d61e03e133395d5bba932bf8a67d5eb90903c787084172120ac9ec74944f85ea8dab3fc7a2a6591f8e0bb70083228db9f41e326f36200c7e97a0a4bb2ed187
+    "@recast-navigation/core": "npm:0.32.0"
+    "@recast-navigation/generators": "npm:0.32.0"
+    "@recast-navigation/three": "npm:0.32.0"
+  checksum: 10/5968ac8509a471266f48b98ce6037feeb21b66dd5f359cca6accea86fa6766b3bfc55b9dc95e8c201377fddeaf33777f9e2fbfde373607e28c3bd89ec29cd606
   languageName: node
   linkType: hard
 
@@ -7690,7 +7690,7 @@ __metadata:
     react-colorful: "npm:^5.6.1"
     react-dom: "npm:^18.3.1"
     react-router-dom: "npm:^6.23.1"
-    recast-navigation: "npm:^0.31.1"
+    recast-navigation: "npm:^0.32.0"
     simplex-noise: "npm:^4.0.1"
     styled-breakpoints: "npm:^14.1.3"
     styled-components: "npm:^6.1.11"
