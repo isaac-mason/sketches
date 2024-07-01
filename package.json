@@ -45,7 +45,7 @@
     "devDependencies": {
         "@babel/plugin-proposal-class-properties": "^7.18.6",
         "@babel/plugin-proposal-decorators": "^7.24.7",
-        "@isaac-mason/eslint-config-typescript": "0.0.7",
+        "@isaac-mason/eslint-config-typescript": "0.0.8",
         "@types/d3": "^7.4.3",
         "@types/eslint": "^8.56.10",
         "@types/node": "^20.14.4",
@@ -54,9 +54,9 @@
         "@types/three": "^0.166.0",
         "@vitejs/plugin-basic-ssl": "^1.1.0",
         "@vitejs/plugin-react": "^4.3.1",
-        "eslint": "^9.5.0",
+        "eslint": "^9.6.0",
         "prettier": "^3.3.2",
-        "typescript": "^5.4.5",
+        "typescript": "^5.5.2",
         "vite": "^5.3.1",
         "vite-imagetools": "^7.0.2",
         "vite-plugin-html": "^3.2.2"
