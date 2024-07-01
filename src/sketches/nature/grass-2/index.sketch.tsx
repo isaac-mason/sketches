@@ -36,8 +36,6 @@ import {
     vec4,
     vertexIndex,
 } from 'three/examples/jsm/nodes/Nodes.js'
-
-// @ts-expect-error (untyped)
 import WGSLNodeBuilder from 'three/examples/jsm/renderers/webgpu/nodes/WGSLNodeBuilder.js'
 
 const NUM_GRASS = 500
@@ -335,6 +333,7 @@ const Grass = () => {
     }, [debugPositionsAndAngles, wireframe, wind, color])
 
     useEffect(() => {
+        // @ts-expect-error untyped constructor
         const nodeBuilder = new WGSLNodeBuilder(mesh, gl)
         nodeBuilder.build()
         console.log(nodeBuilder.vertexShader, nodeBuilder.fragmentShader)
