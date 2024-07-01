@@ -69,8 +69,6 @@ const FACE_NORMALS: { [face: number]: [number, number, number] } = {
     [Face.DOWN]: [0, -1, 0],
 }
 
-const AIR = { type: 0, solid: false }
-
 type BlockData = {
     // [x1, y1, z1, x2, y2, z2, ...]
     positions: number[]

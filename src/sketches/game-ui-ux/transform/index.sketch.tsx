@@ -1,17 +1,14 @@
-import { animated, useSpring } from '@react-spring/three'
+import { Crosshair } from '@/common'
 import {
-    FirstPersonControls,
     KeyboardControls,
     PointerLockControls,
-    Text,
     TransformControls,
-    useKeyboardControls,
+    useKeyboardControls
 } from '@react-three/drei'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { ReactNode, useRef, useState } from 'react'
-import { Crosshair } from '@/common'
-import * as THREE from 'three'
+import { Canvas, useFrame } from '@react-three/fiber'
 import { useControls } from 'leva'
+import { ReactNode } from 'react'
+import * as THREE from 'three'
 
 const controls = [
     { name: 'left', keys: ['KeyA'] },

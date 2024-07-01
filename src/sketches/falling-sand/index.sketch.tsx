@@ -180,7 +180,7 @@ export default function Sketch() {
         }
 
         let pointerDown = false
-        let pointerPosition = { x: 0, y: 0 }
+        const pointerPosition = { x: 0, y: 0 }
 
         const updatePointerPosition = (e: PointerEvent) => {
             const x = Math.floor((e.offsetX / canvas.clientWidth) * width)

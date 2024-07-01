@@ -4,8 +4,6 @@ import { Fragment, createContext, forwardRef, useContext, useEffect, useImperati
 import * as THREE from 'three'
 import { Voxels as VoxelsImpl, VoxelsWorkerPool } from './voxels'
 import { Chunk, getChunkBounds } from './world'
-import { Helper } from '@react-three/drei'
-import { VertexNormalsHelper } from 'three/examples/jsm/Addons.js'
 
 type VoxelsContextType = {
     voxels: VoxelsImpl

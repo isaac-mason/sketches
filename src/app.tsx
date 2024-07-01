@@ -9,7 +9,6 @@ import {
     redirect,
     useAsyncValue,
     useLoaderData,
-    useSearchParams,
 } from 'react-router-dom'
 import { createStyledBreakpointsTheme } from 'styled-breakpoints'
 import styled, { ThemeProvider } from 'styled-components'
@@ -379,7 +378,7 @@ const LazySketch = () => {
 
     return (
         <>
-            <SketchWrapper className={isFullscreen ? "fullscreen" : ""}>
+            <SketchWrapper className={isFullscreen ? 'fullscreen' : ''}>
                 {!screenshotMode && !options?.noTitle && <h1>{sketch?.title}</h1>}
 
                 <SketchModule route={sketch.route} />

@@ -1,6 +1,6 @@
 import { WebGPUCanvas } from '@/common'
 import { OrbitControls } from '@react-three/drei'
-import { Fragment, useMemo } from 'react'
+import { useMemo } from 'react'
 import * as THREE from 'three'
 
 type TreeNode = {

@@ -1,9 +1,9 @@
-import { OrbitControls, useGLTF } from '@react-three/drei'
+import { Canvas, usePageVisible } from '@/common'
+import { OrbitControls } from '@react-three/drei'
+import { useFrame } from '@react-three/fiber'
 import { Physics, RapierRigidBody, RigidBody, Vector3Tuple } from '@react-three/rapier'
 import { useControls } from 'leva'
-import { Canvas, usePageVisible } from '@/common'
 import { useMemo, useRef } from 'react'
-import { useFrame } from '@react-three/fiber'
 import { Euler, Quaternion } from 'three'
 
 const LEVA_KEY = 'rapier-ball-pit-mixer'

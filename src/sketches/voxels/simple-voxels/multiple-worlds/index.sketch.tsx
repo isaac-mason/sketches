@@ -283,7 +283,7 @@ const useTool = create<{
 }))
 
 const ToolPicker = () => {
-    const { tool, cycleTool } = useTool()
+    const { cycleTool } = useTool()
 
     useEffect(() => {
         const onKeyUp = (e: KeyboardEvent) => {
