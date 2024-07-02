@@ -57,7 +57,7 @@
         "eslint": "^9.6.0",
         "prettier": "^3.3.2",
         "typescript": "^5.5.2",
-        "vite": "^5.3.1",
+        "vite": "^5.3.2",
         "vite-imagetools": "^7.0.2",
         "vite-plugin-html": "^3.2.2"
     },
