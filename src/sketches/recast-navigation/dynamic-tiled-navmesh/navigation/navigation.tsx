@@ -1,23 +1,23 @@
-import { useInterval } from '@/common'
-import { useFrame } from '@react-three/fiber'
-import { useEffect, useMemo, useState } from 'react'
+import { useInterval, usePageVisible } from '@/common'
+import { useFrame, useThree } from '@react-three/fiber'
+import { useControls } from 'leva'
+import { useEffect, useState } from 'react'
 import { Crowd, NavMesh, NavMeshQuery, RecastConfig } from 'recast-navigation'
-import { NavMeshHelper, getPositionsAndIndices } from 'recast-navigation/three'
+import { DebugDrawer, getPositionsAndIndices } from 'recast-navigation/three'
 import * as THREE from 'three'
 import { create } from 'zustand'
+import { SKETCH } from '../const'
 import { traversableQuery } from '../ecs'
 import { DynamicTiledNavMesh } from './dynamic-tiled-navmesh'
-import { useControls } from 'leva'
-import { SKETCH } from '../const'
 
-export type NavState = {
+export type NavigationState = {
     dynamicTiledNavMesh?: DynamicTiledNavMesh
     navMesh?: NavMesh
     navMeshQuery?: NavMeshQuery
     crowd?: Crowd
 }
 
-export const useNav = create<NavState>(() => ({
+export const useNavigation = create<NavigationState>(() => ({
     dynamicTiledNavMesh: undefined,
     navMesh: undefined,
     navMeshQuery: undefined,
@@ -61,12 +61,39 @@ export const getTraversableMeshes = () => {
     return Array.from(traversableMeshes)
 }
 
+const NavMeshDebug = () => {
+    const { dynamicTiledNavMesh } = useNavigation()
+    const scene = useThree((state) => state.scene)
+
+    useEffect(() => {
+        if (!dynamicTiledNavMesh) return
+
+        const debugDrawer = new DebugDrawer()
+        debugDrawer.drawNavMesh(dynamicTiledNavMesh.navMesh)
+        scene.add(debugDrawer)
+
+        const unsubOnNavMeshUpdate = dynamicTiledNavMesh.onNavMeshUpdate.add(() => {
+            debugDrawer.reset()
+            debugDrawer.drawNavMesh(dynamicTiledNavMesh.navMesh)
+        })
+
+        return () => {
+            unsubOnNavMeshUpdate()
+            scene.remove(debugDrawer)
+            debugDrawer.dispose()
+        }
+    }, [dynamicTiledNavMesh])
+
+    return null
+}
+
 export const Navigation = () => {
+    const pageVisible = usePageVisible()
+
     const { boundsDebug, navMeshDebug } = useControls(`${SKETCH}-navigation`, {
         boundsDebug: false,
         navMeshDebug: true,
     })
-    const [navMeshVersion, setNavMeshVersion] = useState(0)
 
     const [dynamicTiledNavMesh, setDynamicTiledNavMesh] = useState<DynamicTiledNavMesh>()
 
@@ -82,10 +109,8 @@ export const Navigation = () => {
         const navMeshQuery = new NavMeshQuery(dynamicTiledNavMesh.navMesh)
         const crowd = new Crowd(dynamicTiledNavMesh.navMesh, { maxAgents, maxAgentRadius })
 
-        dynamicTiledNavMesh.onNavMeshUpdate.add((version) => setNavMeshVersion(version))
-
         setDynamicTiledNavMesh(dynamicTiledNavMesh)
-        useNav.setState({ dynamicTiledNavMesh, navMesh: dynamicTiledNavMesh.navMesh, navMeshQuery, crowd })
+        useNavigation.setState({ dynamicTiledNavMesh, navMesh: dynamicTiledNavMesh.navMesh, navMeshQuery, crowd })
 
         /* build tiles where traversable entities are added */
         const unsubTraversableQueryAdd = traversableQuery.onEntityAdded.add((entity) => {
@@ -111,7 +136,12 @@ export const Navigation = () => {
         return () => {
             unsubTraversableQueryAdd()
 
-            useNav.setState({ dynamicTiledNavMesh: undefined, navMesh: undefined, navMeshQuery: undefined, crowd: undefined })
+            useNavigation.setState({
+                dynamicTiledNavMesh: undefined,
+                navMesh: undefined,
+                navMeshQuery: undefined,
+                crowd: undefined,
+            })
 
             dynamicTiledNavMesh.destroy()
             navMeshQuery.destroy()
@@ -119,7 +149,7 @@ export const Navigation = () => {
         }
     }, [])
 
-    /* rebuild tiles with active rigid bodies */
+    /* rebuild tiles with active rigid bodies every 200ms */
     useInterval(() => {
         if (!dynamicTiledNavMesh) return
 
@@ -148,30 +178,16 @@ export const Navigation = () => {
     }, 200)
 
     useFrame((_, delta) => {
-        const crowd = useNav.getState().crowd
-        if (!crowd) return
+        const crowd = useNavigation.getState().crowd
+        if (!crowd || !pageVisible) return
 
-        crowd.update(1 / 60, delta)
+        crowd.update(1 / 60, Math.min(delta, 0.1))
     })
-
-    const navMeshHelper = useMemo(() => {
-        if (!dynamicTiledNavMesh) return null
-
-        return new NavMeshHelper({
-            navMesh: dynamicTiledNavMesh.navMesh,
-            navMeshMaterial: new THREE.MeshBasicMaterial({
-                color: 'orange',
-                transparent: true,
-                opacity: 0.5,
-                depthWrite: false,
-            }),
-        })
-    }, [navMeshVersion])
 
     return (
         <>
-            {navMeshDebug && navMeshHelper && <primitive object={navMeshHelper} />}
             {boundsDebug && <box3Helper args={[navMeshBounds]} />}
+            {navMeshDebug && <NavMeshDebug />}
         </>
     )
 }

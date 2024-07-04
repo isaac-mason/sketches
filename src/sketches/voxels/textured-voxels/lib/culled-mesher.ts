@@ -53,8 +53,8 @@ const FACES: { [axis: number]: { [side: number]: number } } = {
 
 const FACE_TEXTURE_UVS: { [face: number]: [number, number, number, number, number, number, number, number] } = {
     [Face.NORTH]: [1, 0, 1, 1, 0, 1, 0, 0],
-    [Face.EAST]: [1, 0, 1, 1, 0, 1, 0, 0],
     [Face.SOUTH]: [0, 0, 1, 0, 1, 1, 0, 1],
+    [Face.EAST]: [1, 0, 1, 1, 0, 1, 0, 0],
     [Face.WEST]: [0, 0, 1, 0, 1, 1, 0, 1],
     [Face.UP]: [0, 1, 0, 0, 1, 0, 1, 1],
     [Face.DOWN]: [0, 0, 1, 0, 1, 1, 0, 1],
@@ -62,8 +62,8 @@ const FACE_TEXTURE_UVS: { [face: number]: [number, number, number, number, numbe
 
 const FACE_NORMALS: { [face: number]: [number, number, number] } = {
     [Face.NORTH]: [0, 0, -1],
-    [Face.EAST]: [1, 0, 0],
     [Face.SOUTH]: [0, 0, 1],
+    [Face.EAST]: [1, 0, 0],
     [Face.WEST]: [-1, 0, 0],
     [Face.UP]: [0, 1, 0],
     [Face.DOWN]: [0, -1, 0],

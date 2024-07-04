@@ -1,14 +1,13 @@
-import { Topic } from 'arancini/events'
+import { Topic } from '@/common/utils'
 import {
     Detour,
     NavMesh,
     NavMeshParams,
-    Raw,
-    Recast,
     RecastConfig,
     UnsignedCharArray,
     Vector3Tuple,
     recastConfigDefaults,
+    statusFailed,
     statusToReadableString,
 } from 'recast-navigation'
 import * as THREE from 'three'
@@ -26,6 +25,7 @@ export type DynamicTiledNavMeshProps = {
 export class DynamicTiledNavMesh {
     navMesh: NavMesh
     navMeshVersion = 0
+
     onNavMeshUpdate = new Topic<[version: number, tile: [x: number, y: number]]>()
 
     navMeshBounds: [min: Vector3Tuple, max: Vector3Tuple]
@@ -97,13 +97,9 @@ export class DynamicTiledNavMesh {
 
                 const addTileResult = navMesh.addTile(navMeshData, Detour.DT_TILE_FREE_DATA, 0)
 
-                if (Raw.Detour.statusFailed(addTileResult.status)) {
+                if (statusFailed(addTileResult.status)) {
                     console.error(
-                        Recast.RC_LOG_WARNING,
-                        `Failed to add tile to nav mesh` +
-                            '\n\t' +
-                            `tx: ${tileX}, ty: ${tileY},` +
-                            `status: ${statusToReadableString(addTileResult.status)} (${addTileResult.status})`,
+                        `Failed to add tile to nav mesh at [${tileX}, ${tileY}], status: ${addTileResult.status} (${statusToReadableString(addTileResult.status)}`,
                     )
 
                     navMeshData.destroy()

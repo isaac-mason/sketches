@@ -13,7 +13,7 @@ import { Duck } from './duck'
 import { Component, Entity, crowdAgentQuery, followersQuery, playerQuery } from './ecs'
 import { Level } from './level/level'
 import { Agent } from './navigation/crowd-agent'
-import { Navigation, useNav } from './navigation/navigation'
+import { Navigation, useNavigation } from './navigation/navigation'
 import { Player, PlayerControls } from './player'
 
 await init()
@@ -78,7 +78,7 @@ const Followers = () => {
         followers.push(<Follower key={i} position={[3, 17, -0.55]} />)
     }
 
-    const { navMeshQuery } = useNav()
+    const { navMeshQuery } = useNavigation()
 
     useFrame((_, delta) => {
         updateCrowdAgents(delta, navMeshQuery)

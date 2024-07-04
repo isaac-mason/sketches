@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
-import { useNav } from './navigation'
+import { useNavigation } from './navigation'
 import { Vector3Tuple } from 'three'
 import { CrowdAgent, CrowdAgentParams, vec3 } from 'recast-navigation'
 
@@ -8,7 +8,7 @@ export type AgentProps = {
 } & Partial<CrowdAgentParams>
 
 export const Agent = forwardRef<CrowdAgent | undefined, AgentProps>(({ initialPosition, ...crowdAgentParams }, ref) => {
-    const { crowd } = useNav()
+    const { crowd } = useNavigation()
 
     const [agent, setAgent] = useState<CrowdAgent | undefined>()
 
