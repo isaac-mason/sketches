@@ -7705,7 +7705,7 @@ __metadata:
     styled-breakpoints: "npm:^14.1.3"
     styled-components: "npm:^6.1.11"
     suspend-react: "npm:^0.1.3"
-    three: "npm:^0.166.0"
+    three: "npm:^0.166.1"
     three-bvh-csg: "npm:^0.0.16"
     tunnel-rat: "npm:^0.1.2"
     typescript: "npm:^5.5.2"
@@ -8131,10 +8131,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"three@npm:^0.166.0":
-  version: 0.166.0
-  resolution: "three@npm:0.166.0"
-  checksum: 10/0b79061cb32029e4ea161a1da625e973eaac7111924893e7dd0513cfd597b1edb15e7d4bbb795314d0195cc85cd5675419f60959c533bfd9613ad42cf90e404e
+"three@npm:^0.166.1":
+  version: 0.166.1
+  resolution: "three@npm:0.166.1"
+  checksum: 10/10f36702ab0f6b7f03a45f46437157a00ece42a1760d70b1c24db5e8d3f02b7b522a117377e7c8ad7ec504e2008a8776ccb4fa16512d455d431b66390f23a2ed
   languageName: node
   linkType: hard
 
