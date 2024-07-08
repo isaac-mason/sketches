@@ -15,7 +15,7 @@
         "@pmndrs/assets": "^1.6.0",
         "@react-spring/three": "^9.7.3",
         "@react-three/csg": "^3.2.0",
-        "@react-three/drei": "^9.108.1",
+        "@react-three/drei": "^9.108.3",
         "@react-three/fiber": "^8.16.8",
         "@react-three/flex": "^1.0.1",
         "@react-three/postprocessing": "^2.16.2",
