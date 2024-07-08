@@ -1,16 +1,34 @@
 import Rapier from '@dimforge/rapier3d-compat'
-import { Vector3, Object3D, Quaternion, ArrowHelper } from 'three'
-import {
-    calcRollingFriction,
-    getVehicleAxisWorld,
-    getVelocityAtWorldPoint,
-    pointToWorldFrame,
-    resolveSingleBilateralConstraint,
-    vectorToLocalFrame,
-    vectorToWorldFrame,
-} from './utils'
+import { ArrowHelper, Matrix3, Object3D, Quaternion, Vector3 } from 'three'
 
 const directions = [new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1)]
+
+const _updateWheelTransform_up = new Vector3()
+const _updateWheelTransform_right = new Vector3()
+const _updateWheelTransform_fwd = new Vector3()
+const _updateWheelTransform_steeringOrn = new Quaternion()
+const _updateWheelTransform_rotatingOrn = new Quaternion()
+const _updateWheelTransform_chassisRigidBodyQuaternion = new Quaternion()
+
+const _updateCurrentSpeed_chassisVelocity = new Vector3()
+const _updateCurrentSpeed_forwardWorld = new Vector3()
+
+const _updateWheelSuspension_denominator = new Vector3()
+const _updateWheelSuspension_chassisVelocityAtContactPoint = new Vector3()
+const _updateWheelSuspension_direction = new Vector3()
+const _updateWheelSuspension_wheelRaycastArrowHelperDirection = new Vector3()
+
+const _applyWheelSuspensionForce_impulse = new Vector3()
+const _applyWheelSuspensionForce_rollInfluenceAdjustedWorldPos = new Vector3()
+
+const _updateFriction_surfNormalWS_scaled_proj = new Vector3()
+const _updateFriction_impulse = new Vector3()
+const _updateFriction_sideImp = new Vector3()
+const _updateFriction_worldPos = new Vector3()
+const _updateFriction_relPos = new Vector3()
+const _updateWheelRotation_hitNormalWorldScaledWithProj = new Vector3()
+const _updateWheelRotation_fwd = new Vector3()
+const _updateWheelRotation_vel = new Vector3()
 
 export type VehicleState = {
     sliding: boolean
@@ -118,34 +136,6 @@ export class RapierRaycastVehicle {
     indexForwardAxis: number
     indexUpAxis: number
 
-    private updateWheelTransform_up = new Vector3()
-    private updateWheelTransform_right = new Vector3()
-    private updateWheelTransform_fwd = new Vector3()
-    private updateWheelTransform_steeringOrn = new Quaternion()
-    private updateWheelTransform_rotatingOrn = new Quaternion()
-    private updateWheelTransform_chassisRigidBodyQuaternion = new Quaternion()
-
-    private updateCurrentSpeed_chassisVelocity = new Vector3()
-    private updateCurrentSpeed_forwardWorld = new Vector3()
-
-    private updateWheelSuspension_denominator = new Vector3()
-    private updateWheelSuspension_chassisVelocityAtContactPoint = new Vector3()
-    private updateWheelSuspension_direction = new Vector3()
-    private updateWheelSuspension_wheelRaycastArrowHelperDirection = new Vector3()
-
-    private applyWheelSuspensionForce_impulse = new Vector3()
-    private applyWheelSuspensionForce_rollInfluenceAdjustedWorldPos = new Vector3()
-
-    private updateFriction_surfNormalWS_scaled_proj = new Vector3()
-    private updateFriction_impulse = new Vector3()
-    private updateFriction_sideImp = new Vector3()
-    private updateFriction_worldPos = new Vector3()
-    private updateFriction_relPos = new Vector3()
-
-    private updateWheelRotation_hitNormalWorldScaledWithProj = new Vector3()
-    private updateWheelRotation_fwd = new Vector3()
-    private updateWheelRotation_vel = new Vector3()
-
     constructor({ world, chassisRigidBody, indexRightAxis = 2, indexForwardAxis = 0, indexUpAxis = 1 }: RaycastVehicleOptions) {
         this.world = world
 
@@ -244,9 +234,9 @@ export class RapierRaycastVehicle {
         for (let i = 0; i < this.wheels.length; i++) {
             const wheel = this.wheels[i]
 
-            const up = this.updateWheelTransform_up
-            const right = this.updateWheelTransform_right
-            const fwd = this.updateWheelTransform_fwd
+            const up = _updateWheelTransform_up
+            const right = _updateWheelTransform_right
+            const fwd = _updateWheelTransform_fwd
 
             this.updateWheelTransformWorld(wheel)
 
@@ -258,16 +248,16 @@ export class RapierRaycastVehicle {
 
             // Rotate around steering over the wheelAxle
             const steering = wheel.state.steering
-            const steeringOrn = this.updateWheelTransform_steeringOrn
+            const steeringOrn = _updateWheelTransform_steeringOrn
             steeringOrn.setFromAxisAngle(up, steering)
 
-            const rotatingOrn = this.updateWheelTransform_rotatingOrn
+            const rotatingOrn = _updateWheelTransform_rotatingOrn
             rotatingOrn.setFromAxisAngle(right, wheel.state.rotation)
 
             // World rotation of the wheel
             const q = wheel.state.worldTransform.quaternion
             q.multiplyQuaternions(
-                this.updateWheelTransform_chassisRigidBodyQuaternion.copy(this.chassisRigidBody.rotation() as Quaternion),
+                _updateWheelTransform_chassisRigidBodyQuaternion.copy(this.chassisRigidBody.rotation() as Quaternion),
                 steeringOrn,
             )
             q.multiplyQuaternions(q, rotatingOrn)
@@ -283,11 +273,11 @@ export class RapierRaycastVehicle {
 
     private updateCurrentSpeed(): void {
         const chassis = this.chassisRigidBody
-        const chassisVelocity = this.updateCurrentSpeed_chassisVelocity.copy(chassis.linvel() as Vector3)
+        const chassisVelocity = _updateCurrentSpeed_chassisVelocity.copy(chassis.linvel() as Vector3)
 
         this.state.currentVehicleSpeedKmHour = 3.6 * chassisVelocity.length()
 
-        const forwardWorld = this.updateCurrentSpeed_forwardWorld
+        const forwardWorld = _updateCurrentSpeed_forwardWorld
         getVehicleAxisWorld(chassis, this.indexForwardAxis, forwardWorld)
 
         if (forwardWorld.dot(chassisVelocity) > 0) {
@@ -305,7 +295,7 @@ export class RapierRaycastVehicle {
 
             const origin = wheel.state.chassisConnectionPointWorld
 
-            const direction = this.updateWheelSuspension_direction.copy(wheel.state.directionWorld).normalize()
+            const direction = _updateWheelSuspension_direction.copy(wheel.state.directionWorld).normalize()
 
             const ray = new Rapier.Ray(origin, direction)
             const rayColliderIntersection = this.world.castRayAndGetNormal(
@@ -352,14 +342,14 @@ export class RapierRaycastVehicle {
                     wheel.state.hitPointWorld.set(0, 0, 0)
                 }
 
-                const denominator = this.updateWheelSuspension_denominator
+                const denominator = _updateWheelSuspension_denominator
                     .copy(wheel.state.hitNormalWorld)
                     .dot(wheel.state.directionWorld)
 
                 const chassisVelocityAtContactPoint = getVelocityAtWorldPoint(
                     this.chassisRigidBody,
                     wheel.state.hitPointWorld,
-                    this.updateWheelSuspension_chassisVelocityAtContactPoint,
+                    _updateWheelSuspension_chassisVelocityAtContactPoint,
                 )
 
                 const projVel = wheel.state.hitNormalWorld.dot(chassisVelocityAtContactPoint)
@@ -381,7 +371,7 @@ export class RapierRaycastVehicle {
             }
 
             // update debug arrow helpers
-            const debugWheelDirection = this.updateWheelSuspension_wheelRaycastArrowHelperDirection.copy(direction).normalize()
+            const debugWheelDirection = _updateWheelSuspension_wheelRaycastArrowHelperDirection.copy(direction).normalize()
 
             wheel.debug.suspensionArrowHelper.position.copy(origin)
             wheel.debug.suspensionArrowHelper.setDirection(debugWheelDirection)
@@ -421,7 +411,7 @@ export class RapierRaycastVehicle {
         for (let i = 0; i < this.wheels.length; i++) {
             const wheel = this.wheels[i]
 
-            const impulse = this.applyWheelSuspensionForce_impulse
+            const impulse = _applyWheelSuspensionForce_impulse
 
             let suspensionForce = wheel.state.suspensionForce
             if (suspensionForce > wheel.options.maxSuspensionForce) {
@@ -435,7 +425,7 @@ export class RapierRaycastVehicle {
     }
 
     private updateFriction(delta: number): void {
-        const surfNormalWS_scaled_proj = this.updateFriction_surfNormalWS_scaled_proj
+        const surfNormalWS_scaled_proj = _updateFriction_surfNormalWS_scaled_proj
 
         for (let i = 0; i < this.wheels.length; i++) {
             const wheel = this.wheels[i]
@@ -552,13 +542,13 @@ export class RapierRaycastVehicle {
         for (let i = 0; i < this.wheels.length; i++) {
             const wheel = this.wheels[i]
 
-            const worldPos = this.updateFriction_worldPos.copy(wheel.state.hitPointWorld)
+            const worldPos = _updateFriction_worldPos.copy(wheel.state.hitPointWorld)
 
-            const relPos = this.updateFriction_relPos.copy(worldPos)
+            const relPos = _updateFriction_relPos.copy(worldPos)
             relPos.sub(this.chassisRigidBody.translation() as Vector3)
 
             if (wheel.state.forwardImpulse !== 0) {
-                const impulse = this.updateFriction_impulse.copy(wheel.state.forwardWS).multiplyScalar(wheel.state.forwardImpulse)
+                const impulse = _updateFriction_impulse.copy(wheel.state.forwardWS).multiplyScalar(wheel.state.forwardImpulse)
 
                 this.chassisRigidBody.applyImpulseAtPoint(impulse, worldPos, true)
             }
@@ -569,9 +559,9 @@ export class RapierRaycastVehicle {
 
                 const world_pos2 = wheel.state.hitPointWorld
 
-                const sideImp = this.updateFriction_sideImp.copy(wheel.state.axle).multiplyScalar(wheel.state.sideImpulse)
+                const sideImp = _updateFriction_sideImp.copy(wheel.state.axle).multiplyScalar(wheel.state.sideImpulse)
 
-                const rollInfluenceAdjustedWorldPos = this.applyWheelSuspensionForce_rollInfluenceAdjustedWorldPos
+                const rollInfluenceAdjustedWorldPos = _applyWheelSuspensionForce_rollInfluenceAdjustedWorldPos
 
                 // Scale the relative position in the up direction with rollInfluence.
                 // If rollInfluence is 1, the impulse will be applied on the hitPoint (easy to roll over), if it is zero it will be applied in the same plane as the center of mass (not easy to roll over).
@@ -595,9 +585,9 @@ export class RapierRaycastVehicle {
     }
 
     private updateWheelRotation(delta: number): void {
-        const hitNormalWorldScaledWithProj = this.updateWheelRotation_hitNormalWorldScaledWithProj.set(0, 0, 0)
-        const fwd = this.updateWheelRotation_fwd.set(0, 0, 0)
-        const vel = this.updateWheelRotation_vel.set(0, 0, 0)
+        const hitNormalWorldScaledWithProj = _updateWheelRotation_hitNormalWorldScaledWithProj.set(0, 0, 0)
+        const fwd = _updateWheelRotation_fwd.set(0, 0, 0)
+        const vel = _updateWheelRotation_vel.set(0, 0, 0)
 
         for (let i = 0; i < this.wheels.length; i++) {
             const wheel = this.wheels[i]
@@ -645,4 +635,176 @@ export class RapierRaycastVehicle {
             wheel.state.deltaRotation *= 0.99 // damping of rotation when not in contact
         }
     }
+}
+
+const _getVelocityAtWorldPoint_r = new Vector3()
+const _getVelocityAtWorldPoint_position = new Vector3()
+const _getVelocityAtWorldPoint_angvel = new Vector3()
+const _getVelocityAtWorldPoint_linvel = new Vector3()
+
+function getVelocityAtWorldPoint(rigidBody: Rapier.RigidBody, worldPoint: Vector3, target = new Vector3()): Vector3 {
+    const r = _getVelocityAtWorldPoint_r.set(0, 0, 0)
+
+    const position = _getVelocityAtWorldPoint_position.copy(rigidBody.translation() as Vector3)
+    const angvel = _getVelocityAtWorldPoint_angvel.copy(rigidBody.angvel() as Vector3)
+    const linvel = _getVelocityAtWorldPoint_linvel.copy(rigidBody.linvel() as Vector3)
+
+    r.subVectors(worldPoint, position)
+    target.crossVectors(angvel, r)
+    target.addVectors(linvel, target)
+
+    return target
+}
+
+const _pointToWorldFrame_quaternion = new Quaternion()
+
+function pointToWorldFrame(object: Rapier.RigidBody, localPoint: Vector3, target = new Vector3()): Vector3 {
+    const quaternion = _pointToWorldFrame_quaternion.copy(object.rotation() as Quaternion)
+
+    const position = object.translation() as Vector3
+
+    return target.copy(localPoint).applyQuaternion(quaternion).add(position)
+}
+
+const _vectorToLocalFrame_quaternion = new Quaternion()
+
+function vectorToLocalFrame(object: Rapier.RigidBody, worldVector: Vector3, target = new Vector3()): Vector3 {
+    const quaternion = _vectorToLocalFrame_quaternion.copy(object.rotation() as Quaternion)
+
+    quaternion.conjugate()
+
+    return target.copy(worldVector).applyQuaternion(quaternion)
+}
+
+const vectorToWorldFrame_quaternion = new Quaternion()
+
+function vectorToWorldFrame(object: Rapier.RigidBody | Object3D, localVector: Vector3, target = new Vector3()): Vector3 {
+    const quaternion = vectorToWorldFrame_quaternion.copy(
+        object instanceof Object3D ? object.quaternion : (object.rotation() as Quaternion),
+    )
+
+    return target.copy(localVector).applyQuaternion(quaternion)
+}
+
+// get one of the wheel axes, world-oriented
+function getVehicleAxisWorld(chassisBody: Rapier.RigidBody, axisIndex: number, result = new Vector3()): Vector3 {
+    result.set(axisIndex === 0 ? 1 : 0, axisIndex === 1 ? 1 : 0, axisIndex === 2 ? 1 : 0)
+    return vectorToWorldFrame(chassisBody, result, result)
+}
+
+// bilateral constraint between two dynamic objects
+const _resolveSingleBilateralConstraint_vel1 = new Vector3()
+const _resolveSingleBilateralConstraint_vel2 = new Vector3()
+const _resolveSingleBilateralConstraint_vel = new Vector3()
+
+function resolveSingleBilateralConstraint(
+    body1: Rapier.RigidBody,
+    pos1: Vector3,
+    body2: Rapier.RigidBody,
+    pos2: Vector3,
+    normal: Vector3,
+): number {
+    const normalLenSqr = normal.lengthSq()
+    if (normalLenSqr > 1.1) {
+        return 0 // no impulse
+    }
+
+    const vel1 = _resolveSingleBilateralConstraint_vel1
+    const vel2 = _resolveSingleBilateralConstraint_vel2
+    const vel = _resolveSingleBilateralConstraint_vel
+
+    getVelocityAtWorldPoint(body1, pos1, vel1)
+    getVelocityAtWorldPoint(body2, pos2, vel2)
+
+    vel.subVectors(vel1, vel2)
+
+    const rel_vel = normal.dot(vel)
+
+    const contactDamping = 0.2
+
+    const body1InvMass = body1.invMass()
+    const body2InvMass = body2.invMass()
+
+    const massTerm = 1 / (body1InvMass + body2InvMass)
+    const impulse = -contactDamping * rel_vel * massTerm
+
+    return impulse
+}
+
+// compute impulse denominator
+const _computeImpulseDenominator_r0 = new Vector3()
+const _computeImpulseDenominator_c0 = new Vector3()
+const _computeImpulseDenominator_vec = new Vector3()
+const _computeImpulseDenominator_m = new Vector3()
+const _computeImpulseDenominator_effectiveWorldInvInertiaSqrt = new Matrix3()
+
+function computeImpulseDenominator(body: Rapier.RigidBody, pos: Vector3, normal: Vector3): number {
+    const r0 = _computeImpulseDenominator_r0
+    const c0 = _computeImpulseDenominator_c0
+    const vec = _computeImpulseDenominator_vec
+    const m = _computeImpulseDenominator_m
+
+    const effectiveWorldInvInertiaSqrtSpdMatrix3 = body.effectiveWorldInvInertiaSqrt()
+
+    // prettier-ignore
+    const effectiveWorldInvInertiaSqrt = _computeImpulseDenominator_effectiveWorldInvInertiaSqrt.set(
+        effectiveWorldInvInertiaSqrtSpdMatrix3.m11, effectiveWorldInvInertiaSqrtSpdMatrix3.m12, effectiveWorldInvInertiaSqrtSpdMatrix3.m13,
+        effectiveWorldInvInertiaSqrtSpdMatrix3.m23, effectiveWorldInvInertiaSqrtSpdMatrix3.m22, effectiveWorldInvInertiaSqrtSpdMatrix3.m23,
+        effectiveWorldInvInertiaSqrtSpdMatrix3.m33, effectiveWorldInvInertiaSqrtSpdMatrix3.m12, effectiveWorldInvInertiaSqrtSpdMatrix3.m33,
+    )
+
+    r0.subVectors(pos, body.translation() as Vector3)
+
+    c0.crossVectors(r0, normal)
+
+    m.copy(c0).applyMatrix3(effectiveWorldInvInertiaSqrt)
+
+    vec.crossVectors(m, r0)
+
+    return body.invMass() + normal.dot(vec)
+}
+
+// calculate rolling friction
+const _calcRollingFriction_vel1 = new Vector3()
+const _calcRollingFriction_vel2 = new Vector3()
+const _calcRollingFriction_vel = new Vector3()
+
+function calcRollingFriction(
+    body0: Rapier.RigidBody,
+    body1: Rapier.RigidBody,
+    frictionPosWorld: Vector3,
+    frictionDirectionWorld: Vector3,
+    maxImpulse: number,
+): number {
+    let j1 = 0
+    const contactPosWorld = frictionPosWorld
+
+    const vel1 = _calcRollingFriction_vel1
+    const vel2 = _calcRollingFriction_vel2
+    const vel = _calcRollingFriction_vel
+
+    getVelocityAtWorldPoint(body0, contactPosWorld, vel1)
+    getVelocityAtWorldPoint(body1, contactPosWorld, vel2)
+    vel.subVectors(vel1, vel2)
+
+    const vrel = frictionDirectionWorld.dot(vel)
+
+    const denom0 = computeImpulseDenominator(body0, frictionPosWorld, frictionDirectionWorld)
+
+    const denom1 = computeImpulseDenominator(body1, frictionPosWorld, frictionDirectionWorld)
+
+    const relaxation = 1
+    const jacDiagABInv = relaxation / (denom0 + denom1)
+
+    // calculate j that moves us to zero relative velocity
+    j1 = -vrel * jacDiagABInv
+
+    if (maxImpulse < j1) {
+        j1 = maxImpulse
+    }
+    if (j1 < -maxImpulse) {
+        j1 = -maxImpulse
+    }
+
+    return j1
 }

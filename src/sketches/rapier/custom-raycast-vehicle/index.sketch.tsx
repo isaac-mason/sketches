@@ -175,13 +175,13 @@ const Game = () => {
             <LampPost position={[10, 0, 100]} />
 
             {/* traffic cones */}
-            <TrafficCone position={[4, 0.2, 6]} />
-            <TrafficCone position={[2, 0.2, 8]} />
-            <TrafficCone position={[4, 0.2, 10]} />
+            <TrafficCone position={[4, 1, 6]} />
+            <TrafficCone position={[2, 1, 8]} />
+            <TrafficCone position={[4, 1, 10]} />
 
-            <TrafficCone position={[-4, 0.2, 16]} />
-            <TrafficCone position={[-2, 0.2, 18]} />
-            <TrafficCone position={[-4, 0.2, 20]} />
+            <TrafficCone position={[-4, 1, 16]} />
+            <TrafficCone position={[-2, 1, 18]} />
+            <TrafficCone position={[-4, 1, 20]} />
 
             {/* ramp */}
             <RigidBody type="fixed">

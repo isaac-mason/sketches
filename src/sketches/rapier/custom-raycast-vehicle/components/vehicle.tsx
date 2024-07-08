@@ -4,10 +4,10 @@ import { useControls as useLeva } from 'leva'
 import { Fragment, RefObject, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { Color, Group, Mesh, MeshStandardMaterial, Object3D, SpotLightHelper, Vector3, Vector3Tuple } from 'three'
 import { GLTF } from 'three-stdlib'
-import chassisDracoUrl from '../assets/chassis-draco.glb?url'
 import { LEVA_KEY } from '../constants'
 import { RapierRaycastVehicle, WheelOptions } from '../lib/rapier-raycast-vehicle'
 
+import chassisDracoUrl from '../assets/chassis-draco.glb?url'
 import wheelGlbUrl from '../assets/wheel-draco.glb?url'
 
 type WheelGLTF = GLTF & {
