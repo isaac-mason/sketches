@@ -1927,9 +1927,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-three/drei@npm:^9.108.1":
-  version: 9.108.1
-  resolution: "@react-three/drei@npm:9.108.1"
+"@react-three/drei@npm:^9.108.3":
+  version: 9.108.3
+  resolution: "@react-three/drei@npm:9.108.3"
   dependencies:
     "@babel/runtime": "npm:^7.11.2"
     "@mediapipe/tasks-vision": "npm:0.10.8"
@@ -1962,7 +1962,7 @@ __metadata:
   peerDependenciesMeta:
     react-dom:
       optional: true
-  checksum: 10/1592026295453e313a6ac2d3fec979f9c7a5fae524d64cb7179d78a6df4f02946164092558569d2bad3ec6ad64446b6a9d727870393a60fb8151060018f40061
+  checksum: 10/16955250b2ef4dde9437c9d8ff50201545117be8d76ea10a18ae8fe3ad426ab80dce233a7e0c9ae1bae6e00e0eb3f042a9fe14bdd69e9c814dd5b49daca61cbd
   languageName: node
   linkType: hard
 
@@ -7691,7 +7691,7 @@ __metadata:
     "@pmndrs/assets": "npm:^1.6.0"
     "@react-spring/three": "npm:^9.7.3"
     "@react-three/csg": "npm:^3.2.0"
-    "@react-three/drei": "npm:^9.108.1"
+    "@react-three/drei": "npm:^9.108.3"
     "@react-three/fiber": "npm:^8.16.8"
     "@react-three/flex": "npm:^1.0.1"
     "@react-three/postprocessing": "npm:^2.16.2"
