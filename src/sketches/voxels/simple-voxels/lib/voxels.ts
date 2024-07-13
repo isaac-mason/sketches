@@ -1,7 +1,7 @@
 import { Topic } from 'arancini/events'
 import * as THREE from 'three'
 import { ChunkGeometry } from './chunk-geometry'
-import { chunkMaterial } from './chunk-material'
+import { createChunkMaterial } from './chunk-material'
 import {
     ChunkMeshUpdateResultMessage,
     CulledMesherWorkerMessageType,
@@ -150,6 +150,8 @@ export class Voxels {
     chunkState = new Map<string, ChunkState>()
     chunkMeshes = new Map<string, ChunkMesh>()
 
+    private chunkMaterial: THREE.Material
+
     private dirtyChunks = new Set<string>()
     private dirtyUnloadedChunks = new Set<string>()
 
@@ -158,29 +160,32 @@ export class Voxels {
     private voxelsWorkerPool: VoxelsWorkerPool
 
     constructor({ voxelsWorkerPool }: VoxelsParams) {
+        this.chunkMaterial = createChunkMaterial()
+
         this.voxelsWorkerPool = voxelsWorkerPool
 
-        this.voxelsWorkerPool.onMesherResult.add((message) => {
-            if (message.worldId !== this.world.id) return
+        this.voxelsWorkerPool.onMesherResult.add(this.onMesherResult)
+        this.world.onChunkCreated.add(this.onChunkCreated)
+    }
 
-            this.processMesherResult(message)
-        })
+    private onMesherResult = (message: ChunkMeshUpdateResultMessage) => {
+        if (message.worldId !== this.world.id) return
 
-        this.world.onChunkCreated.add((chunk) => {
-            /* init chunk */
-            this.chunkState.set(chunk.id, { loaded: false, priority: 0 })
+        this.processMesherResult(message)
+    }
 
-            const mesh = {
-                initialised: false,
-                mesh: new THREE.Mesh(new ChunkGeometry(), chunkMaterial),
-            }
-            this.chunkMeshes.set(chunk.id, mesh)
+    private onChunkCreated = (chunk: Chunk) => {
+        this.chunkState.set(chunk.id, { loaded: false, priority: 0 })
 
-            this.dirtyChunks.add(chunk.id)
+        const mesh = {
+            initialised: false,
+            mesh: new THREE.Mesh(new ChunkGeometry(), this.chunkMaterial),
+        }
+        
+        this.chunkMeshes.set(chunk.id, mesh)
+        this.dirtyChunks.add(chunk.id)
 
-            /* register chunk with mesher workers */
-            this.voxelsWorkerPool.registerChunk(this.world, chunk)
-        })
+        this.voxelsWorkerPool.registerChunk(this.world, chunk)
     }
 
     update() {
@@ -191,6 +196,19 @@ export class Voxels {
 
     setBlock({ x, y, z }: THREE.Vector3Like, value: BlockValue) {
         this.setBlockRequests.push({ position: { x, y, z }, value })
+    }
+
+    dispose() {
+        this.voxelsWorkerPool.onMesherResult.remove(this.onMesherResult)
+        this.world.onChunkCreated.remove(this.onChunkCreated)
+
+        this.chunkMaterial.dispose()
+
+        for (const {
+            mesh: { geometry },
+        } of this.chunkMeshes.values()) {
+            geometry.dispose()
+        }
     }
 
     private processBlockChanges(): VoxelsChange[] {
@@ -330,7 +348,6 @@ export class Voxels {
         if (!chunk || !chunkMesh) return
 
         const geometry = chunkMesh.mesh.geometry
-
         geometry.updateChunk(chunkMesherData)
 
         chunkMesh.mesh.position.set(chunk.position.x * CHUNK_SIZE, chunk.position.y * CHUNK_SIZE, chunk.position.z * CHUNK_SIZE)

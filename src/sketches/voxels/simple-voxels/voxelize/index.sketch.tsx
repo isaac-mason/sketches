@@ -1,6 +1,6 @@
 import { Canvas } from '@/common'
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { VoxelChunkMeshes, Voxels, VoxelsRef } from '../lib/react'
 
@@ -98,11 +98,13 @@ type VoxelizeProps = {
 }
 
 const Voxelize = ({ children, cellSize, cellHeight }: VoxelizeProps) => {
-    const voxels = useRef<VoxelsRef>(null!)
+    const [voxels, setVoxels] = useState<VoxelsRef | null>()
 
     const group = useRef<THREE.Group>(null!)
 
     useEffect(() => {
+        if (!voxels) return
+
         const positions: number[] = []
         const indices: number[] = []
 
@@ -136,20 +138,22 @@ const Voxelize = ({ children, cellSize, cellHeight }: VoxelizeProps) => {
             color.copy(orange)
             color.addScalar((Math.random() - 0.5) * 0.12)
 
-            voxels.current.setBlock(cursor, { solid: true, color: color.getHex() })
+            voxels.setBlock(cursor, { solid: true, color: color.getHex() })
         }
-    }, [])
+    }, [voxels])
 
     return (
-        <Voxels ref={voxels}>
-            <group ref={group} visible={true}>
+        <>
+            <group ref={group} visible={false}>
                 {children}
             </group>
 
-            <group scale={[cellSize, cellHeight, cellSize]}>
-                <VoxelChunkMeshes />
-            </group>
-        </Voxels>
+            <Voxels ref={setVoxels}>
+                <group scale={[cellSize, cellHeight, cellSize]}>
+                    <VoxelChunkMeshes />
+                </group>
+            </Voxels>
+        </>
     )
 }
 
@@ -157,7 +161,7 @@ export default function Sketch() {
     return (
         <Canvas>
             <Voxelize cellSize={0.05} cellHeight={0.05}>
-                <mesh visible={false}>
+                <mesh>
                     <torusKnotGeometry args={[1, 0.2, 128, 16]} />
                 </mesh>
             </Voxelize>

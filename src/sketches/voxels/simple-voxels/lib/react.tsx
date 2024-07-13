@@ -1,13 +1,10 @@
-import { useConst } from '@/common'
 import { ThreeElements, useFrame } from '@react-three/fiber'
 import { Fragment, createContext, forwardRef, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react'
 import * as THREE from 'three'
 import { Voxels as VoxelsImpl, VoxelsWorkerPool } from './voxels'
 import { Chunk, getChunkBounds } from './world'
 
-type VoxelsContextType = {
-    voxels: VoxelsImpl
-}
+type VoxelsContextType = { voxels: VoxelsImpl }
 
 const voxelsContext = createContext<VoxelsContextType>(null!)
 
@@ -27,13 +24,13 @@ export type VoxelsProps = {
     children: React.ReactNode
 }
 
-export type VoxelsRef = VoxelsImpl
+export type VoxelsRef = VoxelsImpl | undefined
 
-export const Voxels = forwardRef<VoxelsImpl, VoxelsProps>(
+export const Voxels = forwardRef<VoxelsRef, VoxelsProps>(
     ({ voxels: existingVoxels, voxelsWorkerPool: existingVoxelsWorkerPool, children }, ref) => {
-        const voxelsWorkerPool = useConst(() => existingVoxelsWorkerPool ?? new VoxelsWorkerPool())
+        const [voxels, setVoxels] = useState<VoxelsImpl>()
 
-        const voxels = useConst(() => existingVoxels ?? new VoxelsImpl({ voxelsWorkerPool }))
+        const voxelsWorkerPool = useMemo(() => existingVoxelsWorkerPool ?? new VoxelsWorkerPool(), [])
 
         useImperativeHandle(ref, () => voxels, [voxels])
 
@@ -47,13 +44,36 @@ export const Voxels = forwardRef<VoxelsImpl, VoxelsProps>(
             }
         }, [])
 
+        useEffect(() => {
+            if (existingVoxels) {
+                setVoxels(existingVoxels)
+                return
+            }
+
+            if (!voxelsWorkerPool) return
+
+            const voxels = new VoxelsImpl({ voxelsWorkerPool })
+
+            setVoxels(voxels)
+
+            return () => {
+                setVoxels(undefined)
+
+                voxels.dispose()
+            }
+        }, [voxelsWorkerPool])
+
         useFrame(() => {
+            if (!voxels) return
+
             voxels.update()
         })
 
-        const contextValue = useMemo(() => ({ voxels }), [voxels])
+        const context = useMemo(() => ({ voxels: voxels! }), [voxels])
 
-        return <voxelsContext.Provider value={contextValue}>{children}</voxelsContext.Provider>
+        if (!voxels) return null
+
+        return <voxelsContext.Provider value={context}>{children}</voxelsContext.Provider>
     },
 )
 
@@ -100,7 +120,7 @@ export const VoxelChunkMeshes = ({ chunkHelper = false, ...groupProps }: VoxelCh
 
             unsubOnChunkMeshInitialised()
         }
-    }, [])
+    }, [voxels])
 
     return (
         <group {...groupProps}>
