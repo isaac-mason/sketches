@@ -6050,13 +6050,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jolt-physics@npm:^0.24.0":
-  version: 0.24.0
-  resolution: "jolt-physics@npm:0.24.0"
-  checksum: 10/f9e8f41f84d307a5c80179a80d5b856e89227ba7152a0bb9bbc00934eb8cea8ee397110c5600fcea44694673c1d4f5fd9e75cc5c59e1d0ff05bc556cfda28d2c
-  languageName: node
-  linkType: hard
-
 "js-tokens@npm:^3.0.0 || ^4.0.0, js-tokens@npm:^4.0.0":
   version: 4.0.0
   resolution: "js-tokens@npm:4.0.0"
@@ -7709,7 +7702,6 @@ __metadata:
     arancini: "npm:^6.6.1"
     d3: "npm:^7.9.0"
     eslint: "npm:^9.6.0"
-    jolt-physics: "npm:^0.24.0"
     leva: "npm:^0.9.35"
     p2-es: "npm:^1.2.3"
     prettier: "npm:^3.3.2"

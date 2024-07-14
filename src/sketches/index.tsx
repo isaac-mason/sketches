@@ -157,12 +157,6 @@ const sketchList = [
         path: 'rapier/arancini-integration',
         tags: ['physics', 'rapier', 'arancini'],
     },
-    /* Jolt Physics */
-    {
-        title: 'Jolt Physics - Cube Heap',
-        path: 'jolt-physics/cube-heap',
-        tags: ['physics', 'jolt-physics', 'arancini'],
-    },
     /* p2-es */
     {
         title: 'p2-es - Top Down Character Controller',
