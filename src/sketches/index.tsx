@@ -184,6 +184,12 @@ const sketchList = [
         path: 'falling-sand',
         tags: ['falling-sand', 'simulation'],
     },
+    /* Melodic Marble Run */
+    {
+        title: 'Melodic Marble Run',
+        path: 'melodic-marble-run',
+        tags: ['marble-run', 'music', 'audio'],
+    },
     /* Raytracing */
     {
         title: 'Raytracing - Hello World',

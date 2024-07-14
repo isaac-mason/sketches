@@ -575,6 +575,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/runtime@npm:^7.24.8":
+  version: 7.24.8
+  resolution: "@babel/runtime@npm:7.24.8"
+  dependencies:
+    regenerator-runtime: "npm:^0.14.0"
+  checksum: 10/e6f335e472a8a337379effc15815dd0eddf6a7d0c00b50deb4f9e9585819b45431d0ff3c2d3d0fa58c227a9b04dcc4a85e7245fb57493adb2863b5208c769cbd
+  languageName: node
+  linkType: hard
+
 "@babel/template@npm:^7.22.15":
   version: 7.22.15
   resolution: "@babel/template@npm:7.22.15"
@@ -3528,6 +3537,16 @@ __metadata:
   version: 2.2.2
   resolution: "attr-accept@npm:2.2.2"
   checksum: 10/c867ed41ed749988ad2a6fc70eb2498b9c3c2d58aaad2a8d05422a383058f9d29e50c4bca363c5ee7433df738a7920cc95377bbce8678e817fb498299dd82010
+  languageName: node
+  linkType: hard
+
+"automation-events@npm:^7.0.7":
+  version: 7.0.7
+  resolution: "automation-events@npm:7.0.7"
+  dependencies:
+    "@babel/runtime": "npm:^7.24.8"
+    tslib: "npm:^2.6.3"
+  checksum: 10/c4ffb42efd1f0dc18aa70673bcd4d46f214dd2ed52b74edd1c05490ca317c3439598ae88b5e46076e301f03837b8e9ec711603bb074745a8f645421525ed4fc9
   languageName: node
   linkType: hard
 
@@ -7717,6 +7736,7 @@ __metadata:
     suspend-react: "npm:^0.1.3"
     three: "npm:^0.166.1"
     three-bvh-csg: "npm:^0.0.16"
+    tone: "npm:15.0.4"
     tunnel-rat: "npm:^0.1.2"
     typescript: "npm:^5.5.3"
     vite: "npm:^5.3.3"
@@ -7800,6 +7820,17 @@ __metadata:
   dependencies:
     minipass: "npm:^7.0.3"
   checksum: 10/453f9a1c241c13f5dfceca2ab7b4687bcff354c3ccbc932f35452687b9ef0ccf8983fd13b8a3baa5844c1a4882d6e3ddff48b0e7fd21d743809ef33b80616d79
+  languageName: node
+  linkType: hard
+
+"standardized-audio-context@npm:^25.3.70":
+  version: 25.3.75
+  resolution: "standardized-audio-context@npm:25.3.75"
+  dependencies:
+    "@babel/runtime": "npm:^7.24.8"
+    automation-events: "npm:^7.0.7"
+    tslib: "npm:^2.6.3"
+  checksum: 10/cd6c9b741d6bec17c8c58d02cd7130b49bba872cfbd73d9061dc9cca692c6a1e467d62527c42aa751cd78d2665c853c0062e288b205e4444bba00672a781274d
   languageName: node
   linkType: hard
 
@@ -8185,6 +8216,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tone@npm:15.0.4":
+  version: 15.0.4
+  resolution: "tone@npm:15.0.4"
+  dependencies:
+    standardized-audio-context: "npm:^25.3.70"
+    tslib: "npm:^2.3.1"
+  checksum: 10/ec5de9c2e80d6e98498cead27e549d8647f0fc201abe3fe522dfb102e27a2e4bfc4fae07b8f5547e8d4730d83f2e568fed54fdf8e64404c98d10e2a95e38829b
+  languageName: node
+  linkType: hard
+
 "troika-three-text@npm:^0.49.0":
   version: 0.49.0
   resolution: "troika-three-text@npm:0.49.0"
@@ -8247,6 +8288,13 @@ __metadata:
   version: 2.6.2
   resolution: "tslib@npm:2.6.2"
   checksum: 10/bd26c22d36736513980091a1e356378e8b662ded04204453d353a7f34a4c21ed0afc59b5f90719d4ba756e581a162ecbf93118dc9c6be5acf70aa309188166ca
+  languageName: node
+  linkType: hard
+
+"tslib@npm:^2.3.1, tslib@npm:^2.6.3":
+  version: 2.6.3
+  resolution: "tslib@npm:2.6.3"
+  checksum: 10/52109bb681f8133a2e58142f11a50e05476de4f075ca906d13b596ae5f7f12d30c482feb0bff167ae01cfc84c5803e575a307d47938999246f5a49d174fc558c
   languageName: node
   linkType: hard
 
