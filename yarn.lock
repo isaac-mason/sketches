@@ -7685,10 +7685,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"simplex-noise@npm:^4.0.1":
-  version: 4.0.1
-  resolution: "simplex-noise@npm:4.0.1"
-  checksum: 10/1ef5675bfbdd99e6c32610d29a892bf5094cb93b542ba71423c8ef898c2367b633eb041a70e3c838f37649f5ce56d0d2ec40afe72c0dd360b0107baf87985271
+"simplex-noise@npm:^4.0.2":
+  version: 4.0.2
+  resolution: "simplex-noise@npm:4.0.2"
+  checksum: 10/bb9d72d5fe3f8520fc2d060a30f5fb10c84f568cf2aafbd1234929bfda4b3e43c219710703119b2b37172e6f18ca3c0e1e3159aa1bb23f6b129e9bd33623619a
   languageName: node
   linkType: hard
 
@@ -7730,7 +7730,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     react-router-dom: "npm:^6.23.1"
     recast-navigation: "npm:^0.33.0"
-    simplex-noise: "npm:^4.0.1"
+    simplex-noise: "npm:^4.0.2"
     styled-breakpoints: "npm:^14.1.3"
     styled-components: "npm:^6.1.11"
     suspend-react: "npm:^0.1.3"
