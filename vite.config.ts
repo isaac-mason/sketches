@@ -4,6 +4,7 @@ import { imagetools } from 'vite-imagetools'
 import { createHtmlPlugin } from 'vite-plugin-html'
 import basicSsl from '@vitejs/plugin-basic-ssl'
 import * as path from 'path'
+import * as fs from 'fs'
 
 // https://vitejs.dev/config/
 export default defineConfig(() => {
@@ -51,12 +52,26 @@ export default defineConfig(() => {
             {
                 name: 'configure-server',
                 configureServer: (server) => {
+                    // add headers required for SharedArrayBuffer
                     server.middlewares.use((_req, res, next) => {
-                        // required for SharedArrayBuffer
                         res.setHeader('Cross-Origin-Opener-Policy', 'same-origin')
                         res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp')
                         next()
                     })
+
+                    // respond with static html files for 'sketches-static/*' requests
+                    // server.middlewares.use((req, res, next) => {
+                    //     if (req.url?.includes('/sketches-static')) {
+                    //         console.log(req.url)
+                    //         req.url += '.html'
+                    //         const sketchPath = req.url.replace('/sketches-static', '')
+                    //         res.setHeader('Content-Type', 'text/html')
+                    //         res.writeHead(200)
+                    //         res.write(fs.readFileSync(path.join(__dirname, `sketches-static/${sketchPath}`)))
+                    //         res.end()
+                    //     }
+                    //     next()
+                    // })
                 },
             },
             // hack: work around issues with WebGPURenderer
@@ -78,7 +93,6 @@ export default defineConfig(() => {
             exclude: [
                 // these packages do not play nicely with vite pre-bundling
                 'recast-navigation',
-                'jolt-physics',
             ],
         },
         build: {
@@ -92,5 +106,6 @@ export default defineConfig(() => {
         worker: {
             format: 'es',
         },
+        publicDir: 'public',
     }
 })

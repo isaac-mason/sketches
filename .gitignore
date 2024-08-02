@@ -26,3 +26,7 @@ dist-ssr
 # Yarn berry
 .yarn/cache
 .yarn/install-state.gz
+
+# Sketches
+public/sketches-static
+src/generated

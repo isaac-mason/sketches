@@ -27,7 +27,6 @@ body,
     background: #222;
 }
 
-#gl {
-    position: relative;
-    z-index: 0;
+iframe {
+    border: none;
 }

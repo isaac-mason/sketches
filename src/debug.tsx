@@ -1,6 +1,6 @@
-import { create } from 'zustand'
 import { Perf } from 'r3f-perf'
 import { useEffect } from 'react'
+import { create } from 'zustand'
 
 type DebugState = {
     debugMode: boolean

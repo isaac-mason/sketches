@@ -1,25 +1,15 @@
-import { Component, ReactNode, Suspense, memo, useEffect, useMemo, useState } from 'react'
-import {
-    Await,
-    Link,
-    RouteObject,
-    RouterProvider,
-    createBrowserRouter,
-    defer,
-    redirect,
-    useAsyncValue,
-    useLoaderData,
-} from 'react-router-dom'
+import { Component, ReactNode, useEffect, useMemo, useRef, useState } from 'react'
+import { Link, RouteObject, RouterProvider, createBrowserRouter, redirect, useLoaderData } from 'react-router-dom'
 import { createStyledBreakpointsTheme } from 'styled-breakpoints'
 import styled, { ThemeProvider } from 'styled-components'
 import { create } from 'zustand'
-import { Spinner } from './common'
 import { useDebounce } from './common/hooks/use-debounce'
-import { Controls } from './controls'
-import { DebugKeyboardControls, useDebug } from './debug'
+import sketchesMetadata from './generated/sketches.json'
 import { ScreenshotKeyboardControls, useScreenshot } from './screenshot'
-import { findSketchByRoute, renamedSketches, sketchModules, sketches, visibleSketches } from './sketches'
-import { Sketch, SketchOptions } from './sketches/types'
+
+type SketchMetadata = (typeof sketchesMetadata)[number] & { cover?: string; tags?: string[]; options?: { hidden: boolean } }
+
+const visibleSketches = (sketchesMetadata as SketchMetadata[]).filter((s) => !s.options.hidden)
 
 const theme = createStyledBreakpointsTheme()
 
@@ -288,7 +278,7 @@ const SketchWrapper = styled.div`
 
         margin: 0;
         padding-right: 20px;
-
+        
         font-size: 2em;
         font-weight: 900;
         line-height: 1.2;
@@ -313,14 +303,9 @@ const SketchWrapper = styled.div`
     }
 `
 
-type SketchData = {
-    sketch: Sketch
-    options?: SketchOptions
-}
-
 type SketchLoaderData = {
     sketchPath: string
-    sketchData: SketchData
+    sketchMetadata: SketchMetadata
 }
 
 const errorBoundaryState = create<{ error: boolean }>(() => ({
@@ -349,12 +334,6 @@ class ErrorBoundary extends Component<ErrorBoundaryProps> {
     }
 }
 
-const SketchModule = memo(({ route }: { route: string }) => {
-    const { component: SketchModuleComponent } = sketchModules[route]
-
-    return <SketchModuleComponent key={route} />
-})
-
 const useIsFullscreen = () => {
     const [fullscreen] = useState(() => document.location.search.includes('fullscreen'))
 
@@ -362,35 +341,52 @@ const useIsFullscreen = () => {
 }
 
 const LazySketch = () => {
-    const { sketch, options } = useAsyncValue() as SketchData
+    const { sketchMetadata } = useLoaderData() as SketchLoaderData
+
+    const wrapperRef = useRef<HTMLDivElement>(null!)
+    const iframeRef = useRef<HTMLIFrameElement>(null!)
 
     const { screenshotMode } = useScreenshot()
-
     const isFullscreen = useIsFullscreen()
 
+    const sketchUrl = `/sketches-static/${sketchMetadata.path}/index.html`
+
     useEffect(() => {
-        if (!sketch) return
+        if (!sketchMetadata) return
 
-        document.title = sketch.route === 'intro' ? 'Sketches | Isaac Mason' : `${sketch.title} | Sketches`
+        document.title = sketchMetadata.path === 'intro' ? 'Sketches | Isaac Mason' : `${sketchMetadata.title} | Sketches`
 
-        gtag('event', 'sketch_navigation', { route: sketch.route, title: sketch.title })
-    }, [sketch])
+        gtag('event', 'sketch_navigation', { route: sketchMetadata.path, title: sketchMetadata.title })
+    }, [sketchMetadata])
+
+    useEffect(() => {
+        const onResize = () => {
+            iframeRef.current.style.width = `${wrapperRef.current.clientWidth}px`
+            iframeRef.current.style.height = `${wrapperRef.current.clientHeight}px`
+        }
+
+        const resizeObserver = new ResizeObserver(onResize)
+
+        resizeObserver.observe(wrapperRef.current)
+
+        return () => {
+            resizeObserver.disconnect()
+        }
+    }, [])
 
     return (
         <>
-            <SketchWrapper className={isFullscreen ? 'fullscreen' : ''}>
-                {!screenshotMode && !options?.noTitle && <h1>{sketch?.title}</h1>}
+            <SketchWrapper ref={wrapperRef} className={isFullscreen ? 'fullscreen' : ''}>
+                {(!screenshotMode && sketchMetadata.options.displayTitle) ?? (true && <h1>{sketchMetadata?.title}</h1>)}
 
-                <SketchModule route={sketch.route} />
+                <iframe ref={iframeRef} src={sketchUrl} />
             </SketchWrapper>
-
-            <Controls key={sketch.route} expanded={options?.controls?.expanded} />
         </>
     )
 }
 
 type NavItemProps = {
-    sketch: Sketch
+    sketch: SketchMetadata
     currentSketchPath: string
     closeNav: () => void
 }
@@ -398,10 +394,10 @@ type NavItemProps = {
 const NavItem = ({ sketch, currentSketchPath, closeNav }: NavItemProps) => {
     return (
         <NavItemWrapper
-            to={`/sketch/${sketch.route}`}
+            to={`/sketch/${sketch.path}`}
             onClick={() => closeNav()}
             title={sketch.title}
-            className={sketch.route === currentSketchPath ? 'active' : ''}
+            className={sketch.path === currentSketchPath ? 'active' : ''}
         >
             {sketch.cover ? <NavItemImage src={sketch.cover} alt={sketch.title} loading="lazy" /> : undefined}
 
@@ -441,9 +437,7 @@ const SideNav = () => {
         if (searchTerm.trim() === '') return visibleSketches
 
         return visibleSketches.filter((s) => {
-            const match = `${s?.title.toLowerCase() ?? ''} ${s?.tags?.join(' ').toLowerCase() ?? ''} ${
-                s?.description?.toLowerCase() ?? ''
-            }`
+            const match = `${s?.title.toLowerCase() ?? ''} ${s?.tags?.join(' ').toLowerCase() ?? ''}`
 
             return match.includes(searchTerm.toLowerCase())
         })
@@ -461,7 +455,7 @@ const SideNav = () => {
 
                 <NavItems>
                     {filteredSketches.map((s) => (
-                        <NavItem key={s.route} sketch={s} currentSketchPath={sketchPath} closeNav={closeNav} />
+                        <NavItem key={s.path} sketch={s} currentSketchPath={sketchPath} closeNav={closeNav} />
                     ))}
                 </NavItems>
             </Nav>
@@ -470,11 +464,10 @@ const SideNav = () => {
 }
 
 const App = () => {
-    const { sketchPath, sketchData } = useLoaderData() as SketchLoaderData
+    const { sketchPath } = useLoaderData() as SketchLoaderData
 
     const { open: navOpen, toggleNav, closeNav } = useNav()
     const { screenshotMode } = useScreenshot()
-    const { debugMode } = useDebug()
 
     const isFullscreen = useIsFullscreen()
 
@@ -484,11 +477,7 @@ const App = () => {
                 {!isFullscreen && <SideNav />}
 
                 <ErrorBoundary>
-                    <Suspense fallback={<Spinner />}>
-                        <Await resolve={sketchData}>
-                            <LazySketch />
-                        </Await>
-                    </Suspense>
+                    <LazySketch />
                 </ErrorBoundary>
             </PageLayout>
 
@@ -501,10 +490,9 @@ const App = () => {
             ) : undefined}
 
             <ScreenshotKeyboardControls />
-            <DebugKeyboardControls />
 
-            {!debugMode && !screenshotMode && !isFullscreen ? (
-                <GithubLink target="_blank" href={`https://github.com/isaac-mason/sketches/tree/main/src/sketches/${sketchPath}`}>
+            {!screenshotMode && !isFullscreen ? (
+                <GithubLink target="_blank" href={`https://github.com/isaac-mason/sketches/tree/main/sketches/${sketchPath}`}>
                     GitHub
                 </GithubLink>
             ) : undefined}
@@ -513,33 +501,21 @@ const App = () => {
 }
 
 const routes: RouteObject[] = [
-    ...renamedSketches.map((renamedSketch) => ({
-        path: `/sketch/${renamedSketch.from}`,
-        element: null,
-        loader: async () => {
-            return redirect(`/sketch/${renamedSketch.to}`)
-        },
-    })),
-    ...sketches.map((sketch) => {
+    ...sketchesMetadata.map((sketch) => {
         const route: RouteObject = {
-            path: `/sketch/${sketch.route}`,
+            path: `/sketch/${sketch.path}`,
             Component: App,
             loader: async ({ request }) => {
                 errorBoundaryState.setState({ error: false })
 
                 const sketchPath = new URL(request.url).pathname.replace('/sketch/', '')
 
-                const getSketchData = async (): Promise<SketchData> => {
-                    const sketch = findSketchByRoute(sketchPath)!
-                    const options = await sketchModules[sketchPath].getOptions()
+                const sketchMetadata = sketchesMetadata.find((s) => s.path === sketchPath)! as SketchMetadata
 
-                    return { sketch, options }
-                }
-
-                return defer({
+                return {
                     sketchPath,
-                    sketchData: getSketchData(),
-                })
+                    sketchMetadata,
+                }
             },
         }
         return route
@@ -553,7 +529,7 @@ const routes: RouteObject[] = [
     },
 ]
 
-const router = createBrowserRouter(routes)
+const router = createBrowserRouter(routes, {})
 
 export default () => {
     return (
