@@ -2419,6 +2419,227 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@sketches/game-of-life@workspace:sketches/game-of-life":
+  version: 0.0.0-use.local
+  resolution: "@sketches/game-of-life@workspace:sketches/game-of-life"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/game-ui-ux-transform@workspace:sketches/game-ui-ux/transform":
+  version: 0.0.0-use.local
+  resolution: "@sketches/game-ui-ux-transform@workspace:sketches/game-ui-ux/transform"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/game-ui-ux-unlock-pointer-lock@workspace:sketches/game-ui-ux/unlock-pointer-lock":
+  version: 0.0.0-use.local
+  resolution: "@sketches/game-ui-ux-unlock-pointer-lock@workspace:sketches/game-ui-ux/unlock-pointer-lock"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/game-ui-ux-zoom@workspace:sketches/game-ui-ux/zoom":
+  version: 0.0.0-use.local
+  resolution: "@sketches/game-ui-ux-zoom@workspace:sketches/game-ui-ux/zoom"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/glsl-shaders-from-scratch-fract-and-friends@workspace:sketches/glsl-shaders-from-scratch/common-functions-and-tricks/fract-and-friends":
+  version: 0.0.0-use.local
+  resolution: "@sketches/glsl-shaders-from-scratch-fract-and-friends@workspace:sketches/glsl-shaders-from-scratch/common-functions-and-tricks/fract-and-friends"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/glsl-shaders-from-scratch-intro-attributes@workspace:sketches/glsl-shaders-from-scratch/intro/attributes":
+  version: 0.0.0-use.local
+  resolution: "@sketches/glsl-shaders-from-scratch-intro-attributes@workspace:sketches/glsl-shaders-from-scratch/intro/attributes"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/glsl-shaders-from-scratch-intro-uniforms@workspace:sketches/glsl-shaders-from-scratch/intro/uniforms":
+  version: 0.0.0-use.local
+  resolution: "@sketches/glsl-shaders-from-scratch-intro-uniforms@workspace:sketches/glsl-shaders-from-scratch/intro/uniforms"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/glsl-shaders-from-scratch-intro-varyings@workspace:sketches/glsl-shaders-from-scratch/intro/varyings":
+  version: 0.0.0-use.local
+  resolution: "@sketches/glsl-shaders-from-scratch-intro-varyings@workspace:sketches/glsl-shaders-from-scratch/intro/varyings"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/glsl-shaders-from-scratch-lighting-models@workspace:sketches/glsl-shaders-from-scratch/lighting-models":
+  version: 0.0.0-use.local
+  resolution: "@sketches/glsl-shaders-from-scratch-lighting-models@workspace:sketches/glsl-shaders-from-scratch/lighting-models"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/glsl-shaders-from-scratch-min-max-clamp-saturate@workspace:sketches/glsl-shaders-from-scratch/common-functions-and-tricks/min-max-clamp-saturate":
+  version: 0.0.0-use.local
+  resolution: "@sketches/glsl-shaders-from-scratch-min-max-clamp-saturate@workspace:sketches/glsl-shaders-from-scratch/common-functions-and-tricks/min-max-clamp-saturate"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/glsl-shaders-from-scratch-raymarching-basic@workspace:sketches/glsl-shaders-from-scratch/raymarching/basic":
+  version: 0.0.0-use.local
+  resolution: "@sketches/glsl-shaders-from-scratch-raymarching-basic@workspace:sketches/glsl-shaders-from-scratch/raymarching/basic"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/glsl-shaders-from-scratch-raymarching-terrain@workspace:sketches/glsl-shaders-from-scratch/raymarching/terrain":
+  version: 0.0.0-use.local
+  resolution: "@sketches/glsl-shaders-from-scratch-raymarching-terrain@workspace:sketches/glsl-shaders-from-scratch/raymarching/terrain"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/glsl-shaders-from-scratch-step-mix-smoothstep@workspace:sketches/glsl-shaders-from-scratch/common-functions-and-tricks/step-mix-smoothstep":
+  version: 0.0.0-use.local
+  resolution: "@sketches/glsl-shaders-from-scratch-step-mix-smoothstep@workspace:sketches/glsl-shaders-from-scratch/common-functions-and-tricks/step-mix-smoothstep"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
 "@sketches/intro@workspace:sketches/intro":
   version: 0.0.0-use.local
   resolution: "@sketches/intro@workspace:sketches/intro"
