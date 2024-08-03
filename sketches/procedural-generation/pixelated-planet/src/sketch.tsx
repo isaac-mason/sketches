@@ -1,11 +1,11 @@
+import { Canvas } from '@/common'
 import { Html, OrbitControls } from '@react-three/drei'
+import { useThree } from '@react-three/fiber'
 import { EffectComposer, Pixelation } from '@react-three/postprocessing'
 import { button, useControls } from 'leva'
 import { useMemo, useState } from 'react'
 import { createNoise3D } from 'simplex-noise'
 import * as THREE from 'three'
-import { Canvas } from '@/common'
-import { useThree } from '@react-three/fiber'
 
 type PlanetLayer = {
     /**
@@ -183,7 +183,7 @@ const Effects = () => {
     )
 }
 
-export default () => {
+export function Sketch() {
     const [version, setVersion] = useState(0)
 
     const { planetRadius, noiseIterations, textureWidth, textureHeight } = useControls(
@@ -253,19 +253,17 @@ export default () => {
     }, [noiseIterations, planetRadius, textureWidth, textureHeight, version])
 
     return (
-        <>
-            <Canvas orthographic camera={{ position: [0, 0, 10], zoom: 200 }}>
-                <Planet map={map} radius={planetRadius} />
+        <Canvas orthographic camera={{ position: [0, 0, 10], zoom: 200 }}>
+            <Planet map={map} radius={planetRadius} />
 
-                <directionalLight position={[10, 0, 10]} intensity={2} />
-                <ambientLight intensity={0.6} />
+            <directionalLight position={[10, 0, 10]} intensity={2} />
+            <ambientLight intensity={0.6} />
 
-                <WorldMap map={map} />
+            <WorldMap map={map} />
 
-                <Effects />
+            <Effects />
 
-                <OrbitControls enablePan={false} />
-            </Canvas>
-        </>
+            <OrbitControls enablePan={false} />
+        </Canvas>
     )
 }

@@ -204,7 +204,7 @@ const Terrain = ({ size, range, wireframe, vertexNormalsHelper }: TerrainProps) 
 // Size of the heightmap should be a power of 2 plus 1 (e.g., 9, 17, 33, 65, ...)
 const sizeOptions = Array.from({ length: 12 }, (_, idx) => Math.pow(2, idx) + 1)
 
-export default () => {
+export function Sketch() {
     const { size, range, wireframe, vertexNormalsHelper, pointLightPosition } = useControls('procgen-diamond-square-heightmap', {
         size: {
             value: sizeOptions[8],
@@ -217,20 +217,18 @@ export default () => {
     })
 
     return (
-        <>
-            <Canvas shadows camera={{ position: [50, 50, -20] }}>
-                <Bounds fit margin={1.2}>
-                    <Terrain size={size} range={range} wireframe={wireframe} vertexNormalsHelper={vertexNormalsHelper} />
-                </Bounds>
+        <Canvas shadows camera={{ position: [50, 50, -20] }}>
+            <Bounds fit margin={1.2}>
+                <Terrain size={size} range={range} wireframe={wireframe} vertexNormalsHelper={vertexNormalsHelper} />
+            </Bounds>
 
-                <ambientLight intensity={0.7} />
+            <ambientLight intensity={0.7} />
 
-                <directionalLight position={pointLightPosition} intensity={1.5}>
-                    <Helper type={PointLightHelper} args={[10]} />
-                </directionalLight>
+            <directionalLight position={pointLightPosition} intensity={1.5}>
+                <Helper type={PointLightHelper} args={[10]} />
+            </directionalLight>
 
-                <OrbitControls makeDefault />
-            </Canvas>
-        </>
+            <OrbitControls makeDefault />
+        </Canvas>
     )
 }

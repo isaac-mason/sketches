@@ -316,7 +316,7 @@ const LSystem = ({ config }: LSystemProps) => {
     )
 }
 
-export default function Sketch() {
+export function Sketch() {
     const { configKey } = useControls('l-systems', {
         configKey: {
             value: configKeys[0],
