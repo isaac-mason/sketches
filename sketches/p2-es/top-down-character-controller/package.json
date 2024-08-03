@@ -1,11 +1,12 @@
 {
-    "name": "@sketches/nature-grass-2",
+    "name": "@sketches/p2-es-top-down-character-controller",
     "private": true,
     "sketch": {
-        "title": "Nature - Grass 2",
+        "title": "p2-es - Top Down Character Controller",
         "tags": [
-            "nature",
-            "grass"
+            "physics",
+            "p2-es",
+            "character-controller"
         ]
     },
     "scripts": {
@@ -15,7 +16,7 @@
     "dependencies": {
         "@react-three/drei": "^9.108.3",
         "@react-three/fiber": "^8.16.8",
-        "leva": "^0.9.35",
+        "p2-es": "^1.2.3",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
         "three": "^0.166.1"

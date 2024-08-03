@@ -2,7 +2,11 @@
     "name": "@sketches/nature-grass",
     "private": true,
     "sketch": {
-        "title": "Nature - Grass"
+        "title": "Nature - Grass",
+        "tags": [
+            "nature",
+            "grass"
+        ]
     },
     "scripts": {
         "dev": "vite dev",

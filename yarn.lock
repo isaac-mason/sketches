@@ -2903,6 +2903,78 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@sketches/p2-es-kinematic-character-controller@workspace:sketches/p2-es/kinematic-character-controller":
+  version: 0.0.0-use.local
+  resolution: "@sketches/p2-es-kinematic-character-controller@workspace:sketches/p2-es/kinematic-character-controller"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    p2-es: "npm:^1.2.3"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/p2-es-marching-cubes-goo@workspace:sketches/p2-es/marching-cubes-goo":
+  version: 0.0.0-use.local
+  resolution: "@sketches/p2-es-marching-cubes-goo@workspace:sketches/p2-es/marching-cubes-goo"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    p2-es: "npm:^1.2.3"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/p2-es-pixelated-text@workspace:sketches/p2-es/pixelated-text":
+  version: 0.0.0-use.local
+  resolution: "@sketches/p2-es-pixelated-text@workspace:sketches/p2-es/pixelated-text"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    p2-es: "npm:^1.2.3"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/p2-es-top-down-character-controller@workspace:sketches/p2-es/top-down-character-controller":
+  version: 0.0.0-use.local
+  resolution: "@sketches/p2-es-top-down-character-controller@workspace:sketches/p2-es/top-down-character-controller"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    p2-es: "npm:^1.2.3"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
 "@stitches/react@npm:^1.2.8":
   version: 1.2.8
   resolution: "@stitches/react@npm:1.2.8"

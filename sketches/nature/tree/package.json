@@ -3,6 +3,10 @@
     "private": true,
     "sketch": {
         "title": "Nature - Tree",
+        "tags": [
+            "nature",
+            "tree"
+        ],
         "options": {
             "hidden": true
         }

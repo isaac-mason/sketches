@@ -179,8 +179,8 @@ const Loop = () => {
     return null
 }
 
-export default () => (
-    <>
+export function Sketch() {
+    return (
         <Canvas camera={{ position: [-0.5, 0, 5], fov: 25 }}>
             <Balls />
             <Container />
@@ -199,5 +199,5 @@ export default () => (
 
             <Loop />
         </Canvas>
-    </>
-)
+    )
+}

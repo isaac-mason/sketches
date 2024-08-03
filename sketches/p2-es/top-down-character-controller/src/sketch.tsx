@@ -251,7 +251,7 @@ const Wall = (props: WallProps) => {
     )
 }
 
-export default () => {
+export function Sketch() {
     return (
         <>
             <Canvas>

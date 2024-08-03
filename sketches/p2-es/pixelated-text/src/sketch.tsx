@@ -146,7 +146,7 @@ const Text = ({ position, velocity, color, text, underline }: TextProps) => {
     return <>{boxes}</>
 }
 
-export default () => {
+export function Sketch () {
     const [version, setVersion] = useState(0)
 
     const { firstWord, secondWord, thirdWord } = useControls(

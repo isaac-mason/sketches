@@ -281,36 +281,38 @@ const Box = (props: {
     )
 }
 
-export default () => (
-    <KeyboardControls
-        map={[
-            { name: 'up', keys: ['ArrowUp', 'w', 'W'] },
-            { name: 'left', keys: ['ArrowLeft', 'a', 'A'] },
-            { name: 'right', keys: ['ArrowRight', 'd', 'D'] },
-        ]}
-    >
-        <Canvas>
-            <Player />
-            <Camera />
-            <Loop />
+export function Sketch() {
+    return (
+        <KeyboardControls
+            map={[
+                { name: 'up', keys: ['ArrowUp', 'w', 'W'] },
+                { name: 'left', keys: ['ArrowLeft', 'a', 'A'] },
+                { name: 'right', keys: ['ArrowRight', 'd', 'D'] },
+            ]}
+        >
+            <Canvas>
+                <Player />
+                <Camera />
+                <Loop />
 
-            <Box width={15} height={1} position={[0, 0]} />
+                <Box width={15} height={1} position={[0, 0]} />
 
-            <Box width={1} height={20} position={[-8, 10]} />
-            <Box width={1} height={20} position={[8, 10]} />
+                <Box width={1} height={20} position={[-8, 10]} />
+                <Box width={1} height={20} position={[8, 10]} />
 
-            <Box width={8} height={1} angle={-0.4} position={[-6, 3]} />
-            <Box width={18} height={1} angle={0.4} position={[4, 10]} />
-            <Box width={12} height={1} position={[-4, 15]} />
+                <Box width={8} height={1} angle={-0.4} position={[-6, 3]} />
+                <Box width={18} height={1} angle={0.4} position={[4, 10]} />
+                <Box width={12} height={1} position={[-4, 15]} />
 
-            <Billboard follow={true}>
-                <Text color="orange" fontSize={0.5} position={[0, 3.5, 2]}>
-                    USE WASD TO MOVE
-                </Text>
-            </Billboard>
+                <Billboard follow={true}>
+                    <Text color="orange" fontSize={0.5} position={[0, 3.5, 2]}>
+                        USE WASD TO MOVE
+                    </Text>
+                </Billboard>
 
-            <ambientLight intensity={1.5} />
-            <directionalLight position={[10, 40, 10]} intensity={1.5} />
-        </Canvas>
-    </KeyboardControls>
-)
+                <ambientLight intensity={1.5} />
+                <directionalLight position={[10, 40, 10]} intensity={1.5} />
+            </Canvas>
+        </KeyboardControls>
+    )
+}
