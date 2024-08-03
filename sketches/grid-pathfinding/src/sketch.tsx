@@ -233,7 +233,7 @@ const Info = styled.div`
     color: white;
 `
 
-export default () => {
+export function Sketch() {
     const { start, goal, levelSize, obstacles, setPath } = usePathfindingState()
 
     useEffect(() => {

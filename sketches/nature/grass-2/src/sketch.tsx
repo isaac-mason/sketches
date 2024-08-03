@@ -342,7 +342,7 @@ const Grass = () => {
     return <primitive object={mesh} />
 }
 
-export default function Sketch() {
+export function Sketch() {
     return (
         <WebGPUCanvas>
             <Grass />

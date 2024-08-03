@@ -175,7 +175,7 @@ const Tree = ({
     )
 }
 
-export default function Sketch() {
+export function Sketch() {
     return (
         <WebGPUCanvas>
             <Tree />

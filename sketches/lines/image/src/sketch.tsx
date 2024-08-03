@@ -2,8 +2,7 @@ import { Canvas } from '@/common'
 import { OrbitControls, useTexture } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { useControls } from 'leva'
-import React, { useEffect, useMemo, useRef } from 'react'
-import ReactDOM from 'react-dom/client'
+import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import plantImageUrl from './plant.png?url'
 
@@ -184,7 +183,7 @@ const Line = ({ vertices, texture }: LineProps) => {
     )
 }
 
-function Sketch() {
+export function Sketch() {
     const config = useControls('lines-image', {
         numberLines: 400,
         maxDistance: 11,
@@ -200,9 +199,3 @@ function Sketch() {
         </Canvas>
     )
 }
-
-ReactDOM.createRoot(document.getElementById('root')!).render(
-    <React.StrictMode>
-        <Sketch />
-    </React.StrictMode>,
-)

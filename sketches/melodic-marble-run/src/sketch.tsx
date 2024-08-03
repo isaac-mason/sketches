@@ -1,3 +1,4 @@
+import { usePageVisible } from '@/common'
 import sunsetEnvironment from '@pmndrs/assets/hdri/sunset.exr'
 import { Environment, OrbitControls, PerspectiveCamera } from '@react-three/drei'
 import { Canvas, useFrame } from '@react-three/fiber'
@@ -15,7 +16,6 @@ import { useControls } from 'leva'
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import * as tone from 'tone'
-import { usePageVisible } from '../../common'
 
 type SynthProviderProps = {
     children: React.ReactNode
@@ -135,7 +135,7 @@ const Marble = (props: MarbleProps) => {
     )
 }
 
-export default function Sketch() {
+export function Sketch() {
     const { debug } = useControls('note-pillars', {
         debug: false,
     })

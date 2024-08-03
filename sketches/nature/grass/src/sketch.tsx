@@ -1,3 +1,4 @@
+import { Canvas } from '@/common'
 import forestEnvironment from '@pmndrs/assets/hdri/forest.exr'
 import { CameraShake, Environment, OrbitControls, PerspectiveCamera, Sky, useTexture } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
@@ -5,7 +6,6 @@ import { useControls } from 'leva'
 import { useMemo, useRef } from 'react'
 import { createNoise2D } from 'simplex-noise'
 import * as THREE from 'three'
-import { Canvas } from '@/common'
 import cloudUrl from './cloud.jpg?url'
 import grassBladeAlphaUrl from './grass-blade-alpha.jpg?url'
 
@@ -413,7 +413,7 @@ const Grass = () => {
     )
 }
 
-export default () => {
+export function Sketch() {
     return (
         <Canvas>
             <Grass />

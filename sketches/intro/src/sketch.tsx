@@ -1,7 +1,6 @@
 import { Html } from '@react-three/drei'
 import { Canvas, useFrame } from '@react-three/fiber'
-import React, { useRef } from 'react'
-import ReactDOM from 'react-dom/client'
+import { useRef } from 'react'
 import { Group } from 'three'
 
 const Home = () => {
@@ -30,7 +29,7 @@ const Home = () => {
     )
 }
 
-function Sketch() {
+export function Sketch() {
     return (
         <>
             <h1>Select a sketch...</h1>
@@ -40,9 +39,3 @@ function Sketch() {
         </>
     )
 }
-
-ReactDOM.createRoot(document.getElementById('root')!).render(
-    <React.StrictMode>
-        <Sketch />
-    </React.StrictMode>,
-)
