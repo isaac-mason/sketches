@@ -90,7 +90,7 @@ const Suzi = () => {
     )
 }
 
-export default function Sketch() {
+export function Sketch() {
     return (
         <Canvas gl={{ outputColorSpace: THREE.SRGBColorSpace }}>
             <Suzi />

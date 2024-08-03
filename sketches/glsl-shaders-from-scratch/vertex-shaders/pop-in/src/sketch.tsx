@@ -81,7 +81,7 @@ const Suzi = () => {
     )
 }
 
-export default function Sketch() {
+export function Sketch() {
     return (
         <Canvas>
             <Suzi />

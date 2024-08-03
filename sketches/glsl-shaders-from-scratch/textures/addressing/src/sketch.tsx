@@ -49,8 +49,8 @@ const App = () => {
     )
 }
 
-export default () => (
-    <>
+export function Sketch() {
+    return (
         <Canvas>
             <App />
             <OrthographicCamera
@@ -65,5 +65,5 @@ export default () => (
                 position={[0, 0, 0.5]}
             />
         </Canvas>
-    </>
-)
+    )
+}

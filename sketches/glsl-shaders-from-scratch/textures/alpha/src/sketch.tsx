@@ -2,6 +2,7 @@ import { OrthographicCamera, useTexture } from '@react-three/drei'
 import { Vector4 } from 'three'
 import { Canvas } from '@/common'
 import dogImage from './dog.jpeg'
+import overlayImage from './overlay.png'
 
 const vertexShader = /* glsl */ `
 varying vec2 vUvs;
@@ -18,37 +19,27 @@ const fragmentShader = /* glsl */ `
 varying vec2 vUvs;
 
 uniform sampler2D diffuse;
-uniform vec4 tint;
+uniform sampler2D overlay;
 
 void main() {
-    // flip the image horizontally, just for fun
-    vec4 diffuseSample = texture2D(diffuse, vec2(1.0 - vUvs.x, vUvs.y));
-
-    // apply the tint
-    // "modulate" or "modulation" blending
-    gl_FragColor = diffuseSample * tint;
-
-    // 'diffuseSample * tint' is doing component-wise multiplication
-    // same as:
-    // gl_FragColor = vec4(
-    //     diffuseSample.r * tint.x,
-    //     diffuseSample.g * tint.y,
-    //     diffuseSample.b * tint.z,
-    //     1.0
-    // );
+    vec4 diffuseSample = texture2D(diffuse, vUvs);
+    vec4 overlaySample = texture2D(overlay, vUvs);
+    gl_FragColor = mix(diffuseSample, overlaySample, overlaySample.w);
 }
 `
 
 const App = () => {
-    const texture = useTexture(dogImage)
+    const dogTexture = useTexture(dogImage)
+    const overlayTexture = useTexture(overlayImage)
     return (
         <mesh position={[0.5, 0.5, 0]}>
             <shaderMaterial
                 vertexShader={vertexShader}
                 fragmentShader={fragmentShader}
                 uniforms={{
-                    diffuse: { value: texture },
-                    tint: { value: new Vector4(1, 0.7, 0.7) },
+                    diffuse: { value: dogTexture },
+                    overlay: { value: overlayTexture },
+                    tint: { value: new Vector4(1, 0.5, 0.5) },
                 }}
             />
             <planeGeometry args={[1, 1]} />
@@ -56,8 +47,8 @@ const App = () => {
     )
 }
 
-export default () => (
-    <>
+export function Sketch() {
+    return (
         <Canvas>
             <App />
             <OrthographicCamera
@@ -72,5 +63,5 @@ export default () => (
                 position={[0, 0, 0.5]}
             />
         </Canvas>
-    </>
-)
+    )
+}

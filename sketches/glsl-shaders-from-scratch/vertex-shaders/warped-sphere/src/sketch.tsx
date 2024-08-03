@@ -103,7 +103,7 @@ const WarpedSphere = () => {
     )
 }
 
-export default function Sketch() {
+export function Sketch() {
     return (
         <Canvas gl={{ outputColorSpace: THREE.LinearSRGBColorSpace }}>
             <WarpedSphere />

@@ -2640,6 +2640,142 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@sketches/glsl-shaders-from-scratch-textures-addressing@workspace:sketches/glsl-shaders-from-scratch/textures/addressing":
+  version: 0.0.0-use.local
+  resolution: "@sketches/glsl-shaders-from-scratch-textures-addressing@workspace:sketches/glsl-shaders-from-scratch/textures/addressing"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/glsl-shaders-from-scratch-textures-alpha@workspace:sketches/glsl-shaders-from-scratch/textures/alpha":
+  version: 0.0.0-use.local
+  resolution: "@sketches/glsl-shaders-from-scratch-textures-alpha@workspace:sketches/glsl-shaders-from-scratch/textures/alpha"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/glsl-shaders-from-scratch-textures-basic@workspace:sketches/glsl-shaders-from-scratch/textures/basic":
+  version: 0.0.0-use.local
+  resolution: "@sketches/glsl-shaders-from-scratch-textures-basic@workspace:sketches/glsl-shaders-from-scratch/textures/basic"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/glsl-shaders-from-scratch-toon-shading@workspace:sketches/glsl-shaders-from-scratch/toon-shading":
+  version: 0.0.0-use.local
+  resolution: "@sketches/glsl-shaders-from-scratch-toon-shading@workspace:sketches/glsl-shaders-from-scratch/toon-shading"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/glsl-shaders-from-scratch-vector-operations-and-math-shaping-functions@workspace:sketches/glsl-shaders-from-scratch/vector-operations-and-math/shaping-functions":
+  version: 0.0.0-use.local
+  resolution: "@sketches/glsl-shaders-from-scratch-vector-operations-and-math-shaping-functions@workspace:sketches/glsl-shaders-from-scratch/vector-operations-and-math/shaping-functions"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/glsl-shaders-from-scratch-vector-operations-and-math-sin-cos@workspace:sketches/glsl-shaders-from-scratch/vector-operations-and-math/sin-cos":
+  version: 0.0.0-use.local
+  resolution: "@sketches/glsl-shaders-from-scratch-vector-operations-and-math-sin-cos@workspace:sketches/glsl-shaders-from-scratch/vector-operations-and-math/sin-cos"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/glsl-shaders-from-scratch-vertex-shaders-pop-in@workspace:sketches/glsl-shaders-from-scratch/vertex-shaders/pop-in":
+  version: 0.0.0-use.local
+  resolution: "@sketches/glsl-shaders-from-scratch-vertex-shaders-pop-in@workspace:sketches/glsl-shaders-from-scratch/vertex-shaders/pop-in"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/glsl-shaders-from-scratch-vertex-shaders-warped-sphere@workspace:sketches/glsl-shaders-from-scratch/vertex-shaders/warped-sphere":
+  version: 0.0.0-use.local
+  resolution: "@sketches/glsl-shaders-from-scratch-vertex-shaders-warped-sphere@workspace:sketches/glsl-shaders-from-scratch/vertex-shaders/warped-sphere"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
 "@sketches/intro@workspace:sketches/intro":
   version: 0.0.0-use.local
   resolution: "@sketches/intro@workspace:sketches/intro"

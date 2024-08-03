@@ -1,6 +1,5 @@
 import { OrthographicCamera, useTexture } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
-import { useRef } from 'react'
+import { Vector4 } from 'three'
 import { Canvas } from '@/common'
 import dogImage from './dog.jpeg'
 
@@ -18,46 +17,38 @@ void main() {
 const fragmentShader = /* glsl */ `
 varying vec2 vUvs;
 
-uniform sampler2D diffuse1;
-
-uniform float uTime;
-
-float inverseLerp(float v, float minValue, float maxValue) {
-    return (v - minValue) / (maxValue - minValue);
-}
-
-float remap(float v, float inMin, float inMax, float outMin, float outMax) {
-    float t = inverseLerp(v, inMin, inMax);
-    return mix(outMin, outMax, t);
-}
+uniform sampler2D diffuse;
+uniform vec4 tint;
 
 void main() {
-    float t1 = remap(sin(vUvs.y * 400.0 + uTime * 10.0), -1.0, 1.0, 0.9, 1.0);
-    float t2 = remap(sin(vUvs.y * 50.0 - uTime * 2.0), -1.0, 1.0, 0.9, 1.0);
+    // flip the image horizontally, just for fun
+    vec4 diffuseSample = texture2D(diffuse, vec2(1.0 - vUvs.x, vUvs.y));
 
-    vec3 color = texture2D(diffuse1, vUvs).xyz * t1 * t2;
+    // apply the tint
+    // "modulate" or "modulation" blending
+    gl_FragColor = diffuseSample * tint;
 
-    gl_FragColor = vec4(color, 1.0);
+    // 'diffuseSample * tint' is doing component-wise multiplication
+    // same as:
+    // gl_FragColor = vec4(
+    //     diffuseSample.r * tint.x,
+    //     diffuseSample.g * tint.y,
+    //     diffuseSample.b * tint.z,
+    //     1.0
+    // );
 }
 `
 
 const App = () => {
-    const dogTexture = useTexture(dogImage)
-
-    const time = useRef({ value: 0 })
-
-    useFrame(({ clock: { elapsedTime } }) => {
-        time.current.value = elapsedTime
-    })
-
+    const texture = useTexture(dogImage)
     return (
         <mesh position={[0.5, 0.5, 0]}>
             <shaderMaterial
                 vertexShader={vertexShader}
                 fragmentShader={fragmentShader}
                 uniforms={{
-                    diffuse1: { value: dogTexture },
-                    uTime: time.current,
+                    diffuse: { value: texture },
+                    tint: { value: new Vector4(1, 0.7, 0.7) },
                 }}
             />
             <planeGeometry args={[1, 1]} />
@@ -65,8 +56,8 @@ const App = () => {
     )
 }
 
-export default () => (
-    <>
+export function Sketch() {
+    return (
         <Canvas>
             <App />
             <OrthographicCamera
@@ -81,5 +72,5 @@ export default () => (
                 position={[0, 0, 0.5]}
             />
         </Canvas>
-    </>
-)
+    )
+}

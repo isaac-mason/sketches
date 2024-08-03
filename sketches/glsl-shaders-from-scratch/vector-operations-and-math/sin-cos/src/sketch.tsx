@@ -1,8 +1,8 @@
 import { OrthographicCamera, useTexture } from '@react-three/drei'
-import { Vector4 } from 'three'
+import { useFrame } from '@react-three/fiber'
+import { useRef } from 'react'
 import { Canvas } from '@/common'
 import dogImage from './dog.jpeg'
-import overlayImage from './overlay.png'
 
 const vertexShader = /* glsl */ `
 varying vec2 vUvs;
@@ -18,28 +18,46 @@ void main() {
 const fragmentShader = /* glsl */ `
 varying vec2 vUvs;
 
-uniform sampler2D diffuse;
-uniform sampler2D overlay;
+uniform sampler2D diffuse1;
+
+uniform float uTime;
+
+float inverseLerp(float v, float minValue, float maxValue) {
+    return (v - minValue) / (maxValue - minValue);
+}
+
+float remap(float v, float inMin, float inMax, float outMin, float outMax) {
+    float t = inverseLerp(v, inMin, inMax);
+    return mix(outMin, outMax, t);
+}
 
 void main() {
-    vec4 diffuseSample = texture2D(diffuse, vUvs);
-    vec4 overlaySample = texture2D(overlay, vUvs);
-    gl_FragColor = mix(diffuseSample, overlaySample, overlaySample.w);
+    float t1 = remap(sin(vUvs.y * 400.0 + uTime * 10.0), -1.0, 1.0, 0.9, 1.0);
+    float t2 = remap(sin(vUvs.y * 50.0 - uTime * 2.0), -1.0, 1.0, 0.9, 1.0);
+
+    vec3 color = texture2D(diffuse1, vUvs).xyz * t1 * t2;
+
+    gl_FragColor = vec4(color, 1.0);
 }
 `
 
 const App = () => {
     const dogTexture = useTexture(dogImage)
-    const overlayTexture = useTexture(overlayImage)
+
+    const time = useRef({ value: 0 })
+
+    useFrame(({ clock: { elapsedTime } }) => {
+        time.current.value = elapsedTime
+    })
+
     return (
         <mesh position={[0.5, 0.5, 0]}>
             <shaderMaterial
                 vertexShader={vertexShader}
                 fragmentShader={fragmentShader}
                 uniforms={{
-                    diffuse: { value: dogTexture },
-                    overlay: { value: overlayTexture },
-                    tint: { value: new Vector4(1, 0.5, 0.5) },
+                    diffuse1: { value: dogTexture },
+                    uTime: time.current,
                 }}
             />
             <planeGeometry args={[1, 1]} />
@@ -47,8 +65,8 @@ const App = () => {
     )
 }
 
-export default () => (
-    <>
+export function Sketch() {
+    return (
         <Canvas>
             <App />
             <OrthographicCamera
@@ -63,5 +81,5 @@ export default () => (
                 position={[0, 0, 0.5]}
             />
         </Canvas>
-    </>
-)
+    )
+}
