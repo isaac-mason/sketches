@@ -108,10 +108,10 @@ const App = () => {
     )
 }
 
-export default () => (
-    <>
+export function Sketch() {
+    return (
         <Canvas shadows orthographic camera={{ position: [30, 30, 30], zoom: 0.6 }}>
             <App />
         </Canvas>
-    </>
-)
+    )
+}

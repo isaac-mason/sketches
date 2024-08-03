@@ -2975,6 +2975,57 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@sketches/particles-instanced-particles@workspace:sketches/particles/instanced-particles":
+  version: 0.0.0-use.local
+  resolution: "@sketches/particles-instanced-particles@workspace:sketches/particles/instanced-particles"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/postprocessing-emissive-bloom@workspace:sketches/postprocessing/emissive-bloom":
+  version: 0.0.0-use.local
+  resolution: "@sketches/postprocessing-emissive-bloom@workspace:sketches/postprocessing/emissive-bloom"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/postprocessing-pixelation@workspace:sketches/postprocessing/pixelation":
+  version: 0.0.0-use.local
+  resolution: "@sketches/postprocessing-pixelation@workspace:sketches/postprocessing/pixelation"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
 "@stitches/react@npm:^1.2.8":
   version: 1.2.8
   resolution: "@stitches/react@npm:1.2.8"

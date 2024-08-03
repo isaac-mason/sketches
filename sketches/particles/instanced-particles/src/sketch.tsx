@@ -165,7 +165,7 @@ const Pointer = (props: ThreeElements['object3D']) => {
     return <object3D {...props} ref={ref} />
 }
 
-export default function Sketch() {
+export function Sketch() {
     return (
         <Canvas>
             <InstancedParticles type="spark">

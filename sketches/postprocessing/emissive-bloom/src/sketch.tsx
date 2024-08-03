@@ -27,8 +27,8 @@ const App = () => {
     )
 }
 
-export default () => (
-    <>
+export function Sketch() {
+    return (
         <Canvas flat gl={{ logarithmicDepthBuffer: true }} camera={{ position: [3, 3, 3] }}>
             <App />
 
@@ -40,5 +40,5 @@ export default () => (
 
             <OrbitControls />
         </Canvas>
-    </>
-)
+    )
+}
