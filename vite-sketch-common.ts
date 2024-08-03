@@ -53,13 +53,13 @@ export const createCommonConfig = (currentDirectory: string): UserConfig => {
         build: {
             target: 'esnext',
         },
-        resolve: {
-            alias: {
-                '@/': path.resolve(`${rootRepoDirectory}/src`),
-            },
-        },
         worker: {
             format: 'es',
+        },
+        resolve: {
+            alias: {
+                '@/common': path.resolve(`${rootRepoDirectory}/common`),
+            },
         },
         // relative paths
         base: './',

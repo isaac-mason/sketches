@@ -4,7 +4,7 @@
     "version": "0.0.0",
     "type": "module",
     "scripts": {
-        "dev": "tsx vite-dev.ts",
+        "dev": "tsx dev.ts",
         "build": "bun build.ts",
         "build:container": "tsc && vite build",
         "preview": "vite preview",
@@ -68,7 +68,7 @@
         "vite-plugin-html": "^3.2.2"
     },
     "workspaces": [
-        "sketches/*"
+        "sketches/**/*"
     ],
     "packageManager": "yarn@4.1.1"
 }

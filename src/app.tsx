@@ -1,15 +1,15 @@
+import { useDebounce } from '../common'
 import { Component, ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, RouteObject, RouterProvider, createBrowserRouter, redirect, useLoaderData } from 'react-router-dom'
 import { createStyledBreakpointsTheme } from 'styled-breakpoints'
 import styled, { ThemeProvider } from 'styled-components'
 import { create } from 'zustand'
-import { useDebounce } from './common/hooks/use-debounce'
 import sketchesMetadata from './generated/sketches.json'
 import { ScreenshotKeyboardControls, useScreenshot } from './screenshot'
 
 type SketchMetadata = (typeof sketchesMetadata)[number] & { cover?: string; tags?: string[]; options?: { hidden: boolean } }
 
-const visibleSketches = (sketchesMetadata as SketchMetadata[]).filter((s) => !s.options.hidden)
+const visibleSketches = (sketchesMetadata as SketchMetadata[]).filter((s) => !s.options?.hidden)
 
 const theme = createStyledBreakpointsTheme()
 
@@ -377,7 +377,7 @@ const LazySketch = () => {
     return (
         <>
             <SketchWrapper ref={wrapperRef} className={isFullscreen ? 'fullscreen' : ''}>
-                {(!screenshotMode && sketchMetadata.options.displayTitle) ?? (true && <h1>{sketchMetadata?.title}</h1>)}
+                {(!screenshotMode && sketchMetadata.options?.displayTitle) ?? (true && <h1>{sketchMetadata?.title}</h1>)}
 
                 <iframe ref={iframeRef} src={sketchUrl} />
             </SketchWrapper>

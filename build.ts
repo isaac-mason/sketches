@@ -42,5 +42,9 @@ await Bun.write('./src/generated/sketches.json', JSON.stringify(sketchesMeta))
 // build sketches
 for (const { path } of sketchesMeta) {
     await $`(cd ./sketches/${path} && yarn build)`
-    await $`(cp -r ./sketches/${path}/dist ${import.meta.dir}/public/sketches-static/${path})`
+    await $`mkdir -p ${import.meta.dir}/public/sketches-static/${path}`
+    await $`(cp -r ./sketches/${path}/dist/* ${import.meta.dir}/public/sketches-static/${path})`
 }
+
+// build container
+await $`yarn build:container`
