@@ -14,6 +14,7 @@
         "build": "vite build"
     },
     "dependencies": {
+        "@react-three/csg": "^3.2.0",
         "@react-three/drei": "^9.108.3",
         "@react-three/fiber": "^8.16.8",
         "@react-three/rapier": "^1.4.0",

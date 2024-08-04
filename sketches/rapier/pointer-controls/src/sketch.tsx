@@ -1,18 +1,11 @@
+import { Canvas, getQueryParamOrDefault, usePageVisible } from '@/common'
 import Rapier from '@dimforge/rapier3d-compat'
 import { OrbitControls, Wireframe } from '@react-three/drei'
 import { Vector3 as Vector3Tuple, useThree } from '@react-three/fiber'
-import {
-    Physics,
-    RapierRigidBody,
-    RigidBody,
-    RigidBodyProps,
-    useRapier
-} from '@react-three/rapier'
+import { Physics, RapierRigidBody, RigidBody, RigidBodyProps, useRapier } from '@react-three/rapier'
 import { useControls } from 'leva'
 import { useEffect, useRef, useState } from 'react'
 import { Mesh, Quaternion, Raycaster, Vector3 } from 'three'
-import { Canvas, usePageVisible } from '@/common'
-import { getQueryParamOrDefault } from '@/common/utils/url-query-param'
 
 const LEVA_KEY = 'rapier-pointer-constraint'
 
@@ -150,7 +143,7 @@ const PointerControls = ({ target }: PointerConstraintControlsProps) => {
             }
 
             joint.current = null
-            
+
             setDragging(false)
         }
 

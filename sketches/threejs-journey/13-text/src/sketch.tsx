@@ -1,0 +1,66 @@
+import { Billboard, Float, Text } from '@react-three/drei'
+import { Canvas } from '@/common'
+import NotoEmojiRegular from './NotoEmoji-Regular.ttf'
+
+const Balloons = () => {
+    return (
+        <>
+            {Array.from({ length: 10 }).map((_, idx) => (
+                <Float key={idx} floatIntensity={1} rotationIntensity={2}>
+                    <Text fontSize={2} font={NotoEmojiRegular} scale={0.5} position={[0, 0, -idx * 2]}>
+                        🎈
+                        <meshNormalMaterial />
+                    </Text>
+                </Float>
+            ))}
+        </>
+    )
+}
+
+const Tadas = () => {
+    return (
+        <>
+            {Array.from({ length: 10 }).map((_, idx) => (
+                <Float key={idx} floatIntensity={1} rotationIntensity={2}>
+                    <Text fontSize={2} font={NotoEmojiRegular} scale={0.5} position={[-2.5, 0, -idx * 2]}>
+                        🎉
+                        <meshNormalMaterial />
+                    </Text>
+                </Float>
+            ))}
+        </>
+    )
+}
+
+const Confettis = () => {
+    return (
+        <>
+            {Array.from({ length: 10 }).map((_, idx) => (
+                <Float key={idx} floatIntensity={1} rotationIntensity={2}>
+                    <Text fontSize={2} font={NotoEmojiRegular} scale={0.5} position={[2.5, 0, -idx * 2]}>
+                        🎊
+                        <meshNormalMaterial />
+                    </Text>
+                </Float>
+            ))}
+        </>
+    )
+}
+
+export function Sketch() {
+    return (
+        <Canvas camera={{ position: [0, 2, 5] }}>
+            <Float>
+                <Billboard follow>
+                    <Text fontSize={0.5} position={[0, -2, 0]}>
+                        Yeeeew!
+                    </Text>
+                </Billboard>
+            </Float>
+
+            <Tadas />
+            <Balloons />
+            <Confettis />
+        </Canvas>
+    )
+}

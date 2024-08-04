@@ -3144,6 +3144,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/rapier-custom-raycast-vehicle@workspace:sketches/rapier/custom-raycast-vehicle"
   dependencies:
+    "@react-three/csg": "npm:^3.2.0"
     "@react-three/drei": "npm:^9.108.3"
     "@react-three/fiber": "npm:^8.16.8"
     "@react-three/rapier": "npm:^1.4.0"
@@ -3284,6 +3285,535 @@ __metadata:
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.166.0"
     leva: "npm:^0.9.35"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/raytracing-hello-world@workspace:sketches/raytracing/hello-world":
+  version: 0.0.0-use.local
+  resolution: "@sketches/raytracing-hello-world@workspace:sketches/raytracing/hello-world"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    leva: "npm:^0.9.35"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/recast-navigation-busy-street-crossing@workspace:sketches/recast-navigation/busy-street-crossing":
+  version: 0.0.0-use.local
+  resolution: "@sketches/recast-navigation-busy-street-crossing@workspace:sketches/recast-navigation/busy-street-crossing"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    leva: "npm:^0.9.35"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    recast-navigation: "npm:^0.33.0"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/recast-navigation-character-controller@workspace:sketches/recast-navigation/character-controller":
+  version: 0.0.0-use.local
+  resolution: "@sketches/recast-navigation-character-controller@workspace:sketches/recast-navigation/character-controller"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    leva: "npm:^0.9.35"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    recast-navigation: "npm:^0.33.0"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/recast-navigation-dynamic-tiled-navmesh@workspace:sketches/recast-navigation/dynamic-tiled-navmesh":
+  version: 0.0.0-use.local
+  resolution: "@sketches/recast-navigation-dynamic-tiled-navmesh@workspace:sketches/recast-navigation/dynamic-tiled-navmesh"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@react-three/rapier": "npm:^1.4.0"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    leva: "npm:^0.9.35"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    recast-navigation: "npm:^0.33.0"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/recast-navigation-rigid-body-agent@workspace:sketches/recast-navigation/rigid-body-agent":
+  version: 0.0.0-use.local
+  resolution: "@sketches/recast-navigation-rigid-body-agent@workspace:sketches/recast-navigation/rigid-body-agent"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@react-three/rapier": "npm:^1.4.0"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    leva: "npm:^0.9.35"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    recast-navigation: "npm:^0.33.0"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/sound-spatial@workspace:sketches/sound/spatial":
+  version: 0.0.0-use.local
+  resolution: "@sketches/sound-spatial@workspace:sketches/sound/spatial"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/sprites-face-camera@workspace:sketches/sprites/face-camera":
+  version: 0.0.0-use.local
+  resolution: "@sketches/sprites-face-camera@workspace:sketches/sprites/face-camera"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/sticky-notes@workspace:sketches/sticky-notes":
+  version: 0.0.0-use.local
+  resolution: "@sketches/sticky-notes@workspace:sketches/sticky-notes"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    "@use-gesture/react": "npm:^10.3.1"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    styled-components: "npm:^6.1.11"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/threejs-journey-03-basic@workspace:sketches/threejs-journey/03-basic":
+  version: 0.0.0-use.local
+  resolution: "@sketches/threejs-journey-03-basic@workspace:sketches/threejs-journey/03-basic"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/threejs-journey-05-transforms@workspace:sketches/threejs-journey/05-transforms":
+  version: 0.0.0-use.local
+  resolution: "@sketches/threejs-journey-05-transforms@workspace:sketches/threejs-journey/05-transforms"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/threejs-journey-06-animations@workspace:sketches/threejs-journey/06-animations":
+  version: 0.0.0-use.local
+  resolution: "@sketches/threejs-journey-06-animations@workspace:sketches/threejs-journey/06-animations"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/threejs-journey-07-cameras@workspace:sketches/threejs-journey/07-cameras":
+  version: 0.0.0-use.local
+  resolution: "@sketches/threejs-journey-07-cameras@workspace:sketches/threejs-journey/07-cameras"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/threejs-journey-09-geometries@workspace:sketches/threejs-journey/09-geometries":
+  version: 0.0.0-use.local
+  resolution: "@sketches/threejs-journey-09-geometries@workspace:sketches/threejs-journey/09-geometries"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/threejs-journey-11-textures@workspace:sketches/threejs-journey/11-textures":
+  version: 0.0.0-use.local
+  resolution: "@sketches/threejs-journey-11-textures@workspace:sketches/threejs-journey/11-textures"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/threejs-journey-12-materials@workspace:sketches/threejs-journey/12-materials":
+  version: 0.0.0-use.local
+  resolution: "@sketches/threejs-journey-12-materials@workspace:sketches/threejs-journey/12-materials"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/threejs-journey-13-text@workspace:sketches/threejs-journey/13-text":
+  version: 0.0.0-use.local
+  resolution: "@sketches/threejs-journey-13-text@workspace:sketches/threejs-journey/13-text"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/threejs-journey-15-lights@workspace:sketches/threejs-journey/15-lights":
+  version: 0.0.0-use.local
+  resolution: "@sketches/threejs-journey-15-lights@workspace:sketches/threejs-journey/15-lights"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/threejs-journey-16-shadows@workspace:sketches/threejs-journey/16-shadows":
+  version: 0.0.0-use.local
+  resolution: "@sketches/threejs-journey-16-shadows@workspace:sketches/threejs-journey/16-shadows"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/threejs-journey-17-haunted-house@workspace:sketches/threejs-journey/17-haunted-house":
+  version: 0.0.0-use.local
+  resolution: "@sketches/threejs-journey-17-haunted-house@workspace:sketches/threejs-journey/17-haunted-house"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/threejs-journey-18-1-particles@workspace:sketches/threejs-journey/18-1-particles":
+  version: 0.0.0-use.local
+  resolution: "@sketches/threejs-journey-18-1-particles@workspace:sketches/threejs-journey/18-1-particles"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/threejs-journey-18-2-particles@workspace:sketches/threejs-journey/18-2-particles":
+  version: 0.0.0-use.local
+  resolution: "@sketches/threejs-journey-18-2-particles@workspace:sketches/threejs-journey/18-2-particles"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/threejs-journey-19-galaxy-generator@workspace:sketches/threejs-journey/19-galaxy-generator":
+  version: 0.0.0-use.local
+  resolution: "@sketches/threejs-journey-19-galaxy-generator@workspace:sketches/threejs-journey/19-galaxy-generator"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    leva: "npm:^0.9.35"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/threejs-journey-27-shaders@workspace:sketches/threejs-journey/27-shaders":
+  version: 0.0.0-use.local
+  resolution: "@sketches/threejs-journey-27-shaders@workspace:sketches/threejs-journey/27-shaders"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    leva: "npm:^0.9.35"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/threejs-journey-28-raging-sea@workspace:sketches/threejs-journey/28-raging-sea":
+  version: 0.0.0-use.local
+  resolution: "@sketches/threejs-journey-28-raging-sea@workspace:sketches/threejs-journey/28-raging-sea"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    leva: "npm:^0.9.35"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/threejs-journey-29-animated-galaxy@workspace:sketches/threejs-journey/29-animated-galaxy":
+  version: 0.0.0-use.local
+  resolution: "@sketches/threejs-journey-29-animated-galaxy@workspace:sketches/threejs-journey/29-animated-galaxy"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    leva: "npm:^0.9.35"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/threejs-journey-30-modified-materials@workspace:sketches/threejs-journey/30-modified-materials":
+  version: 0.0.0-use.local
+  resolution: "@sketches/threejs-journey-30-modified-materials@workspace:sketches/threejs-journey/30-modified-materials"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    leva: "npm:^0.9.35"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/transparency-face-sorting@workspace:sketches/transparency/face-sorting":
+  version: 0.0.0-use.local
+  resolution: "@sketches/transparency-face-sorting@workspace:sketches/transparency/face-sorting"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/tris-in-box@workspace:sketches/tris-in-box":
+  version: 0.0.0-use.local
+  resolution: "@sketches/tris-in-box@workspace:sketches/tris-in-box"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/xr-basic-vr@workspace:sketches/xr/basic-vr":
+  version: 0.0.0-use.local
+  resolution: "@sketches/xr-basic-vr@workspace:sketches/xr/basic-vr"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@react-three/xr": "npm:^5.7.1"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/z-fighting-mitigations@workspace:sketches/z-fighting-mitigations":
+  version: 0.0.0-use.local
+  resolution: "@sketches/z-fighting-mitigations@workspace:sketches/z-fighting-mitigations"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     three: "npm:^0.166.1"

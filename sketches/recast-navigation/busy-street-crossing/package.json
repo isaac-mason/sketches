@@ -1,0 +1,32 @@
+{
+    "name": "@sketches/recast-navigation-busy-street-crossing",
+    "private": true,
+    "sketch": {
+        "title": "Recast Navigation - Busy Street Crossing",
+        "tags": [
+            "recast-navigation",
+            "navigation",
+            "pathfinding"
+        ]
+    },
+    "scripts": {
+        "dev": "vite dev",
+        "build": "vite build"
+    },
+    "dependencies": {
+        "@react-three/drei": "^9.108.3",
+        "@react-three/fiber": "^8.16.8",
+        "leva": "^0.9.35",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
+        "recast-navigation": "^0.33.0",
+        "three": "^0.166.1"
+    },
+    "devDependencies": {
+        "@types/react": "^18.3.3",
+        "@types/react-dom": "^18.3.0",
+        "@types/three": "^0.166.0",
+        "typescript": "^5.5.3",
+        "vite": "^5.3.3"
+    }
+}
