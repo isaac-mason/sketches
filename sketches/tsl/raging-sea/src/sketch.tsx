@@ -49,7 +49,7 @@ const waterColor = mix(wavesLowColor, wavesHighColor, elevation.mul(wavesColorMu
 
 waterMaterial.colorNode = waterColor
 
-export default function Sketch() {
+export function Sketch() {
     return (
         <WebGPUCanvas>
             <mesh rotation-x={-Math.PI / 2}>

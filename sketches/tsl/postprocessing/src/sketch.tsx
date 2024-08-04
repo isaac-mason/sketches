@@ -40,7 +40,7 @@ const PostProcessing = () => {
     return null
 }
 
-export default function Sketch() {
+export function Sketch() {
     return (
         <WebGPUCanvas>
             <mesh>

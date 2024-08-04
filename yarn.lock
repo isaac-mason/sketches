@@ -4030,6 +4030,74 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@sketches/tsl-gradient@workspace:sketches/tsl/gradient":
+  version: 0.0.0-use.local
+  resolution: "@sketches/tsl-gradient@workspace:sketches/tsl/gradient"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/tsl-hello-world@workspace:sketches/tsl/hello-world":
+  version: 0.0.0-use.local
+  resolution: "@sketches/tsl-hello-world@workspace:sketches/tsl/hello-world"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/tsl-raging-sea@workspace:sketches/tsl/raging-sea":
+  version: 0.0.0-use.local
+  resolution: "@sketches/tsl-raging-sea@workspace:sketches/tsl/raging-sea"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/tsl-vignette@workspace:sketches/tsl/postprocessing":
+  version: 0.0.0-use.local
+  resolution: "@sketches/tsl-vignette@workspace:sketches/tsl/postprocessing"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
 "@sketches/xr-basic-vr@workspace:sketches/xr/basic-vr":
   version: 0.0.0-use.local
   resolution: "@sketches/xr-basic-vr@workspace:sketches/xr/basic-vr"

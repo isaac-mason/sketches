@@ -13,14 +13,16 @@ material.colorNode = mix(red, blue, sin(time))
 
 material.positionNode = positionLocal.add(vec3(0, sin(time).mul(0.2), 0))
 
-export default () => (
-    <WebGPUCanvas>
-        <mesh>
-            <boxGeometry />
-            <primitive attach="material" object={material} />
-        </mesh>
+export function Sketch() {
+    return (
+        <WebGPUCanvas>
+            <mesh>
+                <boxGeometry />
+                <primitive attach="material" object={material} />
+            </mesh>
 
-        <OrbitControls />
-        <PerspectiveCamera position={[2, 1, 2]} makeDefault />
-    </WebGPUCanvas>
-)
+            <OrbitControls />
+            <PerspectiveCamera position={[2, 1, 2]} makeDefault />
+        </WebGPUCanvas>
+    )
+}
