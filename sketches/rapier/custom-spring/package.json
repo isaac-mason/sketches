@@ -1,0 +1,31 @@
+{
+    "name": "@sketches/rapier-custom-spring",
+    "private": true,
+    "sketch": {
+        "title": "Rapier - Custom Spring",
+        "tags": [
+            "rapier",
+            "spring"
+        ]
+    },
+    "scripts": {
+        "dev": "vite dev",
+        "build": "vite build"
+    },
+    "dependencies": {
+        "@react-three/drei": "^9.108.3",
+        "@react-three/fiber": "^8.16.8",
+        "@react-three/rapier": "^1.4.0",
+        "leva": "^0.9.35",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
+        "three": "^0.166.1"
+    },
+    "devDependencies": {
+        "@types/react": "^18.3.3",
+        "@types/react-dom": "^18.3.0",
+        "@types/three": "^0.166.0",
+        "typescript": "^5.5.3",
+        "vite": "^5.3.3"
+    }
+}

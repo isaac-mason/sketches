@@ -3083,6 +3083,215 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@sketches/rapier-arcade-vehicle-controller@workspace:sketches/rapier/arcade-vehicle-controller":
+  version: 0.0.0-use.local
+  resolution: "@sketches/rapier-arcade-vehicle-controller@workspace:sketches/rapier/arcade-vehicle-controller"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@react-three/rapier": "npm:^1.4.0"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    leva: "npm:^0.9.35"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/rapier-ball-pit-mixer@workspace:sketches/rapier/ball-pit-mixer":
+  version: 0.0.0-use.local
+  resolution: "@sketches/rapier-ball-pit-mixer@workspace:sketches/rapier/ball-pit-mixer"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@react-three/rapier": "npm:^1.4.0"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    leva: "npm:^0.9.35"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/rapier-cluster@workspace:sketches/rapier/cluster":
+  version: 0.0.0-use.local
+  resolution: "@sketches/rapier-cluster@workspace:sketches/rapier/cluster"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@react-three/rapier": "npm:^1.4.0"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    leva: "npm:^0.9.35"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/rapier-custom-raycast-vehicle@workspace:sketches/rapier/custom-raycast-vehicle":
+  version: 0.0.0-use.local
+  resolution: "@sketches/rapier-custom-raycast-vehicle@workspace:sketches/rapier/custom-raycast-vehicle"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@react-three/rapier": "npm:^1.4.0"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    leva: "npm:^0.9.35"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/rapier-custom-spring@workspace:sketches/rapier/custom-spring":
+  version: 0.0.0-use.local
+  resolution: "@sketches/rapier-custom-spring@workspace:sketches/rapier/custom-spring"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@react-three/rapier": "npm:^1.4.0"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    leva: "npm:^0.9.35"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/rapier-dynamic-raycast-vehicle-controller@workspace:sketches/rapier/dynamic-raycast-vehicle-controller":
+  version: 0.0.0-use.local
+  resolution: "@sketches/rapier-dynamic-raycast-vehicle-controller@workspace:sketches/rapier/dynamic-raycast-vehicle-controller"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@react-three/rapier": "npm:^1.4.0"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    leva: "npm:^0.9.35"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/rapier-kinematic-character-controller@workspace:sketches/rapier/kinematic-character-controller":
+  version: 0.0.0-use.local
+  resolution: "@sketches/rapier-kinematic-character-controller@workspace:sketches/rapier/kinematic-character-controller"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@react-three/rapier": "npm:^1.4.0"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    leva: "npm:^0.9.35"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/rapier-pointer-controls@workspace:sketches/rapier/pointer-controls":
+  version: 0.0.0-use.local
+  resolution: "@sketches/rapier-pointer-controls@workspace:sketches/rapier/pointer-controls"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@react-three/rapier": "npm:^1.4.0"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    leva: "npm:^0.9.35"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/rapier-pointer-raycasting@workspace:sketches/rapier/pointer-raycasting":
+  version: 0.0.0-use.local
+  resolution: "@sketches/rapier-pointer-raycasting@workspace:sketches/rapier/pointer-raycasting"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@react-three/rapier": "npm:^1.4.0"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    leva: "npm:^0.9.35"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/rapier-raycasting@workspace:sketches/rapier/raycasting":
+  version: 0.0.0-use.local
+  resolution: "@sketches/rapier-raycasting@workspace:sketches/rapier/raycasting"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@react-three/rapier": "npm:^1.4.0"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    leva: "npm:^0.9.35"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/rapier-revolute-joint-vehicle@workspace:sketches/rapier/revolute-joint-vehicle":
+  version: 0.0.0-use.local
+  resolution: "@sketches/rapier-revolute-joint-vehicle@workspace:sketches/rapier/revolute-joint-vehicle"
+  dependencies:
+    "@react-three/drei": "npm:^9.108.3"
+    "@react-three/fiber": "npm:^8.16.8"
+    "@react-three/rapier": "npm:^1.4.0"
+    "@types/react": "npm:^18.3.3"
+    "@types/react-dom": "npm:^18.3.0"
+    "@types/three": "npm:^0.166.0"
+    leva: "npm:^0.9.35"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.166.1"
+    typescript: "npm:^5.5.3"
+    vite: "npm:^5.3.3"
+  languageName: unknown
+  linkType: soft
+
 "@stitches/react@npm:^1.2.8":
   version: 1.2.8
   resolution: "@stitches/react@npm:1.2.8"
