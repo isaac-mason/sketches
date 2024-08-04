@@ -16,25 +16,29 @@ const packages = (await $`ls ${import.meta.dir}/sketches/**/package.json | grep 
     .split('\n')
     .filter(Boolean)
 
-const sketchesMeta = await Promise.all(
-    packages.map(async (packagePath) => {
-        const packageJson = await Bun.file(packagePath).json()
+const sketchesMeta = (
+    await Promise.all(
+        packages.map(async (packagePath) => {
+            const packageJson = await Bun.file(packagePath).json()
 
-        let path = packagePath.replace(import.meta.dir, '')
-        path = path.replace('/sketches/', '')
-        path = path.replace('/package.json', '')
+            const sketch = packageJson.sketch
 
-        const details = packageJson.sketch
+            if (!sketch) return null
 
-        const hasCoverImage = await Bun.file(`${import.meta.dir}/sketches/${path}/cover.jpg`).exists()
+            let path = packagePath.replace(import.meta.dir, '')
+            path = path.replace('/sketches/', '')
+            path = path.replace('/package.json', '')
 
-        return {
-            ...details,
-            path,
-            cover: hasCoverImage ? `${path}/cover.jpg` : undefined,
-        }
-    }),
-)
+            const hasCoverImage = await Bun.file(`${import.meta.dir}/sketches/${path}/cover.jpg`).exists()
+
+            return {
+                ...sketch,
+                path,
+                cover: hasCoverImage ? `${path}/cover.jpg` : undefined,
+            }
+        }),
+    )
+).filter(Boolean)
 
 // write sketch meta
 await Bun.write('./src/generated/sketches.json', JSON.stringify(sketchesMeta))

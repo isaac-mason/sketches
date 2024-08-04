@@ -1,10 +1,10 @@
 {
-    "name": "@sketches/threejs-journey-09-geometries",
+    "name": "@sketches/simple-voxels-multiple-worlds",
     "private": true,
     "sketch": {
-        "title": "Journey Lesson 9 - geometries",
+        "title": "Simple Voxels - Multiple Worlds",
         "tags": [
-            "threejs-journey"
+            "voxels"
         ]
     },
     "scripts": {
@@ -12,12 +12,18 @@
         "build": "vite build"
     },
     "dependencies": {
+        "@dimforge/rapier3d-compat": "^0.14.0",
         "@react-three/drei": "^9.108.3",
         "@react-three/fiber": "^8.16.8",
-        "@react-three/flex": "^1.0.1",
+        "@react-three/rapier": "^1.4.0",
+        "arancini": "^6.6.1",
+        "leva": "^0.9.35",
+        "maath": "^0.10.8",
         "react": "^18.3.1",
+        "react-colorful": "^5.6.1",
         "react-dom": "^18.3.1",
-        "three": "^0.166.1"
+        "three": "^0.166.1",
+        "tunnel-rat": "^0.1.2"
     },
     "devDependencies": {
         "@types/react": "^18.3.3",

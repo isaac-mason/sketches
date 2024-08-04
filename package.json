@@ -68,7 +68,8 @@
         "vite-plugin-html": "^3.2.2"
     },
     "workspaces": [
-        "sketches/**/*"
+        "sketches/**/*",
+        "common"
     ],
     "packageManager": "yarn@4.1.1"
 }
