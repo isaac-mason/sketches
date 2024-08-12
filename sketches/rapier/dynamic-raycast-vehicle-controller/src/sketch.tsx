@@ -5,7 +5,7 @@ import { useControls } from 'leva'
 import { RefObject, useRef, useState } from 'react'
 import styled from 'styled-components'
 import * as THREE from 'three'
-import { Canvas, useLoadingAssets, usePageVisible } from '@/common'
+import { Canvas, Instructions, useLoadingAssets, usePageVisible } from '@/common'
 import racetrackGlbUrl from './racetrack.glb?url'
 import { WheelInfo, useVehicleController } from './use-vehicle-controller'
 import { Collider } from '@dimforge/rapier3d-compat'
@@ -255,14 +255,6 @@ const Scene = () => {
     )
 }
 
-const Instructions = styled.div`
-    color: white;
-    font-size: 1.2em;
-    left: 50px;
-    position: absolute;
-    bottom: 30px;
-`
-
 export function Sketch() {
     const pageVisible = usePageVisible()
     const loading = useLoadingAssets()
@@ -290,15 +282,13 @@ export function Sketch() {
             </Canvas>
 
             <Instructions>
-                <pre>
-                    * offroad is lava !
-                    <br />
-                    <br />
-                    wasd to drive
-                    <br />
-                    space to brake
-                    <br />r to reset
-                </pre>
+                * offroad is lava !
+                <br />
+                <br />
+                wasd to drive
+                <br />
+                space to brake
+                <br />r to reset
             </Instructions>
         </>
     )

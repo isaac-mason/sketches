@@ -1,8 +1,7 @@
-import react from '@vitejs/plugin-react'
+import react from '@vitejs/plugin-react-swc'
 import { defineConfig } from 'vite'
 import { imagetools } from 'vite-imagetools'
 import { createHtmlPlugin } from 'vite-plugin-html'
-import basicSsl from '@vitejs/plugin-basic-ssl'
 import * as path from 'path'
 
 // https://vitejs.dev/config/
@@ -31,14 +30,7 @@ export default defineConfig(() => {
 
     return {
         plugins: [
-            react({
-                babel: {
-                    plugins: [
-                        ['@babel/plugin-proposal-decorators', { legacy: true }],
-                        ['@babel/plugin-proposal-class-properties', { loose: true }],
-                    ],
-                },
-            }),
+            react(),
             createHtmlPlugin({
                 minify: true,
                 inject: {
@@ -48,26 +40,11 @@ export default defineConfig(() => {
                 },
             }),
             imagetools(),
-            // hack: work around issues with WebGPURenderer
-            {
-                name: 'no-treeshake-three-examples-jsm-renderers',
-                transform(_code, id) {
-                    if (id.includes('three/examples/jsm/renderers')) {
-                        return { moduleSideEffects: 'no-treeshake' }
-                    }
-                },
-            },
-            // for easy local development using features that require a secure context
-            basicSsl(),
         ],
         optimizeDeps: {
             esbuildOptions: {
                 target: 'esnext',
             },
-            exclude: [
-                // these packages do not play nicely with vite pre-bundling
-                'recast-navigation',
-            ],
         },
         build: {
             target: 'esnext',
@@ -76,9 +53,6 @@ export default defineConfig(() => {
             alias: {
                 '@common': path.resolve(import.meta.dirname, './common'),
             },
-        },
-        worker: {
-            format: 'es',
         },
         publicDir: 'public',
     }

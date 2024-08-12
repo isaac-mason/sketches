@@ -1,17 +1,17 @@
-import { useDebounce } from '../common'
 import { Component, ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, RouteObject, RouterProvider, createBrowserRouter, redirect, useLoaderData } from 'react-router-dom'
-import { createStyledBreakpointsTheme } from 'styled-breakpoints'
-import styled, { ThemeProvider } from 'styled-components'
+import styled from 'styled-components'
 import { create } from 'zustand'
-import sketchesMetadata from './generated/sketches.json'
+import { useDebounce } from '../../common'
+import sketchesMetadata from '../generated/sketches.json'
 import { ScreenshotKeyboardControls, useScreenshot } from './screenshot'
+import { Theme } from './theme'
+import { GitHubIcon } from './svgs/GitHubIcon'
+import { WindowMaximizeIcon } from './svgs/WindowMaximizeIcon'
 
-type SketchMetadata = (typeof sketchesMetadata)[number] & { cover?: string; tags?: string[]; options?: { hidden: boolean } }
+type SketchMetadata = (typeof sketchesMetadata)[number] & { cover?: string }
 
-const visibleSketches = (sketchesMetadata as SketchMetadata[]).filter((s) => !s.options?.hidden)
-
-const theme = createStyledBreakpointsTheme()
+const sketches = (sketchesMetadata as SketchMetadata[]).filter((s) => !s.options?.hidden)
 
 const Error = styled.div`
     width: 100%;
@@ -22,9 +22,34 @@ const Error = styled.div`
     color: #fff;
 `
 
-const GithubLink = styled.a`
+// const GithubLink = styled.a`
+//     position: absolute;
+//     z-index: 2;
+
+//     font-size: 1.2em;
+//     margin: 0;
+//     text-decoration: none;
+
+//     color: #eee;
+//     text-shadow: 2px 2px #333;
+//     font-family: 'Poppins', sans-serif;
+
+//     bottom: 20px;
+//     right: 20px;
+
+//     ${({ theme }) => theme.breakpoints.up('md')} {
+//         bottom: 60px;
+//         right: 60px;
+//     }
+// `
+
+const Links = styled.div`
     position: absolute;
     z-index: 2;
+
+    display: flex;
+    align-items: center;
+    gap: 1em;
 
     font-size: 1.2em;
     margin: 0;
@@ -38,8 +63,20 @@ const GithubLink = styled.a`
     right: 20px;
 
     ${({ theme }) => theme.breakpoints.up('md')} {
-        bottom: 60px;
-        right: 60px;
+        bottom: 30px;
+        right: 30px;
+    }
+
+    a {
+        display: block;
+        width: 40px;
+        height: 40px;
+        padding: 0.5em;
+        border-radius: 0.2em;
+
+        stroke: #fff;
+        fill: #fff;
+        background-color: #cccccc33;
     }
 `
 
@@ -278,7 +315,7 @@ const SketchWrapper = styled.div`
 
         margin: 0;
         padding-right: 20px;
-        
+
         font-size: 2em;
         font-weight: 900;
         line-height: 1.2;
@@ -305,6 +342,7 @@ const SketchWrapper = styled.div`
 
 type SketchLoaderData = {
     sketchPath: string
+    sketchUrl: string
     sketchMetadata: SketchMetadata
 }
 
@@ -341,28 +379,26 @@ const useIsFullscreen = () => {
 }
 
 const LazySketch = () => {
-    const { sketchMetadata } = useLoaderData() as SketchLoaderData
+    const { sketchMetadata, sketchPath, sketchUrl } = useLoaderData() as SketchLoaderData
 
     const wrapperRef = useRef<HTMLDivElement>(null!)
-    const iframeRef = useRef<HTMLIFrameElement>(null!)
+    const [iframe, setIframe] = useState<HTMLIFrameElement | null>()
 
     const { screenshotMode } = useScreenshot()
     const isFullscreen = useIsFullscreen()
-
-    const sketchUrl = `/sketches-static/${sketchMetadata.path}/index.html`
 
     useEffect(() => {
         if (!sketchMetadata) return
 
         document.title = sketchMetadata.path === 'intro' ? 'Sketches | Isaac Mason' : `${sketchMetadata.title} | Sketches`
-
-        gtag('event', 'sketch_navigation', { route: sketchMetadata.path, title: sketchMetadata.title })
     }, [sketchMetadata])
 
     useEffect(() => {
+        if (!iframe) return
+
         const onResize = () => {
-            iframeRef.current.style.width = `${wrapperRef.current.clientWidth}px`
-            iframeRef.current.style.height = `${wrapperRef.current.clientHeight}px`
+            iframe.style.width = `${wrapperRef.current.clientWidth}px`
+            iframe.style.height = `${wrapperRef.current.clientHeight}px`
         }
 
         const resizeObserver = new ResizeObserver(onResize)
@@ -372,14 +408,14 @@ const LazySketch = () => {
         return () => {
             resizeObserver.disconnect()
         }
-    }, [])
+    }, [iframe])
 
     return (
         <>
             <SketchWrapper ref={wrapperRef} className={isFullscreen ? 'fullscreen' : ''}>
                 {(!screenshotMode && sketchMetadata.options?.displayTitle) ?? (true && <h1>{sketchMetadata?.title}</h1>)}
 
-                <iframe ref={iframeRef} src={sketchUrl} />
+                <iframe key={sketchPath} ref={setIframe} src={sketchUrl} allow="cross-origin-isolated" />
             </SketchWrapper>
         </>
     )
@@ -434,9 +470,9 @@ const SideNav = () => {
     const debouncedSearchTerm = useDebounce(searchTerm)
 
     const filteredSketches = useMemo(() => {
-        if (searchTerm.trim() === '') return visibleSketches
+        if (searchTerm.trim() === '') return sketches
 
-        return visibleSketches.filter((s) => {
+        return sketches.filter((s) => {
             const match = `${s?.title.toLowerCase() ?? ''} ${s?.tags?.join(' ').toLowerCase() ?? ''}`
 
             return match.includes(searchTerm.toLowerCase())
@@ -464,7 +500,7 @@ const SideNav = () => {
 }
 
 const App = () => {
-    const { sketchPath } = useLoaderData() as SketchLoaderData
+    const { sketchPath, sketchUrl } = useLoaderData() as SketchLoaderData
 
     const { open: navOpen, toggleNav, closeNav } = useNav()
     const { screenshotMode } = useScreenshot()
@@ -492,9 +528,18 @@ const App = () => {
             <ScreenshotKeyboardControls />
 
             {!screenshotMode && !isFullscreen ? (
-                <GithubLink target="_blank" href={`https://github.com/isaac-mason/sketches/tree/main/sketches/${sketchPath}`}>
-                    GitHub
-                </GithubLink>
+                // <GithubLink target="_blank" href={`https://github.com/isaac-mason/sketches/tree/main/sketches/${sketchPath}`}>
+                //     GitHub
+                // </GithubLink>
+                <Links>
+                    <a target="_blank" href={`https://github.com/isaac-mason/sketches/tree/main/sketches/${sketchPath}`}>
+                        <GitHubIcon />
+                    </a>
+
+                    <a target="_blank" href={sketchUrl}>
+                        <WindowMaximizeIcon />
+                    </a>
+                </Links>
             ) : undefined}
         </>
     )
@@ -512,9 +557,12 @@ const routes: RouteObject[] = [
 
                 const sketchMetadata = sketchesMetadata.find((s) => s.path === sketchPath)! as SketchMetadata
 
+                const sketchUrl = `/sketches-static/${sketchMetadata.path}/index.html`
+
                 return {
                     sketchPath,
                     sketchMetadata,
+                    sketchUrl,
                 }
             },
         }
@@ -533,8 +581,8 @@ const router = createBrowserRouter(routes, {})
 
 export default () => {
     return (
-        <ThemeProvider theme={theme}>
+        <Theme>
             <RouterProvider router={router} />
-        </ThemeProvider>
+        </Theme>
     )
 }

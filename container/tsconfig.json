@@ -21,6 +21,6 @@
             "@/common": ["./common/index.ts"]
         }
     },
-    "include": ["src", "common", "sketches/box-edge-outline", "sketches/character-animation", "sketches/d3", "sketches/falling-sand", "sketches/fractals", "sketches/game-of-life", "sketches/game-ui-ux", "sketches/glsl-shaders-from-scratch", "sketches/grid-pathfinding", "sketches/melodic-marble-run", "sketches/nature", "sketches/p2-es", "sketches/particles", "sketches/postprocessing", "sketches/procedural-generation", "sketches/rapier", "sketches/raytracing", "sketches/recast-navigation", "sketches/sound", "sketches/sprites", "sketches/sticky-notes", "sketches/threejs-journey", "sketches/transparency", "sketches/tris-in-box", "sketches/tsl", "sketches/voxels", "sketches/xr", "sketches/z-fighting-mitigations"],
+    "include": ["src", "generated", "common"],
     "references": [{ "path": "./tsconfig.node.json" }]
 }

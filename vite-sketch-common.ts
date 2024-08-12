@@ -1,8 +1,10 @@
 import basicSsl from '@vitejs/plugin-basic-ssl'
-import react from '@vitejs/plugin-react'
+import react from '@vitejs/plugin-react-swc';
 import * as fs from 'fs'
 import * as path from 'path'
 import { defineConfig, UserConfig } from 'vite'
+
+// todo - fixing @/common/* alias for non barrel imports
 
 function findRootPackageJson(currentDirectory: string) {
     while (currentDirectory !== path.parse(currentDirectory).root) {
@@ -22,8 +24,6 @@ function findRootPackageJson(currentDirectory: string) {
 export const createCommonConfig = (currentDirectory: string): UserConfig => {
     const rootRepoDirectory = findRootPackageJson(currentDirectory)
 
-    console.log(rootRepoDirectory)
-
     return defineConfig({
         plugins: [
             react(),
@@ -34,12 +34,20 @@ export const createCommonConfig = (currentDirectory: string): UserConfig => {
                         // required for SharedArrayBuffer
                         res.setHeader('Cross-Origin-Opener-Policy', 'same-origin')
                         res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp')
+
+                        // required for iframe embed
+                        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin')
+
+                        // res.setHeader('Cross-Origin-Opener-Policy', 'same-origin')
+                        // res.setHeader('Cross-Origin-Embedder-Policy', 'credentialless')
                         next()
                     })
                 },
             },
             // for easy local development using features that require a secure context
-            basicSsl(),
+            basicSsl({
+                certDir: path.resolve(rootRepoDirectory, 'dev', 'certs'),
+            }),
         ],
         optimizeDeps: {
             esbuildOptions: {
@@ -61,7 +69,7 @@ export const createCommonConfig = (currentDirectory: string): UserConfig => {
                 '@/common': path.resolve(`${rootRepoDirectory}/common`),
             },
         },
-        // relative paths
+        // relative
         base: './',
     })
 }

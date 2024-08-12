@@ -254,7 +254,7 @@ const CameraRig = () => {
     return null
 }
 
-export default function Sketch() {
+export function Sketch() {
     return (
         <Canvas shadows dpr={[1, 1.5]}>
             {/* bunnies */}

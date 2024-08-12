@@ -1,7 +1,7 @@
+import { Canvas } from '@/common'
 import { useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
 import { Mesh } from 'three'
-import { Canvas } from '@/common'
 
 const App = () => {
     const ref = useRef<Mesh>(null!)

@@ -2,7 +2,11 @@
     "name": "@sketches/lines",
     "private": true,
     "sketch": {
-        "title": "Lines - Image"
+        "title": "Lines - Image",
+        "tags": [
+            "lines",
+            "image"
+        ]
     },
     "scripts": {
         "dev": "vite dev",

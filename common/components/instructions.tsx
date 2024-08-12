@@ -5,15 +5,15 @@ const InstructionsWrapper = styled.div`
     font-size: 1.2em;
     left: 50px;
     position: absolute;
-    bottom: 60px;
+    bottom: 30px;
     line-height: 1.5;
     display: flex;
     align-items: center;
     justify-content: flex-end;
 
-    pre {
-        margin: 0;
-    }
+    display: block;
+    font-family: monospace;
+    white-space: pre;
 `
 
 type InstructionsProps = {
@@ -21,9 +21,5 @@ type InstructionsProps = {
 }
 
 export const Instructions = ({ children }: InstructionsProps) => {
-    return (
-        <InstructionsWrapper>
-            <pre>{children}</pre>
-        </InstructionsWrapper>
-    )
+    return <InstructionsWrapper>{children}</InstructionsWrapper>
 }

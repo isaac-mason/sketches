@@ -1,6 +1,6 @@
 
 import { Vector3 } from 'three'
-import { CHUNK_SIZE, Chunk, World } from '../lib/world'
+import { CHUNK_SIZE, Chunk, World } from '../../lib/world'
 
 const VOXEL_FACE_DIRECTIONS: {
     // direction of the neighbour voxel

@@ -1,7 +1,6 @@
 import { Canvas } from '@/common'
 import { OrbitControls, useAnimations, useGLTF } from '@react-three/drei'
-import React, { useEffect, useState } from 'react'
-import ReactDOM from 'react-dom/client'
+import { useEffect, useState } from 'react'
 import { LoopRepeat } from 'three'
 import characterGltfUrl from './character.glb?url'
 

@@ -1,8 +1,6 @@
 import { Canvas } from '@/common'
 import { Bounds, OrbitControls, PerspectiveCamera } from '@react-three/drei'
-import React from 'react'
 import { DoubleSide, Vector3Tuple } from 'three'
-
 const vertexShader = /* glsl */ `
     uniform vec3 uBoxSize;
 
