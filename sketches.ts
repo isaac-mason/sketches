@@ -39,8 +39,6 @@ export const sketchesOrder = [
     'raytracing/hello-world',
     'particles/instanced-particles',
     'game-ui-ux/unlock-pointer-lock',
-    'game-ui-ux/transform',
-    'game-ui-ux/zoom',
     'sound/spatial',
     'grid-pathfinding',
     'fractals/mandelbrot-set',
