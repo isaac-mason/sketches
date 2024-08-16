@@ -99,7 +99,6 @@ if (!port) {
     throw new Error('could not start dev server, no free ports')
 }
 
-app.listen(port)
 
 // handle exit signals
 ;['exit', 'SIGINT', 'SIGTERM', 'SIGQUIT'].forEach((signal) => {
@@ -111,3 +110,7 @@ app.listen(port)
         process.exit()
     })
 })
+
+app.listen(port)
+
+console.log(`sketches dev server running at http://127.0.0.1:${port}`)
