@@ -37,9 +37,7 @@ export const createCommonConfig = (currentDirectory: string): UserConfig => {
 
                         // required for iframe embed
                         res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin')
-
-                        // res.setHeader('Cross-Origin-Opener-Policy', 'same-origin')
-                        // res.setHeader('Cross-Origin-Embedder-Policy', 'credentialless')
+                        
                         next()
                     })
                 },
@@ -71,5 +69,9 @@ export const createCommonConfig = (currentDirectory: string): UserConfig => {
         },
         // relative
         base: './',
+        server: {
+            // don't try to use next available port, exit if port is
+            strictPort: true,
+        }
     })
 }
