@@ -2,7 +2,7 @@ import { Component, ReactNode, useEffect, useMemo, useRef, useState } from 'reac
 import { Link, RouteObject, RouterProvider, createBrowserRouter, redirect, useLoaderData } from 'react-router-dom'
 import styled from 'styled-components'
 import { create } from 'zustand'
-import { useDebounce } from '../../common'
+import { Spinner, useDebounce } from '../../common'
 import sketchesMetadata from '../generated/sketches.json'
 import { ScreenshotKeyboardControls, useScreenshot } from './screenshot'
 import { Theme } from './theme'
@@ -383,6 +383,7 @@ const LazySketch = () => {
 
     const wrapperRef = useRef<HTMLDivElement>(null!)
     const [iframe, setIframe] = useState<HTMLIFrameElement | null>()
+    const [loading, setLoading] = useState(true)
 
     const { screenshotMode } = useScreenshot()
     const isFullscreen = useIsFullscreen()
@@ -395,6 +396,8 @@ const LazySketch = () => {
 
     useEffect(() => {
         if (!iframe) return
+
+        setLoading(true)
 
         const onResize = () => {
             iframe.style.width = `${wrapperRef.current.clientWidth}px`
@@ -411,13 +414,20 @@ const LazySketch = () => {
     }, [iframe])
 
     return (
-        <>
-            <SketchWrapper ref={wrapperRef} className={isFullscreen ? 'fullscreen' : ''}>
-                {(!screenshotMode && sketchMetadata.options?.displayTitle) ?? (true && <h1>{sketchMetadata?.title}</h1>)}
+        <SketchWrapper ref={wrapperRef} className={isFullscreen ? 'fullscreen' : ''}>
+            {(!screenshotMode && sketchMetadata.options?.displayTitle) ?? <h1>{sketchMetadata?.title}</h1>}
 
-                <iframe key={sketchPath} ref={setIframe} src={sketchUrl} allow="cross-origin-isolated" />
-            </SketchWrapper>
-        </>
+            {loading && <Spinner />}
+
+            <iframe
+                key={sketchPath}
+                ref={setIframe}
+                src={sketchUrl}
+                loading="eager"
+                allow="cross-origin-isolated"
+                onLoad={() => setLoading(false)}
+            />
+        </SketchWrapper>
     )
 }
 
