@@ -1,14 +1,13 @@
+import { Canvas, Instructions, useLoadingAssets, usePageVisible } from '@/common'
+import { Collider } from '@dimforge/rapier3d-compat'
 import { KeyboardControls, OrbitControls, useGLTF, useKeyboardControls } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
 import { CuboidCollider, Physics, RapierRigidBody, RigidBody, useRapier } from '@react-three/rapier'
 import { useControls } from 'leva'
 import { RefObject, useRef, useState } from 'react'
-import styled from 'styled-components'
 import * as THREE from 'three'
-import { Canvas, Instructions, useLoadingAssets, usePageVisible } from '@/common'
 import racetrackGlbUrl from './racetrack.glb?url'
 import { WheelInfo, useVehicleController } from './use-vehicle-controller'
-import { Collider } from '@dimforge/rapier3d-compat'
 
 // https://github.com/michael-go/raphcar
 // https://sketchfab.com/3d-models/low-poly-race-track-b40628339fde4b2fbe41711edc7c7a93
@@ -96,6 +95,7 @@ const Vehicle = ({ position, rotation }: VehicleProps) => {
         /* controls */
 
         const controller = vehicleController.current
+        
         const chassisRigidBody = controller.chassis()
 
         const controls = getKeyboardControls()
@@ -103,9 +103,11 @@ const Vehicle = ({ position, rotation }: VehicleProps) => {
         // rough ground check
         let outOfBounds = false
 
+        const ray = new rapier.Ray(chassisRigidBody.translation(), { x: 0, y: -1, z: 0 })
+
         const raycastResult = world.castRay(
-            new rapier.Ray(chassisRigidBody.translation(), { x: 0, y: -1, z: 0 }),
-            1,
+            ray,
+            10,
             false,
             undefined,
             undefined,
@@ -122,6 +124,7 @@ const Vehicle = ({ position, rotation }: VehicleProps) => {
 
             ground.current = collider
         }
+
 
         const engineForce = Number(controls.forward) * accelerateForce - Number(controls.back)
 
