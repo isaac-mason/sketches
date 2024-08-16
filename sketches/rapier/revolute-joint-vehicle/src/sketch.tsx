@@ -4,9 +4,8 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { CylinderCollider, Physics, RapierRigidBody, RigidBody, useFixedJoint, useRevoluteJoint } from '@react-three/rapier'
 import { useControls } from 'leva'
 import React, { RefObject, createRef, useEffect, useMemo, useRef } from 'react'
-import styled from 'styled-components'
 import { Quaternion, Vector3, Vector3Tuple, Vector4Tuple } from 'three'
-import { Canvas, usePageVisible } from '@/common'
+import { Canvas, Instructions, usePageVisible } from '@/common'
 
 const LEVA_KEY = 'rapier-revolute-joint-vehicle'
 
@@ -349,18 +348,6 @@ const Scene = () => {
     )
 }
 
-const ControlsText = styled.div`
-    position: absolute;
-    bottom: 4em;
-    left: 0;
-    width: 100%;
-    text-align: center;
-    font-size: 2em;
-    color: white;
-    font-family: monospace;
-    text-shadow: 2px 2px black;
-`
-
 export function Sketch() {
     const visible = usePageVisible()
 
@@ -387,7 +374,7 @@ export function Sketch() {
                 </Physics>
             </Canvas>
 
-            <ControlsText>use wasd to drive</ControlsText>
+            <Instructions>use wasd to drive</Instructions>
         </>
     )
 }

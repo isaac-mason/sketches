@@ -2999,6 +2999,7 @@ __metadata:
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
+    styled-components: "npm:^6.1.11"
     three: "npm:^0.166.1"
     typescript: "npm:^5.5.3"
     vite: "npm:^5.3.3"

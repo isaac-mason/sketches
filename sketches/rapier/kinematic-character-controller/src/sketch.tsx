@@ -1,12 +1,11 @@
+import { Canvas, Instructions, useLoadingAssets, usePageVisible } from '@/common'
 import Rapier from '@dimforge/rapier3d-compat'
 import { Environment, KeyboardControls, PointerLockControls, useKeyboardControls } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
 import { CapsuleCollider, Physics, RapierRigidBody, RigidBody, useRapier } from '@react-three/rapier'
 import { useControls as useLevaControls } from 'leva'
 import { RefObject, useEffect, useMemo, useRef } from 'react'
-import styled from 'styled-components'
 import { Group, MathUtils, PerspectiveCamera, Vector3 } from 'three'
-import { Canvas, useLoadingAssets, usePageVisible } from '@/common'
 import { GameLevel, Shield, Sword } from './models'
 
 const LEVA_KEY = 'rapier-kinematic-character-controller'
@@ -301,18 +300,6 @@ const Scene = () => {
     )
 }
 
-const ControlsText = styled.div`
-    position: absolute;
-    bottom: 4em;
-    left: 0;
-    width: 100%;
-    text-align: center;
-    font-size: 2em;
-    color: white;
-    font-family: monospace;
-    text-shadow: 2px 2px black;
-`
-
 export function Sketch() {
     const loading = useLoadingAssets()
     const visible = usePageVisible()
@@ -329,9 +316,7 @@ export function Sketch() {
                 </Physics>
             </Canvas>
 
-            <ControlsText>
-                <p>WASD - move, SHIFT - sprint, SPACE - jump</p>
-            </ControlsText>
+            <Instructions>* wasd to move, shift to sprint, space to jump</Instructions>
         </>
     )
 }

@@ -14,6 +14,8 @@ const InstructionsWrapper = styled.div`
     display: block;
     font-family: monospace;
     white-space: pre;
+
+    text-shadow: 1px 1px 1px black;
 `
 
 type InstructionsProps = {

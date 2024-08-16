@@ -5,7 +5,7 @@ import { useControls as useLeva } from 'leva'
 import { useRef } from 'react'
 import styled from 'styled-components'
 import { Quaternion, Vector3 } from 'three'
-import { Canvas, useLoadingAssets, usePageVisible } from '@/common'
+import { Canvas, Instructions, useLoadingAssets, usePageVisible } from '@/common'
 import { LampPost } from './components/lamp-post'
 import { TrafficCone } from './components/traffic-cone'
 import { Vehicle, VehicleRef } from './components/vehicle'
@@ -14,7 +14,6 @@ import { SpeedTextTunnel } from './constants/speed-text-tunnel'
 import { useControls } from './hooks/use-controls'
 
 const Text = styled.div`
-    width: 100%;
     text-align: center;
     font-size: 2em;
     color: white;
@@ -22,16 +21,10 @@ const Text = styled.div`
     text-shadow: 2px 2px black;
 `
 
-const ControlsText = styled(Text)`
-    position: absolute;
-    bottom: 4em;
-    left: 0;
-`
-
 const SpeedText = styled(Text)`
     position: absolute;
-    bottom: 2em;
-    left: 0;
+    bottom: 3em;
+    left: 2em;
 `
 
 const cameraIdealOffset = new Vector3()
@@ -274,7 +267,7 @@ export function Sketch() {
 
             <SpeedTextTunnel.Out />
 
-            <ControlsText>use wasd to drive, space to break</ControlsText>
+            <Instructions>use wasd to drive, space to break</Instructions>
         </>
     )
 }
