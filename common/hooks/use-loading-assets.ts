@@ -1,13 +1,24 @@
-import { useProgress } from '@react-three/drei'
 import { useEffect, useState } from 'react'
+import { DefaultLoadingManager } from 'three'
 
 export const useLoadingAssets = () => {
-    const { progress } = useProgress()
-    const [loading, setLoading] = useState(true)
+    const [progress, setProgress] = useState(0)
 
     useEffect(() => {
-        setLoading(progress !== 100)
-    }, [progress])
+        const originalOnProgress = DefaultLoadingManager.onProgress
 
-    return loading
+        DefaultLoadingManager.onProgress = (item, loaded, total) => {
+            if (typeof originalOnProgress === 'function') {
+                originalOnProgress(item, loaded, total)
+            }
+
+            setProgress((loaded / total) * 100)
+        }
+
+        return () => {
+            DefaultLoadingManager.onProgress = originalOnProgress
+        }
+    }, [])
+
+    return progress !== 100
 }
