@@ -1,4 +1,4 @@
 {
     "extends": "../../tsconfig.sketch.json",
-    "include": ["src"]
+    "include": ["src", "../../common"]
 }
