@@ -4,8 +4,6 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { UserConfig } from 'vite'
 
-// todo - fixing @/common/* alias for non barrel imports
-
 function findRootPackageJson(currentDirectory: string) {
     while (currentDirectory !== path.parse(currentDirectory).root) {
         const packageJsonPath = path.join(currentDirectory, 'package.json')
