@@ -3154,23 +3154,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sketches/sound-spatial@workspace:sketches/sound/spatial":
-  version: 0.0.0-use.local
-  resolution: "@sketches/sound-spatial@workspace:sketches/sound/spatial"
-  dependencies:
-    "@react-three/drei": "npm:^9.111.2"
-    "@react-three/fiber": "npm:^8.16.8"
-    "@types/react": "npm:^18.3.3"
-    "@types/react-dom": "npm:^18.3.0"
-    "@types/three": "npm:^0.167.1"
-    react: "npm:^18.3.1"
-    react-dom: "npm:^18.3.1"
-    three: "npm:^0.167.1"
-    typescript: "npm:^5.5.3"
-    vite: "npm:^5.3.3"
-  languageName: unknown
-  linkType: soft
-
 "@sketches/sticky-notes@workspace:sketches/sticky-notes":
   version: 0.0.0-use.local
   resolution: "@sketches/sticky-notes@workspace:sketches/sticky-notes"
