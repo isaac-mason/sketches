@@ -107,7 +107,7 @@ const Vehicle = ({ position, rotation }: VehicleProps) => {
 
         const raycastResult = world.castRay(
             ray,
-            10,
+            1,
             false,
             undefined,
             undefined,
