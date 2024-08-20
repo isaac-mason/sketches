@@ -2,7 +2,7 @@
     "name": "@sketches/fractals-mandelbrot-set",
     "private": true,
     "sketch": {
-        "title": "Falling Sand",
+        "title": "Fractals - Mandelbrot Set",
         "tags": [
             "fractals",
             "mandelbrot-set"
