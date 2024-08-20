@@ -13,7 +13,7 @@
         "build": "vite build"
     },
     "dependencies": {
-        "@react-three/drei": "^9.108.3",
+        "@react-three/drei": "^9.111.2",
         "@react-three/fiber": "^8.16.8",
         "@react-three/postprocessing": "^2.16.2",
         "leva": "^0.9.35",

@@ -13,7 +13,7 @@
     },
     "dependencies": {
         "@react-spring/three": "^9.7.3",
-        "@react-three/drei": "^9.108.3",
+        "@react-three/drei": "^9.111.2",
         "@react-three/fiber": "^8.16.8",
         "@react-three/rapier": "^1.4.0",
         "leva": "^0.9.35",
