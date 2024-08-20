@@ -4,9 +4,10 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { UserConfig } from 'vite'
 
-function findRootPackageJson(currentDirectory: string) {
+function findRootPackageDirectory(currentDirectory: string) {
     while (currentDirectory !== path.parse(currentDirectory).root) {
         const packageJsonPath = path.join(currentDirectory, 'package.json')
+
         if (fs.existsSync(packageJsonPath)) {
             const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'))
 
@@ -14,13 +15,15 @@ function findRootPackageJson(currentDirectory: string) {
                 return currentDirectory
             }
         }
+
         currentDirectory = path.dirname(currentDirectory)
     }
-    throw new Error('Root package.json with name "sketches" not found')
+
+    throw new Error('root package.json with name "sketches" not found')
 }
 
 export const createCommonConfig = (currentDirectory: string) => {
-    const rootRepoDirectory = findRootPackageJson(currentDirectory)
+    const rootPackageDirectoryDirectory = findRootPackageDirectory(currentDirectory)
 
     return {
         plugins: [
@@ -42,7 +45,7 @@ export const createCommonConfig = (currentDirectory: string) => {
             },
             // for easy local development using features that require a secure context
             basicSsl({
-                certDir: path.resolve(rootRepoDirectory, 'dev', 'certs'),
+                certDir: path.resolve(rootPackageDirectoryDirectory, 'dev', 'certs'),
             }),
         ],
         optimizeDeps: {
@@ -62,7 +65,7 @@ export const createCommonConfig = (currentDirectory: string) => {
         },
         resolve: {
             alias: {
-                '@/common': path.resolve(`${rootRepoDirectory}/common`),
+                '@/common': path.resolve(`${rootPackageDirectoryDirectory}/common`),
             },
         },
         // relative
