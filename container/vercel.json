@@ -1,5 +1,5 @@
 {
-    "rewrites": [{ "source": "/(?!sketches-static)(.*)", "destination": "/" }],
+    "rewrites": [{ "source": "/((?!sketches-static/).*)", "destination": "/" }],
     "headers": [
         {
             "source": "(.*)",
