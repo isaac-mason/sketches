@@ -1,11 +1,9 @@
-import { WebGPUCanvas } from '@/common'
-import { Helper, OrbitControls, PerspectiveCamera } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
-import { useControls } from 'leva'
+import { WebGPUCanvas } from '@/common/components/webgpu-canvas'
+import { useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useRef, useState } from 'react'
 import { suspend } from 'suspend-react'
 import * as THREE from 'three'
-import { VertexNormalsHelper } from 'three/examples/jsm/Addons.js'
+import { OrbitControls as OrbitControlsImpl } from 'three/addons/controls/OrbitControls.js'
 import { BlockRegistry } from '../../lib/block-registry'
 import { ChunkGeometry } from '../../lib/chunk-geometry'
 import { ChunkMaterial } from '../../lib/chunk-material'
@@ -18,10 +16,6 @@ import greyTextureUrl from './textures/grey.png?url'
 import stoneTextureUrl from './textures/stone.png?url'
 
 const Example = () => {
-    const { vertexNormalsHelper } = useControls('textured-voxels-sphere', {
-        vertexNormalsHelper: false,
-    })
-
     const [chunkMeshes, setChunkMeshes] = useState<THREE.Mesh[]>([])
 
     const [diamondTexture, stoneTexture, greyTexture] = suspend(async () => {
@@ -128,9 +122,7 @@ const Example = () => {
     return (
         <group>
             {chunkMeshes.map((mesh, index) => (
-                <primitive key={index} object={mesh}>
-                    {vertexNormalsHelper && <Helper type={VertexNormalsHelper} />}
-                </primitive>
+                <primitive key={index} object={mesh} />
             ))}
         </group>
     )
@@ -144,24 +136,46 @@ const SpinningPointLight = () => {
         pointLightRef.current.position.z = Math.cos(elapsedTime) * 15
     })
 
-    return (
-        <pointLight position={[15, 0, 15]} intensity={90} ref={pointLightRef}>
-            <Helper type={THREE.PointLightHelper} />
-        </pointLight>
-    )
+    return <pointLight position={[15, 0, 15]} intensity={90} ref={pointLightRef} />
+}
+
+// cannot import OrbitControls from drei - https://github.com/mrdoob/three.js/issues/29156
+const OrbitControls = () => {
+    const camera = useThree((state) => state.camera)
+    const gl = useThree((state) => state.gl)
+
+    const controlsRef = useRef<OrbitControlsImpl>()
+
+    useEffect(() => {
+        const orbitControls = new OrbitControlsImpl(camera, gl.domElement)
+
+        orbitControls.enableDamping = true
+
+        controlsRef.current = orbitControls
+
+        return () => {
+            orbitControls.dispose()
+        }
+    }, [])
+
+    useFrame(() => {
+        if (!controlsRef.current) return
+
+        controlsRef.current.update()
+    })
+
+    return null
 }
 
 export function Sketch() {
     return (
-        <WebGPUCanvas>
+        <WebGPUCanvas camera={{ position: [20, 10, 20] }}>
             <Example />
 
             <ambientLight intensity={0.5} />
             <SpinningPointLight />
 
-            <OrbitControls makeDefault />
-
-            <PerspectiveCamera makeDefault position={[5, 10, 40]} />
+            <OrbitControls />
         </WebGPUCanvas>
     )
 }

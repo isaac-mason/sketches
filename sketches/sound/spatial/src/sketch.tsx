@@ -1,11 +1,4 @@
-import {
-    Instructions,
-    InteractionBarrier,
-    ThirdPersonController,
-    WebGPUCanvas,
-    useConst,
-    useThirdPersonController,
-} from '@/common'
+import { Canvas, Instructions, InteractionBarrier, ThirdPersonController, useConst, useThirdPersonController } from '@/common'
 import { PerspectiveCamera, useGLTF } from '@react-three/drei'
 import { ThreeElements, useFrame, useLoader } from '@react-three/fiber'
 import { useEffect, useRef } from 'react'
@@ -82,7 +75,7 @@ const Ground = () => (
 export function Sketch() {
     return (
         <InteractionBarrier>
-            <WebGPUCanvas>
+            <Canvas>
                 <Speaker position-y={0.5} />
 
                 <Ground />
@@ -91,7 +84,7 @@ export function Sketch() {
 
                 <ThirdPersonController position={[-4, 0, 0]} />
                 <PerspectiveCamera makeDefault position={[-10, 1, 0]} />
-            </WebGPUCanvas>
+            </Canvas>
 
             <Instructions>* wasd to move</Instructions>
         </InteractionBarrier>

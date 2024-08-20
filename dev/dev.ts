@@ -53,10 +53,10 @@ app.use((_req, res, next) => {
 })
 
 app.use('/sketches-static', async (req, res, next) => {
-    const sketchMeta = sketchesMeta.find(({ path }) => req.url.startsWith(`/${path}`))
+    const sketchMeta = sketchesMeta.find(({ path }) => req.url.startsWith(`/${path}/`))
 
     if (!sketchMeta) {
-        return res.status(404)
+        return res.status(404).send()
     }
 
     // redirect index.html to sketch dev servers
@@ -71,7 +71,8 @@ app.use('/sketches-static', async (req, res, next) => {
 
     res.locals.sketch = { meta: sketchMeta, devServer }
 
-    res.redirect(devServer.url)})
+    res.redirect(devServer.url)
+})
 
 // server static files from public, for sketch cover images
 app.use(express.static(resolve(containerAppDirectory, 'public')))
@@ -98,7 +99,6 @@ const port = await getFreePort({ from: preferredPort })
 if (!port) {
     throw new Error('could not start dev server, no free ports')
 }
-
 
 // handle exit signals
 ;['exit', 'SIGINT', 'SIGTERM', 'SIGQUIT'].forEach((signal) => {

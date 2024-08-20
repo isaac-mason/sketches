@@ -1,6 +1,5 @@
-import { OrbitControls, PerspectiveCamera } from '@react-three/drei'
-import { MeshBasicNodeMaterial, mix, positionLocal, sin, timerLocal, vec3 } from 'three/examples/jsm/nodes/Nodes.js'
-import { WebGPUCanvas } from '@/common'
+import { WebGPUCanvas } from '@/common/components/webgpu-canvas'
+import { MeshBasicNodeMaterial, mix, positionLocal, sin, timerLocal, vec3 } from 'three/tsl'
 
 const material = new MeshBasicNodeMaterial()
 
@@ -15,14 +14,11 @@ material.positionNode = positionLocal.add(vec3(0, sin(time).mul(0.2), 0))
 
 export function Sketch() {
     return (
-        <WebGPUCanvas>
+        <WebGPUCanvas camera={{ position: [2, 1, 2] }}>
             <mesh>
                 <boxGeometry />
                 <primitive attach="material" object={material} />
             </mesh>
-
-            <OrbitControls />
-            <PerspectiveCamera position={[2, 1, 2]} makeDefault />
         </WebGPUCanvas>
     )
 }

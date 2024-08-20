@@ -1,11 +1,8 @@
-import { Canvas } from '@/common'
-import { Html, OrbitControls } from '@react-three/drei'
 import { useEffect, useMemo, useState } from 'react'
-import * as THREE from 'three'
 import { loadImage } from '../../lib/load-image'
 import { TextureAtlas } from '../../lib/texture-atlas'
-import largeTextureUrl from './large.png?url'
-import smallTextureUrl from './small.png?url'
+import largeTextureUrl from './textures/large.png?url'
+import smallTextureUrl from './textures/small.png?url'
 
 export function Sketch() {
     const [div, setDiv] = useState<HTMLDivElement | null>()
@@ -34,33 +31,31 @@ export function Sketch() {
         const image = await loadImage(largeTextureUrl)
 
         textureAtlas.add(image)
+
+        console.log('here')
     }
 
     return (
-        <Canvas>
-            <Html center>
-                <div
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        gap: '1em',
-                        marginBottom: '1em',
-                    }}
-                >
-                    <button onClick={addSmallTexture}>Add small texture</button>
-                    <button onClick={addLargeTexture}>Add large texture</button>
-                </div>
+        <div
+            style={{
+                width: 'calc(100% - 8em)',
+                height: '100%',
+                margin: '8em 4em 1em 4em',
 
-                <div ref={setDiv}></div>
-            </Html>
+            }}
+        >
+            <div
+                style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    gap: '1em',
+                }}
+            >
+                <button onClick={addSmallTexture}>Add small texture</button>
+                <button onClick={addLargeTexture}>Add large texture</button>
+            </div>
 
-            <OrbitControls
-                makeDefault
-                screenSpacePanning
-                mouseButtons={{ LEFT: THREE.MOUSE.PAN, MIDDLE: undefined, RIGHT: undefined }}
-                touches={{ ONE: THREE.TOUCH.PAN, TWO: undefined }}
-                enableZoom={false}
-            />
-        </Canvas>
+            <div ref={setDiv}></div>
+        </div>
     )
 }

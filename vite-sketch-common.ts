@@ -1,8 +1,8 @@
 import basicSsl from '@vitejs/plugin-basic-ssl'
-import react from '@vitejs/plugin-react-swc';
+import react from '@vitejs/plugin-react-swc'
 import * as fs from 'fs'
 import * as path from 'path'
-import { defineConfig, UserConfig } from 'vite'
+import { UserConfig } from 'vite'
 
 // todo - fixing @/common/* alias for non barrel imports
 
@@ -21,10 +21,10 @@ function findRootPackageJson(currentDirectory: string) {
     throw new Error('Root package.json with name "sketches" not found')
 }
 
-export const createCommonConfig = (currentDirectory: string): UserConfig => {
+export const createCommonConfig = (currentDirectory: string) => {
     const rootRepoDirectory = findRootPackageJson(currentDirectory)
 
-    return defineConfig({
+    return {
         plugins: [
             react(),
             {
@@ -37,7 +37,7 @@ export const createCommonConfig = (currentDirectory: string): UserConfig => {
 
                         // required for iframe embed
                         res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin')
-                        
+
                         next()
                     })
                 },
@@ -72,6 +72,6 @@ export const createCommonConfig = (currentDirectory: string): UserConfig => {
         server: {
             // don't try to use next available port, exit if port is
             strictPort: true,
-        }
-    })
+        },
+    } satisfies UserConfig
 }

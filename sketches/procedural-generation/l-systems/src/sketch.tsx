@@ -1,14 +1,10 @@
-import { WebGPUCanvas } from '@/common'
+import { Canvas } from '@/common/components/canvas'
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei'
 import { useControls } from 'leva'
+import { Generator } from 'maath/random'
 import { useMemo } from 'react'
 import * as THREE from 'three'
-import { Line2 } from 'three/addons/lines/Line2.js'
-import { LineGeometry } from 'three/addons/lines/LineGeometry.js'
-import { Generator } from 'maath/random'
-
-// @ts-expect-error untyped
-import { Line2NodeMaterial } from 'three/nodes'
+import { Line2, LineGeometry, LineMaterial } from 'three/examples/jsm/Addons.js'
 
 const DEG2RAD = Math.PI / 180
 
@@ -297,11 +293,10 @@ const LSystem = ({ config }: LSystemProps) => {
         geometry.setPositions(positions)
         geometry.instanceCount = positions.length / 3 - 1
 
-        const material = new Line2NodeMaterial({
+        const material = new LineMaterial({
             color: 0xffffff,
-            linewidth: 0.01,
+            linewidth: 1,
             alphaToCoverage: false,
-            useWorldUnits: true,
         })
 
         const line = new Line2(geometry, material)
@@ -327,12 +322,12 @@ export function Sketch() {
     const config = configs[configKey as keyof typeof configs]
 
     return (
-        <WebGPUCanvas>
+        <Canvas>
             <LSystem config={config} />
 
             <PerspectiveCamera makeDefault position={[0, 3, -10]} />
 
-            <OrbitControls makeDefault target={[0, 3, 0]} />
-        </WebGPUCanvas>
+            <OrbitControls makeDefault target={[0, 2, 0]} />
+        </Canvas>
     )
 }

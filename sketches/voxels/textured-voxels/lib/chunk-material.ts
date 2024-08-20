@@ -1,5 +1,5 @@
 import { CanvasTexture, NearestFilter, SRGBColorSpace } from 'three'
-import { MeshStandardNodeMaterial, attribute, float, texture, uv, vec2 } from 'three/examples/jsm/nodes/Nodes.js'
+import { MeshStandardNodeMaterial, attribute, float, texture, uv, vec2 } from 'three/tsl'
 import { TextureAtlas } from './texture-atlas'
 
 export class ChunkMaterial extends MeshStandardNodeMaterial {

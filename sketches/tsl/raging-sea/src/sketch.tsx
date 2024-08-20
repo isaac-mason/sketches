@@ -1,18 +1,6 @@
-import { OrbitControls, PerspectiveCamera } from '@react-three/drei'
-import {
-    MeshBasicNodeMaterial,
-    abs,
-    color,
-    mix,
-    modelWorldMatrix,
-    positionLocal,
-    sin,
-    timerLocal,
-    vec3,
-    vec4,
-} from 'three/examples/jsm/nodes/Nodes.js'
-import { WebGPUCanvas } from '@/common'
-import { perlinNoise3d } from '@/common/tsl/noise/perlinNoise3d'
+import { WebGPUCanvas } from '@/common/components/webgpu-canvas'
+import { MeshBasicNodeMaterial, abs, color, mix, modelWorldMatrix, positionLocal, sin, timerLocal, vec3, vec4 } from 'three/tsl'
+import { perlinNoise3d } from './tsl/perlin-noise-3d'
 
 const waterMaterial = new MeshBasicNodeMaterial()
 
@@ -51,14 +39,11 @@ waterMaterial.colorNode = waterColor
 
 export function Sketch() {
     return (
-        <WebGPUCanvas>
+        <WebGPUCanvas camera={{ position: [3, 3, 3] }}>
             <mesh rotation-x={-Math.PI / 2}>
                 <planeGeometry args={[4, 4, 512, 512]} />
                 <primitive object={waterMaterial} />
             </mesh>
-
-            <OrbitControls makeDefault />
-            <PerspectiveCamera makeDefault position={[3, 3, 3]} />
         </WebGPUCanvas>
     )
 }

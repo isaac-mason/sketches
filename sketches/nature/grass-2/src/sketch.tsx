@@ -1,9 +1,9 @@
 import { WebGPUCanvas } from '@/common'
-import { OrbitControls, PerspectiveCamera } from '@react-three/drei'
-import { useThree } from '@react-three/fiber'
+import { useFrame, useThree } from '@react-three/fiber'
 import { useControls } from 'leva'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
+import { OrbitControls as OrbitControlsImpl } from 'three/addons/controls/OrbitControls.js'
 import {
     MeshBasicNodeMaterial,
     Node,
@@ -35,8 +35,7 @@ import {
     vec3,
     vec4,
     vertexIndex,
-} from 'three/examples/jsm/nodes/Nodes.js'
-import WGSLNodeBuilder from 'three/examples/jsm/renderers/webgpu/nodes/WGSLNodeBuilder.js'
+} from 'three/tsl'
 
 const NUM_GRASS = 500
 const GRASS_SEGMENTS = 6
@@ -206,8 +205,6 @@ const Grass = () => {
         },
     })
 
-    const gl = useThree((state) => state.gl)
-
     const mesh = useMemo(() => {
         const grassSegments = int(uniform(GRASS_SEGMENTS))
         const grassVertices = int(uniform(GRASS_VERTICES))
@@ -332,25 +329,45 @@ const Grass = () => {
         return mesh
     }, [debugPositionsAndAngles, wireframe, wind, color])
 
+    return <primitive object={mesh} />
+}
+
+// cannot import OrbitControls from drei - https://github.com/mrdoob/three.js/issues/29156
+const OrbitControls = () => {
+    const camera = useThree((state) => state.camera)
+    const gl = useThree((state) => state.gl)
+
+    const controlsRef = useRef<OrbitControlsImpl>()
+
     useEffect(() => {
-        // @ts-expect-error untyped constructor
-        const nodeBuilder = new WGSLNodeBuilder(mesh, gl)
-        nodeBuilder.build()
-        console.log(nodeBuilder.vertexShader, nodeBuilder.fragmentShader)
+        const orbitControls = new OrbitControlsImpl(camera, gl.domElement)
+
+        orbitControls.enableDamping = true
+
+        controlsRef.current = orbitControls
+
+        return () => {
+            orbitControls.dispose()
+        }
     }, [])
 
-    return <primitive object={mesh} />
+    useFrame(() => {
+        if (!controlsRef.current) return
+
+        controlsRef.current.update()
+    })
+
+    return null
 }
 
 export function Sketch() {
     return (
-        <WebGPUCanvas>
+        <WebGPUCanvas camera={{ position: [10, 10, 10] }}>
             <Grass />
 
             <color attach="background" args={['#99f']} />
 
-            <OrbitControls makeDefault />
-            <PerspectiveCamera makeDefault position={[10, 10, 10]} />
+            <OrbitControls />
         </WebGPUCanvas>
     )
 }

@@ -12,7 +12,7 @@ import {
     tslFn,
     vec3,
     vec4,
-} from 'three/examples/jsm/nodes/Nodes.js'
+} from 'three/tsl'
 
 const permute = tslFn((input: { x: ShaderNodeObject<Node> }) => {
     return fract(add(mul(input.x, 34), 1).mul(input.x).div(289)).mul(289)

@@ -18,9 +18,9 @@
         "experimentalDecorators": true,
         "baseUrl": ".",
         "paths": {
-            "@/common": ["./common/index.ts"]
+            "@/common": ["../common/index.ts"]
         }
     },
-    "include": ["src", "generated", "common"],
+    "include": ["src", "generated", "../common"],
     "references": [{ "path": "./tsconfig.node.json" }]
 }

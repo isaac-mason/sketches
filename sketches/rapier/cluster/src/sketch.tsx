@@ -2,7 +2,6 @@ import { Canvas, Instructions } from '@/common'
 import { animated, useSpring } from '@react-spring/three'
 import { PerspectiveCamera } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
-import { EffectComposer, N8AO } from '@react-three/postprocessing'
 import {
     BallCollider,
     InstancedRigidBodies,
@@ -145,10 +144,6 @@ export function Sketch() {
 
                     <ambientLight intensity={1.75} />
                     <pointLight position={[15, -5, 15]} decay={1} intensity={2} />
-
-                    <EffectComposer enableNormalPass={false} multisampling={8}>
-                        <N8AO distanceFalloff={1} aoRadius={1} intensity={1} />
-                    </EffectComposer>
 
                     <PerspectiveCamera makeDefault position={[0, 0, 30]} />
                 </Physics>

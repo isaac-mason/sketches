@@ -1,4 +1,4 @@
-import { Topic } from 'arancini/events'
+import { Topic } from '@/common/utils/topic'
 import * as THREE from 'three'
 import { Vector3Map } from './utils'
 
@@ -37,12 +37,12 @@ export class Chunk {
     position: THREE.Vector3
 
     solid: Uint16Array
-    solidBuffer: SharedArrayBuffer
+    solidBuffer: ArrayBuffer
 
     type: Uint16Array
-    typeBuffer: SharedArrayBuffer
+    typeBuffer: ArrayBuffer
 
-    constructor(id: string, position: THREE.Vector3, solidBuffer: SharedArrayBuffer, typeBuffer: SharedArrayBuffer) {
+    constructor(id: string, position: THREE.Vector3, solidBuffer: ArrayBuffer, typeBuffer: ArrayBuffer) {
         this.id = id
         this.position = position
         this.solidBuffer = solidBuffer
@@ -129,13 +129,12 @@ export class World {
 
     setBlock(position: THREE.Vector3Like, solid: boolean, type: number = 0) {
         const chunkPosition = worldPositionToChunkPosition(position, _chunkPosition)
-        
 
         let chunk = this.chunks.get(worldPositionToChunkPosition(position, _chunkPosition))
 
         if (!chunk) {
-            const solidBuffer = new SharedArrayBuffer(Uint16Array.BYTES_PER_ELEMENT * CHUNK_SIZE ** 3)
-            const typeBuffer = new SharedArrayBuffer(Uint16Array.BYTES_PER_ELEMENT * CHUNK_SIZE ** 3)
+            const solidBuffer = new ArrayBuffer(Uint16Array.BYTES_PER_ELEMENT * CHUNK_SIZE ** 3)
+            const typeBuffer = new ArrayBuffer(Uint16Array.BYTES_PER_ELEMENT * CHUNK_SIZE ** 3)
 
             chunk = new Chunk(Chunk.id(chunkPosition), chunkPosition.clone(), solidBuffer, typeBuffer)
 

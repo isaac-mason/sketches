@@ -1,8 +1,8 @@
 import { Canvas, CanvasProps } from '@react-three/fiber'
 import * as React from 'react'
 import styled from 'styled-components'
-import WebGPUCapabilities from 'three/examples/jsm/capabilities/WebGPU.js'
-import WebGPURenderer from 'three/examples/jsm/renderers/webgpu/WebGPURenderer.js'
+import { WebGPURenderer } from 'three/webgpu'
+import WebGPU from 'three/examples/jsm/capabilities/WebGPU.js'
 
 const UnsupportedNoticeWrapper = styled.div`
     position: absolute;
@@ -24,14 +24,12 @@ const UnsupportedNotice = styled.div`
     padding: 3em;
 `
 
-export type WebGPUCanvasProps = React.PropsWithChildren<
-    {
-        /**
-         * @default true
-         */
-        webglFallback?: boolean
-    } & CanvasProps
->
+export type WebGPUCanvasProps = {
+    /**
+     * @default true
+     */
+    webglFallback?: boolean
+} & CanvasProps
 
 export const WebGPUCanvas = ({
     children,
@@ -49,7 +47,7 @@ export const WebGPUCanvas = ({
         setCanvasFrameloop(frameloop)
     }, [initialising, frameloop])
 
-    if (!webglFallback && !WebGPUCapabilities.isAvailable()) {
+    if (!webglFallback && !WebGPU.isAvailable()) {
         return (
             <UnsupportedNoticeWrapper>
                 <UnsupportedNotice>
