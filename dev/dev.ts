@@ -3,22 +3,7 @@ import * as vite from 'vite'
 import { resolve } from 'path'
 import containerViteConfig from '../container/vite.config.mts'
 import * as SketchDevServers from './sketch-dev-servers'
-import {
-    containerAppDirectory,
-    copySketchCoverImages,
-    createSketchesMeta,
-    getFreePort,
-    SketchMeta,
-    writeSketchesMeta,
-} from './utils'
-
-declare global {
-    namespace Express {
-        interface Locals {
-            sketch?: { meta: SketchMeta; devServer: SketchDevServers.SketchDevServer }
-        }
-    }
-}
+import { containerAppDirectory, copySketchCoverImages, createSketchesMeta, getFreePort, writeSketchesMeta } from './utils'
 
 const sketchesMeta = await createSketchesMeta()
 
@@ -26,8 +11,6 @@ await writeSketchesMeta(sketchesMeta)
 await copySketchCoverImages(sketchesMeta)
 
 const app = express()
-
-// const proxyServer = createProxyServer()
 
 const sketchDevServers = SketchDevServers.init()
 
@@ -52,6 +35,7 @@ app.use((_req, res, next) => {
     next()
 })
 
+// serve sketches from dev servers
 app.use('/sketches-static', async (req, res, next) => {
     const sketchMeta = sketchesMeta.find(({ path }) => req.url.startsWith(`/${path}/`))
 
@@ -69,22 +53,21 @@ app.use('/sketches-static', async (req, res, next) => {
 
     const devServer = await SketchDevServers.get(sketchDevServers, sketchMeta.path)
 
-    res.locals.sketch = { meta: sketchMeta, devServer }
-
     res.redirect(devServer.url)
 })
 
 // server static files from public, for sketch cover images
 app.use(express.static(resolve(containerAppDirectory, 'public')))
 
+// container dev server
 app.use(containerViteDevServer.middlewares)
 
+// stop dev servers after 60 seconds of inactivity
 setInterval(() => {
-    // stop dev servers after 60 seconds of inactivity
     SketchDevServers.stopUnusedDevServers(sketchDevServers, 60 * 1000)
 }, 5000)
 
-// --port 5173
+// e.g. --port 5173
 const portArgIndex = process.argv.indexOf('--port')
 
 let preferredPort = 5173
@@ -100,6 +83,10 @@ if (!port) {
     throw new Error('could not start dev server, no free ports')
 }
 
+app.listen(port)
+
+console.log(`sketches dev server running at http://127.0.0.1:${port}`)
+
 // handle exit signals
 ;['exit', 'SIGINT', 'SIGTERM', 'SIGQUIT'].forEach((signal) => {
     process.on(signal, async () => {
@@ -110,7 +97,3 @@ if (!port) {
         process.exit()
     })
 })
-
-app.listen(port)
-
-console.log(`sketches dev server running at http://127.0.0.1:${port}`)
