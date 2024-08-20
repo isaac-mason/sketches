@@ -4,7 +4,6 @@ import {
     copySketchBuilds,
     copySketchCoverImages,
     createSketchesMeta,
-    resolvePromisesConcurrently,
     rootDirectory,
     writeSketchesMeta,
 } from './utils'
@@ -19,13 +18,11 @@ writeSketchesMeta(sketchesMeta)
 
 console.log('building sketches')
 
-const buildConcurrency = 5
-
-await resolvePromisesConcurrently(buildConcurrency, sketchesMeta, async ({ path }) => {
+for (const { path } of sketchesMeta) {
     console.log(`\n\nbuilding ${path} ...\n`)
 
     await $`(cd sketches/${path} && yarn build)`.cwd(rootDirectory)
-})
+}
 
 console.log('copying sketch builds to sketches-static')
 

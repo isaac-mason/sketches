@@ -94,51 +94,6 @@ export const copySketchCoverImages = async (sketchesMeta: SketchMeta[]) => {
     }
 }
 
-async function* asyncPool<T extends Array<unknown>>(
-    concurrency: number,
-    iterable: [...T],
-    iteratorFn: (item: [...T][number], index: number) => Promise<void>,
-) {
-    const executing = new Set<Promise<unknown>>()
-
-    async function consume() {
-        const result = await Promise.race(executing)
-
-        const [promise, value] = result as any
-
-        executing.delete(promise)
-
-        return value
-    }
-
-    let index = 0
-
-    for (const item of iterable) {
-        index++
-
-        const promise = (async () => await iteratorFn(item, index))().then((value) => [promise, value])
-
-        executing.add(promise)
-
-        if (executing.size >= concurrency) {
-            yield await consume()
-        }
-    }
-
-    while (executing.size) {
-        yield await consume()
-    }
-}
-
-export const resolvePromisesConcurrently = async <T extends Array<unknown>>(
-    concurrency: number,
-    iterable: [...T],
-    iteratorFn: (item: [...T][number], index: number) => Promise<void>,
-) => {
-    for await (const _ of asyncPool(concurrency, iterable, iteratorFn)) {
-    }
-}
-
 export type GetFreePortOptions = {
     from?: number
     to?: number
