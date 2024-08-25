@@ -3,7 +3,7 @@ import forestEnvironment from '@pmndrs/assets/hdri/forest.exr'
 import { CameraShake, Environment, OrbitControls, PerspectiveCamera, Sky, useTexture } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { useControls } from 'leva'
-import { useMemo, useRef } from 'react'
+import { useMemo } from 'react'
 import { createNoise2D } from 'simplex-noise'
 import * as THREE from 'three'
 import cloudUrl from './cloud.jpg?url'
@@ -24,114 +24,14 @@ const GRASS_BLADE_COLORS = [
     },
 ]
 
-const simplexNoise = createNoise2D(Math.random)
+const simplexNoise = createNoise2D()
 
-const getHeight = (x: number, z: number): number => {
+const getGroundHeight = (x: number, z: number): number => {
     let y = 2 * simplexNoise(x / 50, z / 50)
     y += 4 * simplexNoise(x / 100, z / 100)
     y += 0.2 * simplexNoise(x / 10, z / 10)
 
     return y
-}
-
-const computeGrassAttributes = (instances: number, width: number) => {
-    const tipColor: number[] = []
-    const middleColor: number[] = []
-    const baseColor: number[] = []
-
-    const offsets: number[] = []
-    const orientations: number[] = []
-    const stretches: number[] = []
-    const halfRootAngleSin: number[] = []
-    const halfRootAngleCos: number[] = []
-
-    const tmpColor = new THREE.Color()
-
-    const tmpQuaternion_0 = new THREE.Quaternion()
-    const tmpQuaternion_1 = new THREE.Quaternion()
-
-    // The min and max angle for the growth direction (in radians)
-    const min = -0.25
-    const max = 0.25
-
-    // For each instance of the grass blade
-    for (let i = 0; i < instances; i++) {
-        /* Position */
-        // Offset
-        const offsetX = Math.random() * width - width / 2
-        const offsetZ = Math.random() * width - width / 2
-        const offsetY = getHeight(offsetX, offsetZ)
-        offsets.push(offsetX, offsetY, offsetZ)
-
-        // Growth direction
-        // Rotate around Y
-        let angle = Math.PI - Math.random() * (2 * Math.PI)
-        halfRootAngleSin.push(Math.sin(0.5 * angle))
-        halfRootAngleCos.push(Math.cos(0.5 * angle))
-
-        let rotationAxis = new THREE.Vector3(0, 1, 0)
-        let x = rotationAxis.x * Math.sin(angle / 2.0)
-        let y = rotationAxis.y * Math.sin(angle / 2.0)
-        let z = rotationAxis.z * Math.sin(angle / 2.0)
-        let w = Math.cos(angle / 2.0)
-        tmpQuaternion_0.set(x, y, z, w).normalize()
-
-        // Rotate around X
-        angle = Math.random() * (max - min) + min
-        rotationAxis = new THREE.Vector3(1, 0, 0)
-        x = rotationAxis.x * Math.sin(angle / 2.0)
-        y = rotationAxis.y * Math.sin(angle / 2.0)
-        z = rotationAxis.z * Math.sin(angle / 2.0)
-        w = Math.cos(angle / 2.0)
-        tmpQuaternion_1.set(x, y, z, w).normalize()
-
-        // Combine rotations to a single quaternion
-        tmpQuaternion_0.multiplyQuaternions(tmpQuaternion_0, tmpQuaternion_1)
-
-        // Rotate around Z
-        angle = Math.random() * (max - min) + min
-        rotationAxis = new THREE.Vector3(0, 0, 1)
-        x = rotationAxis.x * Math.sin(angle / 2.0)
-        y = rotationAxis.y * Math.sin(angle / 2.0)
-        z = rotationAxis.z * Math.sin(angle / 2.0)
-        w = Math.cos(angle / 2.0)
-        tmpQuaternion_1.set(x, y, z, w).normalize()
-
-        // Combine rotations to a single quaternion
-        tmpQuaternion_0.multiplyQuaternions(tmpQuaternion_0, tmpQuaternion_1)
-
-        orientations.push(tmpQuaternion_0.x, tmpQuaternion_0.y, tmpQuaternion_0.z, tmpQuaternion_0.w)
-
-        /* Height */
-        if (i < instances / 3) {
-            stretches.push(Math.random() * 1.8)
-        } else {
-            stretches.push(Math.random())
-        }
-
-        /* Color */
-        const bladeColor = GRASS_BLADE_COLORS[Math.floor(Math.random() * GRASS_BLADE_COLORS.length)]
-
-        const base = tmpColor.copy(bladeColor.base)
-        baseColor.push(base.r, base.g, base.b)
-
-        const middle = tmpColor.copy(bladeColor.middle)
-        middleColor.push(middle.r, middle.g, middle.b)
-
-        const tip = tmpColor.copy(bladeColor.tip)
-        tipColor.push(tip.r, tip.g, tip.b)
-    }
-
-    return {
-        offsets: new Float32Array(offsets),
-        orientations: new Float32Array(orientations),
-        stretches: new Float32Array(stretches),
-        halfRootAngleCos: new Float32Array(halfRootAngleCos),
-        halfRootAngleSin: new Float32Array(halfRootAngleSin),
-        baseColor: new Float32Array(baseColor),
-        middleColor: new Float32Array(middleColor),
-        tipColor: new Float32Array(tipColor),
-    }
 }
 
 const slerp = /* glsl */ `
@@ -319,13 +219,221 @@ const grassFragmentShader = /* glsl */ `
     }
 `
 
+class GrassMaterial extends THREE.ShaderMaterial {
+    constructor() {
+        super({
+            uniforms: {
+                uTime: { value: 0 },
+                uBladeHeight: { value: 0 },
+                uCloud: { value: null },
+                alphaMap: { value: null },
+            },
+            vertexShader: grassVertexShader,
+            fragmentShader: grassFragmentShader,
+            side: THREE.DoubleSide,
+            wireframe: false,
+            toneMapped: false,
+        })
+    }
+}
+
+type GrassGeometryOptions = {
+    bladeWidth: number
+    bladeHeight: number
+    bladeJoints: number
+    width: number
+    instances: number
+}
+
+class GrassGeometry extends THREE.InstancedBufferGeometry {
+    constructor({ bladeWidth, bladeHeight, bladeJoints, width, instances }: GrassGeometryOptions) {
+        super()
+
+        const baseGeometry = new THREE.PlaneGeometry(bladeWidth, bladeHeight, 1, bladeJoints).translate(0, bladeHeight / 2, 0)
+        const attributes = this.computeGrassAttributes(instances, width)
+
+        this.index = baseGeometry.index
+
+        this.setAttribute('position', baseGeometry.attributes.position)
+        this.setAttribute('uv', baseGeometry.attributes.uv)
+
+        this.setAttribute('offset', new THREE.InstancedBufferAttribute(attributes.offsets, 3))
+        this.setAttribute('orientation', new THREE.InstancedBufferAttribute(attributes.orientations, 4))
+        this.setAttribute('stretch', new THREE.InstancedBufferAttribute(attributes.stretches, 1))
+        this.setAttribute('halfRootAngleSin', new THREE.InstancedBufferAttribute(attributes.halfRootAngleSin, 1))
+        this.setAttribute('halfRootAngleCos', new THREE.InstancedBufferAttribute(attributes.halfRootAngleCos, 1))
+        this.setAttribute('baseColor', new THREE.InstancedBufferAttribute(attributes.baseColor, 3))
+        this.setAttribute('middleColor', new THREE.InstancedBufferAttribute(attributes.middleColor, 3))
+        this.setAttribute('tipColor', new THREE.InstancedBufferAttribute(attributes.tipColor, 3))
+
+        this.computeBoundingSphere()
+    }
+
+    computeBoundingSphere() {
+        const offsets = this.attributes.offset.array
+
+        const position = new THREE.Vector3()
+        const center = new THREE.Vector3(0, 0, 0)
+
+        for (let i = 0; i < offsets.length; i += 3) {
+            position.set(offsets[i], offsets[i + 1], offsets[i + 2])
+
+            center.add(position)
+        }
+
+        center.divideScalar(offsets.length / 3)
+
+        let maxRadiusSq = 0
+
+        for (let i = 0; i < offsets.length; i += 3) {
+            position.set(offsets[i], offsets[i + 1], offsets[i + 2])
+
+            const distanceSq = center.distanceToSquared(position)
+
+            if (distanceSq > maxRadiusSq) {
+                maxRadiusSq = distanceSq
+            }
+        }
+
+        const radius = Math.sqrt(maxRadiusSq)
+
+        this.boundingSphere = new THREE.Sphere(center, radius)
+    }
+
+    computeGrassAttributes(instances: number, width: number) {
+        const tipColor: number[] = []
+        const middleColor: number[] = []
+        const baseColor: number[] = []
+
+        const offsets: number[] = []
+        const orientations: number[] = []
+        const stretches: number[] = []
+        const halfRootAngleSin: number[] = []
+        const halfRootAngleCos: number[] = []
+
+        const tmpColor = new THREE.Color()
+
+        const tmpQuaternion_0 = new THREE.Quaternion()
+        const tmpQuaternion_1 = new THREE.Quaternion()
+
+        // The min and max angle for the growth direction (in radians)
+        const min = -0.25
+        const max = 0.25
+
+        // For each instance of the grass blade
+        for (let i = 0; i < instances; i++) {
+            /* Position */
+            // Offset
+            const offsetX = Math.random() * width - width / 2
+            const offsetZ = Math.random() * width - width / 2
+            const offsetY = getGroundHeight(offsetX, offsetZ)
+            offsets.push(offsetX, offsetY, offsetZ)
+
+            // Growth direction
+            // Rotate around Y
+            let angle = Math.PI - Math.random() * (2 * Math.PI)
+            halfRootAngleSin.push(Math.sin(0.5 * angle))
+            halfRootAngleCos.push(Math.cos(0.5 * angle))
+
+            let rotationAxis = new THREE.Vector3(0, 1, 0)
+            let x = rotationAxis.x * Math.sin(angle / 2.0)
+            let y = rotationAxis.y * Math.sin(angle / 2.0)
+            let z = rotationAxis.z * Math.sin(angle / 2.0)
+            let w = Math.cos(angle / 2.0)
+            tmpQuaternion_0.set(x, y, z, w).normalize()
+
+            // Rotate around X
+            angle = Math.random() * (max - min) + min
+            rotationAxis = new THREE.Vector3(1, 0, 0)
+            x = rotationAxis.x * Math.sin(angle / 2.0)
+            y = rotationAxis.y * Math.sin(angle / 2.0)
+            z = rotationAxis.z * Math.sin(angle / 2.0)
+            w = Math.cos(angle / 2.0)
+            tmpQuaternion_1.set(x, y, z, w).normalize()
+
+            // Combine rotations to a single quaternion
+            tmpQuaternion_0.multiplyQuaternions(tmpQuaternion_0, tmpQuaternion_1)
+
+            // Rotate around Z
+            angle = Math.random() * (max - min) + min
+            rotationAxis = new THREE.Vector3(0, 0, 1)
+            x = rotationAxis.x * Math.sin(angle / 2.0)
+            y = rotationAxis.y * Math.sin(angle / 2.0)
+            z = rotationAxis.z * Math.sin(angle / 2.0)
+            w = Math.cos(angle / 2.0)
+            tmpQuaternion_1.set(x, y, z, w).normalize()
+
+            // Combine rotations to a single quaternion
+            tmpQuaternion_0.multiplyQuaternions(tmpQuaternion_0, tmpQuaternion_1)
+
+            orientations.push(tmpQuaternion_0.x, tmpQuaternion_0.y, tmpQuaternion_0.z, tmpQuaternion_0.w)
+
+            /* Height */
+            if (i < instances / 3) {
+                stretches.push(Math.random() * 1.8)
+            } else {
+                stretches.push(Math.random())
+            }
+
+            /* Color */
+            const bladeColor = GRASS_BLADE_COLORS[Math.floor(Math.random() * GRASS_BLADE_COLORS.length)]
+
+            const base = tmpColor.copy(bladeColor.base)
+            baseColor.push(base.r, base.g, base.b)
+
+            const middle = tmpColor.copy(bladeColor.middle)
+            middleColor.push(middle.r, middle.g, middle.b)
+
+            const tip = tmpColor.copy(bladeColor.tip)
+            tipColor.push(tip.r, tip.g, tip.b)
+        }
+
+        return {
+            offsets: new Float32Array(offsets),
+            orientations: new Float32Array(orientations),
+            stretches: new Float32Array(stretches),
+            halfRootAngleCos: new Float32Array(halfRootAngleCos),
+            halfRootAngleSin: new Float32Array(halfRootAngleSin),
+            baseColor: new Float32Array(baseColor),
+            middleColor: new Float32Array(middleColor),
+            tipColor: new Float32Array(tipColor),
+        }
+    }
+}
+
+class GroundGeometry extends THREE.PlaneGeometry {
+    maxHeight: number
+
+    constructor(width: number) {
+        super(width, width, 32, 32)
+
+        this.lookAt(new THREE.Vector3(0, 1, 0))
+
+        let maxHeight = -Infinity
+
+        for (let i = 0; i < this.attributes.position.array.length / 3; i++) {
+            const x = this.attributes.position.array[i * 3 + 0]
+            const z = this.attributes.position.array[i * 3 + 2]
+
+            const y = getGroundHeight(x, z)
+            this.attributes.position.array[i * 3 + 1] = y
+
+            if (y > maxHeight) {
+                maxHeight = y
+            }
+        }
+
+        this.computeVertexNormals()
+
+        this.maxHeight = maxHeight
+    }
+}
+
 const Grass = () => {
     const cloudMap = useTexture(cloudUrl)
     cloudMap.wrapS = cloudMap.wrapT = THREE.RepeatWrapping
 
     const grassBladeAlphaMap = useTexture(grassBladeAlphaUrl)
-
-    const uTime = useRef({ value: 0 })
 
     const { bladeWidth, bladeHeight, bladeJoints, wireframe, width, instances } = useControls('nature-grass', {
         bladeWidth: 0.12,
@@ -336,71 +444,34 @@ const Grass = () => {
         wireframe: false,
     })
 
-    const attributes = useMemo(() => computeGrassAttributes(instances, width), [instances, width])
+    const grassMaterial = useMemo(() => {
+        const material = new GrassMaterial()
 
-    const baseGeometry = useMemo(
-        () => new THREE.PlaneGeometry(bladeWidth, bladeHeight, 1, bladeJoints).translate(0, bladeHeight / 2, 0),
-        [bladeWidth, bladeHeight, bladeJoints],
+        material.uniforms.uCloud.value = cloudMap
+        material.uniforms.alphaMap.value = grassBladeAlphaMap
+        material.uniforms.uBladeHeight.value = bladeHeight
+        material.wireframe = wireframe
+
+        return material
+    }, [cloudMap, grassBladeAlphaMap, bladeHeight, wireframe])
+
+    const grassGeometry = useMemo(
+        () => new GrassGeometry({ bladeWidth, bladeHeight, bladeJoints, width, instances }),
+        [bladeWidth, bladeHeight, bladeJoints, width, instances],
     )
 
-    const { groundGeometry, maxHeight } = useMemo(() => {
-        let maxY = -Infinity
-
-        const geometry = new THREE.PlaneGeometry(width, width, 32, 32)
-
-        geometry.lookAt(new THREE.Vector3(0, 1, 0))
-
-        for (let i = 0; i < geometry.attributes.position.array.length / 3; i++) {
-            const x = geometry.attributes.position.array[i * 3 + 0]
-            const z = geometry.attributes.position.array[i * 3 + 2]
-
-            const y = getHeight(x, z)
-            geometry.attributes.position.array[i * 3 + 1] = y
-
-            maxY = Math.max(maxY, y)
-        }
-
-        geometry.computeVertexNormals()
-
-        return { groundGeometry: geometry, maxHeight: maxY }
-    }, [width])
+    const groundGeometry = useMemo(() => new GroundGeometry(width), [width])
 
     useFrame(({ clock: { elapsedTime } }) => {
-        uTime.current.value = elapsedTime
+        grassMaterial.uniforms.uTime.value = elapsedTime
     })
 
     return (
         <>
             <group>
                 <mesh>
-                    <instancedBufferGeometry
-                        index={baseGeometry.index}
-                        key={[bladeWidth, bladeHeight, bladeJoints, width, instances].join('-')}
-                        attributes-position={baseGeometry.attributes.position}
-                        attributes-uv={baseGeometry.attributes.uv}
-                    >
-                        <instancedBufferAttribute attach="attributes-offset" args={[attributes.offsets, 3]} />
-                        <instancedBufferAttribute attach="attributes-orientation" args={[attributes.orientations, 4]} />
-                        <instancedBufferAttribute attach="attributes-stretch" args={[attributes.stretches, 1]} />
-                        <instancedBufferAttribute attach="attributes-halfRootAngleSin" args={[attributes.halfRootAngleSin, 1]} />
-                        <instancedBufferAttribute attach="attributes-halfRootAngleCos" args={[attributes.halfRootAngleCos, 1]} />
-                        <instancedBufferAttribute attach="attributes-baseColor" args={[attributes.baseColor, 3]} />
-                        <instancedBufferAttribute attach="attributes-middleColor" args={[attributes.middleColor, 3]} />
-                        <instancedBufferAttribute attach="attributes-tipColor" args={[attributes.tipColor, 3]} />
-                    </instancedBufferGeometry>
-                    <shaderMaterial
-                        uniforms={{
-                            uTime: uTime.current,
-                            uBladeHeight: { value: bladeHeight },
-                            uCloud: { value: cloudMap },
-                            alphaMap: { value: grassBladeAlphaMap },
-                        }}
-                        vertexShader={grassVertexShader}
-                        fragmentShader={grassFragmentShader}
-                        side={THREE.DoubleSide}
-                        wireframe={wireframe}
-                        toneMapped={false}
-                    />
+                    <primitive object={grassGeometry} />
+                    <primitive object={grassMaterial} />
                 </mesh>
                 <mesh>
                     <primitive object={groundGeometry} />
@@ -408,7 +479,7 @@ const Grass = () => {
                 </mesh>
             </group>
 
-            <PerspectiveCamera makeDefault position={[40, maxHeight + 10, 40]} fov={50} />
+            <PerspectiveCamera makeDefault position={[40, groundGeometry.maxHeight + 10, 40]} fov={50} />
         </>
     )
 }
