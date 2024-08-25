@@ -62,7 +62,7 @@ export const get = async (state: SketchDevServerState, sketchPath: string): Prom
     if (!port) {
         const freePorts = await getFreePorts()
 
-        // try to reuse the port of an existing sketch, if it's free.
+        // if the sketch was previously started, try to reuse the port.
         // otherwise use the first port not reserved by another sketch.
         if (existingSketch && freePorts.includes(existingSketch.port)) {
             port = existingSketch.port
