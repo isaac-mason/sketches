@@ -18,6 +18,7 @@ export const sketchesOrder = [
     'voxels/simple-voxels/multiple-worlds',
     'voxels/textured-voxels/texture-atlas',
     'voxels/textured-voxels/sphere',
+    'isosurface/marching-cubes-terrain',
     'rapier/cluster',
     'rapier/custom-raycast-vehicle',
     'rapier/revolute-joint-vehicle',

@@ -538,9 +538,6 @@ const App = () => {
             <ScreenshotKeyboardControls />
 
             {!screenshotMode && !isFullscreen ? (
-                // <GithubLink target="_blank" href={`https://github.com/isaac-mason/sketches/tree/main/sketches/${sketchPath}`}>
-                //     GitHub
-                // </GithubLink>
                 <Links>
                     <a target="_blank" href={`https://github.com/isaac-mason/sketches/tree/main/sketches/${sketchPath}`}>
                         <GitHubIcon />
