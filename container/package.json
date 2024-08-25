@@ -34,11 +34,10 @@
         "eslint": "^9.6.0",
         "express": "^4.19.2",
         "http-proxy": "^1.18.1",
-        "prettier": "^3.3.2",
         "tsx": "^4.16.3",
         "typescript": "^5.5.3",
         "vite": "^5.3.3",
-        "vite-imagetools": "^7.0.2",
+        "vite-imagetools": "^7.0.4",
         "vite-plugin-html": "^3.2.2"
     },
     "workspaces": [
