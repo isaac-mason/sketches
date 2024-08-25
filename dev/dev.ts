@@ -3,7 +3,7 @@ import * as vite from 'vite'
 import { resolve } from 'path'
 import containerViteConfig from '../container/vite.config.mts'
 import * as SketchDevServers from './sketch-dev-servers'
-import { containerAppDirectory, copySketchCoverImages, createSketchesMeta, getFreePort, writeSketchesMeta } from './utils'
+import { containerAppDirectory, copySketchCoverImages, createSketchesMeta, getFreePorts, writeSketchesMeta } from './utils'
 
 const sketchesMeta = await createSketchesMeta()
 
@@ -62,7 +62,7 @@ app.use(express.static(resolve(containerAppDirectory, 'public')))
 // container dev server
 app.use(containerViteDevServer.middlewares)
 
-// stop dev servers after 60 seconds of inactivity
+// stop dev servers after 1 minute of inactivity
 setInterval(() => {
     SketchDevServers.stopUnusedDevServers(sketchDevServers, 60 * 1000)
 }, 5000)
@@ -77,7 +77,7 @@ if (portArgIndex !== -1 && process.argv[portArgIndex + 1]) {
     preferredPort = Number(portValue)
 }
 
-const port = await getFreePort({ from: preferredPort })
+const [port] = await getFreePorts({ from: preferredPort, count: 1 })
 
 if (!port) {
     throw new Error('could not start dev server, no free ports')

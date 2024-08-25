@@ -31,10 +31,7 @@ export const createSketchesMeta = async (): Promise<SketchMeta[]> => {
 
                 if (!sketch) return null
 
-                const path = packagePath
-                    .replace(rootDirectory, '')
-                    .replace('sketches/', '')
-                    .replace('/package.json', '')
+                const path = packagePath.replace(rootDirectory, '').replace('sketches/', '').replace('/package.json', '')
 
                 const hasCoverImage = await Bun.file(`${rootDirectory}/sketches/${path}/cover.png`).exists()
 
@@ -97,20 +94,38 @@ export const copySketchCoverImages = async (sketchesMeta: SketchMeta[]) => {
 export type GetFreePortOptions = {
     from?: number
     to?: number
+    count?: number
 }
 
-export const getFreePort = async (options?: GetFreePortOptions) => {
-    const { from = 1024, to = 65535 } = options || {}
+export const getUsedPorts = async () => {
+    return (await $`lsof -i -P -n | grep LISTEN | awk '{print $9}' | grep -o '[0-9]*$' | sort -n | uniq`.quiet().text()).split(
+        '\n',
+    )
+}
 
-    const usedPorts = (
-        await $`lsof -i -P -n | grep LISTEN | awk '{print $9}' | grep -o '[0-9]*$' | sort -n | uniq`.quiet().text()
-    ).split('\n')
+export const getFreePorts = async (options?: GetFreePortOptions) => {
+    const { from = 1024, to = 65535, count = -1 } = options || {}
+
+    const usedPorts = await getUsedPorts()
+
+    const freePorts: number[] = []
 
     for (let port = from; port <= to; port++) {
         if (!usedPorts.includes(String(port))) {
-            return port
+            freePorts.push(port)
+            if (count !== -1 && freePorts.length === count) {
+                break
+            }
         }
     }
 
-    return undefined
+    return freePorts
+}
+
+export const isPortFree = async (port: number) => {
+    const usedPorts = await getUsedPorts()
+
+    console.log('usedPorts', usedPorts)
+
+    return !usedPorts.includes(String(port))
 }

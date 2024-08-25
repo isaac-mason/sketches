@@ -1,16 +1,16 @@
-import { Subprocess } from 'bun'
-import { getFreePort, rootDirectory } from './utils'
+import { $, Subprocess } from 'bun'
+import { getFreePorts, isPortFree, rootDirectory } from './utils'
 import * as path from 'path'
 
-export type SketchDevServer = { proc: Subprocess; url: string; path: string; lastRequestTime: number }
+export type SketchDevServer = { process?: Subprocess; port: number; url: string; path: string; lastRequestTime: number }
 
 export type SketchDevServerState = {
-    runningSketches: Map<string, SketchDevServer>
+    sketches: Map<string, SketchDevServer>
 }
 
 export const init = () => {
     return {
-        runningSketches: new Map<string, SketchDevServer>(),
+        sketches: new Map<string, SketchDevServer>(),
     }
 }
 
@@ -42,13 +42,38 @@ async function watchSketchOutputReadableStream(sketch: SketchDevServer, stream: 
 }
 
 export const get = async (state: SketchDevServerState, sketchPath: string): Promise<SketchDevServer> => {
-    const existingSketch = state.runningSketches.get(sketchPath)
+    const existingSketch = state.sketches.get(sketchPath)
 
-    if (existingSketch) {
+    // if the sketch is already running, return it
+    if (existingSketch && existingSketch.process) {
         return existingSketch
     }
 
-    const port = await getFreePort()
+    let port: number | undefined = undefined
+
+    if (existingSketch) {
+        const existingSketchPortFree = await isPortFree(existingSketch.port)
+
+        if (existingSketchPortFree) {
+            port = existingSketch.port
+        }
+    }
+
+    if (!port) {
+        const freePorts = await getFreePorts()
+
+        // try to reuse the port of an existing sketch, if it's free.
+        // otherwise use the first port not reserved by another sketch.
+        if (existingSketch && freePorts.includes(existingSketch.port)) {
+            port = existingSketch.port
+        } else {
+            const sketchPorts = Array.from(state.sketches.values()).map((sketch) => sketch.port)
+
+            const unreservedPorts = freePorts.filter((freePort) => !sketchPorts.includes(freePort))
+
+            port = unreservedPorts[0]
+        }
+    }
 
     if (!port) {
         throw new Error('no free ports')
@@ -57,17 +82,15 @@ export const get = async (state: SketchDevServerState, sketchPath: string): Prom
     const url = `https://localhost:${port}/`
 
     const cwd = path.resolve(rootDirectory, 'sketches', sketchPath)
-    const proc = Bun.spawn({
-        cmd: ['yarn', 'dev', '--port', String(port), '--base', url],
+
+    const process = Bun.spawn({
+        cmd: ['yarn', 'dev', '--port', String(port)],
         cwd,
-        env: {
-            VITE_BASE: url,
-        },
         stdout: 'pipe',
         stderr: 'pipe',
     })
 
-    // wait until the dev server is up
+    // try to wait until the dev server is up
     for (let attempt = 0; attempt < 20; attempt++) {
         try {
             await fetch(url)
@@ -79,35 +102,41 @@ export const get = async (state: SketchDevServerState, sketchPath: string): Prom
 
     console.log(`started dev server for ${sketchPath} at ${url}`)
 
-    const sketch = { proc, url, path: sketchPath, lastRequestTime: Date.now() }
+    const sketch = { proc: process, url, path: sketchPath, port, lastRequestTime: Date.now() }
 
-    state.runningSketches.set(sketchPath, sketch)
+    state.sketches.set(sketchPath, sketch)
 
-    watchSketchOutputReadableStream(sketch, proc.stdout, 'stdout')
-    watchSketchOutputReadableStream(sketch, proc.stderr, 'stderr')
+    watchSketchOutputReadableStream(sketch, process.stdout, 'stdout')
+    watchSketchOutputReadableStream(sketch, process.stderr, 'stderr')
 
     return sketch
 }
 
 export const stop = async (state: SketchDevServerState, path: string) => {
-    const sketch = state.runningSketches.get(path)
+    const sketch = state.sketches.get(path)
 
     if (!sketch) return
 
-    sketch.proc.kill()
+    if (sketch.process) {
+        sketch.process.kill()
 
-    state.runningSketches.delete(path)
+        // also kill any process using the sketch port
+        // proc.kill does not kill grandchildren processes
+        await $`lsof -i :${sketch.port} | grep LISTEN | awk '{print $2}' | xargs kill -9`.quiet()
+
+        sketch.process = undefined
+    }
 }
 
 export const stopAll = async (state: SketchDevServerState) => {
-    for (const [, sketch] of state.runningSketches) {
+    for (const [, sketch] of state.sketches) {
         await stop(state, sketch.path)
     }
 }
 
 export const stopUnusedDevServers = (state: SketchDevServerState, msSinceLastRequest: number) => {
-    for (const [, sketch] of state.runningSketches) {
-        if (Date.now() - sketch.lastRequestTime > msSinceLastRequest) {
+    for (const [, sketch] of state.sketches) {
+        if (sketch.process && Date.now() - sketch.lastRequestTime > msSinceLastRequest) {
             console.log(`stopping unused dev server for ${sketch.path}`)
             stop(state, sketch.path)
         }
