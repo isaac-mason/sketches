@@ -2446,11 +2446,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/marching-cubes-terrain@workspace:sketches/isosurface/marching-cubes-terrain"
   dependencies:
+    "@pmndrs/assets": "npm:^1.6.0"
     "@react-three/drei": "npm:^9.111.2"
     "@react-three/fiber": "npm:^8.16.8"
     "@types/react": "npm:^18.3.3"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.167.1"
+    maath: "npm:^0.10.8"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     three: "npm:^0.167.1"
