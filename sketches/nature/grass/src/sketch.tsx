@@ -62,16 +62,14 @@ const Grass = () => {
 
     return (
         <>
-            <group>
-                <mesh>
-                    <primitive object={grassGeometry} />
-                    <primitive object={grassMaterial} />
-                </mesh>
-                <mesh>
-                    <primitive object={groundGeometry} />
-                    <meshStandardMaterial color={GROUND_COLOR} />
-                </mesh>
-            </group>
+            <mesh>
+                <primitive object={grassGeometry} />
+                <primitive object={grassMaterial} />
+            </mesh>
+            <mesh>
+                <primitive object={groundGeometry} />
+                <meshStandardMaterial color={GROUND_COLOR} />
+            </mesh>
 
             <PerspectiveCamera makeDefault position={[40, groundGeometry.maxHeight + 10, 40]} fov={50} />
         </>

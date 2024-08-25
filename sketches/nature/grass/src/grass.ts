@@ -250,38 +250,7 @@ export class GrassGeometry extends THREE.InstancedBufferGeometry {
         this.setAttribute('middleColor', new THREE.InstancedBufferAttribute(attributes.middleColor, 3))
         this.setAttribute('tipColor', new THREE.InstancedBufferAttribute(attributes.tipColor, 3))
 
-        this.computeBoundingSphere()
-    }
-
-    computeBoundingSphere() {
-        const offsets = this.attributes.offset.array
-
-        const position = new THREE.Vector3()
-        const center = new THREE.Vector3(0, 0, 0)
-
-        for (let i = 0; i < offsets.length; i += 3) {
-            position.set(offsets[i], offsets[i + 1], offsets[i + 2])
-
-            center.add(position)
-        }
-
-        center.divideScalar(offsets.length / 3)
-
-        let maxRadiusSq = 0
-
-        for (let i = 0; i < offsets.length; i += 3) {
-            position.set(offsets[i], offsets[i + 1], offsets[i + 2])
-
-            const distanceSq = center.distanceToSquared(position)
-
-            if (distanceSq > maxRadiusSq) {
-                maxRadiusSq = distanceSq
-            }
-        }
-
-        const radius = Math.sqrt(maxRadiusSq)
-
-        this.boundingSphere = new THREE.Sphere(center, radius)
+        this.boundingSphere = new THREE.Sphere(new THREE.Vector3(), (Math.sqrt(2) * width) / 2)
     }
 
     private computeGrassAttributes(instances: number, width: number) {
