@@ -8,9 +8,7 @@ import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js'
 import { marchingCubes } from './marching-cubes'
 import * as Voxels from './voxels'
 
-const tree = (world: Voxels.World, base: THREE.Vector3Like) => {
-    const { x: treeX, y: treeY, z: treeZ } = base
-
+const tree = (world: Voxels.World, treeX: number, treeY: number, treeZ: number) => {
     // trunk
     for (let y = 0; y < 10; y++) {
         Voxels.setBlock(world, treeX, treeY + y, treeZ, true)
@@ -57,7 +55,7 @@ const createVoxelWorld = () => {
             }
 
             if (generator.value() < 0.002) {
-                tree(world, { x, y, z })
+                tree(world, x, y, z)
             }
         }
     }
