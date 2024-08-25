@@ -35,7 +35,7 @@ app.use((_req, res, next) => {
     next()
 })
 
-// serve sketches from dev servers
+// redirects to sketch dev servers
 app.use('/sketches-static', async (req, res, next) => {
     const sketchMeta = sketchesMeta.find(({ path }) => req.url.startsWith(`/${path}/`))
 
@@ -44,7 +44,7 @@ app.use('/sketches-static', async (req, res, next) => {
     }
 
     // redirect index.html to sketch dev servers
-    // server cover images are served from static middlware
+    // cover images are served from static middlware
     const isIndex = req.url === `/${sketchMeta.path}/index.html`
 
     if (!isIndex) {
@@ -56,7 +56,7 @@ app.use('/sketches-static', async (req, res, next) => {
     res.redirect(devServer.url)
 })
 
-// server static files from public, for sketch cover images
+// serve static files from public, for sketch cover images
 app.use(express.static(resolve(containerAppDirectory, 'public')))
 
 // container dev server
