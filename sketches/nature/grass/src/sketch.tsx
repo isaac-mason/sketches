@@ -1,14 +1,14 @@
 import { Canvas } from '@/common'
 import forestEnvironment from '@pmndrs/assets/hdri/forest.exr'
-import { CameraShake, Environment, OrbitControls, PerspectiveCamera, Sky, useTexture } from '@react-three/drei'
+import { Environment, OrbitControls, PerspectiveCamera, Sky, useTexture } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { useControls } from 'leva'
 import { useMemo } from 'react'
 import { createNoise2D } from 'simplex-noise'
 import * as THREE from 'three'
 import cloudUrl from './cloud.jpg?url'
-import grassBladeAlphaUrl from './grass-blade-alpha.jpg?url'
 import { GrassGeometry, GrassMaterial } from './grass'
+import grassBladeAlphaUrl from './grass-blade-alpha.jpg?url'
 import { GroundGeometry } from './ground'
 
 const GROUND_COLOR = '#001700'
@@ -71,7 +71,7 @@ const Grass = () => {
                 <meshStandardMaterial color={GROUND_COLOR} />
             </mesh>
 
-            <PerspectiveCamera makeDefault position={[40, groundGeometry.maxHeight + 10, 40]} fov={50} />
+            
         </>
     )
 }
@@ -85,8 +85,8 @@ export function Sketch() {
 
             <Environment files={forestEnvironment} />
 
-            <OrbitControls makeDefault autoRotate autoRotateSpeed={0.25} target={[0, 3, 0]} />
-            <CameraShake maxRoll={0} maxPitch={0.05} maxYaw={0.05} />
+            <PerspectiveCamera makeDefault position={[40, 5, 40]} fov={50} />
+            <OrbitControls makeDefault />
         </Canvas>
     )
 }
