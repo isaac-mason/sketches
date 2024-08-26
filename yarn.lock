@@ -1978,7 +1978,7 @@ __metadata:
     r3f-perf: "npm:^7.2.1"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    styled-components: "npm:^6.1.11"
+    styled-components: "npm:^6.1.12"
     three: "npm:^0.167.1"
     zustand: "npm:^4.5.4"
   languageName: unknown
@@ -2006,7 +2006,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     react-router-dom: "npm:^6.23.1"
     styled-breakpoints: "npm:^14.1.3"
-    styled-components: "npm:^6.1.11"
+    styled-components: "npm:^6.1.12"
     tsx: "npm:^4.16.3"
     tunnel-rat: "npm:^0.1.2"
     typescript: "npm:^5.5.3"
@@ -2789,7 +2789,7 @@ __metadata:
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    styled-components: "npm:^6.1.11"
+    styled-components: "npm:^6.1.12"
     three: "npm:^0.167.1"
     typescript: "npm:^5.5.3"
     vite: "npm:^5.3.3"
@@ -3182,7 +3182,7 @@ __metadata:
     "@use-gesture/react": "npm:^10.3.1"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    styled-components: "npm:^6.1.11"
+    styled-components: "npm:^6.1.12"
     three: "npm:^0.167.1"
     typescript: "npm:^5.5.3"
     vite: "npm:^5.3.3"
@@ -9935,26 +9935,6 @@ __metadata:
     react: ">= 16.8.0"
     react-dom: ">= 16.8.0"
   checksum: 10/22d2101f7e58967a8b2891eb53f73b7c1620a37d2ddd800cf7214717e0a149ed9b8c9ff82b607bf5830fed39019ec0fad3965cdb87064926deda7aa124bf6ec1
-  languageName: node
-  linkType: hard
-
-"styled-components@npm:^6.1.11":
-  version: 6.1.11
-  resolution: "styled-components@npm:6.1.11"
-  dependencies:
-    "@emotion/is-prop-valid": "npm:1.2.2"
-    "@emotion/unitless": "npm:0.8.1"
-    "@types/stylis": "npm:4.2.5"
-    css-to-react-native: "npm:3.2.0"
-    csstype: "npm:3.1.3"
-    postcss: "npm:8.4.38"
-    shallowequal: "npm:1.1.0"
-    stylis: "npm:4.3.2"
-    tslib: "npm:2.6.2"
-  peerDependencies:
-    react: ">= 16.8.0"
-    react-dom: ">= 16.8.0"
-  checksum: 10/6813bba73ad706998a903793da2c903a6a64e487b2167d26cc3d55a850637a31becab1ce43fa072f9aba4f6074ec5a914dd4696e9ba2548e6c4873436f4ca632
   languageName: node
   linkType: hard
 

@@ -9,7 +9,7 @@
         "r3f-perf": "^7.2.1",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
-        "styled-components": "^6.1.11",
+        "styled-components": "^6.1.12",
         "three": "^0.167.1",
         "zustand": "^4.5.4"
     },
