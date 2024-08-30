@@ -1973,6 +1973,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.111.2"
     "@react-three/fiber": "npm:^8.16.8"
+    "@types/three": "npm:^0.167.1"
     "@use-gesture/react": "npm:^10.3.1"
     leva: "npm:^0.9.35"
     r3f-perf: "npm:^7.2.1"
