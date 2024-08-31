@@ -125,7 +125,5 @@ export const getFreePorts = async (options?: GetFreePortOptions) => {
 export const isPortFree = async (port: number) => {
     const usedPorts = await getUsedPorts()
 
-    console.log('usedPorts', usedPorts)
-
     return !usedPorts.includes(String(port))
 }
