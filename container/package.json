@@ -36,7 +36,7 @@
         "http-proxy": "^1.18.1",
         "tsx": "^4.16.3",
         "typescript": "^5.5.3",
-        "vite": "^5.3.3",
+        "vite": "^5.4.2",
         "vite-imagetools": "^7.0.4",
         "vite-plugin-html": "^3.2.2"
     },
