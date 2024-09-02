@@ -4,9 +4,9 @@ import { useControls } from 'leva'
 import { Generator } from 'maath/random'
 import { useMemo } from 'react'
 import * as THREE from 'three'
-import { Line2 } from "three/addons/lines/Line2.js"
-import { LineGeometry } from "three/addons/lines/LineGeometry.js"
-import { LineMaterial } from "three/addons/lines/LineMaterial.js"
+import { Line2 } from 'three/addons/lines/Line2.js'
+import { LineGeometry } from 'three/addons/lines/LineGeometry.js'
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js'
 
 const DEG2RAD = Math.PI / 180
 
@@ -306,11 +306,7 @@ const LSystem = ({ config }: LSystemProps) => {
         return line
     }, [branches])
 
-    return (
-        <group>
-            <primitive object={line} />
-        </group>
-    )
+    return <primitive object={line} />
 }
 
 export function Sketch() {
