@@ -2,7 +2,9 @@ import { useThree } from '@react-three/fiber'
 import * as d3 from 'd3'
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
-import { Line2, LineGeometry, LineMaterial } from 'three/examples/jsm/Addons.js'
+import { Line2 } from 'three/addons/lines/Line2.js'
+import { LineGeometry } from 'three/addons/lines/LineGeometry.js'
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js'
 
 const vec = new THREE.Vector3()
 

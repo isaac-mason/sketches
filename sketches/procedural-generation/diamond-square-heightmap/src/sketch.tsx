@@ -3,7 +3,7 @@ import { Bounds, Helper, OrbitControls } from '@react-three/drei'
 import { useControls } from 'leva'
 import { useMemo } from 'react'
 import { PlaneGeometry, PointLightHelper } from 'three'
-import { VertexNormalsHelper } from 'three/addons'
+import { VertexNormalsHelper } from 'three/addons/helpers/VertexNormalsHelper.js'
 
 const randomInRange = (min: number, max: number): number => {
     return Math.random() * (max - min) + min

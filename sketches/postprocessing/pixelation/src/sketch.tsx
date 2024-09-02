@@ -1,10 +1,11 @@
+import { Canvas } from '@/common'
 import { OrbitControls } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
 import { useControls } from 'leva'
 import { useEffect, useMemo, useRef } from 'react'
 import { Group, OrthographicCamera, Quaternion, Vector2, Vector3 } from 'three'
-import { EffectComposer, RenderPixelatedPass } from 'three/addons'
-import { Canvas } from '@/common'
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js'
+import { RenderPixelatedPass } from 'three/addons/postprocessing/RenderPixelatedPass.js'
 
 // https://threejs.org/examples/#webgl_postprocessing_pixel
 function pixelAlignFrustum(
