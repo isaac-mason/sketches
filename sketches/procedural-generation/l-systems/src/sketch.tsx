@@ -4,7 +4,9 @@ import { useControls } from 'leva'
 import { Generator } from 'maath/random'
 import { useMemo } from 'react'
 import * as THREE from 'three'
-import { Line2, LineGeometry, LineMaterial } from 'three/examples/jsm/Addons.js'
+import { Line2 } from "three/addons/lines/Line2.js"
+import { LineGeometry } from "three/addons/lines/LineGeometry.js"
+import { LineMaterial } from "three/addons/lines/LineMaterial.js"
 
 const DEG2RAD = Math.PI / 180
 
