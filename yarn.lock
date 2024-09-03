@@ -1717,21 +1717,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-three/xr@npm:^5.7.1":
-  version: 5.7.1
-  resolution: "@react-three/xr@npm:5.7.1"
-  dependencies:
-    "@types/webxr": "npm:*"
-    three-stdlib: "npm:^2.21.1"
-    zustand: "npm:^3.7.1"
-  peerDependencies:
-    "@react-three/fiber": ">=8.0.0"
-    react: ">=18.0"
-    three: ">=0.141"
-  checksum: 10/1232bc36d207b6ba89876ceca8061cb5cdaa512860a6ccd1955396fcd64860a43553113a0788d266dd0dae9bc0d7b737dd329ca97e1faebee4870c39d59c6796
-  languageName: node
-  linkType: hard
-
 "@recast-navigation/core@npm:0.33.0":
   version: 0.33.0
   resolution: "@recast-navigation/core@npm:0.33.0"
@@ -3632,24 +3617,6 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.111.2"
     "@react-three/fiber": "npm:^8.16.8"
-    "@types/react": "npm:^18.3.3"
-    "@types/react-dom": "npm:^18.3.0"
-    "@types/three": "npm:^0.168.0"
-    react: "npm:^18.3.1"
-    react-dom: "npm:^18.3.1"
-    three: "npm:^0.168.0"
-    typescript: "npm:^5.5.3"
-    vite: "npm:^5.3.3"
-  languageName: unknown
-  linkType: soft
-
-"@sketches/xr-basic-vr@workspace:sketches/xr/basic-vr":
-  version: 0.0.0-use.local
-  resolution: "@sketches/xr-basic-vr@workspace:sketches/xr/basic-vr"
-  dependencies:
-    "@react-three/drei": "npm:^9.111.2"
-    "@react-three/fiber": "npm:^8.16.8"
-    "@react-three/xr": "npm:^5.7.1"
     "@types/react": "npm:^18.3.3"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.168.0"
@@ -10140,7 +10107,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"three-stdlib@npm:^2.21.1, three-stdlib@npm:^2.23.4":
+"three-stdlib@npm:^2.23.4":
   version: 2.28.7
   resolution: "three-stdlib@npm:2.28.7"
   dependencies:
