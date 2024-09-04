@@ -12,7 +12,7 @@ import { Theme } from './theme'
 type SketchMetadata = (typeof sketchesMetadata)[number] & { cover?: string }
 
 const sketches = (sketchesMetadata as SketchMetadata[]).filter((s) => !s.hidden)
-
+console.log(sketches)
 const Error = styled.div`
     width: 100%;
     height: 100%;
@@ -21,27 +21,6 @@ const Error = styled.div`
     justify-content: center;
     color: #fff;
 `
-
-// const GithubLink = styled.a`
-//     position: absolute;
-//     z-index: 2;
-
-//     font-size: 1.2em;
-//     margin: 0;
-//     text-decoration: none;
-
-//     color: #eee;
-//     text-shadow: 2px 2px #333;
-//     font-family: 'Poppins', sans-serif;
-
-//     bottom: 20px;
-//     right: 20px;
-
-//     ${({ theme }) => theme.breakpoints.up('md')} {
-//         bottom: 60px;
-//         right: 60px;
-//     }
-// `
 
 const Links = styled.div`
     position: absolute;
