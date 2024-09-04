@@ -12,7 +12,7 @@ import { Theme } from './theme'
 type SketchMetadata = (typeof sketchesMetadata)[number] & { cover?: string }
 
 const sketches = (sketchesMetadata as SketchMetadata[]).filter((s) => !s.hidden)
-console.log(sketches)
+
 const Error = styled.div`
     width: 100%;
     height: 100%;
