@@ -3,7 +3,7 @@
     "private": true,
     "sketch": {
         "title": "Prosper",
-        "hidden": false
+        "hidden": true
     },
     "scripts": {
         "dev": "vite dev",
