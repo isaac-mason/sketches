@@ -316,66 +316,66 @@ const dims = [Voxels.CHUNK_SIZE, Voxels.CHUNK_SIZE, Voxels.CHUNK_SIZE]
 export const marchingCubes = (world: Voxels.World, chunk: Voxels.Chunk) => {
     const vertices: Vector3Tuple[] = []
     const faces: Vector3Tuple[] = []
-    let n = 0
     const grid = new Float32Array(8)
     const edges = new Int32Array(12)
-    const x = new Int32Array(3)
+    const position = new Int32Array(3)
 
     // March over the volume
-    for (x[2] = -1; x[2] < dims[2]; ++x[2], n += dims[0]) {
-        for (x[1] = -1; x[1] < dims[1]; ++x[1], ++n) {
-            for (x[0] = -1; x[0] < dims[0]; ++x[0], ++n) {
+    for (position[2] = -1; position[2] < dims[2]; ++position[2]) {
+        for (position[1] = -1; position[1] < dims[1]; ++position[1]) {
+            for (position[0] = -1; position[0] < dims[0]; ++position[0]) {
                 // For each cell, compute cube mask
-                let cube_index = 0
+                let cubeIndex = 0
+
                 for (let i = 0; i < 8; ++i) {
                     const v = cubeVerts[i]
 
-                    const worldX = x[0] + v[0] + chunk.position[0] * Voxels.CHUNK_SIZE
-                    const worldY = x[1] + v[1] + chunk.position[1] * Voxels.CHUNK_SIZE
-                    const worldZ = x[2] + v[2] + chunk.position[2] * Voxels.CHUNK_SIZE
+                    const worldX = position[0] + v[0] + chunk.position[0] * Voxels.CHUNK_SIZE
+                    const worldY = position[1] + v[1] + chunk.position[1] * Voxels.CHUNK_SIZE
+                    const worldZ = position[2] + v[2] + chunk.position[2] * Voxels.CHUNK_SIZE
 
-                    const s = Number(Voxels.getSolid(world, worldX, worldY, worldZ))
+                    const solid = Number(Voxels.getSolid(world, worldX, worldY, worldZ))
 
-                    grid[i] = s
+                    grid[i] = solid
 
-                    cube_index |= s > 0 ? 1 << i : 0
+                    cubeIndex |= solid > 0 ? 1 << i : 0
                 }
 
                 // Compute vertices
-                const edge_mask = edgeTable[cube_index]
+                const edgeMask = edgeTable[cubeIndex]
 
-                if (edge_mask === 0) {
+                if (edgeMask === 0) {
                     continue
                 }
 
                 for (let i = 0; i < 12; ++i) {
-                    if ((edge_mask & (1 << i)) === 0) {
+                    if ((edgeMask & (1 << i)) === 0) {
                         continue
                     }
 
                     edges[i] = vertices.length
-                    const nv: Vector3Tuple = [0, 0, 0]
-                    const e = edgeIndex[i]
-                    const p0 = cubeVerts[e[0]]
-                    const p1 = cubeVerts[e[1]]
-                    const a = grid[e[0]]
-                    const b = grid[e[1]]
-                    const d = a - b
+                    const newVertex: Vector3Tuple = [0, 0, 0]
+                    const edge = edgeIndex[i]
+                    const p0 = cubeVerts[edge[0]]
+                    const p1 = cubeVerts[edge[1]]
+                    const a = grid[edge[0]]
+                    const b = grid[edge[1]]
+                    const difference = a - b
                     let t = 0
 
-                    if (Math.abs(d) > 1e-6) {
-                        t = a / d
+                    if (Math.abs(difference) > 1e-6) {
+                        t = a / difference
                     }
 
                     for (let j = 0; j < 3; ++j) {
-                        nv[j] = x[j] + p0[j] + t * (p1[j] - p0[j])
+                        newVertex[j] = position[j] + p0[j] + t * (p1[j] - p0[j])
                     }
 
-                    vertices.push(nv)
+                    vertices.push(newVertex)
                 }
 
                 // Add faces
-                const f = triTable[cube_index]
+                const f = triTable[cubeIndex]
                 for (let i = 0; i < f.length; i += 3) {
                     const a = edges[f[i]]
                     const b = edges[f[i + 1]]
