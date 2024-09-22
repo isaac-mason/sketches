@@ -1,12 +1,11 @@
 import { Canvas } from '@/common/components/canvas'
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei'
-import { useControls } from 'leva'
 import { Generator } from 'maath/random'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import * as THREE from 'three'
-import { Line2 } from 'three/addons/lines/Line2.js'
 import { LineGeometry } from 'three/addons/lines/LineGeometry.js'
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js'
+import { LineSegments2 } from 'three/addons/lines/LineSegments2.js'
 
 const DEG2RAD = Math.PI / 180
 
@@ -74,20 +73,6 @@ const restoreState = (context: InterpreterContext) => {
         context.currentDirection = popped.direction
     }
 }
-
-// default L-system grammar:
-//
-// '+'      - Turn right
-// '-'      - Turn left
-// '&'      - Pitch down
-// '^'      - Pitch up
-// '<'      - Roll left
-// '>'      - Roll right
-// '|'      - Turn 180 degrees
-// 'F'      - Draw branch and move forward
-// 'g'      - Move forward without drawing
-// '['      - Save state
-// ']'      - Restore state
 
 const defaultSyntax = {
     '+': turnRight,
@@ -266,7 +251,7 @@ const tree_2 = {
     iterations: 5,
 }
 
-const configs = {
+const configs: Record<string, Config> = {
     'fractal plant': fractalPlantConfig,
     tree: treeConfig,
     'tree 2': tree_2,
@@ -293,15 +278,15 @@ const LSystem = ({ config }: LSystemProps) => {
 
         const geometry = new LineGeometry()
         geometry.setPositions(positions)
-        geometry.instanceCount = positions.length / 3 - 1
 
         const material = new LineMaterial({
             color: 0xffffff,
-            linewidth: 1,
+            linewidth: 0.01,
             alphaToCoverage: false,
+            worldUnits: true,
         })
 
-        const line = new Line2(geometry, material)
+        const line = new LineSegments2(geometry, material)
 
         return line
     }, [branches])
@@ -310,22 +295,44 @@ const LSystem = ({ config }: LSystemProps) => {
 }
 
 export function Sketch() {
-    const { configKey } = useControls('l-systems', {
-        configKey: {
-            value: configKeys[0],
-            options: configKeys,
-        },
-    })
+    const [configKey, setConfigKey] = useState(configKeys[0])
 
     const config = configs[configKey as keyof typeof configs]
 
     return (
-        <Canvas>
-            <LSystem config={config} />
+        <>
+            <div
+                style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    zIndex: 2,
+                }}
+            >
+                {configKeys.map((key) => (
+                    <button
+                        key={key}
+                        onClick={() => setConfigKey(key)}
+                        style={{
+                            padding: '0.5rem',
+                            margin: '0.5rem',
+                            fontWeight: '600',
+                            backgroundColor: key === configKey ? '#22f' : '#fff',
+                            color: key === configKey ? 'white' : 'black',
+                            border: 'none',
+                        }}
+                    >
+                        {key}
+                    </button>
+                ))}
+            </div>
 
-            <PerspectiveCamera makeDefault position={[0, 3, -10]} />
+            <Canvas>
+                <LSystem config={config} />
 
-            <OrbitControls makeDefault target={[0, 2, 0]} />
-        </Canvas>
+                <PerspectiveCamera makeDefault position={[0, 3, -10]} />
+                <OrbitControls makeDefault target={[0, 2, 0]} />
+            </Canvas>
+        </>
     )
 }
