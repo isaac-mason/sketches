@@ -2731,25 +2731,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sketches/rapier-ball-pit-mixer@workspace:sketches/rapier/ball-pit-mixer":
-  version: 0.0.0-use.local
-  resolution: "@sketches/rapier-ball-pit-mixer@workspace:sketches/rapier/ball-pit-mixer"
-  dependencies:
-    "@react-three/drei": "npm:^9.111.2"
-    "@react-three/fiber": "npm:^8.16.8"
-    "@react-three/rapier": "npm:^1.4.0"
-    "@types/react": "npm:^18.3.3"
-    "@types/react-dom": "npm:^18.3.0"
-    "@types/three": "npm:^0.168.0"
-    leva: "npm:^0.9.35"
-    react: "npm:^18.3.1"
-    react-dom: "npm:^18.3.1"
-    three: "npm:^0.168.0"
-    typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
-  languageName: unknown
-  linkType: soft
-
 "@sketches/rapier-cluster@workspace:sketches/rapier/cluster":
   version: 0.0.0-use.local
   resolution: "@sketches/rapier-cluster@workspace:sketches/rapier/cluster"
@@ -2851,25 +2832,6 @@ __metadata:
 "@sketches/rapier-pointer-controls@workspace:sketches/rapier/pointer-controls":
   version: 0.0.0-use.local
   resolution: "@sketches/rapier-pointer-controls@workspace:sketches/rapier/pointer-controls"
-  dependencies:
-    "@react-three/drei": "npm:^9.111.2"
-    "@react-three/fiber": "npm:^8.16.8"
-    "@react-three/rapier": "npm:^1.4.0"
-    "@types/react": "npm:^18.3.3"
-    "@types/react-dom": "npm:^18.3.0"
-    "@types/three": "npm:^0.168.0"
-    leva: "npm:^0.9.35"
-    react: "npm:^18.3.1"
-    react-dom: "npm:^18.3.1"
-    three: "npm:^0.168.0"
-    typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
-  languageName: unknown
-  linkType: soft
-
-"@sketches/rapier-pointer-raycasting@workspace:sketches/rapier/pointer-raycasting":
-  version: 0.0.0-use.local
-  resolution: "@sketches/rapier-pointer-raycasting@workspace:sketches/rapier/pointer-raycasting"
   dependencies:
     "@react-three/drei": "npm:^9.111.2"
     "@react-three/fiber": "npm:^8.16.8"
