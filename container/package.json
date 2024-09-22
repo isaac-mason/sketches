@@ -32,7 +32,7 @@
         "@vitejs/plugin-react-swc": "^3.7.0",
         "bun": "^1.1.21",
         "eslint": "^9.6.0",
-        "express": "^4.19.2",
+        "express": "^4.20.0",
         "http-proxy": "^1.18.1",
         "tsx": "^4.16.3",
         "typescript": "^5.5.3",
