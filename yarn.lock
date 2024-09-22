@@ -1921,7 +1921,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -1938,7 +1938,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -1955,7 +1955,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2003,7 +2003,7 @@ __metadata:
     tsx: "npm:^4.16.3"
     tunnel-rat: "npm:^0.1.2"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
     vite-imagetools: "npm:^7.0.4"
     vite-plugin-html: "npm:^3.2.2"
     zustand: "npm:^4.5.4"
@@ -2025,7 +2025,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2039,7 +2039,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     styled-components: "npm:^6.1.13"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
     zustand: "npm:^4.5.4"
   languageName: unknown
   linkType: soft
@@ -2057,7 +2057,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2074,7 +2074,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2092,7 +2092,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2109,7 +2109,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2126,7 +2126,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2143,7 +2143,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2160,7 +2160,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2177,7 +2177,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2194,7 +2194,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2211,7 +2211,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2228,7 +2228,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2245,7 +2245,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2262,7 +2262,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2279,7 +2279,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2296,7 +2296,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2313,7 +2313,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2330,7 +2330,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2347,7 +2347,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2364,7 +2364,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2381,7 +2381,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2395,7 +2395,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     styled-components: "npm:^6.1.13"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
     zustand: "npm:^4.5.4"
   languageName: unknown
   linkType: soft
@@ -2413,7 +2413,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2431,7 +2431,7 @@ __metadata:
     styled-components: "npm:^6.1.13"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2450,7 +2450,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2472,7 +2472,7 @@ __metadata:
     three: "npm:^0.168.0"
     tone: "npm:15.0.4"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2490,7 +2490,7 @@ __metadata:
     suspend-react: "npm:^0.1.3"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2508,7 +2508,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2528,7 +2528,7 @@ __metadata:
     simplex-noise: "npm:^4.0.3"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2546,7 +2546,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2564,7 +2564,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2582,7 +2582,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2600,7 +2600,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2617,7 +2617,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2634,7 +2634,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2651,7 +2651,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2669,7 +2669,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2688,7 +2688,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2708,7 +2708,7 @@ __metadata:
     simplex-noise: "npm:^4.0.3"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2725,7 +2725,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2744,7 +2744,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2763,7 +2763,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2783,7 +2783,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2804,7 +2804,7 @@ __metadata:
     styled-components: "npm:^6.1.13"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2823,7 +2823,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2842,7 +2842,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2861,7 +2861,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2880,7 +2880,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2899,7 +2899,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2918,7 +2918,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2937,7 +2937,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2955,7 +2955,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2974,7 +2974,7 @@ __metadata:
     recast-navigation: "npm:^0.33.0"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -2993,7 +2993,7 @@ __metadata:
     recast-navigation: "npm:^0.33.0"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3013,7 +3013,7 @@ __metadata:
     recast-navigation: "npm:^0.33.0"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3033,7 +3033,7 @@ __metadata:
     recast-navigation: "npm:^0.33.0"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3050,7 +3050,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3067,7 +3067,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3084,7 +3084,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3101,7 +3101,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3120,7 +3120,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3143,7 +3143,7 @@ __metadata:
     three: "npm:^0.168.0"
     tunnel-rat: "npm:^0.1.2"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3161,7 +3161,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3178,7 +3178,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3197,7 +3197,7 @@ __metadata:
     styled-components: "npm:^6.1.13"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3216,7 +3216,7 @@ __metadata:
     suspend-react: "npm:^0.1.3"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3233,7 +3233,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3250,7 +3250,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3267,7 +3267,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3284,7 +3284,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3301,7 +3301,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3319,7 +3319,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3336,7 +3336,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3354,7 +3354,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3371,7 +3371,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3388,7 +3388,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3405,7 +3405,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3422,7 +3422,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3439,7 +3439,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3456,7 +3456,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3474,7 +3474,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3492,7 +3492,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3510,7 +3510,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3528,7 +3528,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3546,7 +3546,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3563,7 +3563,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3580,7 +3580,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3597,7 +3597,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3614,7 +3614,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3631,7 +3631,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -3648,7 +3648,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.168.0"
     typescript: "npm:^5.5.3"
-    vite: "npm:^5.4.6"
+    vite: "npm:^5.4.7"
   languageName: unknown
   linkType: soft
 
@@ -10596,9 +10596,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^5.4.6":
-  version: 5.4.6
-  resolution: "vite@npm:5.4.6"
+"vite@npm:^5.4.7":
+  version: 5.4.7
+  resolution: "vite@npm:5.4.7"
   dependencies:
     esbuild: "npm:^0.21.3"
     fsevents: "npm:~2.3.3"
@@ -10635,7 +10635,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 10/8489fa55c48675fc12b64bf7af58b5e2f8a11b2aebc63cb177861bd53dc196d7c496d6918f5a8c48828f51b6fe498166a1a2350334bbfaae10d015a0c71f1c77
+  checksum: 10/3f27e870930ad83b51e009604c6b69ab090e69bb5bfe85007c7e4ec3326efae4e33ac799645926363f258595b3be3055cc1ebc5ee158cff4bacdf41adf4ef8ed
   languageName: node
   linkType: hard
 
