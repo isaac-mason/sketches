@@ -9,9 +9,16 @@ import { GitHubIcon } from './svgs/GitHubIcon'
 import { WindowMaximizeIcon } from './svgs/WindowMaximizeIcon'
 import { Theme } from './theme'
 
-type SketchMetadata = (typeof sketchesMetadata)[number] & { cover?: string }
+type SketchMetadata = {
+    title: string
+    path: string
+    tags?: string[]
+    cover?: string
+    hidden?: boolean
+    options?: { displayTitle?: boolean }
+}
 
-const sketches = (sketchesMetadata as SketchMetadata[]).filter((s) => !s.hidden)
+const sketches = (sketchesMetadata satisfies SketchMetadata[]).filter((s: SketchMetadata) => !s.hidden)
 
 const Error = styled.div`
     width: 100%;
