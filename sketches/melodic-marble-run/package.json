@@ -9,7 +9,7 @@
         "build": "vite build"
     },
     "dependencies": {
-        "@pmndrs/assets": "^1.6.0",
+        "@pmndrs/assets": "^1.6.1",
         "@react-three/drei": "^9.113.0",
         "@react-three/fiber": "^8.17.7",
         "@react-three/rapier": "^1.4.0",

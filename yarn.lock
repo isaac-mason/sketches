@@ -1031,10 +1031,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pmndrs/assets@npm:^1.6.0":
-  version: 1.6.0
-  resolution: "@pmndrs/assets@npm:1.6.0"
-  checksum: 10/2fadd7ef37920485ed24f70c7832fc1b5d3e749f893aaf01c6e0024fb00fbc89cafda9a3f8c4f94368ad58fc60b3e82098316f7db81529da89dd8647ed6225b4
+"@pmndrs/assets@npm:^1.6.1":
+  version: 1.6.1
+  resolution: "@pmndrs/assets@npm:1.6.1"
+  checksum: 10/b1e018efec2c8aa7a8c348542640313b339b9d05dbf396b46dbf8740c7b760a86f26c5779eb8ad918f2ed252ca5a4ec638854808fa8e8b23dca855a20d8d8a20
   languageName: node
   linkType: hard
 
@@ -2440,7 +2440,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/marching-cubes-terrain@workspace:sketches/isosurface/marching-cubes-terrain"
   dependencies:
-    "@pmndrs/assets": "npm:^1.6.0"
+    "@pmndrs/assets": "npm:^1.6.1"
     "@react-three/drei": "npm:^9.113.0"
     "@react-three/fiber": "npm:^8.17.7"
     "@types/react": "npm:^18.3.3"
@@ -2459,7 +2459,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/melodic-marble-run@workspace:sketches/melodic-marble-run"
   dependencies:
-    "@pmndrs/assets": "npm:^1.6.0"
+    "@pmndrs/assets": "npm:^1.6.1"
     "@react-three/drei": "npm:^9.113.0"
     "@react-three/fiber": "npm:^8.17.7"
     "@react-three/rapier": "npm:^1.4.0"
@@ -2517,7 +2517,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/nature-grass@workspace:sketches/nature/grass"
   dependencies:
-    "@pmndrs/assets": "npm:^1.6.0"
+    "@pmndrs/assets": "npm:^1.6.1"
     "@react-three/drei": "npm:^9.113.0"
     "@react-three/fiber": "npm:^8.17.7"
     "@types/react": "npm:^18.3.3"
