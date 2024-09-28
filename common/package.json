@@ -10,10 +10,10 @@
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
         "styled-components": "^6.1.13",
-        "three": "^0.168.0",
+        "three": "^0.169.0",
         "zustand": "^4.5.4"
     },
     "devDependencies": {
-        "@types/three": "^0.168.0"
+        "@types/three": "^0.169.0"
     }
 }
