@@ -53,7 +53,6 @@ export const sketchesOrder = [
     'tsl/hello-world',
     'tsl/gradient',
     'tsl/raging-sea',
-    'box-edge-outline',
     'z-fighting-mitigations',
     'transparency/face-sorting',
     'tris-in-box',
