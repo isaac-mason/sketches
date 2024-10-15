@@ -6,6 +6,7 @@ import * as path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig(() => {
+    console.log('here!')
     const gtagId = process.env.VITE_GTAG_ID
 
     const analyticsScript = gtagId

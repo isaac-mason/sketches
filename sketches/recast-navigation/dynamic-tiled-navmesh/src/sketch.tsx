@@ -8,7 +8,8 @@ import { Environment } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { Physics, RigidBody } from '@react-three/rapier'
 import { useControls } from 'leva'
-import { NavMeshQuery, init } from 'recast-navigation'
+import { NavMeshQuery, init as initRecast } from 'recast-navigation'
+import { suspend } from 'suspend-react'
 import * as THREE from 'three'
 import { Vector3Tuple } from 'three'
 import { BoxTool } from './box-tool'
@@ -19,8 +20,6 @@ import { Level } from './level/level'
 import { Agent } from './navigation/crowd-agent'
 import { Navigation, useNavigation } from './navigation/navigation'
 import { Player, PlayerControls } from './player'
-
-await init()
 
 const Scene = () => {
     return (
@@ -146,6 +145,9 @@ const updateFollowers = (navMeshQuery: NavMeshQuery | undefined) => {
 }
 
 export function Sketch() {
+    suspend(async () => {
+        await initRecast()
+    }, [])
     const { physicsDebug } = useControls(`${SKETCH}-physics`, {
         physicsDebug: false,
     })

@@ -9,11 +9,10 @@ import { Executor, System } from 'arancini/systems'
 import { useControls } from 'leva'
 import { useEffect, useState } from 'react'
 import { NavMesh, NavMeshQuery, init as initRecast } from 'recast-navigation'
+import { suspend } from 'suspend-react'
 import * as THREE from 'three'
 import characterGltfUrl from './character.glb?url'
 import levelGlbUrl from './game-level-transformed.glb?url'
-
-await initRecast()
 
 const LEVA_KEY = 'recast-navigation-character-controller'
 
@@ -537,6 +536,10 @@ const App = () => {
 }
 
 export function Sketch() {
+    suspend(async () => {
+        await initRecast()
+    }, [])
+
     return (
         <Canvas shadows={{ type: THREE.PCFSoftShadowMap }}>
             <App />
