@@ -1880,7 +1880,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -1897,7 +1897,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -1936,7 +1936,7 @@ __metadata:
     "@types/express": "npm:^4"
     "@types/http-proxy": "npm:^1"
     "@types/node": "npm:^22.4.1"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@vitejs/plugin-basic-ssl": "npm:^1.1.0"
     "@vitejs/plugin-react-swc": "npm:^3.7.0"
@@ -1966,7 +1966,7 @@ __metadata:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
     "@types/d3": "npm:^7.4.3"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     d3: "npm:^7.9.0"
@@ -1982,7 +1982,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/falling-sand@workspace:sketches/falling-sand"
   dependencies:
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
@@ -1999,7 +1999,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2016,7 +2016,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2034,7 +2034,7 @@ __metadata:
     "@react-spring/three": "npm:^9.7.3"
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2051,7 +2051,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2068,7 +2068,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2085,7 +2085,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2102,7 +2102,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2119,7 +2119,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2136,7 +2136,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2153,7 +2153,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2170,7 +2170,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2187,7 +2187,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2204,7 +2204,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2221,7 +2221,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2238,7 +2238,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2255,7 +2255,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2272,7 +2272,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2289,7 +2289,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2306,7 +2306,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2323,7 +2323,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2338,7 +2338,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/grid-pathfinding@workspace:sketches/grid-pathfinding"
   dependencies:
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
@@ -2355,7 +2355,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2372,7 +2372,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2391,7 +2391,7 @@ __metadata:
     "@pmndrs/assets": "npm:^1.6.1"
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     maath: "npm:^0.10.8"
@@ -2411,7 +2411,7 @@ __metadata:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
     "@react-three/rapier": "npm:^1.5.0"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     leva: "npm:^0.9.35"
@@ -2431,7 +2431,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2449,7 +2449,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     leva: "npm:^0.9.35"
@@ -2468,7 +2468,7 @@ __metadata:
     "@pmndrs/assets": "npm:^1.6.1"
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     leva: "npm:^0.9.35"
@@ -2487,7 +2487,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     p2-es: "npm:^1.2.3"
@@ -2505,7 +2505,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     p2-es: "npm:^1.2.3"
@@ -2523,7 +2523,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     p2-es: "npm:^1.2.3"
@@ -2541,7 +2541,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     p2-es: "npm:^1.2.3"
@@ -2559,7 +2559,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2576,7 +2576,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2593,7 +2593,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2610,7 +2610,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     leva: "npm:^0.9.35"
@@ -2628,7 +2628,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     leva: "npm:^0.9.35"
@@ -2648,7 +2648,7 @@ __metadata:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
     "@react-three/postprocessing": "npm:^2.16.2"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     leva: "npm:^0.9.35"
@@ -2668,7 +2668,7 @@ __metadata:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
     "@react-three/rapier": "npm:^1.5.0"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     leva: "npm:^0.9.35"
@@ -2688,7 +2688,7 @@ __metadata:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
     "@react-three/rapier": "npm:^1.5.0"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     leva: "npm:^0.9.35"
@@ -2708,7 +2708,7 @@ __metadata:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
     "@react-three/rapier": "npm:^1.5.0"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     leva: "npm:^0.9.35"
@@ -2728,7 +2728,7 @@ __metadata:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
     "@react-three/rapier": "npm:^1.5.0"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     leva: "npm:^0.9.35"
@@ -2747,7 +2747,7 @@ __metadata:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
     "@react-three/rapier": "npm:^1.5.0"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     leva: "npm:^0.9.35"
@@ -2766,7 +2766,7 @@ __metadata:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
     "@react-three/rapier": "npm:^1.5.0"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     leva: "npm:^0.9.35"
@@ -2785,7 +2785,7 @@ __metadata:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
     "@react-three/rapier": "npm:^1.5.0"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     leva: "npm:^0.9.35"
@@ -2804,7 +2804,7 @@ __metadata:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
     "@react-three/rapier": "npm:^1.5.0"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     leva: "npm:^0.9.35"
@@ -2823,7 +2823,7 @@ __metadata:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
     "@recast-navigation/three": "npm:^0.35.2"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     leva: "npm:^0.9.35"
@@ -2844,7 +2844,7 @@ __metadata:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
     "@recast-navigation/three": "npm:^0.35.2"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     leva: "npm:^0.9.35"
@@ -2866,7 +2866,7 @@ __metadata:
     "@react-three/fiber": "npm:^8.17.10"
     "@react-three/rapier": "npm:^1.5.0"
     "@recast-navigation/three": "npm:^0.35.2"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     leva: "npm:^0.9.35"
@@ -2888,7 +2888,7 @@ __metadata:
     "@react-three/fiber": "npm:^8.17.10"
     "@react-three/rapier": "npm:^1.5.0"
     "@recast-navigation/three": "npm:^0.35.2"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     leva: "npm:^0.9.35"
@@ -2907,7 +2907,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2924,7 +2924,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2941,7 +2941,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2958,7 +2958,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -2975,7 +2975,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     leva: "npm:^0.9.35"
@@ -2995,7 +2995,7 @@ __metadata:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
     "@react-three/rapier": "npm:^1.5.0"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     arancini: "npm:^6.6.1"
@@ -3018,7 +3018,7 @@ __metadata:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
     "@react-three/rapier": "npm:^1.5.0"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -3035,7 +3035,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -3052,7 +3052,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     "@use-gesture/react": "npm:^10.3.1"
@@ -3071,7 +3071,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     leva: "npm:^0.9.35"
@@ -3090,7 +3090,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -3107,7 +3107,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -3124,7 +3124,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -3141,7 +3141,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -3158,7 +3158,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -3176,7 +3176,7 @@ __metadata:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
     "@react-three/flex": "npm:^1.0.1"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -3193,7 +3193,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -3211,7 +3211,7 @@ __metadata:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
     "@react-three/flex": "npm:^1.0.1"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -3228,7 +3228,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -3245,7 +3245,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -3262,7 +3262,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -3279,7 +3279,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -3296,7 +3296,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -3313,7 +3313,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -3330,7 +3330,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     leva: "npm:^0.9.35"
@@ -3348,7 +3348,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     leva: "npm:^0.9.35"
@@ -3366,7 +3366,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     leva: "npm:^0.9.35"
@@ -3384,7 +3384,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     leva: "npm:^0.9.35"
@@ -3402,7 +3402,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     leva: "npm:^0.9.35"
@@ -3420,7 +3420,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -3437,7 +3437,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -3454,7 +3454,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -3471,7 +3471,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -3488,7 +3488,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -3505,7 +3505,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -4334,13 +4334,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:^18.3.3":
-  version: 18.3.3
-  resolution: "@types/react@npm:18.3.3"
+"@types/react@npm:^18.3.11":
+  version: 18.3.11
+  resolution: "@types/react@npm:18.3.11"
   dependencies:
     "@types/prop-types": "npm:*"
     csstype: "npm:^3.0.2"
-  checksum: 10/68e203b7f1f91d6cf21f33fc7af9d6d228035a26c83f514981e54aa3da695d0ec6af10c277c6336de1dd76c4adbe9563f3a21f80c4462000f41e5f370b46e96c
+  checksum: 10/a36f0707fdfe9fe19cbe5892bcdab0f042ecadb501ea4e1c39519943f3e74cffbd31e892d3860f5c87cf33f5f223552b246a552bed0087b95954f2cb39d5cf65
   languageName: node
   linkType: hard
 
@@ -10410,7 +10410,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
@@ -10426,7 +10426,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.114.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.3"
+    "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     react: "npm:^18.3.1"
