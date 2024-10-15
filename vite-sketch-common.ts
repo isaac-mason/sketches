@@ -55,6 +55,9 @@ export const createCommonConfig = (currentDirectory: string) => {
             exclude: [
                 // these packages do not play nicely with vite pre-bundling
                 'recast-navigation',
+                '@recast-navigation/core',
+                '@recast-navigation/generators',
+                '@recast-navigation/three',
             ],
         },
         build: {
@@ -71,7 +74,7 @@ export const createCommonConfig = (currentDirectory: string) => {
         // relative
         base: './',
         server: {
-            // don't try to use next available port, exit if port is
+            // don't try to use next available port, exit if port is taken
             strictPort: true,
         },
     } satisfies UserConfig

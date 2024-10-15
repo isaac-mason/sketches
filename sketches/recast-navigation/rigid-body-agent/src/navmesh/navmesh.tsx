@@ -1,4 +1,5 @@
-import { useConst, useInterval } from '@/common'
+import { useConst } from '@/common/hooks/use-const'
+import { useInterval } from '@/common/hooks/use-interval'
 import { useFrame } from '@react-three/fiber'
 import { useRapier } from '@react-three/rapier'
 import { useEffect, useRef, useState } from 'react'

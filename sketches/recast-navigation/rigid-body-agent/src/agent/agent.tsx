@@ -1,4 +1,4 @@
-import { useInterval } from '@/common'
+import { useInterval } from '@/common/hooks/use-interval'
 import { Line } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { CapsuleCollider, RapierRigidBody, RigidBody, useBeforePhysicsStep } from '@react-three/rapier'

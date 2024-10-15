@@ -14,8 +14,8 @@
         "build": "vite build"
     },
     "dependencies": {
-        "@react-three/drei": "^9.113.0",
-        "@react-three/fiber": "^8.17.7",
+        "@react-three/drei": "^9.114.3",
+        "@react-three/fiber": "^8.17.10",
         "@recast-navigation/three": "^0.35.2",
         "leva": "^0.9.35",
         "react": "^18.3.1",
