@@ -1819,7 +1819,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     styled-components: "npm:^6.1.13"
     three: "npm:^0.169.0"
-    zustand: "npm:^4.5.4"
+    zustand: "npm:^5.0.0"
   languageName: unknown
   linkType: soft
 
@@ -1879,7 +1879,7 @@ __metadata:
     styled-components: "npm:^6.1.13"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
-    zustand: "npm:^4.5.4"
+    zustand: "npm:^5.0.0"
   languageName: unknown
   linkType: soft
 
@@ -2235,7 +2235,7 @@ __metadata:
     styled-components: "npm:^6.1.13"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
-    zustand: "npm:^4.5.4"
+    zustand: "npm:^5.0.0"
   languageName: unknown
   linkType: soft
 
@@ -10457,26 +10457,6 @@ __metadata:
     react:
       optional: true
   checksum: 10/572e42d912362eb3aabde9a37bca47caa547391fc4563e41444d9aef7ca453ca730ee1f00aae4b25c2635ca293d69c23ab0a41688cd4db8394545732a2d9c236
-  languageName: node
-  linkType: hard
-
-"zustand@npm:^4.5.4":
-  version: 4.5.4
-  resolution: "zustand@npm:4.5.4"
-  dependencies:
-    use-sync-external-store: "npm:1.2.0"
-  peerDependencies:
-    "@types/react": ">=16.8"
-    immer: ">=9.0.6"
-    react: ">=16.8"
-  peerDependenciesMeta:
-    "@types/react":
-      optional: true
-    immer:
-      optional: true
-    react:
-      optional: true
-  checksum: 10/44431b75f055c5440f47f448124f86230e1612bca8b09527890ec67a10b55f7ef9c288301f89346630552357627380c28222d933accdb55c119cf05e15f9e6cc
   languageName: node
   linkType: hard
 
