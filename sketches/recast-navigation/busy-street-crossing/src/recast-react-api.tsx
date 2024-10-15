@@ -1,5 +1,5 @@
 import { useFrame } from '@react-three/fiber'
-import { Crowd, CrowdAgent, CrowdAgentParams, NavMesh, init, vec3 } from 'recast-navigation'
+import { Crowd, CrowdAgent, CrowdAgentParams, NavMesh, vec3 } from 'recast-navigation'
 import type { SoloNavMeshGeneratorConfig } from 'recast-navigation/generators'
 import { NavMeshHelper, threeToSoloNavMesh } from '@recast-navigation/three'
 import {
@@ -14,8 +14,6 @@ import {
     useState,
 } from 'react'
 import { Group, Mesh, MeshStandardMaterial, Vector3Tuple } from 'three'
-
-await init()
 
 type NavigationContextType = {
     navMesh: NavMesh | undefined

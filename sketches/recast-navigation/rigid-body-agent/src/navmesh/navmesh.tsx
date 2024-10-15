@@ -3,13 +3,11 @@ import { useInterval } from '@/common/hooks/use-interval'
 import { useFrame } from '@react-three/fiber'
 import { useRapier } from '@react-three/rapier'
 import { useEffect, useRef, useState } from 'react'
-import { NavMesh, NavMeshQuery, RecastConfig, UnsignedCharArray, init } from 'recast-navigation'
+import { NavMesh, NavMeshQuery, RecastConfig, UnsignedCharArray } from 'recast-navigation'
 import { NavMeshHelper, getPositionsAndIndices } from '@recast-navigation/three'
 import * as THREE from 'three'
 import { Entity, NavComponent, navQuery, traversableQuery } from '../ecs'
 import NavMeshGeneratorWorker from './navmesh-generator.worker?worker'
-
-await init()
 
 export const getTraversableMeshes = () => {
     const traversable = traversableQuery.entities.map((e) => e.three)

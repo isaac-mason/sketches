@@ -12,6 +12,8 @@ import { SKETCH } from './const'
 import { Component, Entity } from './ecs'
 import { NavMeshDebug, NavMeshGenerator } from './navmesh/navmesh'
 import { Player, PlayerControls } from './player'
+import { init as initRecast } from 'recast-navigation'
+import { suspend } from 'suspend-react'
 
 const Scene = () => {
     return (
@@ -45,6 +47,10 @@ const Scene = () => {
 }
 
 export function Sketch() {
+    suspend(async () => {
+        await initRecast()
+    }, [])
+
     const loading = useLoadingAssets()
 
     const { physicsDebug, navMeshDebug } = useControls(`${SKETCH}-physics`, {
