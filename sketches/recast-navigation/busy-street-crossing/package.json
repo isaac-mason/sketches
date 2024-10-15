@@ -16,10 +16,11 @@
     "dependencies": {
         "@react-three/drei": "^9.113.0",
         "@react-three/fiber": "^8.17.7",
+        "@recast-navigation/three": "^0.35.2",
         "leva": "^0.9.35",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
-        "recast-navigation": "^0.34.0",
+        "recast-navigation": "^0.35.2",
         "three": "^0.169.0"
     },
     "devDependencies": {
@@ -27,6 +28,6 @@
         "@types/react-dom": "^18.3.0",
         "@types/three": "^0.169.0",
         "typescript": "^5.6.2",
-        "vite": "^5.4.7"
+        "vite": "^5.4.9"
     }
 }

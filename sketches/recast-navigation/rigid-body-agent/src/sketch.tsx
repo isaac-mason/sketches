@@ -1,4 +1,7 @@
-import { Canvas, Crosshair, Instructions, useLoadingAssets } from '@/common'
+import { Canvas } from '@/common/components/canvas'
+import { Crosshair } from '@/common/components/crosshair'
+import { Instructions } from '@/common/components/instructions'
+import { useLoadingAssets } from '@/common/hooks/use-loading-assets'
 import cityEnvironment from '@pmndrs/assets/hdri/city.exr'
 import { Environment, MeshReflectorMaterial, PerspectiveCamera } from '@react-three/drei'
 import { CuboidCollider, Physics, RigidBody } from '@react-three/rapier'
@@ -15,7 +18,6 @@ const Scene = () => {
         <>
             <Entity traversable>
                 <RigidBody type="fixed" position={[0, -1, 0]} colliders={false}>
-
                     <CuboidCollider args={[25, 1, 25]} position={[0, -1, 0]} />
 
                     <Component name="three">

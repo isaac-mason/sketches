@@ -1,11 +1,11 @@
-import { Canvas } from '@/common'
+import { Canvas } from '@/common/components/canvas'
 import cityEnvironment from '@pmndrs/assets/hdri/city.exr'
 import { Environment, OrbitControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
+import { CrowdAgent, Vector3, vec3 } from '@recast-navigation/core'
 import { World } from 'arancini'
 import { createReactAPI } from 'arancini/react'
 import { useControls } from 'leva'
-import { CrowdAgent, Vector3, vec3 } from 'recast-navigation'
 import { Object3D } from 'three'
 import { Agent, Navigation, Traversable } from './recast-react-api'
 
@@ -192,6 +192,7 @@ const App = () => {
 }
 
 export function Sketch() {
+    console.log('herE!')
     return (
         <Canvas camera={{ position: [5, 30, 10] }}>
             <App />

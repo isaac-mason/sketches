@@ -1,4 +1,7 @@
 import { useFrame } from '@react-three/fiber'
+import { Crowd, CrowdAgent, CrowdAgentParams, NavMesh, init, vec3 } from 'recast-navigation'
+import type { SoloNavMeshGeneratorConfig } from 'recast-navigation/generators'
+import { NavMeshHelper, threeToSoloNavMesh } from '@recast-navigation/three'
 import {
     ReactNode,
     createContext,
@@ -10,9 +13,6 @@ import {
     useRef,
     useState,
 } from 'react'
-import { Crowd, CrowdAgent, CrowdAgentParams, NavMesh, init, vec3 } from 'recast-navigation'
-import type { SoloNavMeshGeneratorConfig } from 'recast-navigation/generators'
-import { NavMeshHelper, threeToSoloNavMesh } from 'recast-navigation/three'
 import { Group, Mesh, MeshStandardMaterial, Vector3Tuple } from 'three'
 
 await init()
@@ -89,8 +89,7 @@ export const Navigation = ({ children, debug, generatorConfig }: NavigationProps
     const navMeshHelper = useMemo(() => {
         if (!navMesh || !debug) return null
 
-        return new NavMeshHelper({
-            navMesh,
+        return new NavMeshHelper(navMesh, {
             navMeshMaterial: new MeshStandardMaterial({
                 color: 'orange',
                 opacity: 0.5,

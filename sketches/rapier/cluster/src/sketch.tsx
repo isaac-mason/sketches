@@ -142,8 +142,8 @@ export function Sketch() {
 
                     <Pointer />
 
-                    <ambientLight intensity={1.75} />
-                    <pointLight position={[15, -5, 15]} decay={1} intensity={2} />
+                    <ambientLight intensity={1.2} />
+                    <directionalLight position={[5, 5, 5]} intensity={0.5} />
 
                     <PerspectiveCamera makeDefault position={[0, 0, 30]} />
                 </Physics>

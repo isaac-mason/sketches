@@ -1,14 +1,14 @@
-import { Canvas } from '@/common'
+import { Canvas } from '@/common/components/canvas'
 import sunsetEnvironment from '@pmndrs/assets/hdri/sunset.exr'
 import { Environment, KeyboardControls, PerspectiveCamera, useAnimations, useGLTF, useKeyboardControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
+import { NavMeshHelper, threeToSoloNavMesh } from '@recast-navigation/three'
 import { With, World } from 'arancini'
 import { createReactAPI } from 'arancini/react'
 import { Executor, System } from 'arancini/systems'
 import { useControls } from 'leva'
 import { useEffect, useState } from 'react'
 import { NavMesh, NavMeshQuery, init as initRecast } from 'recast-navigation'
-import { NavMeshHelper, threeToSoloNavMesh } from 'recast-navigation/three'
 import * as THREE from 'three'
 import characterGltfUrl from './character.glb?url'
 import levelGlbUrl from './game-level-transformed.glb?url'
@@ -363,7 +363,7 @@ const NavigationMesh = () => {
             },
         })
 
-        const navMeshHelper = new NavMeshHelper({ navMesh })
+        const navMeshHelper = new NavMeshHelper(navMesh)
         navMeshHelper.position.y += 0.15
 
         setNavMeshHelper(navMeshHelper)

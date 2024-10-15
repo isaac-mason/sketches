@@ -105,45 +105,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@chevrotain/cst-dts-gen@npm:10.5.0":
-  version: 10.5.0
-  resolution: "@chevrotain/cst-dts-gen@npm:10.5.0"
-  dependencies:
-    "@chevrotain/gast": "npm:10.5.0"
-    "@chevrotain/types": "npm:10.5.0"
-    lodash: "npm:4.17.21"
-  checksum: 10/99027773daed40c80ce676eee3401a12a92be78679f977097d1afeeb6e9c05b14e5404d909b6b62c8ad6fed354fad215273297e2cf3b89353b600fe2bb8e483f
-  languageName: node
-  linkType: hard
-
-"@chevrotain/gast@npm:10.5.0":
-  version: 10.5.0
-  resolution: "@chevrotain/gast@npm:10.5.0"
-  dependencies:
-    "@chevrotain/types": "npm:10.5.0"
-    lodash: "npm:4.17.21"
-  checksum: 10/539453540abd6b3005d69deb3e9504233ef52d91f5881adfb865a1c394731ab59983a223a906def79e7f4740ee8e97d2b7c8e0292c8158b567a2ea4a23f6c33d
-  languageName: node
-  linkType: hard
-
-"@chevrotain/types@npm:10.5.0":
-  version: 10.5.0
-  resolution: "@chevrotain/types@npm:10.5.0"
-  checksum: 10/71526b43651124d06c9432871bba64b701b5c6ed4cf3715aa5803448f5c9d27ac65b441e6ce255392ed0f408e2db95e3246f133bd91914eb852f01973fbc8b8b
-  languageName: node
-  linkType: hard
-
-"@chevrotain/utils@npm:10.5.0":
-  version: 10.5.0
-  resolution: "@chevrotain/utils@npm:10.5.0"
-  checksum: 10/92571b905e33c8cb7ba83935e9b8c5a46b4528d9906ad26d74f1530da33e4888cfac15fc4cea6212843cb62350906a88671d586afd9019ceb176ae2c3a1a402e
-  languageName: node
-  linkType: hard
-
-"@dimforge/rapier3d-compat@npm:0.13.1":
-  version: 0.13.1
-  resolution: "@dimforge/rapier3d-compat@npm:0.13.1"
-  checksum: 10/cf84d674b59e9ecefac0ec0b0dc6b9b57edabd64552a6f299c94d0d3859e79330978228ea3e3f01d2439c47773bc68084bc6e7fcd082431d992c48ada0432132
+"@dimforge/rapier3d-compat@npm:0.14.0":
+  version: 0.14.0
+  resolution: "@dimforge/rapier3d-compat@npm:0.14.0"
+  checksum: 10/8b00c59b2be375a1b8f57590a7f3a0eeef641cf71690977558f4c02a8177168514e7d590fc032f1f640db2fecee92c3664507b08cb86523db130698244f74cae
   languageName: node
   linkType: hard
 
@@ -1703,57 +1668,57 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-three/rapier@npm:^1.4.0":
-  version: 1.4.0
-  resolution: "@react-three/rapier@npm:1.4.0"
+"@react-three/rapier@npm:^1.5.0":
+  version: 1.5.0
+  resolution: "@react-three/rapier@npm:1.5.0"
   dependencies:
-    "@dimforge/rapier3d-compat": "npm:0.13.1"
+    "@dimforge/rapier3d-compat": "npm:0.14.0"
     suspend-react: "npm:^0.1.3"
-    three-stdlib: "npm:2.23.9"
+    three-stdlib: "npm:^2.29.4"
   peerDependencies:
     "@react-three/fiber": ">=8.9.0"
     react: ">=18.0.0"
     three: ">=0.139.0"
-  checksum: 10/262b79a6507668478df1cca1b7d67fe38009a8af20576134494813f82bbcdec46ebe20e424859010d8730a664f5fda4e7bfb280b8413b49a7ba2718a441a4a9f
+  checksum: 10/485bc36202e53974c5146c506b81d2c3979aa3df016c1659f530f6921e8d215ada1acee8f05399c87858d43385bc0314cc73d1ff13991819bb288fa5498803ef
   languageName: node
   linkType: hard
 
-"@recast-navigation/core@npm:0.34.0":
-  version: 0.34.0
-  resolution: "@recast-navigation/core@npm:0.34.0"
+"@recast-navigation/core@npm:0.35.2":
+  version: 0.35.2
+  resolution: "@recast-navigation/core@npm:0.35.2"
   dependencies:
-    "@recast-navigation/wasm": "npm:0.34.0"
-  checksum: 10/6b2cb8bd40863bd9b5a76e619cb7083008e9137681588628c09a0c8545d678989965a75c5c909267a2f3fbb3082e4e70c72ef3b1f6bbeac6ddd66951fe11c07f
+    "@recast-navigation/wasm": "npm:0.35.2"
+  checksum: 10/f0568f94e0bb4923df2eff2801efe418b5bc5bb0ed33f2861ce36231c71637ec8cde7eba6f63361f5cea4bd963ef00aac7086f496dd875d9891fb6f059442172
   languageName: node
   linkType: hard
 
-"@recast-navigation/generators@npm:0.34.0":
-  version: 0.34.0
-  resolution: "@recast-navigation/generators@npm:0.34.0"
+"@recast-navigation/generators@npm:0.35.2":
+  version: 0.35.2
+  resolution: "@recast-navigation/generators@npm:0.35.2"
   dependencies:
-    "@recast-navigation/core": "npm:0.34.0"
-    "@recast-navigation/wasm": "npm:0.34.0"
-  checksum: 10/b254893f3a6d6a17ef06e297792dea95d88db489452257e19f3bc659bb9ea66e76ca943079403175205fad17e56c084649fcf298c7785fce2e27477d2a795e11
+    "@recast-navigation/core": "npm:0.35.2"
+    "@recast-navigation/wasm": "npm:0.35.2"
+  checksum: 10/c35c2ec88326c5f38b2495ab052bdb038d4fa7937d1798e626dd5333733ca3651e55efcdbd350930bec11fa2b53f2e7ccd2a10c2b71600bf2d1ad4ae6c67baee
   languageName: node
   linkType: hard
 
-"@recast-navigation/three@npm:0.34.0":
-  version: 0.34.0
-  resolution: "@recast-navigation/three@npm:0.34.0"
+"@recast-navigation/three@npm:^0.35.2":
+  version: 0.35.2
+  resolution: "@recast-navigation/three@npm:0.35.2"
   dependencies:
-    "@recast-navigation/core": "npm:0.34.0"
-    "@recast-navigation/generators": "npm:0.34.0"
+    "@recast-navigation/core": "npm:0.35.2"
+    "@recast-navigation/generators": "npm:0.35.2"
   peerDependencies:
     "@types/three": 0.x.x
     three: 0.x.x
-  checksum: 10/159bafe31221e1f3448565cf053e7f46a38342dd69ab56f10974eeb3a3c3983f65cd2529a32d682b4409206144ef49f46a67ba4419402081f5ae802f0e272c6c
+  checksum: 10/749952e564b1e8c25baef2c697683a132da8d8d36ca91e4de4c4a44e63e3c22edcc165c3fd270ad40403449f67ffafacadd3f9d5fd79e36a1a6abf9681774603
   languageName: node
   linkType: hard
 
-"@recast-navigation/wasm@npm:0.34.0":
-  version: 0.34.0
-  resolution: "@recast-navigation/wasm@npm:0.34.0"
-  checksum: 10/c1d8cbd11d11fcb7919babee2a2a4e2107a1c97e7e322eeb601b04319aa1f695585ec408b2ddd954bd48a7fae173a6b1c4ac2f029c1736a7f7fc52c96cdaa107
+"@recast-navigation/wasm@npm:0.35.2":
+  version: 0.35.2
+  resolution: "@recast-navigation/wasm@npm:0.35.2"
+  checksum: 10/f0439942d84c99a48465447c8d5b6cc092609029820b950ac6c153fde27515ecc797013fceefe4a1413f94d09b5114e54ca5237c4f72730cbd04964820b45627
   languageName: node
   linkType: hard
 
@@ -1922,7 +1887,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -1939,7 +1904,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -1956,7 +1921,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2004,7 +1969,7 @@ __metadata:
     tsx: "npm:^4.16.3"
     tunnel-rat: "npm:^0.1.2"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
     vite-imagetools: "npm:^7.0.4"
     vite-plugin-html: "npm:^3.2.2"
     zustand: "npm:^4.5.4"
@@ -2026,7 +1991,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2040,7 +2005,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     styled-components: "npm:^6.1.13"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
     zustand: "npm:^4.5.4"
   languageName: unknown
   linkType: soft
@@ -2058,7 +2023,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2075,7 +2040,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2093,7 +2058,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2110,7 +2075,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2127,7 +2092,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2144,7 +2109,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2161,7 +2126,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2178,7 +2143,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2195,7 +2160,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2212,7 +2177,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2229,7 +2194,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2246,7 +2211,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2263,7 +2228,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2280,7 +2245,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2297,7 +2262,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2314,7 +2279,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2331,7 +2296,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2348,7 +2313,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2365,7 +2330,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2382,7 +2347,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2396,7 +2361,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     styled-components: "npm:^6.1.13"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
     zustand: "npm:^4.5.4"
   languageName: unknown
   linkType: soft
@@ -2414,7 +2379,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2432,7 +2397,7 @@ __metadata:
     styled-components: "npm:^6.1.13"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2451,7 +2416,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2462,7 +2427,7 @@ __metadata:
     "@pmndrs/assets": "npm:^1.6.1"
     "@react-three/drei": "npm:^9.113.0"
     "@react-three/fiber": "npm:^8.17.7"
-    "@react-three/rapier": "npm:^1.4.0"
+    "@react-three/rapier": "npm:^1.5.0"
     "@types/react": "npm:^18.3.3"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
@@ -2473,7 +2438,7 @@ __metadata:
     three: "npm:^0.169.0"
     tone: "npm:15.0.4"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2491,7 +2456,7 @@ __metadata:
     suspend-react: "npm:^0.1.3"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2509,7 +2474,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2529,7 +2494,7 @@ __metadata:
     simplex-noise: "npm:^4.0.3"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2547,7 +2512,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2565,7 +2530,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2583,7 +2548,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2601,7 +2566,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2618,7 +2583,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2635,7 +2600,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2652,7 +2617,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2670,7 +2635,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2689,7 +2654,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2709,7 +2674,7 @@ __metadata:
     simplex-noise: "npm:^4.0.3"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2719,7 +2684,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.113.0"
     "@react-three/fiber": "npm:^8.17.7"
-    "@react-three/rapier": "npm:^1.4.0"
+    "@react-three/rapier": "npm:^1.5.0"
     "@types/react": "npm:^18.3.3"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
@@ -2728,7 +2693,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2739,7 +2704,7 @@ __metadata:
     "@react-spring/three": "npm:^9.7.3"
     "@react-three/drei": "npm:^9.113.0"
     "@react-three/fiber": "npm:^8.17.7"
-    "@react-three/rapier": "npm:^1.4.0"
+    "@react-three/rapier": "npm:^1.5.0"
     "@types/react": "npm:^18.3.3"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
@@ -2748,7 +2713,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2759,7 +2724,7 @@ __metadata:
     "@react-three/csg": "npm:^3.2.0"
     "@react-three/drei": "npm:^9.113.0"
     "@react-three/fiber": "npm:^8.17.7"
-    "@react-three/rapier": "npm:^1.4.0"
+    "@react-three/rapier": "npm:^1.5.0"
     "@types/react": "npm:^18.3.3"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
@@ -2769,7 +2734,7 @@ __metadata:
     styled-components: "npm:^6.1.13"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2779,7 +2744,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.113.0"
     "@react-three/fiber": "npm:^8.17.7"
-    "@react-three/rapier": "npm:^1.4.0"
+    "@react-three/rapier": "npm:^1.5.0"
     "@types/react": "npm:^18.3.3"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
@@ -2788,7 +2753,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2798,7 +2763,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.113.0"
     "@react-three/fiber": "npm:^8.17.7"
-    "@react-three/rapier": "npm:^1.4.0"
+    "@react-three/rapier": "npm:^1.5.0"
     "@types/react": "npm:^18.3.3"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
@@ -2807,7 +2772,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2817,7 +2782,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.113.0"
     "@react-three/fiber": "npm:^8.17.7"
-    "@react-three/rapier": "npm:^1.4.0"
+    "@react-three/rapier": "npm:^1.5.0"
     "@types/react": "npm:^18.3.3"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
@@ -2826,7 +2791,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2836,7 +2801,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.113.0"
     "@react-three/fiber": "npm:^8.17.7"
-    "@react-three/rapier": "npm:^1.4.0"
+    "@react-three/rapier": "npm:^1.5.0"
     "@types/react": "npm:^18.3.3"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
@@ -2845,7 +2810,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2855,7 +2820,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.113.0"
     "@react-three/fiber": "npm:^8.17.7"
-    "@react-three/rapier": "npm:^1.4.0"
+    "@react-three/rapier": "npm:^1.5.0"
     "@types/react": "npm:^18.3.3"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
@@ -2864,7 +2829,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2874,16 +2839,17 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.113.0"
     "@react-three/fiber": "npm:^8.17.7"
+    "@recast-navigation/three": "npm:^0.35.2"
     "@types/react": "npm:^18.3.3"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    recast-navigation: "npm:^0.34.0"
+    recast-navigation: "npm:^0.35.2"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2893,16 +2859,17 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.113.0"
     "@react-three/fiber": "npm:^8.17.7"
+    "@recast-navigation/three": "npm:^0.35.2"
     "@types/react": "npm:^18.3.3"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    recast-navigation: "npm:^0.34.0"
+    recast-navigation: "npm:^0.35.2"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2912,17 +2879,18 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.113.0"
     "@react-three/fiber": "npm:^8.17.7"
-    "@react-three/rapier": "npm:^1.4.0"
+    "@react-three/rapier": "npm:^1.5.0"
+    "@recast-navigation/three": "npm:^0.35.2"
     "@types/react": "npm:^18.3.3"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    recast-navigation: "npm:^0.34.0"
+    recast-navigation: "npm:^0.35.2"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2932,17 +2900,18 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.113.0"
     "@react-three/fiber": "npm:^8.17.7"
-    "@react-three/rapier": "npm:^1.4.0"
+    "@react-three/rapier": "npm:^1.5.0"
+    "@recast-navigation/three": "npm:^0.35.2"
     "@types/react": "npm:^18.3.3"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    recast-navigation: "npm:^0.34.0"
+    recast-navigation: "npm:^0.35.2"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2959,7 +2928,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2976,7 +2945,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -2993,7 +2962,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3010,7 +2979,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3029,7 +2998,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3039,7 +3008,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.113.0"
     "@react-three/fiber": "npm:^8.17.7"
-    "@react-three/rapier": "npm:^1.4.0"
+    "@react-three/rapier": "npm:^1.5.0"
     "@types/react": "npm:^18.3.3"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
@@ -3052,7 +3021,7 @@ __metadata:
     three: "npm:^0.169.0"
     tunnel-rat: "npm:^0.1.2"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3062,7 +3031,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.113.0"
     "@react-three/fiber": "npm:^8.17.7"
-    "@react-three/rapier": "npm:^1.4.0"
+    "@react-three/rapier": "npm:^1.5.0"
     "@types/react": "npm:^18.3.3"
     "@types/react-dom": "npm:^18.3.0"
     "@types/three": "npm:^0.169.0"
@@ -3070,7 +3039,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3087,7 +3056,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3106,7 +3075,7 @@ __metadata:
     styled-components: "npm:^6.1.13"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3125,7 +3094,7 @@ __metadata:
     suspend-react: "npm:^0.1.3"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3142,7 +3111,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3159,7 +3128,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3176,7 +3145,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3193,7 +3162,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3210,7 +3179,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3228,7 +3197,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3245,7 +3214,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3263,7 +3232,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3280,7 +3249,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3297,7 +3266,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3314,7 +3283,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3331,7 +3300,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3348,7 +3317,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3365,7 +3334,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3383,7 +3352,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3401,7 +3370,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3419,7 +3388,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3437,7 +3406,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3455,7 +3424,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3472,7 +3441,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3489,7 +3458,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3506,7 +3475,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3523,7 +3492,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3540,7 +3509,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -3557,7 +3526,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.169.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.7"
+    vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
@@ -5299,20 +5268,6 @@ __metadata:
   dependencies:
     get-func-name: "npm:^2.0.2"
   checksum: 10/e2131025cf059b21080f4813e55b3c480419256914601750b0fee3bd9b2b8315b531e551ef12560419b8b6d92a3636511322752b1ce905703239e7cc451b6399
-  languageName: node
-  linkType: hard
-
-"chevrotain@npm:^10.1.2":
-  version: 10.5.0
-  resolution: "chevrotain@npm:10.5.0"
-  dependencies:
-    "@chevrotain/cst-dts-gen": "npm:10.5.0"
-    "@chevrotain/gast": "npm:10.5.0"
-    "@chevrotain/types": "npm:10.5.0"
-    "@chevrotain/utils": "npm:10.5.0"
-    lodash: "npm:4.17.21"
-    regexp-to-ast: "npm:0.5.0"
-  checksum: 10/f39738bf4429736bc68130548c4fd00846b5ef2b057cfab0e757abae0568519271040f403f60aeb2a4aee826b64cd2c026b6bf5ae746fcf632b458b10731568f
   languageName: node
   linkType: hard
 
@@ -7910,13 +7865,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ktx-parse@npm:^0.4.5":
-  version: 0.4.5
-  resolution: "ktx-parse@npm:0.4.5"
-  checksum: 10/00f53c00f19969cd59d1683edc16d9d107b9a3cadf44c8fa1962a66f9fcb60c5eba953f75545370ecfbe448776a609b4d186b560f238d8673ef4b5d5607b25bf
-  languageName: node
-  linkType: hard
-
 "leva@npm:^0.9.35":
   version: 0.9.35
   resolution: "leva@npm:0.9.35"
@@ -7974,7 +7922,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:4.17.21, lodash@npm:^4.17.15, lodash@npm:^4.17.21":
+"lodash@npm:^4.17.15, lodash@npm:^4.17.21":
   version: 4.17.21
   resolution: "lodash@npm:4.17.21"
   checksum: 10/c08619c038846ea6ac754abd6dd29d2568aa705feb69339e836dfa8d8b09abbb2f859371e86863eda41848221f9af43714491467b5b0299122431e202bb0c532
@@ -8344,13 +8292,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mmd-parser@npm:^1.0.4":
-  version: 1.0.4
-  resolution: "mmd-parser@npm:1.0.4"
-  checksum: 10/7106564b0e0959d64052528a653a45dc76a105e52740f616388d2f7f59e6a3781bff691d30722214509049626bf546cf22b3bb56e0b8cee099d7cae43fdc9cb4
-  languageName: node
-  linkType: hard
-
 "ms@npm:2.0.0":
   version: 2.0.0
   resolution: "ms@npm:2.0.0"
@@ -8548,18 +8489,6 @@ __metadata:
   dependencies:
     ee-first: "npm:1.1.1"
   checksum: 10/8e81472c5028125c8c39044ac4ab8ba51a7cdc19a9fbd4710f5d524a74c6d8c9ded4dd0eed83f28d3d33ac1d7a6a439ba948ccb765ac6ce87f30450a26bfe2ea
-  languageName: node
-  linkType: hard
-
-"opentype.js@npm:^1.3.3":
-  version: 1.3.4
-  resolution: "opentype.js@npm:1.3.4"
-  dependencies:
-    string.prototype.codepointat: "npm:^0.2.1"
-    tiny-inflate: "npm:^1.0.3"
-  bin:
-    ot: bin/ot
-  checksum: 10/1fefbacf0e856bc58e148cf2c578f49a8f1e9e2496a01ef8f0269ee391d08fb9bd90a1a23c53f16c681bc6d5470c0f3943cf8ed82a97efa2b958a6703fd8179e
   languageName: node
   linkType: hard
 
@@ -9076,14 +9005,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"recast-navigation@npm:^0.34.0":
-  version: 0.34.0
-  resolution: "recast-navigation@npm:0.34.0"
+"recast-navigation@npm:^0.35.2":
+  version: 0.35.2
+  resolution: "recast-navigation@npm:0.35.2"
   dependencies:
-    "@recast-navigation/core": "npm:0.34.0"
-    "@recast-navigation/generators": "npm:0.34.0"
-    "@recast-navigation/three": "npm:0.34.0"
-  checksum: 10/7cc87bd44eaa27a6695fd12b9c51dc5beba7a5d8a460ee7501e70ae88fdae00cf167292051456c0f8540957151d673536c056cd64b4dc9cc9f7aae700b919d70
+    "@recast-navigation/core": "npm:0.35.2"
+    "@recast-navigation/generators": "npm:0.35.2"
+  checksum: 10/e98e5721a01ddca723d04b5d33418a91f26ea117496f3fdbddd00417381bda28815eb6e3bd873b3c736cbea516708d1bc52432e048890f2d173c24da3a91a578
   languageName: node
   linkType: hard
 
@@ -9101,13 +9029,6 @@ __metadata:
   version: 0.14.1
   resolution: "regenerator-runtime@npm:0.14.1"
   checksum: 10/5db3161abb311eef8c45bcf6565f4f378f785900ed3945acf740a9888c792f75b98ecb77f0775f3bf95502ff423529d23e94f41d80c8256e8fa05ed4b07cf471
-  languageName: node
-  linkType: hard
-
-"regexp-to-ast@npm:0.5.0":
-  version: 0.5.0
-  resolution: "regexp-to-ast@npm:0.5.0"
-  checksum: 10/41f5c38f568cb64378812e8e77b1dc383a3975e311063bfb2a83179fc1e6601c59b1b32d5b85996eb2ae50b9ccb73e551268b9e32caae3ec60acd0f705d4a58c
   languageName: node
   linkType: hard
 
@@ -9770,13 +9691,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"string.prototype.codepointat@npm:^0.2.1":
-  version: 0.2.1
-  resolution: "string.prototype.codepointat@npm:0.2.1"
-  checksum: 10/bafa15844d7ea5bed24a01fa8954327c0c49226cefe68ab70573f1338f6a4680587db962724924f2cceb91abe408e11bd38c80095f25ee080f136a6c9d300f00
-  languageName: node
-  linkType: hard
-
 "string.prototype.trim@npm:^1.2.8":
   version: 1.2.8
   resolution: "string.prototype.trim@npm:1.2.8"
@@ -10003,27 +9917,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"three-stdlib@npm:2.23.9":
-  version: 2.23.9
-  resolution: "three-stdlib@npm:2.23.9"
-  dependencies:
-    "@types/draco3d": "npm:^1.4.0"
-    "@types/offscreencanvas": "npm:^2019.6.4"
-    "@types/webxr": "npm:^0.5.2"
-    chevrotain: "npm:^10.1.2"
-    draco3d: "npm:^1.4.1"
-    fflate: "npm:^0.6.9"
-    ktx-parse: "npm:^0.4.5"
-    mmd-parser: "npm:^1.0.4"
-    opentype.js: "npm:^1.3.3"
-    potpack: "npm:^1.0.1"
-    zstddec: "npm:^0.0.2"
-  peerDependencies:
-    three: ">=0.128.0"
-  checksum: 10/03eee03c0319cc720c126d7a23f620ff5eb8d63d75470d463a7f6660f8e7894ed16cd0909d7502ed4243b7b662bc869cc3731cef596286134826fb808fa8198b
-  languageName: node
-  linkType: hard
-
 "three-stdlib@npm:^2.23.4":
   version: 2.28.7
   resolution: "three-stdlib@npm:2.28.7"
@@ -10076,13 +9969,6 @@ __metadata:
   version: 0.169.0
   resolution: "three@npm:0.169.0"
   checksum: 10/5d0a5a4c8aeff37877132c4cb633989dba0749891fd1bf6414c551b16ef46ddb3529954901cbcbe4b493698d93c915c1cff9145157adcaa69f122c1fc2d1538f
-  languageName: node
-  linkType: hard
-
-"tiny-inflate@npm:^1.0.3":
-  version: 1.0.3
-  resolution: "tiny-inflate@npm:1.0.3"
-  checksum: 10/f620114fb51ea4a16ea7b4c62d6dd753f8faf41808a133c53d431ed4bf2ca377b21443653a0096894f2be22ca11bb327f148e7e5431f9246068917724ec01ffc
   languageName: node
   linkType: hard
 
@@ -10489,9 +10375,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^5.4.7":
-  version: 5.4.7
-  resolution: "vite@npm:5.4.7"
+"vite@npm:^5.4.9":
+  version: 5.4.9
+  resolution: "vite@npm:5.4.9"
   dependencies:
     esbuild: "npm:^0.21.3"
     fsevents: "npm:~2.3.3"
@@ -10528,7 +10414,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 10/3f27e870930ad83b51e009604c6b69ab090e69bb5bfe85007c7e4ec3326efae4e33ac799645926363f258595b3be3055cc1ebc5ee158cff4bacdf41adf4ef8ed
+  checksum: 10/60dfb3912ba6367d2d128e798d899caae3f4ec58990657b9f679c4d9de21ddec7eba5f6ad3d4fa0e8ea31771d477521b8e757a622ecc54829d73cb7f7c146bc4
   languageName: node
   linkType: hard
 
@@ -10691,13 +10577,6 @@ __metadata:
   version: 0.1.0
   resolution: "yocto-queue@npm:0.1.0"
   checksum: 10/f77b3d8d00310def622123df93d4ee654fc6a0096182af8bd60679ddcdfb3474c56c6c7190817c84a2785648cdee9d721c0154eb45698c62176c322fb46fc700
-  languageName: node
-  linkType: hard
-
-"zstddec@npm:^0.0.2":
-  version: 0.0.2
-  resolution: "zstddec@npm:0.0.2"
-  checksum: 10/5d02f11bc3a283011dfbf7b85b25ef875415f33befd131fa1d343ad3b6b4541051fc95b091d99d9940461cfe7aa25d3c7e5a769cddd4486bacd6462d80b89cc8
   languageName: node
   linkType: hard
 

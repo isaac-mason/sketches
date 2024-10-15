@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { useRapier } from '@react-three/rapier'
 import { useEffect, useRef, useState } from 'react'
 import { NavMesh, NavMeshQuery, RecastConfig, UnsignedCharArray, init } from 'recast-navigation'
-import { NavMeshHelper, getPositionsAndIndices } from 'recast-navigation/three'
+import { NavMeshHelper, getPositionsAndIndices } from '@recast-navigation/three'
 import * as THREE from 'three'
 import { Entity, NavComponent, navQuery, traversableQuery } from '../ecs'
 import NavMeshGeneratorWorker from './navmesh-generator.worker?worker'
@@ -139,8 +139,7 @@ export const NavMeshDebug = () => {
         if (navMeshVersion !== prevNavMeshVersion.current) {
             prevNavMeshVersion.current = navMeshVersion
 
-            const helper = new NavMeshHelper({
-                navMesh,
+            const helper = new NavMeshHelper(navMesh, {
                 navMeshMaterial: new THREE.MeshStandardMaterial({
                     color: 'lightblue',
                     opacity: 0.3,
