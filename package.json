@@ -17,7 +17,7 @@
         "@types/express": "^4",
         "@types/http-proxy": "^1",
         "@types/node": "^22.7.5",
-        "bun": "^1.1.21",
+        "bun": "^1.1.32",
         "eslint": "^9.6.0",
         "express": "^4.20.0",
         "prettier": "^3.3.3",
