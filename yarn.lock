@@ -1838,7 +1838,7 @@ __metadata:
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     react-router-dom: "npm:^6.27.0"
-    styled-breakpoints: "npm:^14.1.3"
+    styled-breakpoints: "npm:^14.1.4"
     styled-components: "npm:^6.1.13"
     tunnel-rat: "npm:^0.1.2"
     typescript: "npm:^5.6.3"
@@ -9609,13 +9609,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"styled-breakpoints@npm:^14.1.3":
-  version: 14.1.3
-  resolution: "styled-breakpoints@npm:14.1.3"
+"styled-breakpoints@npm:^14.1.4":
+  version: 14.1.4
+  resolution: "styled-breakpoints@npm:14.1.4"
   peerDependencies:
     react: ">= 16.8.0"
     react-dom: ">= 16.8.0"
-  checksum: 10/22d2101f7e58967a8b2891eb53f73b7c1620a37d2ddd800cf7214717e0a149ed9b8c9ff82b607bf5830fed39019ec0fad3965cdb87064926deda7aa124bf6ec1
+  checksum: 10/ba1effecd13bbc68d880284ab0ef61c29f4b4cdcbf2c36150dc2c752134c40db1f4d939dcb8cf1a496740b727777935aca8430188669c1e16dfe0d9006aa0398
   languageName: node
   linkType: hard
 
