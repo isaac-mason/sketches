@@ -15,7 +15,7 @@
     },
     "dependencies": {
         "@react-three/csg": "^3.2.0",
-        "@react-three/drei": "^9.114.3",
+        "@react-three/drei": "^9.115.0",
         "@react-three/fiber": "^8.17.10",
         "@react-three/rapier": "^1.5.0",
         "leva": "^0.9.35",
