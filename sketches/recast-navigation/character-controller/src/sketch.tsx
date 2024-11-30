@@ -55,7 +55,7 @@ const _movementTarget = new THREE.Vector3()
 
 let firstPositionUpdate = true
 
-const updateMovement = (delta: number) => {
+const movementUpdate = (delta: number) => {
     const player = playerQuery.first
 
     if (!player || !navigationMeshQuery.first) return
@@ -123,7 +123,7 @@ const _raycaster = new THREE.Raycaster()
 _raycaster.near = 0.01
 _raycaster.far = 10
 
-const updateAnimation = (delta: number) => {
+const animationUpdate = (delta: number) => {
     const player = playerQuery.first
 
     if (!player) return
@@ -479,8 +479,8 @@ const Camera = () => {
 
 const App = () => {
     useFrame((_, delta) => {
-        updateMovement(delta)
-        updateAnimation(delta)
+        movementUpdate(delta)
+        animationUpdate(delta)
         cameraUpdate(delta)
     })
 

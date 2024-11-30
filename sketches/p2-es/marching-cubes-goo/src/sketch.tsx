@@ -1,18 +1,40 @@
+import { Canvas } from '@/common'
 import { Bounds, MarchingCube, MarchingCubes, OrbitControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { World } from 'arancini'
 import { createReactAPI } from 'arancini/react'
-import { Executor, System } from 'arancini/systems'
 import * as p2 from 'p2-es'
 import { useMemo } from 'react'
 import * as THREE from 'three'
-import { Canvas } from '@/common'
 
+type EntityType = {
+    isRotating?: boolean
+    object3D?: THREE.Object3D
+    physicsBody?: p2.Body
+}
+
+const world = new World<EntityType>()
+const { Entity, Component } = createReactAPI(world)
+
+const physicsWorld = new p2.World({ gravity: [0, -5] })
 const defaultMaterial = new p2.Material()
-
 const contactMaterial = new p2.ContactMaterial(defaultMaterial, defaultMaterial, {
     restitution: 0.4,
     friction: 0,
+})
+physicsWorld.addContactMaterial(contactMaterial)
+
+const rotatingPhysicsBodiesQuery = world.query((e) => e.has('isRotating', 'physicsBody', 'object3D'))
+const physicsBodiesQuery = world.query((e) => e.has('physicsBody'))
+
+physicsBodiesQuery.onEntityAdded.add(({ physicsBody }) => {
+    physicsWorld.addBody(physicsBody)
+})
+
+physicsBodiesQuery.onEntityRemoved.add(({ physicsBody }) => {
+    if (physicsBody) {
+        physicsWorld.removeBody(physicsBody)
+    }
 })
 
 const containerParts: {
@@ -28,65 +50,25 @@ const containerParts: {
 
 const gooColors = [0xff0000, 0x00ff00, 0x0000ff]
 
-type EntityType = {
-    isRotating?: boolean
-    object3D?: THREE.Object3D
-    physicsBody?: p2.Body
-}
-
-class RotateSystem extends System<EntityType> {
-    rotating = this.query((e) => e.has('isRotating', 'physicsBody'))
-
-    onUpdate(_delta: number, time: number): void {
-        for (const { physicsBody } of this.rotating) {
-            physicsBody.angle = time * -0.5
-        }
+const rotatingContainerUpdate = (time: number) => {
+    for (const { physicsBody } of rotatingPhysicsBodiesQuery.entities) {
+        // console.log(physicsBody.position)
+        physicsBody.angle = time * -0.5
     }
 }
 
-class PhysicsSystem extends System<EntityType> {
-    physicsWorld = new p2.World({ gravity: [0, -5] })
+const TIME_STEP = 1 / 60
+const MAX_SUB_STEPS = 10
 
-    physicsBodies = this.query((e) => e.has('physicsBody', 'object3D'))
+const physicsUpdate = (delta: number) => {
+    physicsWorld.step(TIME_STEP, delta, MAX_SUB_STEPS)
 
-    static TIME_STEP = 1 / 60
-
-    static MAX_SUB_STEPS = 10
-
-    onInit(): void {
-        this.physicsWorld.addContactMaterial(contactMaterial)
-
-        this.physicsBodies.onEntityAdded.add(({ physicsBody }) => {
-            this.physicsWorld.addBody(physicsBody)
-        })
-
-        this.physicsBodies.onEntityRemoved.add(({ physicsBody }) => {
-            if (physicsBody) {
-                this.physicsWorld.removeBody(physicsBody)
-            }
-        })
-    }
-
-    onUpdate(delta: number): void {
-        this.physicsWorld.step(PhysicsSystem.TIME_STEP, delta, PhysicsSystem.MAX_SUB_STEPS)
-
-        for (const { physicsBody, object3D } of this.physicsBodies) {
-            object3D.position.set(physicsBody.interpolatedPosition[0], physicsBody.interpolatedPosition[1], 0)
-            object3D.rotation.set(0, 0, physicsBody.angle)
-        }
+    for (const { physicsBody, object3D } of physicsBodiesQuery.entities) {
+        if (!object3D) continue
+        object3D.position.set(physicsBody.interpolatedPosition[0], physicsBody.interpolatedPosition[1], 0)
+        object3D.rotation.set(0, 0, physicsBody.angle)
     }
 }
-
-const world = new World<EntityType>()
-
-const executor = new Executor(world)
-
-executor.add(RotateSystem)
-executor.add(PhysicsSystem)
-
-executor.init()
-
-const { Entity, Component } = createReactAPI(world)
 
 type BallProps = { index: number }
 
@@ -172,8 +154,9 @@ const Container = () => {
 }
 
 const Loop = () => {
-    useFrame((_, delta) => {
-        executor.update(Math.min(delta, 0.1))
+    useFrame(({ clock: { elapsedTime } }, delta) => {
+        rotatingContainerUpdate(elapsedTime)
+        physicsUpdate(Math.min(delta, 0.1))
     })
 
     return null

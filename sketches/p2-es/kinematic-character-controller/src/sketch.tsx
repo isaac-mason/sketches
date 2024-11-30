@@ -1,12 +1,11 @@
+import { Canvas } from '@/common'
 import { Billboard, KeyboardControls, Text, useKeyboardControls } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
 import { World } from 'arancini'
 import { createReactAPI } from 'arancini/react'
-import { Executor, System } from 'arancini/systems'
 import * as p2 from 'p2-es'
 import { useMemo } from 'react'
 import * as THREE from 'three'
-import { Canvas } from '@/common'
 import { Duck } from './duck'
 import { KinematicCharacterController } from './kinematic-character-controller'
 
@@ -19,170 +18,126 @@ type EntityType = {
     kinematicCharacterController?: KinematicCharacterController
 }
 
+const world = new World<EntityType>()
+
 const SCENERY_GROUP = 0x01
 const PLAYER_GROUP = 0x02
 
-class PhysicsSystem extends System<EntityType> {
-    physicsWorld = new p2.World({ gravity: [0, -9.81] })
+const TIME_STEP = 1 / 60
+const MAX_SUB_STEPS = 10
+const MAX_STEP_DELTA = TIME_STEP * 5
 
-    physicsBodies = new Map<string, p2.Body>()
+const physicsWorld = new p2.World({ gravity: [0, -9.81] })
 
-    physicsBodyQuery = this.query((e) => e.has('physicsBody', 'object3D'))
+const physicsBodiesQuery = world.query((e) => e.has('physicsBody', 'object3D'))
 
-    static TIME_STEP = 1 / 60
+physicsBodiesQuery.onEntityAdded.add(({ physicsBody }) => {
+    physicsWorld.addBody(physicsBody)
+});
 
-    static MAX_SUB_STEPS = 10
-
-    static MAX_STEP_DELTA = PhysicsSystem.TIME_STEP * 5
-
-    onInit(): void {
-        this.physicsBodyQuery.onEntityAdded.add(({ physicsBody }) => {
-            this.physicsWorld.addBody(physicsBody)
-        })
-
-        this.physicsBodyQuery.onEntityRemoved.add(({ physicsBody }) => {
-            if (physicsBody) {
-                this.physicsWorld.removeBody(physicsBody)
-            }
-        })
+physicsBodiesQuery.onEntityRemoved.add(({ physicsBody }) => {
+    if (physicsBody) {
+        physicsWorld.removeBody(physicsBody)
     }
+});
 
-    onUpdate(delta: number): void {
-        this.physicsWorld.step(
-            PhysicsSystem.TIME_STEP,
-            Math.min(delta, PhysicsSystem.MAX_STEP_DELTA),
-            PhysicsSystem.MAX_SUB_STEPS,
-        )
+const physicsUpdate = (delta: number) => {
+    physicsWorld.step(TIME_STEP, Math.min(delta, MAX_STEP_DELTA), MAX_SUB_STEPS)
 
-        for (const { physicsBody, object3D } of this.physicsBodyQuery.entities) {
-            object3D.position.set(physicsBody.interpolatedPosition[0], physicsBody.interpolatedPosition[1], 0)
+    for (const { physicsBody, object3D } of physicsBodiesQuery.entities) {
+        object3D.position.set(physicsBody.interpolatedPosition[0], physicsBody.interpolatedPosition[1], 0)
+        object3D.rotation.set(0, 0, physicsBody.angle)
+    }
+}
 
-            object3D.rotation.set(0, 0, physicsBody.angle)
+const playerQuery = world.query((e) => e.has('playerInput', 'physicsBody', 'kinematicCharacterController', 'object3D'))
+
+
+const kinematicCharacterControllersUpdate = (delta: number) => {
+    for (const entity of playerQuery) {
+        const { playerInput, kinematicCharacterController } = entity
+
+        if (!kinematicCharacterController) continue
+
+        let left = 0
+        let right = 0
+
+        if (playerInput.left) {
+            left = 1
+        }
+
+        if (playerInput.right) {
+            right = 1
+        }
+
+        kinematicCharacterController.input[0] = right - left
+
+        if (playerInput.up) {
+            kinematicCharacterController.setJumpKeyState(true)
+        } else {
+            kinematicCharacterController.setJumpKeyState(false)
+        }
+
+        kinematicCharacterController.update(delta)
+    }
+}
+
+const playerAnimationUpdate = () => {
+    for (const entity of playerQuery) {
+        const { object3D, kinematicCharacterController } = entity
+
+        if (kinematicCharacterController?.wallSliding) {
+            object3D.rotation.y = 0
+        } else if (entity.playerInput.left) {
+            object3D.rotation.y = -Math.PI / 2
+        } else if (entity.playerInput.right) {
+            object3D.rotation.y = Math.PI / 2
+        } else {
+            object3D.rotation.y = 0
         }
     }
 }
 
-class KinematicCharacterControllerSystem extends System<EntityType> {
-    playerQuery = this.query((e) => e.has('playerInput', 'physicsBody'))
+const cameraQuery = world.query((e) => e.has('camera'))
 
-    physicsSystem = this.attach(PhysicsSystem)!
+const _box3 = new THREE.Box3()
+const _vec3 = new THREE.Vector3()
 
-    onInit(): void {
-        this.playerQuery.onEntityAdded.add((entity) => {
-            const { physicsBody } = entity
+const cameraTargetPosition = new THREE.Vector3()
 
-            const controller = new KinematicCharacterController({
-                world: this.physicsSystem.physicsWorld,
-                body: physicsBody,
-                collisionMask: SCENERY_GROUP,
-                velocityXSmoothing: 0.0001,
-                timeToJumpApex: 0.4,
-                skinWidth: 0.2,
-                wallJumpClimb: [15, 15],
-            })
+const cameraUpdate = (delta: number) => {
+    _box3.min.set(0, 0, 0)
+    _box3.max.set(0, 0, 0)
 
-            world.add(entity, 'kinematicCharacterController', controller)
-        })
+    const points: THREE.Vector3[] = []
+    for (const entity of playerQuery) {
+        const { physicsBody } = entity
+
+        points.push({ x: physicsBody.interpolatedPosition[0], y: physicsBody.interpolatedPosition[1], z: 0 } as THREE.Vector3)
     }
 
-    onUpdate(delta: number): void {
-        for (const entity of this.playerQuery.entities) {
-            const { playerInput, kinematicCharacterController } = entity
+    _box3.setFromPoints(points)
 
-            if (!kinematicCharacterController) continue
+    const center = _box3.getCenter(_vec3)
 
-            let left = 0
-            let right = 0
-            if (playerInput.left) {
-                left = 1
-            }
-            if (playerInput.right) {
-                right = 1
-            }
-            kinematicCharacterController.input[0] = right - left
+    cameraTargetPosition.copy(center)
+    cameraTargetPosition.z = 10
+    cameraTargetPosition.y += 2
 
-            if (playerInput.up) {
-                kinematicCharacterController.setJumpKeyState(true)
-            } else {
-                kinematicCharacterController.setJumpKeyState(false)
-            }
+    const camera = cameraQuery.first!.camera
 
-            kinematicCharacterController.update(delta)
-        }
-    }
+    camera.position.lerp(cameraTargetPosition, 5 * delta)
+    camera.lookAt(center)
 }
-
-class PlayerModelSystem extends System<EntityType> {
-    players = this.query((e) => e.has('isPlayer', 'playerInput', 'object3D', 'kinematicCharacterController'))
-
-    onUpdate(): void {
-        for (const entity of this.players) {
-            const { object3D, playerInput, kinematicCharacterController } = entity
-
-            if (kinematicCharacterController?.wallSliding) {
-                object3D.rotation.y = 0
-            } else if (playerInput.left) {
-                object3D.rotation.y = -Math.PI / 2
-            } else if (playerInput.right) {
-                object3D.rotation.y = Math.PI / 2
-            } else {
-                object3D.rotation.y = 0
-            }
-        }
-    }
-}
-
-class CameraSystem extends System<EntityType> {
-    camera = this.singleton('camera', { required: true })!
-
-    players = this.query((e) => e.has('isPlayer', 'physicsBody', 'object3D'))
-
-    box3 = new THREE.Box3()
-
-    vec3 = new THREE.Vector3()
-
-    cameraTargetPosition = new THREE.Vector3()
-
-    onUpdate(delta: number): void {
-        this.box3.min.set(0, 0, 0)
-        this.box3.max.set(0, 0, 0)
-
-        const points: THREE.Vector3[] = []
-        for (const entity of this.players) {
-            const { physicsBody } = entity
-
-            points.push({ x: physicsBody.interpolatedPosition[0], y: physicsBody.interpolatedPosition[1], z: 0 } as THREE.Vector3)
-        }
-
-        this.box3.setFromPoints(points)
-
-        const center = this.box3.getCenter(this.vec3)
-
-        this.cameraTargetPosition.copy(center)
-        this.cameraTargetPosition.z = 10
-        this.cameraTargetPosition.y += 2
-
-        this.camera.position.lerp(this.cameraTargetPosition, 5 * delta)
-        this.camera.lookAt(center)
-    }
-}
-
-const world = new World<EntityType>()
-
-const executor = new Executor(world)
-
-executor.add(KinematicCharacterControllerSystem)
-executor.add(PhysicsSystem)
-executor.add(CameraSystem)
-executor.add(PlayerModelSystem)
-
-executor.init()
 
 const { Entity, Component } = createReactAPI(world)
 
 const Loop = () => {
     useFrame((_, delta) => {
-        executor.update(delta)
+        kinematicCharacterControllersUpdate(delta)
+        physicsUpdate(delta)
+        cameraUpdate(delta)
+        playerAnimationUpdate()
     })
 
     return null
@@ -199,7 +154,7 @@ const Player = () => {
 
     const input = useMemo(() => ({ left: false, right: true, up: true }), [])
 
-    const player = useMemo(() => {
+    const playerBody = useMemo(() => {
         const body = new p2.Body({
             type: p2.Body.KINEMATIC,
             mass: 0,
@@ -219,6 +174,18 @@ const Player = () => {
         return body
     }, [])
 
+    const kinematicCharacterController = useMemo(() => {
+        return new KinematicCharacterController({
+            world: physicsWorld,
+            body: playerBody,
+            collisionMask: SCENERY_GROUP,
+            velocityXSmoothing: 0.0001,
+            timeToJumpApex: 0.4,
+            skinWidth: 0.2,
+            wallJumpClimb: [15, 15],
+        })
+    }, [playerBody])
+
     useFrame(() => {
         const controls = getKeyboardControls() as {
             up: boolean
@@ -232,7 +199,7 @@ const Player = () => {
     })
 
     return (
-        <Entity isPlayer physicsBody={player} playerInput={input}>
+        <Entity isPlayer physicsBody={playerBody} playerInput={input} kinematicCharacterController={kinematicCharacterController}>
             <Component name="object3D">
                 <group>
                     <Duck />

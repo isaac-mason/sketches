@@ -1,14 +1,15 @@
+import { Canvas } from '@/common'
 import { Bounds } from '@react-three/drei'
 import { Color, useFrame } from '@react-three/fiber'
 import { World } from 'arancini'
-import { Executor, System } from 'arancini/systems'
 import { createReactAPI } from 'arancini/react'
 import { button, useControls } from 'leva'
 import * as p2 from 'p2-es'
 import { ReactNode, useMemo, useState } from 'react'
 import * as THREE from 'three'
-import { Canvas } from '@/common'
 import { createTextShape } from './font'
+
+const LEVA_ROOT = 'p2-text-box'
 
 type EntityType = {
     isBox?: boolean
@@ -17,52 +18,33 @@ type EntityType = {
     color?: Color
 }
 
-const LEVA_ROOT = 'p2-text-box'
-
-const BOX_SIZE = 0.1
-
-class PhysicsSystem extends System<EntityType> {
-    physicsWorld = new p2.World({ gravity: [0, 0] })
-
-    bodies = this.query((e) => e.is('physicsBody'))
-
-    static TIME_STEP = 1 / 60
-
-    static MAX_SUB_STEPS = 10
-
-    onInit() {
-        this.bodies.onEntityAdded.add(({ physicsBody }) => {
-            this.physicsWorld.addBody(physicsBody)
-        })
-
-        this.bodies.onEntityRemoved.add(({ physicsBody }) => {
-            if (physicsBody) {
-                this.physicsWorld.removeBody(physicsBody)
-            }
-        })
-    }
-
-    onUpdate(delta: number) {
-        this.physicsWorld.step(PhysicsSystem.TIME_STEP, delta, PhysicsSystem.MAX_SUB_STEPS)
-
-        for (const { physicsBody, object3D } of this.bodies) {
-            if (object3D) {
-                object3D.position.set(physicsBody.interpolatedPosition[0], physicsBody.interpolatedPosition[1], 0)
-                object3D.rotation.set(0, 0, physicsBody.interpolatedAngle)
-            }
-        }
-    }
-}
-
 const world = new World<EntityType>()
 
+const physicsWorld = new p2.World({ gravity: [0, 0] })
+
+const physicsBodiesQuery = world.query((e) => e.is('physicsBody'))
 const boxQuery = world.query((e) => e.is('isBox', 'physicsBody'))
 
-const executor = new Executor(world)
+physicsBodiesQuery.onEntityAdded.add(({ physicsBody }) => {
+    physicsWorld.addBody(physicsBody)
+})
 
-executor.add(PhysicsSystem)
+physicsBodiesQuery.onEntityRemoved.add(({ physicsBody }) => {
+    if (physicsBody) {
+        physicsWorld.removeBody(physicsBody)
+    }
+})
 
-executor.init()
+const physicsUpdate = (delta: number) => {
+    physicsWorld.step(1 / 60, delta, 10)
+
+    for (const { physicsBody, object3D } of physicsBodiesQuery.entities) {
+        if (!object3D) continue
+
+        object3D.position.set(physicsBody.interpolatedPosition[0], physicsBody.interpolatedPosition[1], 0)
+        object3D.rotation.set(0, 0, physicsBody.interpolatedAngle)
+    }
+}
 
 const { Entity, Entities, Component } = createReactAPI(world)
 
@@ -70,7 +52,7 @@ const MAX_DELTA = (1 / 60) * 10
 
 const Loop = () => {
     useFrame((_, delta) => {
-        executor.update(THREE.MathUtils.clamp(delta, 0, MAX_DELTA))
+        physicsUpdate(Math.min(delta, MAX_DELTA))
     })
 
     return null
@@ -81,6 +63,8 @@ type BoxProps = {
     velocity?: [number, number]
     color?: Color
 }
+
+const BOX_SIZE = 0.1
 
 const Box = ({ position, velocity, color }: BoxProps) => {
     const body = useMemo(() => {
@@ -146,7 +130,7 @@ const Text = ({ position, velocity, color, text, underline }: TextProps) => {
     return <>{boxes}</>
 }
 
-export function Sketch () {
+export function Sketch() {
     const [version, setVersion] = useState(0)
 
     const { firstWord, secondWord, thirdWord } = useControls(
