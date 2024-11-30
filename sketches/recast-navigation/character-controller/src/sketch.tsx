@@ -5,9 +5,8 @@ import { useFrame } from '@react-three/fiber'
 import { NavMeshHelper, threeToSoloNavMesh } from '@recast-navigation/three'
 import { With, World } from 'arancini'
 import { createReactAPI } from 'arancini/react'
-import { Executor, System } from 'arancini/systems'
 import { useControls } from 'leva'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { NavMesh, NavMeshQuery, init as initRecast } from 'recast-navigation'
 import { suspend } from 'suspend-react'
 import * as THREE from 'three'
@@ -45,230 +44,188 @@ type EntityType = {
     }
 }
 
-class MovementSystem extends System<EntityType> {
-    navigationMesh = this.singleton('navigationMesh')
-
-    playerQuery = this.query((e) => e.has('player', 'playerSpeed', 'playerInput', 'three'))
-
-    firstPositionUpdate = true
-
-    private tmpMovementTarget = new THREE.Vector3()
-
-    onUpdate(delta: number): void {
-        const player = this.playerQuery.first
-
-        if (!player || !this.navigationMesh) return
-
-        if (!player.playerMovement) {
-            this.world.add(player, 'playerMovement', {
-                vector: new THREE.Vector3(),
-                sprinting: false,
-            })
-        }
-
-        const {
-            playerInput: input,
-            three: playerObject,
-            playerMovement: movement,
-            playerSpeed: speed,
-        } = player as With<typeof player, 'playerMovement'>
-
-        const { left, right, forward, back, sprint } = input
-
-        /* movement */
-        const movementVector = movement.vector.set(0, 0, 0)
-
-        if (forward || back) {
-            if (forward) movementVector.z -= 1
-            if (back) movementVector.z += 1
-        }
-
-        if (left || right) {
-            if (left) movementVector.x -= 1
-            if (right) movementVector.x += 1
-        }
-
-        const movementScalar = sprint ? speed.running : speed.walking
-
-        const t = 1.0 - Math.pow(0.01, delta)
-
-        movementVector.normalize().multiplyScalar(t).multiplyScalar(movementScalar)
-
-        /* update position */
-        if (movementVector.length() > 0 || this.firstPositionUpdate) {
-            const { query: navMeshQuery } = this.navigationMesh
-
-            const movementTarget = this.tmpMovementTarget.copy(playerObject.position).add(movementVector)
-
-            const { nearestRef: polyRef } = navMeshQuery.findNearestPoly(playerObject.position)
-
-            const { resultPosition, visited } = navMeshQuery.moveAlongSurface(polyRef, playerObject.position, movementTarget)
-            const moveAlongSurfaceFinalRef = visited[visited.length - 1]
-
-            const { success: heightSuccess, height } = navMeshQuery.getPolyHeight(moveAlongSurfaceFinalRef, resultPosition)
-
-            playerObject.position.copy(resultPosition as THREE.Vector3)
-
-            if (heightSuccess) {
-                playerObject.position.y = height
-            }
-
-            this.firstPositionUpdate = false
-        }
-
-        movement.sprinting = sprint
-    }
-}
-
-class AnimationSystem extends System<EntityType> {
-    playerQuery = this.query((q) => q.has('player', 'playerMovement', 'playerAnimation', 'three'))
-
-    traversableQuery = this.query((q) => q.has('traversable', 'three'))
-
-    raycaster: THREE.Raycaster
-
-    private tmpRaycasterOrigin = new THREE.Vector3()
-
-    private tmpRaycasterDirection = new THREE.Vector3()
-
-    private tmpPlayerEuler = new THREE.Euler()
-
-    private tmpPlayerQuaternion = new THREE.Quaternion()
-
-    constructor(executor: Executor<EntityType>) {
-        super(executor)
-
-        this.raycaster = new THREE.Raycaster()
-        this.raycaster.near = 0.01
-        this.raycaster.far = 10
-    }
-
-    onUpdate(delta: number): void {
-        const player = this.playerQuery.first
-
-        if (!player) return
-
-        const t = 1.0 - Math.pow(0.01, delta)
-
-        const { three: playerObject, playerMovement, playerAnimation } = player
-
-        /* update rotation */
-        if (playerMovement.vector.length() > 0) {
-            const rotation = Math.atan2(playerMovement.vector.x, playerMovement.vector.z) - Math.PI
-
-            const targetQuaternion = this.tmpPlayerQuaternion.setFromEuler(this.tmpPlayerEuler.set(0, rotation, 0))
-
-            playerObject.quaternion.slerp(targetQuaternion, t * 5)
-        }
-
-        const speed = playerMovement.vector.length()
-
-        /* update animation weights */
-        let idleWeight: number
-        let walkWeight: number
-        let runWeight: number
-
-        if (speed < 0.01) {
-            idleWeight = 1
-            walkWeight = 0
-            runWeight = 0
-        } else if (playerMovement.sprinting) {
-            idleWeight = 0
-            walkWeight = 0
-            runWeight = 1
-        } else {
-            idleWeight = 0
-            walkWeight = 1
-            runWeight = 0
-        }
-
-        playerAnimation.idle.weight = THREE.MathUtils.lerp(playerAnimation.idle.weight, idleWeight, t)
-        playerAnimation.walk.weight = THREE.MathUtils.lerp(playerAnimation.walk.weight, walkWeight, t)
-        playerAnimation.run.weight = THREE.MathUtils.lerp(playerAnimation.run.weight, runWeight, t)
-
-        /* raycast to correct character height */
-        const characterRayOrigin = this.tmpRaycasterOrigin.copy(playerObject.position)
-        characterRayOrigin.y += 1
-
-        const characterRayDirection = this.tmpRaycasterDirection.set(0, -1, 0)
-        this.raycaster.set(characterRayOrigin, characterRayDirection)
-
-        const characterRayHits = this.raycaster.intersectObjects(
-            this.traversableQuery.entities.map((e) => e.three),
-            false,
-        )
-        const characterRayHit = characterRayHits
-            .filter((hit) => hit.object.userData.walkable)
-            .sort((a, b) => a.distance - b.distance)[0]
-
-        const characterRayHitPoint = characterRayHit ? characterRayHit.point : undefined
-
-        if (characterRayHitPoint) {
-            const yDifference = Math.abs(characterRayHitPoint.y - playerObject.position.y)
-
-            if (yDifference < 1) {
-                playerObject.position.y = characterRayHitPoint.y
-            }
-        }
-    }
-}
-
-class CameraSystem extends System<EntityType> {
-    playerQuery = this.query((e) => e.has('player', 'three'))
-
-    traversableQuery = this.query((e) => e.has('traversable', 'three'))
-
-    cameraQuery = this.query((e) => e.has('camera', 'cameraConfiguration'))!
-
-    cameraLookAt = new THREE.Vector3()
-
-    cameraPosition = new THREE.Vector3()
-
-    private tmpCameraOffset = new THREE.Vector3(0, 0, 0)
-
-    private tmpCameraPositionTarget = new THREE.Vector3()
-
-    onInit(): void {
-        this.cameraQuery.onEntityAdded.add((e) => {
-            this.cameraPosition.copy(e.camera.position)
-        })
-    }
-
-    onUpdate(delta: number): void {
-        const playerEntity = this.playerQuery.first
-        const cameraEntity = this.cameraQuery.first
-
-        if (!playerEntity || !cameraEntity) return
-
-        const { three: playerObject } = playerEntity
-        const { camera, cameraConfiguration } = cameraEntity
-
-        const cameraOffset = this.tmpCameraOffset.set(0, cameraConfiguration.offsetAbove, cameraConfiguration.offsetBehind)
-        const cameraPositionTarget = this.tmpCameraPositionTarget.copy(playerObject.position).add(cameraOffset)
-
-        const t = 1.0 - Math.pow(0.01, delta)
-
-        this.cameraPosition.lerp(cameraPositionTarget, t / 1.1)
-        camera.position.copy(this.cameraPosition)
-
-        const lookAt = this.cameraLookAt.copy(this.cameraPosition).sub(cameraOffset)
-        camera.lookAt(lookAt)
-    }
-}
-
 const world = new World<EntityType>()
+
+const navigationMeshQuery = world.query((e) => e.has('navigationMesh'))
+const traversableQuery = world.query((e) => e.has('traversable', 'three'))
+const playerQuery = world.query((e) => e.has('player', 'playerSpeed', 'playerAnimation', 'playerMovement', 'playerInput', 'three'))
+const cameraQuery = world.query((e) => e.has('camera', 'cameraConfiguration'))!
+
+const _movementTarget = new THREE.Vector3()
+
+let firstPositionUpdate = true
+
+const updateMovement = (delta: number) => {
+    const player = playerQuery.first
+
+    if (!player || !navigationMeshQuery.first) return
+
+    const navigationMesh = navigationMeshQuery.first.navigationMesh
+
+    const {
+        playerInput: input,
+        three: playerObject,
+        playerMovement: movement,
+        playerSpeed: speed,
+    } = player as With<typeof player, 'playerMovement'>
+
+    const { left, right, forward, back, sprint } = input
+
+    /* movement */
+    const movementVector = movement.vector.set(0, 0, 0)
+
+    if (forward || back) {
+        if (forward) movementVector.z -= 1
+        if (back) movementVector.z += 1
+    }
+
+    if (left || right) {
+        if (left) movementVector.x -= 1
+        if (right) movementVector.x += 1
+    }
+
+    const movementScalar = sprint ? speed.running : speed.walking
+
+    const t = 1.0 - Math.pow(0.01, delta)
+
+    movementVector.normalize().multiplyScalar(t).multiplyScalar(movementScalar)
+
+    /* update position */
+    if (movementVector.length() > 0 || firstPositionUpdate) {
+        const { query: navMeshQuery } = navigationMesh
+
+        const movementTarget = _movementTarget.copy(playerObject.position).add(movementVector)
+
+        const { nearestRef: polyRef } = navMeshQuery.findNearestPoly(playerObject.position)
+
+        const { resultPosition, visited } = navMeshQuery.moveAlongSurface(polyRef, playerObject.position, movementTarget)
+        const moveAlongSurfaceFinalRef = visited[visited.length - 1]
+
+        const { success: heightSuccess, height } = navMeshQuery.getPolyHeight(moveAlongSurfaceFinalRef, resultPosition)
+
+        playerObject.position.copy(resultPosition as THREE.Vector3)
+
+        if (heightSuccess) {
+            playerObject.position.y = height
+        }
+
+        firstPositionUpdate = false
+    }
+
+    movement.sprinting = sprint
+}
+
+const _raycasterOrigin = new THREE.Vector3()
+const _raycasterDirection = new THREE.Vector3()
+const _playerEuler = new THREE.Euler()
+const _playerQuaternion = new THREE.Quaternion()
+const _raycaster = new THREE.Raycaster()
+_raycaster.near = 0.01
+_raycaster.far = 10
+
+const updateAnimation = (delta: number) => {
+    const player = playerQuery.first
+
+    if (!player) return
+
+    const t = 1.0 - Math.pow(0.01, delta)
+
+    const { three: playerObject, playerMovement, playerAnimation } = player
+
+    /* update rotation */
+    if (playerMovement.vector.length() > 0) {
+        const rotation = Math.atan2(playerMovement.vector.x, playerMovement.vector.z) - Math.PI
+
+        const targetQuaternion = _playerQuaternion.setFromEuler(_playerEuler.set(0, rotation, 0))
+
+        playerObject.quaternion.slerp(targetQuaternion, t * 5)
+    }
+
+    const speed = playerMovement.vector.length()
+
+    /* update animation weights */
+    let idleWeight: number
+    let walkWeight: number
+    let runWeight: number
+
+    if (speed < 0.01) {
+        idleWeight = 1
+        walkWeight = 0
+        runWeight = 0
+    } else if (playerMovement.sprinting) {
+        idleWeight = 0
+        walkWeight = 0
+        runWeight = 1
+    } else {
+        idleWeight = 0
+        walkWeight = 1
+        runWeight = 0
+    }
+
+    playerAnimation.idle.weight = THREE.MathUtils.lerp(playerAnimation.idle.weight, idleWeight, t)
+    playerAnimation.walk.weight = THREE.MathUtils.lerp(playerAnimation.walk.weight, walkWeight, t)
+    playerAnimation.run.weight = THREE.MathUtils.lerp(playerAnimation.run.weight, runWeight, t)
+
+    /* raycast to correct character height */
+    const characterRayOrigin = _raycasterOrigin.copy(playerObject.position)
+    characterRayOrigin.y += 1
+
+    const characterRayDirection = _raycasterDirection.set(0, -1, 0)
+    _raycaster.set(characterRayOrigin, characterRayDirection)
+
+    const characterRayHits = _raycaster.intersectObjects(
+        traversableQuery.entities.map((e) => e.three),
+        false,
+    )
+    const characterRayHit = characterRayHits
+        .filter((hit) => hit.object.userData.walkable)
+        .sort((a, b) => a.distance - b.distance)[0]
+
+    const characterRayHitPoint = characterRayHit ? characterRayHit.point : undefined
+
+    if (characterRayHitPoint) {
+        const yDifference = Math.abs(characterRayHitPoint.y - playerObject.position.y)
+
+        if (yDifference < 1) {
+            playerObject.position.y = characterRayHitPoint.y
+        }
+    }
+}
+
+const cameraLookAt = new THREE.Vector3()
+const cameraPosition = new THREE.Vector3()
+
+const _cameraOffset = new THREE.Vector3(0, 0, 0)
+const _cameraPositionTarget = new THREE.Vector3()
+
+cameraQuery.onEntityAdded.add((e) => {
+    cameraPosition.copy(e.camera.position)
+})
+
+const cameraUpdate = (delta: number) => {
+    const player = playerQuery.first
+    const cameraEntity = cameraQuery.first
+
+    if (!player || !cameraEntity) return
+
+    const { three: playerObject } = player
+    const { camera, cameraConfiguration } = cameraEntity
+
+    const cameraOffset = _cameraOffset.set(0, cameraConfiguration.offsetAbove, cameraConfiguration.offsetBehind)
+    const cameraPositionTarget = _cameraPositionTarget.copy(playerObject.position).add(cameraOffset)
+
+    const t = 1.0 - Math.pow(0.01, delta)
+
+    cameraPosition.lerp(cameraPositionTarget, t / 1.1)
+    camera.position.copy(cameraPosition)
+
+    const lookAt = cameraLookAt.copy(cameraPosition).sub(cameraOffset)
+    camera.lookAt(lookAt)
+}
 
 const queries = {
     traversableThreeObjects: world.query((e) => e.has('traversable', 'three')),
 }
-
-const executor = new Executor(world)
-
-executor.add(MovementSystem)
-executor.add(AnimationSystem)
-executor.add(CameraSystem)
-
-executor.init()
 
 const { Entity, Component, useQuery } = createReactAPI(world)
 
@@ -450,6 +407,11 @@ const Player = ({ initialPosition }: PlayerProps) => {
         },
     })
 
+    const playerMovement = useMemo(() => ({
+        vector: new THREE.Vector3(),
+        sprinting: false,
+    }), [])
+
     useEffect(() => {
         const idleAction = gltfActions['Idle']!
         idleAction.loop = THREE.LoopRepeat
@@ -475,7 +437,7 @@ const Player = ({ initialPosition }: PlayerProps) => {
     }, [])
 
     return (
-        <Entity player playerSpeed={playerSpeed}>
+        <Entity player playerSpeed={playerSpeed} playerMovement={playerMovement}>
             {/* player object3d */}
             <Component name="three">
                 <group position={initialPosition}>
@@ -517,7 +479,9 @@ const Camera = () => {
 
 const App = () => {
     useFrame((_, delta) => {
-        executor.update(delta)
+        updateMovement(delta)
+        updateAnimation(delta)
+        cameraUpdate(delta)
     })
 
     return (
