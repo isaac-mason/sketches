@@ -1611,42 +1611,42 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@recast-navigation/core@npm:0.35.2":
-  version: 0.35.2
-  resolution: "@recast-navigation/core@npm:0.35.2"
+"@recast-navigation/core@npm:0.36.0":
+  version: 0.36.0
+  resolution: "@recast-navigation/core@npm:0.36.0"
   dependencies:
-    "@recast-navigation/wasm": "npm:0.35.2"
-  checksum: 10/f0568f94e0bb4923df2eff2801efe418b5bc5bb0ed33f2861ce36231c71637ec8cde7eba6f63361f5cea4bd963ef00aac7086f496dd875d9891fb6f059442172
+    "@recast-navigation/wasm": "npm:0.36.0"
+  checksum: 10/72c234c5522d6187ffdd3a7fcedbb6b5d99312e8b796468f71094b6779496b76f4b8234ed8fcba2fe2216415600d0cc8dfb414c865789d36146d068b17624c7f
   languageName: node
   linkType: hard
 
-"@recast-navigation/generators@npm:0.35.2":
-  version: 0.35.2
-  resolution: "@recast-navigation/generators@npm:0.35.2"
+"@recast-navigation/generators@npm:0.36.0":
+  version: 0.36.0
+  resolution: "@recast-navigation/generators@npm:0.36.0"
   dependencies:
-    "@recast-navigation/core": "npm:0.35.2"
-    "@recast-navigation/wasm": "npm:0.35.2"
-  checksum: 10/c35c2ec88326c5f38b2495ab052bdb038d4fa7937d1798e626dd5333733ca3651e55efcdbd350930bec11fa2b53f2e7ccd2a10c2b71600bf2d1ad4ae6c67baee
+    "@recast-navigation/core": "npm:0.36.0"
+    "@recast-navigation/wasm": "npm:0.36.0"
+  checksum: 10/b9f7037c02bad04ef04a75a23f433e0f30d3025aca3bcbdafc83138df56519b57147ce72161996d4286148d66f6cd0ce3338827ae802615c046406f2d009f179
   languageName: node
   linkType: hard
 
-"@recast-navigation/three@npm:^0.35.2":
-  version: 0.35.2
-  resolution: "@recast-navigation/three@npm:0.35.2"
+"@recast-navigation/three@npm:^0.36.0":
+  version: 0.36.0
+  resolution: "@recast-navigation/three@npm:0.36.0"
   dependencies:
-    "@recast-navigation/core": "npm:0.35.2"
-    "@recast-navigation/generators": "npm:0.35.2"
+    "@recast-navigation/core": "npm:0.36.0"
+    "@recast-navigation/generators": "npm:0.36.0"
   peerDependencies:
     "@types/three": 0.x.x
     three: 0.x.x
-  checksum: 10/749952e564b1e8c25baef2c697683a132da8d8d36ca91e4de4c4a44e63e3c22edcc165c3fd270ad40403449f67ffafacadd3f9d5fd79e36a1a6abf9681774603
+  checksum: 10/72e8d630664262e0f9b1ecf970150ef09f01085c10edfc8ceebd40a00d58ca00925627c75217fb03614d65231e042281e1c93c0a9c5c245b89cf871e1ae09670
   languageName: node
   linkType: hard
 
-"@recast-navigation/wasm@npm:0.35.2":
-  version: 0.35.2
-  resolution: "@recast-navigation/wasm@npm:0.35.2"
-  checksum: 10/f0439942d84c99a48465447c8d5b6cc092609029820b950ac6c153fde27515ecc797013fceefe4a1413f94d09b5114e54ca5237c4f72730cbd04964820b45627
+"@recast-navigation/wasm@npm:0.36.0":
+  version: 0.36.0
+  resolution: "@recast-navigation/wasm@npm:0.36.0"
+  checksum: 10/e135df526ffcb79d5c1dd3748f3979708957cd7dbd58a7c95cb7bd8d65b67e64c385e7ca7c5693a19638ce3f75430907796cbeee47e24e20c33f1301d1b6f428
   languageName: node
   linkType: hard
 
@@ -2730,7 +2730,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.116.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@recast-navigation/three": "npm:^0.35.2"
+    "@recast-navigation/three": "npm:^0.36.0"
     "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.1"
     "@types/three": "npm:^0.170.0"
@@ -2738,7 +2738,7 @@ __metadata:
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    recast-navigation: "npm:^0.35.2"
+    recast-navigation: "npm:^0.36.0"
     suspend-react: "npm:^0.1.3"
     three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
@@ -2752,7 +2752,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.116.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@recast-navigation/three": "npm:^0.35.2"
+    "@recast-navigation/three": "npm:^0.36.0"
     "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.1"
     "@types/three": "npm:^0.170.0"
@@ -2760,7 +2760,7 @@ __metadata:
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    recast-navigation: "npm:^0.35.2"
+    recast-navigation: "npm:^0.36.0"
     suspend-react: "npm:^0.1.3"
     three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
@@ -2775,7 +2775,7 @@ __metadata:
     "@react-three/drei": "npm:^9.116.3"
     "@react-three/fiber": "npm:^8.17.10"
     "@react-three/rapier": "npm:^1.5.0"
-    "@recast-navigation/three": "npm:^0.35.2"
+    "@recast-navigation/three": "npm:^0.36.0"
     "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.1"
     "@types/three": "npm:^0.170.0"
@@ -2783,7 +2783,7 @@ __metadata:
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    recast-navigation: "npm:^0.35.2"
+    recast-navigation: "npm:^0.36.0"
     suspend-react: "npm:^0.1.3"
     three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
@@ -2799,7 +2799,7 @@ __metadata:
     "@react-three/drei": "npm:^9.116.3"
     "@react-three/fiber": "npm:^8.17.10"
     "@react-three/rapier": "npm:^1.5.0"
-    "@recast-navigation/three": "npm:^0.35.2"
+    "@recast-navigation/three": "npm:^0.36.0"
     "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.1"
     "@types/three": "npm:^0.170.0"
@@ -2807,7 +2807,7 @@ __metadata:
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    recast-navigation: "npm:^0.35.2"
+    recast-navigation: "npm:^0.36.0"
     three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
@@ -8258,13 +8258,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"recast-navigation@npm:^0.35.2":
-  version: 0.35.2
-  resolution: "recast-navigation@npm:0.35.2"
+"recast-navigation@npm:^0.36.0":
+  version: 0.36.0
+  resolution: "recast-navigation@npm:0.36.0"
   dependencies:
-    "@recast-navigation/core": "npm:0.35.2"
-    "@recast-navigation/generators": "npm:0.35.2"
-  checksum: 10/e98e5721a01ddca723d04b5d33418a91f26ea117496f3fdbddd00417381bda28815eb6e3bd873b3c736cbea516708d1bc52432e048890f2d173c24da3a91a578
+    "@recast-navigation/core": "npm:0.36.0"
+    "@recast-navigation/generators": "npm:0.36.0"
+  checksum: 10/7da6179d336fbc0a0e606282b148afffe3a6936e34657dd83173351fb7576e34a4e77d68da8588ac5edee76918ba258d703f1a7dbc632984ef88fa6012222fa5
   languageName: node
   linkType: hard
 
