@@ -48,7 +48,9 @@ const world = new World<EntityType>()
 
 const navigationMeshQuery = world.query((e) => e.has('navigationMesh'))
 const traversableQuery = world.query((e) => e.has('traversable', 'three'))
-const playerQuery = world.query((e) => e.has('player', 'playerSpeed', 'playerAnimation', 'playerMovement', 'playerInput', 'three'))
+const playerQuery = world.query((e) =>
+    e.has('player', 'playerSpeed', 'playerAnimation', 'playerMovement', 'playerInput', 'three'),
+)
 const cameraQuery = world.query((e) => e.has('camera', 'cameraConfiguration'))!
 
 const _movementTarget = new THREE.Vector3()
@@ -223,10 +225,6 @@ const cameraUpdate = (delta: number) => {
     camera.lookAt(lookAt)
 }
 
-const queries = {
-    traversableThreeObjects: world.query((e) => e.has('traversable', 'three')),
-}
-
 const { Entity, Component, useQuery } = createReactAPI(world)
 
 const NavigationMesh = () => {
@@ -283,7 +281,7 @@ const NavigationMesh = () => {
     )
     const [navMeshHelper, setNavMeshHelper] = useState<NavMeshHelper>()
 
-    const traversable = useQuery(queries.traversableThreeObjects)
+    const traversable = useQuery(traversableQuery)
 
     useEffect(() => {
         if (traversable.entities.length === 0) return
@@ -407,10 +405,13 @@ const Player = ({ initialPosition }: PlayerProps) => {
         },
     })
 
-    const playerMovement = useMemo(() => ({
-        vector: new THREE.Vector3(),
-        sprinting: false,
-    }), [])
+    const playerMovement = useMemo(
+        () => ({
+            vector: new THREE.Vector3(),
+            sprinting: false,
+        }),
+        [],
+    )
 
     useEffect(() => {
         const idleAction = gltfActions['Idle']!
