@@ -1,4 +1,4 @@
-import { Topic } from 'arancini/events'
+import { Topic } from '@/common/utils/topic'
 import * as THREE from 'three'
 import { ChunkGeometry } from './chunk-geometry'
 import { createChunkMaterial } from './chunk-material'
@@ -181,7 +181,7 @@ export class Voxels {
             initialised: false,
             mesh: new THREE.Mesh(new ChunkGeometry(), this.chunkMaterial),
         }
-        
+
         this.chunkMeshes.set(chunk.id, mesh)
         this.dirtyChunks.add(chunk.id)
 

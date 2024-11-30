@@ -1,6 +1,7 @@
+import { Topic } from '@/common/utils/topic'
 import * as THREE from 'three'
-import { Topic } from 'arancini/events'
-import { RaycastResult, raycast } from './raycast'
+import { RaycastResult, raycast } 
+from './raycast'
 
 export const CHUNK_BITS = 4
 export const CHUNK_SIZE = Math.pow(2, CHUNK_BITS)
@@ -114,7 +115,7 @@ let worldId = 0
 
 export class World {
     id = worldId++
-    
+
     chunks = new Map<string, Chunk>()
 
     onChunkCreated = new Topic<[chunk: Chunk]>()
