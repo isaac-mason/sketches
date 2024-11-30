@@ -16,52 +16,52 @@ const state = {
 
 const worker = self as unknown as Worker
 
-const update = () => {
-    for (const [worldId, chunkIds] of state.worldChunkMeshJobs) {
-        const remoteWorld = state.worlds.get(worldId)
+const updateWorld = (worldId: number, chunkIds: Set<string>) => {
+    const remoteWorld = state.worlds.get(worldId)
 
-        if (!remoteWorld) {
+    if (!remoteWorld) {
+        return
+    }
+
+    const incomplete = new Set(chunkIds)
+
+    for (const chunkId of chunkIds) {
+        const chunk = remoteWorld.chunks.get(chunkId)
+
+        if (!chunk) {
             continue
         }
 
-        const incomplete = new Set(chunkIds)
+        try {
+            const { positions, indices, normals, colors, ambientOcclusion } = mesh(chunk, remoteWorld)
 
-        const chunksToProcess = chunkIds
-
-        state.worldChunkMeshJobs.set(worldId, new Set())
-
-        for (const chunkId of chunksToProcess) {
-            const chunk = remoteWorld.chunks.get(chunkId)
-
-            if (!chunk) {
-                continue
+            const chunkMeshUpdateNotification: ChunkMeshUpdateResultMessage = {
+                type: CulledMesherWorkerMessageType.CHUNK_MESH_UPDATE_RESULT,
+                worldId,
+                chunkId: chunkId,
+                positions,
+                indices,
+                normals,
+                colors,
+                ambientOcclusion,
             }
 
-            try {
-                const { positions, indices, normals, colors, ambientOcclusion } = mesh(chunk, remoteWorld)
+            worker.postMessage(chunkMeshUpdateNotification, {
+                transfer: [positions.buffer, indices.buffer, normals.buffer, colors.buffer, ambientOcclusion.buffer],
+            })
 
-                const chunkMeshUpdateNotification: ChunkMeshUpdateResultMessage = {
-                    type: CulledMesherWorkerMessageType.CHUNK_MESH_UPDATE_RESULT,
-                    worldId,
-                    chunkId: chunkId,
-                    positions,
-                    indices,
-                    normals,
-                    colors,
-                    ambientOcclusion,
-                }
-
-                worker.postMessage(chunkMeshUpdateNotification, {
-                    transfer: [positions.buffer, indices.buffer, normals.buffer, colors.buffer, ambientOcclusion.buffer],
-                })
-
-                incomplete.delete(chunkId)
-            } catch (e) {
-                // swallow
-            }
-
-            state.worldChunkMeshJobs.set(worldId, new Set([...incomplete, ...state.worldChunkMeshJobs.get(worldId)!]))
+            incomplete.delete(chunkId)
+        } catch (e) {
+            // swallow
         }
+    }
+
+    state.worldChunkMeshJobs.set(worldId, incomplete)
+}
+
+const update = () => {
+    for (const [worldId, chunkIds] of state.worldChunkMeshJobs) {
+        updateWorld(worldId, chunkIds)
     }
 }
 
