@@ -1,26 +1,28 @@
 {
-    "name": "@sketches/grid-pathfinding",
+    "name": "@sketches/ducks",
     "private": true,
     "sketch": {
-        "title": "Grid Pathfinding",
-        "tags": [
-            "pathfinding",
-            "grid"
-        ]
+        "title": "Ducks"
     },
     "scripts": {
         "dev": "vite dev",
         "build": "vite build"
     },
     "dependencies": {
+        "@pmndrs/assets": "^1.6.1",
+        "@react-three/drei": "^9.116.3",
+        "@react-three/fiber": "^8.17.10",
+        "@react-three/rapier": "^1.5.0",
+        "leva": "^0.9.35",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
         "styled-components": "^6.1.13",
-        "zustand": "^5.0.0"
+        "three": "^0.171.0"
     },
     "devDependencies": {
         "@types/react": "^18.3.11",
         "@types/react-dom": "^18.3.1",
+        "@types/three": "^0.170.0",
         "typescript": "^5.6.2",
         "vite": "^5.4.9"
     }

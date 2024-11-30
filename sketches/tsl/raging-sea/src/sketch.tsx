@@ -1,10 +1,10 @@
 import { WebGPUCanvas } from '@/common/components/webgpu-canvas'
-import { MeshBasicNodeMaterial, abs, color, mix, modelWorldMatrix, positionLocal, sin, timerLocal, vec3, vec4 } from 'three/tsl'
+import { abs, color, mix, modelWorldMatrix, positionLocal, sin, time, vec3, vec4 } from 'three/tsl'
+import { MeshBasicNodeMaterial } from 'three/webgpu'
 import { perlinNoise3d } from './tsl/perlin-noise-3d'
+import { OrbitControls } from '@react-three/drei'
 
 const waterMaterial = new MeshBasicNodeMaterial()
-
-const time = timerLocal(1)
 
 const modelPosition = modelWorldMatrix.mul(vec4(positionLocal, 1))
 
@@ -44,6 +44,8 @@ export function Sketch() {
                 <planeGeometry args={[4, 4, 512, 512]} />
                 <primitive object={waterMaterial} />
             </mesh>
+
+            <OrbitControls />
         </WebGPUCanvas>
     )
 }

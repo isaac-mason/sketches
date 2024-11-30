@@ -1,11 +1,11 @@
 {
-    "name": "@sketches/game-ui-ux-unlock-pointer-lock",
+    "name": "@sketches/textured-voxels-sphere",
     "private": true,
     "sketch": {
-        "title": "Game UI/UX - Unlock Pointer Lock",
+        "title": "Textured Voxels - Sphere",
         "tags": [
-            "game-ui-ux",
-            "pointer-lock"
+            "voxels",
+            "tsl"
         ]
     },
     "scripts": {
@@ -13,12 +13,13 @@
         "build": "vite build"
     },
     "dependencies": {
-        "@react-spring/three": "^9.7.3",
         "@react-three/drei": "^9.116.3",
         "@react-three/fiber": "^8.17.10",
+        "leva": "^0.9.35",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
-        "three": "^0.170.0"
+        "suspend-react": "^0.1.3",
+        "three": "^0.171.0"
     },
     "devDependencies": {
         "@types/react": "^18.3.11",

@@ -1,28 +1,14 @@
-import {
-    Node,
-    ShaderNodeObject,
-    add,
-    dot,
-    float,
-    floor,
-    fract,
-    mix,
-    mul,
-    step,
-    tslFn,
-    vec3,
-    vec4,
-} from 'three/tsl'
+import { Node, ShaderNodeObject, add, dot, float, floor, fract, mix, mul, step, Fn, vec3, vec4 } from 'three/tsl'
 
-const permute = tslFn((input: { x: ShaderNodeObject<Node> }) => {
+const permute = Fn((input: { x: ShaderNodeObject<Node> }) => {
     return fract(add(mul(input.x, 34), 1).mul(input.x).div(289)).mul(289)
 })
 
-const taylorInvSqrt = tslFn((input: { r: ShaderNodeObject<Node> }) => {
+const taylorInvSqrt = Fn((input: { r: ShaderNodeObject<Node> }) => {
     return float(1.79284291400159).sub(float(0.85373472095314).mul(input.r))
 })
 
-const fade = tslFn((input: { t: ShaderNodeObject<Node> }) => {
+const fade = Fn((input: { t: ShaderNodeObject<Node> }) => {
     const t = input.t
     return t
         .mul(t)
@@ -30,7 +16,7 @@ const fade = tslFn((input: { t: ShaderNodeObject<Node> }) => {
         .mul(t.mul(t.mul(6).sub(15)).add(10))
 })
 
-export const perlinNoise3d = tslFn(({ position }: { position: ShaderNodeObject<Node> }) => {
+export const perlinNoise3d = Fn(({ position }: { position: ShaderNodeObject<Node> }) => {
     const Pi0 = vec3(position.floor())
     const Pi1 = Pi0.add(vec3(1))
     const Pf0 = fract(position)

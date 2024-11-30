@@ -21,7 +21,7 @@
         "react": "^18.3.1",
         "react-colorful": "^5.6.1",
         "react-dom": "^18.3.1",
-        "three": "^0.170.0",
+        "three": "^0.171.0",
         "tunnel-rat": "^0.1.2"
     },
     "devDependencies": {

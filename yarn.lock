@@ -1876,7 +1876,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -1893,7 +1893,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -1912,7 +1912,7 @@ __metadata:
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     styled-components: "npm:^6.1.13"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     zustand: "npm:^5.0.0"
   languageName: unknown
   linkType: soft
@@ -1956,7 +1956,28 @@ __metadata:
     d3: "npm:^7.9.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
+    typescript: "npm:^5.6.2"
+    vite: "npm:^5.4.9"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/ducks@workspace:sketches/ducks":
+  version: 0.0.0-use.local
+  resolution: "@sketches/ducks@workspace:sketches/ducks"
+  dependencies:
+    "@pmndrs/assets": "npm:^1.6.1"
+    "@react-three/drei": "npm:^9.116.3"
+    "@react-three/fiber": "npm:^8.17.10"
+    "@react-three/rapier": "npm:^1.5.0"
+    "@types/react": "npm:^18.3.11"
+    "@types/react-dom": "npm:^18.3.1"
+    "@types/three": "npm:^0.170.0"
+    leva: "npm:^0.9.35"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    styled-components: "npm:^6.1.13"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -1988,7 +2009,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2005,25 +2026,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
-    typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.9"
-  languageName: unknown
-  linkType: soft
-
-"@sketches/game-ui-ux-unlock-pointer-lock@workspace:sketches/game-ui-ux/unlock-pointer-lock":
-  version: 0.0.0-use.local
-  resolution: "@sketches/game-ui-ux-unlock-pointer-lock@workspace:sketches/game-ui-ux/unlock-pointer-lock"
-  dependencies:
-    "@react-spring/three": "npm:^9.7.3"
-    "@react-three/drei": "npm:^9.116.3"
-    "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.11"
-    "@types/react-dom": "npm:^18.3.1"
-    "@types/three": "npm:^0.170.0"
-    react: "npm:^18.3.1"
-    react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2040,7 +2043,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2057,7 +2060,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2074,7 +2077,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2091,7 +2094,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2108,7 +2111,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2125,7 +2128,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2142,7 +2145,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2159,7 +2162,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2176,7 +2179,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2193,7 +2196,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2210,7 +2213,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2227,7 +2230,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2244,7 +2247,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2261,7 +2264,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2278,7 +2281,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2295,7 +2298,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2312,24 +2315,9 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
-  languageName: unknown
-  linkType: soft
-
-"@sketches/grid-pathfinding@workspace:sketches/grid-pathfinding":
-  version: 0.0.0-use.local
-  resolution: "@sketches/grid-pathfinding@workspace:sketches/grid-pathfinding"
-  dependencies:
-    "@types/react": "npm:^18.3.11"
-    "@types/react-dom": "npm:^18.3.1"
-    react: "npm:^18.3.1"
-    react-dom: "npm:^18.3.1"
-    styled-components: "npm:^6.1.13"
-    typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.9"
-    zustand: "npm:^5.0.0"
   languageName: unknown
   linkType: soft
 
@@ -2344,7 +2332,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2362,7 +2350,7 @@ __metadata:
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     styled-components: "npm:^6.1.13"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2381,7 +2369,7 @@ __metadata:
     maath: "npm:^0.10.8"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2402,7 +2390,7 @@ __metadata:
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     styled-components: "npm:^6.1.13"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     tone: "npm:15.0.4"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
@@ -2421,7 +2409,7 @@ __metadata:
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     suspend-react: "npm:^0.1.3"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2439,7 +2427,7 @@ __metadata:
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2459,7 +2447,7 @@ __metadata:
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     simplex-noise: "npm:^4.0.3"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2477,7 +2465,7 @@ __metadata:
     p2-es: "npm:^1.2.3"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2495,7 +2483,7 @@ __metadata:
     p2-es: "npm:^1.2.3"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2513,7 +2501,7 @@ __metadata:
     p2-es: "npm:^1.2.3"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2531,7 +2519,7 @@ __metadata:
     p2-es: "npm:^1.2.3"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2548,7 +2536,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2565,7 +2553,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2582,7 +2570,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2600,7 +2588,7 @@ __metadata:
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2619,7 +2607,7 @@ __metadata:
     maath: "npm:^0.10.8"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2639,7 +2627,7 @@ __metadata:
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     simplex-noise: "npm:^4.0.3"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2658,7 +2646,7 @@ __metadata:
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2678,7 +2666,7 @@ __metadata:
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2699,7 +2687,7 @@ __metadata:
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     styled-components: "npm:^6.1.13"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2718,7 +2706,7 @@ __metadata:
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2737,7 +2725,7 @@ __metadata:
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2756,7 +2744,7 @@ __metadata:
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2775,7 +2763,7 @@ __metadata:
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2794,7 +2782,7 @@ __metadata:
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2815,7 +2803,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     recast-navigation: "npm:^0.35.2"
     suspend-react: "npm:^0.1.3"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2836,7 +2824,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     recast-navigation: "npm:^0.35.2"
     suspend-react: "npm:^0.1.3"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2858,7 +2846,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     recast-navigation: "npm:^0.35.2"
     suspend-react: "npm:^0.1.3"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2879,7 +2867,7 @@ __metadata:
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     recast-navigation: "npm:^0.35.2"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2896,7 +2884,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2913,7 +2901,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2930,7 +2918,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2947,7 +2935,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2966,7 +2954,7 @@ __metadata:
     maath: "npm:^0.10.8"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -2988,7 +2976,7 @@ __metadata:
     react: "npm:^18.3.1"
     react-colorful: "npm:^5.6.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     tunnel-rat: "npm:^0.1.2"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
@@ -3007,7 +2995,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -3024,7 +3012,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -3043,15 +3031,15 @@ __metadata:
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     styled-components: "npm:^6.1.13"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
   linkType: soft
 
-"@sketches/textured-voxels-sphere@workspace:sketches/voxels/textured-voxels/sphere":
+"@sketches/textured-voxels-sphere@workspace:sketches/voxels/textured-voxels":
   version: 0.0.0-use.local
-  resolution: "@sketches/textured-voxels-sphere@workspace:sketches/voxels/textured-voxels/sphere"
+  resolution: "@sketches/textured-voxels-sphere@workspace:sketches/voxels/textured-voxels"
   dependencies:
     "@react-three/drei": "npm:^9.116.3"
     "@react-three/fiber": "npm:^8.17.10"
@@ -3062,24 +3050,7 @@ __metadata:
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     suspend-react: "npm:^0.1.3"
-    three: "npm:^0.170.0"
-    typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.9"
-  languageName: unknown
-  linkType: soft
-
-"@sketches/textured-voxels-texture-atlas@workspace:sketches/voxels/textured-voxels/texture-atlas":
-  version: 0.0.0-use.local
-  resolution: "@sketches/textured-voxels-texture-atlas@workspace:sketches/voxels/textured-voxels/texture-atlas"
-  dependencies:
-    "@react-three/drei": "npm:^9.116.3"
-    "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.11"
-    "@types/react-dom": "npm:^18.3.1"
-    "@types/three": "npm:^0.170.0"
-    react: "npm:^18.3.1"
-    react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -3096,7 +3067,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -3113,7 +3084,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -3130,7 +3101,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -3147,7 +3118,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -3165,7 +3136,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -3182,7 +3153,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -3200,7 +3171,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -3217,7 +3188,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -3234,7 +3205,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -3251,7 +3222,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -3268,7 +3239,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -3285,7 +3256,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -3302,7 +3273,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -3320,7 +3291,7 @@ __metadata:
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -3338,7 +3309,7 @@ __metadata:
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -3356,7 +3327,7 @@ __metadata:
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -3374,7 +3345,7 @@ __metadata:
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -3392,7 +3363,7 @@ __metadata:
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -3409,7 +3380,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -3426,7 +3397,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -3443,7 +3414,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -3460,7 +3431,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -3477,7 +3448,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -3494,7 +3465,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
   languageName: unknown
@@ -9957,6 +9928,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"three@npm:^0.171.0":
+  version: 0.171.0
+  resolution: "three@npm:0.171.0"
+  checksum: 10/ca66784004375cc6a476a40b4af3436510bec6037876195792a4edd70167105684fa3db066ac0c7ed4970d05cb0d4a64a4ac34e0f4b6bdd1bd79fa4728a09ce9
+  languageName: node
+  linkType: hard
+
 "tiny-invariant@npm:^1.3.1":
   version: 1.3.3
   resolution: "tiny-invariant@npm:1.3.3"
@@ -10455,14 +10433,14 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
   languageName: unknown
   linkType: soft
 
-"voxels-textured-voxels-lib@workspace:sketches/voxels/textured-voxels/lib":
+"voxels-textured-voxels-lib@workspace:sketches/voxels/textured-voxels/src/lib":
   version: 0.0.0-use.local
-  resolution: "voxels-textured-voxels-lib@workspace:sketches/voxels/textured-voxels/lib"
+  resolution: "voxels-textured-voxels-lib@workspace:sketches/voxels/textured-voxels/src/lib"
   dependencies:
     "@react-three/drei": "npm:^9.116.3"
     "@react-three/fiber": "npm:^8.17.10"
@@ -10471,7 +10449,7 @@ __metadata:
     "@types/three": "npm:^0.170.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    three: "npm:^0.170.0"
+    three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
   languageName: unknown
   linkType: soft

@@ -19,7 +19,7 @@
         "d3": "^7.9.0",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
-        "three": "^0.170.0"
+        "three": "^0.171.0"
     },
     "devDependencies": {
         "@types/d3": "^7.4.3",

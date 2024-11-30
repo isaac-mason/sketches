@@ -1,16 +1,16 @@
 import { WebGPUCanvas } from '@/common/components/webgpu-canvas'
-import { useFrame, useThree } from '@react-three/fiber'
+import { OrbitControls } from '@react-three/drei'
+import { useFrame } from '@react-three/fiber'
 import { useEffect, useRef, useState } from 'react'
 import { suspend } from 'suspend-react'
 import * as THREE from 'three'
-import { OrbitControls as OrbitControlsImpl } from 'three/addons/controls/OrbitControls.js'
-import { BlockRegistry } from '../../lib/block-registry'
-import { ChunkGeometry } from '../../lib/chunk-geometry'
-import { ChunkMaterial } from '../../lib/chunk-material'
-import { CulledMesher } from '../../lib/culled-mesher'
-import { loadImage } from '../../lib/load-image'
-import { TextureAtlas } from '../../lib/texture-atlas'
-import { CHUNK_SIZE, World } from '../../lib/world'
+import { BlockRegistry } from './lib/block-registry'
+import { ChunkGeometry } from './lib/chunk-geometry'
+import { ChunkMaterial } from './lib/chunk-material'
+import { CulledMesher } from './lib/culled-mesher'
+import { loadImage } from './lib/load-image'
+import { TextureAtlas } from './lib/texture-atlas'
+import { CHUNK_SIZE, World } from './lib/world'
 import diamondTextureUrl from './textures/diamond.png?url'
 import greyTextureUrl from './textures/grey.png?url'
 import stoneTextureUrl from './textures/stone.png?url'
@@ -137,34 +137,6 @@ const SpinningPointLight = () => {
     })
 
     return <pointLight position={[15, 0, 15]} intensity={90} ref={pointLightRef} />
-}
-
-// cannot import OrbitControls from drei - https://github.com/mrdoob/three.js/issues/29156
-const OrbitControls = () => {
-    const camera = useThree((state) => state.camera)
-    const gl = useThree((state) => state.gl)
-
-    const controlsRef = useRef<OrbitControlsImpl>()
-
-    useEffect(() => {
-        const orbitControls = new OrbitControlsImpl(camera, gl.domElement)
-
-        orbitControls.enableDamping = true
-
-        controlsRef.current = orbitControls
-
-        return () => {
-            orbitControls.dispose()
-        }
-    }, [])
-
-    useFrame(() => {
-        if (!controlsRef.current) return
-
-        controlsRef.current.update()
-    })
-
-    return null
 }
 
 export function Sketch() {

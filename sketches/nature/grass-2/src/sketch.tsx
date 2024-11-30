@@ -1,14 +1,12 @@
 import { WebGPUCanvas } from '@/common'
-import { useFrame, useThree } from '@react-three/fiber'
+import { OrbitControls } from '@react-three/drei'
 import { useControls } from 'leva'
-import { useEffect, useMemo, useRef } from 'react'
+import { useMemo } from 'react'
 import * as THREE from 'three'
-import { OrbitControls as OrbitControlsImpl } from 'three/addons/controls/OrbitControls.js'
 import {
-    MeshBasicNodeMaterial,
+    Fn,
     Node,
     ShaderNodeObject,
-    cond,
     cos,
     dot,
     float,
@@ -25,10 +23,10 @@ import {
     positionWorld,
     pow,
     remap,
+    select,
     sin,
     sub,
-    timerLocal,
-    tslFn,
+    time,
     uniform,
     varying,
     vec2,
@@ -36,6 +34,7 @@ import {
     vec4,
     vertexIndex,
 } from 'three/tsl'
+import { MeshBasicNodeMaterial } from 'three/webgpu'
 
 const NUM_GRASS = 500
 const GRASS_SEGMENTS = 6
@@ -81,30 +80,30 @@ const createGrassGeometry = (numGrass: number, segments: number) => {
     return geom
 }
 
-const quickHashVec2 = tslFn(({ p }: { p: ShaderNodeObject<Node> }) => {
+const quickHashVec2 = Fn(({ p }: { p: ShaderNodeObject<Node> }) => {
     const r = vec2(dot(vec2(p), vec2(17.43267, 23.8934543)), dot(vec2(p), vec2(13.98342, 37.2435232)))
 
     return fract(sin(r).mul(1743.54892229))
 })
 
-const hashVec3 = tslFn(({ p }: { p: ShaderNodeObject<Node> }) => {
+const hashVec3 = Fn(({ p }: { p: ShaderNodeObject<Node> }) => {
     const r = vec3(dot(p, vec3(127.1, 311.7, 74.7)), dot(p, vec3(269.5, 183.3, 246.1)), dot(p, vec3(113.5, 271.9, 124.6)))
 
     return float(float(-1).add(2)).mul(fract(sin(r).mul(43758.5453123)))
 })
 
-const easeOut = tslFn(({ x, t }: { x: ShaderNodeObject<Node>; t: ShaderNodeObject<Node> }) => {
+const easeOut = Fn(({ x, t }: { x: ShaderNodeObject<Node>; t: ShaderNodeObject<Node> }) => {
     return float(1).sub(pow(float(1).sub(x), t))
 })
 
-const rotateY = tslFn(({ theta }: { theta: ShaderNodeObject<Node> }) => {
+const rotateY = Fn(({ theta }: { theta: ShaderNodeObject<Node> }) => {
     const c = cos(theta)
     const s = sin(theta)
 
     return mat3(c, 0, s, 0, 1, 0, s.negate(), 0, c)
 })
 
-const rotateAxis = tslFn(([axis, angle]: [axis: ShaderNodeObject<Node>, angle: ShaderNodeObject<Node>]) => {
+const rotateAxis = Fn(([axis, angle]: [axis: ShaderNodeObject<Node>, angle: ShaderNodeObject<Node>]) => {
     const s = sin(angle)
     const c = cos(angle)
     const oc = float(1).sub(c)
@@ -122,7 +121,7 @@ const rotateAxis = tslFn(([axis, angle]: [axis: ShaderNodeObject<Node>, angle: S
     )
 })
 
-const bezier = tslFn(
+const bezier = Fn(
     ({
         p0,
         p1,
@@ -157,7 +156,7 @@ const bezier = tslFn(
     },
 )
 
-const noise = tslFn(([p_immutable]: [p_immutable: ShaderNodeObject<Node>]) => {
+const noise = Fn(([p_immutable]: [p_immutable: ShaderNodeObject<Node>]) => {
     const p = vec3(p_immutable).toVar()
     const i = vec3(floor(p)).toVar()
     const f = vec3(fract(p)).toVar()
@@ -218,7 +217,7 @@ const Grass = () => {
 
         // 0 = left, 1 = right
         const xTest = vertID.bitAnd(0x1)
-        const zTest = cond(vertFB_ID.greaterThanEqual(grassVertices), 1, -1)
+        const zTest = select(vertFB_ID.greaterThanEqual(grassVertices), 1, -1)
         const xSide = float(xTest)
         const zSide = float(zTest)
         const heightPercent = float(vertID.sub(xTest)).div(float(grassSegments).mul(float(2)))
@@ -251,7 +250,6 @@ const Grass = () => {
         }
 
         const stiffness = 1.0
-        const time = timerLocal(1.0)
 
         const windStrength = float(noise(vec3(grassWorldPosition.xz.mul(0.05), 0.0).add(time)))
         const windAngle = float(0.0)
@@ -330,34 +328,6 @@ const Grass = () => {
     }, [debugPositionsAndAngles, wireframe, wind, color])
 
     return <primitive object={mesh} />
-}
-
-// cannot import OrbitControls from drei - https://github.com/mrdoob/three.js/issues/29156
-const OrbitControls = () => {
-    const camera = useThree((state) => state.camera)
-    const gl = useThree((state) => state.gl)
-
-    const controlsRef = useRef<OrbitControlsImpl>()
-
-    useEffect(() => {
-        const orbitControls = new OrbitControlsImpl(camera, gl.domElement)
-
-        orbitControls.enableDamping = true
-
-        controlsRef.current = orbitControls
-
-        return () => {
-            orbitControls.dispose()
-        }
-    }, [])
-
-    useFrame(() => {
-        if (!controlsRef.current) return
-
-        controlsRef.current.update()
-    })
-
-    return null
 }
 
 export function Sketch() {
