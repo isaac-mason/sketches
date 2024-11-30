@@ -1,7 +1,6 @@
 import { Topic } from '@/common/utils/topic'
 import * as THREE from 'three'
-import { RaycastResult, raycast } 
-from './raycast'
+import { RaycastResult, raycast } from './raycast'
 
 export const CHUNK_BITS = 4
 export const CHUNK_SIZE = Math.pow(2, CHUNK_BITS)
