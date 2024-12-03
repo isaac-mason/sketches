@@ -5,31 +5,22 @@ __metadata:
   version: 8
   cacheKey: 10
 
-"@arancini/core@npm:7.0.0":
-  version: 7.0.0
-  resolution: "@arancini/core@npm:7.0.0"
-  dependencies:
-    "@arancini/events": "npm:7.0.0"
-  checksum: 10/f43483b59aba30e0f3c389f28c4629535f6e9f1a25e58b9725c5253f0245c24660682d47fab058c81fb0342c0cfd2a9e4a4a45d25b5f6f037aa2103cc6ff90e9
+"@arancini/core@npm:8.0.0":
+  version: 8.0.0
+  resolution: "@arancini/core@npm:8.0.0"
+  checksum: 10/6bd1478c5a29532b97100acea9651af88ee35c95a68ee2f553c1670088d23097251d22cd6564cc57e31a406554ff92bc63a750946b92bb4c0f469356e0acb6ec
   languageName: node
   linkType: hard
 
-"@arancini/events@npm:7.0.0":
-  version: 7.0.0
-  resolution: "@arancini/events@npm:7.0.0"
-  checksum: 10/9e25f543fd512567794f2e0b85eee7efd10358db3b4a2ee1af901138092c4f296eaa7ca34d3a6b4c994ae0958380f867e9495252fbc2c7b9977f9d68ccb78b3d
-  languageName: node
-  linkType: hard
-
-"@arancini/react@npm:7.0.0":
-  version: 7.0.0
-  resolution: "@arancini/react@npm:7.0.0"
+"@arancini/react@npm:8.0.0":
+  version: 8.0.0
+  resolution: "@arancini/react@npm:8.0.0"
   dependencies:
-    "@arancini/core": "npm:7.0.0"
+    "@arancini/core": "npm:8.0.0"
   peerDependencies:
     react: ^18.0.0
     react-dom: ^18.0.0
-  checksum: 10/9ad4a8b84c9b629d3e6cc6e3e82144ed49ae869bc7d48646581d8d4407980ae0bdfb817c8d70e881ace6f423ecbae4c991fe130752ce65169a8d33900f68133e
+  checksum: 10/e3c3f8f9264b802ca1fd9cb7095db8d542f32532372bb2652b04b1df2a761f317b123212921b7d9c4b911f628d3c77a080bf71405796a6f183249302ed73e1ce
   languageName: node
   linkType: hard
 
@@ -2392,7 +2383,7 @@ __metadata:
     "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.1"
     "@types/three": "npm:^0.170.0"
-    arancini: "npm:^7.0.0"
+    arancini: "npm:^8.0.0"
     p2-es: "npm:^1.2.3"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
@@ -2411,7 +2402,7 @@ __metadata:
     "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.1"
     "@types/three": "npm:^0.170.0"
-    arancini: "npm:^7.0.0"
+    arancini: "npm:^8.0.0"
     p2-es: "npm:^1.2.3"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
@@ -2430,7 +2421,7 @@ __metadata:
     "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.1"
     "@types/three": "npm:^0.170.0"
-    arancini: "npm:^7.0.0"
+    arancini: "npm:^8.0.0"
     p2-es: "npm:^1.2.3"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
@@ -2449,7 +2440,7 @@ __metadata:
     "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.1"
     "@types/three": "npm:^0.170.0"
-    arancini: "npm:^7.0.0"
+    arancini: "npm:^8.0.0"
     p2-es: "npm:^1.2.3"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
@@ -2468,7 +2459,7 @@ __metadata:
     "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.1"
     "@types/three": "npm:^0.170.0"
-    arancini: "npm:^7.0.0"
+    arancini: "npm:^8.0.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     three: "npm:^0.171.0"
@@ -2734,7 +2725,7 @@ __metadata:
     "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.1"
     "@types/three": "npm:^0.170.0"
-    arancini: "npm:^7.0.0"
+    arancini: "npm:^8.0.0"
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
@@ -2756,7 +2747,7 @@ __metadata:
     "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.1"
     "@types/three": "npm:^0.170.0"
-    arancini: "npm:^7.0.0"
+    arancini: "npm:^8.0.0"
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
@@ -2779,7 +2770,7 @@ __metadata:
     "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.1"
     "@types/three": "npm:^0.170.0"
-    arancini: "npm:^7.0.0"
+    arancini: "npm:^8.0.0"
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
@@ -2803,7 +2794,7 @@ __metadata:
     "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.1"
     "@types/three": "npm:^0.170.0"
-    arancini: "npm:^7.0.0"
+    arancini: "npm:^8.0.0"
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
@@ -2943,7 +2934,7 @@ __metadata:
     "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.1"
     "@types/three": "npm:^0.170.0"
-    arancini: "npm:^7.0.0"
+    arancini: "npm:^8.0.0"
     leva: "npm:^0.9.35"
     maath: "npm:^0.10.8"
     react: "npm:^18.3.1"
@@ -4491,17 +4482,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"arancini@npm:^7.0.0":
-  version: 7.0.0
-  resolution: "arancini@npm:7.0.0"
+"arancini@npm:^8.0.0":
+  version: 8.0.0
+  resolution: "arancini@npm:8.0.0"
   dependencies:
-    "@arancini/core": "npm:7.0.0"
-    "@arancini/events": "npm:7.0.0"
-    "@arancini/react": "npm:7.0.0"
+    "@arancini/core": "npm:8.0.0"
+    "@arancini/react": "npm:8.0.0"
   peerDependencies:
     react: ^18.0.0
     react-dom: ^18.0.0
-  checksum: 10/666d87246406512c8ab71c4d1355cfe0117cbbf6f063e33c7c5d990aeeb007ddf530d2d60e84fb6bda3d1815a0f95c696e77ec0feb0f6b9908e0749a41f23ba5
+  checksum: 10/1d29d5a846ebc40fa46f7526e3947534bc86792e3d2f1ab9d386a4301b84c92a2da0c71662b8ae253adb8c2144feedb3e22d455bb4633b8eee27f09e0d362918
   languageName: node
   linkType: hard
 
