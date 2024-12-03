@@ -1883,27 +1883,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sketches/ducks@workspace:sketches/ducks":
-  version: 0.0.0-use.local
-  resolution: "@sketches/ducks@workspace:sketches/ducks"
-  dependencies:
-    "@pmndrs/assets": "npm:^1.6.1"
-    "@react-three/drei": "npm:^9.116.3"
-    "@react-three/fiber": "npm:^8.17.10"
-    "@react-three/rapier": "npm:^1.5.0"
-    "@types/react": "npm:^18.3.11"
-    "@types/react-dom": "npm:^18.3.1"
-    "@types/three": "npm:^0.170.0"
-    leva: "npm:^0.9.35"
-    react: "npm:^18.3.1"
-    react-dom: "npm:^18.3.1"
-    styled-components: "npm:^6.1.13"
-    three: "npm:^0.171.0"
-    typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.9"
-  languageName: unknown
-  linkType: soft
-
 "@sketches/falling-sand@workspace:sketches/falling-sand":
   version: 0.0.0-use.local
   resolution: "@sketches/falling-sand@workspace:sketches/falling-sand"
