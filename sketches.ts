@@ -16,7 +16,7 @@ export const sketchesOrder = [
     'voxels/simple-voxels/metropolis',
     'voxels/simple-voxels/voxelize',
     'voxels/simple-voxels/multiple-worlds',
-    'voxels/textured-voxels/sphere',
+    'voxels/textured-voxels',
     'isosurface/marching-cubes-terrain',
     'rapier/cluster',
     'rapier/custom-raycast-vehicle',
