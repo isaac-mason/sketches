@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Caves</title>
+    </head>
+    <body>
+        <div id="app"></div>
+    </body>
+    <script src="./sketch.js" type="module"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+        }
+        canvas {
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+        }
+        .controls {
+            position: fixed;
+            bottom: 1em;
+            left: 1em;
+            padding: 1em;
+            gap: 1em;
+            width: 12em;
+            display: flex;
+            flex-direction: column;
+            font-family: monospace;
+            background: #0005;
+            color: #fff;
+        }
+        .controls .control label {
+            display: block;
+            margin-bottom: 0.5em;
+        }
+    </style>
+</html>

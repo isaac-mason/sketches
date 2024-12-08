@@ -1,5 +1,5 @@
 import { $, Subprocess } from 'bun'
-import { getFreePorts, isPortFree, rootDirectory } from './utils'
+import { getFreePorts, isPortFree, rootDirectory, SketchMeta } from './utils'
 import * as path from 'path'
 
 export type SketchDevServer = { process?: Subprocess; port: number; url: string; path: string; lastRequestTime: number }
@@ -41,21 +41,21 @@ async function watchSketchOutputReadableStream(sketch: SketchDevServer, stream: 
     }
 }
 
-export const get = async (state: SketchDevServerState, sketchPath: string): Promise<SketchDevServer> => {
-    const existingSketch = state.sketches.get(sketchPath)
+export const get = async (state: SketchDevServerState, sketchPath: string, sketchMeta: SketchMeta): Promise<SketchDevServer> => {
+    const previouslyStartedSketch = state.sketches.get(sketchPath)
 
     // if the sketch is already running, return it
-    if (existingSketch && existingSketch.process) {
-        return existingSketch
+    if (previouslyStartedSketch && previouslyStartedSketch.process) {
+        return previouslyStartedSketch
     }
 
     let port: number | undefined = undefined
 
-    if (existingSketch) {
-        const existingSketchPortFree = await isPortFree(existingSketch.port)
+    if (previouslyStartedSketch) {
+        const isPreviousSketchPortFree = await isPortFree(previouslyStartedSketch.port)
 
-        if (existingSketchPortFree) {
-            port = existingSketch.port
+        if (isPreviousSketchPortFree) {
+            port = previouslyStartedSketch.port
         }
     }
 
@@ -64,8 +64,8 @@ export const get = async (state: SketchDevServerState, sketchPath: string): Prom
 
         // if the sketch was previously started, try to reuse the port.
         // otherwise use the first port not reserved by another sketch.
-        if (existingSketch && freePorts.includes(existingSketch.port)) {
-            port = existingSketch.port
+        if (previouslyStartedSketch && freePorts.includes(previouslyStartedSketch.port)) {
+            port = previouslyStartedSketch.port
         } else {
             const sketchPorts = Array.from(state.sketches.values()).map((sketch) => sketch.port)
 
@@ -79,7 +79,8 @@ export const get = async (state: SketchDevServerState, sketchPath: string): Prom
         throw new Error('no free ports')
     }
 
-    const url = `https://localhost:${port}/`
+    const secure = sketchMeta.dev?.secure ?? true
+    const url = `http${secure ? 's' : ''}://localhost:${port}/`
 
     const cwd = path.resolve(rootDirectory, 'sketches', sketchPath)
 
