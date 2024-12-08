@@ -18,12 +18,12 @@
         "@react-three/drei": "^9.116.3",
         "@react-three/fiber": "^8.17.10",
         "@react-three/rapier": "^1.5.0",
-        "@recast-navigation/three": "^0.36.0",
+        "@recast-navigation/three": "^0.36.1",
         "arancini": "^8.0.0",
         "leva": "^0.9.35",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
-        "recast-navigation": "^0.36.0",
+        "recast-navigation": "^0.36.1",
         "three": "^0.171.0"
     },
     "devDependencies": {
