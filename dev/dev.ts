@@ -51,7 +51,7 @@ app.use('/sketches-static', async (req, res, next) => {
         return next()
     }
 
-    const devServer = await SketchDevServers.get(sketchDevServers, sketchMeta.path)
+    const devServer = await SketchDevServers.get(sketchDevServers, sketchMeta.path, sketchMeta)
 
     res.redirect(devServer.url)
 })

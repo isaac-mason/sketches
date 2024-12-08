@@ -40,6 +40,7 @@ export const sketchesOrder = [
     'nature/grass',
     'nature/grass-2',
     'nature/tree',
+    'procedural-generation/caves',
     'procedural-generation/l-systems',
     'procedural-generation/diamond-square-heightmap',
     'procedural-generation/pixelated-planet',

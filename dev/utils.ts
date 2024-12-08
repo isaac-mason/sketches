@@ -14,6 +14,9 @@ export type SketchMeta = {
         hidden?: boolean
         displayTitle?: boolean
     }
+    dev?: {
+        secure?: boolean
+    }
 }
 
 export const createSketchesMeta = async (): Promise<SketchMeta[]> => {

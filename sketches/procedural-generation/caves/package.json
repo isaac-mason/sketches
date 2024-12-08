@@ -1,0 +1,18 @@
+{
+    "name": "caves",
+    "packageManager": "yarn@4.1.1",
+    "private": true,
+    "sketch": {
+        "title": "Procedural Generation - Caves",
+        "tags": [
+            "procedural-generation"
+        ],
+        "dev": {
+            "secure": false
+        }
+    },
+    "scripts": {
+        "dev": "bun run ../../../dev/static-server.ts ./src",
+        "build": "rm -rf ./dist && mkdir dist && cp src/* dist/"
+    }
+}
