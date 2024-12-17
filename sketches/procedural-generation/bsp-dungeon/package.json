@@ -1,9 +1,10 @@
 {
-    "name": "@sketches/caves",
+    "name": "@sketches/bsp-dungeon",
     "packageManager": "yarn@4.1.1",
     "private": true,
     "sketch": {
-        "title": "Procedural Generation - Caves",
+        "hidden": true,
+        "title": "Procedural Generation - BSP Dungeon",
         "tags": [
             "procedural-generation"
         ],
