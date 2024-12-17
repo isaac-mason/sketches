@@ -6,19 +6,19 @@ import {
     RecastConfig,
     UnsignedCharArray,
     Vector3Tuple,
+    calcGridSize,
     recastConfigDefaults,
     statusFailed,
     statusToReadableString,
 } from 'recast-navigation'
+import { dtIlog2, dtNextPow2 } from 'recast-navigation/generators'
 import * as THREE from 'three'
-import { BuildTileMeshProps, buildConfig } from './build-tile'
+import { BuildTileMeshProps } from './build-tile'
 import DynamicTiledNavMeshWorker from './dynamic-tiled-navmesh.worker?worker'
 
 export type DynamicTiledNavMeshProps = {
     navMeshBounds: THREE.Box3
     recastConfig: Partial<RecastConfig>
-    maxTiles: number
-
     workers: number
 }
 
@@ -62,7 +62,22 @@ export class DynamicTiledNavMesh {
 
         const navMesh = new NavMesh()
 
-        const { tileWidth, tileHeight, tcs, maxPolysPerTile } = buildConfig({ recastConfig, navMeshBounds })
+        // tile size
+        const gridSize = calcGridSize(navMeshBounds[0], navMeshBounds[1], recastConfig.cs)
+        const tileSize = Math.floor(recastConfig.tileSize)
+        const tileWidth = Math.floor((gridSize.width + tileSize - 1) / tileSize)
+        const tileHeight = Math.floor((gridSize.height + tileSize - 1) / tileSize)
+        const tcs = recastConfig.tileSize * recastConfig.cs
+
+        // Max tiles and max polys affect how the tile IDs are caculated.
+        // There are 22 bits available for identifying a tile and a polygon.
+        let tileBits = Math.min(Math.floor(dtIlog2(dtNextPow2(tileWidth * tileHeight))), 14)
+        if (tileBits > 14) tileBits = 14
+        const polyBits = 22 - tileBits
+
+        const maxTiles = 1 << tileBits
+        const maxPolysPerTile = 1 << polyBits
+
         this.tileWidth = tileWidth
         this.tileHeight = tileHeight
         this.tcs = tcs
@@ -71,7 +86,7 @@ export class DynamicTiledNavMesh {
             orig: navMeshOrigin,
             tileWidth: recastConfig.tileSize * recastConfig.cs,
             tileHeight: recastConfig.tileSize * recastConfig.cs,
-            maxTiles: props.maxTiles,
+            maxTiles,
             maxPolys: maxPolysPerTile,
         })
 

@@ -1,5 +1,5 @@
 import { RecastConfig, init } from 'recast-navigation'
-import { createSoloNavMeshData } from './create-solo-nav-mesh-data'
+import { generateSoloNavMeshData } from 'recast-navigation/generators';
 
 let ready = false
 
@@ -10,7 +10,7 @@ const process = () => {
 
     const { positions, indices, recastConfig } = message
 
-    const { success, navMeshData } = createSoloNavMeshData(positions, indices, recastConfig)
+    const { success, navMeshData } = generateSoloNavMeshData(positions, indices, recastConfig)
 
     if (!success) return
 

@@ -1602,42 +1602,42 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@recast-navigation/core@npm:0.36.1":
-  version: 0.36.1
-  resolution: "@recast-navigation/core@npm:0.36.1"
+"@recast-navigation/core@npm:0.38.0":
+  version: 0.38.0
+  resolution: "@recast-navigation/core@npm:0.38.0"
   dependencies:
-    "@recast-navigation/wasm": "npm:0.36.1"
-  checksum: 10/81444d3c36e5ad18c890d3650061288bb807f5b4acfbc2da3da5b5b4d473be1c58e08b844a2fa3331ba04574ee51ccd44ab20687800d6dbb0357aa4bf9442312
+    "@recast-navigation/wasm": "npm:0.38.0"
+  checksum: 10/ce2e78f0166585378f5cb52852931fd44fa903079719695b6a82b523b349fe079093214053c7e0c0f0cccefbcfc69f604421763b08645d64750136b51534726a
   languageName: node
   linkType: hard
 
-"@recast-navigation/generators@npm:0.36.1":
-  version: 0.36.1
-  resolution: "@recast-navigation/generators@npm:0.36.1"
+"@recast-navigation/generators@npm:0.38.0":
+  version: 0.38.0
+  resolution: "@recast-navigation/generators@npm:0.38.0"
   dependencies:
-    "@recast-navigation/core": "npm:0.36.1"
-    "@recast-navigation/wasm": "npm:0.36.1"
-  checksum: 10/f049f8d980c4cf40772e39ebc1968d0a885d53b9337d6bba464d80f0cfaa7209a6ac3ae4949051b8d94f111d26591baa8c42cb2831435464e71959f0324a83cc
+    "@recast-navigation/core": "npm:0.38.0"
+    "@recast-navigation/wasm": "npm:0.38.0"
+  checksum: 10/738b33f21376cc621ab3b7f61751b4e417318c628a4671b5362414e64e4759de873956d3515917e6be35615c5b75df53e906fbe39079f453bfacfb5ab67faa25
   languageName: node
   linkType: hard
 
-"@recast-navigation/three@npm:^0.36.1":
-  version: 0.36.1
-  resolution: "@recast-navigation/three@npm:0.36.1"
+"@recast-navigation/three@npm:^0.38.0":
+  version: 0.38.0
+  resolution: "@recast-navigation/three@npm:0.38.0"
   dependencies:
-    "@recast-navigation/core": "npm:0.36.1"
-    "@recast-navigation/generators": "npm:0.36.1"
+    "@recast-navigation/core": "npm:0.38.0"
+    "@recast-navigation/generators": "npm:0.38.0"
   peerDependencies:
     "@types/three": 0.x.x
     three: 0.x.x
-  checksum: 10/60309a940070e60a6e1e4f1320d178b29f61e9548e04e7fb9a0a496021e7df37be601266e0743137107054e36b6480d492bc166eafe24604f56e5ff937ccb3b7
+  checksum: 10/ab820060e86aded20a4a3c7f32b784e60fe31896d6593c3b54b8c7a2c168a93a24bd72931a54f3d9a1bd6a628c76c904c5369d4abb786208a1baedf912ea635e
   languageName: node
   linkType: hard
 
-"@recast-navigation/wasm@npm:0.36.1":
-  version: 0.36.1
-  resolution: "@recast-navigation/wasm@npm:0.36.1"
-  checksum: 10/31b4b8aa5453a67367cac569e6c256c9dba7342efdacdec0f28531ac8fa8ffdd87789a4efdd8265ea5455718042a4d3bf16a6fc7f1437d32d53c32de9423fe75
+"@recast-navigation/wasm@npm:0.38.0":
+  version: 0.38.0
+  resolution: "@recast-navigation/wasm@npm:0.38.0"
+  checksum: 10/a29e71750b20bb5d0dfb5bc5fbd863ec2708f1b20928be9f34231e090494f257f8d99af3b86c74c42f33bf0b9b64ddcf05195363a54d860c9d02633ed3dec039
   languageName: node
   linkType: hard
 
@@ -1785,6 +1785,12 @@ __metadata:
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
+
+"@sketches/bsp-dungeon@workspace:sketches/procedural-generation/bsp-dungeon":
+  version: 0.0.0-use.local
+  resolution: "@sketches/bsp-dungeon@workspace:sketches/procedural-generation/bsp-dungeon"
+  languageName: unknown
+  linkType: soft
 
 "@sketches/character-animation-basic@workspace:sketches/character-animation/basic":
   version: 0.0.0-use.local
@@ -2700,7 +2706,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.116.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@recast-navigation/three": "npm:^0.36.1"
+    "@recast-navigation/three": "npm:^0.38.0"
     "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.1"
     "@types/three": "npm:^0.170.0"
@@ -2708,7 +2714,7 @@ __metadata:
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    recast-navigation: "npm:^0.36.1"
+    recast-navigation: "npm:^0.38.0"
     suspend-react: "npm:^0.1.3"
     three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
@@ -2722,7 +2728,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.116.3"
     "@react-three/fiber": "npm:^8.17.10"
-    "@recast-navigation/three": "npm:^0.36.1"
+    "@recast-navigation/three": "npm:^0.38.0"
     "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.1"
     "@types/three": "npm:^0.170.0"
@@ -2730,7 +2736,7 @@ __metadata:
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    recast-navigation: "npm:^0.36.1"
+    recast-navigation: "npm:^0.38.0"
     suspend-react: "npm:^0.1.3"
     three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
@@ -2745,7 +2751,7 @@ __metadata:
     "@react-three/drei": "npm:^9.116.3"
     "@react-three/fiber": "npm:^8.17.10"
     "@react-three/rapier": "npm:^1.5.0"
-    "@recast-navigation/three": "npm:^0.36.1"
+    "@recast-navigation/three": "npm:^0.38.0"
     "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.1"
     "@types/three": "npm:^0.170.0"
@@ -2753,7 +2759,7 @@ __metadata:
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    recast-navigation: "npm:^0.36.1"
+    recast-navigation: "npm:^0.38.0"
     suspend-react: "npm:^0.1.3"
     three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
@@ -2769,7 +2775,7 @@ __metadata:
     "@react-three/drei": "npm:^9.116.3"
     "@react-three/fiber": "npm:^8.17.10"
     "@react-three/rapier": "npm:^1.5.0"
-    "@recast-navigation/three": "npm:^0.36.1"
+    "@recast-navigation/three": "npm:^0.38.0"
     "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.1"
     "@types/three": "npm:^0.170.0"
@@ -2777,7 +2783,7 @@ __metadata:
     leva: "npm:^0.9.35"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    recast-navigation: "npm:^0.36.1"
+    recast-navigation: "npm:^0.38.0"
     three: "npm:^0.171.0"
     typescript: "npm:^5.6.2"
     vite: "npm:^5.4.9"
@@ -4842,12 +4848,6 @@ __metadata:
   checksum: 10/f121d626f3c85210573a58de4d6c20082f8dce31623c9e6f3b72c7fbc2352b12f324e36c1098aafe3c6e3d4f848f5cce5895ffaae4629986b4dd2b6ae014332e
   languageName: node
   linkType: hard
-
-"caves@workspace:sketches/procedural-generation/caves":
-  version: 0.0.0-use.local
-  resolution: "caves@workspace:sketches/procedural-generation/caves"
-  languageName: unknown
-  linkType: soft
 
 "chalk@npm:^4.0.0, chalk@npm:^4.0.2":
   version: 4.1.2
@@ -8233,13 +8233,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"recast-navigation@npm:^0.36.1":
-  version: 0.36.1
-  resolution: "recast-navigation@npm:0.36.1"
+"recast-navigation@npm:^0.38.0":
+  version: 0.38.0
+  resolution: "recast-navigation@npm:0.38.0"
   dependencies:
-    "@recast-navigation/core": "npm:0.36.1"
-    "@recast-navigation/generators": "npm:0.36.1"
-  checksum: 10/ac14be75bc08206f90e56162637c55e1f2bc0acd44792419047b3aa7c70b7a9477e6021361694dd49afd0645fec7a6ad132296d87528cbce9c7c1c82bda7699a
+    "@recast-navigation/core": "npm:0.38.0"
+    "@recast-navigation/generators": "npm:0.38.0"
+  checksum: 10/502b7926ff89575638a8abf8b86457d21105f34bca0923e2fe1aaa89aa9d19e64499d71dc28b7e23d556f5c2dea7f31d808eacb7435828869c5411a71f137ae7
   languageName: node
   linkType: hard
 

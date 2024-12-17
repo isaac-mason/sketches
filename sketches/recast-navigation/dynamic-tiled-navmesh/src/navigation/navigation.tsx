@@ -39,8 +39,6 @@ const recastConfig: Partial<RecastConfig> = {
     walkableHeight: 3 / cellHeight,
 }
 
-const maxTiles = 512
-
 const navMeshWorkers = navigator.hardwareConcurrency ?? 3
 
 const maxAgents = 50
@@ -100,13 +98,11 @@ export const Navigation = () => {
 
     const getTraversablePositionsAndIndices = (): [positions: Float32Array, indices: Uint32Array] => {
         const traversableMeshes = getTraversableMeshes()
-        const [positions, indices] = getPositionsAndIndices(traversableMeshes)
-
-        return [positions, indices]
+        return getPositionsAndIndices(traversableMeshes)
     }
 
     useEffect(() => {
-        const dynamicTiledNavMesh = new DynamicTiledNavMesh({ navMeshBounds, recastConfig, maxTiles, workers: navMeshWorkers })
+        const dynamicTiledNavMesh = new DynamicTiledNavMesh({ navMeshBounds, recastConfig, workers: navMeshWorkers })
         const navMeshQuery = new NavMeshQuery(dynamicTiledNavMesh.navMesh)
         const crowd = new Crowd(dynamicTiledNavMesh.navMesh, { maxAgents, maxAgentRadius })
 

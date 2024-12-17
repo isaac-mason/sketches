@@ -24,7 +24,6 @@ import {
     buildPolyMeshDetail,
     buildRegions,
     calcGridSize,
-    cloneRcConfig,
     createHeightfield,
     createNavMeshData,
     createRcConfig,
@@ -37,9 +36,7 @@ import {
     freeHeightfield,
     markWalkableTriangles,
     rasterizeTriangles,
-    vec3,
 } from '@recast-navigation/core'
-import { dtIlog2, dtNextPow2 } from '@recast-navigation/generators'
 import * as THREE from 'three'
 
 const getTrianglesInBox = (positions: ArrayLike<number>, indices: ArrayLike<number>, box: THREE.Box3): number[] => {
@@ -74,7 +71,7 @@ type BuildConfigProps = {
     navMeshBounds: [min: Vector3Tuple, max: Vector3Tuple]
 }
 
-export const buildConfig = ({ recastConfig, navMeshBounds: [navMeshBoundsMin, navMeshBoundsMax] }: BuildConfigProps) => {
+const buildConfig = ({ recastConfig, navMeshBounds: [navMeshBoundsMin, navMeshBoundsMax] }: BuildConfigProps) => {
     //
     // Initialize build config.
     //
@@ -94,35 +91,7 @@ export const buildConfig = ({ recastConfig, navMeshBounds: [navMeshBoundsMin, na
     config.detailSampleDist = config.detailSampleDist < 0.9 ? 0 : config.cs * config.detailSampleDist
     config.detailSampleMaxError = config.ch * config.detailSampleMaxError
 
-    // tile size
-    const tileSize = Math.floor(config.tileSize)
-    const tileWidth = Math.floor((gridSize.width + tileSize - 1) / tileSize)
-    const tileHeight = Math.floor((gridSize.height + tileSize - 1) / tileSize)
-    const tcs = config.tileSize * config.cs
-
-    /* Create dtNavMeshParams, initialise nav mesh for tiled use */
-    const orig = vec3.fromArray(navMeshBoundsMin)
-
-    // Max tiles and max polys affect how the tile IDs are caculated.
-    // There are 22 bits available for identifying a tile and a polygon.
-    let tileBits = Math.min(Math.floor(dtIlog2(dtNextPow2(tileWidth * tileHeight))), 14)
-    if (tileBits > 14) tileBits = 14
-    const polyBits = 22 - tileBits
-
-    const maxTiles = 1 << tileBits
-    const maxPolysPerTile = 1 << polyBits
-
-    return {
-        config,
-        orig,
-        tileBits,
-        polyBits,
-        maxTiles,
-        maxPolysPerTile,
-        tcs,
-        tileWidth,
-        tileHeight,
-    }
+    return config
 }
 
 export type TileIntermediates = {
@@ -145,10 +114,7 @@ export type BuildTileMeshProps = {
     keepIntermediates: boolean
 }
 
-export type BuildTileMeshResult = (
-    | { success: true; data?: UnsignedCharArray }
-    | { success: false; error: string }
-) & {
+export type BuildTileMeshResult = ({ success: true; data?: UnsignedCharArray } | { success: false; error: string }) & {
     tileIntermediates?: TileIntermediates
     buildContext: RecastBuildContext
 }
@@ -203,8 +169,7 @@ export const buildTile = ({
         return { success: false as const, error, tileIntermediates, buildContext }
     }
 
-    const { config } = buildConfig({ recastConfig, navMeshBounds: navMeshBounds })
-    const tileConfig = cloneRcConfig(config)
+    const tileConfig = buildConfig({ recastConfig, navMeshBounds })
 
     // Expand the heightfield bounding box by border size to find the extents of geometry we need to build this tile.
     //
@@ -252,7 +217,7 @@ export const buildTile = ({
     buildContext.startTimer(Recast.RC_TIMER_TOTAL)
 
     buildContext.log(Recast.RC_LOG_PROGRESS, `Building tile at x: ${tileX}, y: ${tileY}`)
-    buildContext.log(Recast.RC_LOG_PROGRESS, ` - ${config.width} x ${config.height} cells`)
+    buildContext.log(Recast.RC_LOG_PROGRESS, ` - ${tileConfig.width} x ${tileConfig.height} cells`)
     buildContext.log(Recast.RC_LOG_PROGRESS, ` - ${numVertices / 1000}fK verts, ${numTriangles / 1000}K tris`)
 
     // Allocate voxel heightfield where we rasterize our input data to.
@@ -442,9 +407,9 @@ export const buildTile = ({
     navMeshCreateParams.setPolyMeshCreateParams(polyMesh)
     navMeshCreateParams.setPolyMeshDetailCreateParams(polyMeshDetail)
 
-    navMeshCreateParams.setWalkableHeight(tileConfig.walkableHeight)
-    navMeshCreateParams.setWalkableRadius(tileConfig.walkableRadius)
-    navMeshCreateParams.setWalkableClimb(tileConfig.walkableClimb)
+    navMeshCreateParams.setWalkableHeight(recastConfig.walkableHeight * recastConfig.ch)
+    navMeshCreateParams.setWalkableRadius(recastConfig.walkableRadius * recastConfig.cs)
+    navMeshCreateParams.setWalkableClimb(recastConfig.walkableClimb * recastConfig.ch)
 
     navMeshCreateParams.setCellSize(tileConfig.cs)
     navMeshCreateParams.setCellHeight(tileConfig.ch)
