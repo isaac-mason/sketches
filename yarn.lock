@@ -1792,6 +1792,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@sketches/caves@workspace:sketches/procedural-generation/caves":
+  version: 0.0.0-use.local
+  resolution: "@sketches/caves@workspace:sketches/procedural-generation/caves"
+  languageName: unknown
+  linkType: soft
+
 "@sketches/character-animation-basic@workspace:sketches/character-animation/basic":
   version: 0.0.0-use.local
   resolution: "@sketches/character-animation-basic@workspace:sketches/character-animation/basic"
