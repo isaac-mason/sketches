@@ -1,7 +1,9 @@
 import { Vector2 } from './vector.js'
 import { createRandomGenerator } from './random.js'
+import { CHUNK_SIZE, getChunkPositionFromIndex, Grid } from './grid.js'
 
-// use BSP to generate a dungeon
+const TILE_ROOM = 0
+const TILE_CORRIDOR = 1
 
 /**
  * @typedef {{
@@ -14,18 +16,37 @@ import { createRandomGenerator } from './random.js'
  * }} BSPNode
  */
 
-const remap = (value, min, max) => {
-    return min + value * (max - min)
+/**
+ * @typedef {{
+ *   id: number,
+ *   x: number,
+ *   y: number,
+ *   width: number,
+ *   height: number,
+ * }} Room
+ */
+
+/**
+ * @typedef {{
+ *   id: number,
+ *   roomA: number,
+ *   roomB: number,
+ *   path: Array<Vector2>
+ * }} Corridor
+ */
+
+const remap = (value, fromMin, fromMax, toMin, toMax) => {
+    return ((value - fromMin) / (fromMax - fromMin)) * (toMax - toMin) + toMin
 }
 
 /**
  * @param {BSPNode} node
  * @param {() => number} random
  */
-const splitBSPNode = (node, random) => {
+const splitBSPNode = (node, random, minSize) => {
     if (node.children.length > 0) {
         for (const child of node.children) {
-            splitBSPNode(child, random)
+            splitBSPNode(child, random, minSize)
         }
         return
     }
@@ -34,10 +55,17 @@ const splitBSPNode = (node, random) => {
     const horizontalSplitChance = node.width / (node.width + node.height)
     const isHorizontalSplit = random() > horizontalSplitChance
 
-    const splitPositionPercentage = remap(random(), 0.3, 0.7)
+    const splitPositionPercentage = remap(random(), 0, 1, 0.3, 0.7)
     const splitPosition = isHorizontalSplit
-        ? remap(splitPositionPercentage, node.y + 1, node.y + node.height - 1)
-        : remap(splitPositionPercentage, node.x + 1, node.x + node.width - 1)
+        ? Math.round(remap(splitPositionPercentage, 0, 1, node.y + 1, node.y + node.height - 1))
+        : Math.round(remap(splitPositionPercentage, 0, 1, node.x + 1, node.x + node.width - 1))
+
+    const splitRoomSize = isHorizontalSplit ? splitPosition - node.y : splitPosition - node.x
+
+    // don't split if under min size
+    if (splitRoomSize < minSize) {
+        return
+    }
 
     const childA = {
         x: node.x,
@@ -60,6 +88,10 @@ const splitBSPNode = (node, random) => {
     node.children.push(childA, childB)
 }
 
+/**
+ * @param {BSPNode} node
+ * @returns {BSPNode[]}
+ */
 const getLeafNodes = (node) => {
     if (node.children.length === 0) {
         return [node]
@@ -68,146 +100,331 @@ const getLeafNodes = (node) => {
     return node.children.flatMap(getLeafNodes)
 }
 
-const generate = (splitIterations) => {
-    const random = createRandomGenerator(42)
-
-    // create bsp to lay out dungeon structure
-    const bsp = {
-        x: 0,
-        y: 0,
-        width: 1000,
-        height: 1000,
-        children: [],
-        parent: null,
-    }
-
-    for (let i = 0; i < splitIterations; i++) {
-        splitBSPNode(bsp, random)
-    }
-
-    const leafNodes = getLeafNodes(bsp)
+const createRooms = (leafNodes, random) => {
+    /**
+     * @type {Room[]}
+     */
+    const rooms = []
 
     let roomIdCounter = 0
 
-    // create rooms within leaf nodes
-    const rooms = leafNodes.map((node) => {
-        const roomWidth = remap(random(), node.width * 0.7, node.width - 1)
-        const roomHeight = remap(random(), node.height * 0.7, node.height - 1)
+    for (const node of leafNodes) {
+        if (random() < 0.1) {
+            continue
+        }
 
-        const roomX = remap(random(), node.x, node.x + node.width - roomWidth)
-        const roomY = remap(random(), node.y, node.y + node.height - roomHeight)
+        const roomPadding = 1
+        const roomMinSizePercentage = 0.5
+        const romMaxSizePercentage = 0.99
 
-        return {
+        const roomMinWidth = Math.floor(node.width * roomMinSizePercentage)
+        const roomMaxWidth = Math.floor(node.width * romMaxSizePercentage) - roomPadding * 2
+        const roomMinHeight = Math.floor(node.height * roomMinSizePercentage)
+        const roomMaxHeight = Math.floor(node.height * romMaxSizePercentage) - roomPadding * 2
+
+        const roomWidth = Math.floor(remap(random(), 0, 1, roomMinWidth, roomMaxWidth))
+        const roomHeight = Math.floor(remap(random(), 0, 1, roomMinHeight, roomMaxHeight))
+
+        const roomMinX = node.x + roomPadding
+        const roomMaxX = node.x + node.width - roomWidth - roomPadding
+        const roomMinY = node.y + roomPadding
+        const roomMaxY = node.y + node.height - roomHeight - roomPadding
+
+        const roomX = Math.floor(remap(random(), 0, 1, roomMinX, roomMaxX))
+        const roomY = Math.floor(remap(random(), 0, 1, roomMinY, roomMaxY))
+
+        rooms.push({
             id: roomIdCounter++,
             x: roomX,
             y: roomY,
             width: roomWidth,
             height: roomHeight,
             node,
-        }
-    })
-
-    // create corridors between rooms
-
-    // To build corridors, we loop through all the leafs of the tree, connecting each leaf to its sister. If the two rooms have face-to-face walls, we can use a straight corridor. Else we have to use a Z shaped corridor.
-    // Now we get up one level in the tree and repeat the process for the parent sub-regions. Now, we can connect two sub-regions with a link either between two rooms, or a corridor and a room or two corridors.
-    // We repeat the process until we have connected the first two sub-dungeons A and B :
-    // https://roguebasin.com/index.php/Basic_BSP_Dungeon_generation
-
-
-
-
-    /**
-     * @type {Array<{ a: Vector2, b: Vector2 }>}
-     */
-    const corridors = []
-
-    let leafNodeParents = new Set()
-
-    for (const leafNode of leafNodes) {
-        leafNodeParents.add(leafNode.parent)
+        })
     }
 
-    for (const nodeWithChildren of leafNodeParents) {
-        console.log(nodeWithChildren)
-        const a = nodeWithChildren.children[0]
-        const b = nodeWithChildren.children[1]
+    return rooms
+}
 
-        const roomA = rooms.find((room) => room.node === a)
-        const roomB = rooms.find((room) => room.node === b)
+const createCorridors = (rooms, random) => {
+    const corridors = []
 
-        const centerA = new Vector2(roomA.x + roomA.width / 2, roomA.y + roomA.height / 2)
-        const centerB = new Vector2(roomB.x + roomB.width / 2, roomB.y + roomB.height / 2)
+    for (let i = 0; i < rooms.length - 1; i++) {
+        const roomA = rooms[i]
+        const roomB = rooms[i + 1]
+
+        // does a corridor already exist between these rooms?
+        if (
+            corridors.some(
+                (c) => (c.roomA === roomA.id && c.roomB === roomB.id) || (c.roomA === roomB.id && c.roomB === roomA.id),
+            )
+        ) {
+            continue
+        }
 
         const corridor = {
-            a: centerA,
-            b: centerB,
+            id: i,
+            roomA: roomA.id,
+            roomB: roomB.id,
+            path: [],
+        }
+
+        const x1 = roomA.x + Math.floor(roomA.width / 2)
+        const y1 = roomA.y + Math.floor(roomA.height / 2)
+
+        const x2 = roomB.x + Math.floor(roomB.width / 2)
+        const y2 = roomB.y + Math.floor(roomB.height / 2)
+
+        let x = x1
+        let y = y1
+
+        while (x !== x2 || y !== y2) {
+            const dx = Math.sign(x2 - x)
+            const dy = Math.sign(y2 - y)
+
+            if (x !== x2 && random() > 0.5) {
+                x += dx
+            } else if (y !== y2) {
+                y += dy
+            }
+
+            corridor.path.push({ x, y })
         }
 
         corridors.push(corridor)
     }
-    
+
+    return corridors
+}
+
+/**
+ * @param {number} seed
+ * @param {BSPNode} bsp
+ * @param {number} splitIterations
+ * @param {number} minRoomSize
+ * @returns {{ grid: Grid, bsp: BSPNode, rooms: Room[], corridors: Corridor[] }}
+ */
+const generate = (seed, bsp, splitIterations, minRoomSize) => {
+    const random = createRandomGenerator(seed)
+
+    // split the bsp nodes to create rooms
+    for (let i = 0; i < splitIterations; i++) {
+        splitBSPNode(bsp, random, minRoomSize)
+    }
+
+    // create rooms using bsp leaf nodes
+    const leafNodes = getLeafNodes(bsp)
+
+    /**
+     * @type {Room[]}
+     */
+    const rooms = createRooms(leafNodes, random)
+
+    // create corridors between rooms with a drunken walk
+    const corridors = createCorridors(rooms, random)
+
+    // create a grid map of the dungeon rooms and corridors
+    const grid = new Grid()
+
+    for (const room of rooms) {
+        for (let y = room.y; y < room.y + room.height; y++) {
+            for (let x = room.x; x < room.x + room.width; x++) {
+                grid.set(x, y, TILE_ROOM)
+            }
+        }
+    }
+
+    for (const corridor of corridors) {
+        for (const { x, y } of corridor.path) {
+            // 3x3 brush
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    if (grid.get(x + dx, y + dy) === undefined) {
+                        grid.set(x + dx, y + dy, TILE_CORRIDOR)
+                    }
+                }
+            }
+        }
+    }
+
     return {
+        grid,
         bsp,
         rooms,
         corridors,
     }
 }
 
-const drawBSPNode = (node, ctx, depth, maxDepth) => {
-    if (node.children.length === 0) {
-        const hslValue = Math.floor((depth / maxDepth) * 360)
-        ctx.fillStyle = `hsl(${hslValue}, ${hslValue}%, ${hslValue}%, 0.1)`
-        ctx.strokeStyle = `hsl(${hslValue}, ${hslValue}%, ${hslValue}%)`
-        ctx.lineWidth = 1
-
-        ctx.beginPath()
-        ctx.rect(node.x, node.y, node.width, node.height)
-        ctx.fill()
-        ctx.stroke()
-    }
-
-    for (const child of node.children) {
-        drawBSPNode(child, ctx, depth + 1, maxDepth)
-    }
+const options = {
+    seed: 42,
+    drawGrid: true,
+    drawRooms: false,
+    drawBSP: false,
+    drawCorridors: false,
+    minRoomSize: 20,
+    splitIterations: 5,
 }
 
-const drawRooms = (rooms, ctx) => {
-    ctx.fillStyle = '#333'
-
-    for (const room of rooms) {
-        ctx.fillRect(room.x, room.y, room.width, room.height)
+function run() {
+    const bsp = {
+        x: 0,
+        y: 0,
+        width: 128,
+        height: 128,
+        children: [],
+        parent: null,
     }
+
+    console.time('generate')
+    const { grid, rooms, corridors } = generate(options.seed, bsp, options.splitIterations, options.minRoomSize)
+    console.timeEnd('generate')
+
+    console.log(grid, bsp, rooms, corridors)
+
+    draw(grid, rooms, corridors, options)
 }
-
-const drawCorridors = (corridors, ctx) => {
-    ctx.strokeStyle = '#f33'
-    ctx.lineWidth = 3
-
-    for (const corridor of corridors) {
-        ctx.beginPath()
-        ctx.moveTo(corridor.a.x, corridor.a.y)
-        ctx.lineTo(corridor.b.x, corridor.b.y)
-        ctx.stroke()
-    }
-}
-
-const splitIterations = 3
-
-const { bsp, rooms, corridors } = generate(splitIterations)
-
-console.log(bsp, rooms, corridors)
 
 const canvas = document.createElement('canvas')
-canvas.width = 1000
-canvas.height = 1000
 document.body.appendChild(canvas)
 
-const ctx = canvas.getContext('2d')
+const UNEXPLORED_COLOR = '#333'
 
-ctx.fillStyle = '#fff'
-ctx.fillRect(0, 0, canvas.width, canvas.height)
+const CELL_COLORS = {
+    [TILE_ROOM]: '#999',
+    [TILE_CORRIDOR]: '#eee',
+}
 
-drawBSPNode(bsp, ctx, 0, splitIterations)
-drawRooms(rooms, ctx)
-drawCorridors(corridors, ctx)
+function draw(grid, rooms, corridors, options) {
+    const [min, max] = grid.getChunkBounds()
+
+    canvas.width = max[0] - min[0] + 1 * CHUNK_SIZE
+    canvas.height = max[1] - min[1] + 1 * CHUNK_SIZE
+
+    const ctx = canvas.getContext('2d')
+
+    const _drawOffset = new Vector2(-min.x, -min.y)
+    const _chunkOffset = new Vector2()
+    const _drawCursor = new Vector2()
+
+    if (options.drawGrid) {
+        for (const chunk of Object.values(grid.chunks)) {
+            _chunkOffset.copy(chunk.chunkPosition).multiplyScalar(CHUNK_SIZE)
+
+            for (let i = 0; i < chunk.data.length; i++) {
+                getChunkPositionFromIndex(i, _drawCursor)
+                _drawCursor.add(_chunkOffset)
+                _drawCursor.add(_drawOffset)
+
+                const value = chunk.data[i]
+                ctx.fillStyle = CELL_COLORS[value] ?? UNEXPLORED_COLOR
+                ctx.fillRect(_drawCursor.x, _drawCursor.y, 1, 1)
+            }
+        }
+    }
+
+    if (options.drawRooms || options.drawBSP) {
+        for (const room of rooms) {
+            const h = room.id * 30
+
+            if (options.drawRooms) {
+                ctx.fillStyle = `hsl(${h}, 50%, 50%, 1)`
+                ctx.fillRect(room.x + _drawOffset.x, room.y + _drawOffset.y, room.width, room.height)
+            }
+
+            if (options.drawBSP) {
+                ctx.fillStyle = `hsl(${h}, 50%, 50%, ${options.drawGrid ? 0.3 : 0.5})`
+                ctx.fillRect(room.node.x + _drawOffset.x, room.node.y + _drawOffset.y, room.node.width, room.node.height)
+            }
+        }
+    }
+
+    if (options.drawCorridors) {
+        for (const corridor of corridors) {
+            for (const { x, y } of corridor.path) {
+                ctx.fillStyle = `hsl(${corridor.id * 30}, 100%, 50%, ${options.drawGrid ? 0.5 : 1})`
+                ctx.fillRect(x + _drawOffset.x, y + _drawOffset.y, 1, 1)
+            }
+        }
+    }
+}
+
+const controls = document.querySelector('#controls')
+
+// add draw rooms checkbox
+const createControl = (label, controlElement, controls) => {
+    const control = document.createElement('div')
+    control.className = 'control'
+
+    const labelElement = document.createElement('label')
+    labelElement.textContent = label
+    control.appendChild(labelElement)
+
+    control.appendChild(controlElement)
+
+    controls.appendChild(control)
+}
+
+const drawGridCheckbox = document.createElement('input')
+drawGridCheckbox.type = 'checkbox'
+drawGridCheckbox.checked = true
+drawGridCheckbox.addEventListener('change', () => {
+    options.drawGrid = drawGridCheckbox.checked
+    run()
+})
+createControl('Draw Grid', drawGridCheckbox, controls)
+
+const drawRoomsCheckbox = document.createElement('input')
+drawRoomsCheckbox.type = 'checkbox'
+drawRoomsCheckbox.checked = options.drawRooms
+drawRoomsCheckbox.addEventListener('change', () => {
+    options.drawRooms = drawRoomsCheckbox.checked
+    run()
+})
+createControl('Draw Rooms', drawRoomsCheckbox, controls)
+
+const drawBSPCheckbox = document.createElement('input')
+drawBSPCheckbox.type = 'checkbox'
+drawBSPCheckbox.checked = options.drawBSP
+drawBSPCheckbox.addEventListener('change', () => {
+    options.drawBSP = drawBSPCheckbox.checked
+    run()
+})
+createControl('Draw BSP', drawBSPCheckbox, controls)
+
+const drawCorridorsCheckbox = document.createElement('input')
+drawCorridorsCheckbox.type = 'checkbox'
+drawCorridorsCheckbox.checked = options.drawCorridors
+drawCorridorsCheckbox.addEventListener('change', () => {
+    options.drawCorridors = drawCorridorsCheckbox.checked
+    run()
+})
+createControl('Draw Corridors', drawCorridorsCheckbox, controls)
+
+const splitIterationsInput = document.createElement('input')
+splitIterationsInput.type = 'number'
+splitIterationsInput.value = options.splitIterations
+splitIterationsInput.addEventListener('change', () => {
+    options.splitIterations = parseInt(splitIterationsInput.value)
+    run()
+})
+createControl('Split Iterations', splitIterationsInput, controls)
+
+const minRoomSizeInput = document.createElement('input')
+minRoomSizeInput.type = 'number'
+minRoomSizeInput.value = options.minRoomSize
+minRoomSizeInput.addEventListener('change', () => {
+    options.minRoomSize = parseInt(minRoomSizeInput.value)
+    run()
+})
+createControl('Min Room Size', minRoomSizeInput, controls)
+
+const seedInput = document.createElement('input')
+seedInput.type = 'number'
+seedInput.value = options.seed
+seedInput.addEventListener('change', () => {
+    options.seed = parseInt(seedInput.value)
+    run()
+})
+createControl('Seed', seedInput, controls)
+
+run()

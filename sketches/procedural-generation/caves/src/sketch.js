@@ -161,8 +161,6 @@ const CELL_COLORS = {
 
 const UNEXPLORED_COLOR = '#f00'
 
-const CELL_SIZE = 8
-
 /**
  * @param {HTMLCanvasElement} canvas
  * @param {Grid} grid
@@ -171,14 +169,15 @@ function draw(canvas, grid) {
     // set the canvas size based on the chunks
     const [min, max] = grid.getChunkBounds()
 
-    canvas.width = (max[0] - min[0] + 1) * CHUNK_SIZE
-    canvas.height = (max[1] - min[1] + 1) * CHUNK_SIZE
+    canvas.width = max[0] - min[0] + (1 * CHUNK_SIZE)
+    canvas.height = max[1] - min[1] + (1 * CHUNK_SIZE)
 
     const ctx = canvas.getContext('2d')
 
-    // calculate the offset to center the grid on the canvas
-    const offsetX = -min.x + (canvas.width / CELL_SIZE - (max.x - min.x + CHUNK_SIZE)) / 2
-    const offsetY = -min.y + (canvas.height / CELL_SIZE - (max.y - min.y + CHUNK_SIZE)) / 2
+    // calculate the offset to put the top-left corner of the grid in the top-left corner of the canvas
+    const _drawOffset = new Vector2(
+        -min.x, -min.y
+    )
 
     const _drawCursor = new Vector2()
     const _chunkOffset = new Vector2()
@@ -189,12 +188,11 @@ function draw(canvas, grid) {
         for (let i = 0; i < chunk.data.length; i++) {
             getChunkPositionFromIndex(i, _drawCursor)
             _drawCursor.add(_chunkOffset)
+            _drawCursor.add(_drawOffset)
 
-            const x = _drawCursor.x
-            const y = _drawCursor.y
             const value = chunk.data[i]
             ctx.fillStyle = CELL_COLORS[value] ?? UNEXPLORED_COLOR
-            ctx.fillRect((x + offsetX) * CELL_SIZE, (y + offsetY) * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+            ctx.fillRect(_drawCursor.x, _drawCursor.y, 1, 1)
         }
     }
 }

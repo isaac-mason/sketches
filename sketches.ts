@@ -32,6 +32,7 @@ export const sketchesOrder = [
     'p2-es/marching-cubes-goo',
     'p2-es/pixelated-text',
     'procedural-generation/caves',
+    'procedural-generation/bsp-dungeon',
     'procedural-generation/l-systems',
     'procedural-generation/diamond-square-heightmap',
     'procedural-generation/pixelated-planet',

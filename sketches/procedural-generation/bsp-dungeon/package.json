@@ -3,7 +3,6 @@
     "packageManager": "yarn@4.1.1",
     "private": true,
     "sketch": {
-        "hidden": true,
         "title": "Procedural Generation - BSP Dungeon",
         "tags": [
             "procedural-generation"

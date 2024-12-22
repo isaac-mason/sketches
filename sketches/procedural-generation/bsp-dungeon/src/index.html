@@ -7,17 +7,52 @@
     </head>
     <body>
         <div id="app"></div>
+        <div id="controls"></div>
     </body>
     <script src="./sketch.js" type="module"></script>
     <style>
         body {
+            width: 100vw;
+            height: 100vh;
             margin: 0;
             padding: 0;
-            background: #000;
+            background: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         canvas {
-            width: 100vw;
+            width: 100vh;
+            max-width: 45em;
             object-fit: cover;
+            image-rendering: pixelated;
+        }
+        #controls {
+            position: fixed;
+            bottom: 1em;
+            left: 1em;
+            padding: 1em;
+            gap: 1em;
+            width: 20em;
+            display: flex;
+            flex-direction: column;
+            font-family: monospace;
+            opacity: 0.4;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+        }
+        #controls:hover {
+            opacity: 1;
+        }
+        #controls .control {
+            display: flex;
+            gap: 1em;
+            align-items: center;
+            justify-content: space-between;
+        }
+        #controls .control label {
+            display: block;
+            margin-bottom: 0.5em;
         }
     </style>
 </html>
