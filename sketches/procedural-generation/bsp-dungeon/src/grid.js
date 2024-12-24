@@ -69,7 +69,7 @@ export class Grid {
     }
 
     /**
-     * @returns {[Vector2, Vector2]}
+     * @returns {{ min: Vector2, max: Vector2 }}
      */
     getChunkBounds() {
         const min = new Vector2()
@@ -86,6 +86,27 @@ export class Grid {
         min.multiplyScalar(CHUNK_SIZE)
         max.multiplyScalar(CHUNK_SIZE)
 
-        return [min, max]
+        return { min, max }
+    }
+
+    /**
+     * @returns {{ min: Vector2, max: Vector2 }}
+     */
+    getBounds() {
+        const { min, max } = this.getChunkBounds()
+
+        return {
+            min: new Vector2(min[0], min[1]),
+            max: new Vector2(max[0] + CHUNK_SIZE - 1, max[1] + CHUNK_SIZE - 1),
+        }
+    }
+
+    /**
+     * @returns {Vector2}
+     */
+    getSize() {
+        const { min, max } = this.getChunkBounds()
+
+        return new Vector2(max[0] - min[0] + 1 * CHUNK_SIZE, max[1] - min[1] + 1 * CHUNK_SIZE)
     }
 }

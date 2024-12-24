@@ -1,6 +1,6 @@
-import { Vector2 } from './vector.js'
+import { CHUNK_SIZE, getChunkPositionFromIndex as chunkIndexToPosition, Grid } from './grid.js'
 import { createRandomGenerator } from './random.js'
-import { CHUNK_SIZE, getChunkPositionFromIndex, Grid } from './grid.js'
+import { Vector2 } from './vector.js'
 
 const TILE_ROOM = 0
 const TILE_CORRIDOR = 1
@@ -23,6 +23,7 @@ const TILE_CORRIDOR = 1
  *   y: number,
  *   width: number,
  *   height: number,
+ *   node: BSPNode
  * }} Room
  */
 
@@ -35,6 +36,14 @@ const TILE_CORRIDOR = 1
  * }} Corridor
  */
 
+/**
+ * @param {number} value
+ * @param {number} fromMin
+ * @param {number} fromMax
+ * @param {number} toMin
+ * @param {number} toMax
+ * @returns {number}
+ */
 const remap = (value, fromMin, fromMax, toMin, toMax) => {
     return ((value - fromMin) / (fromMax - fromMin)) * (toMax - toMin) + toMin
 }
@@ -100,6 +109,32 @@ const getLeafNodes = (node) => {
     return node.children.flatMap(getLeafNodes)
 }
 
+/**
+ * @param {BSPNode} node
+ * @returns {BSPNode[]}
+ */
+const getBranches = (node) => {
+    const branches = []
+
+    if (node.children.length === 0) {
+        return branches
+    }
+
+    if (node.children.length === 2) {
+        branches.push([node.children[0], node.children[1]])
+
+        branches.push(...getBranches(node.children[0]))
+        branches.push(...getBranches(node.children[1]))
+    }
+
+    return branches
+}
+
+/**
+ * @param {BSPNode[]} leafNodes
+ * @param {() => number} random
+ * @returns {Room[]}
+ */
 const createRooms = (leafNodes, random) => {
     /**
      * @type {Room[]}
@@ -146,55 +181,128 @@ const createRooms = (leafNodes, random) => {
     return rooms
 }
 
-const createCorridors = (rooms, random) => {
+/**
+ * @param {BSPNode} bsp
+ * @param {Room[]} rooms
+ * @param {() => number} random
+ * @returns
+ */
+const createCorridors = (bsp) => {
     const corridors = []
 
-    for (let i = 0; i < rooms.length - 1; i++) {
-        const roomA = rooms[i]
-        const roomB = rooms[i + 1]
-
-        // does a corridor already exist between these rooms?
-        if (
-            corridors.some(
-                (c) => (c.roomA === roomA.id && c.roomB === roomB.id) || (c.roomA === roomB.id && c.roomB === roomA.id),
-            )
-        ) {
-            continue
-        }
-
+    const connectLeaves = (leaf1, leaf2) => {
         const corridor = {
-            id: i,
-            roomA: roomA.id,
-            roomB: roomB.id,
+            id: corridors.length,
             path: [],
         }
 
-        const x1 = roomA.x + Math.floor(roomA.width / 2)
-        const y1 = roomA.y + Math.floor(roomA.height / 2)
+        corridors.push(corridor)
 
-        const x2 = roomB.x + Math.floor(roomB.width / 2)
-        const y2 = roomB.y + Math.floor(roomB.height / 2)
-
-        let x = x1
-        let y = y1
-
-        while (x !== x2 || y !== y2) {
-            const dx = Math.sign(x2 - x)
-            const dy = Math.sign(y2 - y)
-
-            if (x !== x2 && random() > 0.5) {
-                x += dx
-            } else if (y !== y2) {
-                y += dy
-            }
-
-            corridor.path.push({ x, y })
+        const center1 = {
+            x: Math.floor(leaf1.x + leaf1.width / 2),
+            y: Math.floor(leaf1.y + leaf1.height / 2),
+        }
+        const center2 = {
+            x: Math.floor(leaf2.x + leaf2.width / 2),
+            y: Math.floor(leaf2.y + leaf2.height / 2),
         }
 
-        corridors.push(corridor)
+        let x = Math.min(center1.x, center2.x)
+        let y = Math.min(center1.y, center2.y)
+        let w = 1
+        let h = 1
+
+        const horizontal = Math.abs(center1.y - center2.y) > Math.abs(center1.x - center2.x)
+
+        if (horizontal) {
+            x -= Math.floor(w / 2) + 1
+            h = Math.abs(center1.y - center2.y)
+        } else {
+            y -= Math.floor(h / 2) + 1
+            w = Math.abs(center1.x - center2.x)
+        }
+
+        x = Math.max(0, x)
+        y = Math.max(0, y)
+
+        for (let i = x; i < x + w; i++) {
+            for (let j = y; j < y + h; j++) {
+                corridor.path.push({ x: i, y: j })
+            }
+        }
+    }
+
+    const branches = getBranches(bsp)
+
+    for (const [a, b] of branches) {
+        connectLeaves(a, b)
     }
 
     return corridors
+}
+
+/**
+ * @param {Grid} grid
+ * @param {Room[]} rooms
+ */
+const addRoomsToGrid = (grid, rooms) => {
+    for (const room of rooms) {
+        for (let y = room.y; y < room.y + room.height; y++) {
+            for (let x = room.x; x < room.x + room.width; x++) {
+                grid.set(x, y, TILE_ROOM)
+            }
+        }
+    }
+}
+
+/**
+ * @param {Grid} grid
+ * @param {Corridor[]} corridors
+ */
+const addCorridorsToGrid = (grid, corridors) => {
+    for (const corridor of corridors) {
+        for (const { x, y } of corridor.path) {
+            if (grid.get(x, y) === undefined) {
+                grid.set(x, y, TILE_CORRIDOR)
+            }
+        }
+    }
+}
+
+/**
+ * @param {Grid} grid
+ */
+const clearDeadends = (grid) => {
+    let done = false
+
+    const cursor = new Vector2()
+    const chunkOffset = new Vector2()
+
+    while (!done) {
+        done = true
+
+        for (const chunk of Object.values(grid.chunks)) {
+            chunkOffset.copy(chunk.chunkPosition).multiplyScalar(CHUNK_SIZE)
+
+            for (let i = 0; i < chunk.data.length; i++) {
+                if (chunk.data[i] !== TILE_CORRIDOR) continue
+
+                chunkIndexToPosition(i, cursor)
+                cursor.add(chunkOffset)
+
+                let undefinedCount = 0
+                if (grid.get(cursor.x, cursor.y - 1) === undefined) undefinedCount += 1
+                if (grid.get(cursor.x, cursor.y + 1) === undefined) undefinedCount += 1
+                if (grid.get(cursor.x - 1, cursor.y) === undefined) undefinedCount += 1
+                if (grid.get(cursor.x + 1, cursor.y) === undefined) undefinedCount += 1
+
+                if (undefinedCount === 3) {
+                    grid.set(cursor.x, cursor.y, undefined)
+                    done = false
+                }
+            }
+        }
+    }
 }
 
 /**
@@ -207,45 +315,23 @@ const createCorridors = (rooms, random) => {
 const generate = (seed, bsp, splitIterations, minRoomSize) => {
     const random = createRandomGenerator(seed)
 
-    // split the bsp nodes to create rooms
     for (let i = 0; i < splitIterations; i++) {
         splitBSPNode(bsp, random, minRoomSize)
     }
 
-    // create rooms using bsp leaf nodes
     const leafNodes = getLeafNodes(bsp)
 
-    /**
-     * @type {Room[]}
-     */
     const rooms = createRooms(leafNodes, random)
 
-    // create corridors between rooms with a drunken walk
-    const corridors = createCorridors(rooms, random)
+    const corridors = createCorridors(bsp)
 
-    // create a grid map of the dungeon rooms and corridors
     const grid = new Grid()
 
-    for (const room of rooms) {
-        for (let y = room.y; y < room.y + room.height; y++) {
-            for (let x = room.x; x < room.x + room.width; x++) {
-                grid.set(x, y, TILE_ROOM)
-            }
-        }
-    }
+    addRoomsToGrid(grid, rooms)
 
-    for (const corridor of corridors) {
-        for (const { x, y } of corridor.path) {
-            // 3x3 brush
-            for (let dy = -1; dy <= 1; dy++) {
-                for (let dx = -1; dx <= 1; dx++) {
-                    if (grid.get(x + dx, y + dy) === undefined) {
-                        grid.set(x + dx, y + dy, TILE_CORRIDOR)
-                    }
-                }
-            }
-        }
-    }
+    addCorridorsToGrid(grid, corridors)
+
+    clearDeadends(grid)
 
     return {
         grid,
@@ -295,14 +381,15 @@ const CELL_COLORS = {
 }
 
 function draw(grid, rooms, corridors, options) {
-    const [min, max] = grid.getChunkBounds()
+    const size = grid.getSize()
+    const bounds = grid.getBounds()
 
-    canvas.width = max[0] - min[0] + 1 * CHUNK_SIZE
-    canvas.height = max[1] - min[1] + 1 * CHUNK_SIZE
+    canvas.width = size.x
+    canvas.height = size.y
 
     const ctx = canvas.getContext('2d')
 
-    const _drawOffset = new Vector2(-min.x, -min.y)
+    const _drawOffset = new Vector2(-bounds.min.x, -bounds.min.y)
     const _chunkOffset = new Vector2()
     const _drawCursor = new Vector2()
 
@@ -311,7 +398,7 @@ function draw(grid, rooms, corridors, options) {
             _chunkOffset.copy(chunk.chunkPosition).multiplyScalar(CHUNK_SIZE)
 
             for (let i = 0; i < chunk.data.length; i++) {
-                getChunkPositionFromIndex(i, _drawCursor)
+                chunkIndexToPosition(i, _drawCursor)
                 _drawCursor.add(_chunkOffset)
                 _drawCursor.add(_drawOffset)
 
