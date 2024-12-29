@@ -2309,6 +2309,26 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@sketches/meowtchmaker@workspace:sketches/meowtchmaker":
+  version: 0.0.0-use.local
+  resolution: "@sketches/meowtchmaker@workspace:sketches/meowtchmaker"
+  dependencies:
+    "@react-three/drei": "npm:^9.116.3"
+    "@react-three/fiber": "npm:^8.17.10"
+    "@types/react": "npm:^18.3.11"
+    "@types/react-dom": "npm:^18.3.1"
+    "@types/three": "npm:^0.170.0"
+    arancini: "npm:^8.0.0"
+    p2-es: "npm:^1.2.3"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.171.0"
+    typescript: "npm:^5.6.2"
+    vite: "npm:^5.4.9"
+    zustand: "npm:^5.0.2"
+  languageName: unknown
+  linkType: soft
+
 "@sketches/metropolis@workspace:sketches/voxels/simple-voxels/metropolis":
   version: 0.0.0-use.local
   resolution: "@sketches/metropolis@workspace:sketches/voxels/simple-voxels/metropolis"
@@ -9769,6 +9789,27 @@ __metadata:
     use-sync-external-store:
       optional: true
   checksum: 10/9ee5b2483213157c519be2647e873fb21962b4e6e521031916e8969552379dd03348057c9dfd030eb1e7ef98a945a1f99f9aa9badda5d9673eb4004e354dc2dc
+  languageName: node
+  linkType: hard
+
+"zustand@npm:^5.0.2":
+  version: 5.0.2
+  resolution: "zustand@npm:5.0.2"
+  peerDependencies:
+    "@types/react": ">=18.0.0"
+    immer: ">=9.0.6"
+    react: ">=18.0.0"
+    use-sync-external-store: ">=1.2.0"
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    immer:
+      optional: true
+    react:
+      optional: true
+    use-sync-external-store:
+      optional: true
+  checksum: 10/9fb60796b9770dcc3f78dd794e7f424ff735e5676784cbc9726761037613942b62470b24a9ca9e98534ee4369a3b5429be570ff34281cb3c9d6d4e8df559ec3f
   languageName: node
   linkType: hard
 

@@ -375,7 +375,7 @@ document.body.appendChild(canvas)
 
 const UNEXPLORED_COLOR = '#333'
 
-const CELL_COLORS = {
+const TILE_COLORS = {
     [TILE_ROOM]: '#999',
     [TILE_CORRIDOR]: '#eee',
 }
@@ -403,7 +403,7 @@ function draw(grid, rooms, corridors, options) {
                 _drawCursor.add(_drawOffset)
 
                 const value = chunk.data[i]
-                ctx.fillStyle = CELL_COLORS[value] ?? UNEXPLORED_COLOR
+                ctx.fillStyle = TILE_COLORS[value] ?? UNEXPLORED_COLOR
                 ctx.fillRect(_drawCursor.x, _drawCursor.y, 1, 1)
             }
         }
