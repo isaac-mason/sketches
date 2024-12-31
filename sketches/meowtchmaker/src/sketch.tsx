@@ -1,7 +1,7 @@
 import { WebGPUCanvas } from '@/common/components/webgpu-canvas'
 import sunsetEnvironment from '@pmndrs/assets/hdri/sunset.exr'
-import { Environment, Html, Hud, PerspectiveCamera } from '@react-three/drei'
-import { useFrame, useThree } from '@react-three/fiber'
+import { Environment, PerspectiveCamera } from '@react-three/drei'
+import { useFrame } from '@react-three/fiber'
 import { With, World } from 'arancini'
 import * as p2 from 'p2-es'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -24,10 +24,16 @@ const ignoreBodyForPlacementCheck = (body: p2.Body) => {
 }
 
 const _direction = new THREE.Vector3()
+const _velocity = new THREE.Vector3()
 const _position = new THREE.Vector3()
+const _offset = new THREE.Vector3()
+const _euler = new THREE.Euler()
+const _quaternion = new THREE.Quaternion()
 const _matrix4 = new THREE.Matrix4()
 const _cameraPositionTarget = new THREE.Vector3()
 const _cameraLookAtTarget = new THREE.Vector3()
+
+const VECTOR_UP = new THREE.Vector3(0, 1, 0)
 
 const MINGLING_CAT_TYPES = ['blackCat', 'christmasCat', 'classicCat', 'grayCat', 'triCat']
 
@@ -129,6 +135,7 @@ type AudioAssetId = keyof typeof AUDIO_ASSETS
 
 type CharacterInput = {
     wishDirection: [number, number]
+    boostDown?: boolean
 }
 
 type CharacterMovement = {
@@ -136,6 +143,9 @@ type CharacterMovement = {
     stopSpeed: number
     surfaceFriction: number
     acceleration: number
+
+    boostChargeTime?: number
+    lastBoostTime?: number
 }
 
 type EntityType = {
@@ -178,6 +188,7 @@ const createPlayer = (world: World, position: [number, number]) => {
     const playerBody = new p2.Body({
         mass: 1,
         type: p2.Body.DYNAMIC,
+        fixedRotation: true,
         position,
     })
 
@@ -244,7 +255,9 @@ const createMinglingCats = (world: World, physics: p2.World) => {
 const createCat = (world: World, position: [number, number]) => {
     const body = new p2.Body({
         mass: 1,
+        type: p2.Body.DYNAMIC,
         position,
+        fixedRotation: true,
     })
 
     const shape = new p2.Circle({ radius: 0.5 })
@@ -497,10 +510,8 @@ const init = (assets: Assets) => {
 
     /* player input */
     const input = {
-        left: false,
-        right: false,
-        up: false,
-        down: false,
+        direction: [0, 0],
+        boostDown: false,
     }
 
     /* audio listener */
@@ -589,15 +600,17 @@ const updatePlayerInput = (state: GameState) => {
     const input = state.input
 
     const wishDirection = player.input.wishDirection
-    wishDirection[0] = 0
-    wishDirection[1] = 0
 
-    if (input.left) wishDirection[0] -= 1
-    if (input.right) wishDirection[0] += 1
-    if (input.up) wishDirection[1] -= 1
-    if (input.down) wishDirection[1] += 1
+    wishDirection[0] = input.direction[0]
+    wishDirection[1] = input.direction[1]
+
+    const length = p2.vec2.length(wishDirection)
 
     p2.vec2.normalize(wishDirection, wishDirection)
+
+    p2.vec2.scale(wishDirection, wishDirection, length)
+
+    player.input.boostDown = input.boostDown
 }
 
 const updateStatusEffects = (state: GameState, delta: number) => {
@@ -667,6 +680,31 @@ const updateCharacterMovement = (state: GameState, delta: number) => {
         p2.vec2.scale(velocityChange, velocityChange, addSpeed)
 
         p2.vec2.add(body.velocity, body.velocity, velocityChange)
+
+        if (requestingMovement) {
+            body.angle = Math.atan2(body.velocity[1], body.velocity[0])
+        }
+
+        if (
+            entity.input.boostDown &&
+            (entity.movement.boostChargeTime !== undefined || state.time > (entity.movement.lastBoostTime ?? 0) + 0.2)
+        ) {
+            entity.movement.boostChargeTime = (entity.movement.boostChargeTime ?? 0) + delta
+        } else {
+            if (entity.movement.boostChargeTime) {
+                const addBoostVelocity =
+                    10 + THREE.MathUtils.clamp(THREE.MathUtils.mapLinear(entity.movement.boostChargeTime, 0, 3, 10, 150), 10, 150)
+
+                const boostVelocity = [Math.cos(body.angle) * addBoostVelocity, Math.sin(body.angle) * addBoostVelocity]
+
+                p2.vec2.add(body.velocity, body.velocity, boostVelocity)
+
+                spawnBoostParticles(state, entity.transform.position, entity.movement.boostChargeTime)
+
+                entity.movement.boostChargeTime = undefined
+                entity.movement.lastBoostTime = state.time
+            }
+        }
     }
 }
 
@@ -697,10 +735,26 @@ const updateCatTransforms = (state: GameState) => {
 
         const velocity = body.velocity
 
+        const facingLeft = body.angle > Math.PI / 2 || body.angle < -Math.PI / 2
+
         if (Math.abs(velocity[0]) > 0.1 || Math.abs(velocity[1]) > 0.1) {
             transform.rotation.y = velocity[0] > 0 ? 0.2 : -0.2
 
-            transform.scale.x = velocity[0] > 0 ? 1 : -1
+            transform.scale.x = facingLeft ? -1 : 1
+        }
+
+        transform.rotation.z = 0
+
+        if (entity.movement?.boostChargeTime) {
+            const lowAngle = 0
+            const highAngle = Math.PI / 4
+            const angle = THREE.MathUtils.clamp(
+                THREE.MathUtils.mapLinear(entity.movement.boostChargeTime, 0, 3, lowAngle, highAngle),
+                lowAngle,
+                highAngle,
+            )
+
+            transform.rotation.z = angle * (facingLeft ? -1 : 1)
         }
     }
 }
@@ -985,12 +1039,12 @@ const updateLifetime = (state: GameState, delta: number) => {
     }
 }
 
+const N_CONFETTI = 15
 const CONFETTI_COLORS = [0xff0000, 0x00ff00, 0x9999ff, 0xffff00, 0xff00ff, 0x00ffff]
 
 const spawnConfetti = (state: GameState, position: THREE.Vector3) => {
-    for (let i = 0; i < 10; i++) {
-        _direction.set(Math.random() - 0.5, 0.5 + Math.random(), Math.random() - 0.5).normalize()
-        _direction.normalize()
+    for (let i = 0; i < N_CONFETTI; i++) {
+        const confettiDirection = _direction.set(Math.random() - 0.5, Math.random(), Math.random() - 0.5).normalize()
 
         const color = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)]
 
@@ -1000,10 +1054,35 @@ const spawnConfetti = (state: GameState, position: THREE.Vector3) => {
             position.x,
             position.y,
             position.z,
-            _direction.x,
-            _direction.y,
-            _direction.z,
+            confettiDirection.x,
+            confettiDirection.y,
+            confettiDirection.z,
             color,
+        )
+    }
+}
+
+const BOOST_COLORS = [0xff0000, 0x00ff00, 0x9999ff, 0xffff00, 0xff00ff, 0x00ffff]
+
+const spawnBoostParticles = (state: GameState, position: THREE.Vector3, boostChargeTime: number) => {
+    const boostColor = BOOST_COLORS[Math.floor(Math.random() * BOOST_COLORS.length)]
+
+    const particles = Math.floor(THREE.MathUtils.clamp(THREE.MathUtils.mapLinear(boostChargeTime, 0, 1, 5, 25), 5, 25))
+
+    for (let i = 0; i < particles; i++) {
+        const angle = Math.random() * Math.PI * 2
+        const boostDirection = _direction.set(Math.cos(angle), 0, Math.sin(angle))
+
+        Particles.add(
+            state.particles,
+            Particles.PARTICLE_TYPE_PHYSICAL,
+            position.x,
+            position.y,
+            position.z,
+            boostDirection.x,
+            boostDirection.y,
+            boostDirection.z,
+            boostColor,
         )
     }
 }
@@ -1063,30 +1142,66 @@ const updateTrails = (state: GameState) => {
             continue
         }
 
-        const now = performance.now()
-
         const particles = THREE.MathUtils.clamp(THREE.MathUtils.mapLinear(speed, 0, 10, 1, 5), 1, 5)
-        const cooldown = THREE.MathUtils.clamp(THREE.MathUtils.mapLinear(speed, 0, 10, 500, 100), 100, 500)
+        const cooldown = THREE.MathUtils.clamp(THREE.MathUtils.mapLinear(speed, 0, 10, 0.5, 0.1), 0.05, 0.5)
 
-        if (now > entity.trail.lastSpawnTime + cooldown) {
-            entity.trail.lastSpawnTime = now
+        const excitingSpeedThreshold = 12
+        const excitingParticles = speed > excitingSpeedThreshold
+
+        if (state.time > entity.trail.lastSpawnTime + cooldown) {
+            entity.trail.lastSpawnTime = state.time
 
             for (let i = 0; i < particles; i++) {
-                const vx = -body.velocity[0] * 0.02 + (0.5 - Math.random()) * 0.1
-                const vz = -body.velocity[1] * 0.02 + (0.5 - Math.random()) * 0.1
-                const vy = 0.2
+                let vx = -body.velocity[0] * 0.02 + (0.5 - Math.random()) * 0.1
+                let vz = -body.velocity[1] * 0.02 + (0.5 - Math.random()) * 0.1
+                let vy = 0.1
+
+                if (excitingParticles) {
+                    vx *= 2
+                    vz *= 2
+                    vy += Math.random() * 1
+                }
 
                 Particles.add(
                     state.particles,
                     Particles.PARTICLE_TYPE_PHYSICAL,
                     body.position[0],
-                    1,
+                    0.3,
                     body.position[1],
                     vx,
                     vy,
                     vz,
                     0xffffff,
                 )
+            }
+
+            if (excitingParticles) {
+                for (let i = 0; i < 15; i++) {
+                    const angle = (i / 15) * Math.PI * 2
+                    const radius = 0.5
+
+                    const offset = _offset.set(Math.cos(angle) * radius, Math.sin(angle) * radius, 0)
+
+                    _velocity.set(body.velocity[0], 0, body.velocity[1]).multiplyScalar(-1).multiplyScalar(0.1)
+
+                    const angleToVelocity = Math.atan2(body.velocity[0], body.velocity[1])
+                    offset.applyAxisAngle(VECTOR_UP, angleToVelocity)
+
+                    const position = _position.set(body.position[0], 0.3, body.position[1]).add(offset)
+
+                    Particles.add(
+                        state.particles,
+                        Particles.PARTICLE_TYPE_DECAY,
+                        position.x,
+                        position.y,
+                        position.z,
+                        _velocity.x,
+                        _velocity.y,
+                        _velocity.z,
+                        0xffffff,
+                        0.3,
+                    )
+                }
             }
         }
     }
@@ -1135,57 +1250,77 @@ const update = (
 }
 
 const GameUI = () => {
-    const state = useGame()
-
     const countdownRef = useRef<HTMLDivElement>(null)
     const scoreRef = useRef<HTMLDivElement>(null)
 
-    const camera = useThree((state) => state.camera)
-    const viewport = useThree((state) => state.viewport)
-
-    const [height, setHeight] = useState(0)
+    const state = useGame()
 
     useEffect(() => {
-        const targetViewport = viewport.getCurrentViewport(camera, new THREE.Vector3(0, 0, 0))
-        setHeight(targetViewport.height)
-    }, [viewport])
+        if (!state) return
 
-    useFrame(() => {
-        if (!countdownRef.current || !scoreRef.current) return
+        const update = () => {
+            if (!countdownRef.current || !scoreRef.current) return
 
-        if (state.game.gameState === GAME_STATE_PLAYING) {
-            scoreRef.current.innerText = `${state.game.score.toString()}/${N_MEOWTCHES} Meoewtches!`
-            countdownRef.current.innerText = `${Math.ceil(state.game.timeRemaining)}s until the new year!`
-        } else if (state.game.gameState === GAME_STATE_MENU) {
-            scoreRef.current.innerText = `Meowtchmake for new years kisses!`
-            countdownRef.current.innerText = `Make a match to start the game`
-        } else {
-            scoreRef.current.innerText = `Happy new year! You made ${state.game.score} Meoewtches!`
-            countdownRef.current.innerText = `Press [R] to restart!`
+            if (state.game.gameState === GAME_STATE_PLAYING) {
+                scoreRef.current.innerText = `${state.game.score.toString()}/${N_MEOWTCHES} Meoewtches!`
+                countdownRef.current.innerText = `${Math.ceil(state.game.timeRemaining)}s until the new year!`
+            } else if (state.game.gameState === GAME_STATE_MENU) {
+                scoreRef.current.innerText = `Meowtchmake for new years kisses!`
+                countdownRef.current.innerText = `Make a match to start the game`
+            } else {
+                scoreRef.current.innerText = `Happy new year! You made ${state.game.score} Meoewtches!`
+                countdownRef.current.innerText = `Press [R] to restart!`
+            }
         }
-    })
+
+        const interval = setInterval(update, 1000 / 30)
+
+        return () => clearInterval(interval)
+    }, [state])
 
     return (
-        <Html position={[0, -height / 2 + 1, 0]} center>
+        <div
+            style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                fontFamily: 'monospace',
+                lineHeight: '1.5',
+                fontWeight: 600,
+                color: '#fff',
+                textShadow: '1px 1px 0px #333',
+            }}
+        >
             <div
                 style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
                     display: 'flex',
                     flexDirection: 'column',
-                    alignItems: 'center',
-                    width: '100vw',
-                    fontFamily: 'monospace',
-                    textAlign: 'center',
-                    fontWeight: 600,
-                    fontSize: '2.5rem',
-                    color: '#333',
-                    textShadow: '2px 2px 0px #fff',
+                    alignItems: 'flex-start',
+                    padding: '16px',
+                    textAlign: 'left',
+                    fontSize: '1.5rem',
                 }}
             >
-                <div ref={scoreRef} style={{ padding: '0.2em' }}></div>
+                <div ref={scoreRef}></div>
 
-                <div ref={countdownRef} style={{ padding: '0.2em' }}></div>
+                <div ref={countdownRef}></div>
+
+                <div
+                    style={{
+                        fontSize: '1rem',
+                        paddingTop: '8px',
+                    }}
+                >
+                    <div>move - WASD</div>
+                    <div>boost - SPACE</div>
+                </div>
             </div>
-        </Html>
+        </div>
     )
 }
 
@@ -1234,6 +1369,73 @@ const Ground = () => {
 
 const useGame = create<GameState>(() => null!)
 
+const useKeyboardInput = (state: GameState) => {
+    useEffect(() => {
+        if (!state) return
+
+        const input = state.input
+
+        const keyboardState = {
+            up: false,
+            down: false,
+            left: false,
+            right: false,
+            boost: false,
+        }
+
+        const updateInput = () => {
+            input.direction[0] = 0
+            input.direction[1] = 0
+
+            if (keyboardState.up) input.direction[1] -= 1
+            if (keyboardState.down) input.direction[1] += 1
+            if (keyboardState.left) input.direction[0] -= 1
+            if (keyboardState.right) input.direction[0] += 1
+            input.boostDown = keyboardState.boost
+        }
+
+        const keydown = (e: KeyboardEvent) => {
+            if (e.key === 'a') keyboardState.left = true
+            if (e.key === 'd') keyboardState.right = true
+            if (e.key === 'w') keyboardState.up = true
+            if (e.key === 's') keyboardState.down = true
+            if (e.key === ' ') keyboardState.boost = true
+
+            updateInput()
+        }
+
+        const keyup = (e: KeyboardEvent) => {
+            if (e.key === 'a') keyboardState.left = false
+            if (e.key === 'd') keyboardState.right = false
+            if (e.key === 'w') keyboardState.up = false
+            if (e.key === 's') keyboardState.down = false
+            if (e.key === ' ') keyboardState.boost = false
+
+            updateInput()
+        }
+
+        window.addEventListener('keydown', keydown)
+        window.addEventListener('keyup', keyup)
+
+        return () => {
+            window.removeEventListener('keydown', keydown)
+            window.removeEventListener('keyup', keyup)
+        }
+    }, [state])
+}
+
+const useBackgroundMusic = (state: GameState, assets: Assets) => {
+    useEffect(() => {
+        if (!state) return
+
+        const audio = playLoopingAudio(state, assets, 'terrible_cat_theme')
+
+        return () => {
+            audio.stop()
+        }
+    }, [state, assets])
+}
+
 const Game = () => {
     const assets = suspend(loadAssets, ['_assets'])
 
@@ -1249,44 +1451,6 @@ const Game = () => {
         }
     }, [])
 
-    useEffect(() => {
-        if (!state) return
-
-        const audio = playLoopingAudio(state, assets, 'terrible_cat_theme')
-
-        return () => {
-            audio.stop()
-        }
-    }, [state, assets])
-
-    useEffect(() => {
-        if (!state) return
-
-        const input = state.input
-
-        const keydown = (e: KeyboardEvent) => {
-            if (e.key === 'a') input.left = true
-            if (e.key === 'd') input.right = true
-            if (e.key === 'w') input.up = true
-            if (e.key === 's') input.down = true
-        }
-
-        const keyup = (e: KeyboardEvent) => {
-            if (e.key === 'a') input.left = false
-            if (e.key === 'd') input.right = false
-            if (e.key === 'w') input.up = false
-            if (e.key === 's') input.down = false
-        }
-
-        window.addEventListener('keydown', keydown)
-        window.addEventListener('keyup', keyup)
-
-        return () => {
-            window.removeEventListener('keydown', keydown)
-            window.removeEventListener('keyup', keyup)
-        }
-    }, [state])
-
     useFrame(({ gl, scene, camera }, delta) => {
         if (!state) return
 
@@ -1294,6 +1458,10 @@ const Game = () => {
 
         update(state, assets, gl as THREE.Renderer as WebGPURenderer, scene, camera, clampedDelta)
     }, 1)
+
+    useKeyboardInput(state)
+
+    useBackgroundMusic(state, assets)
 
     if (!state) return null
 
@@ -1310,12 +1478,6 @@ const Game = () => {
             <Environment files={sunsetEnvironment} />
             <ambientLight intensity={0.5} />
             <pointLight position={[5, 5, 5]} intensity={1} />
-
-            <Hud>
-                <PerspectiveCamera makeDefault position={[0, 0, 10]} />
-
-                <GameUI />
-            </Hud>
         </>
     )
 }
@@ -1338,10 +1500,14 @@ export function Sketch() {
     })
 
     return (
-        <WebGPUCanvas camera={{ position: [2, 1, 2] }}>
-            <Game key={gameId} />
+        <>
+            <WebGPUCanvas camera={{ position: [2, 1, 2] }}>
+                <Game key={gameId} />
 
-            <PerspectiveCamera makeDefault position={[0, 10, 30]} fov={70} />
-        </WebGPUCanvas>
+                <PerspectiveCamera makeDefault position={[0, 10, 30]} fov={70} />
+            </WebGPUCanvas>
+
+            <GameUI />
+        </>
     )
 }

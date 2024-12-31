@@ -4,9 +4,14 @@
     "sketch": {
         "title": "Meowtchmaker",
         "tags": [
-            "minigame"
+            "minigame",
+            "festive"
         ],
-        "hidden": true
+        "options": {
+            "displayTitle": false,
+            "showAudioNotice": true,
+            "showDesktopOnlyNotice": true
+        }
     },
     "scripts": {
         "dev": "vite dev",
