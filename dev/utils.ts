@@ -5,18 +5,23 @@ import { sketchesOrder } from '../sketches'
 export const rootDirectory = path.resolve(`${import.meta.dir}`, '..')
 export const containerAppDirectory = path.resolve(rootDirectory, 'container')
 
-export type SketchMeta = {
-    path: string
+export type PackageSketchesMeta = {
     title: string
-    tags: string[]
-    cover: string
+    tags?: string[]
     options?: {
-        hidden?: boolean
         displayTitle?: boolean
+        showAudioNotice?: boolean
+        showDesktopOnlyNotice?: boolean
     }
     dev?: {
         secure?: boolean
     }
+    hidden?: boolean
+}
+
+export type SketchMeta = PackageSketchesMeta & {
+    path?: string
+    cover?: string
 }
 
 export const createSketchesMeta = async (): Promise<SketchMeta[]> => {

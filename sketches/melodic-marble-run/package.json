@@ -2,7 +2,10 @@
     "name": "@sketches/melodic-marble-run",
     "private": true,
     "sketch": {
-        "title": "Melodic Marble Run"
+        "title": "Melodic Marble Run",
+        "options": {
+            "showAudioNotice": true
+        }
     },
     "scripts": {
         "dev": "vite dev",

@@ -8,17 +8,9 @@ import { ScreenshotKeyboardControls, useScreenshot } from './screenshot'
 import { GitHubIcon } from './svgs/GitHubIcon'
 import { WindowMaximizeIcon } from './svgs/WindowMaximizeIcon'
 import { Theme } from './theme'
+import type { SketchMeta } from '../../dev/utils'
 
-type SketchMetadata = {
-    title: string
-    path: string
-    tags?: string[]
-    cover?: string
-    hidden?: boolean
-    options?: { displayTitle?: boolean }
-}
-
-const sketches = (sketchesMetadata satisfies SketchMetadata[]).filter((s: SketchMetadata) => !s.hidden)
+const sketches = (sketchesMetadata satisfies SketchMeta[]).filter((s: SketchMeta) => !s.hidden)
 
 const Error = styled.div`
     width: 100%;
@@ -195,11 +187,37 @@ const NavItemTags = styled.div`
     font-style: italic;
 `
 
+const SketchNotices = styled.div`
+    display: flex;
+    flex-direction: row;
+    gap: 0.5em;
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 2;
+    padding: 1em;
+`
+
+const SketchNotice = styled.div`
+    padding: 0.5em;
+    background: #333;
+    border: 1px solid #999;
+    border-radius: 50%;
+    width: 2em;
+    height: 2em;
+    font-size: 1em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    fill: #fff;
+`
+
 const NavItemImage = styled.img`
     width: 100%;
     height: 150px;
     object-fit: cover;
     border-radius: 0.2em 0.2em 0 0;
+    user-select: none;
 `
 
 const NavItemTitle = styled.div`
@@ -209,6 +227,8 @@ const NavItemTitle = styled.div`
 `
 
 const NavItemWrapper = styled(Link)`
+    position: relative;
+
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -329,7 +349,7 @@ const SketchWrapper = styled.div`
 type SketchLoaderData = {
     sketchPath: string
     sketchUrl: string
-    sketchMetadata: SketchMetadata
+    sketchMetadata: SketchMeta
 }
 
 const errorBoundaryState = create<{ error: boolean }>(() => ({
@@ -418,12 +438,17 @@ const LazySketch = () => {
 }
 
 type NavItemProps = {
-    sketch: SketchMetadata
+    sketch: SketchMeta
     currentSketchPath: string
     closeNav: () => void
 }
 
 const NavItem = ({ sketch, currentSketchPath, closeNav }: NavItemProps) => {
+    const showAudioNotice = sketch.options?.showAudioNotice ?? false
+    const showDesktopOnlyNotice = sketch.options?.showDesktopOnlyNotice ?? false
+    const anyNotices = showAudioNotice || showDesktopOnlyNotice
+    console.log(anyNotices)
+
     return (
         <NavItemWrapper
             to={`/sketch/${sketch.path}`}
@@ -432,6 +457,24 @@ const NavItem = ({ sketch, currentSketchPath, closeNav }: NavItemProps) => {
             className={sketch.path === currentSketchPath ? 'active' : ''}
         >
             {sketch.cover ? <NavItemImage src={sketch.cover} alt={sketch.title} loading="lazy" /> : undefined}
+
+            {anyNotices && (
+                <SketchNotices>
+                    {showAudioNotice && (
+                        <SketchNotice title="This sketch has audio">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 256 256">
+                                <path d="M155.51,24.81a8,8,0,0,0-8.42.88L77.25,80H32A16,16,0,0,0,16,96v64a16,16,0,0,0,16,16H77.25l69.84,54.31A8,8,0,0,0,160,224V32A8,8,0,0,0,155.51,24.81ZM32,96H72v64H32ZM144,207.64,88,164.09V91.91l56-43.55Zm54-106.08a40,40,0,0,1,0,52.88,8,8,0,0,1-12-10.58,24,24,0,0,0,0-31.72,8,8,0,0,1,12-10.58ZM248,128a79.9,79.9,0,0,1-20.37,53.34,8,8,0,0,1-11.92-10.67,64,64,0,0,0,0-85.33,8,8,0,1,1,11.92-10.67A79.83,79.83,0,0,1,248,128Z"></path>
+                            </svg>
+                        </SketchNotice>
+                    )}
+
+                    {showDesktopOnlyNotice && (
+                        <SketchNotice title="This sketch is desktop only">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 256 256"><path d="M213.92,210.62l-160-176A8,8,0,1,0,42.08,45.38L56,60.69V216a24,24,0,0,0,24,24h96a24,24,0,0,0,23.82-21.11l2.26,2.49a8,8,0,1,0,11.84-10.76ZM184,216a8,8,0,0,1-8,8H80a8,8,0,0,1-8-8V78.29l112,123.2ZM68.7,24a8,8,0,0,1,8-8H176a24,24,0,0,1,24,24V150.83a8,8,0,1,1-16,0V40a8,8,0,0,0-8-8H76.7A8,8,0,0,1,68.7,24Z"></path></svg>
+                        </SketchNotice>
+                    )}
+                </SketchNotices>
+            )}
 
             <NavItemTitle>{sketch.title}</NavItemTitle>
 
@@ -548,7 +591,7 @@ const routes: RouteObject[] = [
 
                 const sketchPath = new URL(request.url).pathname.replace('/sketch/', '')
 
-                const sketchMetadata = sketchesMetadata.find((s) => s.path === sketchPath)! as SketchMetadata
+                const sketchMetadata = sketchesMetadata.find((s) => s.path === sketchPath)! as SketchMeta
 
                 const sketchUrl = `/sketches-static/${sketchMetadata.path}/index.html`
 
