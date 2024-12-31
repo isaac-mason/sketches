@@ -216,6 +216,8 @@ const createControl = (label, value) => {
     input.value = value
     control.appendChild(input)
 
+    input.addEventListener('change', run)
+
     controls.appendChild(control)
 
     return input
@@ -224,11 +226,6 @@ const createControl = (label, value) => {
 const seedInput = createControl('Seed', 42)
 const carveMaxIterationsInput = createControl('Carve Max Iterations', 10000)
 const carveReshuffleIterationsInput = createControl('Carve Reshuffle Iterations', 2000)
-
-const runButton = document.createElement('button')
-runButton.textContent = 'Generate'
-controls.appendChild(runButton)
-runButton.onclick = run
 
 document.querySelector('#app').appendChild(controls)
 
