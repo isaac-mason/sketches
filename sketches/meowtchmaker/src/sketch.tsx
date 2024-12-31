@@ -1,10 +1,10 @@
 import { WebGPUCanvas } from '@/common/components/webgpu-canvas'
 import sunsetEnvironment from '@pmndrs/assets/hdri/sunset.exr'
-import { Environment, PerspectiveCamera } from '@react-three/drei'
+import { Environment, PerspectiveCamera, Loader } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { With, World } from 'arancini'
 import * as p2 from 'p2-es'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { suspend } from 'suspend-react'
 import * as THREE from 'three'
 import { color, mix, smoothstep, uv } from 'three/tsl'
@@ -12,6 +12,7 @@ import { MeshBasicNodeMaterial, WebGPURenderer } from 'three/webgpu'
 import { create } from 'zustand'
 import * as Particles from './particles'
 import * as InstancedSprites from './sprites'
+import { Spinner } from '../../../common'
 
 type P2BodyWithUserData = p2.Body & {
     userData?: {
@@ -27,8 +28,6 @@ const _direction = new THREE.Vector3()
 const _velocity = new THREE.Vector3()
 const _position = new THREE.Vector3()
 const _offset = new THREE.Vector3()
-const _euler = new THREE.Euler()
-const _quaternion = new THREE.Quaternion()
 const _matrix4 = new THREE.Matrix4()
 const _cameraPositionTarget = new THREE.Vector3()
 const _cameraLookAtTarget = new THREE.Vector3()
@@ -1501,13 +1500,15 @@ export function Sketch() {
 
     return (
         <>
-            <WebGPUCanvas camera={{ position: [2, 1, 2] }}>
-                <Game key={gameId} />
+            <Suspense fallback={<Spinner />}>
+                <WebGPUCanvas camera={{ position: [2, 1, 2] }}>
+                    <Game key={gameId} />
 
-                <PerspectiveCamera makeDefault position={[0, 10, 30]} fov={70} />
-            </WebGPUCanvas>
+                    <PerspectiveCamera makeDefault position={[0, 10, 30]} fov={70} />
+                </WebGPUCanvas>
 
-            <GameUI />
+                <GameUI />
+            </Suspense>
         </>
     )
 }
