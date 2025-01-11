@@ -1,11 +1,13 @@
-import { Canvas, FixedTimeStep, useMutableCallback, usePageVisible } from '@/common'
+import { FixedTimeStep, useMutableCallback, usePageVisible, WebGPUCanvas } from '@/common'
 import bunny from '@pmndrs/assets/models/bunny.glb'
-import { Instance, Instances, MeshReflectorMaterial, PerspectiveCamera, useGLTF } from '@react-three/drei'
-import { ThreeElements, ThreeEvent, useFrame } from '@react-three/fiber'
-import { Bloom, EffectComposer } from '@react-three/postprocessing'
+import { Instance, Instances, PerspectiveCamera, useGLTF } from '@react-three/drei'
+import { ThreeElements, ThreeEvent, useFrame, useThree } from '@react-three/fiber'
 import { easing } from 'maath'
-import React, { useEffect, useMemo, useRef } from 'react'
-import * as THREE from 'three'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { bloom } from 'three/addons/tsl/display/BloomNode.js'
+import { blendColor, bool, color, floor, mrt, output, pass, reflector, select, texture, uniform, uv, vec2, vec4 } from 'three/tsl'
+import * as THREE from 'three/webgpu'
+import { PostProcessing, WebGPURenderer } from 'three/webgpu'
 
 const gameOfLifeStep = (current: Uint8Array, next: Uint8Array, width: number, height: number) => {
     for (let y = 1; y < height - 1; y++) {
@@ -29,39 +31,6 @@ const gameOfLifeStep = (current: Uint8Array, next: Uint8Array, width: number, he
         }
     }
 }
-
-const gameOfLifeVertexShader = /* glsl */ `
-    varying vec2 vUv;
-
-    void main() {
-        vUv = uv;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-`
-
-const gameOfLifeFragmentShader = /* glsl */ `
-    uniform sampler2D uState;
-    uniform float uGameWidth;
-    uniform float uGameHeight;
-
-    varying vec2 vUv;
-
-    void main() {
-        vec2 cellPosition = vec2(
-            floor(vUv.x * uGameWidth + 0.5),
-            floor(vUv.y * uGameHeight + 0.5)
-        );
-        vec2 samplePosition = cellPosition / vec2(uGameWidth, uGameHeight);
-
-        vec4 textureSample = texture2D(uState, samplePosition);
-
-        bool isAlive = textureSample.r > 0.5;
-
-        vec4 color = isAlive ? vec4(1.0, 1.0, 1.0, 1.0) : vec4(0.0, 0.0, 0.0, 0.5);
-
-        gl_FragColor = color;
-    }
-`
 
 type GameOfLifeProps = {
     gameSize: [number, number]
@@ -176,18 +145,36 @@ const GameOfLife = ({
         drawing.current = false
     }
 
+    const { uGameWidth, uGameHeight } = useMemo(() => {
+        return {
+            uGameWidth: uniform(0, 'float'),
+            uGameHeight: uniform(0, 'float'),
+        }
+    }, [])
+
+    useEffect(() => {
+        uGameWidth.value = gameWidth
+        uGameHeight.value = gameHeight
+    }, [gameWidth, gameHeight])
+
+    const material = useMemo(() => {
+        const meshPhongMaterial = new THREE.MeshBasicNodeMaterial()
+
+        const cellPosition = vec2(floor(uv().x.mul(uGameWidth).add(0.5)), floor(uv().y.mul(uGameHeight).add(0.5)))
+        const samplePosition = vec2(cellPosition.div(vec2(uGameWidth, uGameHeight)))
+        const textureSample = vec4(texture(dataTexture.texture, samplePosition))
+
+        const isAlive = bool(textureSample.r.greaterThan(0.5)).toVar()
+
+        meshPhongMaterial.colorNode = vec4(select(isAlive, vec4(1.0, 1.0, 1.0, 1.0), vec4(color('#333'), 0.5)))
+
+        return meshPhongMaterial
+    }, [])
+
     return (
         <mesh {...meshProps} ref={meshRef} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp}>
             <planeGeometry args={[planeWidth, planeHeight]} />
-            <shaderMaterial
-                uniforms={{
-                    uState: { value: dataTexture.texture },
-                    uGameWidth: { value: gameWidth },
-                    uGameHeight: { value: gameHeight },
-                }}
-                vertexShader={gameOfLifeVertexShader}
-                fragmentShader={gameOfLifeFragmentShader}
-            />
+            <primitive object={material} />
         </mesh>
     )
 }
@@ -254,51 +241,95 @@ const CameraRig = () => {
     return null
 }
 
+const ReflectingFloor = () => {
+    const { floorMaterial, reflection } = useMemo(() => {
+        const reflection = reflector({ resolution: 0.5 })
+        reflection.target.rotateX(-Math.PI / 2)
+
+        const floorMaterial = new THREE.MeshStandardNodeMaterial()
+        floorMaterial.colorNode = color('#999').add(reflection)
+        floorMaterial.roughness = 1
+        floorMaterial.metalness = 0.8
+
+        return { reflection, floorMaterial }
+    }, [])
+
+    return (
+        <>
+            <primitive object={reflection.target} />
+
+            <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 25]}>
+                <planeGeometry args={[200, 100]} />
+                <primitive object={floorMaterial} />
+            </mesh>
+        </>
+    )
+}
+
+const RenderPipeline = () => {
+    const { gl, scene, camera } = useThree()
+
+    const [postProcessing, setPostProcessing] = useState<PostProcessing | null>(null)
+
+    useEffect(() => {
+        const scenePass = pass(scene, camera, {
+            magFilter: THREE.NearestFilter,
+            minFilter: THREE.NearestFilter,
+        })
+
+        scenePass.setMRT(mrt({ output }))
+
+        const scenePassColor = scenePass.getTextureNode('output')
+
+        const strength = 0.2
+        const radius = 0.02
+        const threshold = 0
+        const bloomPass = bloom(scenePassColor, strength, radius, threshold)
+
+        const outputNode = blendColor(scenePassColor, bloomPass)
+
+        const postProcessing = new PostProcessing(gl as unknown as WebGPURenderer)
+        postProcessing.outputNode = outputNode
+
+        setPostProcessing(postProcessing)
+
+        return () => {
+            setPostProcessing(null)
+        }
+    }, [gl, scene, camera])
+
+    useFrame(() => {
+        if (!postProcessing) return
+
+        gl.clear()
+        postProcessing.render()
+    }, 1)
+
+    return null
+}
+
 export function Sketch() {
     return (
-        <Canvas shadows dpr={[1, 1.5]}>
-            {/* bunnies */}
+        <WebGPUCanvas shadows dpr={[1, 1.5]}>
             <Bunnies>
                 {bunnies.map((bunny, i) => (
                     <Bunny key={i} position={bunny.position} color={bunny.color} rotation-y={bunny.rotation} />
                 ))}
             </Bunnies>
 
-            {/* floor */}
-            <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 25]}>
-                <planeGeometry args={[200, 100]} />
-                <MeshReflectorMaterial
-                    mirror={0}
-                    blur={[300, 30]}
-                    resolution={1024}
-                    mixBlur={1}
-                    mixStrength={80}
-                    roughness={1}
-                    depthScale={1.2}
-                    minDepthThreshold={0.4}
-                    maxDepthThreshold={1.4}
-                    color="#999"
-                    metalness={0.8}
-                />
-            </mesh>
+            <ReflectingFloor />
 
-            {/* screen */}
             <GameOfLife gameSize={[200, 150]} planeSize={[225, 150]} position={[0, 74.5, -25]} />
 
-            {/* lights */}
-            <hemisphereLight intensity={0.15} groundColor="black" />
+            <hemisphereLight intensity={1} groundColor="black" />
 
-            {/* background */}
             <color attach="background" args={['black']} />
 
-            {/* effects */}
-            <EffectComposer enableNormalPass={false}>
-                <Bloom luminanceThreshold={0} mipmapBlur luminanceSmoothing={5.0} intensity={3} />
-            </EffectComposer>
+            <RenderPipeline />
 
             {/* camera */}
             <PerspectiveCamera makeDefault position={[20, 10, 80]} />
             <CameraRig />
-        </Canvas>
+        </WebGPUCanvas>
     )
 }

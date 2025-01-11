@@ -1,6 +1,6 @@
 import { WebGPUCanvas } from '@/common/components/webgpu-canvas'
 import sunsetEnvironment from '@pmndrs/assets/hdri/sunset.exr'
-import { Environment, PerspectiveCamera, Loader } from '@react-three/drei'
+import { Environment, PerspectiveCamera } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { With, World } from 'arancini'
 import * as p2 from 'p2-es'
@@ -1455,7 +1455,7 @@ const Game = () => {
 
         const clampedDelta = Math.min(delta, 0.1)
 
-        update(state, assets, gl as THREE.Renderer as WebGPURenderer, scene, camera, clampedDelta)
+        update(state, assets, gl as unknown as WebGPURenderer, scene, camera, clampedDelta)
     }, 1)
 
     useKeyboardInput(state)

@@ -447,7 +447,6 @@ const NavItem = ({ sketch, currentSketchPath, closeNav }: NavItemProps) => {
     const showAudioNotice = sketch.options?.showAudioNotice ?? false
     const showDesktopOnlyNotice = sketch.options?.showDesktopOnlyNotice ?? false
     const anyNotices = showAudioNotice || showDesktopOnlyNotice
-    console.log(anyNotices)
 
     return (
         <NavItemWrapper
