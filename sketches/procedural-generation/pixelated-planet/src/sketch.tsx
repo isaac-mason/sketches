@@ -1,11 +1,13 @@
-import { Canvas } from '@/common'
+import { WebGPUCanvas } from '@/common'
 import { Html, OrbitControls } from '@react-three/drei'
-import { useThree } from '@react-three/fiber'
-import { EffectComposer, Pixelation } from '@react-three/postprocessing'
+import { useFrame, useThree } from '@react-three/fiber'
 import { button, useControls } from 'leva'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { createNoise3D } from 'simplex-noise'
 import * as THREE from 'three'
+import { pixelationPass } from 'three/examples/jsm/tsl/display/PixelationPassNode.js'
+import { mrt, output, pass, uniform } from 'three/tsl'
+import { PostProcessing, WebGPURenderer } from 'three/webgpu'
 
 type PlanetLayer = {
     /**
@@ -162,25 +164,44 @@ const WorldMap = ({ map }: WorldMapProps) => {
     )
 }
 
-const Effects = () => {
-    const viewport = useThree((state) => state.viewport)
+const RenderPipeline = () => {
+    const { gl, scene, camera } = useThree()
 
-    const { pixelationGranularity } = useControls('procgen-pixelated-planet-generation-postprocessing', {
-        pixelationGranularity: {
-            value: 12,
-            min: 1,
-            max: 30,
-            step: 1,
-        },
-    })
+    const [postProcessing, setPostProcessing] = useState<PostProcessing | null>(null)
 
-    const adjustedPixelationGranularity = pixelationGranularity * viewport.dpr
+    useEffect(() => {
+        const scenePass = pass(scene, camera, {
+            magFilter: THREE.NearestFilter,
+            minFilter: THREE.NearestFilter,
+        })
 
-    return (
-        <EffectComposer>
-            <Pixelation granularity={adjustedPixelationGranularity} />
-        </EffectComposer>
-    )
+        scenePass.setMRT(mrt({ output }))
+
+        const pixelSize = uniform(20)
+        const normalEdgeStrength = uniform(0.1)
+        const depthEdgeStrength = uniform(0.1)
+        const pixelation = pixelationPass(scene, camera, pixelSize, normalEdgeStrength, depthEdgeStrength)
+
+        const outputNode = pixelation
+
+        const postProcessing = new PostProcessing(gl as unknown as WebGPURenderer)
+        postProcessing.outputNode = outputNode
+
+        setPostProcessing(postProcessing)
+
+        return () => {
+            setPostProcessing(null)
+        }
+    }, [gl, scene, camera])
+
+    useFrame(() => {
+        if (!postProcessing) return
+
+        gl.clear()
+        postProcessing.render()
+    }, 1)
+
+    return null
 }
 
 export function Sketch() {
@@ -253,7 +274,7 @@ export function Sketch() {
     }, [noiseIterations, planetRadius, textureWidth, textureHeight, version])
 
     return (
-        <Canvas orthographic camera={{ position: [0, 0, 10], zoom: 200 }}>
+        <WebGPUCanvas orthographic camera={{ position: [0, 0, 10], zoom: 200 }}>
             <Planet map={map} radius={planetRadius} />
 
             <directionalLight position={[10, 0, 10]} intensity={2} />
@@ -261,9 +282,9 @@ export function Sketch() {
 
             <WorldMap map={map} />
 
-            <Effects />
+            <RenderPipeline />
 
             <OrbitControls enablePan={false} />
-        </Canvas>
+        </WebGPUCanvas>
     )
 }
