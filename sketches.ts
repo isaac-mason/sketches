@@ -42,7 +42,6 @@ export const sketchesOrder = [
     'nature/grass',
     'nature/grass-2',
     'd3/force-directed-graph',
-    'particles/instanced-particles',
     'fractals/mandelbrot-set',
     'character-animation/basic',
     'character-animation/mixamo-animations',

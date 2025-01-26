@@ -2461,24 +2461,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sketches/particles-instanced-particles@workspace:sketches/particles/instanced-particles":
-  version: 0.0.0-use.local
-  resolution: "@sketches/particles-instanced-particles@workspace:sketches/particles/instanced-particles"
-  dependencies:
-    "@react-three/drei": "npm:^9.116.3"
-    "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.11"
-    "@types/react-dom": "npm:^18.3.1"
-    "@types/three": "npm:^0.172.0"
-    arancini: "npm:^8.0.0"
-    react: "npm:^18.3.1"
-    react-dom: "npm:^18.3.1"
-    three: "npm:^0.172.0"
-    typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.9"
-  languageName: unknown
-  linkType: soft
-
 "@sketches/postprocessing-emissive-bloom@workspace:sketches/postprocessing/emissive-bloom":
   version: 0.0.0-use.local
   resolution: "@sketches/postprocessing-emissive-bloom@workspace:sketches/postprocessing/emissive-bloom"
