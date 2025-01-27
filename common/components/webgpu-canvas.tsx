@@ -26,16 +26,21 @@ const UnsupportedNotice = styled.div`
 
 export type WebGPUCanvasProps = {
     /**
-     * @default true
+     * @default false
      */
-    webglFallback?: boolean
+    forceWebGL?: boolean
+    /**
+     * @default false
+     */
+    forceWebGPU?: boolean
 
     gl?: ConstructorParameters<typeof WebGPURenderer>[0]
 } & Omit<CanvasProps, 'gl'>
 
 export const WebGPUCanvas = ({
     children,
-    webglFallback = true,
+    forceWebGL = false,
+    forceWebGPU = false,
     frameloop = 'always',
     gl,
     ...props
@@ -49,12 +54,10 @@ export const WebGPUCanvas = ({
         setCanvasFrameloop(frameloop)
     }, [initialising, frameloop])
 
-    if (!webglFallback && !WebGPU.isAvailable()) {
+    if (forceWebGPU && !WebGPU.isAvailable()) {
         return (
             <UnsupportedNoticeWrapper>
-                <UnsupportedNotice>
-                    Darn, your browser doesn't support WebGPU! Just pretend there's something very cool on your screen.
-                </UnsupportedNotice>
+                <UnsupportedNotice>Your browser doesn't support WebGPU, this content cannot be displayed.</UnsupportedNotice>
             </UnsupportedNoticeWrapper>
         )
     }
@@ -65,7 +68,7 @@ export const WebGPUCanvas = ({
             id="gl"
             frameloop={canvasFrameloop}
             gl={(canvas) => {
-                const renderer = new WebGPURenderer({ ...gl, canvas: canvas as HTMLCanvasElement })
+                const renderer = new WebGPURenderer({ ...gl, canvas: canvas as HTMLCanvasElement, forceWebGL })
                 renderer.init().then(() => {
                     setInitialising(false)
                 })
