@@ -16,7 +16,6 @@ const Level = () => {
 const store = createXRStore({
     hand: { teleportPointer: true },
     controller: { teleportPointer: true },
-    secondaryInputSources: true,
 })
 
 const SPAWN_POSITION: THREE.Vector3Tuple = [-0.5920812728872339, 9.83978923780684, -1.5619062958282723]
@@ -32,6 +31,33 @@ const NAVMESH_GENERATOR_CONFIG: Partial<TiledNavMeshGeneratorConfig> = {
     walkableClimb: Math.ceil(0.8 / CELL_HEIGHT_WORLD),
     walkableSlopeAngle: 60,
     tileSize: 16,
+}
+
+const VRButtonStyles = {
+    position: 'absolute',
+    bottom: '2em',
+    left: '2em',
+    zIndex: 2,
+    padding: '1em',
+    color: 'black',
+    background: 'white',
+    borderRadius: '0.5em',
+    border: 'none',
+    fontSize: '1em',
+    fontWeight: '600',
+    cursor: 'pointer',
+} as const
+
+const VRButtonOnClick = () => {
+    store.enterVR()
+}
+
+const VRButton = () => {
+    return (
+        <button onClick={VRButtonOnClick} style={VRButtonStyles}>
+            Enter VR
+        </button>
+    )
 }
 
 export function Sketch() {
@@ -62,23 +88,7 @@ export function Sketch() {
                 </XR>
             </Canvas>
 
-            <button
-                onClick={() => store.enterVR()}
-                style={{
-                    position: 'absolute',
-                    top: '1em',
-                    left: '1em',
-                    zIndex: 1,
-                    padding: '1em',
-                    color: 'black',
-                    background: 'white',
-                    borderRadius: '0.5em',
-                    border: 'none',
-                    fontSize: '1em',
-                }}
-            >
-                Enter VR
-            </button>
+            <VRButton />
         </>
     )
 }
