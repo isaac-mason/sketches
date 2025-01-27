@@ -1,17 +1,11 @@
-import { Effects, OrbitControls } from '@react-three/drei'
-import { Object3DNode, extend } from '@react-three/fiber'
-import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
-import { Canvas } from '@/common'
-
-extend({ UnrealBloomPass })
-
-declare global {
-    namespace React.JSX {
-        interface IntrinsicElements {
-            unrealBloomPass: Object3DNode<UnrealBloomPass, typeof UnrealBloomPass>
-        }
-    }
-}
+import { WebGPUCanvas } from '@/common'
+import { OrbitControls } from '@react-three/drei'
+import { useFrame, useThree } from '@react-three/fiber'
+import { useEffect, useState } from 'react'
+import { bloom } from 'three/addons/tsl/display/BloomNode.js'
+import { blendColor, mrt, output, pass } from 'three/tsl'
+import * as THREE from 'three/webgpu'
+import { PostProcessing, WebGPURenderer } from 'three/webgpu'
 
 const App = () => {
     return (
@@ -27,18 +21,58 @@ const App = () => {
     )
 }
 
+const RenderPipeline = () => {
+    const { gl, scene, camera } = useThree()
+
+    const [postProcessing, setPostProcessing] = useState<PostProcessing | null>(null)
+
+    useEffect(() => {
+        const scenePass = pass(scene, camera, {
+            magFilter: THREE.NearestFilter,
+            minFilter: THREE.NearestFilter,
+        })
+
+        scenePass.setMRT(mrt({ output }))
+
+        const scenePassColor = scenePass.getTextureNode('output')
+
+        const strength = 0.22
+        const radius = 0.5
+        const threshold = 0.5
+        const bloomPass = bloom(scenePassColor, strength, radius, threshold)
+
+        const outputNode = blendColor(scenePassColor, bloomPass)
+
+        const postProcessing = new PostProcessing(gl as unknown as WebGPURenderer)
+        postProcessing.outputNode = outputNode
+
+        setPostProcessing(postProcessing)
+
+        return () => {
+            setPostProcessing(null)
+        }
+    }, [gl, scene, camera])
+
+    useFrame(() => {
+        if (!postProcessing) return
+
+        gl.clear()
+        postProcessing.render()
+    }, 1)
+
+    return null
+}
+
 export function Sketch() {
     return (
-        <Canvas flat gl={{ logarithmicDepthBuffer: true }} camera={{ position: [3, 3, 3] }}>
+        <WebGPUCanvas flat camera={{ position: [3, 3, 3] }}>
             <App />
 
             <color attach="background" args={['#222']} />
 
-            <Effects disableGamma>
-                <unrealBloomPass args={[undefined!, 1.2, 0.01, 0.9]} />
-            </Effects>
+            <RenderPipeline />
 
             <OrbitControls />
-        </Canvas>
+        </WebGPUCanvas>
     )
 }
