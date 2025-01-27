@@ -3,7 +3,7 @@ import { OrbitControls, PerspectiveCamera, useGLTF } from '@react-three/drei'
 import { createXRStore, PointerEvents, XR, XROrigin } from '@react-three/xr'
 import { Suspense, useState } from 'react'
 import * as THREE from 'three'
-import { NavMeshProvider, TeleportTargetNavMesh, Walkable } from './navmesh'
+import { NavMeshProvider, NavMeshTeleportTarget, Walkable } from './navmesh'
 import levelGlbUrl from './sands_location.glb?url'
 import { TiledNavMeshGeneratorConfig } from 'recast-navigation/generators'
 
@@ -56,7 +56,7 @@ export function Sketch() {
                                 <Level />
                             </Walkable>
 
-                            <TeleportTargetNavMesh onTeleport={setPosition} visible />
+                            <NavMeshTeleportTarget onTeleport={setPosition} visible />
                         </NavMeshProvider>
                     </Suspense>
                 </XR>

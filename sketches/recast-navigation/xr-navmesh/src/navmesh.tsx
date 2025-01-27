@@ -197,12 +197,12 @@ export const Walkable = ({ children }: WalkableProps) => {
     return <object3D userData={userData}>{children}</object3D>
 }
 
-type TeleportTargetNavMeshProps = {
+type NavMeshTeleportTargetProps = {
     onTeleport: (position: THREE.Vector3) => void
     visible?: boolean
 }
 
-export const TeleportTargetNavMesh = ({ onTeleport, visible = false }: TeleportTargetNavMeshProps) => {
+export const NavMeshTeleportTarget = ({ onTeleport, visible = false }: NavMeshTeleportTargetProps) => {
     const context = useContext(NavMeshProviderContext)
 
     const [geometry, setGeometry] = useState<THREE.BufferGeometry | undefined>(undefined)
