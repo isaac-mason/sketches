@@ -5,7 +5,6 @@ import { useMemo } from 'react'
 import * as THREE from 'three'
 import {
     Fn,
-    Node,
     ShaderNodeObject,
     cos,
     dot,
@@ -34,7 +33,7 @@ import {
     vec4,
     vertexIndex,
 } from 'three/tsl'
-import { MeshBasicNodeMaterial } from 'three/webgpu'
+import { MeshBasicNodeMaterial, Node } from 'three/webgpu'
 
 const NUM_GRASS = 500
 const GRASS_SEGMENTS = 6
