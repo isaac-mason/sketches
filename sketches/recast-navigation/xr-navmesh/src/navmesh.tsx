@@ -3,132 +3,10 @@ import { TeleportTarget } from '@react-three/xr'
 import * as RecastThree from '@recast-navigation/three'
 import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react'
 import * as Recast from 'recast-navigation'
+import { floodFillPruneNavMesh, getNavMeshPositionsAndIndices } from 'recast-navigation'
 import { TiledNavMeshGeneratorConfig } from 'recast-navigation/generators'
 import { suspend } from 'suspend-react'
 import * as THREE from 'three'
-
-const ENABLED_POLY_FLAG = 1
-
-export const getNavMeshPositionsAndIndices = (navMesh: Recast.NavMesh, flags: number) => {
-    const positions: number[] = []
-    const indices: number[] = []
-    let tri = 0
-
-    const maxTiles = navMesh.getMaxTiles()
-
-    for (let tileIndex = 0; tileIndex < maxTiles; tileIndex++) {
-        const tile = navMesh.getTile(tileIndex)
-        const tileHeader = tile.header()
-
-        if (!tileHeader) continue
-
-        const tilePolyCount = tileHeader.polyCount()
-
-        for (let tilePolyIndex = 0; tilePolyIndex < tilePolyCount; ++tilePolyIndex) {
-            const poly = tile.polys(tilePolyIndex)
-
-            if ((poly.flags() & flags) === 0) continue
-
-            if (poly.getType() === 1) continue
-
-            const polyVertCount = poly.vertCount()
-            const polyDetail = tile.detailMeshes(tilePolyIndex)
-            const polyDetailTriBase = polyDetail.triBase()
-            const polyDetailTriCount = polyDetail.triCount()
-
-            for (let polyDetailTriIndex = 0; polyDetailTriIndex < polyDetailTriCount; ++polyDetailTriIndex) {
-                const detailTrisBaseIndex = (polyDetailTriBase + polyDetailTriIndex) * 4
-
-                for (let trianglePoint = 0; trianglePoint < 3; ++trianglePoint) {
-                    if (tile.detailTris(detailTrisBaseIndex + trianglePoint) < polyVertCount) {
-                        const tileVertsBaseIndex = poly.verts(tile.detailTris(detailTrisBaseIndex + trianglePoint)) * 3
-
-                        positions.push(
-                            tile.verts(tileVertsBaseIndex),
-                            tile.verts(tileVertsBaseIndex + 1),
-                            tile.verts(tileVertsBaseIndex + 2),
-                        )
-                    } else {
-                        const tileVertsBaseIndex =
-                            (polyDetail.vertBase() + tile.detailTris(detailTrisBaseIndex + trianglePoint) - poly.vertCount()) * 3
-
-                        positions.push(
-                            tile.detailVerts(tileVertsBaseIndex),
-                            tile.detailVerts(tileVertsBaseIndex + 1),
-                            tile.detailVerts(tileVertsBaseIndex + 2),
-                        )
-                    }
-
-                    indices.push(tri++)
-                }
-            }
-        }
-    }
-
-    return [positions, indices]
-}
-
-const floodFillPruneNavMesh = (navMesh: Recast.NavMesh, point: THREE.Vector3) => {
-    const navMeshQuery = new Recast.NavMeshQuery(navMesh)
-
-    const nearestPolyResult = navMeshQuery.findNearestPoly(point, {
-        halfExtents: { x: 2, y: 2, z: 2 },
-    })
-
-    if (!nearestPolyResult.success) return
-
-    /* find all polys connected to the nearest poly */
-    const visited = new Set<number>()
-    visited.add(nearestPolyResult.nearestRef)
-
-    const openList: number[] = []
-
-    openList.push(nearestPolyResult.nearestRef)
-
-    while (openList.length > 0) {
-        const ref = openList.pop()!
-
-        // get current poly and tile
-        const { poly, tile } = navMesh.getTileAndPolyByRefUnsafe(ref)
-
-        // visit linked polys
-        for (let i = poly.firstLink(); i !== Recast.Detour.DT_NULL_LINK; i = tile.links(i).next()) {
-            const neiRef = tile.links(i).ref()
-
-            // skip invalid and already visited
-            if (!neiRef || visited.has(neiRef)) continue
-
-            // mark as visited
-            visited.add(neiRef)
-
-            // visit neighbours
-            openList.push(neiRef)
-        }
-    }
-
-    /* disable unvisited polys */
-    for (let tileIndex = 0; tileIndex < navMesh.getMaxTiles(); tileIndex++) {
-        const tile = navMesh.getTile(tileIndex)
-
-        if (!tile || !tile.header()) continue
-
-        const tileHeader = tile.header()!
-
-        const base = navMesh.getPolyRefBase(tile)
-
-        for (let i = 0; i < tileHeader.polyCount(); i++) {
-            const ref = base | i
-
-            if (!visited.has(ref)) {
-                // set flag to 0
-                // this could also be a custom 'disabled' area flag if using custom areas
-                navMesh.setPolyFlags(ref, 0)
-            }
-        }
-    }
-
-    navMeshQuery.destroy()
-}
 
 type NavMeshProviderContextType = {
     navMesh: Recast.NavMesh
@@ -172,7 +50,15 @@ export const NavMeshProvider = ({ children, config, floodFillPoint }: NavMeshPro
         if (!success) return
 
         if (floodFillPoint) {
-            floodFillPruneNavMesh(navMesh, new THREE.Vector3().fromArray(floodFillPoint))
+            const navMeshQuery = new Recast.NavMeshQuery(navMesh)
+            const point = new THREE.Vector3(...floodFillPoint)
+            const { success, status, nearestRef } = navMeshQuery.findNearestPoly(point)
+
+            if (success) {
+                floodFillPruneNavMesh(navMesh, [nearestRef])
+            } else {
+                console.warn('Failed to find nearest poly for flood fill', Recast.statusToReadableString(status))
+            }
         }
 
         setContext({ navMesh })
@@ -201,6 +87,8 @@ type NavMeshTeleportTargetProps = {
     onTeleport: (position: THREE.Vector3) => void
     visible?: boolean
 }
+
+const ENABLED_POLY_FLAG = 1
 
 export const NavMeshTeleportTarget = ({ onTeleport, visible = false }: NavMeshTeleportTargetProps) => {
     const context = useContext(NavMeshProviderContext)
