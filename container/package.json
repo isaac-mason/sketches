@@ -29,8 +29,8 @@
         "@vitejs/plugin-react-swc": "^3.7.1",
         "eslint": "^9.12.0",
         "typescript": "^5.6.3",
-        "vite": "^5.4.9",
-        "vite-imagetools": "^7.0.4",
+        "vite": "^ 6.1.0",
+        "vite-imagetools": "^7.0.5",
         "vite-plugin-html": "^3.2.2"
     },
     "packageManager": "yarn@4.1.1"

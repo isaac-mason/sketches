@@ -39,7 +39,7 @@ app.use((_req, res, next) => {
 app.use('/sketches-static', async (req, res, next) => {
     const sketchMeta = sketchesMeta.find(({ path }) => req.url.startsWith(`/${path}/`))
 
-    if (!sketchMeta) {
+    if (!sketchMeta || !sketchMeta.path) {
         return res.status(404).send()
     }
 
@@ -115,3 +115,5 @@ console.log(`sketches dev server running at http://127.0.0.1:${port}`)
         process.exit()
     })
 })
+
+// open 
