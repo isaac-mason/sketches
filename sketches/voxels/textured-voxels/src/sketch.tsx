@@ -7,7 +7,7 @@ import * as THREE from 'three'
 import { BlockRegistry } from './lib/block-registry'
 import { ChunkGeometry } from './lib/chunk-geometry'
 import { ChunkMaterial } from './lib/chunk-material'
-import { CulledMesher } from './lib/culled-mesher'
+import { CulledMesher, NeigbourChunks } from './lib/culled-mesher'
 import { loadImage } from './lib/load-image'
 import { TextureAtlas } from './lib/texture-atlas'
 import { CHUNK_SIZE, World } from './lib/world'
@@ -35,29 +35,21 @@ const Example = () => {
         }
 
         const blockRegistry = new BlockRegistry()
-        blockRegistry.register({ name: Blocks.DIAMOND, texture: diamondTextureInfo })
-        blockRegistry.register({ name: Blocks.STONE, texture: stoneTextureInfo })
-        blockRegistry.register({ name: Blocks.GREY, texture: greyTextureInfo })
-
-        const { id: diamondBlockId } = blockRegistry.getBlockByName(Blocks.DIAMOND)!
-        const { id: stoneBlockId } = blockRegistry.getBlockByName(Blocks.STONE)!
-        const { id: greyBlockId } = blockRegistry.getBlockByName(Blocks.GREY)!
+        const diamondBlock = blockRegistry.register({ name: Blocks.DIAMOND, texture: diamondTextureInfo })
+        const stoneBlock = blockRegistry.register({ name: Blocks.STONE, texture: stoneTextureInfo })
+        const greyBlock = blockRegistry.register({ name: Blocks.GREY, texture: greyTextureInfo })
 
         const world = new World()
-
-        const cursor = new THREE.Vector3()
 
         // sphere
         const size = 20
         const radius = 10
-        const center = new THREE.Vector3(0, 0, 0)
         for (let x = -size; x < size; x++) {
             for (let y = -size; y < size; y++) {
                 for (let z = -size; z < size; z++) {
-                    cursor.set(x, y, z)
-                    if (center.distanceTo(cursor) < radius) {
-                        const blockType = Math.random() > 0.5 ? stoneBlockId : diamondBlockId
-                        world.setBlock(cursor, true, blockType)
+                    if (x ** 2 + y ** 2 + z ** 2 < radius ** 2) {
+                        const blockType = Math.random() > 0.5 ? stoneBlock.id : diamondBlock.id
+                        world.setBlock(x, y, z, true, blockType)
                     }
                 }
             }
@@ -66,24 +58,21 @@ const Example = () => {
         // left hand wall
         for (let y = -size; y < size; y++) {
             for (let z = -size; z < size; z++) {
-                cursor.set(-size, y, z)
-                world.setBlock(cursor, true, greyBlockId)
+                world.setBlock(-size, y, z, true, greyBlock.id)
             }
         }
 
         // back wall
         for (let x = -size; x < size; x++) {
             for (let y = -size; y < size; y++) {
-                cursor.set(x, y, -size)
-                world.setBlock(cursor, true, greyBlockId)
+                world.setBlock(x, y, -size, true, greyBlock.id)
             }
         }
 
         // ground
         for (let x = -size; x < size; x++) {
             for (let z = -size; z < size; z++) {
-                cursor.set(x, -size, z)
-                world.setBlock(cursor, true, greyBlockId)
+                world.setBlock(x, -size, z, true, greyBlock.id)
             }
         }
 
@@ -93,7 +82,15 @@ const Example = () => {
         const meshes: THREE.Mesh[] = []
 
         for (const chunk of world.chunks) {
-            const { opaque } = CulledMesher.mesh(chunk, world, blockRegistry)
+            const neighborChunks: NeigbourChunks = {
+                nx: world.chunks.get(chunk.position.x - 1, chunk.position.y, chunk.position.z),
+                ny: world.chunks.get(chunk.position.x, chunk.position.y - 1, chunk.position.z),
+                nz: world.chunks.get(chunk.position.x, chunk.position.y, chunk.position.z - 1),
+                px: world.chunks.get(chunk.position.x + 1, chunk.position.y, chunk.position.z),
+                py: world.chunks.get(chunk.position.x, chunk.position.y + 1, chunk.position.z),
+                pz: world.chunks.get(chunk.position.x, chunk.position.y, chunk.position.z + 1),
+            }
+            const { opaque } = CulledMesher.mesh(chunk, neighborChunks, blockRegistry)
 
             if (opaque.positions.length <= 0) continue
 

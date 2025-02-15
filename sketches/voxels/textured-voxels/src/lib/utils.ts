@@ -1,49 +1,21 @@
 import * as THREE from 'three'
 
+const hash = (x: number, y: number, z: number) => `${x},${y},${z}`
+
 export class Vector3Map<T> {
-    map = new Map<number, Map<number, Map<number, T>>>()
+    map = new Map<string, T>()
 
-    get({ x, y, z }: THREE.Vector3Like) {
-        const xMap = this.map.get(x)
-
-        if (!xMap) {
-            return
-        }
-
-        const yMap = xMap.get(y)
-
-        if (!yMap) {
-            return
-        }
-
-        return yMap.get(z)
+    get(x: number, y: number, z: number) {
+        return this.map.get(hash(x, y, z))
     }
 
     set({ x, y, z }: THREE.Vector3Like, value: T) {
-        let xMap = this.map.get(x)
-
-        if (!xMap) {
-            xMap = new Map()
-            this.map.set(x, xMap)
-        }
-
-        let yMap = xMap.get(y)
-
-        if (!yMap) {
-            yMap = new Map()
-            xMap.set(y, yMap)
-        }
-
-        yMap.set(z, value)
+        this.map.set(hash(x, y, z), value)
     }
 
     *[Symbol.iterator]() {
-        for (const xMap of this.map.values()) {
-            for (const yMap of xMap.values()) {
-                for (const value of yMap.values()) {
-                    yield value
-                }
-            }
+        for (const value of this.map.values()) {
+            yield value
         }
     }
 }

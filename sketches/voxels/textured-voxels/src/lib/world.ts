@@ -1,15 +1,14 @@
-import { Topic } from '@/common/utils/topic'
 import * as THREE from 'three'
 import { Vector3Map } from './utils'
 
 export const CHUNK_BITS = 4
 export const CHUNK_SIZE = Math.pow(2, CHUNK_BITS)
 
-export const worldPositionToChunkLocalPosition = ({ x, y, z }: THREE.Vector3Like, out = new THREE.Vector3()): THREE.Vector3 => {
+export const worldPositionToChunkLocalPosition = (x: number, y: number, z: number, out = new THREE.Vector3()): THREE.Vector3 => {
     return out.set(x & (CHUNK_SIZE - 1), y & (CHUNK_SIZE - 1), z & (CHUNK_SIZE - 1))
 }
 
-export const worldPositionToChunkPosition = ({ x, y, z }: THREE.Vector3Like, out = new THREE.Vector3()): THREE.Vector3 => {
+export const worldPositionToChunkPosition = (x: number, y: number, z: number, out = new THREE.Vector3()): THREE.Vector3 => {
     // Using signed right shift to convert to chunk vec
     // Shifts right by pushing copies of the leftmost bit in from the left, and let the rightmost bits fall off
     // e.g.
@@ -51,35 +50,18 @@ export class Chunk {
         this.type = new Uint16Array(typeBuffer)
     }
 
-    setBlock(chunkLocalPosition: THREE.Vector3Like, solid: boolean, type: number = 0) {
+    getSolid(x: number, y: number, z: number) {
+        const chunkLocalPosition = worldPositionToChunkLocalPosition(x, y, z, _chunkLocalPosition)
         const solidColumnMask = 1 << chunkLocalPosition.y
-
-        if (solid) {
-            this.solid[Chunk.solidIndex(chunkLocalPosition)] |= solidColumnMask
-        } else {
-            this.solid[Chunk.solidIndex(chunkLocalPosition)] &= ~solidColumnMask
-        }
-
-        this.type[Chunk.typeIndex(chunkLocalPosition)] = solid ? type : 0
-    }
-
-    getSolid(chunkLocalPosition: THREE.Vector3Like) {
-        const solidColumnMask = 1 << chunkLocalPosition.y
-
         const solid = this.solid[Chunk.solidIndex(chunkLocalPosition)] & solidColumnMask
 
         return !!solid
     }
 
-    getType(chunkLocalPosition: THREE.Vector3Like) {
-        return this.type[Chunk.typeIndex(chunkLocalPosition)]
-    }
+    getType(x: number, y: number, z: number) {
+        const chunkLocalPosition = worldPositionToChunkLocalPosition(x, y, z, _chunkLocalPosition)
 
-    getBlock(chunkLocalPosition: THREE.Vector3Like) {
-        return {
-            solid: this.getSolid(chunkLocalPosition),
-            type: this.getType(chunkLocalPosition),
-        }
+        return this.type[Chunk.typeIndex(chunkLocalPosition)]
     }
 
     static solidIndex(chunkLocalPosition: THREE.Vector3Like) {
@@ -98,39 +80,32 @@ export class Chunk {
 export class World {
     chunks = new Vector3Map<Chunk>()
 
-    onChunkCreated = new Topic<[chunk: Chunk]>()
-
-    getBlock(position: THREE.Vector3Like) {
-        const chunk = this.chunks.get(worldPositionToChunkPosition(position, _chunkPosition))
-
-        if (!chunk) {
-            return {
-                solid: false,
-                type: 0,
-            }
-        }
-
-        const chunkLocalPosition = worldPositionToChunkLocalPosition(position, _chunkLocalPosition)
-
-        return chunk.getBlock(chunkLocalPosition)
-    }
-
-    getSolid(position: THREE.Vector3Like) {
-        const chunk = this.chunks.get(worldPositionToChunkPosition(position, _chunkPosition))
+    getSolid(x: number, y: number, z: number) {
+        const chunkPosition = worldPositionToChunkPosition(x, y, z, _chunkPosition)
+        const chunk = this.chunks.get(chunkPosition.x, chunkPosition.y, chunkPosition.z)
 
         if (!chunk) {
             return false
         }
 
-        const chunkLocalPosition = worldPositionToChunkLocalPosition(position, _chunkLocalPosition)
-
-        return chunk.getSolid(chunkLocalPosition)
+        return chunk.getSolid(x, y, z)
     }
 
-    setBlock(position: THREE.Vector3Like, solid: boolean, type: number = 0) {
-        const chunkPosition = worldPositionToChunkPosition(position, _chunkPosition)
+    getType(x: number, y: number, z: number) {
+        const chunkPosition = worldPositionToChunkPosition(x, y, z, _chunkPosition)
+        const chunk = this.chunks.get(chunkPosition.x, chunkPosition.y, chunkPosition.z)
 
-        let chunk = this.chunks.get(worldPositionToChunkPosition(position, _chunkPosition))
+        if (!chunk) {
+            return 0
+        }
+
+        return chunk.getType(x, y, z)
+    }
+
+    setBlock(x: number, y: number, z: number, solid: boolean, type: number = 0) {
+        const chunkPosition = worldPositionToChunkPosition(x, y, z, _chunkPosition)
+
+        let chunk = this.chunks.get(chunkPosition.x, chunkPosition.y, chunkPosition.z)
 
         if (!chunk) {
             const solidBuffer = new ArrayBuffer(Uint16Array.BYTES_PER_ELEMENT * CHUNK_SIZE ** 3)
@@ -138,14 +113,20 @@ export class World {
 
             chunk = new Chunk(Chunk.id(chunkPosition), chunkPosition.clone(), solidBuffer, typeBuffer)
 
-            this.chunks.set(worldPositionToChunkPosition(position, _chunkPosition), chunk)
-
-            this.onChunkCreated.emit(chunk)
+            this.chunks.set(chunkPosition, chunk)
         }
 
-        const chunkLocalPosition = worldPositionToChunkLocalPosition(position, _chunkLocalPosition)
+        const chunkLocalPosition = worldPositionToChunkLocalPosition(x, y, z, _chunkLocalPosition)
 
-        chunk.setBlock(chunkLocalPosition, solid, type)
+        const solidColumnMask = 1 << chunkLocalPosition.y
+
+        if (solid) {
+            chunk.solid[Chunk.solidIndex(chunkLocalPosition)] |= solidColumnMask
+        } else {
+            chunk.solid[Chunk.solidIndex(chunkLocalPosition)] &= ~solidColumnMask
+        }
+
+        chunk.type[Chunk.typeIndex(chunkLocalPosition)] = solid ? type : 0
 
         return {
             success: true,

@@ -1,6 +1,5 @@
-import * as THREE from 'three'
 import { BlockRegistry } from './block-registry'
-import { CHUNK_SIZE, Chunk, World } from './world'
+import { CHUNK_SIZE, Chunk } from './world'
 
 export type ChunkGeometryData = {
     positions: Float32Array
@@ -13,6 +12,15 @@ export type ChunkGeometryData = {
 export type CulledMesherResult = {
     id: string
     opaque: ChunkGeometryData
+}
+
+export type NeigbourChunks = {
+    nx?: Chunk
+    ny?: Chunk
+    nz?: Chunk
+    px?: Chunk
+    py?: Chunk
+    pz?: Chunk
 }
 
 const DIRECTION_VECTORS: number[][][] = new Array(3)
@@ -69,118 +77,202 @@ const FACE_NORMALS: { [face: number]: [number, number, number] } = {
     [Face.DOWN]: [0, -1, 0],
 }
 
-type BlockData = {
-    // [x1, y1, z1, x2, y2, z2, ...]
-    positions: number[]
-    // [a, b, c, ...]
-    indices: number[]
-    // [x, y, z, ...]
-    normals: number[]
-    // [u1, v1, u2, v2, ...]
-    uv: number[]
-    // [x, y, w, h, ...]
-    tex: number[]
+const MAX_POSITIONS = 6 * 4 * 3 * CHUNK_SIZE ** 3
+const MAX_INDICES = 6 * 2 * 3 * CHUNK_SIZE ** 3
+const MAX_NORMALS = 6 * 4 * 3 * CHUNK_SIZE ** 3
+const MAX_UV = 6 * 4 * 2 * CHUNK_SIZE ** 3
+const MAX_TEX = 6 * 4 * 4 * CHUNK_SIZE ** 3
+
+const _buffer = {
+    positions: new Array(MAX_POSITIONS),
+    indices: new Array(MAX_INDICES),
+    normals: new Array(MAX_NORMALS),
+    uv: new Array(MAX_UV),
+    tex: new Array(MAX_TEX),
 }
 
 export class CulledMesher {
-    static mesh(chunk: Chunk, world: World, blockRegistry: BlockRegistry): CulledMesherResult {
-        const buffer: BlockData = {
-            positions: [],
-            indices: [],
-            normals: [],
-            uv: [],
-            tex: [],
-        }
+    static mesh(chunk: Chunk, neighbours: NeigbourChunks, blockRegistry: BlockRegistry): CulledMesherResult {
+        let positionsIndex = 0
+        let indicesIndex = 0
+        let normalsIndex = 0
+        let uvIndex = 0
+        let texIndex = 0
 
-        const currentWorldPosition = new THREE.Vector3()
-        const nxWorldPosition = new THREE.Vector3()
-        const nyWorldPosition = new THREE.Vector3()
-        const nzWorldPosition = new THREE.Vector3()
-
+        // march over the chunk, comparing neighbouring blocks in px, py, pz directions
         for (let x = -1; x < CHUNK_SIZE; x++) {
             for (let z = -1; z < CHUNK_SIZE; z++) {
                 for (let y = -1; y < CHUNK_SIZE; y++) {
-                    currentWorldPosition.set(
-                        chunk.position.x * CHUNK_SIZE + x,
-                        chunk.position.y * CHUNK_SIZE + y,
-                        chunk.position.z * CHUNK_SIZE + z,
-                    )
-                    nxWorldPosition.set(currentWorldPosition.x + 1, currentWorldPosition.y, currentWorldPosition.z)
-                    nyWorldPosition.set(currentWorldPosition.x, currentWorldPosition.y + 1, currentWorldPosition.z)
-                    nzWorldPosition.set(currentWorldPosition.x, currentWorldPosition.y, currentWorldPosition.z + 1)
+                    if (x < 0 || x >= CHUNK_SIZE || y < 0 || y >= CHUNK_SIZE || z < 0 || z >= CHUNK_SIZE) {
+                        continue
+                    }
 
-                    const current = world.getBlock(currentWorldPosition)
+                    let currentSolid = false
+                    let currentType = 0
 
-                    const neighbours = [
-                        world.getBlock(nxWorldPosition),
-                        world.getBlock(nyWorldPosition),
-                        world.getBlock(nzWorldPosition),
-                    ]
+                    // if we are on the nx/ny/nz face of the chunk, we need to check the neighbour for the current block
+                    if (x === -1) {
+                        if (neighbours.nx) {
+                            currentSolid = neighbours.nx.getSolid(CHUNK_SIZE - 1, y, z)
+                            if (currentSolid) {
+                                currentType = neighbours.nx.getType(CHUNK_SIZE - 1, y, z)
+                            }
+                        }
+                    } else if (y === -1) {
+                        if (neighbours.ny) {
+                            currentSolid = neighbours.ny.getSolid(x, CHUNK_SIZE - 1, z)
+                            if (currentSolid) {
+                                currentType = neighbours.ny.getType(x, CHUNK_SIZE - 1, z)
+                            }
+                        }
+                    } else if (z === -1) {
+                        if (neighbours.nz) {
+                            currentSolid = neighbours.nz.getSolid(x, y, CHUNK_SIZE - 1)
+                            if (currentSolid) {
+                                currentType = neighbours.nz.getType(x, y, CHUNK_SIZE - 1)
+                            }
+                        }
+                    } else {
+                        currentSolid = chunk.getSolid(x, y, z)
+                        if (currentSolid) {
+                            currentType = chunk.getType(x, y, z)
+                        }
+                    }
 
                     for (let dir = 0; dir < 3; dir++) {
-                        const nei = neighbours[dir]
+                        let neighbourSolid: boolean = false
+                        let neighbourType: number = 0
 
-                        if (current.solid === nei.solid) continue
+                        if (dir === 0) {
+                            if (x === CHUNK_SIZE - 1) {
+                                if (neighbours.px) {
+                                    neighbourSolid = neighbours.px.getSolid(0, y, z)
+                                    if (neighbourSolid) {
+                                        neighbourType = neighbours.px.getType(0, y, z)
+                                    }
+                                }
+                            } else {
+                                neighbourSolid = chunk.getSolid(x + 1, y, z)
+                                if (neighbourSolid) {
+                                    neighbourType = chunk.getType(x + 1, y, z)
+                                }
+                            }
+                        } else if (dir === 1) {
+                            if (y === CHUNK_SIZE - 1) {
+                                if (neighbours.py) {
+                                    neighbourSolid = neighbours.py.getSolid(x, 0, z)
+                                    if (neighbourSolid) {
+                                        neighbourType = neighbours.py.getType(x, 0, z)
+                                    }
+                                }
+                            } else {
+                                neighbourSolid = chunk.getSolid(x, y + 1, z)
+                                if (neighbourSolid) {
+                                    neighbourType = chunk.getType(x, y + 1, z)
+                                }
+                            }
+                        } else {
+                            if (z === CHUNK_SIZE - 1) {
+                                if (neighbours.pz) {
+                                    neighbourSolid = neighbours.pz.getSolid(x, y, 0)
+                                    if (neighbourSolid) {
+                                        neighbourType = neighbours.pz.getType(x, y, 0)
+                                    }
+                                }
+                            } else {
+                                neighbourSolid = chunk.getSolid(x, y, z + 1)
+                                if (neighbourSolid) {
+                                    neighbourType = chunk.getType(x, y, z + 1)
+                                }
+                            }
+                        }
 
-                        const side = !current.solid ? 1 : 0
+                        if (currentSolid === neighbourSolid) continue
+
+                        const side = !currentSolid ? 1 : 0
 
                         const localChunkPosition = [x, y, z]
                         const u = DIRECTION_VECTORS[dir][side]
                         const v = DIRECTION_VECTORS[dir][side ^ 1]
                         ++localChunkPosition[dir]
 
-                        // Skip face generation for positions outside the current chunk
-                        if (
-                            localChunkPosition[0] < 0 ||
-                            localChunkPosition[0] >= CHUNK_SIZE ||
-                            localChunkPosition[1] < 0 ||
-                            localChunkPosition[1] >= CHUNK_SIZE ||
-                            localChunkPosition[2] < 0 ||
-                            localChunkPosition[2] >= CHUNK_SIZE
-                        )
-                            continue
+                        _buffer.positions[positionsIndex++] = localChunkPosition[0]
+                        _buffer.positions[positionsIndex++] = localChunkPosition[1]
+                        _buffer.positions[positionsIndex++] = localChunkPosition[2]
 
-                        buffer.positions.push(localChunkPosition[0], localChunkPosition[1], localChunkPosition[2])
-                        buffer.positions.push(
-                            localChunkPosition[0] + u[0],
-                            localChunkPosition[1] + u[1],
-                            localChunkPosition[2] + u[2],
-                        )
-                        buffer.positions.push(
-                            localChunkPosition[0] + u[0] + v[0],
-                            localChunkPosition[1] + u[1] + v[1],
-                            localChunkPosition[2] + u[2] + v[2],
-                        )
-                        buffer.positions.push(
-                            localChunkPosition[0] + v[0],
-                            localChunkPosition[1] + v[1],
-                            localChunkPosition[2] + v[2],
-                        )
+                        _buffer.positions[positionsIndex++] = localChunkPosition[0] + u[0]
+                        _buffer.positions[positionsIndex++] = localChunkPosition[1] + u[1]
+                        _buffer.positions[positionsIndex++] = localChunkPosition[2] + u[2]
 
-                        const a = buffer.positions.length / 3 - 4
-                        const b = buffer.positions.length / 3 - 3
-                        const c = buffer.positions.length / 3 - 2
-                        const d = buffer.positions.length / 3 - 1
-                        buffer.indices.push(a, b, d, b, c, d)
+                        _buffer.positions[positionsIndex++] = localChunkPosition[0] + u[0] + v[0]
+                        _buffer.positions[positionsIndex++] = localChunkPosition[1] + u[1] + v[1]
+                        _buffer.positions[positionsIndex++] = localChunkPosition[2] + u[2] + v[2]
+
+                        _buffer.positions[positionsIndex++] = localChunkPosition[0] + v[0]
+                        _buffer.positions[positionsIndex++] = localChunkPosition[1] + v[1]
+                        _buffer.positions[positionsIndex++] = localChunkPosition[2] + v[2]
+
+                        const bufferPositionsLength = positionsIndex / 3
+                        const a = bufferPositionsLength - 4
+                        const b = bufferPositionsLength - 3
+                        const c = bufferPositionsLength - 2
+                        const d = bufferPositionsLength - 1
+
+                        _buffer.indices[indicesIndex++] = a
+                        _buffer.indices[indicesIndex++] = b
+                        _buffer.indices[indicesIndex++] = d
+                        _buffer.indices[indicesIndex++] = b
+                        _buffer.indices[indicesIndex++] = c
+                        _buffer.indices[indicesIndex++] = d
 
                         const face = FACES[dir][side]
 
                         const normal = FACE_NORMALS[face]
-                        buffer.normals.push(...normal, ...normal, ...normal, ...normal)
 
-                        buffer.uv.push(...FACE_TEXTURE_UVS[face])
+                        _buffer.normals[normalsIndex++] = normal[0]
+                        _buffer.normals[normalsIndex++] = normal[1]
+                        _buffer.normals[normalsIndex++] = normal[2]
 
-                        const block = side ? nei : current
-                        const blockType = blockRegistry.getBlock(block.type)
+                        _buffer.normals[normalsIndex++] = normal[0]
+                        _buffer.normals[normalsIndex++] = normal[1]
+                        _buffer.normals[normalsIndex++] = normal[2]
+
+                        _buffer.normals[normalsIndex++] = normal[0]
+                        _buffer.normals[normalsIndex++] = normal[1]
+                        _buffer.normals[normalsIndex++] = normal[2]
+
+                        _buffer.normals[normalsIndex++] = normal[0]
+                        _buffer.normals[normalsIndex++] = normal[1]
+                        _buffer.normals[normalsIndex++] = normal[2]
+
+                        const uvs = FACE_TEXTURE_UVS[face]
+                        _buffer.uv[uvIndex++] = uvs[0]
+                        _buffer.uv[uvIndex++] = uvs[1]
+                        _buffer.uv[uvIndex++] = uvs[2]
+                        _buffer.uv[uvIndex++] = uvs[3]
+                        _buffer.uv[uvIndex++] = uvs[4]
+                        _buffer.uv[uvIndex++] = uvs[5]
+                        _buffer.uv[uvIndex++] = uvs[6]
+                        _buffer.uv[uvIndex++] = uvs[7]
+
+                        const blockTypeId = side ? neighbourType : currentType
+                        const blockType = blockRegistry.getBlock(blockTypeId)
 
                         if (blockType) {
                             const texture = blockType.texture
                             for (let i = 0; i < 4; i++) {
-                                buffer.tex.push(texture.x, texture.y, texture.width, texture.height)
+                                _buffer.tex[texIndex++] = texture.x
+                                _buffer.tex[texIndex++] = texture.y
+                                _buffer.tex[texIndex++] = texture.width
+                                _buffer.tex[texIndex++] = texture.height
                             }
                         } else {
                             for (let i = 0; i < 4; i++) {
-                                buffer.tex.push(0, 0, 0, 0) // todo: error texture
+                                // todo: error texture
+                                _buffer.tex[texIndex++] = 0
+                                _buffer.tex[texIndex++] = 0
+                                _buffer.tex[texIndex++] = 0
+                                _buffer.tex[texIndex++] = 0
                             }
                         }
                     }
@@ -191,11 +283,11 @@ export class CulledMesher {
         return {
             id: chunk.id,
             opaque: {
-                positions: new Float32Array(buffer.positions),
-                indices: new Uint32Array(buffer.indices),
-                normals: new Float32Array(buffer.normals),
-                uv: new Float32Array(buffer.uv),
-                tex: new Float32Array(buffer.tex),
+                positions: new Float32Array(_buffer.positions.slice(0, positionsIndex)),
+                indices: new Uint32Array(_buffer.indices.slice(0, indicesIndex)),
+                normals: new Float32Array(_buffer.normals.slice(0, normalsIndex)),
+                uv: new Float32Array(_buffer.uv.slice(0, uvIndex)),
+                tex: new Float32Array(_buffer.tex.slice(0, texIndex)),
             },
         }
     }
