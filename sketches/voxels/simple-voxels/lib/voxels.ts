@@ -10,7 +10,7 @@ import {
     WorkerMessage,
 } from './culled-mesher-worker-types'
 import CulledMesherWorker from './culled-mesher.worker?worker'
-import { BlockValue, CHUNK_SIZE, Chunk, World, worldPositionToChunkLocalPosition, worldPositionToChunkPosition } from './world'
+import { CHUNK_SIZE, Chunk, World, worldPositionToChunkLocalPosition, worldPositionToChunkPosition } from './world'
 
 const _vector3 = new THREE.Vector3()
 
@@ -37,7 +37,7 @@ type ChunkMesh = {
     mesh: THREE.Mesh<ChunkGeometry, THREE.Material>
 }
 
-export type VoxelsChange = { position: THREE.Vector3Like; value: BlockValue; chunk: Chunk }
+export type VoxelsChange = { args: [x: number, y: number, z: number, solid: boolean, color: number]; chunk: Chunk }
 
 export type VoxelsWorkerPoolParams = {
     workerPoolSize?: number
@@ -155,7 +155,7 @@ export class Voxels {
     private dirtyChunks = new Set<string>()
     private dirtyUnloadedChunks = new Set<string>()
 
-    private setBlockRequests: { position: THREE.Vector3Like; value: BlockValue }[] = []
+    private setBlockRequests: [x: number, y: number, z: number, solid: boolean, color: number][] = []
 
     private voxelsWorkerPool: VoxelsWorkerPool
 
@@ -194,8 +194,8 @@ export class Voxels {
         this.createMesherJobs(changes)
     }
 
-    setBlock({ x, y, z }: THREE.Vector3Like, value: BlockValue) {
-        this.setBlockRequests.push({ position: { x, y, z }, value })
+    setBlock(x: number, y: number, z: number, solid: boolean, color: number = 0) {
+        this.setBlockRequests.push([x, y, z, solid, color])
     }
 
     dispose() {
@@ -217,10 +217,10 @@ export class Voxels {
         const setBlockRequests = this.setBlockRequests
         this.setBlockRequests = []
 
-        for (const { position, value } of setBlockRequests) {
-            const { chunk } = this.world.setBlock(position, value)
+        for (const [x, y, z, solid, color] of setBlockRequests) {
+            const { chunk } = this.world.setBlock(x, y, z, solid, color)
 
-            changes.push({ position, value, chunk })
+            changes.push({ args: [x, y, z, solid, color], chunk })
         }
 
         if (changes.length > 0) {
@@ -232,7 +232,7 @@ export class Voxels {
 
     private updateChunkStates() {
         for (const [, chunk] of this.world.chunks) {
-            const playerCurrentChunk = worldPositionToChunkPosition(this.actor, _vector3)
+            const playerCurrentChunk = worldPositionToChunkPosition(this.actor.x, this.actor.y, this.actor.z, _vector3)
 
             const chunkDistance = playerCurrentChunk.distanceTo(chunk.position)
 
@@ -274,19 +274,22 @@ export class Voxels {
                         z: chunk.position.z + dz,
                     }
 
-                    const neighbourChunkId = Chunk.id(neighbour)
+                    const neighbourChunkId = Chunk.id(neighbour.x, neighbour.y, neighbour.z)
 
                     this.dirtyChunks.add(neighbourChunkId)
                 }
             }
         } else {
-            for (const { chunk, position } of changes) {
+            for (const {
+                chunk,
+                args: [x, y, z],
+            } of changes) {
                 this.dirtyChunks.add(chunk.id)
 
                 // check if we need to make neighbour chunks dirty
                 // we need to check corners as well for AO
                 for (const { x: dx, y: dy, z: dz } of neighbourDirections) {
-                    const chunkLocal = worldPositionToChunkLocalPosition(position, _chunkLocal)
+                    const chunkLocal = worldPositionToChunkLocalPosition(x, y, z, _chunkLocal)
                     if (
                         chunkLocal.x !== 0 &&
                         chunkLocal.x !== CHUNK_SIZE - 1 &&
@@ -298,9 +301,20 @@ export class Voxels {
                         continue
                     }
 
-                    const neighbour = _neighbourPosition.set(position.x + dx, position.y + dy, position.z + dz)
+                    const neighbour = _neighbourPosition.set(x + dx, y + dy, z + dz)
 
-                    const neighbourChunkId = Chunk.id(worldPositionToChunkPosition(neighbour, _neighbourChunk))
+                    const neighbourChunkPosition = worldPositionToChunkPosition(
+                        neighbour.x,
+                        neighbour.y,
+                        neighbour.z,
+                        _neighbourChunk,
+                    )
+
+                    const neighbourChunkId = Chunk.id(
+                        neighbourChunkPosition.x,
+                        neighbourChunkPosition.y,
+                        neighbourChunkPosition.z,
+                    )
 
                     if (neighbourChunkId !== chunk.id) {
                         this.dirtyChunks.add(neighbourChunkId)

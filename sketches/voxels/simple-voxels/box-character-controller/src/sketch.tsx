@@ -70,8 +70,9 @@ const Player = ({ position: initialPosition, width, height }: PlayerProps) => {
 
     const _intersectsVoxelPosition = new THREE.Vector3()
 
-    const intersectsVoxel = (position: THREE.Vector3Like) => {
-        return voxels.world.getSolid(_intersectsVoxelPosition.copy(position).floor())
+    const intersectsVoxel = (worldPosition: THREE.Vector3Like) => {
+        const position = _intersectsVoxelPosition.copy(worldPosition).floor()
+        return voxels.world.getSolid(position.x, position.y, position.z)
     }
 
     const checkGrounded = (): boolean => {

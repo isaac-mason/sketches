@@ -1,4 +1,5 @@
 import { Vector3 } from 'three'
+import { mesh } from './culled-mesher'
 import {
     ChunkMeshUpdateResultMessage,
     CulledMesherWorkerMessageType,
@@ -7,7 +8,6 @@ import {
     WorkerMessage,
 } from './culled-mesher-worker-types'
 import { Chunk, World } from './world'
-import { mesh } from './culled-mesher'
 
 const state = {
     worlds: new Map<number, World>(),
@@ -17,23 +17,23 @@ const state = {
 const worker = self as unknown as Worker
 
 const updateWorld = (worldId: number, chunkIds: Set<string>) => {
-    const remoteWorld = state.worlds.get(worldId)
+    const world = state.worlds.get(worldId)
 
-    if (!remoteWorld) {
+    if (!world) {
         return
     }
 
     const incomplete = new Set(chunkIds)
 
     for (const chunkId of chunkIds) {
-        const chunk = remoteWorld.chunks.get(chunkId)
+        const chunk = world.chunks.get(chunkId)
 
         if (!chunk) {
             continue
         }
 
         try {
-            const { positions, indices, normals, colors, ambientOcclusion } = mesh(chunk, remoteWorld)
+            const { positions, indices, normals, colors, ambientOcclusion } = mesh(chunk, world)
 
             const chunkMeshUpdateNotification: ChunkMeshUpdateResultMessage = {
                 type: CulledMesherWorkerMessageType.CHUNK_MESH_UPDATE_RESULT,

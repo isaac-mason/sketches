@@ -34,10 +34,7 @@ export const useGoxelLevel = (url: string) => {
                     cursor.set(Number(x), Number(z), Number(y))
                     color.set(`#${colorHex}`)
 
-                    voxels.setBlock(cursor, {
-                        solid: true,
-                        color: color.getHex(),
-                    })
+                    voxels.setBlock(cursor.x, cursor.y, cursor.z, true, color.getHex())
                 }
 
                 yield

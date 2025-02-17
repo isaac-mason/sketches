@@ -68,10 +68,7 @@ const InitialWorlds = () => {
 
         for (let x = -20; x < 20; x++) {
             for (let z = -20; z < 20; z++) {
-                voxels.setBlock(new THREE.Vector3(x, -1, z), {
-                    solid: true,
-                    color: Math.random() > 0.5 ? COLOR_GRASS_GREEN_1 : COLOR_GRASS_GREEN_2,
-                })
+                voxels.setBlock(x, -1, z, true, Math.random() > 0.5 ? COLOR_GRASS_GREEN_1 : COLOR_GRASS_GREEN_2)
             }
         }
     }, [])
@@ -124,7 +121,12 @@ const VoxelWorld = ({ entity }: { entity: (typeof voxelWorldsQuery.entities)[num
 
             if (positions.length === 0 || indices.length === 0) return
 
-            const chunkWorldPosition = chunkPositionToWorldPosition(chunk.position, _vector3)
+            const chunkWorldPosition = chunkPositionToWorldPosition(
+                chunk.position.x,
+                chunk.position.y,
+                chunk.position.z,
+                _vector3,
+            )
             chunkWorldPosition.multiplyScalar(entity.voxelWorld.scale)
 
             for (let i = 0; i < positions.length; i += 3) {
@@ -153,41 +155,40 @@ const VoxelWorld = ({ entity }: { entity: (typeof voxelWorldsQuery.entities)[num
     useEffect(() => {
         if (entity.voxelWorld.type !== 'dynamic') return
 
-        const add = (chunk: Chunk, position: THREE.Vector3Like) => {
-            if (colliders.current.has(`${chunk.id}:${position.x},${position.y},${position.z}`)) return
+        const add = (chunk: Chunk, x: number, y: number, z: number) => {
+            if (colliders.current.has(`${chunk.id}:${x},${y},${z}`)) return
 
             const scale = entity.voxelWorld.scale
             const halfSize = 0.5 * scale
             const colliderDesc = ColliderDesc.cuboid(halfSize, halfSize, halfSize)
-            colliderDesc.setTranslation(
-                position.x * scale + halfSize,
-                position.y * scale + halfSize,
-                position.z * scale + halfSize,
-            )
+            colliderDesc.setTranslation(x * scale + halfSize, y * scale + halfSize, z * scale + halfSize)
 
             const collider = physicsWorld.createCollider(colliderDesc, entity.rigidBody!)
 
-            colliders.current.set(`${chunk.id}:${position.x},${position.y},${position.z}`, collider)
+            colliders.current.set(`${chunk.id}:${x},${y},${z}`, collider)
         }
 
-        const remove = (chunk: Chunk, position: THREE.Vector3Like) => {
-            const collider = colliders.current.get(`${chunk.id}:${position.x},${position.y},${position.z}`)
+        const remove = (chunk: Chunk, x: number, y: number, z: number) => {
+            const collider = colliders.current.get(`${chunk.id}:${x},${y},${z}`)
 
             if (!collider) return
 
             physicsWorld.removeCollider(collider, false)
 
-            colliders.current.delete(`${chunk.id}:${position.x},${position.y},${position.z}`)
+            colliders.current.delete(`${chunk.id}:${x},${y},${z}`)
         }
 
         entity.voxels.onUpdate.add((changes) => {
             for (const change of changes) {
-                const { chunk, position, value } = change
+                const {
+                    chunk,
+                    args: [x, y, z, solid],
+                } = change
 
-                if (value.solid) {
-                    add(chunk, position)
+                if (solid) {
+                    add(chunk, x, y, z)
                 } else {
-                    remove(chunk, position)
+                    remove(chunk, x, y, z)
                 }
             }
         })
@@ -368,7 +369,8 @@ const CreateWorldTool = () => {
 
             const entity = world.create({ voxelWorld: { matrix, scale: scale.current, type } })
 
-            entity.voxels?.setBlock(V0, { solid: true, color: entity.voxelWorld.type === 'fixed' ? COLOR_GREY : COLOR_ORANGE })
+            const color = entity.voxelWorld.type === 'fixed' ? COLOR_GREY : COLOR_ORANGE
+            entity.voxels?.setBlock(V0.x, V0.y, V0.z, true, color)
         }
 
         window.addEventListener('pointerdown', onPointerDown)
@@ -511,7 +513,7 @@ const BuildTool = () => {
                     entity: { voxels },
                 } = raycastResult
 
-                const { color } = voxels.world.getBlock(block)
+                const color = voxels.world.getColor(block.x, block.y, block.z)
 
                 if (!color) return
 
@@ -552,16 +554,11 @@ const BuildTool = () => {
             if (event.button === 0) {
                 if (V0.equals(block)) return
 
-                voxels.setBlock(block, {
-                    solid: false,
-                })
+                voxels.setBlock(block.x, block.y, block.z, false)
             } else {
                 block.add(hitNormal).floor()
 
-                voxels.setBlock(block, {
-                    solid: true,
-                    color: new THREE.Color(color).getHex(),
-                })
+                voxels.setBlock(block.x, block.y, block.z, true, new THREE.Color(color).getHex())
             }
 
             if (localVoxelSpaceDebug) {

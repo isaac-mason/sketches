@@ -43,14 +43,11 @@ export const PointerBuildTool = ({ children }: { children: React.ReactNode }) =>
         if (event.button === 2) {
             const block = ray.hitPosition.floor()
 
-            voxels.setBlock(block, { solid: false })
+            voxels.setBlock(block.x, block.y, block.z, false)
         } else {
             const block = ray.hitPosition.add(ray.hitNormal).floor()
 
-            voxels.setBlock(block, {
-                solid: true,
-                color: _color.set(color).getHex(),
-            })
+            voxels.setBlock(block.x, block.y, block.z, true, _color.set(color).getHex())
         }
     }
 

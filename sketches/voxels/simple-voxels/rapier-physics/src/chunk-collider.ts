@@ -128,7 +128,7 @@ export const createChunkTrimesh = (world: World, chunk: Chunk) => {
             for (let localZ = 0; localZ < CHUNK_SIZE; localZ++) {
                 chunkLocalPosition.set(localX, localY, localZ)
 
-                if (!chunk.getSolid(chunkLocalPosition)) continue
+                if (!chunk.getSolid(chunkLocalPosition.x, chunkLocalPosition.y, chunkLocalPosition.z)) continue
 
                 const worldX = chunkX + localX
                 const worldY = chunkY + localY
@@ -137,7 +137,7 @@ export const createChunkTrimesh = (world: World, chunk: Chunk) => {
                 for (const voxelFaceDirection of VOXEL_FACE_DIRECTIONS) {
                     const { dx, dy, dz, lx, ly, lz, ux, uy, uz, vx, vy, vz } = voxelFaceDirection
 
-                    const solid = world.getSolid({ x: worldX + dx, y: worldY + dy, z: worldZ + dz })
+                    const solid = world.getSolid(worldX + dx, worldY + dy, worldZ + dz)
 
                     if (solid) continue
 

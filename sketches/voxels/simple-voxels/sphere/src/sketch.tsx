@@ -15,13 +15,7 @@ const Sphere = () => {
             for (let y = -10; y < 10; y++) {
                 for (let z = -10; z < 10; z++) {
                     if (x * x + y * y + z * z < 10 * 10) {
-                        voxels.setBlock(
-                            { x, y, z },
-                            {
-                                solid: true,
-                                color: Math.random() > 0.5 ? orange : hotpink,
-                            },
-                        )
+                        voxels.setBlock(x, y, z, true, Math.random() > 0.5 ? orange : hotpink)
                     }
                 }
             }

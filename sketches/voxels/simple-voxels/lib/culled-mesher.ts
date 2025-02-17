@@ -1,134 +1,35 @@
 import { Color, Vector3 } from 'three'
 import { CHUNK_SIZE, Chunk, World } from './world'
 
-export type CulledMesherChunkResult = {
-    chunkId: string
-    positions: Float32Array
-    indices: Uint32Array
-    normals: Float32Array
-    colors: Float32Array
-    ambientOcclusion: Float32Array
+const MAX_POSITIONS = 6 * 4 * 3 * CHUNK_SIZE ** 3
+const MAX_INDICES = 6 * 2 * 3 * CHUNK_SIZE ** 3
+const MAX_NORMALS = 6 * 4 * 3 * CHUNK_SIZE ** 3
+const MAX_COLORS = 6 * 4 * 3 * CHUNK_SIZE ** 3
+const MAX_AMBIENT_OCCLUSION = 6 * 4 * CHUNK_SIZE ** 3
+
+// pre-allocate a worst-case sized buffer for the mesher result
+const _buffer = {
+    positions: new Array(MAX_POSITIONS),
+    indices: new Array(MAX_INDICES),
+    normals: new Array(MAX_NORMALS),
+    colors: new Array(MAX_COLORS),
+    ambientOcclusion: new Array(MAX_AMBIENT_OCCLUSION),
 }
 
-const VOXEL_FACE_DIRECTIONS: {
-    // direction of the face / normal
-    dx: number
-    dy: number
-    dz: number
-
-    // local position offset
-    lx: number
-    ly: number
-    lz: number
-
-    // uvs of the faces
-    ux: number
-    uy: number
-    uz: number
-    vx: number
-    vy: number
-    vz: number
-}[] = [
-    // top
-    {
-        dx: 0,
-        dy: 1,
-        dz: 0,
-        lx: 1,
-        ly: 1,
-        lz: 0,
-        ux: -1,
-        uy: 0,
-        uz: 0,
-        vx: 0,
-        vy: 0,
-        vz: 1,
-    },
-    // bottom
-    {
-        dx: 0,
-        dy: -1,
-        dz: 0,
-        lx: 0,
-        ly: 0,
-        lz: 0,
-        ux: 1,
-        uy: 0,
-        uz: 0,
-        vx: 0,
-        vy: 0,
-        vz: 1,
-    },
-    // left
-    {
-        dx: -1,
-        dy: 0,
-        dz: 0,
-        lx: 0,
-        ly: 0,
-        lz: 1,
-        ux: 0,
-        uy: 1,
-        uz: 0,
-        vx: 0,
-        vy: 0,
-        vz: -1,
-    },
-    // right
-    {
-        dx: 1,
-        dy: 0,
-        dz: 0,
-        lx: 1,
-        ly: 0,
-        lz: 0,
-        ux: 0,
-        uy: 1,
-        uz: 0,
-        vx: 0,
-        vy: 0,
-        vz: 1,
-    },
-    // front
-    {
-        dx: 0,
-        dy: 0,
-        dz: -1,
-        lx: 0,
-        ly: 0,
-        lz: 0,
-        ux: 0,
-        uy: 1,
-        uz: 0,
-        vx: 1,
-        vy: 0,
-        vz: 0,
-    },
-    // back
-    {
-        dx: 0,
-        dy: 0,
-        dz: 1,
-        lx: 1,
-        ly: 0,
-        lz: 1,
-        ux: 0,
-        uy: 1,
-        uz: 0,
-        vx: -1,
-        vy: 0,
-        vz: 0,
-    },
-]
+// cache conversion of hex colors to rgb for vertex colors
+const colorCache = new Map<number, [r: number, g: number, b: number]>()
 
 const _color = new Color()
 
-const _mesh_chunkLocalPosition = new Vector3()
-const _mesh_worldPosition = new Vector3()
-const _mesh_worldNeighbourPosition = new Vector3()
-const _mesh_localNeighbourPosition = new Vector3()
+const _blockPosition = [0, 0, 0]
+const _marchNeighbourPosition = [0, 0, 0]
 
-const _ao_worldPosition = new Vector3()
+type BlockValue = { solid: boolean; color: number }
+const _marchValue: BlockValue = { solid: false, color: 0 }
+const _marchNeighbourValue: BlockValue = { solid: false, color: 0 }
+const _aoNeighbourValue: BlockValue = { solid: false, color: 0 }
+const _worldPos = new Vector3()
+
 const _ao_grid = new Uint32Array(9)
 
 const vertexAmbientOcclusion = (side1: number, side2: number, corner: number) => {
@@ -139,93 +40,265 @@ const vertexAmbientOcclusion = (side1: number, side2: number, corner: number) =>
     return (3 - (side1 + side2 + corner)) / 3
 }
 
-export const mesh = (chunk: Chunk, world: World): CulledMesherChunkResult => {
-    const chunkX = chunk.position.x * CHUNK_SIZE
-    const chunkY = chunk.position.y * CHUNK_SIZE
-    const chunkZ = chunk.position.z * CHUNK_SIZE
+// precompute direction vectors
+const DIRECTION_VECTORS: number[][][] = new Array(3)
+for (let i = 0; i < 3; ++i) {
+    DIRECTION_VECTORS[i] = [
+        [0, 0, 0],
+        [0, 0, 0],
+    ]
+    DIRECTION_VECTORS[i][0][(i + 1) % 3] = 1
+    DIRECTION_VECTORS[i][1][(i + 2) % 3] = 1
+}
 
-    const positions: number[] = []
-    const indices: number[] = []
-    const normals: number[] = []
-    const colors: number[] = []
-    const ambientOcclusion: number[] = []
+const AXIS = {
+    X: 0,
+    Y: 1,
+    Z: 2,
+}
 
-    const chunkLocalPosition = _mesh_chunkLocalPosition
-    const worldPosition = _mesh_worldPosition
-    const localNeighbourPosition = _mesh_localNeighbourPosition
-    const worldNeighbourPosition = _mesh_worldNeighbourPosition
+const FACE = {
+    NORTH: 0,
+    EAST: 1,
+    SOUTH: 2,
+    WEST: 3,
+    UP: 4,
+    DOWN: 5,
+}
 
-    const colorCache = new Map<number, [r: number, g: number, b: number]>()
+const SIDE = {
+    Current: 0,
+    Next: 1,
+}
 
-    for (let localX = 0; localX < CHUNK_SIZE; localX++) {
-        for (let localZ = 0; localZ < CHUNK_SIZE; localZ++) {
-            for (let localY = 0; localY < CHUNK_SIZE; localY++) {
-                /* skip air */
-                chunkLocalPosition.set(localX, localY, localZ)
+const FACES: { [axis: number]: { [side: number]: number } } = {
+    [AXIS.X]: { [SIDE.Current]: FACE.EAST, [SIDE.Next]: FACE.WEST },
+    [AXIS.Y]: { [SIDE.Current]: FACE.UP, [SIDE.Next]: FACE.DOWN },
+    [AXIS.Z]: { [SIDE.Current]: FACE.SOUTH, [SIDE.Next]: FACE.NORTH },
+}
 
-                if (!chunk.getSolid(chunkLocalPosition)) continue
+const FACE_NORMALS: { [face: number]: [number, number, number] } = {
+    [FACE.NORTH]: [0, 0, -1],
+    [FACE.SOUTH]: [0, 0, 1],
+    [FACE.EAST]: [1, 0, 0],
+    [FACE.WEST]: [-1, 0, 0],
+    [FACE.UP]: [0, 1, 0],
+    [FACE.DOWN]: [0, -1, 0],
+}
 
-                /* get voxel color */
-                const colorHex = chunk.getColor(chunkLocalPosition)
+type ChunkNeighbours = {
+    nx?: Chunk
+    ny?: Chunk
+    nz?: Chunk
+    px?: Chunk
+    py?: Chunk
+    pz?: Chunk
+}
 
-                let color = colorCache.get(colorHex)
+const getBlock = (
+    cx: number,
+    cy: number,
+    cz: number,
+    chunk: Chunk,
+    world: World,
+    neighbours: ChunkNeighbours,
+    chunkOffset: Vector3,
+    out: BlockValue,
+) => {
+    // if within chunk bounds, use the current chunk.
+    if (cx >= 0 && cx < CHUNK_SIZE && cy >= 0 && cy < CHUNK_SIZE && cz >= 0 && cz < CHUNK_SIZE) {
+        out.solid = chunk.getSolid(cx, cy, cz)
+        out.color = out.solid ? chunk.getColor(cx, cy, cz) : 0
 
-                if (!color) {
-                    _color.setHex(colorHex)
-                    color = [_color.r, _color.g, _color.b]
-                    colorCache.set(colorHex, color)
+        return out
+    }
+
+    // we're out-of-bounds, so we need to determine the neighbor chunk.
+    // determine local coordinate and neighbor offset for each axis.
+    let offsetX = 0
+    let offsetY = 0
+    let offsetZ = 0
+    let localX = cx
+    let localY = cy
+    let localZ = cz
+
+    if (cx < 0) {
+        offsetX = -1
+        localX = cx + CHUNK_SIZE
+    } else if (cx >= CHUNK_SIZE) {
+        offsetX = 1
+        localX = cx - CHUNK_SIZE
+    }
+
+    if (cy < 0) {
+        offsetY = -1
+        localY = cy + CHUNK_SIZE
+    } else if (cy >= CHUNK_SIZE) {
+        offsetY = 1
+        localY = cy - CHUNK_SIZE
+    }
+
+    if (cz < 0) {
+        offsetZ = -1
+        localZ = cz + CHUNK_SIZE
+    } else if (cz >= CHUNK_SIZE) {
+        offsetZ = 1
+        localZ = cz - CHUNK_SIZE
+    }
+
+    // count how many axes are out-of-bound.
+    const nonZeroCount = (offsetX !== 0 ? 1 : 0) + (offsetY !== 0 ? 1 : 0) + (offsetZ !== 0 ? 1 : 0)
+
+    // if exactly one axis is out-of-bound, we can use the direct neighbor.
+    if (nonZeroCount === 1) {
+        let neighborChunk: Chunk | undefined
+        if (offsetX !== 0) {
+            neighborChunk = offsetX === -1 ? neighbours.nx : neighbours.px
+        } else if (offsetY !== 0) {
+            neighborChunk = offsetY === -1 ? neighbours.ny : neighbours.py
+        } else if (offsetZ !== 0) {
+            neighborChunk = offsetZ === -1 ? neighbours.nz : neighbours.pz
+        }
+
+        if (neighborChunk) {
+            out.solid = neighborChunk.getSolid(localX, localY, localZ)
+            out.color = out.solid ? neighborChunk.getColor(localX, localY, localZ) : 0
+            return out
+        }
+    }
+
+    // for cases where two or three axes are out-of-bound (diagonals/edges)
+    // or if the direct neighbor isn’t available, compute the world position.
+    const worldPos = _worldPos.set(cx, cy, cz).add(chunkOffset)
+
+    out.solid = world.getSolid(worldPos.x, worldPos.y, worldPos.z)
+    out.color = out.solid ? (world.getColor(worldPos.x, worldPos.y, worldPos.z) ?? 0) : 0
+
+    return out
+}
+
+const _chunkOffset = new Vector3()
+
+export const mesh = (chunk: Chunk, world: World) => {
+    const neighbours: ChunkNeighbours = {
+        nx: world.getChunk(chunk.position.x - 1, chunk.position.y, chunk.position.z),
+        ny: world.getChunk(chunk.position.x, chunk.position.y - 1, chunk.position.z),
+        nz: world.getChunk(chunk.position.x, chunk.position.y, chunk.position.z - 1),
+        px: world.getChunk(chunk.position.x + 1, chunk.position.y, chunk.position.z),
+        py: world.getChunk(chunk.position.x, chunk.position.y + 1, chunk.position.z),
+        pz: world.getChunk(chunk.position.x, chunk.position.y, chunk.position.z + 1),
+    }
+
+    let positionsIndex = 0
+    let indicesIndex = 0
+    let normalsIndex = 0
+    let colorsIndex = 0
+    let ambientOcclusionIndex = 0
+
+    const chunkOffset = _chunkOffset.copy(chunk.position).multiplyScalar(CHUNK_SIZE)
+
+    // march over the chunk, comparing neighbouring blocks in px, py, pz directions
+    for (let x = -1; x < CHUNK_SIZE; x++) {
+        for (let z = -1; z < CHUNK_SIZE; z++) {
+            for (let y = -1; y < CHUNK_SIZE; y++) {
+                if (x < 0 || x >= CHUNK_SIZE || y < 0 || y >= CHUNK_SIZE || z < 0 || z >= CHUNK_SIZE) {
+                    continue
                 }
 
-                const [colorR, colorG, colorB] = color
+                const marchValue = getBlock(x, y, z, chunk, world, neighbours, chunkOffset, _marchValue)
 
-                /* check which faces are visible */
-                const worldX = chunkX + localX
-                const worldY = chunkY + localY
-                const worldZ = chunkZ + localZ
+                for (let dir = 0; dir < 3; dir++) {
+                    _marchNeighbourPosition[0] = x
+                    _marchNeighbourPosition[1] = y
+                    _marchNeighbourPosition[2] = z
+                    _marchNeighbourPosition[dir]++
+                    const [marchNeighbourX, marchNeighbourY, marchNeighbourZ] = _marchNeighbourPosition
 
-                for (const voxelFaceDirection of VOXEL_FACE_DIRECTIONS) {
-                    const { dx, dy, dz, lx, ly, lz, ux, uy, uz, vx, vy, vz } = voxelFaceDirection
-
-                    localNeighbourPosition.set(localX + dx, localY + dy, localZ + dz)
-
-                    /* skip creating faces when neighbour is solid */
-                    let solid: boolean
-                    if (
-                        localNeighbourPosition.x < 0 ||
-                        localNeighbourPosition.x >= CHUNK_SIZE ||
-                        localNeighbourPosition.y < 0 ||
-                        localNeighbourPosition.y >= CHUNK_SIZE ||
-                        localNeighbourPosition.z < 0 ||
-                        localNeighbourPosition.z >= CHUNK_SIZE
-                    ) {
-                        worldNeighbourPosition.set(worldX + dx, worldY + dy, worldZ + dz)
-                        solid = world.getSolid(worldNeighbourPosition)
-                    } else {
-                        solid = chunk.getSolid(localNeighbourPosition)
-                    }
-
-                    if (solid) continue
-
-                    worldPosition.set(worldX, worldY, worldZ)
-
-                    /* create face */
-                    const voxelFaceLocalX = localX + lx
-                    const voxelFaceLocalY = localY + ly
-                    const voxelFaceLocalZ = localZ + lz
-
-                    // prettier-ignore
-                    positions.push(
-                        voxelFaceLocalX, voxelFaceLocalY, voxelFaceLocalZ,
-                        voxelFaceLocalX + ux, voxelFaceLocalY + uy, voxelFaceLocalZ + uz,
-                        voxelFaceLocalX + ux + vx, voxelFaceLocalY + uy + vy, voxelFaceLocalZ + uz + vz,
-                        voxelFaceLocalX + vx, voxelFaceLocalY + vy, voxelFaceLocalZ + vz
+                    const marchNeighbourValue = getBlock(
+                        marchNeighbourX,
+                        marchNeighbourY,
+                        marchNeighbourZ,
+                        chunk,
+                        world,
+                        neighbours,
+                        chunkOffset,
+                        _marchNeighbourValue,
                     )
 
-                    normals.push(dx, dy, dz, dx, dy, dz, dx, dy, dz, dx, dy, dz)
+                    if (marchValue.solid === marchNeighbourValue.solid) continue
 
-                    colors.push(colorR, colorG, colorB, colorR, colorG, colorB, colorR, colorG, colorB, colorR, colorG, colorB)
+                    const side = !marchValue.solid ? 1 : 0
+                    const currentValue = side ? marchNeighbourValue : marchValue
 
-                    /**
+                    const face = FACES[dir][side]
+                    const [dx, dy, dz] = FACE_NORMALS[face]
+                    const [ux, uy, uz] = DIRECTION_VECTORS[dir][side]
+                    const [vx, vy, vz] = DIRECTION_VECTORS[dir][side ^ 1]
+
+                    // positions
+                    // use marchNeighbourXYZ as the first vertex position
+                    _buffer.positions[positionsIndex++] = marchNeighbourX
+                    _buffer.positions[positionsIndex++] = marchNeighbourY
+                    _buffer.positions[positionsIndex++] = marchNeighbourZ
+
+                    _buffer.positions[positionsIndex++] = marchNeighbourX + ux
+                    _buffer.positions[positionsIndex++] = marchNeighbourY + uy
+                    _buffer.positions[positionsIndex++] = marchNeighbourZ + uz
+
+                    _buffer.positions[positionsIndex++] = marchNeighbourX + ux + vx
+                    _buffer.positions[positionsIndex++] = marchNeighbourY + uy + vy
+                    _buffer.positions[positionsIndex++] = marchNeighbourZ + uz + vz
+
+                    _buffer.positions[positionsIndex++] = marchNeighbourX + vx
+                    _buffer.positions[positionsIndex++] = marchNeighbourY + vy
+                    _buffer.positions[positionsIndex++] = marchNeighbourZ + vz
+
+                    // normals
+                    _buffer.normals[normalsIndex++] = dx
+                    _buffer.normals[normalsIndex++] = dy
+                    _buffer.normals[normalsIndex++] = dz
+
+                    _buffer.normals[normalsIndex++] = dx
+                    _buffer.normals[normalsIndex++] = dy
+                    _buffer.normals[normalsIndex++] = dz
+
+                    _buffer.normals[normalsIndex++] = dx
+                    _buffer.normals[normalsIndex++] = dy
+                    _buffer.normals[normalsIndex++] = dz
+
+                    _buffer.normals[normalsIndex++] = dx
+                    _buffer.normals[normalsIndex++] = dy
+                    _buffer.normals[normalsIndex++] = dz
+
+                    // colors
+                    const colorHex = currentValue.color
+                    let color = colorCache.get(colorHex)
+
+                    if (color === undefined) {
+                        _color.setHex(colorHex)
+                        color = [_color.r, _color.g, _color.b]
+                        colorCache.set(colorHex, color)
+                    }
+
+                    const [colorR, colorG, colorB] = color
+
+                    _buffer.colors[colorsIndex++] = colorR
+                    _buffer.colors[colorsIndex++] = colorG
+                    _buffer.colors[colorsIndex++] = colorB
+
+                    _buffer.colors[colorsIndex++] = colorR
+                    _buffer.colors[colorsIndex++] = colorG
+                    _buffer.colors[colorsIndex++] = colorB
+
+                    _buffer.colors[colorsIndex++] = colorR
+                    _buffer.colors[colorsIndex++] = colorG
+                    _buffer.colors[colorsIndex++] = colorB
+
+                    _buffer.colors[colorsIndex++] = colorR
+                    _buffer.colors[colorsIndex++] = colorG
+                    _buffer.colors[colorsIndex++] = colorB
+
+                    /*
                      * Calculate ambient occlusion for each vertex
                      *
                      *  . --- . --- . --- .
@@ -237,22 +310,34 @@ export const mesh = (chunk: Chunk, world: World): CulledMesherChunkResult => {
                      *  . --- . --- . --- .
                      */
 
-                    // calculate ambient occlusion grid
-                    const aoGridWorldPosition = _ao_worldPosition
+                    // get the block position, used for ao calculations
+                    _blockPosition[0] = x
+                    _blockPosition[1] = y
+                    _blockPosition[2] = z
+                    _blockPosition[dir] += side
+                    const [blockPositionX, blockPositionY, blockPositionZ] = _blockPosition
+
                     const aoGrid = _ao_grid
 
                     let aoGridIndex = 0
                     for (let q = -1; q < 2; q++) {
                         for (let p = -1; p < 2; p++) {
-                            aoGridWorldPosition.copy(worldPosition)
+                            const aoNeighbourX = blockPositionX + dx + ux * p + vx * q
+                            const aoNeighbourY = blockPositionY + dy + uy * p + vy * q
+                            const aoNeighbourZ = blockPositionZ + dz + uz * p + vz * q
 
-                            aoGridWorldPosition.x += dx + ux * p + vx * q
-                            aoGridWorldPosition.y += dy + uy * p + vy * q
-                            aoGridWorldPosition.z += dz + uz * p + vz * q
+                            const aoNeighbour = getBlock(
+                                aoNeighbourX,
+                                aoNeighbourY,
+                                aoNeighbourZ,
+                                chunk,
+                                world,
+                                neighbours,
+                                chunkOffset,
+                                _aoNeighbourValue,
+                            )
 
-                            const solid = world.getSolid(aoGridWorldPosition)
-
-                            aoGrid[aoGridIndex] = solid ? 1 : 0
+                            aoGrid[aoGridIndex] = aoNeighbour.solid ? 1 : 0
 
                             aoGridIndex++
                         }
@@ -264,16 +349,19 @@ export const mesh = (chunk: Chunk, world: World): CulledMesherChunkResult => {
                     const ao10 = vertexAmbientOcclusion(aoGrid[5], aoGrid[7], aoGrid[8])
                     const ao11 = vertexAmbientOcclusion(aoGrid[3], aoGrid[7], aoGrid[6])
 
-                    ambientOcclusion.push(ao00, ao01, ao10, ao11)
+                    // push ambient occlusion
+                    _buffer.ambientOcclusion[ambientOcclusionIndex++] = ao00
+                    _buffer.ambientOcclusion[ambientOcclusionIndex++] = ao01
+                    _buffer.ambientOcclusion[ambientOcclusionIndex++] = ao10
+                    _buffer.ambientOcclusion[ambientOcclusionIndex++] = ao11
 
                     /*
-                        make two triangles for the face
-
-                        d --- c
-                        |     |
-                        a --- b
-                    */
-                    const index = (positions.length + 1) / 3 - 4
+                     * make two triangles for the face
+                     * d --- c
+                     * |     |
+                     * a --- b
+                     */
+                    const index = (positionsIndex + 1) / 3 - 4
                     const a = index
                     const b = index + 1
                     const c = index + 2
@@ -283,11 +371,23 @@ export const mesh = (chunk: Chunk, world: World): CulledMesherChunkResult => {
                      * @see https://0fps.net/2013/07/03/ambient-occlusion-for-minecraft-like-worlds/
                      */
                     if (ao00 + ao10 > ao11 + ao01) {
-                        // generate flipped quad
-                        indices.push(a, b, c, a, c, d)
+                        // flipped quad
+                        _buffer.indices[indicesIndex++] = a
+                        _buffer.indices[indicesIndex++] = b
+                        _buffer.indices[indicesIndex++] = c
+
+                        _buffer.indices[indicesIndex++] = a
+                        _buffer.indices[indicesIndex++] = c
+                        _buffer.indices[indicesIndex++] = d
                     } else {
-                        // generate normal quad
-                        indices.push(a, b, d, b, c, d)
+                        // normal quad
+                        _buffer.indices[indicesIndex++] = a
+                        _buffer.indices[indicesIndex++] = b
+                        _buffer.indices[indicesIndex++] = d
+
+                        _buffer.indices[indicesIndex++] = b
+                        _buffer.indices[indicesIndex++] = c
+                        _buffer.indices[indicesIndex++] = d
                     }
                 }
             }
@@ -295,11 +395,10 @@ export const mesh = (chunk: Chunk, world: World): CulledMesherChunkResult => {
     }
 
     return {
-        chunkId: chunk.id,
-        positions: new Float32Array(positions),
-        indices: new Uint32Array(indices),
-        normals: new Float32Array(normals),
-        colors: new Float32Array(colors),
-        ambientOcclusion: new Float32Array(ambientOcclusion),
+        positions: new Float32Array(_buffer.positions.slice(0, positionsIndex)),
+        indices: new Uint32Array(_buffer.indices.slice(0, indicesIndex)),
+        normals: new Float32Array(_buffer.normals.slice(0, normalsIndex)),
+        colors: new Float32Array(_buffer.colors.slice(0, colorsIndex)),
+        ambientOcclusion: new Float32Array(_buffer.ambientOcclusion.slice(0, ambientOcclusionIndex)),
     }
 }

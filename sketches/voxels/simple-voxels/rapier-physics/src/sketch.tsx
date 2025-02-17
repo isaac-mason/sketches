@@ -55,8 +55,8 @@ const BoxCannonTool = ({ children }: { children: React.ReactNode }) => {
 
 const VOXEL_PHYSICS_WORLD_OFFSET = 0.5
 
-const worldPositionToPhysicsPosition = (position: THREE.Vector3, out = new THREE.Vector3()) => {
-    return out.copy(position).addScalar(VOXEL_PHYSICS_WORLD_OFFSET)
+const worldPositionToPhysicsPosition = (x: number, y: number, z: number, out = new THREE.Vector3()) => {
+    return out.set(x, y, z).addScalar(VOXEL_PHYSICS_WORLD_OFFSET)
 }
 
 const ChunkColliders = () => {
@@ -81,7 +81,8 @@ const ChunkColliders = () => {
                 if (!chunkRigidBody) {
                     chunkRigidBody = world.createRigidBody(Rapier.RigidBodyDesc.fixed())
 
-                    const offset = worldPositionToPhysicsPosition(chunkPositionToWorldPosition(chunk.position))
+                    const chunkPosition = chunkPositionToWorldPosition(chunk.position.x, chunk.position.y, chunk.position.z)
+                    const offset = worldPositionToPhysicsPosition(chunkPosition.x, chunkPosition.y, chunkPosition.z)
 
                     chunkRigidBody.setTranslation(offset, true)
 

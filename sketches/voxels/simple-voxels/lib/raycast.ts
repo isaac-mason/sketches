@@ -41,7 +41,8 @@ const traceRay = (
         fx = ox - ix
         fy = oy - iy
         fz = oz - iz
-        b = world.getSolid({ x: ix, y: iy, z: iz })
+        // b = world.getSolid({ x: ix, y: iy, z: iz })
+        b = world.getSolid(ix, iy, iz)
 
         if (b) {
             if (hitPosition) {
@@ -65,7 +66,10 @@ const traceRay = (
             ey = ny < 0 ? fy <= minStep : fy >= 1.0 - minStep
             ez = nz < 0 ? fz <= minStep : fz >= 1.0 - minStep
             if (ex && ey && ez) {
-                b = world.getSolid({ x: ix + nx, y: iy + ny, z: iz }) || world.getSolid({ x: ix, y: iy + ny, z: iz + nz }) || world.getSolid({ x: ix + nx, y: iy, z: iz + nz })
+                b =
+                    world.getSolid(ix + nx, iy + ny, iz) ||
+                    world.getSolid(ix, iy + ny, iz + nz) ||
+                    world.getSolid(ix + nx, iy, iz + nz)
                 if (b) {
                     if (hitPosition) {
                         hitPosition.x = nx < 0 ? ix - epsilon : ix + 1.0 - epsilon
@@ -81,7 +85,7 @@ const traceRay = (
                 }
             }
             if (ex && (ey || ez)) {
-                b = world.getSolid({ x: ix + nx, y: iy, z: iz })
+                b = world.getSolid(ix + nx, iy, iz)
                 if (b) {
                     if (hitPosition) {
                         hitPosition.x = nx < 0 ? ix - epsilon : ix + 1.0 - epsilon
@@ -97,7 +101,7 @@ const traceRay = (
                 }
             }
             if (ey && (ex || ez)) {
-                b = world.getSolid({ x: ix, y: iy + ny, z: iz })
+                b = world.getSolid(ix, iy + ny, iz)
                 if (b) {
                     if (hitPosition) {
                         hitPosition.x = fx < epsilon ? +ix : ox
@@ -113,7 +117,7 @@ const traceRay = (
                 }
             }
             if (ez && (ex || ey)) {
-                b = world.getSolid({x: ix, y: iy, z: iz + nz })
+                b = world.getSolid(ix, iy, iz + nz)
                 if (b) {
                     if (hitPosition) {
                         hitPosition.x = fx < epsilon ? +ix : ox
@@ -242,15 +246,7 @@ export const raycast = (
     dy /= ds
     dz /= ds
 
-    const hit = traceRay(
-        world,
-        _origin.set(px, py, pz),
-        _direction.set(dx, dy, dz),
-        maxDistance,
-        hitPosition,
-        hitNormal,
-        EPSILON,
-    )
+    const hit = traceRay(world, _origin.set(px, py, pz), _direction.set(dx, dy, dz), maxDistance, hitPosition, hitNormal, EPSILON)
 
     if (hit) {
         return { hit: true, hitPosition, hitNormal }

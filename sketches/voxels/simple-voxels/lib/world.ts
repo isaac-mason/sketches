@@ -5,11 +5,11 @@ import { RaycastResult, raycast } from './raycast'
 export const CHUNK_BITS = 4
 export const CHUNK_SIZE = Math.pow(2, CHUNK_BITS)
 
-export const worldPositionToChunkLocalPosition = ({ x, y, z }: THREE.Vector3Like, out = new THREE.Vector3()): THREE.Vector3 => {
+export const worldPositionToChunkLocalPosition = (x: number, y: number, z: number, out = new THREE.Vector3()): THREE.Vector3 => {
     return out.set(x & (CHUNK_SIZE - 1), y & (CHUNK_SIZE - 1), z & (CHUNK_SIZE - 1))
 }
 
-export const worldPositionToChunkPosition = ({ x, y, z }: THREE.Vector3Like, out = new THREE.Vector3()): THREE.Vector3 => {
+export const worldPositionToChunkPosition = (x: number, y: number, z: number, out = new THREE.Vector3()): THREE.Vector3 => {
     // Using signed right shift to convert to chunk vec
     // Shifts right by pushing copies of the leftmost bit in from the left, and let the rightmost bits fall off
     // e.g.
@@ -22,7 +22,7 @@ export const worldPositionToChunkPosition = ({ x, y, z }: THREE.Vector3Like, out
     return out.set(cx, cy, cz)
 }
 
-export const chunkPositionToWorldPosition = ({ x, y, z }: THREE.Vector3Like, out = new THREE.Vector3()): THREE.Vector3 => {
+export const chunkPositionToWorldPosition = (x: number, y: number, z: number, out = new THREE.Vector3()): THREE.Vector3 => {
     return out.set(x * CHUNK_SIZE, y * CHUNK_SIZE, z * CHUNK_SIZE)
 }
 
@@ -51,56 +51,42 @@ export class Chunk {
         this.color = new Uint32Array(colorBuffer)
     }
 
-    setBlock(chunkLocalPosition: THREE.Vector3Like, value: BlockValue) {
-        const solidColumnMask = 1 << chunkLocalPosition.y
+    setBlock(x: number, y: number, z: number, solid: boolean, color: number) {
+        const solidColumnMask = 1 << y
 
-        if (value.solid) {
-            this.solid[Chunk.solidIndex(chunkLocalPosition)] |= solidColumnMask
+        if (solid) {
+            this.solid[Chunk.solidIndex(x, y, z)] |= solidColumnMask
         } else {
-            this.solid[Chunk.solidIndex(chunkLocalPosition)] &= ~solidColumnMask
+            this.solid[Chunk.solidIndex(x, y, z)] &= ~solidColumnMask
         }
 
-        this.color[Chunk.colorIndex(chunkLocalPosition)] = value.solid ? value.color : 0
+        this.color[Chunk.colorIndex(x, y, z)] = color
     }
 
-    getSolid(chunkLocalPosition: THREE.Vector3Like) {
-        const solidColumnMask = 1 << chunkLocalPosition.y
+    getSolid(x: number, y: number, z: number) {
+        const solidColumnMask = 1 << y
 
-        const solid = this.solid[Chunk.solidIndex(chunkLocalPosition)] & solidColumnMask
+        const solid = this.solid[Chunk.solidIndex(x, y, z)] & solidColumnMask
 
         return !!solid
     }
 
-    getColor(chunkLocalPosition: THREE.Vector3Like) {
-        return this.color[Chunk.colorIndex(chunkLocalPosition)]
+    getColor(x: number, y: number, z: number) {
+        return this.color[Chunk.colorIndex(x, y, z)]
     }
 
-    getBlock(chunkLocalPosition: THREE.Vector3Like): BlockValue {
-        const solidColumnMask = 1 << chunkLocalPosition.y
-        const solid = this.solid[Chunk.solidIndex(chunkLocalPosition)] & solidColumnMask
-
-        const color = this.color[Chunk.colorIndex(chunkLocalPosition)]
-
-        return {
-            solid: !!solid,
-            color,
-        }
+    static solidIndex(x: number, _y: number, z: number) {
+        return x + z * CHUNK_SIZE
     }
 
-    static solidIndex(chunkLocalPosition: THREE.Vector3Like) {
-        return chunkLocalPosition.x + chunkLocalPosition.z * CHUNK_SIZE
+    static colorIndex(x: number, y: number, z: number) {
+        return x + z * CHUNK_SIZE + y * CHUNK_SIZE * CHUNK_SIZE
     }
 
-    static colorIndex(chunkLocalPosition: THREE.Vector3Like) {
-        return chunkLocalPosition.x + chunkLocalPosition.z * CHUNK_SIZE + chunkLocalPosition.y * CHUNK_SIZE * CHUNK_SIZE
-    }
-
-    static id({ x, y, z }: THREE.Vector3Like): string {
+    static id(x: number, y: number, z: number) {
         return `${x},${y},${z}`
     }
 }
-
-export type BlockValue = { solid: false; color?: number } | { solid: true; color: number }
 
 export type RaycastProps = {
     origin: THREE.Vector3Like
@@ -119,36 +105,43 @@ export class World {
 
     onChunkCreated = new Topic<[chunk: Chunk]>()
 
-    getBlock(position: THREE.Vector3Like): BlockValue {
-        const chunk = this.chunks.get(Chunk.id(worldPositionToChunkPosition(position, _chunkPosition)))
-
-        if (!chunk) {
-            return {
-                solid: false,
-                color: undefined,
-            }
-        }
-
-        const chunkLocalPosition = worldPositionToChunkLocalPosition(position, _chunkLocalPosition)
-
-        return chunk.getBlock(chunkLocalPosition)
+    getChunk(x: number, y: number, z: number) {
+        return this.chunks.get(Chunk.id(x, y, z))
     }
 
-    getSolid(position: THREE.Vector3Like) {
-        const chunk = this.chunks.get(Chunk.id(worldPositionToChunkPosition(position, _chunkPosition)))
+    getChunkAt(x: number, y: number, z: number) {
+        const chunkPosition = worldPositionToChunkPosition(x, y, z, _chunkPosition)
+
+        return this.getChunk(chunkPosition.x, chunkPosition.y, chunkPosition.z)
+    }
+
+    getColor(x: number, y: number, z: number) {
+        const chunk = this.getChunkAt(x, y, z)
+
+        if (!chunk) {
+            return undefined
+        }
+
+        const chunkLocalPosition = worldPositionToChunkLocalPosition(x, y, z, _chunkLocalPosition)
+
+        return chunk.getColor(chunkLocalPosition.x, chunkLocalPosition.y, chunkLocalPosition.z)
+    }
+
+    getSolid(x: number, y: number, z: number) {
+        const chunk = this.getChunkAt(x, y, z)
 
         if (!chunk) {
             return false
         }
 
-        const chunkLocalPosition = worldPositionToChunkLocalPosition(position, _chunkLocalPosition)
+        const chunkLocalPosition = worldPositionToChunkLocalPosition(x, y, z, _chunkLocalPosition)
 
-        return chunk.getSolid(chunkLocalPosition)
+        return chunk.getSolid(chunkLocalPosition.x, chunkLocalPosition.y, chunkLocalPosition.z)
     }
 
-    setBlock(position: THREE.Vector3Like, value: BlockValue) {
-        const chunkPosition = worldPositionToChunkPosition(position, _chunkPosition)
-        const id = Chunk.id(chunkPosition)
+    setBlock(x: number, y: number, z: number, solid: boolean, color: number = 0) {
+        const chunkPosition = worldPositionToChunkPosition(x, y, z, _chunkPosition)
+        const id = Chunk.id(chunkPosition.x, chunkPosition.y, chunkPosition.z)
 
         let chunk = this.chunks.get(id)
 
@@ -163,9 +156,9 @@ export class World {
             this.onChunkCreated.emit(chunk)
         }
 
-        const chunkLocalPosition = worldPositionToChunkLocalPosition(position, _chunkLocalPosition)
+        const chunkLocalPosition = worldPositionToChunkLocalPosition(x, y, z, _chunkLocalPosition)
 
-        chunk.setBlock(chunkLocalPosition, value)
+        chunk.setBlock(chunkLocalPosition.x, chunkLocalPosition.y, chunkLocalPosition.z, solid, color)
 
         return {
             success: true,

@@ -16,7 +16,7 @@ export const useSimpleLevel = () => {
     const { voxels } = useVoxels()
 
     const [ready, setReady] = useState(false)
-    
+
     const generator = useMemo(() => new Generator(randomSeed), [])
     const random = () => generator.value()
 
@@ -26,10 +26,7 @@ export const useSimpleLevel = () => {
         // trunk
         for (let y = 0; y < 10; y++) {
             const treeTrunkPosition = _treePosition.set(treeX, treeY + y, treeZ)
-            voxels.setBlock(treeTrunkPosition, {
-                solid: true,
-                color: brown,
-            })
+            voxels.setBlock(treeTrunkPosition.x, treeTrunkPosition.y, treeTrunkPosition.z, true, brown)
         }
 
         // leaves
@@ -48,10 +45,8 @@ export const useSimpleLevel = () => {
                             center[1] + y + 5 + treeY,
                             center[2] + z + treeZ,
                         )
-                        voxels.setBlock(treeLeavesPosition, {
-                            solid: true,
-                            color: random() > 0.5 ? green1 : green2,
-                        })
+                        const color = random() > 0.5 ? green1 : green2
+                        voxels.setBlock(treeLeavesPosition.x, treeLeavesPosition.y, treeLeavesPosition.z, true, color)
                     }
                 }
             }
@@ -74,10 +69,7 @@ export const useSimpleLevel = () => {
                 for (let i = y; i >= -15; i--) {
                     const position = _groundPosition.set(x, i, z)
 
-                    voxels.setBlock(position, {
-                        solid: true,
-                        color,
-                    })
+                    voxels.setBlock(position.x, position.y, position.z, true, color)
                 }
 
                 // random chance to place a tree

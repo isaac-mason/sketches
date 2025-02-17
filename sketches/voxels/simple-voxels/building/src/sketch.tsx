@@ -16,13 +16,7 @@ const Level = () => {
         // ground
         for (let x = -15; x < 15; x++) {
             for (let z = -15; z < 15; z++) {
-                voxels.setBlock(
-                    { x, y: 0, z },
-                    {
-                        solid: true,
-                        color: Math.random() > 0.5 ? green1 : green2,
-                    },
-                )
+                voxels.setBlock(x, 0, z, true, Math.random() > 0.5 ? green1 : green2)
             }
         }
     }, [])

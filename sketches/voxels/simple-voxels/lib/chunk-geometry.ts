@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { BufferGeometry } from 'three'
-import { CulledMesherChunkResult } from './culled-mesher'
+import { CulledMesherChunkResult } from './culled-mesher-worker-types'
 
 export class ChunkGeometry extends BufferGeometry {
     updateChunk({ indices, positions, normals, colors, ambientOcclusion }: CulledMesherChunkResult) {

@@ -25,16 +25,11 @@ export const CameraBuildTool = () => {
             if (event.button === 0) {
                 const block = ray.hitPosition.floor()
 
-                voxels.setBlock(block, {
-                    solid: false,
-                })
+                voxels.setBlock(block.x, block.y, block.z, false)
             } else {
                 const block = ray.hitPosition.add(ray.hitNormal).floor()
 
-                voxels.setBlock(block, {
-                    solid: true,
-                    color: orange,
-                })
+                voxels.setBlock(block.x, block.y, block.z, true, orange)
             }
         }
 

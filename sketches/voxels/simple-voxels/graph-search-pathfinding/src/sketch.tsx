@@ -139,10 +139,7 @@ const useLevel = () => {
 
                     const cursor = _cursor.set(x, i, z)
 
-                    voxels.setBlock(cursor, {
-                        solid: true,
-                        color: color.getHex(),
-                    })
+                    voxels.setBlock(cursor.x, cursor.y, cursor.z, true, color.getHex())
                 }
             }
         }
@@ -219,7 +216,7 @@ const Scene = () => {
     const adjustedGoal = goal.clone()
 
     for (let i = 0; i < 200; i++) {
-        if (world.getSolid(adjustedStart)) {
+        if (world.getSolid(adjustedStart.x, adjustedStart.y, adjustedStart.z)) {
             adjustedStart.y++
             break
         }
@@ -228,7 +225,7 @@ const Scene = () => {
     }
 
     for (let i = 0; i < 200; i++) {
-        if (world.getSolid(adjustedGoal)) {
+        if (world.getSolid(adjustedGoal.x, adjustedGoal.y, adjustedGoal.z)) {
             adjustedGoal.y++
             break
         }

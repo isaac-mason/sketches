@@ -1,10 +1,17 @@
-import { CulledMesherChunkResult } from './culled-mesher'
-
 export const CulledMesherWorkerMessageType = {
     REGISTER_CHUNK: 0,
     REQUEST_CHUNK_MESH_UPDATE: 1,
     CHUNK_MESH_UPDATE_RESULT: 2,
 } as const
+
+export type CulledMesherChunkResult = {
+    chunkId: string
+    positions: Float32Array
+    indices: Uint32Array
+    normals: Float32Array
+    colors: Float32Array
+    ambientOcclusion: Float32Array
+}
 
 export type RegisterChunkMessage = {
     type: typeof CulledMesherWorkerMessageType.REGISTER_CHUNK

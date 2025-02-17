@@ -127,18 +127,14 @@ const Voxelize = ({ children, cellSize, cellHeight }: VoxelizeProps) => {
 
         const volume = voxelize(positions, indices, cellSize, cellHeight)
 
-        const cursor = new THREE.Vector3()
-
         const orange = new THREE.Color('orange')
         const color = new THREE.Color()
 
         for (const [x, y, z] of volume) {
-            cursor.set(x, y, z)
-
             color.copy(orange)
             color.addScalar((Math.random() - 0.5) * 0.12)
 
-            voxels.setBlock(cursor, { solid: true, color: color.getHex() })
+            voxels.setBlock(x, y, z, true, Math.random() > 0.5 ? orange.getHex() : color.getHex())
         }
     }, [voxels])
 
