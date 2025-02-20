@@ -220,10 +220,10 @@ export const raycast = (
     origin: THREE.Vector3Like,
     direction: THREE.Vector3Like,
     maxDistance = 500,
-    hitPosition: THREE.Vector3,
-    hitNormal: THREE.Vector3,
-    EPSILON = 1e-8,
-): RaycastResult => {
+    outHitPosition: THREE.Vector3,
+    outHitNormal: THREE.Vector3,
+    epsilon = 1e-8,
+): boolean => {
     const px = origin.x
     const py = origin.y
     const pz = origin.z
@@ -234,23 +234,23 @@ export const raycast = (
 
     const ds = Math.sqrt(dx * dx + dy * dy + dz * dz)
 
-    if (typeof EPSILON === 'undefined') {
-        EPSILON = 1e-8
-    }
-
-    if (ds < EPSILON) {
-        return { hit: false, hitPosition: undefined, hitNormal: undefined }
+    if (ds < epsilon) {
+        return false
     }
 
     dx /= ds
     dy /= ds
     dz /= ds
 
-    const hit = traceRay(world, _origin.set(px, py, pz), _direction.set(dx, dy, dz), maxDistance, hitPosition, hitNormal, EPSILON)
+    const hit = traceRay(
+        world,
+        _origin.set(px, py, pz),
+        _direction.set(dx, dy, dz),
+        maxDistance,
+        outHitPosition,
+        outHitNormal,
+        epsilon,
+    )
 
-    if (hit) {
-        return { hit: true, hitPosition, hitNormal }
-    }
-
-    return { hit, hitPosition: undefined, hitNormal: undefined }
+    return hit
 }
