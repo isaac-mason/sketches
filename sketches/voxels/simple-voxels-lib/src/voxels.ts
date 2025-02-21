@@ -71,7 +71,7 @@ export class Voxels {
         const canvas = TextureAtlas.createCanvas(this.textureAtlasLayout!, this.assets)
         this.textureAtlasCanvas = canvas
 
-        const texture = TextureAtlas.createTexture(canvas.canvas)
+        const texture = TextureAtlas.createTexture(canvas)
         this.textureAtlasTexture = texture
 
         this.chunkMaterial.updateTexture(texture)

@@ -183,8 +183,8 @@ export const createCanvas = (layout: Layout, assets: Record<string, HTMLImageEle
 
 export type Texture = ReturnType<typeof createTexture>
 
-export const createTexture = (canvas: HTMLCanvasElement) => {
-    const texture = new THREE.CanvasTexture(canvas)
+export const createTexture = (canvas: Canvas) => {
+    const texture = new THREE.CanvasTexture(canvas.canvas)
 
     texture.colorSpace = THREE.SRGBColorSpace
     texture.mapping = THREE.UVMapping
@@ -195,6 +195,9 @@ export const createTexture = (canvas: HTMLCanvasElement) => {
     texture.format = THREE.RGBAFormat
     texture.type = THREE.UnsignedByteType
     texture.anisotropy = 16
+
+    texture.generateMipmaps = false;
+    texture.mipmaps = canvas.mipmaps
 
     return texture
 }

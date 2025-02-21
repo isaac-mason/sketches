@@ -10,8 +10,7 @@ export class ChunkMaterial extends MeshStandardNodeMaterial {
         this.colorNode = Fn(() => {
             const ao = attribute('ao', 'float')
 
-            // TODO: centroid interpolation sampling?
-            const color = texture(this.map!, uv())
+            const color = texture(this.map!, uv());
 
             const ambientOcclusion = sub(float(1), mul(float(1).sub(ao), 0.5))
 
