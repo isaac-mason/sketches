@@ -38,7 +38,7 @@ export const createLayout = (blockRegistry: BlockRegistry.State, textureSize: nu
 
     const blockFaceToHash = new Map<BlockRegistry.BlockCubeFace, string>()
 
-    const missingFace: BlockRegistry.BlockCubeFace = { color: { hex: '#ff0000' } }
+    const missingFace: BlockRegistry.BlockCubeFace = { color: '#ff0000' }
 
     // find unique faces, create atlas tiles for them
     for (const block of blockRegistry.blockIndexToBlock.values()) {
@@ -89,10 +89,6 @@ export const createLayout = (blockRegistry: BlockRegistry.State, textureSize: nu
 
         tile.layout.canvas = { x, y, width: tile.size, height: tile.size }
         tile.layout.uv = {
-            // u1: x / canvasSize,
-            // v1: y / canvasSize,
-            // u2: (x + tile.size) / canvasSize,
-            // v2: (y + tile.size) / canvasSize,
             u1: x / canvasWidth, // L
             v1: (canvasHeight - y - tile.size) / canvasHeight, // B
             u2: (x + tile.size) / canvasWidth, // R
@@ -137,7 +133,7 @@ export const createCanvas = (layout: Layout, assets: Record<string, HTMLImageEle
     // paint tiles into the canvas
     for (const tile of layout.tiles) {
         if (tile.face.color) {
-            ctx.fillStyle = tile.face.color.hex // e.g. '#ff0000'
+            ctx.fillStyle = tile.face.color // e.g. '#ff0000'
             ctx.fillRect(tile.layout.canvas.x, tile.layout.canvas.y, tile.layout.canvas.width, tile.layout.canvas.height)
         } else if (tile.face.texture) {
             const image = assets[tile.face.texture.id]

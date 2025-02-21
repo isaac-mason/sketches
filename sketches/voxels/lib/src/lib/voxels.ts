@@ -1,12 +1,10 @@
 import { Mesh, Object3D, Vector3 } from 'three'
-import { Chunk, CHUNK_SIZE, World, worldPositionToChunkCoordinate, worldPositionToChunkPosition } from './world'
-import { ChunkMaterial } from './chunk-material'
-// import { BlockRegistry } from './block-registry'
-// import { TextureAtlas } from './texture-atlas'
-import * as CulledMesher from './culled-mesher'
-import { ChunkGeometry } from './chunk-geometry'
 import * as BlockRegistry from './block-registry'
+import { ChunkGeometry } from './chunk-geometry'
+import { ChunkMaterial } from './chunk-material'
+import * as CulledMesher from './culled-mesher'
 import * as TextureAtlas from './texture-atlas'
+import { Chunk, CHUNK_SIZE, World, worldPositionToChunkCoordinate, worldPositionToChunkPosition } from './world'
 
 const _chunkCoordinate = new Vector3()
 const _chunkPosition = new Vector3()
@@ -27,24 +25,41 @@ export class Voxels {
     private chunkStates: Map<string, { mesh: Mesh; geometry: ChunkGeometry }> = new Map()
 
     private object3D: Object3D
+    private textureSize: number
     private chunkMaterial: ChunkMaterial
 
-    constructor(object3D: Object3D) {
-        this.blockRegistry = BlockRegistry.init()
+    constructor(object3D: Object3D, textureSize: number) {
         this.object3D = object3D
+        this.textureSize = textureSize
+        this.blockRegistry = BlockRegistry.init()
         this.chunkMaterial = new ChunkMaterial()
     }
 
-    addBlock(block: BlockRegistry.BlockInfo) {
+    registerBlock(block: BlockRegistry.BlockInfo) {
         return BlockRegistry.add(this.blockRegistry, block)
     }
 
-    updateTextureAtlasLayout() {
-        const layout = TextureAtlas.createLayout(this.blockRegistry, 256)
+    /**
+     * Call after adding blocks to the block registry
+     */
+    updateAtlas() {
+        this.updateAtlasLayout()
+        this.updateAtlasTexture()
+    }
+
+    /**
+     * Update the layout of the texture atlas based on the current block registry
+     * You must call this.updateAtlasTexture() after this
+     */
+    updateAtlasLayout() {
+        const layout = TextureAtlas.createLayout(this.blockRegistry, this.textureSize)
         this.textureAtlasLayout = layout
     }
 
-    updateTextureAtlasTexture() {
+    /**
+     * Call as this.assets updates, e.g. as images load to facilitate lazy loading
+     */
+    updateAtlasTexture() {
         const canvas = TextureAtlas.createCanvas(this.textureAtlasLayout!, this.assets)
         this.textureAtlasCanvas = canvas
 
@@ -124,7 +139,7 @@ export class Voxels {
             }
         }
 
-        // mesh a batch of chunks
+        // mesh chunks
         const batch = chunks.slice(0, batchSize)
 
         for (const chunkId of batch) {

@@ -1,6 +1,6 @@
 export type BlockCubeFace = {
     texture?: { id: string }
-    color?: { hex: string }
+    color?: string
 }
 
 export const CUBE_FACE_DIRS = ['px', 'nx', 'py', 'ny', 'pz', 'nz'] as const

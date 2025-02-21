@@ -18,7 +18,8 @@ const Example = () => {
     }, ['__textured_voxels_sphere_block_textures'])
 
     useEffect(() => {
-        const voxels = new Voxels(scene)
+        const textureSize = 32
+        const voxels = new Voxels(scene, textureSize)
 
         voxels.assets = {
             'tex-diamond': diamondTexture,
@@ -26,34 +27,35 @@ const Example = () => {
             'tex-grey': greyTexture,
         }
 
-        const diamondBlock = voxels.addBlock({
+        const diamondBlock = voxels.registerBlock({
             id: 'diamond',
             cube: {
                 default: { texture: { id: 'tex-diamond' } },
             },
         })
 
-        const stoneBlock = voxels.addBlock({
+        const stoneBlock = voxels.registerBlock({
             id: 'stone',
             cube: {
                 default: { texture: { id: 'tex-stone' } },
             },
         })
 
-        const greyBlock = voxels.addBlock({
+        const greyBlock = voxels.registerBlock({
             id: 'grey',
             cube: {
                 default: { texture: { id: 'tex-grey' } },
             },
         })
 
-        voxels.updateTextureAtlasLayout()
-        voxels.updateTextureAtlasTexture()
+        const orangeColorBlock = voxels.registerBlock({
+            id: 'orange',
+            cube: {
+                default: { color: 'orange' },
+            },
+        })
 
-        // document.body.appendChild(voxels.textureAtlasCanvas!.canvas)
-        // voxels.textureAtlasCanvas!.canvas.style.position = 'absolute'
-        // voxels.textureAtlasCanvas!.canvas.style.top = '0'
-        // voxels.textureAtlasCanvas!.canvas.style.left = '0'
+        voxels.updateAtlas()
 
         // sphere
         const size = 20
@@ -86,7 +88,7 @@ const Example = () => {
         // ground
         for (let x = -size; x < size; x++) {
             for (let z = -size; z < size; z++) {
-                voxels.setType(x, -size, z, greyBlock.index)
+                voxels.setType(x, -size, z, orangeColorBlock.index)
             }
         }
 
