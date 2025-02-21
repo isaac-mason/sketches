@@ -1,7 +1,7 @@
 import { WebGPUCanvas } from '@/common/components/webgpu-canvas'
 import { OrbitControls } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
-import { Voxels } from '@sketches/simple-voxels-lib'
+import { Voxels } from '../../simple-voxels-lib/src/voxels'
 import { useEffect, useRef } from 'react'
 import { suspend } from 'suspend-react'
 import * as THREE from 'three'
