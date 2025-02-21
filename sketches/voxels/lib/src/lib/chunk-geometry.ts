@@ -16,12 +16,11 @@ export class ChunkGeometry extends BufferGeometry {
         this.boundingSphere.radius = (Math.sqrt(3) * CHUNK_SIZE) / 2
     }
 
-    setMesherData({ indices, positions, normals, uv, tex, ambientOcclusion }: CulledMesherResult) {
+    setMesherData({ indices, positions, normals, uv, ambientOcclusion }: CulledMesherResult) {
         this.setIndex(new THREE.BufferAttribute(indices, 1))
         this.setAttribute('position', new THREE.BufferAttribute(positions, 3))
         this.setAttribute('normal', new THREE.BufferAttribute(normals, 3))
         this.setAttribute('uv', new THREE.BufferAttribute(uv, 2))
-        this.setAttribute('tex', new THREE.BufferAttribute(tex, 4))
         this.setAttribute('ambientOcclusion', new THREE.BufferAttribute(ambientOcclusion, 1))
     }
 }

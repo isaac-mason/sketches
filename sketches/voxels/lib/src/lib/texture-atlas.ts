@@ -1,114 +1,204 @@
-class TextureAtlasNode {
-    left: TextureAtlasNode | null = null
-    right: TextureAtlasNode | null = null
-    filled: boolean = false
-    x: number = 0
-    y: number = 0
-    width: number = 0
-    height: number = 0
+import * as BlockRegistry from './block-registry'
+import * as THREE from 'three'
+
+const N_MIPMAPS = 4
+const MIN_FACE_SIZE = Math.pow(2, N_MIPMAPS)
+
+const hashFace = (face: BlockRegistry.BlockCubeFace) => {
+    if (face.texture) {
+        return `tex-${face.texture.id}`
+    } else {
+        return `col-${face.color}`
+    }
 }
 
-type TextureUvInfo = {
-    x: number
-    y: number
-    width: number
-    height: number
+type LayoutData = {
+    uv: { u1: number; v1: number; u2: number; v2: number }
+    canvas: { x: number; y: number; width: number; height: number }
 }
 
-export class TextureAtlas {
-    canvas: HTMLCanvasElement
+const makeEmptyLayoutData = (): LayoutData => ({
+    uv: { u1: 0, v1: 0, u2: 0, v2: 0 },
+    canvas: { x: 0, y: 0, width: 0, height: 0 },
+})
 
-    context: CanvasRenderingContext2D
+type BlockCubeAtlasLayout = {
+    nx: LayoutData
+    px: LayoutData
+    ny: LayoutData
+    py: LayoutData
+    nz: LayoutData
+    pz: LayoutData
+}
 
-    private root: TextureAtlasNode
+export type Layout = ReturnType<typeof createLayout>
 
-    constructor(initialWidth: number = 512, initialHeight: number = 512) {
-        this.canvas = document.createElement('canvas')
-        this.canvas.width = initialWidth
-        this.canvas.height = initialHeight
-        this.context = this.canvas.getContext('2d') as CanvasRenderingContext2D
+export const createLayout = (blockRegistry: BlockRegistry.State, textureSize: number) => {
+    const tileMap = new Map<string, { face: BlockRegistry.BlockCubeFace; size: number; layout: LayoutData }>()
 
-        this.root = new TextureAtlasNode()
-        this.root.width = initialWidth
-        this.root.height = initialHeight
-    }
+    const blockFaceToHash = new Map<BlockRegistry.BlockCubeFace, string>()
 
-    add(image: HTMLImageElement): TextureUvInfo {
-        const node = this.findNode(this.root, image.width, image.height)
+    const missingFace: BlockRegistry.BlockCubeFace = { color: { hex: '#ff0000' } }
 
-        if (node) {
-            this.splitNode(node, image.width, image.height)
-            this.context.drawImage(image, node.x, node.y)
+    // find unique faces, create atlas tiles for them
+    for (const block of blockRegistry.blockIndexToBlock.values()) {
+        if (block.cube) {
+            for (const faceDir of BlockRegistry.CUBE_FACE_DIRS) {
+                const face = block.cube[faceDir] ?? block.cube.default ?? missingFace
 
-            return { x: node.x, y: node.y, width: image.width, height: image.height }
-        } else {
-            this.expandCanvas(image.width, image.height)
-            return this.add(image)
-        }
-    }
+                const hash = hashFace(face)
 
-    private findNode(root: TextureAtlasNode, width: number, height: number): TextureAtlasNode | null {
-        const stack = [root]
+                blockFaceToHash.set(face, hash)
 
-        while (stack.length > 0) {
-            const node = stack.pop() as TextureAtlasNode
-            if (node.left && node.right) {
-                stack.push(node.left)
-                stack.push(node.right)
-            } else if (!node.filled && width <= node.width && height <= node.height) {
-                return node
+                if (tileMap.has(hash)) continue
+
+                const size = face.texture ? textureSize : MIN_FACE_SIZE
+
+                tileMap.set(hash, { face, size, layout: makeEmptyLayoutData() })
             }
         }
-
-        return null
     }
 
-    private splitNode(node: TextureAtlasNode, width: number, height: number) {
-        node.filled = true
-        node.left = new TextureAtlasNode()
-        node.right = new TextureAtlasNode()
+    const tiles = Array.from(tileMap.values()).sort((a, b) => b.size - a.size)
 
-        if (node.width - width > node.height - height) {
-            node.left.x = node.x + width
-            node.left.y = node.y
-            node.left.width = node.width - width
-            node.left.height = height
+    // find the smallest power of 2 canvas size that can fit all the tiles
+    let totalPixels = 0
 
-            node.right.x = node.x
-            node.right.y = node.y + height
-            node.right.width = node.width
-            node.right.height = node.height - height
-        } else {
-            node.left.x = node.x
-            node.left.y = node.y + height
-            node.left.width = width
-            node.left.height = node.height - height
+    for (const tile of tiles) {
+        totalPixels += tile.size ** 2
+    }
 
-            node.right.x = node.x + width
-            node.right.y = node.y
-            node.right.width = node.width - width
-            node.right.height = node.height
+    const canvasSize = Math.pow(2, Math.ceil(Math.log2(Math.sqrt(totalPixels))))
+    const canvasWidth = canvasSize
+    const canvasHeight = canvasSize
+
+    // layout the tiles in the canvas
+    let x = 0
+    let y = 0
+    let rowHeight = 0
+
+    for (const tile of tiles) {
+        if (x + tile.size > canvasSize) {
+            x = 0
+            y += rowHeight
+            rowHeight = 0
+        }
+        if (y + tile.size > canvasSize) {
+            throw new Error('Atlas size too small, increase textureSize')
+        }
+
+        tile.layout.canvas = { x, y, width: tile.size, height: tile.size }
+        tile.layout.uv = {
+            // u1: x / canvasSize,
+            // v1: y / canvasSize,
+            // u2: (x + tile.size) / canvasSize,
+            // v2: (y + tile.size) / canvasSize,
+            u1: x / canvasWidth, // L
+            v1: (canvasHeight - y - tile.size) / canvasHeight, // B
+            u2: (x + tile.size) / canvasWidth, // R
+            v2: (canvasHeight - y) / canvasHeight, // T
+        }
+
+        x += tile.size
+        rowHeight = Math.max(rowHeight, tile.size)
+    }
+
+    // formt result data
+    const blockCubeLayouts = new Map<BlockRegistry.BlockCubeInfo, BlockCubeAtlasLayout>()
+
+    for (const block of blockRegistry.blockIndexToBlock.values()) {
+        if (block.cube) {
+            const layout: BlockCubeAtlasLayout = {
+                nx: tileMap.get(blockFaceToHash.get(block.cube.nx ?? block.cube.default ?? missingFace)!)!.layout,
+                px: tileMap.get(blockFaceToHash.get(block.cube.px ?? block.cube.default ?? missingFace)!)!.layout,
+                ny: tileMap.get(blockFaceToHash.get(block.cube.ny ?? block.cube.default ?? missingFace)!)!.layout,
+                py: tileMap.get(blockFaceToHash.get(block.cube.py ?? block.cube.default ?? missingFace)!)!.layout,
+                nz: tileMap.get(blockFaceToHash.get(block.cube.nz ?? block.cube.default ?? missingFace)!)!.layout,
+                pz: tileMap.get(blockFaceToHash.get(block.cube.pz ?? block.cube.default ?? missingFace)!)!.layout,
+            }
+            blockCubeLayouts.set(block.cube, layout)
         }
     }
 
-    private expandCanvas(width: number, height: number) {
-        const oldRoot = this.root
-        this.root = new TextureAtlasNode()
-        this.root.width = Math.max(oldRoot.width, width)
-        this.root.height = oldRoot.height + height
-        this.root.left = oldRoot
-        this.root.right = new TextureAtlasNode()
-        this.root.right.y = oldRoot.height
-        this.root.right.width = this.root.width
-        this.root.right.height = height
+    return { tiles, blockCubeLayouts, canvasSize }
+}
 
-        const canvasBackup = document.createElement('canvas')
-        canvasBackup.width = this.canvas.width
-        canvasBackup.height = this.canvas.height
-        canvasBackup.getContext('2d')?.drawImage(this.canvas, 0, 0)
+export type Canvas = ReturnType<typeof createCanvas>
 
-        this.canvas.width = this.root.width
-        this.canvas.height = this.root.height
-        this.context.drawImage(canvasBackup, 0, 0)
+export const createCanvas = (layout: Layout, assets: Record<string, HTMLImageElement>) => {
+    // create a canvas
+    const canvas = document.createElement('canvas')
+    canvas.width = layout.canvasSize
+    canvas.height = layout.canvasSize
+
+    const ctx = canvas.getContext('2d')!
+    ctx.imageSmoothingEnabled = false
+
+    // paint tiles into the canvas
+    for (const tile of layout.tiles) {
+        if (tile.face.color) {
+            ctx.fillStyle = tile.face.color.hex // e.g. '#ff0000'
+            ctx.fillRect(tile.layout.canvas.x, tile.layout.canvas.y, tile.layout.canvas.width, tile.layout.canvas.height)
+        } else if (tile.face.texture) {
+            const image = assets[tile.face.texture.id]
+            if (!image) continue
+
+            ctx.drawImage(
+                image,
+                0,
+                0,
+                image.width,
+                image.height,
+                tile.layout.canvas.x,
+                tile.layout.canvas.y,
+                tile.layout.canvas.width,
+                tile.layout.canvas.height,
+            )
+        }
     }
+
+    // create mipmaps
+    // generate mipmaps
+    const mipmaps: HTMLCanvasElement[] = []
+
+    let currentCanvas = canvas
+    for (let i = 0; i < N_MIPMAPS; i++) {
+        if (currentCanvas.width <= 1 && currentCanvas.height <= 1) {
+            break
+        }
+
+        const nextWidth = Math.max(1, Math.floor(currentCanvas.width / 2))
+        const nextHeight = Math.max(1, Math.floor(currentCanvas.height / 2))
+
+        const newCanvas = document.createElement('canvas')
+        newCanvas.width = nextWidth
+        newCanvas.height = nextHeight
+
+        const ctx = newCanvas.getContext('2d')!
+
+        ctx.drawImage(currentCanvas, 0, 0, nextWidth, nextHeight)
+
+        mipmaps.push(newCanvas)
+        currentCanvas = newCanvas
+    }
+
+    return { canvas, mipmaps }
+}
+
+export type Texture = ReturnType<typeof createTexture>
+
+export const createTexture = (canvas: HTMLCanvasElement) => {
+    const texture = new THREE.CanvasTexture(canvas)
+
+    texture.colorSpace = THREE.SRGBColorSpace
+    texture.mapping = THREE.UVMapping
+    texture.wrapS = THREE.RepeatWrapping
+    texture.wrapT = THREE.RepeatWrapping
+    texture.magFilter = THREE.NearestFilter
+    texture.minFilter = THREE.NearestMipmapLinearFilter
+    texture.format = THREE.RGBAFormat
+    texture.type = THREE.UnsignedByteType
+    texture.anisotropy = 16
+
+    return texture
 }

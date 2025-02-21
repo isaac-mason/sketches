@@ -1,36 +1,52 @@
+export type BlockCubeFace = {
+    texture?: { id: string }
+    color?: { hex: string }
+}
+
+export const CUBE_FACE_DIRS = ['px', 'nx', 'py', 'ny', 'pz', 'nz'] as const
+
+export type BlockCubeInfo = {
+    default?: BlockCubeFace
+    px?: BlockCubeFace
+    nx?: BlockCubeFace
+    py?: BlockCubeFace
+    ny?: BlockCubeFace
+    pz?: BlockCubeFace
+    nz?: BlockCubeFace
+}
+
+export type BlockInfo = {
+    id: string
+    cube?: BlockCubeInfo
+}
+
 export type Block = {
     index: number
-    id: string
-    texture: {
-        x: number
-        y: number
-        width: number
-        height: number
+} & BlockInfo
+
+export const init = () => {
+    const blockIndexToBlock = new Map<number, Block>()
+    const blockIdToBlock = new Map<string, Block>()
+
+    return {
+        blockIndexToBlock,
+        blockIdToBlock,
+        indexCounter: 1, // 0 is reserved for air
+        lastUpdateTime: 0,
     }
 }
 
-export const AIR_BLOCK_TYPE = 0
+export type State = ReturnType<typeof init>
 
-export class BlockRegistry {
-    indexCounter = 1 // 0 is reserved for air
+export const add = (state: State, block: BlockInfo) => {
+    const index = state.indexCounter++
 
-    blocks: Map<number, Block> = new Map()
+    const newBlock = { index, ...block }
 
-    blockIdToIndex: Map<string, number> = new Map()
+    state.blockIndexToBlock.set(index, newBlock)
+    state.blockIdToBlock.set(block.id, newBlock)
 
-    add({ id, texture }: { id: string; texture: Block['texture'] }): Block {
-        const index = this.indexCounter
-        this.indexCounter++
+    state.lastUpdateTime = Date.now()
 
-        const block = { index, id, texture }
-
-        this.blocks.set(index, block)
-        this.blockIdToIndex.set(id, index)
-
-        return block
-    }
-
-    get(id: number): Block | undefined {
-        return this.blocks.get(id)
-    }
+    return newBlock
 }

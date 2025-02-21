@@ -4,9 +4,7 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useRef } from 'react'
 import { suspend } from 'suspend-react'
 import * as THREE from 'three'
-import { BlockRegistry } from './lib/block-registry'
 import { loadImage } from './lib/load-image'
-import { TextureAtlas } from './lib/texture-atlas'
 import { Voxels } from './lib/voxels'
 import diamondTextureUrl from './textures/diamond.png?url'
 import greyTextureUrl from './textures/grey.png?url'
@@ -20,17 +18,42 @@ const Example = () => {
     }, ['__textured_voxels_sphere_block_textures'])
 
     useEffect(() => {
-        const textureAtlas = new TextureAtlas(16, 16)
-        const diamondTextureInfo = textureAtlas.add(diamondTexture)
-        const stoneTextureInfo = textureAtlas.add(stoneTexture)
-        const greyTextureInfo = textureAtlas.add(greyTexture)
+        const voxels = new Voxels(scene)
 
-        const blockRegistry = new BlockRegistry()
-        const diamondBlock = blockRegistry.add({ id: 'diamond', texture: diamondTextureInfo })
-        const stoneBlock = blockRegistry.add({ id: 'stone', texture: stoneTextureInfo })
-        const greyBlock = blockRegistry.add({ id: 'grey', texture: greyTextureInfo })
+        voxels.assets = {
+            'tex-diamond': diamondTexture,
+            'tex-stone': stoneTexture,
+            'tex-grey': greyTexture,
+        }
 
-        const voxels = new Voxels(blockRegistry, textureAtlas, scene)
+        const diamondBlock = voxels.addBlock({
+            id: 'diamond',
+            cube: {
+                default: { texture: { id: 'tex-diamond' } },
+            },
+        })
+
+        const stoneBlock = voxels.addBlock({
+            id: 'stone',
+            cube: {
+                default: { texture: { id: 'tex-stone' } },
+            },
+        })
+
+        const greyBlock = voxels.addBlock({
+            id: 'grey',
+            cube: {
+                default: { texture: { id: 'tex-grey' } },
+            },
+        })
+
+        voxels.updateTextureAtlasLayout()
+        voxels.updateTextureAtlasTexture()
+
+        // document.body.appendChild(voxels.textureAtlasCanvas!.canvas)
+        // voxels.textureAtlasCanvas!.canvas.style.position = 'absolute'
+        // voxels.textureAtlasCanvas!.canvas.style.top = '0'
+        // voxels.textureAtlasCanvas!.canvas.style.left = '0'
 
         // sphere
         const size = 20

@@ -1,5 +1,6 @@
 import { Vector3, Vector3Tuple } from 'three'
-import { BlockRegistry } from './block-registry'
+import * as BlockRegistry from './block-registry'
+import * as TextureAtlas from './texture-atlas'
 import { CHUNK_SIZE, Chunk, World } from './world'
 
 export type CulledMesherResult = {
@@ -7,7 +8,6 @@ export type CulledMesherResult = {
     indices: Uint32Array
     normals: Float32Array
     uv: Float32Array
-    tex: Float32Array
     ambientOcclusion: Float32Array
 }
 
@@ -36,6 +36,15 @@ const FACE = {
     DOWN: 5,
 }
 
+const FACE_DIRS = {
+    [FACE.NORTH]: 'pz',
+    [FACE.SOUTH]: 'nz',
+    [FACE.EAST]: 'px',
+    [FACE.WEST]: 'nx',
+    [FACE.UP]: 'py',
+    [FACE.DOWN]: 'ny',
+} as const
+
 const SIDE = {
     CURRENT: 0,
     NEXT: 1,
@@ -45,15 +54,6 @@ const FACES: { [axis: number]: { [side: number]: number } } = {
     [AXIS.X]: { [SIDE.CURRENT]: FACE.EAST, [SIDE.NEXT]: FACE.WEST },
     [AXIS.Y]: { [SIDE.CURRENT]: FACE.UP, [SIDE.NEXT]: FACE.DOWN },
     [AXIS.Z]: { [SIDE.CURRENT]: FACE.SOUTH, [SIDE.NEXT]: FACE.NORTH },
-}
-
-const FACE_TEXTURE_UVS: { [face: number]: [number, number, number, number, number, number, number, number] } = {
-    [FACE.NORTH]: [1, 0, 1, 1, 0, 1, 0, 0],
-    [FACE.SOUTH]: [0, 0, 1, 0, 1, 1, 0, 1],
-    [FACE.EAST]: [1, 0, 1, 1, 0, 1, 0, 0],
-    [FACE.WEST]: [0, 0, 1, 0, 1, 1, 0, 1],
-    [FACE.UP]: [0, 1, 0, 0, 1, 0, 1, 1],
-    [FACE.DOWN]: [0, 0, 1, 0, 1, 1, 0, 1],
 }
 
 const FACE_NORMALS: { [face: number]: [number, number, number] } = {
@@ -69,7 +69,6 @@ const MAX_POSITIONS = 6 * 4 * 3 * CHUNK_SIZE ** 3
 const MAX_INDICES = 6 * 2 * 3 * CHUNK_SIZE ** 3
 const MAX_NORMALS = 6 * 4 * 3 * CHUNK_SIZE ** 3
 const MAX_UV = 6 * 4 * 2 * CHUNK_SIZE ** 3
-const MAX_TEX = 6 * 4 * 4 * CHUNK_SIZE ** 3
 const MAX_AO = 6 * 4 * CHUNK_SIZE ** 3
 
 const _opaqueBuffer = {
@@ -77,7 +76,6 @@ const _opaqueBuffer = {
     indices: new Array(MAX_INDICES),
     normals: new Array(MAX_NORMALS),
     uv: new Array(MAX_UV),
-    tex: new Array(MAX_TEX),
     ambientOcclusion: new Array(MAX_AO),
 }
 
@@ -86,16 +84,12 @@ const getType = (chunk: Chunk, world: World, x: number, y: number, z: number) =>
     if (x >= 0 && x < CHUNK_SIZE && y >= 0 && y < CHUNK_SIZE && z >= 0 && z < CHUNK_SIZE) {
         return chunk.getType(x, y, z)
     }
-    
+
     // if outside of chunk, get from world
     return world.getType(x + chunk.worldPositionOffset.x, y + chunk.worldPositionOffset.y, z + chunk.worldPositionOffset.z)
 }
 
-const MARCH_DIRECTIONS = [
-    new Vector3(1, 0, 0),
-    new Vector3(0, 1, 0),
-    new Vector3(0, 0, 1),
-]
+const MARCH_DIRECTIONS = [new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1)]
 
 const vertexAmbientOcclusion = (side1: number, side2: number, corner: number) => {
     if (side1 && side2) {
@@ -108,12 +102,16 @@ const vertexAmbientOcclusion = (side1: number, side2: number, corner: number) =>
 const _blockPosition: Vector3Tuple = [0, 0, 0]
 const _ao_grid = new Uint32Array(9)
 
-export const mesh = (chunk: Chunk, world: World, blockRegistry: BlockRegistry): CulledMesherResult => {
+export const mesh = (
+    chunk: Chunk,
+    world: World,
+    blockRegistry: BlockRegistry.State,
+    textureAtlasLayout: TextureAtlas.Layout,
+): CulledMesherResult => {
     let positionsIndex = 0
     let indicesIndex = 0
     let normalsIndex = 0
     let uvIndex = 0
-    let texIndex = 0
     let ambientOcclusionIndex = 0
 
     // march over the chunk, comparing neighbouring blocks in px, py, pz directions
@@ -134,19 +132,19 @@ export const mesh = (chunk: Chunk, world: World, blockRegistry: BlockRegistry): 
                     const marchNeighbourY = y + marchDirection.y
                     const marchNeighbourZ = z + marchDirection.z
 
-                    const marchNeighbourBlockType = getType(
-                        chunk,
-                        world,
-                        marchNeighbourX,
-                        marchNeighbourY,
-                        marchNeighbourZ,
-                    )
+                    const marchNeighbourBlockType = getType(chunk, world, marchNeighbourX, marchNeighbourY, marchNeighbourZ)
                     const marchNeighbourBlockSolid = marchNeighbourBlockType !== 0
 
                     if (marchBlockSolid === marchNeighbourBlockSolid) continue
 
                     const side = marchBlockSolid ? 0 : 1
                     const faceBlockType = side ? marchNeighbourBlockType : marchBlockType
+
+                    const faceBlockTypeDetails = blockRegistry.blockIndexToBlock.get(faceBlockType)
+
+                    if (!faceBlockTypeDetails?.cube) {
+                        continue
+                    }
 
                     const face = FACES[dir][side]
                     const [dx, dy, dz] = FACE_NORMALS[face]
@@ -189,38 +187,45 @@ export const mesh = (chunk: Chunk, world: World, blockRegistry: BlockRegistry): 
                     _opaqueBuffer.normals[normalsIndex++] = dz
 
                     // uvs
-                    const uvs = FACE_TEXTURE_UVS[face]
-                    _opaqueBuffer.uv[uvIndex++] = uvs[0]
-                    _opaqueBuffer.uv[uvIndex++] = uvs[1]
-                    _opaqueBuffer.uv[uvIndex++] = uvs[2]
-                    _opaqueBuffer.uv[uvIndex++] = uvs[3]
-                    _opaqueBuffer.uv[uvIndex++] = uvs[4]
-                    _opaqueBuffer.uv[uvIndex++] = uvs[5]
-                    _opaqueBuffer.uv[uvIndex++] = uvs[6]
-                    _opaqueBuffer.uv[uvIndex++] = uvs[7]
+                    let u1 = -1
+                    let v1 = -1
+                    let u2 = -1
+                    let v2 = -1
 
-                    // tex
-                    const faceBlockTypeDetails = blockRegistry.get(faceBlockType)
+                    const cubeLayout = textureAtlasLayout.blockCubeLayouts.get(faceBlockTypeDetails.cube)
 
-                    if (faceBlockTypeDetails) {
-                        const texture = faceBlockTypeDetails.texture
-                        for (let i = 0; i < 4; i++) {
-                            _opaqueBuffer.tex[texIndex++] = texture.x
-                            _opaqueBuffer.tex[texIndex++] = texture.y
-                            _opaqueBuffer.tex[texIndex++] = texture.width
-                            _opaqueBuffer.tex[texIndex++] = texture.height
-                        }
-                    } else {
-                        for (let i = 0; i < 4; i++) {
-                            // todo: error texture
-                            _opaqueBuffer.tex[texIndex++] = 0
-                            _opaqueBuffer.tex[texIndex++] = 0
-                            _opaqueBuffer.tex[texIndex++] = 0
-                            _opaqueBuffer.tex[texIndex++] = 0
+                    if (cubeLayout) {
+                        const faceLayout = cubeLayout[FACE_DIRS[face]]
+
+                        if (faceLayout) {
+                            u1 = faceLayout.uv.u1
+                            v1 = faceLayout.uv.v1
+                            u2 = faceLayout.uv.u2
+                            v2 = faceLayout.uv.v2
                         }
                     }
 
-                    // get the block position, used for ao calculations
+                    if (face === FACE.EAST || face === FACE.NORTH || face === FACE.UP) {
+                        _opaqueBuffer.uv[uvIndex++] = u2
+                        _opaqueBuffer.uv[uvIndex++] = v1
+                        _opaqueBuffer.uv[uvIndex++] = u2
+                        _opaqueBuffer.uv[uvIndex++] = v2
+                        _opaqueBuffer.uv[uvIndex++] = u1
+                        _opaqueBuffer.uv[uvIndex++] = v2
+                        _opaqueBuffer.uv[uvIndex++] = u1
+                        _opaqueBuffer.uv[uvIndex++] = v1
+                    } else {
+                        _opaqueBuffer.uv[uvIndex++] = u1
+                        _opaqueBuffer.uv[uvIndex++] = v1
+                        _opaqueBuffer.uv[uvIndex++] = u2
+                        _opaqueBuffer.uv[uvIndex++] = v1
+                        _opaqueBuffer.uv[uvIndex++] = u2
+                        _opaqueBuffer.uv[uvIndex++] = v2
+                        _opaqueBuffer.uv[uvIndex++] = u1
+                        _opaqueBuffer.uv[uvIndex++] = v2
+                    }
+
+                    // ao
                     _blockPosition[0] = x
                     _blockPosition[1] = y
                     _blockPosition[2] = z
@@ -236,13 +241,7 @@ export const mesh = (chunk: Chunk, world: World, blockRegistry: BlockRegistry): 
                             const aoNeighbourY = blockPositionY + dy + uy * p + vy * q
                             const aoNeighbourZ = blockPositionZ + dz + uz * p + vz * q
 
-                            const aoNeighbourBlockType = getType(
-                                chunk,
-                                world,
-                                aoNeighbourX,
-                                aoNeighbourY,
-                                aoNeighbourZ,
-                            )
+                            const aoNeighbourBlockType = getType(chunk, world, aoNeighbourX, aoNeighbourY, aoNeighbourZ)
                             const aoNeighbourSolid = aoNeighbourBlockType !== 0
 
                             aoGrid[aoGridIndex] = aoNeighbourSolid ? 1 : 0
@@ -307,7 +306,6 @@ export const mesh = (chunk: Chunk, world: World, blockRegistry: BlockRegistry): 
         indices: new Uint32Array(_opaqueBuffer.indices.slice(0, indicesIndex)),
         normals: new Float32Array(_opaqueBuffer.normals.slice(0, normalsIndex)),
         uv: new Float32Array(_opaqueBuffer.uv.slice(0, uvIndex)),
-        tex: new Float32Array(_opaqueBuffer.tex.slice(0, texIndex)),
         ambientOcclusion: new Float32Array(_opaqueBuffer.ambientOcclusion.slice(0, ambientOcclusionIndex)),
     }
 }

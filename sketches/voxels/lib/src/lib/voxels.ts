@@ -1,10 +1,12 @@
 import { Mesh, Object3D, Vector3 } from 'three'
 import { Chunk, CHUNK_SIZE, World, worldPositionToChunkCoordinate, worldPositionToChunkPosition } from './world'
 import { ChunkMaterial } from './chunk-material'
-import { BlockRegistry } from './block-registry'
-import { TextureAtlas } from './texture-atlas'
+// import { BlockRegistry } from './block-registry'
+// import { TextureAtlas } from './texture-atlas'
 import * as CulledMesher from './culled-mesher'
 import { ChunkGeometry } from './chunk-geometry'
+import * as BlockRegistry from './block-registry'
+import * as TextureAtlas from './texture-atlas'
 
 const _chunkCoordinate = new Vector3()
 const _chunkPosition = new Vector3()
@@ -14,18 +16,42 @@ export class Voxels {
 
     dirtyChunks = new Set<string>()
 
+    assets: { [key: string]: HTMLImageElement } = {}
+
+    blockRegistry: BlockRegistry.State
+
+    textureAtlasLayout?: TextureAtlas.Layout
+    textureAtlasCanvas?: TextureAtlas.Canvas
+    textureAtlasTexture?: TextureAtlas.Texture
+
     private chunkStates: Map<string, { mesh: Mesh; geometry: ChunkGeometry }> = new Map()
 
-    private blockRegistry: BlockRegistry
-    private textureAtlas: TextureAtlas
     private object3D: Object3D
     private chunkMaterial: ChunkMaterial
 
-    constructor(blockRegistry: BlockRegistry, textureAtlas: TextureAtlas, object3D: Object3D) {
-        this.blockRegistry = blockRegistry
-        this.textureAtlas = textureAtlas
+    constructor(object3D: Object3D) {
+        this.blockRegistry = BlockRegistry.init()
         this.object3D = object3D
-        this.chunkMaterial = new ChunkMaterial(textureAtlas)
+        this.chunkMaterial = new ChunkMaterial()
+    }
+
+    addBlock(block: BlockRegistry.BlockInfo) {
+        return BlockRegistry.add(this.blockRegistry, block)
+    }
+
+    updateTextureAtlasLayout() {
+        const layout = TextureAtlas.createLayout(this.blockRegistry, 256)
+        this.textureAtlasLayout = layout
+    }
+
+    updateTextureAtlasTexture() {
+        const canvas = TextureAtlas.createCanvas(this.textureAtlasLayout!, this.assets)
+        this.textureAtlasCanvas = canvas
+
+        const texture = TextureAtlas.createTexture(canvas.canvas)
+        this.textureAtlasTexture = texture
+
+        this.chunkMaterial.updateTexture(texture)
     }
 
     dispose() {
@@ -117,7 +143,7 @@ export class Voxels {
     }
 
     private meshChunk(chunk: Chunk) {
-        const result = CulledMesher.mesh(chunk, this.world, this.blockRegistry)
+        const result = CulledMesher.mesh(chunk, this.world, this.blockRegistry, this.textureAtlasLayout!)
 
         let chunkState = this.chunkStates.get(chunk.id)
 
