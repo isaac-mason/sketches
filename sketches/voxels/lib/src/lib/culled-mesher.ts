@@ -8,7 +8,7 @@ export type CulledMesherResult = {
     indices: Uint32Array
     normals: Float32Array
     uv: Float32Array
-    ambientOcclusion: Float32Array
+    ao: Float32Array
 }
 
 const DIRECTION_VECTORS: number[][][] = new Array(3)
@@ -76,7 +76,7 @@ const _opaqueBuffer = {
     indices: new Array(MAX_INDICES),
     normals: new Array(MAX_NORMALS),
     uv: new Array(MAX_UV),
-    ambientOcclusion: new Array(MAX_AO),
+    ao: new Array(MAX_AO),
 }
 
 const getType = (chunk: Chunk, world: World, x: number, y: number, z: number) => {
@@ -112,7 +112,7 @@ export const mesh = (
     let indicesIndex = 0
     let normalsIndex = 0
     let uvIndex = 0
-    let ambientOcclusionIndex = 0
+    let aoIndex = 0
 
     // march over the chunk, comparing neighbouring blocks in px, py, pz directions
     for (let x = -1; x < CHUNK_SIZE; x++) {
@@ -257,10 +257,10 @@ export const mesh = (
                     const ao11 = vertexAmbientOcclusion(aoGrid[3], aoGrid[7], aoGrid[6])
 
                     // push ambient occlusion
-                    _opaqueBuffer.ambientOcclusion[ambientOcclusionIndex++] = ao00
-                    _opaqueBuffer.ambientOcclusion[ambientOcclusionIndex++] = ao01
-                    _opaqueBuffer.ambientOcclusion[ambientOcclusionIndex++] = ao10
-                    _opaqueBuffer.ambientOcclusion[ambientOcclusionIndex++] = ao11
+                    _opaqueBuffer.ao[aoIndex++] = ao00
+                    _opaqueBuffer.ao[aoIndex++] = ao01
+                    _opaqueBuffer.ao[aoIndex++] = ao10
+                    _opaqueBuffer.ao[aoIndex++] = ao11
 
                     /*
                      * make two triangles for the face
@@ -306,6 +306,6 @@ export const mesh = (
         indices: new Uint32Array(_opaqueBuffer.indices.slice(0, indicesIndex)),
         normals: new Float32Array(_opaqueBuffer.normals.slice(0, normalsIndex)),
         uv: new Float32Array(_opaqueBuffer.uv.slice(0, uvIndex)),
-        ambientOcclusion: new Float32Array(_opaqueBuffer.ambientOcclusion.slice(0, ambientOcclusionIndex)),
+        ao: new Float32Array(_opaqueBuffer.ao.slice(0, aoIndex)),
     }
 }

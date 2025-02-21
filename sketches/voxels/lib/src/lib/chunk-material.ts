@@ -6,7 +6,7 @@ export class ChunkMaterial extends MeshStandardNodeMaterial {
     updateTexture(atlasTexture: CanvasTexture) {
         this.map = atlasTexture
 
-        const ao = attribute('ambientOcclusion', 'float')
+        const ao = attribute('ao', 'float')
 
         const color = texture(this.map, uv())
 

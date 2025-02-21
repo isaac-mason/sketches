@@ -116,12 +116,12 @@ export class Voxels {
         this.dirtyChunks.add(chunk.id)
     }
 
-    update(batchSize = 3, actor: Vector3) {
+    update(meshChunkBatchSize = 3, actor: Vector3) {
         // prioritize chunks based on an expanding sphere around the actor
         const chunks = Array.from(this.dirtyChunks.values())
 
         // bubble sort only the REMESH_BATCH_SIZE closest chunks based on distance to the actor
-        for (let i = 0; i < batchSize; i++) {
+        for (let i = 0; i < meshChunkBatchSize; i++) {
             for (let j = i + 1; j < chunks.length; j++) {
                 const chunkA = this.world.chunks.get(chunks[i])
                 const chunkB = this.world.chunks.get(chunks[j])
@@ -140,7 +140,7 @@ export class Voxels {
         }
 
         // mesh chunks
-        const batch = chunks.slice(0, batchSize)
+        const batch = chunks.slice(0, meshChunkBatchSize)
 
         for (const chunkId of batch) {
             const chunk = this.world.chunks.get(chunkId)

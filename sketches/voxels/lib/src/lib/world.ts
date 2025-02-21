@@ -1,5 +1,8 @@
 import * as THREE from 'three'
 
+const _chunkCoordinate = new THREE.Vector3()
+const _chunkPosition = new THREE.Vector3()
+
 export const CHUNK_BITS = 4
 export const CHUNK_SIZE = Math.pow(2, CHUNK_BITS)
 
@@ -47,7 +50,7 @@ export class Chunk {
     }
 
     getType(x: number, y: number, z: number) {
-        const chunkLocalPosition = worldPositionToChunkPosition(x, y, z, _chunkLocalPosition)
+        const chunkLocalPosition = worldPositionToChunkPosition(x, y, z, _chunkPosition)
 
         return this.type[Chunk.typeIndex(chunkLocalPosition.x, chunkLocalPosition.y, chunkLocalPosition.z)]
     }
@@ -65,7 +68,7 @@ export class World {
     chunks = new Map<string, Chunk>()
 
     getType(x: number, y: number, z: number) {
-        const chunkCoordinate = worldPositionToChunkCoordinate(x, y, z, _chunkPosition)
+        const chunkCoordinate = worldPositionToChunkCoordinate(x, y, z, _chunkCoordinate)
         const id = Chunk.id(chunkCoordinate.x, chunkCoordinate.y, chunkCoordinate.z)
         const chunk = this.chunks.get(id)
 
@@ -77,7 +80,7 @@ export class World {
     }
 
     setType(x: number, y: number, z: number, type: number = 0) {
-        const chunkCoordinate = worldPositionToChunkCoordinate(x, y, z, _chunkPosition)
+        const chunkCoordinate = worldPositionToChunkCoordinate(x, y, z, _chunkCoordinate)
         const id = Chunk.id(chunkCoordinate.x, chunkCoordinate.y, chunkCoordinate.z)
         let chunk = this.chunks.get(id)
 
@@ -90,11 +93,8 @@ export class World {
             this.chunks.set(chunkId, chunk)
         }
 
-        const chunkLocalPosition = worldPositionToChunkPosition(x, y, z, _chunkLocalPosition)
+        const chunkLocalPosition = worldPositionToChunkPosition(x, y, z, _chunkPosition)
 
         chunk.type[Chunk.typeIndex(chunkLocalPosition.x, chunkLocalPosition.y, chunkLocalPosition.z)] = type
     }
 }
-
-const _chunkPosition = new THREE.Vector3()
-const _chunkLocalPosition = new THREE.Vector3()
