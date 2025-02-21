@@ -1,11 +1,11 @@
 import { WebGPUCanvas } from '@/common/components/webgpu-canvas'
 import { OrbitControls } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
+import { Voxels } from '@sketches/simple-voxels-lib'
 import { useEffect, useRef } from 'react'
 import { suspend } from 'suspend-react'
 import * as THREE from 'three'
-import { loadImage } from './lib/load-image'
-import { Voxels } from './lib/voxels'
+import { loadImage } from './load-image'
 import diamondTextureUrl from './textures/diamond.png?url'
 import greyTextureUrl from './textures/grey.png?url'
 import stoneTextureUrl from './textures/stone.png?url'
@@ -65,7 +65,7 @@ const Example = () => {
                 for (let z = -size; z < size; z++) {
                     if (x ** 2 + y ** 2 + z ** 2 < radius ** 2) {
                         const blockType = Math.random() > 0.5 ? stoneBlock.index : diamondBlock.index
-                        voxels.setType(x, y, z, blockType)
+                        voxels.set(x, y, z, blockType)
                     }
                 }
             }
@@ -74,21 +74,21 @@ const Example = () => {
         // left hand wall
         for (let y = -size; y < size; y++) {
             for (let z = -size; z < size; z++) {
-                voxels.setType(-size, y, z, greyBlock.index)
+                voxels.set(-size, y, z, greyBlock.index)
             }
         }
 
         // back wall
         for (let x = -size; x < size; x++) {
             for (let y = -size; y < size; y++) {
-                voxels.setType(x, y, -size, greyBlock.index)
+                voxels.set(x, y, -size, greyBlock.index)
             }
         }
 
         // ground
         for (let x = -size; x < size; x++) {
             for (let z = -size; z < size; z++) {
-                voxels.setType(x, -size, z, orangeColorBlock.index)
+                voxels.set(x, -size, z, orangeColorBlock.index)
             }
         }
 

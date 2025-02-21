@@ -28,6 +28,10 @@ export class Voxels {
     private textureSize: number
     private chunkMaterial: ChunkMaterial
 
+    /**
+     * @param object3D object3D to add chunk meshes to
+     * @param textureSize size of the texture atlas
+     */
     constructor(object3D: Object3D, textureSize: number) {
         this.object3D = object3D
         this.textureSize = textureSize
@@ -35,6 +39,10 @@ export class Voxels {
         this.chunkMaterial = new ChunkMaterial()
     }
 
+    /**
+     * Register a new block type.
+     * You must call `this.updateAtlas()` after this.
+     */
     registerBlock(block: BlockRegistry.BlockInfo) {
         return BlockRegistry.add(this.blockRegistry, block)
     }
@@ -69,16 +77,7 @@ export class Voxels {
         this.chunkMaterial.updateTexture(texture)
     }
 
-    dispose() {
-        for (const { mesh } of this.chunkStates.values()) {
-            this.object3D.remove(mesh)
-            mesh.geometry.dispose()
-        }
-
-        this.chunkMaterial.dispose()
-    }
-
-    setType(x: number, y: number, z: number, type: number) {
+    set(x: number, y: number, z: number, type: number) {
         this.world.setType(x, y, z, type)
 
         this.markBlockDirty(x, y, z)
@@ -176,5 +175,14 @@ export class Voxels {
         geometry.setMesherData(result)
 
         this.dirtyChunks.delete(chunk.id)
+    }
+
+    dispose() {
+        for (const { mesh } of this.chunkStates.values()) {
+            this.object3D.remove(mesh)
+            mesh.geometry.dispose()
+        }
+
+        this.chunkMaterial.dispose()
     }
 }
