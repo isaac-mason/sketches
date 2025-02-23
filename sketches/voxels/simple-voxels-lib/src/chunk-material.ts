@@ -5,12 +5,10 @@ import { MeshStandardNodeMaterial } from 'three/webgpu'
 
 export class ChunkMaterial extends MeshStandardNodeMaterial {
     updateTexture(atlasTexture: CanvasTexture) {
-        this.map = atlasTexture
-
         this.colorNode = Fn(() => {
             const ao = attribute('ao', 'float')
 
-            const color = texture(this.map!, uv());
+            const color = texture(atlasTexture, uv())
 
             const ambientOcclusion = sub(float(1), mul(float(1).sub(ao), 0.5))
 
