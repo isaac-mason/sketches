@@ -1,20 +1,19 @@
 import { WebGPUCanvas } from '@/common/components/webgpu-canvas'
 import { OrbitControls } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
-import { Voxels } from '../../simple-voxels-lib/src/voxels'
 import { useEffect, useRef } from 'react'
 import { suspend } from 'suspend-react'
 import * as THREE from 'three'
+import { Voxels } from '../../simple-voxels-lib/src/voxels'
 import { loadImage } from './load-image'
 import diamondTextureUrl from './textures/diamond.png?url'
-import greyTextureUrl from './textures/grey.png?url'
 import stoneTextureUrl from './textures/stone.png?url'
 
 const Example = () => {
     const scene = useThree((state) => state.scene)
 
-    const [diamondTexture, stoneTexture, greyTexture] = suspend(async () => {
-        return await Promise.all([diamondTextureUrl, stoneTextureUrl, greyTextureUrl].map(loadImage))
+    const [diamondTexture, stoneTexture] = suspend(async () => {
+        return await Promise.all([diamondTextureUrl, stoneTextureUrl].map(loadImage))
     }, ['__textured_voxels_sphere_block_textures'])
 
     useEffect(() => {
@@ -24,34 +23,26 @@ const Example = () => {
         voxels.assets = {
             'tex-diamond': diamondTexture,
             'tex-stone': stoneTexture,
-            'tex-grey': greyTexture,
         }
 
-        const diamondBlock = voxels.registerBlock({
+        const diamondBlock = voxels.registerType({
             id: 'diamond',
             cube: {
                 default: { texture: { id: 'tex-diamond' } },
             },
         })
 
-        const stoneBlock = voxels.registerBlock({
+        const stoneBlock = voxels.registerType({
             id: 'stone',
             cube: {
                 default: { texture: { id: 'tex-stone' } },
             },
         })
 
-        const greyBlock = voxels.registerBlock({
+        const greyBlock = voxels.registerType({
             id: 'grey',
             cube: {
-                default: { texture: { id: 'tex-grey' } },
-            },
-        })
-
-        const orangeColorBlock = voxels.registerBlock({
-            id: 'orange',
-            cube: {
-                default: { color: 'orange' },
+                default: { color: '#333' },
             },
         })
 
@@ -65,34 +56,32 @@ const Example = () => {
                 for (let z = -size; z < size; z++) {
                     if (x ** 2 + y ** 2 + z ** 2 < radius ** 2) {
                         const blockType = Math.random() > 0.5 ? stoneBlock.index : diamondBlock.index
-                        voxels.set(x, y, z, blockType)
+                        voxels.setBlock(x, y, z, blockType)
                     }
                 }
             }
         }
 
-        // left hand wall
+        // walls and ground
         for (let y = -size; y < size; y++) {
             for (let z = -size; z < size; z++) {
-                voxels.set(-size, y, z, greyBlock.index)
+                voxels.setBlock(-size, y, z, greyBlock.index)
             }
         }
 
-        // back wall
         for (let x = -size; x < size; x++) {
             for (let y = -size; y < size; y++) {
-                voxels.set(x, y, -size, greyBlock.index)
+                voxels.setBlock(x, y, -size, greyBlock.index)
             }
         }
 
-        // ground
         for (let x = -size; x < size; x++) {
             for (let z = -size; z < size; z++) {
-                voxels.set(x, -size, z, orangeColorBlock.index)
+                voxels.setBlock(x, -size, z, greyBlock.index)
             }
         }
 
-        voxels.meshAllChunks()
+        voxels.updateAll()
 
         return () => {
             voxels.dispose()

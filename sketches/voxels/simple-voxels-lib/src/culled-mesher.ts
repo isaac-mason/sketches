@@ -82,11 +82,11 @@ const _opaqueBuffer = {
 const getType = (chunk: Chunk, world: World, x: number, y: number, z: number) => {
     // if within chunk
     if (x >= 0 && x < CHUNK_SIZE && y >= 0 && y < CHUNK_SIZE && z >= 0 && z < CHUNK_SIZE) {
-        return chunk.getType(x, y, z)
+        return chunk.getBlock(x, y, z)
     }
 
     // if outside of chunk, get from world
-    return world.getType(x + chunk.worldPositionOffset.x, y + chunk.worldPositionOffset.y, z + chunk.worldPositionOffset.z)
+    return world.getBlock(x + chunk.worldPositionOffset.x, y + chunk.worldPositionOffset.y, z + chunk.worldPositionOffset.z)
 }
 
 const MARCH_DIRECTIONS = [new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1)]

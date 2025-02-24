@@ -49,10 +49,19 @@ export class Chunk {
         this.type = new Uint16Array(typeBuffer)
     }
 
-    getType(x: number, y: number, z: number) {
+    getBlock(x: number, y: number, z: number) {
         const chunkLocalPosition = worldPositionToChunkPosition(x, y, z, _chunkPosition)
 
         return this.type[Chunk.typeIndex(chunkLocalPosition.x, chunkLocalPosition.y, chunkLocalPosition.z)]
+    }
+
+    static empty(cx: number, cy: number, cz: number) {
+        const typeBuffer = new ArrayBuffer(Uint16Array.BYTES_PER_ELEMENT * CHUNK_SIZE ** 3)
+
+        const chunkId = Chunk.id(cx, cy, cz)
+        const chunkCoordinate = new THREE.Vector3(cx, cy, cz)
+
+        return new Chunk(chunkId, chunkCoordinate, typeBuffer)
     }
 
     static typeIndex(x: number, y: number, z: number) {
@@ -67,7 +76,7 @@ export class Chunk {
 export class World {
     chunks = new Map<string, Chunk>()
 
-    getType(x: number, y: number, z: number) {
+    getBlock(x: number, y: number, z: number) {
         const chunkCoordinate = worldPositionToChunkCoordinate(x, y, z, _chunkCoordinate)
         const id = Chunk.id(chunkCoordinate.x, chunkCoordinate.y, chunkCoordinate.z)
         const chunk = this.chunks.get(id)
@@ -76,21 +85,18 @@ export class World {
             return 0
         }
 
-        return chunk.getType(x, y, z)
+        return chunk.getBlock(x, y, z)
     }
 
-    setType(x: number, y: number, z: number, type: number = 0) {
+    setBlock(x: number, y: number, z: number, type: number = 0) {
         const chunkCoordinate = worldPositionToChunkCoordinate(x, y, z, _chunkCoordinate)
         const id = Chunk.id(chunkCoordinate.x, chunkCoordinate.y, chunkCoordinate.z)
         let chunk = this.chunks.get(id)
 
         if (!chunk) {
-            const typeBuffer = new ArrayBuffer(Uint16Array.BYTES_PER_ELEMENT * CHUNK_SIZE ** 3)
+            chunk = Chunk.empty(chunkCoordinate.x, chunkCoordinate.y, chunkCoordinate.z)
 
-            const chunkId = Chunk.id(chunkCoordinate.x, chunkCoordinate.y, chunkCoordinate.z)
-            chunk = new Chunk(chunkId, chunkCoordinate.clone(), typeBuffer)
-
-            this.chunks.set(chunkId, chunk)
+            this.chunks.set(chunk.id, chunk)
         }
 
         const chunkLocalPosition = worldPositionToChunkPosition(x, y, z, _chunkPosition)

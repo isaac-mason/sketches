@@ -1,15 +1,21 @@
 import * as THREE from 'three'
 import type { World } from './world'
 
-const traceRay = (
+const _origin = new THREE.Vector3()
+const _direction = new THREE.Vector3()
+
+export const raycast = (
     world: World,
-    origin: THREE.Vector3Like,
-    direction: THREE.Vector3Like,
+    inOrigin: THREE.Vector3Like,
+    inDirection: THREE.Vector3Like,
     maxDistance: number,
-    hitPosition: THREE.Vector3,
-    hitNormal: THREE.Vector3,
-    epsilon: number,
-) => {
+    outHitPosition: THREE.Vector3,
+    outHitNormal: THREE.Vector3,
+    epsilon: number = 1e-8,
+): boolean => {
+    const origin = _origin.copy(inOrigin)
+    const direction = _direction.copy(inDirection).normalize()
+
     let t = 0.0
     let nx = 0
     let ny = 0
@@ -42,19 +48,19 @@ const traceRay = (
         fy = oy - iy
         fz = oz - iz
         // b = world.getSolid({ x: ix, y: iy, z: iz })
-        b = world.getType(ix, iy, iz) !== 0
+        b = world.getBlock(ix, iy, iz) !== 0
 
         if (b) {
-            if (hitPosition) {
+            if (outHitPosition) {
                 // Clamp to face on hit
-                hitPosition.x = fx < epsilon ? +ix : fx > 1.0 - epsilon ? ix + 1.0 - epsilon : ox
-                hitPosition.y = fy < epsilon ? +iy : fy > 1.0 - epsilon ? iy + 1.0 - epsilon : oy
-                hitPosition.z = fz < epsilon ? +iz : fz > 1.0 - epsilon ? iz + 1.0 - epsilon : oz
+                outHitPosition.x = fx < epsilon ? +ix : fx > 1.0 - epsilon ? ix + 1.0 - epsilon : ox
+                outHitPosition.y = fy < epsilon ? +iy : fy > 1.0 - epsilon ? iy + 1.0 - epsilon : oy
+                outHitPosition.z = fz < epsilon ? +iz : fz > 1.0 - epsilon ? iz + 1.0 - epsilon : oz
             }
-            if (hitNormal) {
-                hitNormal.x = nx
-                hitNormal.y = ny
-                hitNormal.z = nz
+            if (outHitNormal) {
+                outHitNormal.x = nx
+                outHitNormal.y = ny
+                outHitNormal.z = nz
             }
             return b
         }
@@ -67,67 +73,67 @@ const traceRay = (
             ez = nz < 0 ? fz <= minStep : fz >= 1.0 - minStep
             if (ex && ey && ez) {
                 b =
-                    world.getType(ix + nx, iy + ny, iz) !== 0 ||
-                    world.getType(ix, iy + ny, iz + nz) !== 0 ||
-                    world.getType(ix + nx, iy, iz + nz) !== 0
+                    world.getBlock(ix + nx, iy + ny, iz) !== 0 ||
+                    world.getBlock(ix, iy + ny, iz + nz) !== 0 ||
+                    world.getBlock(ix + nx, iy, iz + nz) !== 0
                 if (b) {
-                    if (hitPosition) {
-                        hitPosition.x = nx < 0 ? ix - epsilon : ix + 1.0 - epsilon
-                        hitPosition.y = ny < 0 ? iy - epsilon : iy + 1.0 - epsilon
-                        hitPosition.z = nz < 0 ? iz - epsilon : iz + 1.0 - epsilon
+                    if (outHitPosition) {
+                        outHitPosition.x = nx < 0 ? ix - epsilon : ix + 1.0 - epsilon
+                        outHitPosition.y = ny < 0 ? iy - epsilon : iy + 1.0 - epsilon
+                        outHitPosition.z = nz < 0 ? iz - epsilon : iz + 1.0 - epsilon
                     }
-                    if (hitNormal) {
-                        hitNormal.x = nx
-                        hitNormal.y = ny
-                        hitNormal.z = nz
+                    if (outHitNormal) {
+                        outHitNormal.x = nx
+                        outHitNormal.y = ny
+                        outHitNormal.z = nz
                     }
                     return b
                 }
             }
             if (ex && (ey || ez)) {
-                b = world.getType(ix + nx, iy, iz) !== 0
+                b = world.getBlock(ix + nx, iy, iz) !== 0
                 if (b) {
-                    if (hitPosition) {
-                        hitPosition.x = nx < 0 ? ix - epsilon : ix + 1.0 - epsilon
-                        hitPosition.y = fy < epsilon ? +iy : oy
-                        hitPosition.z = fz < epsilon ? +iz : oz
+                    if (outHitPosition) {
+                        outHitPosition.x = nx < 0 ? ix - epsilon : ix + 1.0 - epsilon
+                        outHitPosition.y = fy < epsilon ? +iy : oy
+                        outHitPosition.z = fz < epsilon ? +iz : oz
                     }
-                    if (hitNormal) {
-                        hitNormal.x = nx
-                        hitNormal.y = ny
-                        hitNormal.z = nz
+                    if (outHitNormal) {
+                        outHitNormal.x = nx
+                        outHitNormal.y = ny
+                        outHitNormal.z = nz
                     }
                     return b
                 }
             }
             if (ey && (ex || ez)) {
-                b = world.getType(ix, iy + ny, iz) !== 0
+                b = world.getBlock(ix, iy + ny, iz) !== 0
                 if (b) {
-                    if (hitPosition) {
-                        hitPosition.x = fx < epsilon ? +ix : ox
-                        hitPosition.y = ny < 0 ? iy - epsilon : iy + 1.0 - epsilon
-                        hitPosition.z = fz < epsilon ? +iz : oz
+                    if (outHitPosition) {
+                        outHitPosition.x = fx < epsilon ? +ix : ox
+                        outHitPosition.y = ny < 0 ? iy - epsilon : iy + 1.0 - epsilon
+                        outHitPosition.z = fz < epsilon ? +iz : oz
                     }
-                    if (hitNormal) {
-                        hitNormal.x = nx
-                        hitNormal.y = ny
-                        hitNormal.z = nz
+                    if (outHitNormal) {
+                        outHitNormal.x = nx
+                        outHitNormal.y = ny
+                        outHitNormal.z = nz
                     }
                     return b
                 }
             }
             if (ez && (ex || ey)) {
-                b = world.getType(ix, iy, iz + nz) !== 0
+                b = world.getBlock(ix, iy, iz + nz) !== 0
                 if (b) {
-                    if (hitPosition) {
-                        hitPosition.x = fx < epsilon ? +ix : ox
-                        hitPosition.y = fy < epsilon ? +iy : oy
-                        hitPosition.z = nz < 0 ? iz - epsilon : iz + 1.0 - epsilon
+                    if (outHitPosition) {
+                        outHitPosition.x = fx < epsilon ? +ix : ox
+                        outHitPosition.y = fy < epsilon ? +iy : oy
+                        outHitPosition.z = nz < 0 ? iz - epsilon : iz + 1.0 - epsilon
                     }
-                    if (hitNormal) {
-                        hitNormal.x = nx
-                        hitNormal.y = ny
-                        hitNormal.z = nz
+                    if (outHitNormal) {
+                        outHitNormal.x = nx
+                        outHitNormal.y = ny
+                        outHitNormal.z = nz
                     }
                     return b
                 }
@@ -195,62 +201,15 @@ const traceRay = (
         t += step
     }
 
-    if (hitPosition) {
-        hitPosition.x = ox
-        hitPosition.y = oy
-        hitPosition.z = oz
+    if (outHitPosition) {
+        outHitPosition.x = ox
+        outHitPosition.y = oy
+        outHitPosition.z = oz
     }
 
-    if (hitNormal) {
-        hitNormal.x = hitNormal.y = hitNormal.z = 0
+    if (outHitNormal) {
+        outHitNormal.x = outHitNormal.y = outHitNormal.z = 0
     }
 
     return false
-}
-
-export type RaycastResult =
-    | { hit: false; hitPosition: undefined; hitNormal: undefined }
-    | { hit: true; hitPosition: THREE.Vector3; hitNormal: THREE.Vector3 }
-
-const _origin = new THREE.Vector3()
-const _direction = new THREE.Vector3()
-
-export const raycast = (
-    world: World,
-    origin: THREE.Vector3Like,
-    direction: THREE.Vector3Like,
-    maxDistance = 500,
-    outHitPosition: THREE.Vector3,
-    outHitNormal: THREE.Vector3,
-    epsilon = 1e-8,
-): boolean => {
-    const px = origin.x
-    const py = origin.y
-    const pz = origin.z
-
-    let dx = direction.x
-    let dy = direction.y
-    let dz = direction.z
-
-    const ds = Math.sqrt(dx * dx + dy * dy + dz * dz)
-
-    if (ds < epsilon) {
-        return false
-    }
-
-    dx /= ds
-    dy /= ds
-    dz /= ds
-
-    const hit = traceRay(
-        world,
-        _origin.set(px, py, pz),
-        _direction.set(dx, dy, dz),
-        maxDistance,
-        outHitPosition,
-        outHitNormal,
-        epsilon,
-    )
-
-    return hit
 }

@@ -24,26 +24,32 @@ export class Voxels {
 
     private chunkStates: Map<string, { mesh: Mesh; geometry: ChunkGeometry }> = new Map()
 
-    private object3D: Object3D
+    private parentObject3D: Object3D
     private textureSize: number
     private chunkMaterial: ChunkMaterial
 
     /**
-     * @param object3D object3D to add chunk meshes to
+     * @param parentObject3D object3D to add chunk meshes to
      * @param textureSize size of the texture atlas
      */
-    constructor(object3D: Object3D, textureSize: number) {
-        this.object3D = object3D
+    constructor(parentObject3D: Object3D, textureSize: number) {
+        this.parentObject3D = parentObject3D
         this.textureSize = textureSize
         this.blockRegistry = BlockRegistry.init()
         this.chunkMaterial = new ChunkMaterial()
+    }
+
+    setBlock(x: number, y: number, z: number, type: number) {
+        this.world.setBlock(x, y, z, type)
+
+        this.markBlockDirty(x, y, z)
     }
 
     /**
      * Register a new block type.
      * You must call `this.updateAtlas()` after this.
      */
-    registerBlock(block: BlockRegistry.BlockInfo) {
+    registerType(block: BlockRegistry.BlockInfo) {
         return BlockRegistry.add(this.blockRegistry, block)
     }
 
@@ -65,7 +71,7 @@ export class Voxels {
     }
 
     /**
-     * Call as this.assets updates, e.g. as images load to facilitate lazy loading
+     * Call as this.assets updates, e.g. as images load to facilitate lazy loading.
      */
     updateAtlasTexture() {
         const canvas = TextureAtlas.createCanvas(this.textureAtlasLayout!, this.assets)
@@ -77,12 +83,9 @@ export class Voxels {
         this.chunkMaterial.updateTexture(texture)
     }
 
-    set(x: number, y: number, z: number, type: number) {
-        this.world.setType(x, y, z, type)
-
-        this.markBlockDirty(x, y, z)
-    }
-
+    /**
+     * Call after changing a block, with `World` directly. Calling `voxels.setType` will do this for you.
+     */
     markBlockDirty(x: number, y: number, z: number) {
         const chunkCoordinate = worldPositionToChunkCoordinate(x, y, z, _chunkCoordinate)
         const chunkId = Chunk.id(chunkCoordinate.x, chunkCoordinate.y, chunkCoordinate.z)
@@ -111,16 +114,22 @@ export class Voxels {
         }
     }
 
+    /**
+     * Marks a chunk as dirty.
+     */
     markChunkDirty(chunk: Chunk) {
         this.dirtyChunks.add(chunk.id)
     }
 
-    update(meshChunkBatchSize = 3, actor: Vector3) {
+    /**
+     * Updates n dirty chunks around an actor.
+     */
+    update(n = 3, actor: Vector3) {
         // prioritize chunks based on an expanding sphere around the actor
         const chunks = Array.from(this.dirtyChunks.values())
 
         // bubble sort only the REMESH_BATCH_SIZE closest chunks based on distance to the actor
-        for (let i = 0; i < meshChunkBatchSize; i++) {
+        for (let i = 0; i < n; i++) {
             for (let j = i + 1; j < chunks.length; j++) {
                 const chunkA = this.world.chunks.get(chunks[i])
                 const chunkB = this.world.chunks.get(chunks[j])
@@ -139,24 +148,30 @@ export class Voxels {
         }
 
         // mesh chunks
-        const batch = chunks.slice(0, meshChunkBatchSize)
+        const batch = chunks.slice(0, n)
 
         for (const chunkId of batch) {
             const chunk = this.world.chunks.get(chunkId)
             if (!chunk) continue
 
-            this.meshChunk(chunk)
+            this.updateChunk(chunk)
         }
     }
 
-    meshAllChunks() {
+    /**
+     * Updates all dirty chunks.
+     */
+    updateAll() {
         for (const chunk of this.world.chunks.values()) {
-            this.meshChunk(chunk)
+            this.updateChunk(chunk)
         }
         this.dirtyChunks.clear()
     }
 
-    private meshChunk(chunk: Chunk) {
+    /**
+     * Updates a single chunk.
+     */
+    updateChunk(chunk: Chunk) {
         const result = CulledMesher.mesh(chunk, this.world, this.blockRegistry, this.textureAtlasLayout!)
 
         let chunkState = this.chunkStates.get(chunk.id)
@@ -165,7 +180,7 @@ export class Voxels {
             const geometry = new ChunkGeometry()
             const mesh = new Mesh(geometry, this.chunkMaterial)
             mesh.position.set(chunk.worldPositionOffset.x, chunk.worldPositionOffset.y, chunk.worldPositionOffset.z)
-            this.object3D.add(mesh)
+            this.parentObject3D.add(mesh)
 
             chunkState = { mesh, geometry }
             this.chunkStates.set(chunk.id, chunkState)
@@ -179,7 +194,7 @@ export class Voxels {
 
     dispose() {
         for (const { mesh } of this.chunkStates.values()) {
-            this.object3D.remove(mesh)
+            this.parentObject3D.remove(mesh)
             mesh.geometry.dispose()
         }
 
