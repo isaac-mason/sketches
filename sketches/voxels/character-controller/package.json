@@ -1,12 +1,10 @@
 {
-    "name": "@sketches/simple-voxels-box-character-controller",
+    "name": "@sketches/character-controller",
     "private": true,
     "sketch": {
-        "title": "Simple Voxels - Box Character Controller",
+        "title": "Simple Voxels - Character Controller",
         "tags": [
-            "voxels",
-            "controller",
-            "character"
+            "voxels"
         ]
     },
     "scripts": {
@@ -16,7 +14,7 @@
     "dependencies": {
         "@react-three/drei": "^9.116.3",
         "@react-three/fiber": "^8.17.10",
-        "@sketches/simple-voxels-lib": "file:../lib",
+        "@sketches/simple-voxels-lib": "workspace:*",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
         "three": "^0.173.0"

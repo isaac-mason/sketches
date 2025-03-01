@@ -1965,6 +1965,24 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@sketches/character-controller@workspace:sketches/voxels/character-controller":
+  version: 0.0.0-use.local
+  resolution: "@sketches/character-controller@workspace:sketches/voxels/character-controller"
+  dependencies:
+    "@react-three/drei": "npm:^9.116.3"
+    "@react-three/fiber": "npm:^8.17.10"
+    "@sketches/simple-voxels-lib": "workspace:*"
+    "@types/react": "npm:^18.3.11"
+    "@types/react-dom": "npm:^18.3.1"
+    "@types/three": "npm:^0.173.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.173.0"
+    typescript: "npm:^5.6.2"
+    vite: "npm:^ 6.1.0"
+  languageName: unknown
+  linkType: soft
+
 "@sketches/common@workspace:common":
   version: 0.0.0-use.local
   resolution: "@sketches/common@workspace:common"

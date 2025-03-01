@@ -22,5 +22,11 @@ export class ChunkGeometry extends BufferGeometry {
         this.setAttribute('normal', new THREE.BufferAttribute(normals, 3))
         this.setAttribute('uv', new THREE.BufferAttribute(uv, 2))
         this.setAttribute('ao', new THREE.BufferAttribute(ao, 1))
+
+        this.attributes.position.needsUpdate = true
+        this.attributes.normal.needsUpdate = true
+        this.attributes.uv.needsUpdate = true
+        this.attributes.ao.needsUpdate = true
+        this.index!.needsUpdate = true
     }
 }

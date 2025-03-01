@@ -22,9 +22,9 @@ export class Voxels {
     textureAtlasCanvas?: TextureAtlas.Canvas
     textureAtlasTexture?: TextureAtlas.Texture
 
-    private chunkStates: Map<string, { mesh: Mesh; geometry: ChunkGeometry }> = new Map()
+    private chunkMeshes: Map<string, { mesh: Mesh; geometry: ChunkGeometry }> = new Map()
 
-    private parentObject3D: Object3D
+    private parent: Object3D
     private textureSize: number
     private chunkMaterial: ChunkMaterial
 
@@ -33,7 +33,7 @@ export class Voxels {
      * @param textureSize size of the texture atlas
      */
     constructor(parentObject3D: Object3D, textureSize: number) {
-        this.parentObject3D = parentObject3D
+        this.parent = parentObject3D
         this.textureSize = textureSize
         this.blockRegistry = BlockRegistry.init()
         this.chunkMaterial = new ChunkMaterial()
@@ -95,22 +95,40 @@ export class Voxels {
         const chunkPosition = worldPositionToChunkPosition(x, y, z, _chunkPosition)
 
         if (chunkPosition.x === 0) {
-            this.dirtyChunks.add(Chunk.id(chunkCoordinate.x - 1, chunkCoordinate.y, chunkCoordinate.z))
+            const id = Chunk.id(chunkCoordinate.x - 1, chunkCoordinate.y, chunkCoordinate.z)
+            if (this.world.chunks.has(id)) {
+                this.dirtyChunks.add(id)
+            }
         }
         if (chunkPosition.x === CHUNK_SIZE - 1) {
-            this.dirtyChunks.add(Chunk.id(chunkCoordinate.x + 1, chunkCoordinate.y, chunkCoordinate.z))
+            const id = Chunk.id(chunkCoordinate.x + 1, chunkCoordinate.y, chunkCoordinate.z)
+            if (this.world.chunks.has(id)) {
+                this.dirtyChunks.add(id)
+            }
         }
         if (chunkPosition.y === 0) {
-            this.dirtyChunks.add(Chunk.id(chunkCoordinate.x, chunkCoordinate.y - 1, chunkCoordinate.z))
+            const id = Chunk.id(chunkCoordinate.x, chunkCoordinate.y - 1, chunkCoordinate.z)
+            if (this.world.chunks.has(id)) {
+                this.dirtyChunks.add(id)
+            }
         }
         if (chunkPosition.y === CHUNK_SIZE - 1) {
-            this.dirtyChunks.add(Chunk.id(chunkCoordinate.x, chunkCoordinate.y + 1, chunkCoordinate.z))
+            const id = Chunk.id(chunkCoordinate.x, chunkCoordinate.y + 1, chunkCoordinate.z)
+            if (this.world.chunks.has(id)) {
+                this.dirtyChunks.add(id)
+            }
         }
         if (chunkPosition.z === 0) {
-            this.dirtyChunks.add(Chunk.id(chunkCoordinate.x, chunkCoordinate.y, chunkCoordinate.z - 1))
+            const id = Chunk.id(chunkCoordinate.x, chunkCoordinate.y, chunkCoordinate.z - 1)
+            if (this.world.chunks.has(id)) {
+                this.dirtyChunks.add(id)
+            }
         }
         if (chunkPosition.z === CHUNK_SIZE - 1) {
-            this.dirtyChunks.add(Chunk.id(chunkCoordinate.x, chunkCoordinate.y, chunkCoordinate.z + 1))
+            const id = Chunk.id(chunkCoordinate.x, chunkCoordinate.y, chunkCoordinate.z + 1)
+            if (this.world.chunks.has(id)) {
+                this.dirtyChunks.add(id)
+            }
         }
     }
 
@@ -126,13 +144,13 @@ export class Voxels {
      */
     update(n = 3, actor: Vector3) {
         // prioritize chunks based on an expanding sphere around the actor
-        const chunks = Array.from(this.dirtyChunks.values())
+        const dirtyChunks = Array.from(this.dirtyChunks.values())
 
         // bubble sort only the REMESH_BATCH_SIZE closest chunks based on distance to the actor
         for (let i = 0; i < n; i++) {
-            for (let j = i + 1; j < chunks.length; j++) {
-                const chunkA = this.world.chunks.get(chunks[i])
-                const chunkB = this.world.chunks.get(chunks[j])
+            for (let j = i + 1; j < dirtyChunks.length; j++) {
+                const chunkA = this.world.chunks.get(dirtyChunks[i])
+                const chunkB = this.world.chunks.get(dirtyChunks[j])
 
                 if (!chunkA || !chunkB) continue
 
@@ -140,19 +158,21 @@ export class Voxels {
                 const distanceB = chunkB.position.distanceTo(actor)
 
                 if (distanceB < distanceA) {
-                    const temp = chunks[i]
-                    chunks[i] = chunks[j]
-                    chunks[j] = temp
+                    const temp = dirtyChunks[i]
+                    dirtyChunks[i] = dirtyChunks[j]
+                    dirtyChunks[j] = temp
                 }
             }
         }
 
-        // mesh chunks
-        const batch = chunks.slice(0, n)
+        // mesh dirty chunks
+        const batch = dirtyChunks.slice(0, n)
 
         for (const chunkId of batch) {
             const chunk = this.world.chunks.get(chunkId)
-            if (!chunk) continue
+            if (!chunk) {
+                continue
+            }
 
             this.updateChunk(chunk)
         }
@@ -165,36 +185,42 @@ export class Voxels {
         for (const chunk of this.world.chunks.values()) {
             this.updateChunk(chunk)
         }
-        this.dirtyChunks.clear()
     }
 
     /**
      * Updates a single chunk.
      */
     updateChunk(chunk: Chunk) {
-        const result = CulledMesher.mesh(chunk, this.world, this.blockRegistry, this.textureAtlasLayout!)
+        this.dirtyChunks.delete(chunk.id)
 
-        let chunkState = this.chunkStates.get(chunk.id)
+        let chunkMesh = this.chunkMeshes.get(chunk.id)
 
-        if (!chunkState) {
-            const geometry = new ChunkGeometry()
-            const mesh = new Mesh(geometry, this.chunkMaterial)
-            mesh.position.set(chunk.worldPositionOffset.x, chunk.worldPositionOffset.y, chunk.worldPositionOffset.z)
-            this.parentObject3D.add(mesh)
-
-            chunkState = { mesh, geometry }
-            this.chunkStates.set(chunk.id, chunkState)
+        if (chunkMesh) {
+            chunkMesh.mesh.removeFromParent()
+            chunkMesh.geometry.dispose()
         }
 
-        const geometry = chunkState.geometry
+        const result = CulledMesher.mesh(chunk, this.world, this.blockRegistry, this.textureAtlasLayout!)
+
+        if (result.positions.length === 0) {
+            return
+        }
+
+        const geometry = new ChunkGeometry()
         geometry.setMesherData(result)
 
-        this.dirtyChunks.delete(chunk.id)
+        const mesh = new Mesh(geometry, this.chunkMaterial)
+        mesh.position.set(chunk.worldPositionOffset.x, chunk.worldPositionOffset.y, chunk.worldPositionOffset.z)
+
+        this.parent.add(mesh)
+
+        chunkMesh = { mesh, geometry }
+        this.chunkMeshes.set(chunk.id, chunkMesh)
     }
 
     dispose() {
-        for (const { mesh } of this.chunkStates.values()) {
-            this.parentObject3D.remove(mesh)
+        for (const { mesh } of this.chunkMeshes.values()) {
+            this.parent.remove(mesh)
             mesh.geometry.dispose()
         }
 

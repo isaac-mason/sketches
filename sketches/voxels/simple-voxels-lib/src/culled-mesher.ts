@@ -1,4 +1,4 @@
-import { Vector3, Vector3Tuple } from 'three'
+import { Vector3 } from 'three'
 import * as BlockRegistry from './block-registry'
 import * as TextureAtlas from './texture-atlas'
 import { CHUNK_SIZE, Chunk, World } from './world'
@@ -99,8 +99,10 @@ const vertexAmbientOcclusion = (side1: number, side2: number, corner: number) =>
     return (3 - (side1 + side2 + corner)) / 3
 }
 
-const _blockPosition: Vector3Tuple = [0, 0, 0]
+const _blockPosition = new Vector3()
 const _ao_grid = new Uint32Array(9)
+
+const MARCH_DIR_AXES = ['x', 'y', 'z'] as const
 
 export const mesh = (
     chunk: Chunk,
@@ -118,10 +120,6 @@ export const mesh = (
     for (let x = -1; x < CHUNK_SIZE; x++) {
         for (let z = -1; z < CHUNK_SIZE; z++) {
             for (let y = -1; y < CHUNK_SIZE; y++) {
-                if (x < 0 || x >= CHUNK_SIZE || y < 0 || y >= CHUNK_SIZE || z < 0 || z >= CHUNK_SIZE) {
-                    continue
-                }
-
                 const marchBlockType = getType(chunk, world, x, y, z)
                 const marchBlockSolid = marchBlockType !== 0
 
@@ -143,6 +141,21 @@ export const mesh = (
                     const faceBlockTypeDetails = blockRegistry.blockIndexToBlock.get(faceBlockType)
 
                     if (!faceBlockTypeDetails?.cube) {
+                        continue
+                    }
+
+                    _blockPosition.set(x, y, z)
+                    _blockPosition[MARCH_DIR_AXES[dir]] += side
+
+                    // don't create faces for blocks outside of the chunk
+                    if (
+                        _blockPosition.x < 0 ||
+                        _blockPosition.x >= CHUNK_SIZE ||
+                        _blockPosition.y < 0 ||
+                        _blockPosition.y >= CHUNK_SIZE ||
+                        _blockPosition.z < 0 ||
+                        _blockPosition.z >= CHUNK_SIZE
+                    ) {
                         continue
                     }
 
@@ -226,20 +239,14 @@ export const mesh = (
                     }
 
                     // ao
-                    _blockPosition[0] = x
-                    _blockPosition[1] = y
-                    _blockPosition[2] = z
-                    _blockPosition[dir] += side
-                    const [blockPositionX, blockPositionY, blockPositionZ] = _blockPosition
-
                     const aoGrid = _ao_grid
 
                     let aoGridIndex = 0
                     for (let q = -1; q < 2; q++) {
                         for (let p = -1; p < 2; p++) {
-                            const aoNeighbourX = blockPositionX + dx + ux * p + vx * q
-                            const aoNeighbourY = blockPositionY + dy + uy * p + vy * q
-                            const aoNeighbourZ = blockPositionZ + dz + uz * p + vz * q
+                            const aoNeighbourX = _blockPosition.x + dx + ux * p + vx * q
+                            const aoNeighbourY = _blockPosition.y + dy + uy * p + vy * q
+                            const aoNeighbourZ = _blockPosition.z + dz + uz * p + vz * q
 
                             const aoNeighbourBlockType = getType(chunk, world, aoNeighbourX, aoNeighbourY, aoNeighbourZ)
                             const aoNeighbourSolid = aoNeighbourBlockType !== 0
