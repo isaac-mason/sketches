@@ -2384,6 +2384,24 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@sketches/graph-search-pathfinding@workspace:sketches/voxels/graph-search-pathfinding":
+  version: 0.0.0-use.local
+  resolution: "@sketches/graph-search-pathfinding@workspace:sketches/voxels/graph-search-pathfinding"
+  dependencies:
+    "@react-three/drei": "npm:^9.116.3"
+    "@react-three/fiber": "npm:^8.17.10"
+    "@sketches/simple-voxels-lib": "workspace:*"
+    "@types/react": "npm:^18.3.11"
+    "@types/react-dom": "npm:^18.3.1"
+    "@types/three": "npm:^0.173.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.173.0"
+    typescript: "npm:^5.6.2"
+    vite: "npm:^ 6.1.0"
+  languageName: unknown
+  linkType: soft
+
 "@sketches/intro@workspace:sketches/intro":
   version: 0.0.0-use.local
   resolution: "@sketches/intro@workspace:sketches/intro"
@@ -2969,77 +2987,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sketches/simple-voxels-box-character-controller@workspace:sketches/voxels/simple-voxels/box-character-controller":
-  version: 0.0.0-use.local
-  resolution: "@sketches/simple-voxels-box-character-controller@workspace:sketches/voxels/simple-voxels/box-character-controller"
-  dependencies:
-    "@react-three/drei": "npm:^9.116.3"
-    "@react-three/fiber": "npm:^8.17.10"
-    "@sketches/simple-voxels-lib": "file:../lib"
-    "@types/react": "npm:^18.3.11"
-    "@types/react-dom": "npm:^18.3.1"
-    "@types/three": "npm:^0.173.0"
-    react: "npm:^18.3.1"
-    react-dom: "npm:^18.3.1"
-    three: "npm:^0.173.0"
-    typescript: "npm:^5.6.2"
-    vite: "npm:^ 6.1.0"
-  languageName: unknown
-  linkType: soft
-
-"@sketches/simple-voxels-building@workspace:sketches/voxels/simple-voxels/building":
-  version: 0.0.0-use.local
-  resolution: "@sketches/simple-voxels-building@workspace:sketches/voxels/simple-voxels/building"
-  dependencies:
-    "@react-three/drei": "npm:^9.116.3"
-    "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.11"
-    "@types/react-dom": "npm:^18.3.1"
-    "@types/three": "npm:^0.173.0"
-    react: "npm:^18.3.1"
-    react-dom: "npm:^18.3.1"
-    three: "npm:^0.173.0"
-    typescript: "npm:^5.6.2"
-    vite: "npm:^ 6.1.0"
-  languageName: unknown
-  linkType: soft
-
-"@sketches/simple-voxels-fly-controls@workspace:sketches/voxels/simple-voxels/fly-controls":
-  version: 0.0.0-use.local
-  resolution: "@sketches/simple-voxels-fly-controls@workspace:sketches/voxels/simple-voxels/fly-controls"
-  dependencies:
-    "@react-three/drei": "npm:^9.116.3"
-    "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.11"
-    "@types/react-dom": "npm:^18.3.1"
-    "@types/three": "npm:^0.173.0"
-    react: "npm:^18.3.1"
-    react-dom: "npm:^18.3.1"
-    three: "npm:^0.173.0"
-    typescript: "npm:^5.6.2"
-    vite: "npm:^ 6.1.0"
-  languageName: unknown
-  linkType: soft
-
-"@sketches/simple-voxels-graph-search-pathfinding@workspace:sketches/voxels/simple-voxels/graph-search-pathfinding":
-  version: 0.0.0-use.local
-  resolution: "@sketches/simple-voxels-graph-search-pathfinding@workspace:sketches/voxels/simple-voxels/graph-search-pathfinding"
-  dependencies:
-    "@react-three/drei": "npm:^9.116.3"
-    "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.11"
-    "@types/react-dom": "npm:^18.3.1"
-    "@types/three": "npm:^0.173.0"
-    leva: "npm:^0.9.35"
-    maath: "npm:^0.10.8"
-    react: "npm:^18.3.1"
-    react-dom: "npm:^18.3.1"
-    three: "npm:^0.173.0"
-    typescript: "npm:^5.6.2"
-    vite: "npm:^ 6.1.0"
-  languageName: unknown
-  linkType: soft
-
 "@sketches/simple-voxels-lib-1@workspace:sketches/voxels/simple-voxels/lib":
   version: 0.0.0-use.local
   resolution: "@sketches/simple-voxels-lib-1@workspace:sketches/voxels/simple-voxels/lib"
@@ -3057,23 +3004,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sketches/simple-voxels-lib@file:../lib::locator=%40sketches%2Fsimple-voxels-box-character-controller%40workspace%3Asketches%2Fvoxels%2Fsimple-voxels%2Fbox-character-controller":
-  version: 0.0.0
-  resolution: "@sketches/simple-voxels-lib@file:../lib#../lib::hash=b5def1&locator=%40sketches%2Fsimple-voxels-box-character-controller%40workspace%3Asketches%2Fvoxels%2Fsimple-voxels%2Fbox-character-controller"
-  dependencies:
-    "@react-three/drei": "npm:^9.116.3"
-    "@react-three/fiber": "npm:^8.17.10"
-    react: "npm:^18.3.1"
-    react-dom: "npm:^18.3.1"
-    three: "npm:^0.173.0"
-    zustand: "npm:^5.0.1"
-  checksum: 10/485431e4f080ee3b09eaf3d009267b04e78a21f0b8f74410120d7607af4fa5d2a30070bbff7d2d2e48e2d3b370b323905751f9907fca5d938347ae4319926f38
-  languageName: node
-  linkType: hard
-
 "@sketches/simple-voxels-lib@file:../simple-voxels-lib::locator=%40sketches%2Fvoxels-sphere%40workspace%3Asketches%2Fvoxels%2Fsphere":
   version: 0.0.0
-  resolution: "@sketches/simple-voxels-lib@file:../simple-voxels-lib#../simple-voxels-lib::hash=ae1ef4&locator=%40sketches%2Fvoxels-sphere%40workspace%3Asketches%2Fvoxels%2Fsphere"
+  resolution: "@sketches/simple-voxels-lib@file:../simple-voxels-lib#../simple-voxels-lib::hash=f542ff&locator=%40sketches%2Fvoxels-sphere%40workspace%3Asketches%2Fvoxels%2Fsphere"
   dependencies:
     "@react-three/drei": "npm:^9.116.3"
     "@react-three/fiber": "npm:^8.17.10"
@@ -3081,7 +3014,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.173.0"
     zustand: "npm:^5.0.1"
-  checksum: 10/fb9a0304d1275f7899622821d7529125e752f6df6bc53307f24c41eb9230286c0199a3fd422fcc8d598808cd1f0397496fa3ab5ed6eb77c980543b010f715e47
+  checksum: 10/64d4593814e6233e56c7f380bcca7ce6b79cd1e7652df40a97d6cd0306f2e4504a59054d9b81900823313259828b18095c16a8b555301a3ed689c9e98b633c2c
   languageName: node
   linkType: hard
 

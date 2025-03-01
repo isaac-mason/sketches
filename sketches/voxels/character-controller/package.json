@@ -2,7 +2,7 @@
     "name": "@sketches/character-controller",
     "private": true,
     "sketch": {
-        "title": "Simple Voxels - Character Controller",
+        "title": "Voxels - Character Controller",
         "tags": [
             "voxels"
         ]

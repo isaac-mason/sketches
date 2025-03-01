@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { World } from '../lib/world'
+import { World } from '@sketches/simple-voxels-lib'
 import { sweep } from './sweep'
 
 class PriorityQueue<T> {
@@ -63,7 +63,7 @@ class PriorityQueue<T> {
 
 const canGoThrough = (world: World, height: number, x: number, y: number, z: number): boolean => {
     for (let h = 0; h < height; h++) {
-        if (world.getSolid({ x, y: y + h, z })) {
+        if (world.getBlock(x, y + h, z) !== 0) {
             return false
         }
     }
@@ -71,7 +71,7 @@ const canGoThrough = (world: World, height: number, x: number, y: number, z: num
 }
 
 const canStepAt = (world: World, height: number, x: number, y: number, z: number): boolean => {
-    if (!world.getSolid({ x, y: y - 1, z })) {
+    if (world.getBlock(x, y - 1, z) === 0) {
         return false
     }
 
@@ -330,16 +330,6 @@ const smoothPath = (world: World, path: Node[]): Node[] => {
 
 export type ComputePathEarlyExit = { searchIterations: number }
 
-export type ComputePathProps = {
-    world: World
-    start: THREE.Vector3
-    goal: THREE.Vector3
-    smooth?: boolean
-    searchType: 'greedy' | 'shortest'
-    earlyExit?: ComputePathEarlyExit
-    keepIntermediates?: boolean
-}
-
 export type ComputePathResult = {
     success: boolean
     path: Node[]
@@ -349,15 +339,15 @@ export type ComputePathResult = {
     }
 }
 
-export const computePath = ({
-    world,
-    start,
-    goal,
+export const computePath = (
+    world: World,
+    start: THREE.Vector3,
+    goal: THREE.Vector3,
     smooth = true,
-    searchType,
-    earlyExit,
+    searchType: 'greedy' | 'shortest',
+    earlyExit?: ComputePathEarlyExit,
     keepIntermediates = false,
-}: ComputePathProps): ComputePathResult => {
+): ComputePathResult => {
     const { success, path, iterations, explored } = findPath({ world, start, goal, searchType, earlyExit })
 
     const intermediates = keepIntermediates ? { explored, iterations } : undefined
