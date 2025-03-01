@@ -1,45 +1,18 @@
-import { Canvas } from '@/common'
+import { WebGPUCanvas } from '@/common/components/webgpu-canvas'
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei'
-import { useEffect, useRef, useState } from 'react'
+import { MIN_BLOCK_TEXTURE_SIZE, Voxels } from '@sketches/simple-voxels-lib'
+import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
-import { VoxelChunkMeshes, Voxels, VoxelsRef } from '../../lib/react'
 
-class Volume<T> {
-    private map: Map<number, Map<number, Map<number, T>>> = new Map()
-
-    set(x: number, y: number, z: number, value: T) {
-        if (!this.map.get(x)) {
-            this.map.set(x, new Map())
-        }
-
-        if (!this.map.get(x)?.get(y)) {
-            this.map.get(x)?.set(y, new Map())
-        }
-
-        this.map.get(x)?.get(y)?.set(z, value)
-    }
-
-    get(x: number, y: number, z: number): T | undefined {
-        return this.map.get(x)?.get(y)?.get(z)
-    }
-
-    *iterator() {
-        for (const [x, yMap] of this.map) {
-            for (const [y, zMap] of yMap) {
-                for (const [z, value] of zMap) {
-                    yield [x, y, z, value] as const
-                }
-            }
-        }
-    }
-
-    [Symbol.iterator]() {
-        return this.iterator()
-    }
-}
-
-export const voxelize = (positions: number[], indices: number[], cellSize: number, cellHeight: number): Volume<boolean> => {
-    const volume = new Volume<boolean>()
+const voxelize = (
+    voxels: Voxels,
+    blockType: number,
+    positions: number[],
+    indices: number[],
+    cellSize: number,
+    cellHeight: number,
+) => {
+    const voxelSize = new THREE.Vector3(cellSize, cellHeight, cellSize)
 
     const triangle = new THREE.Triangle()
     const point = new THREE.Vector3()
@@ -52,7 +25,6 @@ export const voxelize = (positions: number[], indices: number[], cellSize: numbe
     const end = new THREE.Vector3()
 
     const voxelBox = new THREE.Box3()
-    const voxelSize = new THREE.Vector3(cellSize, cellHeight, cellSize)
 
     for (let i = 0; i < indices.length; i += 3) {
         a.set(positions[indices[i] * 3], positions[indices[i] * 3 + 1], positions[indices[i] * 3 + 2])
@@ -81,14 +53,12 @@ export const voxelize = (positions: number[], indices: number[], cellSize: numbe
                     voxelBox.setFromCenterAndSize(point, voxelSize)
 
                     if (voxelBox.intersectsTriangle(triangle)) {
-                        volume.set(x, y, z, true)
+                        voxels.setBlock(x, y, z, blockType)
                     }
                 }
             }
         }
     }
-
-    return volume
 }
 
 type VoxelizeProps = {
@@ -98,12 +68,17 @@ type VoxelizeProps = {
 }
 
 const Voxelize = ({ children, cellSize, cellHeight }: VoxelizeProps) => {
-    const [voxels, setVoxels] = useState<VoxelsRef | null>()
-
     const group = useRef<THREE.Group>(null!)
+    const voxelsGroup = useRef<THREE.Group>(null!)
 
     useEffect(() => {
-        if (!voxels) return
+        const voxels = new Voxels(voxelsGroup.current, MIN_BLOCK_TEXTURE_SIZE)
+        const orangeBlockType = voxels.registerType({
+            cube: {
+                default: { color: 'orange' },
+            },
+        })
+        voxels.updateAtlas()
 
         const positions: number[] = []
         const indices: number[] = []
@@ -116,27 +91,23 @@ const Voxelize = ({ children, cellSize, cellHeight }: VoxelizeProps) => {
                 const index = geometry.getIndex()
 
                 if (position) {
-                    positions.push(...position.array)
+                    for (let i = 0; i < position.array.length; i += 3) {
+                        positions.push(position.array[i], position.array[i + 1], position.array[i + 2])
+                    }
                 }
 
                 if (index) {
-                    indices.push(...index.array)
+                    for (let i = 0; i < index.array.length; i++) {
+                        indices.push(index.array[i])
+                    }
                 }
             }
         })
 
-        const volume = voxelize(positions, indices, cellSize, cellHeight)
+        voxelize(voxels, orangeBlockType.index, positions, indices, cellSize, cellHeight)
 
-        const orange = new THREE.Color('orange')
-        const color = new THREE.Color()
-
-        for (const [x, y, z] of volume) {
-            color.copy(orange)
-            color.addScalar((Math.random() - 0.5) * 0.12)
-
-            voxels.setBlock(x, y, z, true, Math.random() > 0.5 ? orange.getHex() : color.getHex())
-        }
-    }, [voxels])
+        voxels.updateAll()
+    }, [])
 
     return (
         <>
@@ -144,18 +115,14 @@ const Voxelize = ({ children, cellSize, cellHeight }: VoxelizeProps) => {
                 {children}
             </group>
 
-            <Voxels ref={setVoxels}>
-                <group scale={[cellSize, cellHeight, cellSize]}>
-                    <VoxelChunkMeshes />
-                </group>
-            </Voxels>
+            <group ref={voxelsGroup} />
         </>
     )
 }
 
 export function Sketch() {
     return (
-        <Canvas>
+        <WebGPUCanvas>
             <Voxelize cellSize={0.05} cellHeight={0.05}>
                 <mesh>
                     <torusKnotGeometry args={[1, 0.2, 128, 16]} />
@@ -167,6 +134,6 @@ export function Sketch() {
 
             <OrbitControls makeDefault />
             <PerspectiveCamera makeDefault position={[0, 0, 10]} />
-        </Canvas>
+        </WebGPUCanvas>
     )
 }

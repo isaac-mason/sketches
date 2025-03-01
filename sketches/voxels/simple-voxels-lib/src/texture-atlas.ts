@@ -2,7 +2,8 @@ import * as BlockRegistry from './block-registry'
 import * as THREE from 'three'
 
 const N_MIPMAPS = 4
-const MIN_FACE_SIZE = Math.pow(2, N_MIPMAPS)
+
+export const MIN_BLOCK_TEXTURE_SIZE = Math.pow(2, N_MIPMAPS)
 
 const hashFace = (face: BlockRegistry.BlockCubeFace) => {
     if (face.texture) {
@@ -52,7 +53,7 @@ export const createLayout = (blockRegistry: BlockRegistry.State, textureSize: nu
 
                 if (tileMap.has(hash)) continue
 
-                const size = face.texture ? textureSize : MIN_FACE_SIZE
+                const size = face.texture ? textureSize : MIN_BLOCK_TEXTURE_SIZE
 
                 tileMap.set(hash, { face, size, layout: makeEmptyLayoutData() })
             }

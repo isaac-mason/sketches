@@ -2951,23 +2951,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sketches/simple-voxelize@workspace:sketches/voxels/simple-voxels/voxelize":
-  version: 0.0.0-use.local
-  resolution: "@sketches/simple-voxelize@workspace:sketches/voxels/simple-voxels/voxelize"
-  dependencies:
-    "@react-three/drei": "npm:^9.116.3"
-    "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.11"
-    "@types/react-dom": "npm:^18.3.1"
-    "@types/three": "npm:^0.173.0"
-    react: "npm:^18.3.1"
-    react-dom: "npm:^18.3.1"
-    three: "npm:^0.173.0"
-    typescript: "npm:^5.6.2"
-    vite: "npm:^ 6.1.0"
-  languageName: unknown
-  linkType: soft
-
 "@sketches/simple-voxels-box-character-controller@workspace:sketches/voxels/simple-voxels/box-character-controller":
   version: 0.0.0-use.local
   resolution: "@sketches/simple-voxels-box-character-controller@workspace:sketches/voxels/simple-voxels/box-character-controller"
@@ -3072,7 +3055,7 @@ __metadata:
 
 "@sketches/simple-voxels-lib@file:../simple-voxels-lib::locator=%40sketches%2Fvoxels-sphere%40workspace%3Asketches%2Fvoxels%2Fsphere":
   version: 0.0.0
-  resolution: "@sketches/simple-voxels-lib@file:../simple-voxels-lib#../simple-voxels-lib::hash=7ad65b&locator=%40sketches%2Fvoxels-sphere%40workspace%3Asketches%2Fvoxels%2Fsphere"
+  resolution: "@sketches/simple-voxels-lib@file:../simple-voxels-lib#../simple-voxels-lib::hash=ae1ef4&locator=%40sketches%2Fvoxels-sphere%40workspace%3Asketches%2Fvoxels%2Fsphere"
   dependencies:
     "@react-three/drei": "npm:^9.116.3"
     "@react-three/fiber": "npm:^8.17.10"
@@ -3080,11 +3063,11 @@ __metadata:
     react-dom: "npm:^18.3.1"
     three: "npm:^0.173.0"
     zustand: "npm:^5.0.1"
-  checksum: 10/be1e6d9513c2d70b44183e25a17b3e4fd75de143557de1d2aa606f5b8e1c0642f752b39fde83c22899032dccb7bc0632028cebda102cd3a7c41b992044dd639b
+  checksum: 10/fb9a0304d1275f7899622821d7529125e752f6df6bc53307f24c41eb9230286c0199a3fd422fcc8d598808cd1f0397496fa3ab5ed6eb77c980543b010f715e47
   languageName: node
   linkType: hard
 
-"@sketches/simple-voxels-lib@workspace:sketches/voxels/simple-voxels-lib":
+"@sketches/simple-voxels-lib@workspace:*, @sketches/simple-voxels-lib@workspace:sketches/voxels/simple-voxels-lib":
   version: 0.0.0-use.local
   resolution: "@sketches/simple-voxels-lib@workspace:sketches/voxels/simple-voxels-lib"
   dependencies:
@@ -3566,6 +3549,24 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^9.116.3"
     "@react-three/fiber": "npm:^8.17.10"
+    "@types/react": "npm:^18.3.11"
+    "@types/react-dom": "npm:^18.3.1"
+    "@types/three": "npm:^0.173.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.173.0"
+    typescript: "npm:^5.6.2"
+    vite: "npm:^ 6.1.0"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/voxelize@workspace:sketches/voxels/voxelize":
+  version: 0.0.0-use.local
+  resolution: "@sketches/voxelize@workspace:sketches/voxels/voxelize"
+  dependencies:
+    "@react-three/drei": "npm:^9.116.3"
+    "@react-three/fiber": "npm:^8.17.10"
+    "@sketches/simple-voxels-lib": "workspace:*"
     "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.1"
     "@types/three": "npm:^0.173.0"

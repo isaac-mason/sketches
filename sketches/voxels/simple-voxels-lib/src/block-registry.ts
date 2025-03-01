@@ -16,7 +16,6 @@ export type BlockCubeInfo = {
 }
 
 export type BlockInfo = {
-    id: string
     cube?: BlockCubeInfo
 }
 
@@ -26,11 +25,9 @@ export type Block = {
 
 export const init = () => {
     const blockIndexToBlock = new Map<number, Block>()
-    const blockIdToBlock = new Map<string, Block>()
 
     return {
         blockIndexToBlock,
-        blockIdToBlock,
         indexCounter: 1, // 0 is reserved for air
         lastUpdateTime: 0,
     }
@@ -44,7 +41,6 @@ export const add = (state: State, block: BlockInfo) => {
     const newBlock = { index, ...block }
 
     state.blockIndexToBlock.set(index, newBlock)
-    state.blockIdToBlock.set(block.id, newBlock)
 
     state.lastUpdateTime = Date.now()
 

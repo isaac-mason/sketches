@@ -26,21 +26,18 @@ const Example = () => {
         }
 
         const diamondBlock = voxels.registerType({
-            id: 'diamond',
             cube: {
                 default: { texture: { id: 'tex-diamond' } },
             },
         })
 
         const stoneBlock = voxels.registerType({
-            id: 'stone',
             cube: {
                 default: { texture: { id: 'tex-stone' } },
             },
         })
 
         const greyBlock = voxels.registerType({
-            id: 'grey',
             cube: {
                 default: { color: '#333' },
             },
