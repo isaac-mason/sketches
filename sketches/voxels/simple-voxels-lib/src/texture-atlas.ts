@@ -155,7 +155,6 @@ export const createCanvas = (layout: Layout, assets: Record<string, HTMLImageEle
     }
 
     // create mipmaps
-    // generate mipmaps
     const mipmaps: HTMLCanvasElement[] = []
 
     let currentCanvas = canvas
@@ -197,7 +196,7 @@ export const createTexture = (canvas: Canvas) => {
     texture.type = THREE.UnsignedByteType
     texture.anisotropy = 16
 
-    texture.generateMipmaps = false;
+    texture.generateMipmaps = false
     texture.mipmaps = canvas.mipmaps
 
     return texture
