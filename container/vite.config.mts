@@ -1,8 +1,9 @@
+import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react-swc'
+import * as path from 'path'
 import { defineConfig } from 'vite'
 import { imagetools } from 'vite-imagetools'
 import { createHtmlPlugin } from 'vite-plugin-html'
-import * as path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig(() => {
@@ -40,6 +41,7 @@ export default defineConfig(() => {
                 },
             }),
             imagetools(),
+            tailwindcss(),
         ],
         optimizeDeps: {
             esbuildOptions: {

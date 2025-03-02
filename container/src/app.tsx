@@ -1,350 +1,14 @@
 import { Spinner, useDebounce } from '../../common'
 import { Component, ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, RouteObject, RouterProvider, createBrowserRouter, redirect, useLoaderData } from 'react-router-dom'
-import styled from 'styled-components'
 import { create } from 'zustand'
 import sketchesMetadata from '../generated/sketches.json'
 import { ScreenshotKeyboardControls, useScreenshot } from './screenshot'
 import { GitHubIcon } from './svgs/GitHubIcon'
 import { WindowMaximizeIcon } from './svgs/WindowMaximizeIcon'
-import { Theme } from './theme'
 import type { SketchMeta } from '../../dev/utils'
 
 const sketches = (sketchesMetadata satisfies SketchMeta[]).filter((s: SketchMeta) => !s.hidden)
-
-const Error = styled.div`
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-`
-
-const Links = styled.div`
-    position: absolute;
-    z-index: 2;
-
-    display: flex;
-    align-items: center;
-    gap: 1em;
-
-    font-size: 1.2em;
-    margin: 0;
-    text-decoration: none;
-
-    color: #eee;
-    text-shadow: 2px 2px #333;
-    font-family: 'Poppins', sans-serif;
-
-    bottom: 20px;
-    right: 20px;
-
-    ${({ theme }) => theme.breakpoints.up('md')} {
-        bottom: 30px;
-        right: 30px;
-    }
-
-    a {
-        display: block;
-        width: 40px;
-        height: 40px;
-        padding: 0.5em;
-        border-radius: 0.2em;
-
-        stroke: #fff;
-        fill: #fff;
-        background-color: #cccccc33;
-    }
-`
-
-const UnstyledButton = styled.button`
-    border: none;
-    margin: 0;
-    padding: 0;
-    width: auto;
-    overflow: visible;
-
-    background: transparent;
-
-    /* inherit color from ancestor */
-    color: inherit;
-
-    /* Normalize 'line-height'. Cannot be changed from 'normal' in Firefox 4+. */
-    line-height: normal;
-
-    /* Corrects font smoothing for webkit */
-    -webkit-font-smoothing: inherit;
-    -moz-osx-font-smoothing: inherit;
-
-    /* Corrects inability to style clickable 'input' types in iOS */
-    -webkit-appearance: none;
-
-    &::-moz-focus-inner {
-        border: 0;
-        padding: 0;
-    }
-`
-
-const NavToggle = styled(UnstyledButton)`
-    position: absolute;
-    z-index: 2;
-    bottom: 10px;
-    left: 10px;
-
-    color: #fff;
-    font-size: 2em;
-    cursor: pointer;
-    border-radius: 50%;
-    width: 1.6em;
-    height: 1.6em;
-    transition: background 0.2s ease;
-    background-color: #000;
-
-    &:hover {
-        background-color: #444;
-    }
-
-    ${({ theme }) => theme.breakpoints.up('md')} {
-        display: none;
-    }
-`
-
-const Nav = styled.div<{ open: boolean }>`
-    position: absolute;
-    transition: transform 0.5s ease;
-    transform: translateX(${(props) => (props.open ? '0' : '-100%')});
-
-    ${({ theme }) => theme.breakpoints.up('md')} {
-        position: relative;
-        transform: unset;
-    }
-
-    top: 0;
-    left: 0;
-
-    z-index: 4;
-
-    background-color: #111;
-
-    overflow-y: scroll;
-    overflow-x: hidden;
-
-    width: 300px;
-    min-width: 300px;
-    height: 100%;
-
-    ${({ theme }) => theme.breakpoints.up('md')} {
-        width: 350px;
-        min-width: 350px;
-    }
-`
-
-const NavTop = styled.div`
-    position: sticky;
-    top: 0;
-    z-index: 5;
-
-    width: 100%;
-    padding: 1em;
-
-    background-color: #111;
-    border-bottom: 1px solid #333;
-`
-
-const NavSearchBar = styled.input`
-    width: 100%;
-
-    padding: 0.5em;
-    border-radius: 0.2em;
-    border: none;
-
-    color: #fff;
-    background-color: #333;
-
-    font-size: 1em;
-    font-weight: 400;
-    font-family: 'Poppins', sans-serif;
-`
-
-const NavItems = styled.div`
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 1.5em;
-    padding: 1em;
-`
-
-const NavItemTags = styled.div`
-    display: flex;
-    flex-flow: row wrap;
-    gap: 0.5em 1em;
-    font-size: 0.8em;
-    color: #fff;
-    margin: 0.7em;
-    margin-top: 0;
-    font-style: italic;
-`
-
-const SketchNotices = styled.div`
-    display: flex;
-    flex-direction: row;
-    gap: 0.5em;
-    position: absolute;
-    top: 0;
-    right: 0;
-    z-index: 2;
-    padding: 1em;
-`
-
-const SketchNotice = styled.div`
-    padding: 0.5em;
-    background: #333;
-    border: 1px solid #999;
-    border-radius: 50%;
-    width: 2em;
-    height: 2em;
-    font-size: 1em;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    fill: #fff;
-`
-
-const NavItemImage = styled.img`
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-    border-radius: 0.2em 0.2em 0 0;
-    user-select: none;
-`
-
-const NavItemTitle = styled.div`
-    font-size: 1em;
-    color: #fff;
-    padding: 0.5em;
-`
-
-const NavItemWrapper = styled(Link)`
-    position: relative;
-
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-start;
-    width: 100%;
-    border-radius: 0.2em;
-    text-decoration: none;
-
-    background-color: #333;
-    border: 1px solid #444;
-    transition:
-        background 0.3s ease,
-        border 0.3s ease,
-        transform 0.5s ease;
-
-    &.active,
-    &:hover {
-        background-color: #444;
-        border: 1px solid #999;
-    }
-
-    &:hover {
-        transform: scale(1.02);
-    }
-
-    ${NavItemTags} span {
-        padding: 0.2em 0.3em;
-        border-radius: 0.2em;
-
-        background-color: #444;
-        transition:
-            background 0.3s ease,
-            transform 0.5s ease;
-    }
-
-    &.active ${NavItemTags} span,
-    &:hover ${NavItemTags} span {
-        background-color: #555;
-    }
-`
-
-const NavBackground = styled.div<{ open: boolean }>`
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    transition:
-        background,
-        0.25s ease;
-    z-index: ${(props) => (props.open ? '3' : '-1')};
-    background: ${(props) => (props.open ? 'rgba(0, 0, 0, 0.4)' : 'rgba(0, 0, 0, 0)')};
-
-    ${({ theme }) => theme.breakpoints.up('md')} {
-        display: none;
-    }
-`
-
-const PageLayout = styled.div`
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-
-    width: 100%;
-    height: 100%;
-
-    position: relative;
-
-    font-family: 'Poppins', sans-serif;
-`
-
-const SketchWrapper = styled.div`
-    width: 100%;
-    height: 100%;
-
-    position: relative;
-
-    &:not(.fullscreen) {
-        ${({ theme }) => theme.breakpoints.up('md')} {
-            width: calc(100% - 350px);
-        }
-    }
-
-    h1 {
-        position: absolute;
-        z-index: 1;
-        top: 20px;
-        left: 20px;
-
-        margin: 0;
-        padding-right: 20px;
-
-        font-size: 2em;
-        font-weight: 900;
-        line-height: 1.2;
-        letter-spacing: -2px;
-
-        color: #eee;
-        text-shadow: 2px 2px #333;
-
-        pointer-events: none;
-
-        ${({ theme }) => theme.breakpoints.up('md')} {
-            top: 40px;
-            left: 40px;
-            padding-right: 40px;
-
-            font-size: 2.5em;
-        }
-
-        ${({ theme }) => theme.breakpoints.up('lg')} {
-            font-size: 3em;
-        }
-    }
-`
 
 type SketchLoaderData = {
     sketchPath: string
@@ -371,17 +35,15 @@ class ErrorBoundary extends Component<ErrorBoundaryProps> {
 
     render() {
         if (errorBoundaryState.getState().error) {
-            return <Error>Something went wrong rendering the sketch!</Error>
+            return (
+                <div className="flex h-full w-full items-center justify-center text-white">
+                    Something went wrong rendering the sketch!
+                </div>
+            )
         }
 
         return this.props.children
     }
-}
-
-const useIsFullscreen = () => {
-    const [fullscreen] = useState(() => document.location.search.includes('fullscreen'))
-
-    return fullscreen
 }
 
 const LazySketch = () => {
@@ -392,7 +54,6 @@ const LazySketch = () => {
     const [loading, setLoading] = useState(true)
 
     const { screenshotMode } = useScreenshot()
-    const isFullscreen = useIsFullscreen()
 
     useEffect(() => {
         if (!sketchMetadata) return
@@ -420,8 +81,10 @@ const LazySketch = () => {
     }, [iframe])
 
     return (
-        <SketchWrapper ref={wrapperRef} className={isFullscreen ? 'fullscreen' : ''}>
-            {(!screenshotMode && sketchMetadata.options?.displayTitle) ?? <h1>{sketchMetadata?.title}</h1>}
+        <div className="relative flex h-full w-full items-center justify-center md:w-[calc(100%-350px)]" ref={wrapperRef}>
+            {(!screenshotMode && sketchMetadata.options?.displayTitle) ?? (
+                <h1 className="absolute top-5 left-5 z-2 m-0 text-[2em] font-bold text-white">{sketchMetadata?.title}</h1>
+            )}
 
             {loading && <Spinner />}
 
@@ -433,7 +96,7 @@ const LazySketch = () => {
                 allow="cross-origin-isolated"
                 onLoad={() => setLoading(false)}
             />
-        </SketchWrapper>
+        </div>
     )
 }
 
@@ -443,48 +106,75 @@ type NavItemProps = {
     closeNav: () => void
 }
 
-const NavItem = ({ sketch, currentSketchPath, closeNav }: NavItemProps) => {
-    const showAudioNotice = sketch.options?.showAudioNotice ?? false
-    const showDesktopOnlyNotice = sketch.options?.showDesktopOnlyNotice ?? false
-    const anyNotices = showAudioNotice || showDesktopOnlyNotice
+const AudioSvg = (
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 256 256">
+        <path d="M155.51,24.81a8,8,0,0,0-8.42.88L77.25,80H32A16,16,0,0,0,16,96v64a16,16,0,0,0,16,16H77.25l69.84,54.31A8,8,0,0,0,160,224V32A8,8,0,0,0,155.51,24.81ZM32,96H72v64H32ZM144,207.64,88,164.09V91.91l56-43.55Zm54-106.08a40,40,0,0,1,0,52.88,8,8,0,0,1-12-10.58,24,24,0,0,0,0-31.72,8,8,0,0,1,12-10.58ZM248,128a79.9,79.9,0,0,1-20.37,53.34,8,8,0,0,1-11.92-10.67,64,64,0,0,0,0-85.33,8,8,0,1,1,11.92-10.67A79.83,79.83,0,0,1,248,128Z"></path>
+    </svg>
+)
+
+const DesktopOnlySvg = (
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 256 256">
+        <path d="M213.92,210.62l-160-176A8,8,0,1,0,42.08,45.38L56,60.69V216a24,24,0,0,0,24,24h96a24,24,0,0,0,23.82-21.11l2.26,2.49a8,8,0,1,0,11.84-10.76ZM184,216a8,8,0,0,1-8,8H80a8,8,0,0,1-8-8V78.29l112,123.2ZM68.7,24a8,8,0,0,1,8-8H176a24,24,0,0,1,24,24V150.83a8,8,0,1,1-16,0V40a8,8,0,0,0-8-8H76.7A8,8,0,0,1,68.7,24Z"></path>
+    </svg>
+)
+
+const NavItem = ({ sketch, closeNav }: NavItemProps) => {
+    const notices = useMemo(() => {
+        const notices: { svg: ReactNode; title: string }[] = []
+
+        if (sketch.options?.showAudioNotice ?? false) {
+            notices.push({ svg: AudioSvg, title: 'This sketch has audio' })
+        }
+
+        if (sketch.options?.showDesktopOnlyNotice ?? false) {
+            notices.push({ svg: DesktopOnlySvg, title: 'This sketch is desktop only' })
+        }
+
+        return notices
+    }, [sketch])
 
     return (
-        <NavItemWrapper
+        <Link
+            className="group text-decoration-none relative flex w-full flex-col items-start justify-start rounded-[0.2em] border border-[#444] bg-[#333] transition-all duration-300 ease-in-out hover:scale-[1.02] hover:border-[#999] hover:bg-[#444]"
             to={`/sketch/${sketch.path}`}
             onClick={() => closeNav()}
             title={sketch.title}
-            className={sketch.path === currentSketchPath ? 'active' : ''}
         >
-            {sketch.cover ? <NavItemImage src={sketch.cover} alt={sketch.title} loading="lazy" /> : undefined}
+            {sketch.cover ? (
+                <img
+                    className="user-select-none h-full w-full rounded-t-[0.2em] object-cover"
+                    src={sketch.cover}
+                    alt={sketch.title}
+                    loading="lazy"
+                />
+            ) : undefined}
 
-            {anyNotices && (
-                <SketchNotices>
-                    {showAudioNotice && (
-                        <SketchNotice title="This sketch has audio">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 256 256">
-                                <path d="M155.51,24.81a8,8,0,0,0-8.42.88L77.25,80H32A16,16,0,0,0,16,96v64a16,16,0,0,0,16,16H77.25l69.84,54.31A8,8,0,0,0,160,224V32A8,8,0,0,0,155.51,24.81ZM32,96H72v64H32ZM144,207.64,88,164.09V91.91l56-43.55Zm54-106.08a40,40,0,0,1,0,52.88,8,8,0,0,1-12-10.58,24,24,0,0,0,0-31.72,8,8,0,0,1,12-10.58ZM248,128a79.9,79.9,0,0,1-20.37,53.34,8,8,0,0,1-11.92-10.67,64,64,0,0,0,0-85.33,8,8,0,1,1,11.92-10.67A79.83,79.83,0,0,1,248,128Z"></path>
-                            </svg>
-                        </SketchNotice>
-                    )}
-
-                    {showDesktopOnlyNotice && (
-                        <SketchNotice title="This sketch is desktop only">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 256 256"><path d="M213.92,210.62l-160-176A8,8,0,1,0,42.08,45.38L56,60.69V216a24,24,0,0,0,24,24h96a24,24,0,0,0,23.82-21.11l2.26,2.49a8,8,0,1,0,11.84-10.76ZM184,216a8,8,0,0,1-8,8H80a8,8,0,0,1-8-8V78.29l112,123.2ZM68.7,24a8,8,0,0,1,8-8H176a24,24,0,0,1,24,24V150.83a8,8,0,1,1-16,0V40a8,8,0,0,0-8-8H76.7A8,8,0,0,1,68.7,24Z"></path></svg>
-                        </SketchNotice>
-                    )}
-                </SketchNotices>
+            {notices.length > 0 && (
+                <div className="absolute top-0 right-0 z-2 flex flex-row gap-2 p-4">
+                    {notices.map((notice) => (
+                        <div
+                            className="flex h-[2em] w-[2em] items-center justify-center rounded-full border border-[#999] bg-[#333] fill-[#fff] p-2 text-[1em]"
+                            title={notice.title}
+                            key={notice.title}
+                        >
+                            {notice.svg}
+                        </div>
+                    ))}
+                </div>
             )}
 
-            <NavItemTitle>{sketch.title}</NavItemTitle>
+            <div className="p-2 text-[1em] text-white">{sketch.title}</div>
 
             {sketch.tags && (
-                <NavItemTags>
+                <div className="mb-2 flex flex-wrap gap-1 px-2 text-xs text-white italic">
                     {sketch.tags.map((tag) => (
-                        <span key={tag}>{tag}</span>
+                        <span key={tag} className="bg-[#444] p-1 group-hover:bg-[#555]">
+                            {tag}
+                        </span>
                     ))}
-                </NavItemTags>
+                </div>
             )}
-        </NavItemWrapper>
+        </Link>
     )
 }
 
@@ -519,20 +209,23 @@ const SideNav = () => {
 
     return (
         <>
-            <Nav open={navOpen}>
-                <NavTop>
-                    <NavSearchBar
+            <div
+                className={`absolute transition duration-500 ${navOpen ? 'translate-x-0' : '-translate-x-full'} top-0 left-0 z-4 h-full w-[300px] min-w-[300px] overflow-x-hidden overflow-y-scroll bg-[#111] md:relative md:w-[350px] md:min-w-[350px] md:translate-x-0`}
+            >
+                <div className="sticky top-0 z-5 w-full border-b border-[#333] bg-[#111] p-4">
+                    <input
+                        className="w-full rounded-[0.2em] border-none bg-[#333] p-2 text-[1em] font-normal text-white"
                         placeholder="Search for a sketch..."
                         onInput={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
                     />
-                </NavTop>
+                </div>
 
-                <NavItems>
+                <div className="flex flex-col items-center justify-start gap-6 p-4">
                     {filteredSketches.map((s) => (
                         <NavItem key={s.path} sketch={s} currentSketchPath={sketchPath} closeNav={closeNav} />
                     ))}
-                </NavItems>
-            </Nav>
+                </div>
+            </div>
         </>
     )
 }
@@ -543,38 +236,54 @@ const App = () => {
     const { open: navOpen, toggleNav, closeNav } = useNav()
     const { screenshotMode } = useScreenshot()
 
-    const isFullscreen = useIsFullscreen()
-
     return (
         <>
-            <PageLayout>
-                {!isFullscreen && <SideNav />}
+            <div className="relative flex h-full w-full flex-col items-center justify-center md:flex-row">
+                <SideNav />
 
                 <ErrorBoundary>
                     <LazySketch />
                 </ErrorBoundary>
-            </PageLayout>
+            </div>
 
-            <NavBackground open={navOpen} onClick={() => closeNav()} />
+            {/* side nav background */}
+            <div
+                className={`absolute top-0 left-0 h-full w-full transition-all duration-500 md:hidden ${navOpen ? 'bg-[#00000066]' : 'pointer-events-none bg-transparent'}`}
+                onClick={() => closeNav()}
+            />
 
-            {!screenshotMode && !isFullscreen ? (
-                <NavToggle className="material-symbols-outlined" onClick={toggleNav}>
-                    menu
-                </NavToggle>
+            {/* side nav toggle */}
+            {!screenshotMode ? (
+                <button
+                    className="absolute bottom-5 left-5 z-2 m-0 flex items-center gap-1.5 rounded-[0.2em] bg-black fill-white stroke-white p-2 no-underline transition-all duration-300 ease-in-out hover:scale-[1.02] hover:border-[#999] hover:bg-[#444] md:bottom-7 md:left-7 md:hidden"
+                    onClick={toggleNav}
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 256 256">
+                        <path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128ZM40,72H216a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16ZM216,184H40a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Z"></path>
+                    </svg>
+                </button>
             ) : undefined}
 
             <ScreenshotKeyboardControls />
 
-            {!screenshotMode && !isFullscreen ? (
-                <Links>
-                    <a target="_blank" href={`https://github.com/isaac-mason/sketches/tree/main/sketches/${sketchPath}`}>
+            {!screenshotMode ? (
+                <div className="absolute right-5 bottom-5 z-2 m-0 flex items-center gap-4 text-2xl text-white no-underline md:right-7 md:bottom-7">
+                    <a
+                        className="block h-[40px] w-[40px] rounded-[0.2em] bg-[#cccccc33] fill-white stroke-white p-2"
+                        target="_blank"
+                        href={`https://github.com/isaac-mason/sketches/tree/main/sketches/${sketchPath}`}
+                    >
                         <GitHubIcon />
                     </a>
 
-                    <a target="_blank" href={sketchUrl}>
+                    <a
+                        className="block h-[40px] w-[40px] rounded-[0.2em] bg-[#cccccc33] fill-white stroke-white p-2"
+                        target="_blank"
+                        href={sketchUrl}
+                    >
                         <WindowMaximizeIcon />
                     </a>
-                </Links>
+                </div>
             ) : undefined}
         </>
     )
@@ -615,9 +324,5 @@ const routes: RouteObject[] = [
 const router = createBrowserRouter(routes, {})
 
 export default () => {
-    return (
-        <Theme>
-            <RouterProvider router={router} />
-        </Theme>
-    )
+    return <RouterProvider router={router} />
 }
