@@ -226,7 +226,7 @@ export class Voxels {
             this.parent.remove(mesh)
             mesh.geometry.dispose()
         }
-
         this.chunkMaterial.dispose()
+        this.textureAtlasTexture?.dispose()
     }
 }
