@@ -2498,24 +2498,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sketches/metropolis@workspace:sketches/voxels/simple-voxels/metropolis":
-  version: 0.0.0-use.local
-  resolution: "@sketches/metropolis@workspace:sketches/voxels/simple-voxels/metropolis"
-  dependencies:
-    "@react-three/drei": "npm:^9.116.3"
-    "@react-three/fiber": "npm:^8.17.10"
-    "@types/react": "npm:^18.3.11"
-    "@types/react-dom": "npm:^18.3.1"
-    "@types/three": "npm:^0.173.0"
-    react: "npm:^18.3.1"
-    react-dom: "npm:^18.3.1"
-    suspend-react: "npm:^0.1.3"
-    three: "npm:^0.173.0"
-    typescript: "npm:^5.6.2"
-    vite: "npm:^ 6.1.0"
-  languageName: unknown
-  linkType: soft
-
 "@sketches/nature-grass-2@workspace:sketches/nature/grass-2":
   version: 0.0.0-use.local
   resolution: "@sketches/nature-grass-2@workspace:sketches/nature/grass-2"
@@ -3514,6 +3496,24 @@ __metadata:
 "@sketches/voxelize@workspace:sketches/voxels/voxelize":
   version: 0.0.0-use.local
   resolution: "@sketches/voxelize@workspace:sketches/voxels/voxelize"
+  dependencies:
+    "@react-three/drei": "npm:^9.116.3"
+    "@react-three/fiber": "npm:^8.17.10"
+    "@sketches/simple-voxels-lib": "workspace:*"
+    "@types/react": "npm:^18.3.11"
+    "@types/react-dom": "npm:^18.3.1"
+    "@types/three": "npm:^0.173.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    three: "npm:^0.173.0"
+    typescript: "npm:^5.6.2"
+    vite: "npm:^ 6.1.0"
+  languageName: unknown
+  linkType: soft
+
+"@sketches/voxels-metropolis@workspace:sketches/voxels/metropolis":
+  version: 0.0.0-use.local
+  resolution: "@sketches/voxels-metropolis@workspace:sketches/voxels/metropolis"
   dependencies:
     "@react-three/drei": "npm:^9.116.3"
     "@react-three/fiber": "npm:^8.17.10"

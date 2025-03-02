@@ -1,8 +1,8 @@
 {
-    "name": "@sketches/metropolis",
+    "name": "@sketches/voxels-metropolis",
     "private": true,
     "sketch": {
-        "title": "Simple Voxels - Metropolis",
+        "title": "Voxels - Metropolis",
         "tags": [
             "voxels"
         ]
@@ -14,9 +14,9 @@
     "dependencies": {
         "@react-three/drei": "^9.116.3",
         "@react-three/fiber": "^8.17.10",
+        "@sketches/simple-voxels-lib": "workspace:*",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
-        "suspend-react": "^0.1.3",
         "three": "^0.173.0"
     },
     "devDependencies": {
