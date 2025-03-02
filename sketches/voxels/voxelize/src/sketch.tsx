@@ -133,7 +133,7 @@ export function Sketch() {
             <directionalLight position={[10, 10, 10]} intensity={1} />
 
             <OrbitControls makeDefault />
-            <PerspectiveCamera makeDefault position={[0, 0, 10]} />
+            <PerspectiveCamera makeDefault position={[0, 0, 100]} />
         </WebGPUCanvas>
     )
 }
