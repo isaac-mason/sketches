@@ -21,12 +21,15 @@
         "eslint": "^9.6.0",
         "express": "^4.21.2",
         "prettier": "^3.5.0",
-        "typescript": "^5.6.2"
+        "typescript": "^5.8.2"
     },
     "workspaces": [
         "common",
         "container",
         "sketches/**/*"
     ],
-    "packageManager": "yarn@4.1.1"
+    "packageManager": "yarn@4.1.1",
+    "dependencies": {
+        "prettier-plugin-tailwindcss": "^0.6.11"
+    }
 }

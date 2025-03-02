@@ -14,22 +14,22 @@
         "build": "vite build"
     },
     "dependencies": {
-        "@react-three/drei": "^9.116.3",
-        "@react-three/fiber": "^8.17.10",
+        "@react-three/drei": "^10.0.3",
+        "@react-three/fiber": "^9.0.4",
         "@recast-navigation/three": "^0.39.0",
         "arancini": "^8.0.0",
-        "leva": "^0.9.35",
-        "react": "^18.3.1",
-        "react-dom": "^18.3.1",
+        "leva": "^0.10.0",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
         "recast-navigation": "^0.39.0",
         "suspend-react": "^0.1.3",
         "three": "^0.173.0"
     },
     "devDependencies": {
-        "@types/react": "^18.3.11",
-        "@types/react-dom": "^18.3.1",
+        "@types/react": "^19.0.10",
+        "@types/react-dom": "^19.0.4",
         "@types/three": "^0.173.0",
-        "typescript": "^5.6.2",
-        "vite": "^ 6.1.0"
+        "typescript": "^5.8.2",
+        "vite": "^6.2.0"
     }
 }
