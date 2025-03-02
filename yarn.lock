@@ -1945,16 +1945,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-three/csg@npm:^3.2.0":
-  version: 3.2.0
-  resolution: "@react-three/csg@npm:3.2.0"
-  dependencies:
-    three-bvh-csg: "npm:^0.0.16"
-    three-mesh-bvh: "npm:^0.6.8"
-  checksum: 10/05030ca4952c6fc4b0a728f91e88a1f92ce85b42d3d49283c4402fff9a1dac4e6654d0eeeaf4d581e801f64dac818241db4b3caa486109948a265c25f6edf319
-  languageName: node
-  linkType: hard
-
 "@react-three/drei@npm:^10.0.3":
   version: 10.0.3
   resolution: "@react-three/drei@npm:10.0.3"
@@ -3245,20 +3235,18 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/rapier-custom-raycast-vehicle@workspace:sketches/rapier/custom-raycast-vehicle"
   dependencies:
-    "@react-three/csg": "npm:^3.2.0"
-    "@react-three/drei": "npm:^9.116.3"
-    "@react-three/fiber": "npm:^8.17.10"
-    "@react-three/rapier": "npm:^1.5.0"
-    "@types/react": "npm:^18.3.11"
-    "@types/react-dom": "npm:^18.3.1"
+    "@react-three/drei": "npm:^10.0.3"
+    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/rapier": "npm:^2.0.0-canary.0"
+    "@types/react": "npm:^19.0.10"
+    "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
-    leva: "npm:^0.9.35"
-    react: "npm:^18.3.1"
-    react-dom: "npm:^18.3.1"
-    styled-components: "npm:^6.1.13"
+    leva: "npm:^0.10.0"
+    react: "npm:^19.0.0"
+    react-dom: "npm:^19.0.0"
     three: "npm:^0.173.0"
-    typescript: "npm:^5.6.2"
-    vite: "npm:^ 6.1.0"
+    typescript: "npm:^5.8.2"
+    vite: "npm:^6.2.0"
   languageName: unknown
   linkType: soft
 
@@ -9898,25 +9886,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"three-bvh-csg@npm:^0.0.16":
-  version: 0.0.16
-  resolution: "three-bvh-csg@npm:0.0.16"
-  peerDependencies:
-    three: ">=0.151.0"
-    three-mesh-bvh: ">=0.6.6"
-  checksum: 10/6b9225d0edff5a0f755818d752e8f5f7bd9c06339015eb1156601c954c87991d677eeba182d59e5091861ac5b06c9611ff20caae1211d51e82d17feeeebdb8ab
-  languageName: node
-  linkType: hard
-
-"three-mesh-bvh@npm:^0.6.8":
-  version: 0.6.8
-  resolution: "three-mesh-bvh@npm:0.6.8"
-  peerDependencies:
-    three: ">= 0.151.0"
-  checksum: 10/b0d4cd3ee54f583b7f938b4d6754033a847dff0d046d9376d072cf12994f0ae7291e1533d5ee44ee4dec0f6f25125c42d3488af19ff53c008033fbe42032d3b9
-  languageName: node
-  linkType: hard
-
 "three-mesh-bvh@npm:^0.7.0":
   version: 0.7.0
   resolution: "three-mesh-bvh@npm:0.7.0"
@@ -10495,7 +10464,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^ 6.2.0, vite@npm:^6.1.0":
+"vite@npm:^ 6.2.0, vite@npm:^6.1.0, vite@npm:^6.2.0":
   version: 6.2.0
   resolution: "vite@npm:6.2.0"
   dependencies:

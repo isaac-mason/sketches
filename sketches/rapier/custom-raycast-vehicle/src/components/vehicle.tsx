@@ -9,6 +9,7 @@ import { RapierRaycastVehicle, WheelOptions } from '../lib/rapier-raycast-vehicl
 
 import chassisDracoUrl from '../assets/chassis-draco.glb?url'
 import wheelGlbUrl from '../assets/wheel-draco.glb?url'
+import { ThreeElements } from '@react-three/fiber'
 
 type WheelGLTF = GLTF & {
     nodes: {
@@ -56,7 +57,7 @@ interface ChassisGLTF extends GLTF {
     }
 }
 
-type WheelProps = JSX.IntrinsicElements['group'] & {
+type WheelProps = ThreeElements['group'] & {
     side: 'left' | 'right'
     radius: number
 }
@@ -68,7 +69,7 @@ const Wheel = ({ side, radius, ...props }: WheelProps) => {
     const scale = radius / 0.34
 
     return (
-        <group dispose={null} {...props} ref={groupRef}>
+        <group {...props} ref={groupRef}>
             <group scale={scale}>
                 <group scale={side === 'left' ? -1 : 1}>
                     <mesh castShadow geometry={nodes.Mesh_14.geometry} material={materials['Material.002']} />
