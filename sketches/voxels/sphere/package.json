@@ -15,7 +15,7 @@
     "dependencies": {
         "@react-three/drei": "^9.116.3",
         "@react-three/fiber": "^8.17.10",
-        "@sketches/simple-voxels-lib": "file:../simple-voxels-lib",
+        "@sketches/simple-voxels-lib": "workspace:*",
         "leva": "^0.9.35",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
