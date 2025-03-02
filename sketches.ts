@@ -24,7 +24,6 @@ export const sketchesOrder = [
     'rapier/custom-spring',
     'rapier/arancini-integration',
     'isosurface/marching-cubes-terrain',
-    'voxels/simple-voxels/multiple-worlds',
     'voxels/sphere',
     'voxels/character-controller',
     'voxels/voxelize',
