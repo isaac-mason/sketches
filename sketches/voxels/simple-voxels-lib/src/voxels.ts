@@ -22,7 +22,7 @@ export class Voxels {
     textureAtlasCanvas?: TextureAtlas.Canvas
     textureAtlasTexture?: TextureAtlas.Texture
 
-    private chunkMeshes: Map<string, { mesh: Mesh; geometry: ChunkGeometry }> = new Map()
+    chunkMeshes: Map<string, { mesh: Mesh; geometry: ChunkGeometry }> = new Map()
 
     private parent: Object3D
     private textureSize: number
@@ -176,6 +176,9 @@ export class Voxels {
 
             this.updateChunk(chunk)
         }
+
+        // return the updated chunk ids
+        return batch
     }
 
     /**

@@ -306,7 +306,8 @@ const GameWorld = () => {
         voxels.updateAtlas()
 
         const levelHalfSize = 100
-        const stoneLevel = -10
+        const dirtLevel = -20
+        const levelBottom = -30
 
         noise.seed(2)
         const generator = new Generator(42)
@@ -317,14 +318,14 @@ const GameWorld = () => {
                 y += Math.floor(noise.simplex2(x / 150, z / 150) * 5)
 
                 // ground
-                for (let y2 = y; y2 < y + 2; y2++) {
-                    voxels.setBlock(x, y2, z, grass.index)
-                }
-                for (let y2 = y - 2; y2 < y; y2++) {
-                    voxels.setBlock(x, y2, z, dirt.index)
-                }
-                for (let y2 = stoneLevel; y2 > -levelHalfSize; y2--) {
-                    voxels.setBlock(x, y2, z, stone.index)
+                for (let currentY = y; currentY >= levelBottom; currentY--) {
+                    if (currentY === y || currentY === y - 1) {
+                        voxels.setBlock(x, currentY, z, grass.index)
+                    } else if (currentY > dirtLevel) {
+                        voxels.setBlock(x, currentY, z, dirt.index)
+                    } else {
+                        voxels.setBlock(x, currentY, z, stone.index)
+                    }
                 }
 
                 // random trees
