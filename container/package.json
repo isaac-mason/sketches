@@ -17,7 +17,7 @@
         "styled-breakpoints": "^14.1.4",
         "styled-components": "^6.1.13",
         "tunnel-rat": "^0.1.2",
-        "zustand": "^5.0.1"
+        "zustand": "^5.0.3"
     },
     "devDependencies": {
         "@isaac-mason/eslint-config-typescript": "0.0.9",
