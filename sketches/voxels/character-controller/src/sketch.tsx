@@ -47,8 +47,6 @@ type Character = ReturnType<typeof initCharacter>
 const _verticalRayOrigin = new THREE.Vector3()
 const _verticalRayOffset = new THREE.Vector3()
 
-const _frontVector = new THREE.Vector3()
-const _sideVector = new THREE.Vector3()
 const _direction = new THREE.Vector3()
 const _cameraWorldDirection = new THREE.Vector3()
 
@@ -115,6 +113,19 @@ const HORIZONTAL_DIMENSIONS = ['x', 'z'] as const
 const _horizontalCheckOne = new THREE.Vector3()
 const _horizontalCheckTwo = new THREE.Vector3()
 
+const checkCollision = (voxels: Voxels, x: number, y: number, z: number, offset: number, dim: 'x' | 'z') => {
+    return (
+        intersectsVoxel(
+            voxels,
+            _horizontalCheckOne.set(dim === 'x' ? x + offset : x - 0.3, y, dim === 'x' ? z - 0.3 : z + offset),
+        ) ||
+        intersectsVoxel(
+            voxels,
+            _horizontalCheckTwo.set(dim === 'x' ? x + offset : x + 0.3, y, dim === 'x' ? z + 0.3 : z + offset),
+        )
+    )
+}
+
 const updateCharacter = (
     character: Character,
     input: CharacterInput,
@@ -125,100 +136,40 @@ const updateCharacter = (
 ) => {
     const grounded = characterIsGrounded(character, voxels)
 
-    /* vertical movement */
-    // jumping
     if (input.jump && time > character.jumpTime + 0.1 && grounded) {
         character.velocity.y = 10
         character.jumping = true
-        if (time > character.jumpTime + 0.1) {
-            character.jumpTime = time
-        }
+        character.jumpTime = time
     } else if (!input.jump) {
         character.jumping = false
     }
 
-    // gravity
     character.velocity.y -= dt * 20
 
-    /* horizontal movement */
-    const frontVector = _frontVector.set(0, 0, Number(input.forward) - Number(input.backward))
-    const sideVector = _sideVector.set(Number(input.left) - Number(input.right), 0, 0)
-    const direction = _direction.copy(frontVector).add(sideVector).normalize()
+    const direction = _direction
+        .set(Number(input.left) - Number(input.right), 0, Number(input.forward) - Number(input.backward))
+        .normalize()
 
     const yaw = Math.atan2(cameraDirection.x, cameraDirection.z)
     direction.applyAxisAngle(VECTOR_UP, yaw)
 
-    character.velocity.x = direction.x
-    character.velocity.z = direction.z
+    character.velocity.set(direction.x, character.velocity.y, direction.z)
 
-    // the desired x and z positions of the character
-    const horizontalSpeed = 10 + (input.sprint ? 10 : 0)
-    const translationX = character.velocity.x * horizontalSpeed * dt
-    const translationZ = character.velocity.z * horizontalSpeed * dt
-
-    const nextX = character.position.x + translationX
-    const nextZ = character.position.z + translationZ
+    const speed = 10 + (input.sprint ? 10 : 0)
+    const nextX = character.position.x + character.velocity.x * speed * dt
+    const nextZ = character.position.z + character.velocity.z * speed * dt
 
     for (const dim of HORIZONTAL_DIMENSIONS) {
-        // check for horizontal collision along the height of the character, starting from the bottom and moving up
-        // if no collision, set the new position to the desired new horizontal position
-        // otherwise, don't update the position and set the horizontal velocity to 0
-        const direction = (character.width / 2) * Math.sign(character.velocity[dim])
-
-        // new desired position for the current dimension
         const desired = dim === 'x' ? nextX : nextZ
-
+        const offset = (character.width / 2) * Math.sign(character.velocity[dim])
         let collision = false
 
-        for (let characterY = 0; characterY < character.height; characterY += 0.1) {
-            let offset = 0
-            if (characterY === 0 && grounded) {
-                offset = 0.1
-            } else if (characterY === character.height - 0.1) {
-                offset = -0.1
+        for (let y = 0; y < character.height; y += 0.1) {
+            const yOffset = y === 0 && grounded ? 0.1 : y === character.height - 0.1 ? -0.1 : 0
+            if (checkCollision(voxels, nextX, character.position.y + y + yOffset, nextZ, offset, dim)) {
+                collision = true
+                break
             }
-
-            const y = characterY + offset
-
-            if (dim === 'x') {
-                collision =
-                    intersectsVoxel(
-                        voxels,
-                        _horizontalCheckOne.set(
-                            nextX + direction,
-                            character.position.y + y,
-                            character.position.z - character.horizontalSensorOffset,
-                        ),
-                    ) ||
-                    intersectsVoxel(
-                        voxels,
-                        _horizontalCheckTwo.set(
-                            nextX + direction,
-                            character.position.y + y,
-                            character.position.z + character.horizontalSensorOffset,
-                        ),
-                    )
-            } else {
-                collision =
-                    intersectsVoxel(
-                        voxels,
-                        _horizontalCheckOne.set(
-                            character.position.x - character.horizontalSensorOffset,
-                            character.position.y + y,
-                            nextZ + direction,
-                        ),
-                    ) ||
-                    intersectsVoxel(
-                        voxels,
-                        _horizontalCheckTwo.set(
-                            character.position.x + character.horizontalSensorOffset,
-                            character.position.y + y,
-                            nextZ + direction,
-                        ),
-                    )
-            }
-
-            if (collision) break
         }
 
         if (!collision) {
@@ -228,25 +179,11 @@ const updateCharacter = (
         }
     }
 
-    // desired y position
     const nextY = character.velocity.y * dt + character.position.y
-
-    // if jumping, check for collision with the ceiling
-    if (character.velocity.y > 0) {
-        const hitCeiling = characterHitCeiling(character, voxels)
-
-        if (hitCeiling) {
-            character.velocity.y = 0
-        }
-    }
-
-    // if falling, check for collision with the ground
-    // if there is a collision, set the y velocity to 0
-    // if no collision, set the new position to the desired new y position
-    if (character.velocity.y < 0 && grounded) {
+    if (character.velocity.y > 0 && characterHitCeiling(character, voxels)) {
         character.velocity.y = 0
-
-        // snap to the ground
+    } else if (character.velocity.y < 0 && grounded) {
+        character.velocity.y = 0
         character.position.y = Math.ceil(character.position.y)
     } else {
         character.position.y = nextY
@@ -423,7 +360,7 @@ export function Sketch() {
                 </KeyboardControls>
 
                 <ambientLight intensity={1.5} />
-                <directionalLight position={[10, 10, 10]} intensity={1} />
+                <directionalLight position={[50, 50, 100]} intensity={1} />
 
                 <PerspectiveCamera makeDefault position={[0, 0, 10]} />
             </WebGPUCanvas>
