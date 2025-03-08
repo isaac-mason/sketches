@@ -2861,24 +2861,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sketches/threejs-journey-09-geometries@workspace:sketches/threejs-journey/09-geometries":
-  version: 0.0.0-use.local
-  resolution: "@sketches/threejs-journey-09-geometries@workspace:sketches/threejs-journey/09-geometries"
-  dependencies:
-    "@react-three/drei": "npm:^10.0.4"
-    "@react-three/fiber": "npm:^9.1.0"
-    "@react-three/flex": "npm:^1.0.1"
-    "@types/react": "npm:^19.0.10"
-    "@types/react-dom": "npm:^19.0.4"
-    "@types/three": "npm:^0.173.0"
-    react: "npm:^19.0.0"
-    react-dom: "npm:^19.0.0"
-    three: "npm:^0.173.0"
-    typescript: "npm:^5.8.2"
-    vite: "npm:^6.2.0"
-  languageName: unknown
-  linkType: soft
-
 "@sketches/threejs-journey-11-textures@workspace:sketches/threejs-journey/11-textures":
   version: 0.0.0-use.local
   resolution: "@sketches/threejs-journey-11-textures@workspace:sketches/threejs-journey/11-textures"
