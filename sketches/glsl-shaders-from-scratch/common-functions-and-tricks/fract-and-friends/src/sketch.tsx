@@ -1,5 +1,6 @@
-import { Canvas, useResolution } from '@/common'
+import { useResolution } from '@/common'
 import { OrthographicCamera } from '@react-three/drei'
+import { Canvas } from '@react-three/fiber'
 
 const vertexShader = /* glsl */ `
 varying vec2 vUvs;
