@@ -1,7 +1,7 @@
 import { OrbitControls } from '@react-three/drei'
 import { useMemo } from 'react'
 import { BufferAttribute, BufferGeometry } from 'three'
-import { Canvas } from '@/common'
+import { Canvas } from '@react-three/fiber'
 
 const App = () => {
     const bufferGeometry = useMemo(() => {

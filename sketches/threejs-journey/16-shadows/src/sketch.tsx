@@ -1,4 +1,4 @@
-import { Canvas } from '@/common'
+import { Canvas } from '@react-three/fiber'
 import { Float, OrbitControls, useHelper } from '@react-three/drei'
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'

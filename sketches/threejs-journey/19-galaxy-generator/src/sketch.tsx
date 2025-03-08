@@ -2,7 +2,7 @@ import { OrbitControls } from '@react-three/drei'
 import { useControls } from 'leva'
 import { useMemo } from 'react'
 import { AdditiveBlending, BufferAttribute, BufferGeometry, Color } from 'three'
-import { Canvas } from '@/common'
+import { Canvas } from '@react-three/fiber'
 
 const App = () => {
     const parameters = useControls('journey-19-galaxy-generator', {

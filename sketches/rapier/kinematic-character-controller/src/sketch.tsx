@@ -1,14 +1,12 @@
-import { Canvas, Instructions, useLoadingAssets, usePageVisible } from '@/common'
+import { Instructions, useLoadingAssets, usePageVisible } from '@/common'
 import Rapier from '@dimforge/rapier3d-compat'
 import { Environment, KeyboardControls, PointerLockControls, useKeyboardControls } from '@react-three/drei'
-import { useFrame, useThree } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { CapsuleCollider, Physics, RapierRigidBody, RigidBody, useRapier } from '@react-three/rapier'
 import { useControls as useLevaControls } from 'leva'
-import { RefObject, useEffect, useMemo, useRef } from 'react'
+import { JSX, RefObject, useEffect, useMemo, useRef } from 'react'
 import { Group, MathUtils, PerspectiveCamera, Vector3 } from 'three'
 import { GameLevel, Shield, Sword } from './models'
-
-const LEVA_KEY = 'rapier-kinematic-character-controller'
 
 const direction = new Vector3()
 const frontVector = new Vector3()
@@ -55,7 +53,7 @@ const useKinematicCharacterController = ({
         minJumpHeight,
         velocityXZSmoothing,
         velocityXZMin,
-    } = useLevaControls(`${LEVA_KEY}-controller`, {
+    } = useLevaControls('controller', {
         applyImpulsesToDynamicBodies: true,
         snapToGroundDistance: 0.1,
         characterShapeOffset: 0.1,
@@ -304,7 +302,7 @@ export function Sketch() {
     const loading = useLoadingAssets()
     const visible = usePageVisible()
 
-    const { debug } = useLevaControls(`${LEVA_KEY}-physics`, {
+    const { debug } = useLevaControls('physics', {
         debug: false,
     })
 

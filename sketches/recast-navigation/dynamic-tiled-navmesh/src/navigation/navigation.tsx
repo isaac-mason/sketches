@@ -7,7 +7,6 @@ import { Crowd, NavMesh, NavMeshQuery, RecastConfig } from 'recast-navigation'
 import { DebugDrawer, getPositionsAndIndices } from '@recast-navigation/three'
 import * as THREE from 'three'
 import { create } from 'zustand'
-import { SKETCH } from '../const'
 import { traversableQuery } from '../ecs'
 import { DynamicTiledNavMesh } from './dynamic-tiled-navmesh'
 
@@ -89,7 +88,7 @@ const NavMeshDebug = () => {
 export const Navigation = () => {
     const pageVisible = usePageVisible()
 
-    const { boundsDebug, navMeshDebug } = useControls(`${SKETCH}-navigation`, {
+    const { boundsDebug, navMeshDebug } = useControls('navigation', {
         boundsDebug: false,
         navMeshDebug: true,
     })

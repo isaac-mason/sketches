@@ -1,7 +1,7 @@
 import suziGlbUrl from '@pmndrs/assets/models/suzi.glb'
 import { OrbitControls, PerspectiveCamera, useCubeTexture, useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
-import { Canvas } from '@/common'
+import { Canvas } from '@react-three/fiber'
 import environmentMapNxImage from './environment/nx.jpg'
 import environmentMapNyImage from './environment/ny.jpg'
 import environmentMapNzImage from './environment/nz.jpg'

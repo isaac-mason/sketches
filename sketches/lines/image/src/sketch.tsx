@@ -1,6 +1,5 @@
-import { Canvas } from '@/common'
 import { OrbitControls, useTexture } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
+import { Canvas, useFrame } from '@react-three/fiber'
 import { useControls } from 'leva'
 import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'

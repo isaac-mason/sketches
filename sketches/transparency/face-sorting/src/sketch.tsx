@@ -1,11 +1,9 @@
-import { Canvas } from '@/common'
+import { Canvas } from '@react-three/fiber'
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { useControls } from 'leva'
 import { useMemo, useRef } from 'react'
 import * as THREE from 'three'
-
-const SKETCH = 'transparency-face-sorting'
 
 const niceColors = ['hotpink', 'orange', 'lightblue', 'lightgreen', 'purple']
 
@@ -121,7 +119,7 @@ const SortFaces = ({ children, sortCameraDistance = 0.2 }: SortFacesProps) => {
 }
 
 const TransparentTorusKnot = () => {
-    const { opacity } = useControls(`${SKETCH}-torus-knot`, {
+    const { opacity } = useControls('torus-knot', {
         opacity: { value: 0.6, min: 0, max: 1 },
     })
 
@@ -153,7 +151,7 @@ const TransparentTorusKnot = () => {
 }
 
 export function Sketch() {
-    const { sort } = useControls(SKETCH, {
+    const { sort } = useControls({
         sort: { value: true },
     })
 

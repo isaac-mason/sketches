@@ -1,4 +1,4 @@
-import { Canvas } from '@/common'
+import { Canvas } from '@react-three/fiber'
 import { OrbitControls, PerspectiveCamera, useGLTF } from '@react-three/drei'
 import { createXRStore, PointerEvents, XR, XROrigin } from '@react-three/xr'
 import { Suspense, useState } from 'react'

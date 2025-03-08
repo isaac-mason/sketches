@@ -1,4 +1,4 @@
-import { Canvas } from '@/common'
+import { Canvas } from '@react-three/fiber'
 import { Bounds, MarchingCube, MarchingCubes, OrbitControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { World } from 'arancini'

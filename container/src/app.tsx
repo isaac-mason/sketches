@@ -1,12 +1,12 @@
-import { Spinner, useDebounce } from '../../common'
-import { Component, ReactNode, useEffect, useMemo, useRef, useState } from 'react'
-import { Link, RouteObject, RouterProvider, createBrowserRouter, redirect, useLoaderData } from 'react-router-dom'
+import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
+import { Link, useLoaderData } from 'react-router-dom'
 import { create } from 'zustand'
+import { Spinner, useDebounce } from '../../common'
+import type { SketchMeta } from '../../dev/utils'
 import sketchesMetadata from '../generated/sketches.json'
 import { ScreenshotKeyboardControls, useScreenshot } from './screenshot'
 import { GitHubIcon } from './svgs/GitHubIcon'
 import { WindowMaximizeIcon } from './svgs/WindowMaximizeIcon'
-import type { SketchMeta } from '../../dev/utils'
 
 const sketches = (sketchesMetadata satisfies SketchMeta[]).filter((s: SketchMeta) => !s.hidden)
 
@@ -14,36 +14,6 @@ type SketchLoaderData = {
     sketchPath: string
     sketchUrl: string
     sketchMetadata: SketchMeta
-}
-
-const errorBoundaryState = create<{ error: boolean }>(() => ({
-    error: false,
-}))
-
-type ErrorBoundaryProps = {
-    children: ReactNode
-}
-
-class ErrorBoundary extends Component<ErrorBoundaryProps> {
-    static getDerivedStateFromError() {
-        return {}
-    }
-
-    componentDidCatch(_error: Error, _errorInfo: never) {
-        errorBoundaryState.setState({ error: true })
-    }
-
-    render() {
-        if (errorBoundaryState.getState().error) {
-            return (
-                <div className="flex h-full w-full items-center justify-center text-white">
-                    Something went wrong rendering the sketch!
-                </div>
-            )
-        }
-
-        return this.props.children
-    }
 }
 
 const LazySketch = () => {
@@ -230,7 +200,7 @@ const SideNav = () => {
     )
 }
 
-const App = () => {
+export const App = () => {
     const { sketchPath, sketchUrl } = useLoaderData() as SketchLoaderData
 
     const { open: navOpen, toggleNav, closeNav } = useNav()
@@ -240,10 +210,7 @@ const App = () => {
         <>
             <div className="relative flex h-full w-full flex-col items-center justify-center md:flex-row">
                 <SideNav />
-
-                <ErrorBoundary>
-                    <LazySketch />
-                </ErrorBoundary>
+                <LazySketch />
             </div>
 
             {/* side nav background */}
@@ -287,42 +254,4 @@ const App = () => {
             ) : undefined}
         </>
     )
-}
-
-const routes: RouteObject[] = [
-    ...sketchesMetadata.map((sketch) => {
-        const route: RouteObject = {
-            path: `/sketch/${sketch.path}`,
-            Component: App,
-            loader: async ({ request }) => {
-                errorBoundaryState.setState({ error: false })
-
-                const sketchPath = new URL(request.url).pathname.replace('/sketch/', '')
-
-                const sketchMetadata = sketchesMetadata.find((s) => s.path === sketchPath)! as SketchMeta
-
-                const sketchUrl = `/sketches-static/${sketchMetadata.path}/index.html`
-
-                return {
-                    sketchPath,
-                    sketchMetadata,
-                    sketchUrl,
-                }
-            },
-        }
-        return route
-    }),
-    {
-        path: '*',
-        element: null,
-        loader: async () => {
-            return redirect('/sketch/intro')
-        },
-    },
-]
-
-const router = createBrowserRouter(routes, {})
-
-export default () => {
-    return <RouterProvider router={router} />
 }

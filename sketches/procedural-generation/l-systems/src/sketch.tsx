@@ -1,4 +1,4 @@
-import { Canvas } from '@/common/components/canvas'
+import { Canvas } from '@react-three/fiber'
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei'
 import { Generator } from 'maath/random'
 import { useMemo, useState } from 'react'

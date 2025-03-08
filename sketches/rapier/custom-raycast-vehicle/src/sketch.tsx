@@ -8,7 +8,7 @@ import { Quaternion, Vector3 } from 'three'
 import { LampPost } from './components/lamp-post'
 import { TrafficCone } from './components/traffic-cone'
 import { Vehicle, VehicleRef } from './components/vehicle'
-import { AFTER_RAPIER_UPDATE, LEVA_KEY, RAPIER_UPDATE_PRIORITY } from './constants'
+import { AFTER_RAPIER_UPDATE, RAPIER_UPDATE_PRIORITY } from './constants'
 import { useControls } from './hooks/use-controls'
 
 const cameraIdealOffset = new Vector3()
@@ -25,14 +25,14 @@ const Game = () => {
 
     const controls = useControls()
 
-    const { cameraMode } = useLeva(`${LEVA_KEY}-camera`, {
+    const { cameraMode } = useLeva('camera', {
         cameraMode: {
             value: 'drive',
             options: ['drive', 'orbit'],
         },
     })
 
-    const { maxForce, maxSteer, maxBrake } = useLeva(`${LEVA_KEY}-controls`, {
+    const { maxForce, maxSteer, maxBrake } = useLeva('controls', {
         maxForce: 30,
         maxSteer: 10,
         maxBrake: 2,
@@ -216,7 +216,7 @@ export function Sketch() {
     const loading = useLoadingAssets()
     const visible = usePageVisible()
 
-    const { debug } = useLeva(`${LEVA_KEY}-physics`, {
+    const { debug } = useLeva('physics', {
         debug: false,
     })
 

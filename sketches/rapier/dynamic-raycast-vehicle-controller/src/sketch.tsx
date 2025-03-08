@@ -1,7 +1,7 @@
-import { Canvas, Instructions, useLoadingAssets, usePageVisible } from '@/common'
+import { Instructions, useLoadingAssets, usePageVisible } from '@/common'
 import { Collider } from '@dimforge/rapier3d-compat'
 import { KeyboardControls, OrbitControls, useGLTF, useKeyboardControls } from '@react-three/drei'
-import { useFrame, useThree } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { CuboidCollider, Physics, RapierRigidBody, RigidBody, useRapier } from '@react-three/rapier'
 import { useControls } from 'leva'
 import { RefObject, useRef, useState } from 'react'
@@ -85,7 +85,7 @@ const Vehicle = ({ position, rotation }: VehicleProps) => {
     const [smoothedCameraPosition] = useState(new THREE.Vector3(0, 100, -300))
     const [smoothedCameraTarget] = useState(new THREE.Vector3())
 
-    const ground = useRef<Collider>()
+    const ground = useRef<Collider | null>(null)
 
     useFrame((state, delta) => {
         if (!chasisMeshRef.current || !vehicleController.current || !!threeControls) return
@@ -95,7 +95,7 @@ const Vehicle = ({ position, rotation }: VehicleProps) => {
         /* controls */
 
         const controller = vehicleController.current
-        
+
         const chassisRigidBody = controller.chassis()
 
         const controls = getKeyboardControls()
@@ -105,17 +105,9 @@ const Vehicle = ({ position, rotation }: VehicleProps) => {
 
         const ray = new rapier.Ray(chassisRigidBody.translation(), { x: 0, y: -1, z: 0 })
 
-        const raycastResult = world.castRay(
-            ray,
-            1,
-            false,
-            undefined,
-            undefined,
-            undefined,
-            chassisRigidBody,
-        )
+        const raycastResult = world.castRay(ray, 1, false, undefined, undefined, undefined, chassisRigidBody)
 
-        ground.current = undefined
+        ground.current = null
 
         if (raycastResult) {
             const collider = raycastResult.collider
@@ -124,7 +116,6 @@ const Vehicle = ({ position, rotation }: VehicleProps) => {
 
             ground.current = collider
         }
-
 
         const engineForce = Number(controls.forward) * accelerateForce - Number(controls.back)
 

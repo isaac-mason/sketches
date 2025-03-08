@@ -19,7 +19,7 @@
     },
     "dependencies": {
         "@react-three/drei": "^10.0.3",
-        "@react-three/fiber": "^9.0.4",
+        "@react-three/fiber": "^9.1.0",
         "arancini": "^8.0.0",
         "p2-es": "^1.2.3",
         "react": "^19.0.0",

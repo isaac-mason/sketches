@@ -1,4 +1,4 @@
-import { Canvas } from '@/common/components/canvas'
+import { Canvas } from '@react-three/fiber'
 import { Crosshair } from '@/common/components/crosshair'
 import { Instructions } from '@/common/components/instructions'
 import { useInterval } from '@/common/hooks/use-interval'
@@ -13,7 +13,6 @@ import { suspend } from 'suspend-react'
 import * as THREE from 'three'
 import { Vector3Tuple } from 'three'
 import { BoxTool } from './box-tool'
-import { SKETCH } from './const'
 import { Duck } from './duck'
 import { Component, Entity, crowdAgentQuery, followersQuery, playerQuery } from './ecs'
 import { Level } from './level/level'
@@ -148,7 +147,7 @@ export function Sketch() {
     suspend(async () => {
         await initRecast()
     }, [])
-    const { physicsDebug } = useControls(`${SKETCH}-physics`, {
+    const { physicsDebug } = useControls('physics', {
         physicsDebug: false,
     })
 

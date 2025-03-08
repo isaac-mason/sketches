@@ -39,19 +39,9 @@ export const WebGPUCanvas = ({
     children,
     forceWebGL = false,
     forceWebGPU = false,
-    frameloop = 'always',
     gl,
     ...props
 }: React.PropsWithChildren<WebGPUCanvasProps>) => {
-    const [canvasFrameloop, setCanvasFrameloop] = React.useState<CanvasProps['frameloop']>('never')
-    const [initialising, setInitialising] = React.useState(true)
-
-    React.useEffect(() => {
-        if (initialising) return
-
-        setCanvasFrameloop(frameloop)
-    }, [initialising, frameloop])
-
     if (forceWebGPU && !WebGPU.isAvailable()) {
         return (
             <div style={UNSUPPORTED_WRAPPER_STYLES}>
@@ -66,12 +56,9 @@ export const WebGPUCanvas = ({
         <Canvas
             {...props}
             id="gl"
-            frameloop={canvasFrameloop}
-            gl={(canvas) => {
+            gl={async ({ canvas }) => {
                 const renderer = new WebGPURenderer({ ...gl, canvas: canvas as HTMLCanvasElement, forceWebGL })
-                renderer.init().then(() => {
-                    setInitialising(false)
-                })
+                renderer.init()
                 return renderer
             }}
         >

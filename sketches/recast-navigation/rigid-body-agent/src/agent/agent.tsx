@@ -5,7 +5,6 @@ import { CapsuleCollider, RapierRigidBody, RigidBody, useBeforePhysicsStep } fro
 import { useControls } from 'leva'
 import { useRef, useState } from 'react'
 import * as THREE from 'three'
-import { SKETCH } from '../const'
 import { navQuery, playerQuery } from '../ecs'
 import { Duck } from './duck'
 
@@ -34,7 +33,7 @@ const distanceThreshold = 3
 const speed = 3.5
 
 export const Agent = ({ position }: AgentProps) => {
-    const { pathDebugLine } = useControls(`${SKETCH}-agent`, {
+    const { pathDebugLine } = useControls('agent', {
         pathDebugLine: false,
     })
 

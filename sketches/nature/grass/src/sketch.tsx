@@ -1,4 +1,4 @@
-import { Canvas } from '@/common'
+import { Canvas } from '@react-three/fiber'
 import forestEnvironment from '@pmndrs/assets/hdri/forest.exr'
 import { Environment, OrbitControls, PerspectiveCamera, Sky, useTexture } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'

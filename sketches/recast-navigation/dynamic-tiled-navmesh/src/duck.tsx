@@ -2,6 +2,7 @@ import { useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import { GLTF } from 'three-stdlib'
 import duckGltf from './duck.gltf?url'
+import { JSX } from 'react'
 
 type GLTFResult = GLTF & {
     nodes: {
@@ -23,7 +24,7 @@ export const Duck = (props: JSX.IntrinsicElements['group']) => {
     const { nodes, materials } = useGLTF(duckGltf) as GLTFResult
 
     return (
-        <group {...props} dispose={null} position={[0, -0.8, 0]}>
+        <group {...props} dispose={null}>
             <mesh
                 castShadow
                 receiveShadow
