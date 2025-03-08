@@ -1,5 +1,6 @@
-import { Canvas, useResolution } from '@/common'
+import { useResolution } from '@/common'
 import { Html, OrthographicCamera } from '@react-three/drei'
+import { Canvas } from '@react-three/fiber'
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 
