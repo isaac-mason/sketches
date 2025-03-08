@@ -1,6 +1,6 @@
-import { Canvas, Instructions } from '@/common'
+import { Instructions } from '@/common'
 import { KeyboardControls, MeshReflectorMaterial, OrbitControls, PerspectiveCamera, useKeyboardControls } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
+import { Canvas, useFrame } from '@react-three/fiber'
 import {
     BallCollider,
     CuboidCollider,
@@ -15,8 +15,6 @@ import {
 import { useControls } from 'leva'
 import { useRef } from 'react'
 import * as THREE from 'three'
-
-const SKETCH = 'rapier/arcade-vehicle-controller'
 
 type KeyControls = {
     accelerate: boolean
@@ -302,7 +300,7 @@ const Floor = () => (
     </>
 )
 export function Sketch() {
-    const { orbitControls, physicsDebug } = useControls(SKETCH, {
+    const { orbitControls, physicsDebug } = useControls({
         orbitControls: false,
         physicsDebug: false,
     })

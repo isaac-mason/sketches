@@ -1,13 +1,11 @@
-import { Canvas, getQueryParamOrDefault, usePageVisible } from '@/common'
+import { getQueryParamOrDefault, usePageVisible } from '@/common'
 import Rapier from '@dimforge/rapier3d-compat'
 import { OrbitControls, Wireframe } from '@react-three/drei'
-import { Vector3 as Vector3Tuple, useThree } from '@react-three/fiber'
+import { Canvas, Vector3 as Vector3Tuple, useThree } from '@react-three/fiber'
 import { Physics, RapierRigidBody, RigidBody, RigidBodyProps, useRapier } from '@react-three/rapier'
 import { useControls } from 'leva'
 import { useEffect, useRef, useState } from 'react'
 import { Mesh, Quaternion, Raycaster, Vector3 } from 'three'
-
-const LEVA_KEY = 'rapier-pointer-constraint'
 
 type DraggableUserData = {
     draggable: boolean
@@ -23,7 +21,7 @@ const ROPE_JOINT = 'rope joint'
 const OPTIONS = [SPHERICAL_CONSTRAINT, SPRING, ROPE_JOINT]
 
 const PointerControls = ({ target }: PointerConstraintControlsProps) => {
-    const { type, pointerRigidBodyVisible, movementPlaneVisible } = useControls(LEVA_KEY, {
+    const { type, pointerRigidBodyVisible, movementPlaneVisible } = useControls({
         type: {
             label: 'Type',
             value: getQueryParamOrDefault('type', SPHERICAL_CONSTRAINT, (value) => OPTIONS.includes(value)),
@@ -236,7 +234,7 @@ const Floor = () => (
 export function Sketch() {
     const visible = usePageVisible()
 
-    const { debug } = useControls(`${LEVA_KEY}-debug`, {
+    const { debug } = useControls('debug', {
         debug: false,
     })
 

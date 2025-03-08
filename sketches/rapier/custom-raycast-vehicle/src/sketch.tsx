@@ -1,31 +1,15 @@
+import { Instructions, useLoadingAssets, usePageVisible } from '@/common'
 import { Environment, OrbitControls, Stars } from '@react-three/drei'
-import { useFrame, useThree } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { CuboidCollider, CylinderCollider, Physics, RigidBody, useBeforePhysicsStep } from '@react-three/rapier'
 import { useControls as useLeva } from 'leva'
 import { useRef } from 'react'
-import styled from 'styled-components'
 import { Quaternion, Vector3 } from 'three'
-import { Canvas, Instructions, useLoadingAssets, usePageVisible } from '@/common'
 import { LampPost } from './components/lamp-post'
 import { TrafficCone } from './components/traffic-cone'
 import { Vehicle, VehicleRef } from './components/vehicle'
-import { AFTER_RAPIER_UPDATE, LEVA_KEY, RAPIER_UPDATE_PRIORITY } from './constants'
-import { SpeedTextTunnel } from './constants/speed-text-tunnel'
+import { AFTER_RAPIER_UPDATE, RAPIER_UPDATE_PRIORITY } from './constants'
 import { useControls } from './hooks/use-controls'
-
-const Text = styled.div`
-    text-align: center;
-    font-size: 2em;
-    color: white;
-    font-family: monospace;
-    text-shadow: 2px 2px black;
-`
-
-const SpeedText = styled(Text)`
-    position: absolute;
-    bottom: 3em;
-    left: 2em;
-`
 
 const cameraIdealOffset = new Vector3()
 const cameraIdealLookAt = new Vector3()
@@ -34,7 +18,6 @@ const chassisRotation = new Quaternion()
 
 const Game = () => {
     const raycastVehicle = useRef<VehicleRef>(null)
-    const currentSpeedTextDiv = useRef<HTMLDivElement>(null)
 
     const camera = useThree((state) => state.camera)
     const currentCameraPosition = useRef(new Vector3(15, 15, 0))
@@ -42,14 +25,14 @@ const Game = () => {
 
     const controls = useControls()
 
-    const { cameraMode } = useLeva(`${LEVA_KEY}-camera`, {
+    const { cameraMode } = useLeva('camera', {
         cameraMode: {
             value: 'drive',
             options: ['drive', 'orbit'],
         },
     })
 
-    const { maxForce, maxSteer, maxBrake } = useLeva(`${LEVA_KEY}-controls`, {
+    const { maxForce, maxSteer, maxBrake } = useLeva('controls', {
         maxForce: 30,
         maxSteer: 10,
         maxBrake: 2,
@@ -111,12 +94,6 @@ const Game = () => {
             wheelObject.quaternion.copy(wheelState.worldTransform.quaternion)
         }
 
-        // update speed text
-        if (currentSpeedTextDiv.current) {
-            const km = Math.abs(vehicle.state.currentVehicleSpeedKmHour).toFixed()
-            currentSpeedTextDiv.current.innerText = `${km} km/h`
-        }
-
         // update brake lights
         setBraking(brakeForce > 0)
     })
@@ -153,10 +130,6 @@ const Game = () => {
 
     return (
         <>
-            <SpeedTextTunnel.In>
-                <SpeedText ref={currentSpeedTextDiv} />
-            </SpeedTextTunnel.In>
-
             {/* raycast vehicle */}
             <Vehicle ref={raycastVehicle} position={[0, 5, 0]} rotation={[0, -Math.PI / 2, 0]} />
 
@@ -243,7 +216,7 @@ export function Sketch() {
     const loading = useLoadingAssets()
     const visible = usePageVisible()
 
-    const { debug } = useLeva(`${LEVA_KEY}-physics`, {
+    const { debug } = useLeva('physics', {
         debug: false,
     })
 
@@ -255,8 +228,6 @@ export function Sketch() {
                 <Physics
                     gravity={[0, -9.81, 0]}
                     updatePriority={RAPIER_UPDATE_PRIORITY}
-                    // todo: support fixed timestepping
-                    // right now if timeStep is not "vary", the wheel positions will be incorrect and will visually jitter
                     timeStep="vary"
                     paused={!visible || loading}
                     debug={debug}
@@ -265,9 +236,7 @@ export function Sketch() {
                 </Physics>
             </Canvas>
 
-            <SpeedTextTunnel.Out />
-
-            <Instructions>use wasd to drive, space to break</Instructions>
+            <Instructions>* use wasd to drive, space to break</Instructions>
         </>
     )
 }

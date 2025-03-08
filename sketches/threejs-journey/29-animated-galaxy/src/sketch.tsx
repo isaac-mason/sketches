@@ -3,7 +3,7 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { useControls } from 'leva'
 import { useMemo, useRef } from 'react'
 import { BufferGeometry, Color, BufferAttribute, AdditiveBlending } from 'three'
-import { Canvas } from '@/common'
+import { Canvas } from '@react-three/fiber'
 
 const vertexShader = /* glsl */ `
 uniform float uTime;

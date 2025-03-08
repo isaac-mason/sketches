@@ -1,4 +1,4 @@
-import { Canvas } from '@/common'
+import { Canvas } from '@react-three/fiber'
 import suziGlbUrl from '@pmndrs/assets/models/suzi.glb'
 import { OrbitControls, useGLTF } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'

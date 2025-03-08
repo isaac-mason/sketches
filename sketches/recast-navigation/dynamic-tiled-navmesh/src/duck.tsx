@@ -1,29 +1,31 @@
 import { useGLTF } from '@react-three/drei'
+import { ObjectMap, ThreeElements } from '@react-three/fiber'
 import * as THREE from 'three'
 import { GLTF } from 'three-stdlib'
 import duckGltf from './duck.gltf?url'
 
-type GLTFResult = GLTF & {
-    nodes: {
-        character_duck: THREE.Mesh
-        character_duckArmLeft: THREE.Mesh
-        character_duckArmRight: THREE.Mesh
-        Cube1338: THREE.Mesh
-        Cube1338_1: THREE.Mesh
-        Cube1338_2: THREE.Mesh
+type GLTFResult = GLTF &
+    ObjectMap & {
+        nodes: {
+            character_duck: THREE.Mesh
+            character_duckArmLeft: THREE.Mesh
+            character_duckArmRight: THREE.Mesh
+            Cube1338: THREE.Mesh
+            Cube1338_1: THREE.Mesh
+            Cube1338_2: THREE.Mesh
+        }
+        materials: {
+            ['White.026']: THREE.MeshStandardMaterial
+            ['Yellow.043']: THREE.MeshStandardMaterial
+            ['Black.027']: THREE.MeshStandardMaterial
+        }
     }
-    materials: {
-        ['White.026']: THREE.MeshStandardMaterial
-        ['Yellow.043']: THREE.MeshStandardMaterial
-        ['Black.027']: THREE.MeshStandardMaterial
-    }
-}
 
-export const Duck = (props: JSX.IntrinsicElements['group']) => {
+export const Duck = (props: ThreeElements['group']) => {
     const { nodes, materials } = useGLTF(duckGltf) as GLTFResult
 
     return (
-        <group {...props} dispose={null} position={[0, -0.8, 0]}>
+        <group {...props} dispose={null}>
             <mesh
                 castShadow
                 receiveShadow

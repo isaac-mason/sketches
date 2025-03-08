@@ -1,4 +1,4 @@
-import { useThree } from '@react-three/fiber'
+import { ThreeElements, useThree } from '@react-three/fiber'
 import * as d3 from 'd3'
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
@@ -36,7 +36,7 @@ type DedupedLink = {
 
 export type NetworkProps = {
     children?: React.ReactNode
-} & JSX.IntrinsicElements['group']
+} & ThreeElements['group']
 
 export const Network = ({ children, ...groupProps }: NetworkProps) => {
     const scene = useThree((state) => state.scene)

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
-import styled from 'styled-components'
 import { create } from 'zustand'
+
+import './styles.css'
 
 type Vec2 = [number, number]
 type Particle = { x: number; y: number; element: number }
@@ -82,27 +83,6 @@ const useFallingSand = create<{
         map.fill(null)
     },
 }))
-
-const ElementSelector = styled.div`
-    width: 80px;
-    height: 80px;
-    padding: 5px;
-    font-weight: 800;
-    font-family: monospace;
-
-    border: 3px solid transparent;
-
-    &.selected {
-        border: 3px solid #000;
-    }
-`
-
-const Button = styled.button`
-    padding: 1em;
-    border: none;
-    font-weight: 600;
-    font-family: monospace;
-`
 
 export function Sketch() {
     const canvasRef = useRef<HTMLCanvasElement>(null!)
@@ -362,9 +342,9 @@ export function Sketch() {
                 }}
             >
                 {Object.entries(ElementDetails).map(([type, { name, color }]) => (
-                    <ElementSelector
+                    <div
                         key={type}
-                        className={selectedElement === Number(type) ? 'selected' : ''}
+                        className={`element ${selectedElement === Number(type) ? 'selected' : ''}`}
                         style={{
                             backgroundColor: color,
                         }}
@@ -373,10 +353,10 @@ export function Sketch() {
                         }}
                     >
                         {name}
-                    </ElementSelector>
+                    </div>
                 ))}
 
-                <Button
+                <button
                     onClick={reset}
                     style={{
                         width: '100%',
@@ -384,9 +364,9 @@ export function Sketch() {
                     }}
                 >
                     Reset
-                </Button>
+                </button>
 
-                <Button
+                <button
                     onClick={togglePause}
                     style={{
                         width: '100%',
@@ -394,7 +374,7 @@ export function Sketch() {
                     }}
                 >
                     {paused ? 'Play' : 'Pause'}
-                </Button>
+                </button>
             </div>
 
             <canvas

@@ -4,7 +4,7 @@ import { Environment, PerspectiveCamera } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { With, World } from 'arancini'
 import * as p2 from 'p2-es'
-import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { suspend } from 'suspend-react'
 import * as THREE from 'three'
 import { color, mix, smoothstep, uv } from 'three/tsl'
@@ -12,16 +12,15 @@ import { MeshBasicNodeMaterial, WebGPURenderer } from 'three/webgpu'
 import { create } from 'zustand'
 import * as Particles from './particles'
 import * as InstancedSprites from './sprites'
-import { Spinner } from '../../../common'
 
 type P2BodyWithUserData = p2.Body & {
     userData?: {
-        ignoreForPlacementCheck?: boolean
+        environment?: boolean
     }
 }
 
-const ignoreBodyForPlacementCheck = (body: p2.Body) => {
-    ;(body as P2BodyWithUserData).userData = { ignoreForPlacementCheck: true }
+const setEnvironmentUserData = (body: p2.Body) => {
+    ;(body as P2BodyWithUserData).userData = { environment: true }
 }
 
 const _direction = new THREE.Vector3()
@@ -230,7 +229,7 @@ const createMinglingCats = (world: World, physics: p2.World) => {
             let tooClose = false
 
             for (const body of physics.bodies) {
-                if ((body as P2BodyWithUserData).userData?.ignoreForPlacementCheck) continue
+                if ((body as P2BodyWithUserData).userData?.environment) continue
 
                 if (tooClose) break
 
@@ -400,7 +399,7 @@ const createIceRink = (group: THREE.Group, world: World) => {
     const rinkPhysicsBody = new p2.Body({ mass: 0, position: [0, 0] })
     rinkPhysicsBody.fromPolygon(points.shape.map((point) => [point.x, point.y]))
 
-    ignoreBodyForPlacementCheck(rinkPhysicsBody)
+    setEnvironmentUserData(rinkPhysicsBody)
 
     world.create({
         body: rinkPhysicsBody,
@@ -1447,11 +1446,13 @@ const Game = () => {
 
         return () => {
             dispose(state)
+            useGame.setState(null!)
         }
     }, [])
 
     useFrame(({ gl, scene, camera }, delta) => {
         if (!state) return
+        console.log('frame')
 
         const clampedDelta = Math.min(delta, 0.1)
 
@@ -1466,7 +1467,6 @@ const Game = () => {
 
     return (
         <>
-            {/* <Matches state={gameState} /> */}
             <Ground />
             <Sky />
 
@@ -1500,15 +1500,13 @@ export function Sketch() {
 
     return (
         <>
-            <Suspense fallback={<Spinner />}>
-                <WebGPUCanvas camera={{ position: [2, 1, 2] }}>
-                    <Game key={gameId} />
+            <WebGPUCanvas camera={{ position: [2, 1, 2] }}>
+                <Game key={gameId} />
 
-                    <PerspectiveCamera makeDefault position={[0, 10, 30]} fov={70} />
-                </WebGPUCanvas>
+                <PerspectiveCamera makeDefault position={[0, 10, 30]} fov={70} />
+            </WebGPUCanvas>
 
-                <GameUI />
-            </Suspense>
+            <GameUI />
         </>
     )
 }

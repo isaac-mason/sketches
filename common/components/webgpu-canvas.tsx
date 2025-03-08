@@ -1,28 +1,26 @@
 import { Canvas, CanvasProps } from '@react-three/fiber'
 import * as React from 'react'
-import styled from 'styled-components'
 import WebGPU from 'three/addons/capabilities/WebGPU.js'
 import { WebGPURenderer } from 'three/webgpu'
 
-const UnsupportedNoticeWrapper = styled.div`
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1000;
-    width: 100%;
-    height: 100%;
-    color: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-`
-
-const UnsupportedNotice = styled.div`
-    font-size: 1.5rem;
-    text-align: center;
-    box-sizing: border-box;
-    padding: 3em;
-`
+const UNSUPPORTED_WRAPPER_STYLES: React.CSSProperties = {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    zIndex: 1000,
+    width: '100%',
+    height: '100%',
+    color: '#fff',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+}
+const UNSUPPORTED_NOTICE_STYLES: React.CSSProperties = {
+    fontSize: '1.5rem',
+    textAlign: 'center',
+    boxSizing: 'border-box',
+    padding: '3em',
+}
 
 export type WebGPUCanvasProps = {
     /**
@@ -41,24 +39,16 @@ export const WebGPUCanvas = ({
     children,
     forceWebGL = false,
     forceWebGPU = false,
-    frameloop = 'always',
     gl,
     ...props
 }: React.PropsWithChildren<WebGPUCanvasProps>) => {
-    const [canvasFrameloop, setCanvasFrameloop] = React.useState<CanvasProps['frameloop']>('never')
-    const [initialising, setInitialising] = React.useState(true)
-
-    React.useEffect(() => {
-        if (initialising) return
-
-        setCanvasFrameloop(frameloop)
-    }, [initialising, frameloop])
-
     if (forceWebGPU && !WebGPU.isAvailable()) {
         return (
-            <UnsupportedNoticeWrapper>
-                <UnsupportedNotice>Your browser doesn't support WebGPU, this content cannot be displayed.</UnsupportedNotice>
-            </UnsupportedNoticeWrapper>
+            <div style={UNSUPPORTED_WRAPPER_STYLES}>
+                <div style={UNSUPPORTED_NOTICE_STYLES}>
+                    Your browser doesn't support WebGPU, this content cannot be displayed.
+                </div>
+            </div>
         )
     }
 
@@ -66,12 +56,9 @@ export const WebGPUCanvas = ({
         <Canvas
             {...props}
             id="gl"
-            frameloop={canvasFrameloop}
-            gl={(canvas) => {
+            gl={async ({ canvas }) => {
                 const renderer = new WebGPURenderer({ ...gl, canvas: canvas as HTMLCanvasElement, forceWebGL })
-                renderer.init().then(() => {
-                    setInitialising(false)
-                })
+                renderer.init()
                 return renderer
             }}
         >

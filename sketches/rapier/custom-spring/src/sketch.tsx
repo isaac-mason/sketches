@@ -1,13 +1,12 @@
+import { usePageVisible } from '@/common'
 import { OrbitControls, Text } from '@react-three/drei'
+import { Canvas } from '@react-three/fiber'
 import { Physics, RapierRigidBody, RigidBody, useAfterPhysicsStep, useBeforePhysicsStep } from '@react-three/rapier'
 import { useControls } from 'leva'
 import { useEffect, useRef } from 'react'
 import { Vector3 } from 'three'
 import { create } from 'zustand'
-import { Canvas, usePageVisible } from '@/common'
 import { Spring } from './spring'
-
-const LEVA_KEY = 'rapier-custom-spring'
 
 const usePointer = create<{ pointerDown: boolean; setPointerDown: (pointerDown: boolean) => void }>((set) => ({
     pointerDown: false,
@@ -17,9 +16,8 @@ const usePointer = create<{ pointerDown: boolean; setPointerDown: (pointerDown: 
 const SpringDemo = () => {
     const { pointerDown } = usePointer()
 
-    const { springRestLength, springStiffness, springDamping } = useControls(LEVA_KEY, {
+    const { springRestLength, springStiffness, springDamping } = useControls({
         postPosition: {
-            
             value: [0, 2],
             onChange: (value) => {
                 postRigidBody.current?.setTranslation(
@@ -109,7 +107,7 @@ export function Sketch() {
 
     const visible = usePageVisible()
 
-    const { debug } = useControls(`${LEVA_KEY}-physics`, {
+    const { debug } = useControls('physics', {
         debug: false,
     })
 

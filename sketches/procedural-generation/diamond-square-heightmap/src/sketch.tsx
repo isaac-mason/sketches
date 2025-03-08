@@ -1,4 +1,4 @@
-import { Canvas } from '@/common'
+import { Canvas } from '@react-three/fiber'
 import { Bounds, Helper, OrbitControls } from '@react-three/drei'
 import { useControls } from 'leva'
 import { useMemo } from 'react'

@@ -1,4 +1,4 @@
-import { Canvas } from '@/common/components/canvas'
+import { Canvas } from '@react-three/fiber'
 import { Crosshair } from '@/common/components/crosshair'
 import { Instructions } from '@/common/components/instructions'
 import { useLoadingAssets } from '@/common/hooks/use-loading-assets'
@@ -8,7 +8,6 @@ import { CuboidCollider, Physics, RigidBody } from '@react-three/rapier'
 import { useControls } from 'leva'
 import { Agent } from './agent/agent'
 import { BoxTool } from './box-tool'
-import { SKETCH } from './const'
 import { Component, Entity } from './ecs'
 import { NavMeshDebug, NavMeshGenerator } from './navmesh/navmesh'
 import { Player, PlayerControls } from './player'
@@ -53,7 +52,7 @@ export function Sketch() {
 
     const loading = useLoadingAssets()
 
-    const { physicsDebug, navMeshDebug } = useControls(`${SKETCH}-physics`, {
+    const { physicsDebug, navMeshDebug } = useControls('physics', {
         physicsDebug: false,
         navMeshDebug: true,
     })

@@ -1,0 +1,20 @@
+.element {
+    width: 80px;
+    height: 80px;
+    padding: 5px;
+    font-weight: 800;
+    font-family: monospace;
+
+    border: 3px solid transparent;
+}
+
+.element.selected {
+    border: 3px solid #000;
+}
+
+button {
+    padding: 1em;
+    border: none;
+    font-weight: 600;
+    font-family: monospace;
+}

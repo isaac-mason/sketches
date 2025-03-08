@@ -4,11 +4,11 @@ import { useControls as useLeva } from 'leva'
 import { Fragment, RefObject, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { Color, Group, Mesh, MeshStandardMaterial, Object3D, SpotLightHelper, Vector3, Vector3Tuple } from 'three'
 import { GLTF } from 'three-stdlib'
-import { LEVA_KEY } from '../constants'
 import { RapierRaycastVehicle, WheelOptions } from '../lib/rapier-raycast-vehicle'
 
 import chassisDracoUrl from '../assets/chassis-draco.glb?url'
 import wheelGlbUrl from '../assets/wheel-draco.glb?url'
+import { ThreeElements } from '@react-three/fiber'
 
 type WheelGLTF = GLTF & {
     nodes: {
@@ -56,7 +56,7 @@ interface ChassisGLTF extends GLTF {
     }
 }
 
-type WheelProps = JSX.IntrinsicElements['group'] & {
+type WheelProps = ThreeElements['group'] & {
     side: 'left' | 'right'
     radius: number
 }
@@ -68,7 +68,7 @@ const Wheel = ({ side, radius, ...props }: WheelProps) => {
     const scale = radius / 0.34
 
     return (
-        <group dispose={null} {...props} ref={groupRef}>
+        <group {...props} ref={groupRef}>
             <group scale={scale}>
                 <group scale={side === 'left' ? -1 : 1}>
                     <mesh castShadow geometry={nodes.Mesh_14.geometry} material={materials['Material.002']} />
@@ -110,7 +110,7 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(({ children, ...grou
     const bottomLeftWheelObject = useRef<Group>(null!)
     const bottomRightWheelObject = useRef<Group>(null!)
 
-    const { headlightsSpotLightHelper } = useLeva(`${LEVA_KEY}-headlights`, {
+    const { headlightsSpotLightHelper } = useLeva('headlights', {
         headlightsSpotLightHelper: false,
     })
 
@@ -125,7 +125,7 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(({ children, ...grou
         vehicleFront,
         vehicleBack,
         ...levaWheelOptions
-    } = useLeva(`${LEVA_KEY}-wheel-options`, {
+    } = useLeva('wheels', {
         radius: 0.38,
 
         indexRightAxis: 2,

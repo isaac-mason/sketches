@@ -1,4 +1,4 @@
-import { Canvas } from '@/common'
+import { Canvas } from '@react-three/fiber'
 import { DragControls, Html, OrbitControls, PerspectiveCamera } from '@react-three/drei'
 import { ThreeElements, useFrame, useThree } from '@react-three/fiber'
 import { useDrag } from '@use-gesture/react'

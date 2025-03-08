@@ -1,4 +1,4 @@
-import { Canvas } from '@/common'
+import { Canvas } from '@react-three/fiber'
 import cityEnvironment from '@pmndrs/assets/hdri/city.exr'
 import { Environment, OrbitControls, useAnimations, useGLTF } from '@react-three/drei'
 import { useEffect, useState } from 'react'

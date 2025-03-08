@@ -5,9 +5,8 @@ import { CylinderCollider, Physics, RapierRigidBody, RigidBody, useFixedJoint, u
 import { useControls } from 'leva'
 import React, { RefObject, createRef, useEffect, useMemo, useRef } from 'react'
 import { Quaternion, Vector3, Vector3Tuple, Vector4Tuple } from 'three'
-import { Canvas, Instructions, usePageVisible } from '@/common'
-
-const LEVA_KEY = 'rapier-revolute-joint-vehicle'
+import { Instructions, usePageVisible } from '@/common'
+import { Canvas } from '@react-three/fiber'
 
 const CONTROLS = {
     forward: 'forward',
@@ -161,7 +160,7 @@ type RevoluteJointVehicleProps = {
 }
 
 const RevoluteJointVehicle = ({ position }: RevoluteJointVehicleProps) => {
-    const { cameraMode } = useControls(`${LEVA_KEY}-camera`, {
+    const { cameraMode } = useControls('camera', {
         cameraMode: {
             value: 'follow',
             options: ['follow', 'orbit'],
@@ -172,11 +171,10 @@ const RevoluteJointVehicle = ({ position }: RevoluteJointVehicleProps) => {
     const currentCameraPosition = useRef(new Vector3(15, 15, 0))
     const currentCameraLookAt = useRef(new Vector3())
 
-    const chassisRef = useRef<RapierRigidBody>(null)
+    const chassisRef = useRef<RapierRigidBody>(null!)
 
-    const wheelRefs = useRef<RefObject<RapierRigidBody>[]>(wheels.map(() => createRef()))
-
-    const axleRefs = useRef<RefObject<RapierRigidBody>[]>(wheels.map(() => createRef()))
+    const wheelRefs = useRef(wheels.map(() => createRef())) as RefObject<RefObject<RapierRigidBody>[]>
+    const axleRefs = useRef(wheels.map(() => createRef())) as RefObject<RefObject<RapierRigidBody>[]>
 
     useFrame((_, delta) => {
         if (!chassisRef.current || cameraMode !== 'follow') {
@@ -351,7 +349,7 @@ const Scene = () => {
 export function Sketch() {
     const visible = usePageVisible()
 
-    const { debug } = useControls(`${LEVA_KEY}-debug`, {
+    const { debug } = useControls({
         debug: false,
     })
 

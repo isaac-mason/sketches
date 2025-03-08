@@ -24,7 +24,7 @@ export const useVehicleController = (
 ) => {
     const { world } = useRapier()
 
-    const vehicleController = useRef<DynamicRayCastVehicleController>()
+    const vehicleController = useRef<DynamicRayCastVehicleController | null>(null)
 
     useEffect(() => {
         const { current: chassis } = chassisRef
@@ -48,7 +48,7 @@ export const useVehicleController = (
         vehicleController.current = vehicle
 
         return () => {
-            vehicleController.current = undefined
+            vehicleController.current = null
             world.removeVehicleController(vehicle)
         }
     }, [])

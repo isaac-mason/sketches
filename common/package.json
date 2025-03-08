@@ -2,16 +2,16 @@
     "name": "@sketches/common",
     "private": true,
     "dependencies": {
-        "@react-three/drei": "^9.116.3",
-        "@react-three/fiber": "^8.17.10",
+        "@react-three/drei": "^10.0.4",
+        "@react-three/fiber": "^9.1.0",
         "@use-gesture/react": "^10.3.1",
-        "leva": "^0.9.35",
+        "leva": "^0.10.0",
         "r3f-perf": "^7.2.1",
-        "react": "^18.3.1",
-        "react-dom": "^18.3.1",
-        "styled-components": "^6.1.13",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "styled-components": "^6.1.15",
         "three": "^0.173.0",
-        "zustand": "^5.0.1"
+        "zustand": "^5.0.3"
     },
     "devDependencies": {
         "@types/three": "^0.173.0"

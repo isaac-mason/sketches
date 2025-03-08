@@ -1,33 +1,32 @@
-import styled, { keyframes } from 'styled-components'
-
-const SpinnerKeyframes = keyframes`
-from {
-    transform: rotate(0deg);
-}
-to {
-    transform: rotate(360deg);
-}
-`
-
-const CenterLayout = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    width: 100%;
-`
-
-const SpinnerDiv = styled.div`
-    width: 50px;
-    height: 50px;
-    border: 3px solid rgba(0, 0, 0, 0);
-    border-top: 3px solid #fff;
-    border-radius: 50%;
-    animation: ${SpinnerKeyframes} 1s ease infinite;
-`
+import React from 'react'
 
 export const Spinner = () => (
-    <CenterLayout>
-        <SpinnerDiv />
-    </CenterLayout>
+    <div
+        style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100%',
+            width: '100%',
+        }}
+    >
+        <div
+            style={{
+                width: '50px',
+                height: '50px',
+                border: '3px solid rgba(0, 0, 0, 0)',
+                borderTop: '3px solid #fff',
+                borderRadius: '50%',
+                animation: 'spin 1s ease infinite',
+            }}
+        />
+        <style>
+            {`
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+            `}
+        </style>
+    </div>
 )

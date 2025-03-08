@@ -1,7 +1,6 @@
-import { Canvas, Instructions } from '@/common'
-import { animated, useSpring } from '@react-spring/three'
+import { Instructions } from '@/common'
 import { PerspectiveCamera } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
+import { Canvas, useFrame } from '@react-three/fiber'
 import {
     BallCollider,
     InstancedRigidBodies,
@@ -86,10 +85,6 @@ const Pointer = ({ vec = new THREE.Vector3() }) => {
 
     const [pointerDown, setPointerDown] = useState(false)
 
-    const { intensity } = useSpring({
-        intensity: pointerDown ? 10 : 3,
-    })
-
     useFrame(({ pointer, viewport }) => {
         if (pointer.x === 0 && pointer.y === 0) return
 
@@ -128,7 +123,7 @@ const Pointer = ({ vec = new THREE.Vector3() }) => {
         <RigidBody position={[1000, 1000, 1000]} type="kinematicPosition" colliders={false} mass={2} ref={rigidBody}>
             <BallCollider args={[4]} />
 
-            <animated.pointLight decay={1} intensity={intensity} />
+            <pointLight decay={1} intensity={3} />
         </RigidBody>
     )
 }

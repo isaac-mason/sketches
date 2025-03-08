@@ -1,9 +1,10 @@
 import { useGLTF } from '@react-three/drei'
+import { ObjectMap, ThreeElements } from '@react-three/fiber'
 import * as THREE from 'three'
 import { GLTF } from 'three-stdlib'
 import duckGltf from './duck.gltf?url'
 
-type GLTFResult = GLTF & {
+type GLTFResult = GLTF & ObjectMap & {
     nodes: {
         character_duck: THREE.Mesh
         character_duckArmLeft: THREE.Mesh
@@ -19,7 +20,7 @@ type GLTFResult = GLTF & {
     }
 }
 
-export const Duck = (props: JSX.IntrinsicElements['group']) => {
+export const Duck = (props: ThreeElements['group']) => {
     const { nodes, materials } = useGLTF(duckGltf) as GLTFResult
 
     return (

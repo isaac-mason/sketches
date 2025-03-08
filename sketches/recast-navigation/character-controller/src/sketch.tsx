@@ -1,4 +1,4 @@
-import { Canvas } from '@/common/components/canvas'
+import { Canvas } from '@react-three/fiber'
 import sunsetEnvironment from '@pmndrs/assets/hdri/sunset.exr'
 import { Environment, KeyboardControls, PerspectiveCamera, useAnimations, useGLTF, useKeyboardControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
@@ -12,8 +12,6 @@ import { suspend } from 'suspend-react'
 import * as THREE from 'three'
 import characterGltfUrl from './character.glb?url'
 import levelGlbUrl from './game-level-transformed.glb?url'
-
-const LEVA_KEY = 'recast-navigation-character-controller'
 
 type EntityType = {
     player?: true
@@ -229,7 +227,7 @@ const { Entity, Component, useQuery } = createReactAPI(world)
 
 const NavigationMesh = () => {
     const { showHelper, cellSize, cellHeight, walkableSlopeAngle, walkableClimb, walkableRadius, walkableHeight } = useControls(
-        `${LEVA_KEY}-nav-mesh`,
+        'nav mesh',
         {
             showHelper: {
                 label: 'Show Helper',
@@ -394,7 +392,7 @@ const Player = ({ initialPosition }: PlayerProps) => {
 
     const [actions, setActions] = useState<EntityType['playerAnimation']>()
 
-    const playerSpeed = useControls(`${LEVA_KEY}-player-speed`, {
+    const playerSpeed = useControls('player speed', {
         walking: {
             label: 'Walking Speed',
             value: 0.8,
@@ -458,7 +456,7 @@ const Player = ({ initialPosition }: PlayerProps) => {
 }
 
 const Camera = () => {
-    const cameraConfiguration = useControls(`${LEVA_KEY}-camera`, {
+    const cameraConfiguration = useControls('cameral', {
         offsetBehind: {
             label: 'Offset Behind',
             value: 10,

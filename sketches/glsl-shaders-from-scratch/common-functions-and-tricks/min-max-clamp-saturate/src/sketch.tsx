@@ -1,7 +1,7 @@
 import { Bounds, Html } from '@react-three/drei'
 import { ThreeElements } from '@react-three/fiber'
 import { Vector3Tuple } from 'three'
-import { Canvas } from '@/common'
+import { Canvas } from '@react-three/fiber'
 
 const vertexShader = /* glsl */ `
 varying vec2 vUvs;
