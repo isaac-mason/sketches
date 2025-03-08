@@ -1,5 +1,5 @@
 import { OrbitControls, useHelper, useTexture } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
+import { ThreeElements, useFrame } from '@react-three/fiber'
 import { useControls } from 'leva'
 import { useLayoutEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
@@ -25,7 +25,7 @@ const CONTROLS_FOLDER = 'journey-17-haunted-house'
 
 const BACKGROUND_COLOR = 0x262837
 
-const House = (props: JSX.IntrinsicElements['group']) => {
+const House = (props: ThreeElements['group']) => {
     const { debug } = useControls(CONTROLS_FOLDER, {
         debug: false,
     })
@@ -119,7 +119,7 @@ const House = (props: JSX.IntrinsicElements['group']) => {
     )
 }
 
-const Bush = (props: JSX.IntrinsicElements['mesh']) => {
+const Bush = (props: ThreeElements['mesh']) => {
     return (
         <mesh {...props} receiveShadow castShadow>
             <sphereGeometry args={[1, 16, 16]} />
@@ -128,7 +128,7 @@ const Bush = (props: JSX.IntrinsicElements['mesh']) => {
     )
 }
 
-const Grave = (props: JSX.IntrinsicElements['group']) => {
+const Grave = (props: ThreeElements['group']) => {
     return (
         <group {...props}>
             <mesh position={[0, 0.3, 1]} receiveShadow castShadow>

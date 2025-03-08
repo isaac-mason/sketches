@@ -1,10 +1,10 @@
 import { Instructions, useLoadingAssets, usePageVisible } from '@/common'
 import Rapier from '@dimforge/rapier3d-compat'
 import { Environment, KeyboardControls, PointerLockControls, useKeyboardControls } from '@react-three/drei'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { Canvas, ThreeElements, useFrame, useThree } from '@react-three/fiber'
 import { CapsuleCollider, Physics, RapierRigidBody, RigidBody, useRapier } from '@react-three/rapier'
 import { useControls as useLevaControls } from 'leva'
-import { JSX, RefObject, useEffect, useMemo, useRef } from 'react'
+import { RefObject, useEffect, useMemo, useRef } from 'react'
 import { Group, MathUtils, PerspectiveCamera, Vector3 } from 'three'
 import { GameLevel, Shield, Sword } from './models'
 
@@ -230,7 +230,7 @@ const useKinematicCharacterController = ({
     })
 }
 
-export const Player = (props: JSX.IntrinsicElements['group']) => {
+export const Player = (props: ThreeElements['group']) => {
     const characterRigidBody = useRef<RapierRigidBody>(null!)
     const characterColliderRef = useRef<Rapier.Collider>(null!)
     const shieldHandRef = useRef<Group>(null)

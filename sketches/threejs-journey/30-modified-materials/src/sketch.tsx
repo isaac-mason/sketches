@@ -1,20 +1,21 @@
 import { OrbitControls, useGLTF, useTexture } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
+import { Canvas, ObjectMap, ThreeElements, useFrame } from '@react-three/fiber'
 import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
-import { Canvas } from '@react-three/fiber'
 import colorImage from './color.jpg'
 import LeePerrySmithModelPath from './LeePerrySmith.glb?url'
 import normalImage from './normal.jpg'
+import { GLTF } from 'three-stdlib'
 
-type LeePerrySmithGLTF = {
-    nodes: {
-        LeePerrySmith: THREE.Mesh
+type LeePerrySmithGLTF = GLTF &
+    ObjectMap & {
+        nodes: {
+            LeePerrySmith: THREE.Mesh
+        }
     }
-}
 
-function LeePerrySmith(props: JSX.IntrinsicElements['group']) {
-    const { nodes } = useGLTF(LeePerrySmithModelPath) as unknown as LeePerrySmithGLTF
+function LeePerrySmith(props: ThreeElements['group']) {
+    const { nodes } = useGLTF(LeePerrySmithModelPath) as LeePerrySmithGLTF
 
     const map = useTexture(colorImage)
     const normal = useTexture(normalImage)
