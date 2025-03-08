@@ -71,7 +71,6 @@ export const sketchesOrder = [
     'threejs-journey/05-transforms',
     'threejs-journey/06-animations',
     'threejs-journey/07-cameras',
-    'threejs-journey/09-geometries',
     'threejs-journey/11-textures',
     'threejs-journey/12-materials',
     'threejs-journey/13-text',
