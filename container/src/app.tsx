@@ -56,7 +56,11 @@ const LazySketch = () => {
                 <h1 className="absolute top-5 left-5 z-2 m-0 text-[2em] font-bold text-white">{sketchMetadata?.title}</h1>
             )}
 
-            {loading && <Spinner />}
+            {loading && (
+                <div className="absolute top-0 left-0 z-2 flex h-full w-full items-center justify-center">
+                    <Spinner />
+                </div>
+            )}
 
             <iframe
                 key={sketchPath}
@@ -112,7 +116,7 @@ const NavItem = ({ sketch, closeNav }: NavItemProps) => {
         >
             {sketch.cover ? (
                 <img
-                    className="user-select-none h-full w-full rounded-t-[0.2em] object-cover"
+                    className="user-select-none w-full rounded-t-[0.2em] object-cover aspect-[3/2]"
                     src={sketch.cover}
                     alt={sketch.title}
                     loading="lazy"
