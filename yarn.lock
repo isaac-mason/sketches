@@ -1333,9 +1333,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-three/drei@npm:^10.0.3":
-  version: 10.0.3
-  resolution: "@react-three/drei@npm:10.0.3"
+"@react-three/drei@npm:^10.0.4":
+  version: 10.0.4
+  resolution: "@react-three/drei@npm:10.0.4"
   dependencies:
     "@babel/runtime": "npm:^7.26.0"
     "@mediapipe/tasks-vision": "npm:0.10.17"
@@ -1366,7 +1366,7 @@ __metadata:
   peerDependenciesMeta:
     react-dom:
       optional: true
-  checksum: 10/b161bd73a38024099061a1e7033f981936d5e5c7b1e5a5a980616d1a7164077be872368f8b0840911a0056c8afb6a47012a3875265cce082a7d13c2c0e4e9b58
+  checksum: 10/eb6f9d9e68bf6625e9e960a14a9559a95c5b68a4bab37a7642adbabd6577952caabc599e8ee9bc4cda5ffb9ef00f73a9ec67a9c6142b8e59c956912e280565d4
   languageName: node
   linkType: hard
 
@@ -1406,48 +1406,6 @@ __metadata:
     react-dom:
       optional: true
   checksum: 10/f00b254e87882554aff50d78cd51c10fc52c755a57a65ffccda5e0c7195e6b04db4a4d57baf84d4cce063ffa34297a0a0310e89d9fb1ff10a7dea84ffed7a091
-  languageName: node
-  linkType: hard
-
-"@react-three/fiber@npm:^9.0.4":
-  version: 9.0.4
-  resolution: "@react-three/fiber@npm:9.0.4"
-  dependencies:
-    "@babel/runtime": "npm:^7.17.8"
-    "@types/react-reconciler": "npm:^0.28.9"
-    "@types/webxr": "npm:*"
-    base64-js: "npm:^1.5.1"
-    buffer: "npm:^6.0.3"
-    its-fine: "npm:^2.0.0"
-    react-reconciler: "npm:^0.31.0"
-    react-use-measure: "npm:^2.1.7"
-    scheduler: "npm:^0.25.0"
-    suspend-react: "npm:^0.1.3"
-    use-sync-external-store: "npm:^1.4.0"
-    zustand: "npm:^5.0.3"
-  peerDependencies:
-    expo: ">=43.0"
-    expo-asset: ">=8.4"
-    expo-file-system: ">=11.0"
-    expo-gl: ">=11.0"
-    react: ^19.0.0
-    react-dom: ^19.0.0
-    react-native: ">=0.78"
-    three: ">=0.156"
-  peerDependenciesMeta:
-    expo:
-      optional: true
-    expo-asset:
-      optional: true
-    expo-file-system:
-      optional: true
-    expo-gl:
-      optional: true
-    react-dom:
-      optional: true
-    react-native:
-      optional: true
-  checksum: 10/2de686ca64c3af8e1156cf3faf1455d29b31a8503c01fea9283404aa323ba0e5c60a72b0f92a401aa98209c261cf482fef8ba3ed44675134dcc2e4f87cefce8d
   languageName: node
   linkType: hard
 
@@ -1769,8 +1727,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/character-animation-basic@workspace:sketches/character-animation/basic"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -1786,8 +1744,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/character-animation-mixamo-animations@workspace:sketches/character-animation/mixamo-animations"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -1803,8 +1761,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/character-controller@workspace:sketches/voxels/character-controller"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@sketches/simple-voxels-lib": "workspace:*"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
@@ -1821,8 +1779,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/common@workspace:common"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/three": "npm:^0.173.0"
     "@use-gesture/react": "npm:^10.3.1"
     leva: "npm:^0.10.0"
@@ -1866,8 +1824,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/d3-force-directed-graph@workspace:sketches/d3/force-directed-graph"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/d3": "npm:^7.4.3"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
@@ -1899,8 +1857,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/fractals-mandelbrot-set@workspace:sketches/fractals/mandelbrot-set"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -1916,8 +1874,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/game-of-life@workspace:sketches/game-of-life"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -1933,8 +1891,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/glsl-shaders-from-scratch-fract-and-friends@workspace:sketches/glsl-shaders-from-scratch/common-functions-and-tricks/fract-and-friends"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -1950,8 +1908,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/glsl-shaders-from-scratch-intro-attributes@workspace:sketches/glsl-shaders-from-scratch/intro/attributes"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -1967,8 +1925,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/glsl-shaders-from-scratch-intro-uniforms@workspace:sketches/glsl-shaders-from-scratch/intro/uniforms"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -1984,8 +1942,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/glsl-shaders-from-scratch-intro-varyings@workspace:sketches/glsl-shaders-from-scratch/intro/varyings"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2001,8 +1959,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/glsl-shaders-from-scratch-lighting-models@workspace:sketches/glsl-shaders-from-scratch/lighting-models"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2018,8 +1976,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/glsl-shaders-from-scratch-min-max-clamp-saturate@workspace:sketches/glsl-shaders-from-scratch/common-functions-and-tricks/min-max-clamp-saturate"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2035,8 +1993,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/glsl-shaders-from-scratch-raymarching-basic@workspace:sketches/glsl-shaders-from-scratch/raymarching/basic"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2052,8 +2010,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/glsl-shaders-from-scratch-raymarching-terrain@workspace:sketches/glsl-shaders-from-scratch/raymarching/terrain"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2069,8 +2027,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/glsl-shaders-from-scratch-step-mix-smoothstep@workspace:sketches/glsl-shaders-from-scratch/common-functions-and-tricks/step-mix-smoothstep"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2086,8 +2044,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/glsl-shaders-from-scratch-textures-addressing@workspace:sketches/glsl-shaders-from-scratch/textures/addressing"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2103,8 +2061,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/glsl-shaders-from-scratch-textures-alpha@workspace:sketches/glsl-shaders-from-scratch/textures/alpha"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2120,8 +2078,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/glsl-shaders-from-scratch-textures-basic@workspace:sketches/glsl-shaders-from-scratch/textures/basic"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2137,8 +2095,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/glsl-shaders-from-scratch-toon-shading@workspace:sketches/glsl-shaders-from-scratch/toon-shading"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2154,8 +2112,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/glsl-shaders-from-scratch-vector-operations-and-math-shaping-functions@workspace:sketches/glsl-shaders-from-scratch/vector-operations-and-math/shaping-functions"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2171,8 +2129,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/glsl-shaders-from-scratch-vector-operations-and-math-sin-cos@workspace:sketches/glsl-shaders-from-scratch/vector-operations-and-math/sin-cos"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2188,8 +2146,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/glsl-shaders-from-scratch-vertex-shaders-pop-in@workspace:sketches/glsl-shaders-from-scratch/vertex-shaders/pop-in"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2205,8 +2163,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/glsl-shaders-from-scratch-vertex-shaders-warped-sphere@workspace:sketches/glsl-shaders-from-scratch/vertex-shaders/warped-sphere"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2222,8 +2180,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/graph-search-pathfinding@workspace:sketches/voxels/graph-search-pathfinding"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@sketches/simple-voxels-lib": "workspace:*"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
@@ -2240,8 +2198,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/intro@workspace:sketches/intro"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2257,8 +2215,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/lines@workspace:sketches/lines/image"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2275,8 +2233,8 @@ __metadata:
   resolution: "@sketches/marching-cubes-terrain@workspace:sketches/isosurface/marching-cubes-terrain"
   dependencies:
     "@pmndrs/assets": "npm:^1.6.1"
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2294,8 +2252,8 @@ __metadata:
   resolution: "@sketches/melodic-marble-run@workspace:sketches/melodic-marble-run"
   dependencies:
     "@pmndrs/assets": "npm:^1.6.1"
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@react-three/rapier": "npm:^2.0.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
@@ -2315,7 +2273,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/meowtchmaker@workspace:sketches/meowtchmaker"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
+    "@react-three/drei": "npm:^10.0.4"
     "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
@@ -2335,8 +2293,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/nature-grass-2@workspace:sketches/nature/grass-2"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2354,8 +2312,8 @@ __metadata:
   resolution: "@sketches/nature-grass@workspace:sketches/nature/grass"
   dependencies:
     "@pmndrs/assets": "npm:^1.6.1"
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2373,8 +2331,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/p2-es-kinematic-character-controller@workspace:sketches/p2-es/kinematic-character-controller"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2392,8 +2350,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/p2-es-marching-cubes-goo@workspace:sketches/p2-es/marching-cubes-goo"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2411,8 +2369,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/p2-es-pixelated-text@workspace:sketches/p2-es/pixelated-text"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2430,8 +2388,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/p2-es-top-down-character-controller@workspace:sketches/p2-es/top-down-character-controller"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2449,8 +2407,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/postprocessing-emissive-bloom@workspace:sketches/postprocessing/emissive-bloom"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2466,8 +2424,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/postprocessing-pixelation@workspace:sketches/postprocessing/pixelation"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2483,8 +2441,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/procedural-generation-diamond-square-heightmap@workspace:sketches/procedural-generation/diamond-square-heightmap"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2501,8 +2459,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/procedural-generation-l-systems@workspace:sketches/procedural-generation/l-systems"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2520,8 +2478,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/procedural-generation-pixelated-planet@workspace:sketches/procedural-generation/pixelated-planet"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2539,8 +2497,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/rapier-arcade-vehicle-controller@workspace:sketches/rapier/arcade-vehicle-controller"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@react-three/rapier": "npm:^2.0.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
@@ -2558,8 +2516,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/rapier-cluster@workspace:sketches/rapier/cluster"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@react-three/rapier": "npm:^2.0.0-canary.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
@@ -2577,8 +2535,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/rapier-custom-raycast-vehicle@workspace:sketches/rapier/custom-raycast-vehicle"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@react-three/rapier": "npm:^2.0.0-canary.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
@@ -2596,8 +2554,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/rapier-custom-spring@workspace:sketches/rapier/custom-spring"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@react-three/rapier": "npm:^2.0.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
@@ -2616,8 +2574,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/rapier-dynamic-raycast-vehicle-controller@workspace:sketches/rapier/dynamic-raycast-vehicle-controller"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@react-three/rapier": "npm:^2.0.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
@@ -2635,8 +2593,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/rapier-kinematic-character-controller@workspace:sketches/rapier/kinematic-character-controller"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@react-three/rapier": "npm:^2.0.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
@@ -2654,8 +2612,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/rapier-pointer-controls@workspace:sketches/rapier/pointer-controls"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@react-three/rapier": "npm:^2.0.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
@@ -2673,8 +2631,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/rapier-revolute-joint-vehicle@workspace:sketches/rapier/revolute-joint-vehicle"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@react-three/rapier": "npm:^2.0.0-canary.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
@@ -2692,8 +2650,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/recast-navigation-busy-street-crossing@workspace:sketches/recast-navigation/busy-street-crossing"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@recast-navigation/three": "npm:^0.39.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
@@ -2714,8 +2672,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/recast-navigation-character-controller@workspace:sketches/recast-navigation/character-controller"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@recast-navigation/three": "npm:^0.39.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
@@ -2736,8 +2694,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/recast-navigation-dynamic-tiled-navmesh@workspace:sketches/recast-navigation/dynamic-tiled-navmesh"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@react-three/rapier": "npm:^2.0.0"
     "@recast-navigation/three": "npm:^0.39.0"
     "@types/react": "npm:^19.0.10"
@@ -2760,8 +2718,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/recast-navigation-rigid-body-agent@workspace:sketches/recast-navigation/rigid-body-agent"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@react-three/rapier": "npm:^2.0.0"
     "@recast-navigation/three": "npm:^0.39.0"
     "@types/react": "npm:^19.0.10"
@@ -2782,8 +2740,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/recast-navigation-xr-navmesh@workspace:sketches/recast-navigation/xr-navmesh"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@react-three/xr": "npm:^6.5.4"
     "@recast-navigation/three": "npm:^0.39.0"
     "@types/react": "npm:^19.0.10"
@@ -2803,8 +2761,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/simple-voxels-lib@workspace:sketches/voxels/simple-voxels-lib"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2820,8 +2778,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/sticky-notes@workspace:sketches/sticky-notes"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2839,8 +2797,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/threejs-journey-03-basic@workspace:sketches/threejs-journey/03-basic"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2856,8 +2814,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/threejs-journey-05-transforms@workspace:sketches/threejs-journey/05-transforms"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2873,8 +2831,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/threejs-journey-06-animations@workspace:sketches/threejs-journey/06-animations"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2890,8 +2848,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/threejs-journey-07-cameras@workspace:sketches/threejs-journey/07-cameras"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2907,8 +2865,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/threejs-journey-09-geometries@workspace:sketches/threejs-journey/09-geometries"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@react-three/flex": "npm:^1.0.1"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
@@ -2925,8 +2883,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/threejs-journey-11-textures@workspace:sketches/threejs-journey/11-textures"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2942,8 +2900,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/threejs-journey-12-materials@workspace:sketches/threejs-journey/12-materials"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@react-three/flex": "npm:^1.0.1"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
@@ -2960,8 +2918,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/threejs-journey-13-text@workspace:sketches/threejs-journey/13-text"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2977,8 +2935,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/threejs-journey-15-lights@workspace:sketches/threejs-journey/15-lights"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -2994,8 +2952,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/threejs-journey-16-shadows@workspace:sketches/threejs-journey/16-shadows"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -3011,8 +2969,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/threejs-journey-17-haunted-house@workspace:sketches/threejs-journey/17-haunted-house"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -3028,8 +2986,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/threejs-journey-18-1-particles@workspace:sketches/threejs-journey/18-1-particles"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -3045,8 +3003,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/threejs-journey-18-2-particles@workspace:sketches/threejs-journey/18-2-particles"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -3062,8 +3020,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/threejs-journey-19-galaxy-generator@workspace:sketches/threejs-journey/19-galaxy-generator"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -3080,8 +3038,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/threejs-journey-27-shaders@workspace:sketches/threejs-journey/27-shaders"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -3098,8 +3056,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/threejs-journey-28-raging-sea@workspace:sketches/threejs-journey/28-raging-sea"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -3116,8 +3074,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/threejs-journey-29-animated-galaxy@workspace:sketches/threejs-journey/29-animated-galaxy"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -3134,8 +3092,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/threejs-journey-30-modified-materials@workspace:sketches/threejs-journey/30-modified-materials"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -3152,8 +3110,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/transparency-face-sorting@workspace:sketches/transparency/face-sorting"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -3169,8 +3127,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/tris-in-box@workspace:sketches/tris-in-box"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -3186,8 +3144,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/tsl-gradient@workspace:sketches/tsl/gradient"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -3203,8 +3161,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/tsl-hello-world@workspace:sketches/tsl/hello-world"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -3220,8 +3178,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/tsl-raging-sea@workspace:sketches/tsl/raging-sea"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
@@ -3237,8 +3195,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/voxelize@workspace:sketches/voxels/voxelize"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@sketches/simple-voxels-lib": "workspace:*"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
@@ -3255,8 +3213,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/voxels-metropolis@workspace:sketches/voxels/metropolis"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@sketches/simple-voxels-lib": "workspace:*"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
@@ -3273,8 +3231,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/voxels-rapier-physics@workspace:sketches/voxels/rapier-physics"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@react-three/rapier": "npm:^2.0.0"
     "@sketches/simple-voxels-lib": "workspace:*"
     "@types/react": "npm:^19.0.10"
@@ -3293,8 +3251,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/voxels-sphere@workspace:sketches/voxels/sphere"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@sketches/simple-voxels-lib": "workspace:*"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
@@ -3313,8 +3271,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@sketches/z-fighting-mitigations@workspace:sketches/z-fighting-mitigations"
   dependencies:
-    "@react-three/drei": "npm:^10.0.3"
-    "@react-three/fiber": "npm:^9.0.4"
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
     "@types/three": "npm:^0.173.0"
