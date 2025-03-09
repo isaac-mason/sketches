@@ -1,52 +1,11 @@
+import { WebGPUCanvas } from '@/common/components/webgpu-canvas'
 import { OrbitControls, useTexture } from '@react-three/drei'
-import { Canvas, useFrame } from '@react-three/fiber'
 import { useControls } from 'leva'
-import { useEffect, useMemo, useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import * as THREE from 'three'
+import { Fn, positionLocal, step, texture, time, uv, vec2, vec3, vec4 } from 'three/tsl'
+import { MeshBasicNodeMaterial } from 'three/webgpu'
 import plantImageUrl from './plant.png?url'
-
-const vertexShader = /* glsl */ `
-    uniform float uTextureWidth;
-    uniform float uTextureHeight;
-
-    varying vec2 vUv;
-    varying vec2 vTextureCoord;
-
-    void main() {
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-
-        vec2 textureCoord = vec4(position, 1.0).xy / vec2(uTextureWidth, uTextureHeight);
- 
-        vUv = uv;
-        vTextureCoord = textureCoord;
-    }
-`
-
-const fragmentShader = /* glsl */ `
-uniform float uFade;
-uniform float uTime;
-uniform sampler2D uTexture;
-
-varying vec2 vUv;
-varying vec2 vTextureCoord;
-
-void main() {
-    vec4 textureSample = texture2D(uTexture, vTextureCoord);
-    vec3 color = textureSample.rgb;
-
-    float wave = sin(uTime * 0.15) * 0.5 + 0.5;
-    float highlightLowerBound = wave - 0.025;
-    float highlightUpperBound = wave + 0.025;
-    wave = smoothstep(highlightLowerBound, wave, vUv.x) + 1.0 - smoothstep(wave, highlightUpperBound, vUv.x);
-    wave = (wave - 1.0) * 0.1;
-
-    color = mix(color, vec3(1.0), wave);
-
-    float alpha = textureSample.a * step(vUv.x, uFade);
-
-    gl_FragColor = vec4(color, alpha);
-}
-`
 
 type LineImageProps = {
     src: string
@@ -59,7 +18,9 @@ type LineImageProps = {
 const LineImage = ({ src, numberLines, maxDistance, sampleSize, brightnessThreshold }: LineImageProps) => {
     const ref = useRef<THREE.Group>(null!)
 
-    const texture = useTexture(src)
+    const texture = useTexture(src, (texture) => {
+        texture.colorSpace = THREE.SRGBColorSpace
+    })
 
     const { width, height } = texture.image
 
@@ -134,7 +95,7 @@ const LineImage = ({ src, numberLines, maxDistance, sampleSize, brightnessThresh
         <group ref={ref} scale={[0.03, 0.03, 0.03]}>
             <group position={[-width / 2, -height / 2, 0]}>
                 {lines.map((d, i) => (
-                    <Line vertices={d} texture={texture} key={i} />
+                    <Line vertices={d} map={texture} key={i} />
                 ))}
             </group>
         </group>
@@ -143,47 +104,40 @@ const LineImage = ({ src, numberLines, maxDistance, sampleSize, brightnessThresh
 
 type LineProps = {
     vertices: THREE.Vector3[]
-    texture: THREE.Texture
+    map: THREE.Texture
 }
 
-const Line = ({ vertices, texture }: LineProps) => {
-    const uFade = useRef({ value: 0 })
-    const uTime = useRef({ value: 0 })
-
+const Line = ({ vertices, map }: LineProps) => {
     const curve = useMemo(() => new THREE.CatmullRomCurve3(vertices), [vertices])
 
-    useFrame(({ clock }, delta) => {
-        uFade.current.value = THREE.MathUtils.lerp(uFade.current.value, 1, delta * 2)
-        uTime.current.value = clock.getElapsedTime()
-    })
+    const material = useMemo(() => {
+        const mat = new MeshBasicNodeMaterial()
 
-    useEffect(() => {
-        uFade.current.value = 0
+        mat.colorNode = Fn(() => {
+            const textureUv = vec2(vec4(positionLocal, 1.0).xy.div(vec2(map.image.width, map.image.height)))
+            const sample = texture(map, textureUv)
+
+            const fade = time.log2().remapClamp(0, 2, 0, 1)
+            const alpha = sample.a.mul(step(uv().x, fade))
+
+            alpha.lessThan(0.1).discard()
+
+            return vec3(sample)
+        })()
+
+        return mat
     }, [])
 
     return (
-        <>
-            <mesh>
-                <tubeGeometry args={[curve, 50, 0.25, 6, false]} />
-                <shaderMaterial
-                    fragmentShader={fragmentShader}
-                    vertexShader={vertexShader}
-                    uniforms={{
-                        uTime: uTime.current,
-                        uFade: uFade.current,
-                        uTexture: { value: texture },
-                        uTextureWidth: { value: texture.image.width },
-                        uTextureHeight: { value: texture.image.height },
-                    }}
-                    transparent
-                />
-            </mesh>
-        </>
+        <mesh>
+            <tubeGeometry args={[curve, 50, 0.25, 6, false]} />
+            <primitive object={material} />
+        </mesh>
     )
 }
 
 export function Sketch() {
-    const config = useControls('lines-image', {
+    const config = useControls({
         numberLines: 400,
         maxDistance: 11,
         sampleSize: 2500,
@@ -191,10 +145,10 @@ export function Sketch() {
     })
 
     return (
-        <Canvas camera={{ position: [0, 0.5, 10] }}>
+        <WebGPUCanvas camera={{ position: [0, 0.5, 10] }}>
             <LineImage src={plantImageUrl} {...config} key={Object.values(config).join('-')} />
 
             <OrbitControls makeDefault target={[0, 0.5, 0]} />
-        </Canvas>
+        </WebGPUCanvas>
     )
 }
