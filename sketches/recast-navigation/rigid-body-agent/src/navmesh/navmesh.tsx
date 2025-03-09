@@ -28,7 +28,7 @@ export const getTraversableMeshes = () => {
 export const NavMeshGenerator = () => {
     const { rapier } = useRapier()
 
-    const navMeshWorker = useRef<InstanceType<typeof NavMeshGeneratorWorker>>()
+    const navMeshWorker = useRef<InstanceType<typeof NavMeshGeneratorWorker>>(undefined)
     const inProgress = useRef(false)
     const first = useRef(true)
 
