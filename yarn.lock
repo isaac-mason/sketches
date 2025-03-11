@@ -1810,7 +1810,7 @@ __metadata:
     react-dom: "npm:^19.0.0"
     react-router-dom: "npm:^7.2.0"
     styled-breakpoints: "npm:^14.1.4"
-    styled-components: "npm:^6.1.13"
+    styled-components: "npm:^6.1.15"
     tailwindcss: "npm:^4.0.9"
     typescript: "npm:^5.8.2"
     vite: "npm:^6.2.0"
@@ -2261,7 +2261,7 @@ __metadata:
     leva: "npm:^0.10.0"
     react: "npm:^19.0.0"
     react-dom: "npm:^19.0.0"
-    styled-components: "npm:^6.1.13"
+    styled-components: "npm:^6.1.15"
     three: "npm:^0.174.0"
     tone: "npm:15.0.4"
     typescript: "npm:^5.8.2"
@@ -2786,7 +2786,7 @@ __metadata:
     "@use-gesture/react": "npm:^10.3.1"
     react: "npm:^19.0.0"
     react-dom: "npm:^19.0.0"
-    styled-components: "npm:^6.1.13"
+    styled-components: "npm:^6.1.15"
     three: "npm:^0.174.0"
     typescript: "npm:^5.8.2"
     vite: "npm:^6.2.0"
@@ -9221,7 +9221,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"styled-components@npm:6.1.13, styled-components@npm:^6.1.13":
+"styled-components@npm:6.1.13":
   version: 6.1.13
   resolution: "styled-components@npm:6.1.13"
   dependencies:

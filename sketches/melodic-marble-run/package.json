@@ -19,7 +19,7 @@
         "leva": "^0.10.0",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
-        "styled-components": "^6.1.13",
+        "styled-components": "^6.1.15",
         "three": "^0.174.0",
         "tone": "15.0.4"
     },
