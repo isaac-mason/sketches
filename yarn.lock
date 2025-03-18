@@ -1772,7 +1772,7 @@ __metadata:
     r3f-perf: "npm:^7.2.1"
     react: "npm:^19.0.0"
     react-dom: "npm:^19.0.0"
-    styled-components: "npm:^6.1.15"
+    styled-components: "npm:^6.1.16"
     three: "npm:^0.174.0"
     zustand: "npm:^5.0.3"
   languageName: unknown
@@ -1795,7 +1795,7 @@ __metadata:
     react-dom: "npm:^19.0.0"
     react-router-dom: "npm:^7.3.0"
     styled-breakpoints: "npm:^14.1.4"
-    styled-components: "npm:^6.1.13"
+    styled-components: "npm:^6.1.16"
     tailwindcss: "npm:^4.0.9"
     typescript: "npm:^5.8.2"
     vite: "npm:^6.2.0"
@@ -2246,7 +2246,7 @@ __metadata:
     leva: "npm:^0.10.0"
     react: "npm:^19.0.0"
     react-dom: "npm:^19.0.0"
-    styled-components: "npm:^6.1.13"
+    styled-components: "npm:^6.1.16"
     three: "npm:^0.174.0"
     tone: "npm:15.0.4"
     typescript: "npm:^5.8.2"
@@ -2771,7 +2771,7 @@ __metadata:
     "@use-gesture/react": "npm:^10.3.1"
     react: "npm:^19.0.0"
     react-dom: "npm:^19.0.0"
-    styled-components: "npm:^6.1.13"
+    styled-components: "npm:^6.1.16"
     three: "npm:^0.174.0"
     typescript: "npm:^5.8.2"
     vite: "npm:^6.2.0"
@@ -9206,7 +9206,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"styled-components@npm:6.1.13, styled-components@npm:^6.1.13":
+"styled-components@npm:6.1.13":
   version: 6.1.13
   resolution: "styled-components@npm:6.1.13"
   dependencies:
@@ -9226,9 +9226,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"styled-components@npm:^6.1.15":
-  version: 6.1.15
-  resolution: "styled-components@npm:6.1.15"
+"styled-components@npm:^6.1.16":
+  version: 6.1.16
+  resolution: "styled-components@npm:6.1.16"
   dependencies:
     "@emotion/is-prop-valid": "npm:1.2.2"
     "@emotion/unitless": "npm:0.8.1"
@@ -9242,7 +9242,7 @@ __metadata:
   peerDependencies:
     react: ">= 16.8.0"
     react-dom: ">= 16.8.0"
-  checksum: 10/54b70e40baa94b99e2a01945bd0589dabd356fb0a5a6d503372d5e920db27444564f4fb9a137423c0a65bd7c1a4e1024a44a6b2c7b162ae5daf2b042f9dc086d
+  checksum: 10/ed7178c31a205a1f29ef99fa2799501cb51f52cb431d960afc90184f4c3f7c2d83debeae6d417e795c03e0b91448113acda10201d8060696acfd0a2e608b8cb5
   languageName: node
   linkType: hard
 
