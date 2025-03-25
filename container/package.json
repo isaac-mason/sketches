@@ -28,7 +28,7 @@
         "@types/react-dom": "^19.0.4",
         "@vitejs/plugin-basic-ssl": "^1.2.0",
         "@vitejs/plugin-react-swc": "^3.8.0",
-        "eslint": "^9.21.0",
+        "eslint": "^9.23.0",
         "typescript": "^5.8.2",
         "vite": "^6.2.0",
         "vite-imagetools": "^7.0.5",
