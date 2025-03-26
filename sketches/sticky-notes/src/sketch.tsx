@@ -3,33 +3,11 @@ import { DragControls, Html, OrbitControls, PerspectiveCamera } from '@react-thr
 import { ThreeElements, useFrame, useThree } from '@react-three/fiber'
 import { useDrag } from '@use-gesture/react'
 import { useRef, useState } from 'react'
-import styled from 'styled-components'
 import * as THREE from 'three'
 import catImageUrl from './images/pexels-bekka-mongeau-804475.jpg?url&w=300&format=webp&imagetools'
 import treeImageUrl from './images/pexels-johannes-plenio-1632790.jpg?url&w=300&format=webp&imagetools'
 
-const Card = styled.div`
-    width: 300px;
-    background-color: white;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    touch-action: none;
-
-    img {
-        width: 100%;
-        border-radius: 10px;
-        pointer-events: none;
-    }
-
-    p {
-        margin: 0;
-        padding: 1em;
-        width: 100%;
-    }
-`
+import "./styles.css";
 
 type DraggableHtmlProps = {
     children?: React.ReactNode
@@ -105,7 +83,7 @@ const DraggableHtml = ({ children, ...groupProps }: DraggableHtmlProps) => {
     return (
         <group {...groupProps} ref={groupRef}>
             <Html center transform>
-                <Card {...bind()}>{children}</Card>
+                <div className="card" {...bind()}>{children}</div>
             </Html>
         </group>
     )
