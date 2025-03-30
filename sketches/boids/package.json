@@ -1,0 +1,30 @@
+{
+    "name": "@sketches/boids",
+    "private": true,
+    "sketch": {
+        "title": "Boids",
+        "tags": [
+            "boids",
+            "c++"
+        ]
+    },
+    "scripts": {
+        "dev": "vite dev",
+        "build": "vite build"
+    },
+    "dependencies": {
+        "@react-three/drei": "^10.0.4",
+        "@react-three/fiber": "^9.1.0",
+        "leva": "^0.10.0",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "three": "^0.174.0"
+    },
+    "devDependencies": {
+        "@types/react": "^19.0.10",
+        "@types/react-dom": "^19.0.4",
+        "@types/three": "^0.174.0",
+        "typescript": "^5.8.2",
+        "vite": "^6.2.0"
+    }
+}

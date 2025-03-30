@@ -14,6 +14,7 @@ export const sketchesOrder = [
     'procedural-generation/l-systems',
     'procedural-generation/diamond-square-heightmap',
     'procedural-generation/pixelated-planet',
+    'boids',
     'rapier/cluster',
     'rapier/custom-raycast-vehicle',
     'rapier/revolute-joint-vehicle',

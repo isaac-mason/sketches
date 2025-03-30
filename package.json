@@ -7,20 +7,17 @@
         "dev": "NODE_TLS_REJECT_UNAUTHORIZED=0 bun dev/dev.ts",
         "build": "bun dev/build.ts",
         "preview": "vite preview",
-        "format": "prettier src/. --write",
-        "lint": "eslint src"
+        "format": "yarn biome format --write sketches/.",
+        "lint": "yarn biome lint --write sketches/."
     },
     "devDependencies": {
-        "@isaac-mason/eslint-config-typescript": "0.0.9",
+        "@biomejs/biome": "^1.9.4",
         "@types/bun": "^1.2.2",
-        "@types/eslint": "^8.56.10",
         "@types/express": "^4",
         "@types/http-proxy": "^1",
         "@types/node": "^22.13.10",
         "bun": "^1.2.4",
-        "eslint": "^9.6.0",
         "express": "^4.21.2",
-        "prettier": "^3.5.0",
         "typescript": "^5.8.2"
     },
     "workspaces": [
@@ -28,8 +25,5 @@
         "container",
         "sketches/**/*"
     ],
-    "packageManager": "yarn@4.1.1",
-    "dependencies": {
-        "prettier-plugin-tailwindcss": "^0.6.11"
-    }
+    "packageManager": "yarn@4.1.1"
 }
