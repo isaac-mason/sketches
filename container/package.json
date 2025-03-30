@@ -11,7 +11,7 @@
         "lint": "eslint src"
     },
     "dependencies": {
-        "@tailwindcss/vite": "^4.0.9",
+        "@tailwindcss/vite": "^4.0.17",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
         "react-router-dom": "^7.3.0",
