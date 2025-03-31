@@ -2626,9 +2626,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sketches/recast-navigation-xr-navmesh@workspace:sketches/recast-navigation/xr-navmesh":
+"@sketches/recast-navigation-vr-navmesh@workspace:sketches/recast-navigation/vr-navmesh":
   version: 0.0.0-use.local
-  resolution: "@sketches/recast-navigation-xr-navmesh@workspace:sketches/recast-navigation/xr-navmesh"
+  resolution: "@sketches/recast-navigation-vr-navmesh@workspace:sketches/recast-navigation/vr-navmesh"
   dependencies:
     "@react-three/drei": "npm:^10.0.4"
     "@react-three/fiber": "npm:^9.1.0"

@@ -1,11 +1,11 @@
 {
-    "name": "@sketches/recast-navigation-xr-navmesh",
+    "name": "@sketches/recast-navigation-vr-navmesh",
     "private": true,
     "sketch": {
-        "title": "Recast Navigation - XR NavMesh",
+        "title": "Recast Navigation - VR NavMesh",
         "tags": [
             "recast-navigation",
-            "xr"
+            "vr"
         ]
     },
     "scripts": {
