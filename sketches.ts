@@ -9,6 +9,7 @@ export const sketchesOrder = [
     'recast-navigation/rigid-body-agent',
     'recast-navigation/dynamic-tiled-navmesh',
     'recast-navigation/vr-navmesh',
+    'recast-navigation/ar-navmesh',
     'procedural-generation/caves',
     'procedural-generation/bsp-dungeon',
     'procedural-generation/l-systems',

@@ -5,7 +5,7 @@ import { Suspense, useState } from 'react'
 import * as THREE from 'three'
 import { NavMeshProvider, NavMeshTeleportTarget, Walkable } from './navmesh'
 import levelGlbUrl from './sands_location.glb?url'
-import { TiledNavMeshGeneratorConfig } from 'recast-navigation/generators'
+import type { TiledNavMeshGeneratorConfig } from 'recast-navigation/generators'
 
 const Level = () => {
     const { scene } = useGLTF(levelGlbUrl)
@@ -16,6 +16,7 @@ const Level = () => {
 const store = createXRStore({
     hand: { teleportPointer: true },
     controller: { teleportPointer: true },
+    emulate: false,
 })
 
 const SPAWN_POSITION: THREE.Vector3Tuple = [-0.5920812728872339, 9.83978923780684, -1.5619062958282723]
@@ -54,7 +55,7 @@ const VRButtonOnClick = () => {
 
 const VRButton = () => {
     return (
-        <button onClick={VRButtonOnClick} style={VRButtonStyles}>
+        <button type="button" onClick={VRButtonOnClick} style={VRButtonStyles}>
             Enter VR
         </button>
     )

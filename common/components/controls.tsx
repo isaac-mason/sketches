@@ -1,16 +1,5 @@
 import { Leva } from 'leva'
-import React, { useEffect, useState } from 'react'
-import { create } from 'zustand'
-
-type ControlsState = {
-    expanded: boolean
-    toggleExpanded: () => void
-}
-
-export const useControlsState = create<ControlsState>((set, get) => ({
-    expanded: false,
-    toggleExpanded: () => set({ expanded: !get().expanded }),
-}))
+import { useEffect, useState } from 'react'
 
 const useIsSmallScreen = () => {
     const [smallScreen, setSmallScreen] = useState(false)
