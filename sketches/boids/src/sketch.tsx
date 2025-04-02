@@ -148,10 +148,9 @@ const Boids = () => {
     return <primitive object={batchedMesh} />;
 };
 
-const mat = new MeshPhysicalNodeMaterial({
-    transmission: 0.9,
-    roughness: 1,
-    thickness: 0.2,
+const mat = new THREE.MeshStandardMaterial({
+    transparent: true,
+    opacity: 0.02,
     color: '#fff',
     side: THREE.DoubleSide,
 });
