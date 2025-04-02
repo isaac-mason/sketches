@@ -13,7 +13,7 @@
     "devDependencies": {
         "@biomejs/biome": "^1.9.4",
         "@types/bun": "^1.2.2",
-        "@types/express": "^4",
+        "@types/express": "^5",
         "@types/http-proxy": "^1",
         "@types/node": "^22.13.10",
         "bun": "^1.2.4",
