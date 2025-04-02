@@ -919,6 +919,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@pmndrs/pointer-events@npm:~6.6.12":
+  version: 6.6.12
+  resolution: "@pmndrs/pointer-events@npm:6.6.12"
+  checksum: 10/009d5f79294cfa2e88ea228f71b558912ed44e68d73007ce1406671d3e625ec57668a28ebadba94a14ca28adcb159bf2a6d2672fced35ba53d4cf7bc3206839f
+  languageName: node
+  linkType: hard
+
 "@pmndrs/uikit@npm:^0.8.14":
   version: 0.8.14
   resolution: "@pmndrs/uikit@npm:0.8.14"
@@ -935,19 +942,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pmndrs/xr@npm:~6.6.11":
-  version: 6.6.11
-  resolution: "@pmndrs/xr@npm:6.6.11"
+"@pmndrs/xr@npm:~6.6.12":
+  version: 6.6.12
+  resolution: "@pmndrs/xr@npm:6.6.12"
   dependencies:
     "@iwer/devui": "npm:^1.1.1"
     "@iwer/sem": "npm:~0.2.5"
-    "@pmndrs/pointer-events": "npm:~6.6.11"
+    "@pmndrs/pointer-events": "npm:~6.6.12"
     iwer: "npm:^2.0.1"
     meshline: "npm:^3.3.1"
     zustand: "npm:^4.5.2"
   peerDependencies:
     three: "*"
-  checksum: 10/e0f2ba0b6ff78a08a766a18f80000361d5bdd10213fe036063ae444501ab94b3b16eba929d7abf2ca1f356cfbf6b692bfd361ac53bfaf23892a25b5e14b86520
+  checksum: 10/6e69e9f2bdd6b284f92b06334bc5e60c713a9385e5d30b7f4eebd3bb4e030331812f0d182b58f0f72bb4e710f42229891ee885a76ba88eef4ae8acdaca7f77cd
   languageName: node
   linkType: hard
 
@@ -1476,12 +1483,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-three/xr@npm:^6.6.11":
-  version: 6.6.11
-  resolution: "@react-three/xr@npm:6.6.11"
+"@react-three/xr@npm:^6.6.12":
+  version: 6.6.12
+  resolution: "@react-three/xr@npm:6.6.12"
   dependencies:
-    "@pmndrs/pointer-events": "npm:~6.6.11"
-    "@pmndrs/xr": "npm:~6.6.11"
+    "@pmndrs/pointer-events": "npm:~6.6.12"
+    "@pmndrs/xr": "npm:~6.6.12"
     suspend-react: "npm:^0.1.3"
     tunnel-rat: "npm:^0.1.2"
     zustand: "npm:^4.5.2"
@@ -1490,7 +1497,7 @@ __metadata:
     react: ">=18"
     react-dom: ">=18"
     three: "*"
-  checksum: 10/b89b85df7394815d98356716c455334d9b22e383aaa469e887cec3944e0370d4f8f440421ffc947432f472751619521f97d74f7f55c4aa839070fc9ce5c1f7f1
+  checksum: 10/098cda6fb0589d1e11db17a1dee405b9e0655774be02828e82405279b4e64788006db7309be0fb49ae45193246f0bdb69d74a3a5e800b334f7e70131e1e027b0
   languageName: node
   linkType: hard
 
@@ -2645,7 +2652,7 @@ __metadata:
     "@react-three/drei": "npm:^10.0.4"
     "@react-three/fiber": "npm:^9.1.0"
     "@react-three/uikit": "npm:^0.8.14"
-    "@react-three/xr": "npm:^6.6.11"
+    "@react-three/xr": "npm:^6.6.12"
     "@recast-navigation/three": "npm:^0.39.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
@@ -2757,7 +2764,7 @@ __metadata:
   dependencies:
     "@react-three/drei": "npm:^10.0.4"
     "@react-three/fiber": "npm:^9.1.0"
-    "@react-three/xr": "npm:^6.6.11"
+    "@react-three/xr": "npm:^6.6.12"
     "@recast-navigation/three": "npm:^0.39.0"
     "@types/react": "npm:^19.0.10"
     "@types/react-dom": "npm:^19.0.4"
