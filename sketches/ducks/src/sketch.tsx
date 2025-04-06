@@ -356,6 +356,65 @@ const ease = (x: number): number => {
 	return -(Math.cos(Math.PI * x) - 1) / 2;
 };
 
+// Add this function to create a stepping pose for the leg
+const createSteppingPose = (
+    segments: LegSegment[],
+    basePosition: Vector3, 
+    targetPosition: Vector3,
+    stepProgress: number
+): LegSegment[] => {
+    // Create a copy of the segments to modify
+    const steppingSegments: LegSegment[] = [];
+    
+    // Calculate the step height factor - highest in the middle of the step
+    const liftFactor = Math.sin(stepProgress * Math.PI);
+    
+    // Calculate a lifting vector (elevated and slightly outward)
+    const liftDirection = new Vector3(0, 1, 0); // Mainly upward
+    
+    // Add a slight outward component based on current leg direction
+    const baseToTarget = new Vector3().subVectors(targetPosition, basePosition).normalize();
+    
+    // Outward is perpendicular to both up and base-to-target
+    const outwardDirection = new Vector3(0, 0, 1).cross(baseToTarget).normalize();
+    
+    // Add outward component to lift direction
+    liftDirection.add(outwardDirection.multiplyScalar(0.3)).normalize();
+    
+    // First segment should lift more, second segment a bit, last segment aims at target
+    for (let i = 0; i < segments.length; i++) {
+        const segment = segments[i];
+        
+        // Calculate segment-specific lifting factor
+        let segmentLiftFactor = 0;
+        
+        if (i === 0) {
+            // First segment (connected to body) lifts the most
+            segmentLiftFactor = liftFactor * 0.5; // 50% of the max lift
+        } else if (i === 1 && segments.length >= 3) {
+            // Middle segment lifts a moderate amount
+            segmentLiftFactor = liftFactor * 0.3; // 30% of the max lift
+        } else {
+            // Last segment(s) lift very little - mostly aim for target
+            segmentLiftFactor = liftFactor * 0.1; // 10% of the max lift
+        }
+        
+        // Create a blended direction
+        const blendedDirection = new Vector3().copy(segment.direction);
+        
+        // Blend with lift direction based on segment lift factor
+        blendedDirection.lerp(liftDirection, segmentLiftFactor).normalize();
+        
+        // Add this segment to our stepping pose
+        steppingSegments.push({
+            direction: blendedDirection,
+            length: segment.length,
+        });
+    }
+    
+    return steppingSegments;
+};
+
 type CrawlerProps = RigidBodyProps & {
     legs: LegDef[];
     legsDesiredHeight: number;
@@ -602,9 +661,22 @@ const Crawler = ({
 			const basePosition = _rayOrigin.clone();
 			const targetPosition = legState.currentPosition.clone();
 
-			// Apply FABRIK
+			 // If the leg is stepping, create a pose that's more elevated and outward-pointing
+			 let segmentsToUpdate = legState.segments;
+        
+			 if (legState.stepping && legState.stepProgress > 0 && legState.stepProgress < 1) {
+				 // Create a stepping pose that influences the FABRIK calculation
+				 segmentsToUpdate = createSteppingPose(
+					 legState.segments,
+					 basePosition,
+					 targetPosition,
+					 legState.stepProgress
+				 );
+			 }
+
+			// Apply FABRIK with potentially modified segments
 			const newSegments = twoPassFabrik(
-				legState.segments,
+				segmentsToUpdate,
 				targetPosition,
 				basePosition
 			);
