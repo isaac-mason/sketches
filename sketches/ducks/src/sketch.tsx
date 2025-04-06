@@ -27,15 +27,13 @@ import { WebGPUCanvas } from '../../../common';
 
 import './styles.css';
 
-// Temp vectors for calculations (to avoid creating new objects)
 const _tempDirection = new Vector3();
 const _tempPosition = new Vector3();
 const _tempOffset = new Vector3();
 const _tempMidpoint = new Vector3();
-const _tempResult = new Vector3();
 const _desiredFootPosition = new Vector3();
 const _crawlerPosition = new Vector3();
-const _outwardOffset = new Vector3(); // Add a new vector for the outward offset calculations
+const _outwardOffset = new Vector3();
 
 const _prevPosition = new Vector3();
 const _currentTarget = new Vector3();
@@ -47,7 +45,6 @@ type LegSegment = {
 	position?: Vector3;
 };
 
-// Corrected FABRIK algorithm implementation based on reference
 const fabrik = (
 	segments: LegSegment[],
 	target: Vector3,
@@ -217,6 +214,7 @@ type LegState = {
 	stepping: boolean; // Whether the leg is currently in a stepping motion
 	stepProgress: number; // 0-1 value for step animation progress
 	debug?: LegHelper;
+	lastStepTime: number; // Store timestamp of last step
 };
 
 type CrawlerState = {
@@ -430,14 +428,14 @@ const Crawler = ({
 	useFrame((_, dt) => {
 		if (!rigidBodyRef.current) return;
 
-        // move up and down along z axis
-        const speed = 1;
-        const angle = (performance.now() / 1000) * speed;
-        const z = Math.cos(angle) * 2;
-        rigidBodyRef.current.setLinvel(
-            new Vector3(rigidBodyRef.current.linvel().x, rigidBodyRef.current.linvel().y, z),
-            true,
-        );
+        // // move up and down along z axis
+        // const speed = 1;
+        // const angle = (performance.now() / 1000) * speed;
+        // const z = Math.cos(angle) * 2;
+        // rigidBodyRef.current.setLinvel(
+        //     new Vector3(rigidBodyRef.current.linvel().x, rigidBodyRef.current.linvel().y, z),
+        //     true,
+        // );
 
 		// /* apply horizontal velocity to move in circle */
 		// const speed = 2;
@@ -531,7 +529,6 @@ const Crawler = ({
 						position: new Vector3(),
 					});
 				}
-
 				legState = state.legs[leg.id] = {
 					id: leg.id,
 					goalPosition: new Vector3(),
@@ -539,6 +536,7 @@ const Crawler = ({
 					segments: initialSegments,
 					stepping: false,
 					stepProgress: 1, // Start as "completed step"
+					lastStepTime: 0,
 				};
 			}
 
@@ -616,10 +614,19 @@ const Crawler = ({
 				// Check if this leg is in its stepping phase window
 				const inStepPhase = legPhase >= phaseWindowStart && legPhase <= phaseWindowEnd;
 				
-				// Determine if leg needs to step based on distance criteria
+				 // Small difference threshold for time-based stepping
+				const smallDifferenceThreshold = 0.01;
+				const hasSmallDifference = distanceToDesired > smallDifferenceThreshold;
+				
+				// Time threshold for periodic adjustment steps (3 seconds)
+				const timeThreshold = 3.0;
+                // consider lastStepTime
+                const needsPeriodicStep = performance.now() - legState.lastStepTime > timeThreshold && hasSmallDifference;
+				
+				// Determine if leg needs to step based on various criteria
 				const needsToStep = 
-					distanceToDesired > 0.5 || // Foot is far from desired position
-					distanceToBody > idealDistance * 1.2; // Leg is too stretched
+					distanceToDesired > 0.5 ||  // Foot is far from desired position
+					needsPeriodicStep;          // Take periodic small adjustment steps
 				
 				// Only step if we're in the right phase AND the leg needs to step
 				if (inStepPhase && needsToStep) {
@@ -640,6 +647,7 @@ const Crawler = ({
 					legState.stepProgress = 1;
 					legState.stepping = false;
 					legState.currentPosition.copy(legState.goalPosition);
+					legState.lastStepTime = performance.now();
 				} else {
 					// Animate step using easing function
 					const easedProgress = ease(legState.stepProgress);
@@ -766,7 +774,7 @@ const LEGS: LegDef[] = [
 		offset: [-0.3, -0.3, 0.3],
 		outwardOffset: [-0.8, 0, 0.8],
 		segments: 3,
-		legLength: 1, // Total leg length
+		legLength: 1.3, // Total leg length
 		phaseOffset: 0, // First in sequence
 	},
 	{
@@ -774,7 +782,7 @@ const LEGS: LegDef[] = [
 		offset: [0.3, -0.3, -0.3],
 		outwardOffset: [0.8, 0, -0.8],
 		segments: 3,
-		legLength: 1,
+		legLength: 1.3,
 		phaseOffset: 0.25, // Second in sequence
 	},
 	{
@@ -782,7 +790,7 @@ const LEGS: LegDef[] = [
 		offset: [0.3, -0.3, 0.3],
 		outwardOffset: [0.8, 0, 0.8],
 		segments: 3,
-		legLength: 1,
+		legLength: 1.3,
 		phaseOffset: 0.5, // Third in sequence
 	},
 	{
@@ -790,7 +798,7 @@ const LEGS: LegDef[] = [
 		offset: [-0.3, -0.3, -0.3],
 		outwardOffset: [-0.8, 0, -0.8],
 		segments: 3,
-		legLength: 1,
+		legLength: 1.3,
 		phaseOffset: 0.75, // Last in sequence
 	},
 ];
