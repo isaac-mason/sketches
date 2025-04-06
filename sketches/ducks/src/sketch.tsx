@@ -462,16 +462,25 @@ const Crawler = ({
 	useFrame((_, dt) => {
 		if (!rigidBodyRef.current) return;
 
-		/* apply horizontal velocity to move in circle */
-		const speed = 2;
-		const angle = (performance.now() / 1000) * speed;
-		const x = Math.cos(angle) * 2;
-		const z = Math.sin(angle) * 2;
-		rigidBodyRef.current.setLinvel(
-			new Vector3(x, rigidBodyRef.current.linvel().y, z),
-			true,
-		);
-		rigidBodyRef.current.setAngvel(new Vector3(0, 0, 0), true);
+        // move up and down along z axis
+        const speed = 1;
+        const angle = (performance.now() / 1000) * speed;
+        const z = Math.cos(angle) * 2;
+        rigidBodyRef.current.setLinvel(
+            new Vector3(rigidBodyRef.current.linvel().x, rigidBodyRef.current.linvel().y, z),
+            true,
+        );
+
+		// /* apply horizontal velocity to move in circle */
+		// const speed = 2;
+		// const angle = (performance.now() / 1000) * speed;
+		// const x = Math.cos(angle) * 2;
+		// const z = Math.sin(angle) * 2;
+		// rigidBodyRef.current.setLinvel(
+		// 	new Vector3(x, rigidBodyRef.current.linvel().y, z),
+		// 	true,
+		// );
+		// rigidBodyRef.current.setAngvel(new Vector3(0, 0, 0), true);
 		
 		// Update crawlerPosition and check for movement
 		_crawlerPosition.copy(rigidBodyRef.current.translation());
