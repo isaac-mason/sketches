@@ -15,14 +15,116 @@ import {
 	type Material,
 	Mesh,
 	MeshBasicMaterial,
+	MeshStandardMaterial,
 	type Scene,
 	SphereGeometry,
+	CylinderGeometry,
 	Vector3,
 	type Vector3Tuple,
+	Quaternion,
 } from 'three';
 import { WebGPUCanvas } from '../../../common';
 
 import './styles.css';
+
+// Vector utility functions
+const vectorAdd = (v1: Vector3, v2: Vector3): Vector3 => {
+	return new Vector3(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
+};
+
+const vectorSubtract = (v1: Vector3, v2: Vector3): Vector3 => {
+	return new Vector3(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
+};
+
+const vectorNormalize = (v: Vector3): Vector3 => {
+	return v.clone().normalize();
+};
+
+const scalarMultiply = (s: number, v: Vector3): Vector3 => {
+	return v.clone().multiplyScalar(s);
+};
+
+// Leg segment type
+type LegSegment = {
+	direction: Vector3;
+	length: number;
+	position?: Vector3;
+};
+
+// FABRIK algorithm implementation with improved stability
+const fabrik = (
+	segments: LegSegment[],
+	target: Vector3,
+	base: Vector3,
+	backwardsSegments: LegSegment[] = [],
+): LegSegment[] => {
+	// Calculate all joint positions
+	const jointPositions: Vector3[] = [];
+	let prevPosition = base.clone();
+
+	// Forward pass - get current chain positions
+	for (let i = 0; i < segments.length; i++) {
+		const segment = segments[i];
+		const direction = segment.direction.clone();
+		const length = segment.length;
+
+		const jointPosition = vectorAdd(
+			prevPosition,
+			scalarMultiply(length, direction),
+		);
+
+		jointPositions.push(jointPosition);
+		prevPosition = jointPosition;
+	}
+
+	// Backward pass - adjust segment directions
+	let currentTarget = target.clone();
+
+	for (let i = jointPositions.length - 1; i >= 0; i--) {
+		const direction = vectorNormalize(
+			vectorSubtract(currentTarget, i > 0 ? jointPositions[i - 1] : base),
+		);
+		const length = segments[i].length;
+
+		// Store the new position
+		const newPos = vectorAdd(
+			i > 0 ? jointPositions[i - 1] : base,
+			scalarMultiply(length, direction),
+		);
+
+		// Update the current target for the next segment
+		currentTarget = newPos;
+
+		// Create new segment with updated direction
+		backwardsSegments.unshift({
+			direction: direction,
+			length: length,
+			position: newPos,
+		});
+	}
+
+	return backwardsSegments;
+};
+
+const twoPassFabrik = (
+	segments: LegSegment[],
+	target: Vector3,
+	root: Vector3,
+	iterations: number = 3,
+): LegSegment[] => {
+	let currentSegments = [...segments];
+
+	// Run multiple iterations for better convergence
+	for (let i = 0; i < iterations; i++) {
+		// First pass (backward reaching)
+		const pass1 = fabrik(currentSegments, target, root, []);
+
+		// Second pass (forward reaching)
+		currentSegments = fabrik(pass1, root, target, []);
+	}
+
+	return currentSegments;
+};
 
 const _rayOrigin = new Vector3();
 const _rayDirection = new Vector3();
@@ -106,12 +208,16 @@ type LegDef = {
 	id: string;
 	offset: Vector3Tuple;
 	stepDistanceThreshold: number;
+	segments: number; // Number of segments
+	segmentLength: number; // Length of each segment
 };
 
 type LegState = {
 	id: string;
 	currentPosition: Vector3 | undefined;
 	goalPosition: Vector3;
+	segments: LegSegment[]; // Leg segments
+	segmentMeshes?: Mesh[]; // Visual meshes for segments
 
 	debug?: LegHelper;
 };
@@ -122,36 +228,165 @@ type CrawlerState = {
 
 type CrawlerProps = {
 	legs: LegDef[];
-	legsLength: number;
+	legsDesiredHeight: number;
 	debug?: boolean;
 } & RigidBodyProps;
 
 const LEGS: LegDef[] = [
 	{
 		id: 'front-left',
-		offset: [-1, 0, 1],
+		offset: [-0.5, -0.5, 0.5],
 		stepDistanceThreshold: 1,
+		segments: 3,
+		segmentLength: 0.33,
 	},
 	{
 		id: 'front-right',
-		offset: [1, 0, 1],
+		offset: [0.5, -0.5, 0.5],
 		stepDistanceThreshold: 1,
+		segments: 3,
+		segmentLength: 0.33,
 	},
 	{
 		id: 'back-left',
-		offset: [-1, 0, -1],
+		offset: [-0.5, -0.5, -0.5],
 		stepDistanceThreshold: 1,
+		segments: 3,
+		segmentLength: 0.33,
 	},
 	{
 		id: 'back-right',
-		offset: [1, 0, -1],
+		offset: [0.5, -0.5, -0.5],
 		stepDistanceThreshold: 1,
+		segments: 3,
+		segmentLength: 0.33,
 	},
 ];
 
+// Function to create leg segment visualization
+const createLegSegmentMeshes = (
+	segments: LegSegment[],
+	startPosition: Vector3,
+	scene: Scene,
+): Mesh[] => {
+	let prevPosition = startPosition.clone();
+	const meshes: Mesh[] = [];
+
+	for (const segment of segments) {
+		const direction = segment.direction.clone();
+		const length = segment.length;
+
+		const endPosition = vectorAdd(
+			prevPosition,
+			scalarMultiply(length, direction),
+		);
+
+		// Create a cylinder mesh for the segment
+		const segmentMesh = new Mesh(
+			new CylinderGeometry(0.05, 0.03, length, 8),
+			new MeshStandardMaterial({ color: 'brown' }),
+		);
+
+		// Position at midpoint
+		segmentMesh.position.copy(
+			new Vector3().addVectors(prevPosition, endPosition).multiplyScalar(0.5),
+		);
+
+		// Calculate rotation to align with segment direction
+		// Note: We need to align the cylinder's Y axis with our segment direction
+		const directionVector = endPosition.clone().sub(prevPosition).normalize();
+
+		// Create a quaternion that rotates the cylinder's Y axis to our direction
+		// We're using Y as the up vector because cylinders in Three.js are oriented along Y
+		const quaternion = new Quaternion();
+		const upVector = new Vector3(0, 1, 0);
+		quaternion.setFromUnitVectors(upVector, directionVector);
+
+		// Apply the rotation
+		segmentMesh.setRotationFromQuaternion(quaternion);
+
+		scene.add(segmentMesh);
+		meshes.push(segmentMesh);
+
+		prevPosition = endPosition;
+	}
+
+	return meshes;
+};
+
+// Add a smoothing function to reduce jitter
+const smoothVector = (
+	current: Vector3,
+	target: Vector3,
+	alpha: number = 0.3,
+): Vector3 => {
+	return new Vector3(
+		current.x + (target.x - current.x) * alpha,
+		current.y + (target.y - current.y) * alpha,
+		current.z + (target.z - current.z) * alpha,
+	);
+};
+
+// Function to update leg segment visualization
+const updateLegSegmentMeshes = (
+	segments: LegSegment[],
+	meshes: Mesh[],
+	startPosition: Vector3,
+	smoothingFactor: number = 0.3,
+) => {
+	let prevPosition = startPosition.clone();
+
+	for (let i = 0; i < segments.length; i++) {
+		const segment = segments[i];
+		const direction = segment.direction.clone();
+		const length = segment.length;
+
+		const endPosition = vectorAdd(
+			prevPosition,
+			scalarMultiply(length, direction),
+		);
+
+		// Calculate the midpoint for the mesh position
+		const midpoint = new Vector3()
+			.addVectors(prevPosition, endPosition)
+			.multiplyScalar(0.5);
+
+		// Apply smoothing to reduce jitter - get current position and smooth towards target
+		const currentPos = meshes[i].position.clone();
+		const smoothedPos = smoothVector(currentPos, midpoint, smoothingFactor);
+
+		// Update mesh position
+		meshes[i].position.copy(smoothedPos);
+
+		// Calculate direction vector and create rotation quaternion
+		const directionVector = endPosition.clone().sub(prevPosition).normalize();
+		const upVector = new Vector3(0, 1, 0);
+		const targetQuaternion = new Quaternion();
+		targetQuaternion.setFromUnitVectors(upVector, directionVector);
+
+		// Smooth the rotation using slerp
+		meshes[i].quaternion.slerp(targetQuaternion, smoothingFactor);
+
+		prevPosition = endPosition;
+	}
+};
+
+// Function to clean up leg segment meshes
+const disposeLegSegmentMeshes = (meshes: Mesh[]) => {
+	for (const mesh of meshes) {
+		mesh.geometry.dispose();
+		if (Array.isArray(mesh.material)) {
+			mesh.material.forEach((m) => m.dispose());
+		} else {
+			mesh.material.dispose();
+		}
+		mesh.removeFromParent();
+	}
+};
+
 const Crawler = ({
 	legs,
-	legsLength,
+	legsDesiredHeight,
 	debug = false,
 	...rigidBodyProps
 }: CrawlerProps) => {
@@ -168,7 +403,7 @@ const Crawler = ({
 		[],
 	);
 
-	/* cleanup leg helpers on unmount */
+	/* cleanup leg helpers and segment meshes on unmount */
 	useEffect(() => {
 		return () => {
 			for (const leg of legs) {
@@ -176,6 +411,10 @@ const Crawler = ({
 				if (legState?.debug) {
 					disposeLegHelper(legState);
 					legState.debug = undefined;
+				}
+				if (legState?.segmentMeshes) {
+					disposeLegSegmentMeshes(legState.segmentMeshes);
+					legState.segmentMeshes = undefined;
 				}
 			}
 		};
@@ -205,7 +444,7 @@ const Crawler = ({
 
 		const rayColliderIntersection = world.castRayAndGetNormal(
 			ray,
-			legsLength,
+			legsDesiredHeight,
 			false,
 			undefined,
 			undefined,
@@ -216,11 +455,12 @@ const Crawler = ({
 		let grounded = false;
 
 		if (rayColliderIntersection?.timeOfImpact !== undefined) {
-			const rayHitDistance = rayColliderIntersection.timeOfImpact * legsLength;
+			const rayHitDistance =
+				rayColliderIntersection.timeOfImpact * legsDesiredHeight;
 
-			const heightDesired = legsLength;
+			const heightDesired = legsDesiredHeight;
 			const heightCurrent = rayHitDistance;
-			const springConstant = 5;
+			const springConstant = 1;
 			const springDamping = 0.2;
 			const currentVerticalVelocity = rigidBodyRef.current.linvel().y;
 
@@ -232,7 +472,7 @@ const Crawler = ({
 
 			rigidBodyRef.current.applyImpulse(_impulse, true);
 
-			if (rayHitDistance < legsLength + 0.1) {
+			if (rayHitDistance < legsDesiredHeight + 0.1) {
 				grounded = true;
 			}
 		}
@@ -242,10 +482,25 @@ const Crawler = ({
 			let legState = state.legs[leg.id];
 
 			if (!legState) {
+				// Initialize leg segments with improved initial directions
+				const initialSegments: LegSegment[] = [];
+
+				// Create a simple vertical chain pointing down
+				const downVector = new Vector3(0, -1, 0);
+
+				for (let i = 0; i < leg.segments; i++) {
+					initialSegments.push({
+						direction: downVector.clone(), // Ensure it points down
+						length: leg.segmentLength,
+						position: new Vector3(),
+					});
+				}
+
 				legState = state.legs[leg.id] = {
 					id: leg.id,
 					goalPosition: new Vector3(),
 					currentPosition: undefined,
+					segments: initialSegments,
 				};
 			}
 
@@ -258,7 +513,7 @@ const Crawler = ({
 
 			const rayColliderIntersection = world.castRayAndGetNormal(
 				ray,
-				legsLength,
+				legsDesiredHeight,
 				false,
 				undefined,
 				undefined,
@@ -268,8 +523,8 @@ const Crawler = ({
 
 			const distance =
 				rayColliderIntersection?.timeOfImpact !== undefined
-					? rayColliderIntersection.timeOfImpact * legsLength
-					: legsLength;
+					? rayColliderIntersection.timeOfImpact * legsDesiredHeight
+					: legsDesiredHeight;
 
 			_rayWorldHitPosition.copy(_rayDirection).multiplyScalar(distance);
 			_rayWorldHitPosition.add(_rayOrigin);
@@ -288,6 +543,49 @@ const Crawler = ({
 				legState.currentPosition.copy(legState.goalPosition);
 			}
 
+			// Apply FABRIK to update leg segments
+			const basePosition = _rayOrigin.clone();
+			const targetPosition = legState.currentPosition.clone();
+
+			console.log('basePosition', basePosition);
+
+			// Apply FABRIK to update segments - use more iterations for stability
+			const newSegments = twoPassFabrik(
+				legState.segments,
+				targetPosition,
+				basePosition,
+				5, // More iterations for better convergence
+			);
+
+			// Smooth between old and new segments to reduce jitter
+			for (let i = 0; i < legState.segments.length; i++) {
+				// Smoothly interpolate the direction
+				legState.segments[i].direction = vectorNormalize(
+					smoothVector(
+						legState.segments[i].direction,
+						newSegments[i].direction,
+						0.2, // Lower value = more stability but slower response
+					),
+				);
+			}
+
+			// Create or update segment visualizations
+			if (!legState.segmentMeshes) {
+				legState.segmentMeshes = createLegSegmentMeshes(
+					legState.segments,
+					basePosition,
+					scene,
+				);
+			} else {
+				// Use a lower smoothing factor for more stable movements
+				updateLegSegmentMeshes(
+					legState.segments,
+					legState.segmentMeshes,
+					basePosition,
+					0.2, // Lower smoothing factor for stability
+				);
+			}
+
 			/* update leg debug helper */
 			if (debug) {
 				if (!legState.debug) {
@@ -303,6 +601,7 @@ const Crawler = ({
 			} else {
 				if (legState.debug) {
 					disposeLegHelper(legState);
+					legState.debug = undefined;
 				}
 			}
 		}
@@ -327,8 +626,8 @@ const Crawler = ({
 
 const Floor = () => (
 	<>
-		<RigidBody type="fixed" position={[0, -1, 0]}>
-			<CuboidCollider args={[100, 1, 100]} />
+		<RigidBody type="fixed" position={[0, -3, 0]}>
+			<CuboidCollider args={[100, 3, 100]} />
 		</RigidBody>
 
 		<mesh rotation={[-Math.PI / 2, 0, 0]}>
@@ -342,7 +641,12 @@ export function Sketch() {
 	return (
 		<WebGPUCanvas gl={{ antialias: true }}>
 			<Physics debug>
-				<Crawler position={[0, 4, 0]} legs={LEGS} legsLength={1} debug />
+				<Crawler
+					position={[0, 4, 0]}
+					legs={LEGS}
+					legsDesiredHeight={0.5}
+					debug
+				/>
 
 				<Floor />
 			</Physics>
