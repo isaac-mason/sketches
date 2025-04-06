@@ -37,6 +37,9 @@ const _desiredFootPosition = new Vector3();
 const _crawlerPosition = new Vector3();
 const _outwardOffset = new Vector3(); // Add a new vector for the outward offset calculations
 
+const _prevPosition = new Vector3();
+const _currentTarget = new Vector3();
+
 // Leg segment type
 type LegSegment = {
 	direction: Vector3;
@@ -53,7 +56,7 @@ const fabrik = (
 ): LegSegment[] => {
 	// Calculate all joint positions (vectorTips in reference code)
 	const jointPositions: Vector3[] = [];
-	let prevPosition = base.clone(); // Need clone here to avoid modifying the input
+	let prevPosition = _prevPosition.copy(base); // Need clone here to avoid modifying the input
 
 	// Forward pass - calculate all joint positions based on current segments
 	for (let i = 0; i < segments.length; i++) {
@@ -68,7 +71,7 @@ const fabrik = (
 	}
 
 	// Backward pass - work backward from target to base
-	let currentTarget = target.clone(); // Need clone here to avoid modifying the input
+	let currentTarget = _currentTarget.copy(target); // Need clone here to avoid modifying the input
 
 	// Loop from second-to-last joint to first joint
 	for (let i = jointPositions.length - 2; i >= 0; i--) {
@@ -116,12 +119,14 @@ const twoPassFabrik = (
 	return pass2.slice(Math.floor(pass2.length / 2));
 };
 
+const _legOrigin = new Vector3();
 const _rayOrigin = new Vector3();
 const _rayDirection = new Vector3();
 const _rayWorldHitPosition = new Vector3();
 const _impulse = new Vector3();
 const _linearVelocity = new Vector3();
-
+const _basePosition = new Vector3();
+const _targetPosition = new Vector3();
 const _legOffset = new Vector3();
 const _legTarget = new Vector3();
 
@@ -200,6 +205,7 @@ type LegDef = {
 	outwardOffset: Vector3Tuple; // Outward stance offset for leg stance
 	segments: number; // Number of segments
 	legLength: number; // Total desired length of the leg
+	phaseOffset: number; // Value between 0-1 indicating when in the cycle this leg steps
 };
 
 type LegState = {
@@ -217,6 +223,7 @@ type CrawlerState = {
 	legs: Record<string, LegState>;
 	legTimer: number; // Timer that increases when crawler is moving
 	lastPosition: Vector3; // Last position to detect movement
+	stepCycleTime: number; // Dedicated timer for phase-based stepping
 };
 
 const LEGS: LegDef[] = [
@@ -226,20 +233,7 @@ const LEGS: LegDef[] = [
 		outwardOffset: [-0.8, 0, 0.8],
 		segments: 3,
 		legLength: 1, // Total leg length
-	},
-	{
-		id: 'front-right',
-		offset: [0.5, -0.5, 0.5],
-		outwardOffset: [0.8, 0, 0.8],
-		segments: 3,
-		legLength: 1,
-	},
-	{
-		id: 'back-left',
-		offset: [-0.5, -0.5, -0.5],
-		outwardOffset: [-0.8, 0, -0.8],
-		segments: 3,
-		legLength: 1,
+		phaseOffset: 0, // First in sequence
 	},
 	{
 		id: 'back-right',
@@ -247,6 +241,23 @@ const LEGS: LegDef[] = [
 		outwardOffset: [0.8, 0, -0.8],
 		segments: 3,
 		legLength: 1,
+		phaseOffset: 0.25, // Second in sequence
+	},
+	{
+		id: 'front-right',
+		offset: [0.5, -0.5, 0.5],
+		outwardOffset: [0.8, 0, 0.8],
+		segments: 3,
+		legLength: 1,
+		phaseOffset: 0.5, // Third in sequence
+	},
+	{
+		id: 'back-left',
+		offset: [-0.5, -0.5, -0.5],
+		outwardOffset: [-0.8, 0, -0.8],
+		segments: 3,
+		legLength: 1,
+		phaseOffset: 0.75, // Last in sequence
 	},
 ];
 
@@ -256,7 +267,7 @@ const createLegSegmentMeshes = (
 	startPosition: Vector3,
 	scene: Scene,
 ): Mesh[] => {
-	let prevPosition = startPosition.clone(); // Need clone to avoid modifying input
+	let prevPosition = _prevPosition.copy(startPosition); // Need clone to avoid modifying input
 	const meshes: Mesh[] = [];
 
 	for (const segment of segments) {
@@ -438,6 +449,7 @@ const Crawler = ({
 			legs: {},
 			legTimer: 0,
 			lastPosition: new Vector3(),
+			stepCycleTime: 0, // Initialize step cycle time
 		}),
 		[],
 	);
@@ -493,6 +505,10 @@ const Crawler = ({
 		
 		// Increment leg timer
 		state.legTimer += dt * 2;
+		
+		// Update step cycle time - this drives the phase-based stepping
+		// Speed up or slow down by adjusting the multiplier (0.5 = slower cycle)
+		state.stepCycleTime = (state.stepCycleTime + dt * 2) % 1;
 
 		/* hovering controller */
 		_rayOrigin.copy(rigidBodyRef.current.translation());
@@ -571,8 +587,8 @@ const Crawler = ({
 			}
 
 			// Calculate the ray origin (the point where the leg attaches to the body)
-			_rayOrigin.copy(_crawlerPosition);
-			_rayOrigin.add(_legOffset.set(...leg.offset));
+			_legOrigin.copy(_crawlerPosition);
+			_legOrigin.add(_legOffset.set(...leg.offset));
 			
 			// Calculate the outward stance position by applying the outward offset
 			_outwardOffset.set(...leg.outwardOffset);
@@ -581,10 +597,10 @@ const Crawler = ({
 			_rayDirection.set(0, -1, 0);
 
 			// Cast ray from the body position plus the outward offset
-			const rayStartPos = _crawlerPosition.clone().add(_outwardOffset);
+			const rayStartPos = _rayOrigin.copy(_crawlerPosition).add(_outwardOffset);
 
 			// Adjust ray origin to be at the same height as the leg attachment
-			rayStartPos.y = _rayOrigin.y;
+			rayStartPos.y = _legOrigin.y;
 
 			const ray = new Rapier.Ray(rayStartPos, _rayDirection);
 			const rayColliderIntersection = world.castRayAndGetNormal(
@@ -620,16 +636,25 @@ const Crawler = ({
 			const distanceToBody = legState.currentPosition.distanceTo(_crawlerPosition);
 			const idealDistance = legsDesiredHeight; // This is our ideal leg length
 			
-			// Spider-like stepping conditions
+			// Spider-like stepping conditions with enhanced phase-based logic
 			if (!legState.stepping) {
-				if (
-					// Current vs desired foot position is too far
-					distanceToDesired + state.legTimer > 0.75 ||
-					// Leg is too stretched
-					distanceToBody + state.legTimer > idealDistance * 1.5 ||
-					// Leg is too compressed
-					distanceToBody - state.legTimer < idealDistance * 0.9
-				) {
+				// Calculate where we are in the stepping cycle for this leg
+				const legPhase = (state.stepCycleTime + leg.phaseOffset) % 1;
+				
+				// Define the phase "window" where this leg is allowed to step
+				const phaseWindowStart = 0;
+				const phaseWindowEnd = 0.3; // Allow 30% of the cycle for stepping
+				
+				// Check if this leg is in its stepping phase window
+				const inStepPhase = legPhase >= phaseWindowStart && legPhase <= phaseWindowEnd;
+				
+				// Determine if leg needs to step based on distance criteria
+				const needsToStep = 
+					distanceToDesired > 0.5 || // Foot is far from desired position
+					distanceToBody > idealDistance * 1.2; // Leg is too stretched
+				
+				// Only step if we're in the right phase AND the leg needs to step
+				if (inStepPhase && needsToStep) {
 					// Start a new step
 					legState.stepping = true;
 					legState.stepProgress = 0;
@@ -657,7 +682,7 @@ const Crawler = ({
 					// Add a slight arc during the step
 					if (easedProgress > 0 && easedProgress < 1) {
 						// Add a vertical component that peaks in the middle of the step
-						const arcHeight = 0.2; // Height of the stepping arc
+						const arcHeight = 0.1; // Height of the stepping arc
 						const arcFactor = Math.sin(easedProgress * Math.PI) * arcHeight;
 						_tempPosition.y += arcFactor;
 					}
@@ -667,8 +692,8 @@ const Crawler = ({
 			}
 
 			// Apply FABRIK to update segments
-			const basePosition = _rayOrigin.clone();
-			const targetPosition = legState.currentPosition.clone();
+			const basePosition = _basePosition.copy(_legOrigin);
+			const targetPosition = _targetPosition.copy(legState.currentPosition);
 
 			 // If the leg is stepping, create a pose that's more elevated and outward-pointing
 			 let segmentsToUpdate = legState.segments;
@@ -712,7 +737,7 @@ const Crawler = ({
 					legState.segments,
 					legState.segmentMeshes,
 					basePosition,
-					0.2, // Lower smoothing factor for stability
+					1, // Lower smoothing factor for stability
 				);
 			}
 
