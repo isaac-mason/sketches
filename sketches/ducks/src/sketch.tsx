@@ -33,6 +33,8 @@ const _tempPosition = new Vector3();
 const _tempOffset = new Vector3();
 const _tempMidpoint = new Vector3();
 const _tempResult = new Vector3();
+const _desiredFootPosition = new Vector3();
+const _crawlerPosition = new Vector3();
 
 // Leg segment type
 type LegSegment = {
@@ -205,19 +207,16 @@ type LegState = {
 	goalPosition: Vector3;
 	segments: LegSegment[]; // Leg segments
 	segmentMeshes?: Mesh[]; // Visual meshes for segments
-
+	stepping: boolean; // Whether the leg is currently in a stepping motion
+	stepProgress: number; // 0-1 value for step animation progress
 	debug?: LegHelper;
 };
 
 type CrawlerState = {
 	legs: Record<string, LegState>;
+	legTimer: number; // Timer that increases when crawler is moving
+	lastPosition: Vector3; // Last position to detect movement
 };
-
-type CrawlerProps = {
-	legs: LegDef[];
-	legsDesiredHeight: number;
-	debug?: boolean;
-} & RigidBodyProps;
 
 const LEGS: LegDef[] = [
 	{
@@ -225,28 +224,28 @@ const LEGS: LegDef[] = [
 		offset: [-0.5, -0.5, 0.5],
 		stepDistanceThreshold: 1,
 		segments: 3,
-		segmentLength: 0.33,
+		segmentLength: 0.2,
 	},
 	{
 		id: 'front-right',
 		offset: [0.5, -0.5, 0.5],
 		stepDistanceThreshold: 1,
 		segments: 3,
-		segmentLength: 0.33,
+		segmentLength: 0.2,
 	},
 	{
 		id: 'back-left',
 		offset: [-0.5, -0.5, -0.5],
 		stepDistanceThreshold: 1,
 		segments: 3,
-		segmentLength: 0.33,
+		segmentLength: 0.2,
 	},
 	{
 		id: 'back-right',
 		offset: [0.5, -0.5, -0.5],
 		stepDistanceThreshold: 1,
 		segments: 3,
-		segmentLength: 0.33,
+		segmentLength: 0.2,
 	},
 ];
 
@@ -355,6 +354,11 @@ const disposeLegSegmentMeshes = (meshes: Mesh[]) => {
 	}
 };
 
+// Add an easing function for smooth stepping motion
+const ease = (x: number): number => {
+	return -(Math.cos(Math.PI * x) - 1) / 2;
+};
+
 const Crawler = ({
 	legs,
 	legsDesiredHeight,
@@ -370,6 +374,8 @@ const Crawler = ({
 	const state = useMemo<CrawlerState>(
 		() => ({
 			legs: {},
+			legTimer: 0,
+			lastPosition: new Vector3(),
 		}),
 		[],
 	);
@@ -404,6 +410,18 @@ const Crawler = ({
 			true,
 		);
 		rigidBodyRef.current.setAngvel(new Vector3(0, 0, 0), true);
+		
+		// Update crawlerPosition and check for movement
+		_crawlerPosition.copy(rigidBodyRef.current.translation());
+		
+		// Reset timer if moved significantly
+		if (_crawlerPosition.distanceTo(state.lastPosition) > 0.05) {
+			state.legTimer = 0;
+			state.lastPosition.copy(_crawlerPosition);
+		}
+		
+		// Increment leg timer
+		state.legTimer += dt * 2;
 
 		/* hovering controller */
 		_rayOrigin.copy(rigidBodyRef.current.translation());
@@ -462,7 +480,7 @@ const Crawler = ({
 
 				for (let i = 0; i < leg.segments; i++) {
 					initialSegments.push({
-						direction: downVector.clone(), // Ensure it points down
+						direction: downVector.clone(),
 						length: leg.segmentLength,
 						position: new Vector3(),
 					});
@@ -473,16 +491,18 @@ const Crawler = ({
 					goalPosition: new Vector3(),
 					currentPosition: undefined,
 					segments: initialSegments,
+					stepping: false,
+					stepProgress: 1, // Start as "completed step"
 				};
 			}
 
-			_rayOrigin.copy(rigidBodyRef.current.translation());
+			// Calculate the ray origin (the point where the leg attaches to the body)
+			_rayOrigin.copy(_crawlerPosition);
 			_rayOrigin.add(_legOffset.set(...leg.offset));
 
+			// Get hit position on ground
 			_rayDirection.set(0, -1, 0);
-
 			const ray = new Rapier.Ray(_rayOrigin, _rayDirection);
-
 			const rayColliderIntersection = world.castRayAndGetNormal(
 				ray,
 				legsDesiredHeight,
@@ -498,41 +518,87 @@ const Crawler = ({
 					? rayColliderIntersection.timeOfImpact * legsDesiredHeight
 					: legsDesiredHeight;
 
+			// Calculate desired foot position on ground
 			_rayWorldHitPosition.copy(_rayDirection).multiplyScalar(distance);
 			_rayWorldHitPosition.add(_rayOrigin);
+			
+			// Store this as the ideal/desired foot position
+			_desiredFootPosition.copy(_rayWorldHitPosition);
 
-			legState.goalPosition.copy(_rayWorldHitPosition);
-
+			// Initialize foot position if not set
 			if (!legState.currentPosition) {
-				legState.currentPosition = legState.goalPosition.clone();
+				legState.currentPosition = _desiredFootPosition.clone();
+				legState.goalPosition.copy(_desiredFootPosition);
+			}
+			
+			// Check if we should start a new step
+			const distanceToDesired = legState.currentPosition.distanceTo(_desiredFootPosition);
+			const distanceToBody = legState.currentPosition.distanceTo(_crawlerPosition);
+			const idealDistance = legsDesiredHeight; // This is our ideal leg length
+			
+			// Spider-like stepping conditions
+			if (!legState.stepping) {
+				if (
+					// Current vs desired foot position is too far
+					distanceToDesired + state.legTimer > 0.75 ||
+					// Leg is too stretched
+					distanceToBody + state.legTimer > idealDistance * 1.5 ||
+					// Leg is too compressed
+					distanceToBody - state.legTimer < idealDistance * 0.9
+				) {
+					// Start a new step
+					legState.stepping = true;
+					legState.stepProgress = 0;
+					legState.goalPosition.copy(_desiredFootPosition);
+				}
+			}
+			
+			// Update step progress if stepping
+			if (legState.stepping) {
+				// Advance step progress
+				legState.stepProgress += dt * 3; // Adjust for step speed
+				
+				if (legState.stepProgress >= 1) {
+					// Step complete
+					legState.stepProgress = 1;
+					legState.stepping = false;
+					legState.currentPosition.copy(legState.goalPosition);
+				} else {
+					// Animate step using easing function
+					const easedProgress = ease(legState.stepProgress);
+					
+					// Interpolate position with easing
+					_tempPosition.copy(legState.currentPosition).lerp(legState.goalPosition, easedProgress);
+					
+					// Add a slight arc during the step
+					if (easedProgress > 0 && easedProgress < 1) {
+						// Add a vertical component that peaks in the middle of the step
+						const arcHeight = 0.2; // Height of the stepping arc
+						const arcFactor = Math.sin(easedProgress * Math.PI) * arcHeight;
+						_tempPosition.y += arcFactor;
+					}
+					
+					legState.currentPosition.copy(_tempPosition);
+				}
 			}
 
-			const currentAndTargetDistance = legState.goalPosition.distanceTo(
-				legState.currentPosition,
-			);
-
-			if (currentAndTargetDistance > leg.stepDistanceThreshold) {
-				legState.currentPosition.copy(legState.goalPosition);
-			}
-
+			// Apply FABRIK to update segments
 			const basePosition = _rayOrigin.clone();
 			const targetPosition = legState.currentPosition.clone();
 
-			// Apply FABRIK to update segments - removed iterations parameter
+			// Apply FABRIK
 			const newSegments = twoPassFabrik(
 				legState.segments,
 				targetPosition,
 				basePosition
 			);
 
-			// Smooth between old and new segments to reduce jitter
+			// Smooth between old and new segments
 			for (let i = 0; i < legState.segments.length; i++) {
-				// Smoothly interpolate the direction - avoid clone()
 				_tempDirection.copy(legState.segments[i].direction)
 					.lerp(newSegments[i].direction, 0.1)
 					.normalize();
 				
-				// Update the direction in place
 				legState.segments[i].direction.copy(_tempDirection);
 			}
 
