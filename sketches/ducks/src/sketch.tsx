@@ -27,22 +27,12 @@ import { WebGPUCanvas } from '../../../common';
 
 import './styles.css';
 
-// Vector utility functions
-const vectorAdd = (v1: Vector3, v2: Vector3): Vector3 => {
-	return new Vector3(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
-};
-
-const vectorSubtract = (v1: Vector3, v2: Vector3): Vector3 => {
-	return new Vector3(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
-};
-
-const vectorNormalize = (v: Vector3): Vector3 => {
-	return v.clone().normalize();
-};
-
-const scalarMultiply = (s: number, v: Vector3): Vector3 => {
-	return v.clone().multiplyScalar(s);
-};
+// Temp vectors for calculations (to avoid creating new objects)
+const _tempDirection = new Vector3();
+const _tempPosition = new Vector3();
+const _tempOffset = new Vector3();
+const _tempMidpoint = new Vector3();
+const _tempResult = new Vector3();
 
 // Leg segment type
 type LegSegment = {
@@ -51,58 +41,60 @@ type LegSegment = {
 	position?: Vector3;
 };
 
-// FABRIK algorithm implementation with improved stability
+// Corrected FABRIK algorithm implementation based on reference
 const fabrik = (
 	segments: LegSegment[],
 	target: Vector3,
 	base: Vector3,
 	backwardsSegments: LegSegment[] = [],
 ): LegSegment[] => {
-	// Calculate all joint positions
+	// Calculate all joint positions (vectorTips in reference code)
 	const jointPositions: Vector3[] = [];
-	let prevPosition = base.clone();
+	let prevPosition = base.clone(); // Need clone here to avoid modifying the input
 
-	// Forward pass - get current chain positions
+	// Forward pass - calculate all joint positions based on current segments
 	for (let i = 0; i < segments.length; i++) {
 		const segment = segments[i];
-		const direction = segment.direction.clone();
-		const length = segment.length;
-
-		const jointPosition = vectorAdd(
-			prevPosition,
-			scalarMultiply(length, direction),
-		);
+		
+		// Calculate joint position by adding scaled direction to previous position
+		_tempDirection.copy(segment.direction).multiplyScalar(segment.length);
+		const jointPosition = new Vector3().copy(prevPosition).add(_tempDirection);
 
 		jointPositions.push(jointPosition);
 		prevPosition = jointPosition;
 	}
 
-	// Backward pass - adjust segment directions
-	let currentTarget = target.clone();
+	// Backward pass - work backward from target to base
+	let currentTarget = target.clone(); // Need clone here to avoid modifying the input
 
-	for (let i = jointPositions.length - 1; i >= 0; i--) {
-		const direction = vectorNormalize(
-			vectorSubtract(currentTarget, i > 0 ? jointPositions[i - 1] : base),
-		);
-		const length = segments[i].length;
-
-		// Store the new position
-		const newPos = vectorAdd(
-			i > 0 ? jointPositions[i - 1] : base,
-			scalarMultiply(length, direction),
-		);
-
-		// Update the current target for the next segment
-		currentTarget = newPos;
-
-		// Create new segment with updated direction
-		backwardsSegments.unshift({
-			direction: direction,
+	// Loop from second-to-last joint to first joint
+	for (let i = jointPositions.length - 2; i >= 0; i--) {
+		// Calculate direction from joint to current target
+		_tempDirection.subVectors(jointPositions[i], currentTarget).normalize();
+		
+		// Use length of NEXT segment (i+1)
+		const length = segments[i + 1].length;
+		
+		// Calculate new position and update current target
+		_tempOffset.copy(_tempDirection).multiplyScalar(length);
+		currentTarget = new Vector3().copy(currentTarget).add(_tempOffset);
+		
+		// Create new segment
+		backwardsSegments.push({
+			direction: new Vector3().copy(_tempDirection),
 			length: length,
-			position: newPos,
 		});
 	}
-
+	
+	// Handle the first segment (from base to first joint)
+	_tempDirection.subVectors(base, currentTarget).normalize();
+	const firstLength = segments[0].length;
+	
+	backwardsSegments.push({
+		direction: new Vector3().copy(_tempDirection),
+		length: firstLength,
+	});
+	
 	return backwardsSegments;
 };
 
@@ -110,20 +102,15 @@ const twoPassFabrik = (
 	segments: LegSegment[],
 	target: Vector3,
 	root: Vector3,
-	iterations: number = 3,
 ): LegSegment[] => {
-	let currentSegments = [...segments];
-
-	// Run multiple iterations for better convergence
-	for (let i = 0; i < iterations; i++) {
-		// First pass (backward reaching)
-		const pass1 = fabrik(currentSegments, target, root, []);
-
-		// Second pass (forward reaching)
-		currentSegments = fabrik(pass1, root, target, []);
-	}
-
-	return currentSegments;
+	// First pass (backward reaching)
+	const pass1 = fabrik(segments, target, root, []);
+	
+	// Second pass (forward reaching)
+	const pass2 = fabrik(pass1, root, target, pass1);
+	
+	// Only return the second half of the array as in reference implementation
+	return pass2.slice(Math.floor(pass2.length / 2));
 };
 
 const _rayOrigin = new Vector3();
@@ -269,38 +256,31 @@ const createLegSegmentMeshes = (
 	startPosition: Vector3,
 	scene: Scene,
 ): Mesh[] => {
-	let prevPosition = startPosition.clone();
+	let prevPosition = startPosition.clone(); // Need clone to avoid modifying input
 	const meshes: Mesh[] = [];
 
 	for (const segment of segments) {
-		const direction = segment.direction.clone();
-		const length = segment.length;
-
-		const endPosition = vectorAdd(
-			prevPosition,
-			scalarMultiply(length, direction),
-		);
+		// Calculate end position
+		_tempDirection.copy(segment.direction).multiplyScalar(segment.length);
+		const endPosition = new Vector3().copy(prevPosition).add(_tempDirection);
 
 		// Create a cylinder mesh for the segment
 		const segmentMesh = new Mesh(
-			new CylinderGeometry(0.05, 0.03, length, 8),
+			new CylinderGeometry(0.05, 0.03, segment.length, 8),
 			new MeshStandardMaterial({ color: 'brown' }),
 		);
 
 		// Position at midpoint
-		segmentMesh.position.copy(
-			new Vector3().addVectors(prevPosition, endPosition).multiplyScalar(0.5),
-		);
+		_tempMidpoint.addVectors(prevPosition, endPosition).multiplyScalar(0.5);
+		segmentMesh.position.copy(_tempMidpoint);
 
 		// Calculate rotation to align with segment direction
-		// Note: We need to align the cylinder's Y axis with our segment direction
-		const directionVector = endPosition.clone().sub(prevPosition).normalize();
+		_tempDirection.subVectors(endPosition, prevPosition).normalize();
 
 		// Create a quaternion that rotates the cylinder's Y axis to our direction
-		// We're using Y as the up vector because cylinders in Three.js are oriented along Y
 		const quaternion = new Quaternion();
 		const upVector = new Vector3(0, 1, 0);
-		quaternion.setFromUnitVectors(upVector, directionVector);
+		quaternion.setFromUnitVectors(upVector, _tempDirection);
 
 		// Apply the rotation
 		segmentMesh.setRotationFromQuaternion(quaternion);
@@ -318,13 +298,9 @@ const createLegSegmentMeshes = (
 const smoothVector = (
 	current: Vector3,
 	target: Vector3,
-	alpha: number = 0.3,
+	alpha = 0.3,
 ): Vector3 => {
-	return new Vector3(
-		current.x + (target.x - current.x) * alpha,
-		current.y + (target.y - current.y) * alpha,
-		current.z + (target.z - current.z) * alpha,
-	);
+	return _tempResult.copy(current).lerp(target, alpha);
 };
 
 // Function to update leg segment visualization
@@ -332,37 +308,32 @@ const updateLegSegmentMeshes = (
 	segments: LegSegment[],
 	meshes: Mesh[],
 	startPosition: Vector3,
-	smoothingFactor: number = 0.3,
+	smoothingFactor = 0.3,
 ) => {
-	let prevPosition = startPosition.clone();
+	let prevPosition = startPosition.clone(); // Need clone to avoid modifying input
 
 	for (let i = 0; i < segments.length; i++) {
 		const segment = segments[i];
-		const direction = segment.direction.clone();
-		const length = segment.length;
-
-		const endPosition = vectorAdd(
-			prevPosition,
-			scalarMultiply(length, direction),
-		);
+		
+		// Calculate end position
+		_tempDirection.copy(segment.direction).multiplyScalar(segment.length);
+		const endPosition = new Vector3().copy(prevPosition).add(_tempDirection);
 
 		// Calculate the midpoint for the mesh position
-		const midpoint = new Vector3()
-			.addVectors(prevPosition, endPosition)
-			.multiplyScalar(0.5);
+		_tempMidpoint.addVectors(prevPosition, endPosition).multiplyScalar(0.5);
 
-		// Apply smoothing to reduce jitter - get current position and smooth towards target
-		const currentPos = meshes[i].position.clone();
-		const smoothedPos = smoothVector(currentPos, midpoint, smoothingFactor);
+		// Apply smoothing to reduce jitter - avoid unnecessary clones
+		_tempPosition.copy(meshes[i].position);
+		const smoothedPos = _tempPosition.lerp(_tempMidpoint, smoothingFactor);
 
 		// Update mesh position
 		meshes[i].position.copy(smoothedPos);
 
 		// Calculate direction vector and create rotation quaternion
-		const directionVector = endPosition.clone().sub(prevPosition).normalize();
+		_tempDirection.subVectors(endPosition, prevPosition).normalize();
 		const upVector = new Vector3(0, 1, 0);
 		const targetQuaternion = new Quaternion();
-		targetQuaternion.setFromUnitVectors(upVector, directionVector);
+		targetQuaternion.setFromUnitVectors(upVector, _tempDirection);
 
 		// Smooth the rotation using slerp
 		meshes[i].quaternion.slerp(targetQuaternion, smoothingFactor);
@@ -426,8 +397,8 @@ const Crawler = ({
 		/* apply horizontal velocity to move in circle */
 		const speed = 2;
 		const angle = (performance.now() / 1000) * speed;
-		const x = Math.cos(angle) * 5;
-		const z = Math.sin(angle) * 5;
+		const x = Math.cos(angle) * 1;
+		const z = Math.sin(angle) * 1;
 		rigidBodyRef.current.setLinvel(
 			new Vector3(x, rigidBodyRef.current.linvel().y, z),
 			true,
@@ -440,11 +411,12 @@ const Crawler = ({
 
 		_rayDirection.set(0, -1, 0);
 
+        const rayLength = legsDesiredHeight + 0.5;
 		const ray = new Rapier.Ray(_rayOrigin, _rayDirection);
 
 		const rayColliderIntersection = world.castRayAndGetNormal(
 			ray,
-			legsDesiredHeight,
+			rayLength,
 			false,
 			undefined,
 			undefined,
@@ -456,7 +428,7 @@ const Crawler = ({
 
 		if (rayColliderIntersection?.timeOfImpact !== undefined) {
 			const rayHitDistance =
-				rayColliderIntersection.timeOfImpact * legsDesiredHeight;
+				rayColliderIntersection.timeOfImpact * rayLength;
 
 			const heightDesired = legsDesiredHeight;
 			const heightCurrent = rayHitDistance;
@@ -543,30 +515,25 @@ const Crawler = ({
 				legState.currentPosition.copy(legState.goalPosition);
 			}
 
-			// Apply FABRIK to update leg segments
 			const basePosition = _rayOrigin.clone();
 			const targetPosition = legState.currentPosition.clone();
 
-			console.log('basePosition', basePosition);
-
-			// Apply FABRIK to update segments - use more iterations for stability
+			// Apply FABRIK to update segments - removed iterations parameter
 			const newSegments = twoPassFabrik(
 				legState.segments,
 				targetPosition,
-				basePosition,
-				5, // More iterations for better convergence
+				basePosition
 			);
 
 			// Smooth between old and new segments to reduce jitter
 			for (let i = 0; i < legState.segments.length; i++) {
-				// Smoothly interpolate the direction
-				legState.segments[i].direction = vectorNormalize(
-					smoothVector(
-						legState.segments[i].direction,
-						newSegments[i].direction,
-						0.2, // Lower value = more stability but slower response
-					),
-				);
+				// Smoothly interpolate the direction - avoid clone()
+				_tempDirection.copy(legState.segments[i].direction)
+					.lerp(newSegments[i].direction, 0.1)
+					.normalize();
+				
+				// Update the direction in place
+				legState.segments[i].direction.copy(_tempDirection);
 			}
 
 			// Create or update segment visualizations
@@ -644,7 +611,7 @@ export function Sketch() {
 				<Crawler
 					position={[0, 4, 0]}
 					legs={LEGS}
-					legsDesiredHeight={0.5}
+					legsDesiredHeight={1} // Increased to give more room for legs
 					debug
 				/>
 
@@ -655,7 +622,7 @@ export function Sketch() {
 			<directionalLight position={[0, 0, 5]} intensity={1.5} />
 
 			<OrbitControls makeDefault />
-			<PerspectiveCamera makeDefault position={[0, 0, 25]} />
+			<PerspectiveCamera makeDefault position={[0, 5, 15]} /> 
 		</WebGPUCanvas>
 	);
 }
