@@ -226,41 +226,6 @@ type CrawlerState = {
 	stepCycleTime: number; // Dedicated timer for phase-based stepping
 };
 
-const LEGS: LegDef[] = [
-	{
-		id: 'front-left',
-		offset: [-0.5, -0.5, 0.5],
-		outwardOffset: [-0.8, 0, 0.8],
-		segments: 3,
-		legLength: 1, // Total leg length
-		phaseOffset: 0, // First in sequence
-	},
-	{
-		id: 'back-right',
-		offset: [0.5, -0.5, -0.5],
-		outwardOffset: [0.8, 0, -0.8],
-		segments: 3,
-		legLength: 1,
-		phaseOffset: 0.25, // Second in sequence
-	},
-	{
-		id: 'front-right',
-		offset: [0.5, -0.5, 0.5],
-		outwardOffset: [0.8, 0, 0.8],
-		segments: 3,
-		legLength: 1,
-		phaseOffset: 0.5, // Third in sequence
-	},
-	{
-		id: 'back-left',
-		offset: [-0.5, -0.5, -0.5],
-		outwardOffset: [-0.8, 0, -0.8],
-		segments: 3,
-		legLength: 1,
-		phaseOffset: 0.75, // Last in sequence
-	},
-];
-
 // Function to create leg segment visualization
 const createLegSegmentMeshes = (
 	segments: LegSegment[],
@@ -303,15 +268,6 @@ const createLegSegmentMeshes = (
 	}
 
 	return meshes;
-};
-
-// Add a smoothing function to reduce jitter
-const smoothVector = (
-	current: Vector3,
-	target: Vector3,
-	alpha = 0.3,
-): Vector3 => {
-	return _tempResult.copy(current).lerp(target, alpha);
 };
 
 // Function to update leg segment visualization
@@ -631,6 +587,18 @@ const Crawler = ({
 				legState.goalPosition.copy(_desiredFootPosition);
 			}
 			
+            // Important: Update the goal position to latest desired position while stepping
+			// This allows the leg to adapt to creature movement during the step
+			if (legState.stepping && legState.stepProgress < 0.5) {
+				// Only update during first half of the step to avoid jumps near the end
+				// Use a weighted blend - favor the original goal more as step progresses
+				const blendFactor = 1.0 - legState.stepProgress * 2; // 1.0 to 0.0 over first half
+				legState.goalPosition.lerp(_desiredFootPosition, blendFactor * 0.5);
+			} else if (!legState.stepping) {
+				// When not stepping, always keep the goal position updated
+				legState.goalPosition.copy(_desiredFootPosition);
+			}
+
 			// Check if we should start a new step
 			const distanceToDesired = legState.currentPosition.distanceTo(_desiredFootPosition);
 			const distanceToBody = legState.currentPosition.distanceTo(_crawlerPosition);
@@ -771,7 +739,7 @@ const Crawler = ({
 		>
 			<group ref={groupRef}>
 				<mesh>
-					<boxGeometry args={[1, 1, 1]} />
+                    <sphereGeometry args={[0.5, 32, 32]} />
 					<meshStandardMaterial color="orange" />
 				</mesh>
 			</group>
@@ -792,6 +760,41 @@ const Floor = () => (
 	</>
 );
 
+const LEGS: LegDef[] = [
+	{
+		id: 'front-left',
+		offset: [-0.3, -0.3, 0.3],
+		outwardOffset: [-0.8, 0, 0.8],
+		segments: 3,
+		legLength: 1, // Total leg length
+		phaseOffset: 0, // First in sequence
+	},
+	{
+		id: 'back-right',
+		offset: [0.3, -0.3, -0.3],
+		outwardOffset: [0.8, 0, -0.8],
+		segments: 3,
+		legLength: 1,
+		phaseOffset: 0.25, // Second in sequence
+	},
+	{
+		id: 'front-right',
+		offset: [0.3, -0.3, 0.3],
+		outwardOffset: [0.8, 0, 0.8],
+		segments: 3,
+		legLength: 1,
+		phaseOffset: 0.5, // Third in sequence
+	},
+	{
+		id: 'back-left',
+		offset: [-0.3, -0.3, -0.3],
+		outwardOffset: [-0.8, 0, -0.8],
+		segments: 3,
+		legLength: 1,
+		phaseOffset: 0.75, // Last in sequence
+	},
+];
+
 export function Sketch() {
 	return (
 		<WebGPUCanvas gl={{ antialias: true }}>
@@ -799,7 +802,7 @@ export function Sketch() {
 				<Crawler
 					position={[0, 4, 0]}
 					legs={LEGS}
-					legsDesiredHeight={1} // Increased to give more room for legs
+					legsDesiredHeight={0.75}
 					debug
 				/>
 
