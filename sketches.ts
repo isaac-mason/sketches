@@ -76,7 +76,6 @@ export const sketchesOrder = [
     'threejs-journey/11-textures',
     'threejs-journey/12-materials',
     'threejs-journey/13-text',
-    'threejs-journey/15-lights',
     'threejs-journey/16-shadows',
     'threejs-journey/17-haunted-house',
     'threejs-journey/18-1-particles',
