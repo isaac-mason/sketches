@@ -35,6 +35,7 @@ const _tempMidpoint = new Vector3();
 const _tempResult = new Vector3();
 const _desiredFootPosition = new Vector3();
 const _crawlerPosition = new Vector3();
+const _outwardOffset = new Vector3(); // Add a new vector for the outward offset calculations
 
 // Leg segment type
 type LegSegment = {
@@ -195,10 +196,10 @@ const disposeLegHelper = (legState: LegState) => {
 
 type LegDef = {
 	id: string;
-	offset: Vector3Tuple;
-	stepDistanceThreshold: number;
+	offset: Vector3Tuple;     // Leg attachment point
+	outwardOffset: Vector3Tuple; // Outward stance offset for leg stance
 	segments: number; // Number of segments
-	segmentLength: number; // Length of each segment
+	legLength: number; // Total desired length of the leg
 };
 
 type LegState = {
@@ -222,30 +223,30 @@ const LEGS: LegDef[] = [
 	{
 		id: 'front-left',
 		offset: [-0.5, -0.5, 0.5],
-		stepDistanceThreshold: 1,
+		outwardOffset: [-0.8, 0, 0.8],
 		segments: 3,
-		segmentLength: 0.2,
+		legLength: 1, // Total leg length
 	},
 	{
 		id: 'front-right',
 		offset: [0.5, -0.5, 0.5],
-		stepDistanceThreshold: 1,
+		outwardOffset: [0.8, 0, 0.8],
 		segments: 3,
-		segmentLength: 0.2,
+		legLength: 1,
 	},
 	{
 		id: 'back-left',
 		offset: [-0.5, -0.5, -0.5],
-		stepDistanceThreshold: 1,
+		outwardOffset: [-0.8, 0, -0.8],
 		segments: 3,
-		segmentLength: 0.2,
+		legLength: 1,
 	},
 	{
 		id: 'back-right',
 		offset: [0.5, -0.5, -0.5],
-		stepDistanceThreshold: 1,
+		outwardOffset: [0.8, 0, -0.8],
 		segments: 3,
-		segmentLength: 0.2,
+		legLength: 1,
 	},
 ];
 
@@ -345,11 +346,7 @@ const updateLegSegmentMeshes = (
 const disposeLegSegmentMeshes = (meshes: Mesh[]) => {
 	for (const mesh of meshes) {
 		mesh.geometry.dispose();
-		if (Array.isArray(mesh.material)) {
-			mesh.material.forEach((m) => m.dispose());
-		} else {
-			mesh.material.dispose();
-		}
+        (mesh.material as MeshStandardMaterial).dispose();
 		mesh.removeFromParent();
 	}
 };
@@ -358,6 +355,12 @@ const disposeLegSegmentMeshes = (meshes: Mesh[]) => {
 const ease = (x: number): number => {
 	return -(Math.cos(Math.PI * x) - 1) / 2;
 };
+
+type CrawlerProps = RigidBodyProps & {
+    legs: LegDef[];
+    legsDesiredHeight: number;
+    debug?: boolean;
+}
 
 const Crawler = ({
 	legs,
@@ -403,8 +406,8 @@ const Crawler = ({
 		/* apply horizontal velocity to move in circle */
 		const speed = 2;
 		const angle = (performance.now() / 1000) * speed;
-		const x = Math.cos(angle) * 1;
-		const z = Math.sin(angle) * 1;
+		const x = Math.cos(angle) * 2;
+		const z = Math.sin(angle) * 2;
 		rigidBodyRef.current.setLinvel(
 			new Vector3(x, rigidBodyRef.current.linvel().y, z),
 			true,
@@ -472,6 +475,9 @@ const Crawler = ({
 			let legState = state.legs[leg.id];
 
 			if (!legState) {
+				// Calculate segment length from total leg length
+				const segmentLength = leg.legLength / leg.segments;
+				
 				// Initialize leg segments with improved initial directions
 				const initialSegments: LegSegment[] = [];
 
@@ -481,7 +487,7 @@ const Crawler = ({
 				for (let i = 0; i < leg.segments; i++) {
 					initialSegments.push({
 						direction: downVector.clone(),
-						length: leg.segmentLength,
+						length: segmentLength, // Use derived segment length
 						position: new Vector3(),
 					});
 				}
@@ -499,10 +505,20 @@ const Crawler = ({
 			// Calculate the ray origin (the point where the leg attaches to the body)
 			_rayOrigin.copy(_crawlerPosition);
 			_rayOrigin.add(_legOffset.set(...leg.offset));
+			
+			// Calculate the outward stance position by applying the outward offset
+			_outwardOffset.set(...leg.outwardOffset);
 
-			// Get hit position on ground
+			// Get hit position on ground, but starting from the outward position
 			_rayDirection.set(0, -1, 0);
-			const ray = new Rapier.Ray(_rayOrigin, _rayDirection);
+
+			// Cast ray from the body position plus the outward offset
+			const rayStartPos = _crawlerPosition.clone().add(_outwardOffset);
+
+			// Adjust ray origin to be at the same height as the leg attachment
+			rayStartPos.y = _rayOrigin.y;
+
+			const ray = new Rapier.Ray(rayStartPos, _rayDirection);
 			const rayColliderIntersection = world.castRayAndGetNormal(
 				ray,
 				legsDesiredHeight,
@@ -518,9 +534,9 @@ const Crawler = ({
 					? rayColliderIntersection.timeOfImpact * legsDesiredHeight
 					: legsDesiredHeight;
 
-			// Calculate desired foot position on ground
+			// Calculate desired foot position on ground using the outward offset
 			_rayWorldHitPosition.copy(_rayDirection).multiplyScalar(distance);
-			_rayWorldHitPosition.add(_rayOrigin);
+			_rayWorldHitPosition.add(rayStartPos);
 			
 			// Store this as the ideal/desired foot position
 			_desiredFootPosition.copy(_rayWorldHitPosition);
