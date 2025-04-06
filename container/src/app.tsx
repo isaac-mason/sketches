@@ -1,5 +1,5 @@
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useLoaderData } from 'react-router-dom';
+import { Link, useLoaderData } from 'react-router';
 import { create } from 'zustand';
 import { Spinner, useDebounce } from '../../common';
 import type { SketchMeta } from '../../dev/utils';

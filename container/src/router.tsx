@@ -4,7 +4,7 @@ import {
 	RouterProvider,
 	createBrowserRouter,
 	redirect,
-} from 'react-router-dom';
+} from 'react-router';
 import { create } from 'zustand';
 import type { SketchMeta } from '../../dev/utils';
 import sketchesMetadata from '../generated/sketches.json';
