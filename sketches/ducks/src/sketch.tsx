@@ -56,24 +56,36 @@ const _legOriginVec3: Vec3 = [0, 0, 0];
 const UP = new Vector3(0, 1, 0);
 
 type LegDef = {
+	/** unique (within for the crawler) id for the leg */
 	id: string;
-	attachmentOffset: Vector3Tuple; // Leg attachment point
-	footPlacementOffset: Vector3Tuple; // Outward stance offset for leg stance
-	segments: number; // Number of segments
-	legLength: number; // Total desired length of the leg
-	phaseOffset: number; // Value between 0-1 indicating when in the cycle this leg steps
+	/** leg attachment point */
+	attachmentOffset: Vector3Tuple;
+	/** outward stance offset for leg stance */
+	footPlacementOffset: Vector3Tuple;
+	/** number of segments */
+	segments: number;
+	/** total desired length of the leg */
+	legLength: number;
+	/** value between 0-1 indicating when in the cycle this leg steps */
+	phaseOffset: number;
 };
 
 type LegState = {
-	id: string;
+	/** position of the ray origin for foot placement */
 	footPlacementRayOrigin: Vector3;
-	footPlacementIdealPosition: Vector3;
+	/** position from ideal foot placement */
+	footPlacementPosition: Vector3;
+	/** current position of the end effector */
 	effectorCurrentPosition: Vector3;
+	/** the chain of bones for this leg */
 	chain: Chain;
-	stepping: boolean; // Whether the leg is currently in a stepping motion
-	stepProgress: number; // 0-1 value for step animation progress
-	debug?: FootPlacementHelper;
-	lastStepTime: number; // Store timestamp of last step
+	/** whether the leg is currently in a stepping motion */
+	stepping: boolean;
+	/** 0-1 value for step animation progress */
+	stepProgress: number;
+	/** timestamp of last step */
+	lastStepTime: number;
+	
 	chainHelper: ChainHelper | undefined;
 	footPlacementHelper: FootPlacementHelper | undefined;
 };
@@ -119,9 +131,8 @@ const initCrawler = (def: CrawlerDef) => {
 		}
 
 		legs[leg.id] = {
-			id: leg.id,
 			footPlacementRayOrigin: new Vector3(),
-			footPlacementIdealPosition: new Vector3(),
+			footPlacementPosition: new Vector3(),
 			effectorCurrentPosition: new Vector3(),
 			stepping: false,
 			stepProgress: 1, // init as "completed" (0, 1)
@@ -264,7 +275,7 @@ const updateCrawlerFootPlacement = (
 			_rayWorldHitPosition.add(rayStartPos);
 
 			legState.footPlacementRayOrigin.copy(rayStartPos);
-			legState.footPlacementIdealPosition.copy(_rayWorldHitPosition);
+			legState.footPlacementPosition.copy(_rayWorldHitPosition);
 		}
 	} else {
 		// extend legs outwards
@@ -277,8 +288,8 @@ const updateCrawlerFootPlacement = (
 			_direction.subVectors(_end, _start).normalize();
 			_direction.multiplyScalar(leg.legLength);
 
-			legState.footPlacementIdealPosition.copy(_direction);
-			crawlerObject.localToWorld(legState.footPlacementIdealPosition);
+			legState.footPlacementPosition.copy(_direction);
+			crawlerObject.localToWorld(legState.footPlacementPosition);
 		}
 	}
 };
@@ -291,7 +302,7 @@ const updateCrawlerStepping = (crawler: CrawlerState, dt: number) => {
 		if (!crawler.state.grounded) {
 			legState.stepping = false;
 			legState.effectorCurrentPosition.copy(
-				legState.footPlacementIdealPosition,
+				legState.footPlacementPosition,
 			);
 
 			continue;
@@ -302,7 +313,7 @@ const updateCrawlerStepping = (crawler: CrawlerState, dt: number) => {
 		);
 
 		const distanceToDesired = currentEffectorPosition.distanceTo(
-			legState.footPlacementIdealPosition,
+			legState.footPlacementPosition,
 		);
 
 		if (legState.stepping) {
@@ -349,7 +360,7 @@ const updateCrawlerStepping = (crawler: CrawlerState, dt: number) => {
 		// determine current position for the step
 		if (legState.stepping) {
 			legState.effectorCurrentPosition.lerp(
-				legState.footPlacementIdealPosition,
+				legState.footPlacementPosition,
 				dt * 10,
 			);
 
@@ -578,14 +589,14 @@ const updateCrawlerDebugVisuals = (
 		const legState = crawler.state.legs[leg.id];
 
 		if (debug) {
-			if (!legState.debug) {
-				legState.debug = initFootPlacementHelper(scene);
+			if (!legState.footPlacementHelper) {
+				legState.footPlacementHelper = initFootPlacementHelper(scene);
 			}
 
 			updateFootPlacementHelper(
-				legState.debug!,
+				legState.footPlacementHelper,
 				legState.footPlacementRayOrigin,
-				legState.footPlacementIdealPosition,
+				legState.footPlacementPosition,
 				legState.effectorCurrentPosition,
 			);
 
@@ -605,6 +616,17 @@ const updateCrawlerDebugVisuals = (
 				legState.chainHelper = undefined;
 			}
 		}
+	}
+};
+
+const updateCrawlerVisuals = (
+	crawler: CrawlerState,
+	object: Object3D,
+) => {
+	for (const leg of crawler.def.legs) {
+		const legState = crawler.state.legs[leg.id];
+
+
 	}
 };
 
@@ -630,8 +652,12 @@ const disposeCrawler = (crawler: CrawlerState) => {
 	for (const leg of crawler.def.legs) {
 		const legState = crawler.state.legs[leg.id];
 
-		if (legState.debug) {
-			disposeFootPlacementHelper(legState.debug!);
+		if (legState.footPlacementHelper) {
+			disposeFootPlacementHelper(legState.footPlacementHelper);
+		}
+
+		if (legState.chainHelper) {
+			disposeChainHelper(legState.chainHelper);
 		}
 	}
 };
