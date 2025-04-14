@@ -1780,6 +1780,26 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@sketches/crawlers@workspace:sketches/crawlers":
+  version: 0.0.0-use.local
+  resolution: "@sketches/crawlers@workspace:sketches/crawlers"
+  dependencies:
+    "@react-three/drei": "npm:^10.0.4"
+    "@react-three/fiber": "npm:^9.1.0"
+    "@react-three/rapier": "npm:^2.1.0"
+    "@types/gl-matrix": "npm:^3.2.0"
+    "@types/react": "npm:^19.1.0"
+    "@types/react-dom": "npm:^19.1.1"
+    "@types/three": "npm:^0.175.0"
+    gl-matrix: "npm:^3.4.3"
+    react: "npm:^19.1.0"
+    react-dom: "npm:^19.1.0"
+    three: "npm:^0.175.0"
+    typescript: "npm:^5.8.2"
+    vite: "npm:^6.2.0"
+  languageName: unknown
+  linkType: soft
+
 "@sketches/d3-force-directed-graph@workspace:sketches/d3/force-directed-graph":
   version: 0.0.0-use.local
   resolution: "@sketches/d3-force-directed-graph@workspace:sketches/d3/force-directed-graph"
@@ -1791,26 +1811,6 @@ __metadata:
     "@types/react-dom": "npm:^19.1.1"
     "@types/three": "npm:^0.175.0"
     d3: "npm:^7.9.0"
-    react: "npm:^19.1.0"
-    react-dom: "npm:^19.1.0"
-    three: "npm:^0.175.0"
-    typescript: "npm:^5.8.2"
-    vite: "npm:^6.2.0"
-  languageName: unknown
-  linkType: soft
-
-"@sketches/ducks@workspace:sketches/ducks":
-  version: 0.0.0-use.local
-  resolution: "@sketches/ducks@workspace:sketches/ducks"
-  dependencies:
-    "@react-three/drei": "npm:^10.0.4"
-    "@react-three/fiber": "npm:^9.1.0"
-    "@react-three/rapier": "npm:^2.1.0"
-    "@types/gl-matrix": "npm:^3.2.0"
-    "@types/react": "npm:^19.1.0"
-    "@types/react-dom": "npm:^19.1.1"
-    "@types/three": "npm:^0.175.0"
-    gl-matrix: "npm:^3.4.3"
     react: "npm:^19.1.0"
     react-dom: "npm:^19.1.0"
     three: "npm:^0.175.0"

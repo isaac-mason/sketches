@@ -1,10 +1,10 @@
 {
-    "name": "@sketches/ducks",
+    "name": "@sketches/crawlers",
     "private": true,
     "sketch": {
-        "title": "Ducks",
+        "title": "Crawlers",
         "tags": [
-            "ducks",
+            "crawlers",
             "procedural-animation"
         ]
     },
