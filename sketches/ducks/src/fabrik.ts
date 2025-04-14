@@ -1,8 +1,5 @@
 import { vec3, type Vec3 } from "./vec3";
 
-// TODO!
-// https://github.com/lo-th/fullik/blob/gh-pages/src/core/Chain3D.js
-
 export type Bone = {
     start: Vec3;
     end: Vec3;
@@ -27,6 +24,12 @@ export type Chain = {
     bones: Bone[];
 }
 
+const _outerToInnerUV: Vec3 = [0, 0, 0];
+const _innerToOuterUV: Vec3 = [0, 0, 0];
+const _offset: Vec3 = [0, 0, 0];
+const _newStartLocation: Vec3 = [0, 0, 0];
+const _newEndLocation: Vec3 = [0, 0, 0];
+
 /**
  * Forward And Backward Reaching Inverse Kinematics
  */
@@ -50,12 +53,12 @@ export const fabrik = (
             vec3.copy(target, bone.end);
 
             // get the UV between the target / end-location (which are now the same) and the start location of this bone
-            const outerToInnerUV = vec3.directionBetween(bone.start, bone.end, [0, 0, 0]);
+            const outerToInnerUV = vec3.directionBetween(bone.start, bone.end, _outerToInnerUV);
 
             // calculate the new start position as:
             // the end location plus the outer-to-inner direction UV multiplied by the length of the bone
-            const outerToInnerDirectionLengthOffset = vec3.multiplyScalar(outerToInnerUV, bone.length, [0, 0, 0]);
-            const newStartLocation = vec3.add(bone.end, outerToInnerDirectionLengthOffset, [0, 0, 0]);
+            const offset = vec3.multiplyScalar(outerToInnerUV, bone.length, _offset);
+            const newStartLocation = vec3.add(bone.end, offset, _newStartLocation);
 
             vec3.copy(newStartLocation, bone.start);
 
@@ -72,14 +75,13 @@ export const fabrik = (
             // const nextBone = chain.bones[i + 1];
             // const outerBoneOuterToInnerUV = vec3.directionBetween(nextBone.start, nextBone.end, [0, 0, 0]);
 
-
             // get the outer-to-inner direction UV of this bone
-            const boneOuterToInnerUV = vec3.directionBetween(bone.start, bone.end, [0, 0, 0]);
+            const outerToInnerUV = vec3.directionBetween(bone.start, bone.end, _outerToInnerUV);
 
             // set the new inner joint location to be the end joint location of this bone plus the
             // outer-to-inner direction unit vector multiplied by the length of the bone.
-            const boneOuterDirectionLengthOffset = vec3.multiplyScalar(boneOuterToInnerUV, bone.length, [0, 0, 0]);
-            const newStartLocation = vec3.add(bone.end, boneOuterDirectionLengthOffset, [0, 0, 0]);
+            const offset = vec3.multiplyScalar(outerToInnerUV, bone.length, _offset);
+            const newStartLocation = vec3.add(bone.end, offset, _newStartLocation);
             
             vec3.copy(newStartLocation, bone.start);
 
@@ -100,25 +102,26 @@ export const fabrik = (
         if (i === 0) {
             // this is the base bone
             
+            // const fixedBase = true;
+            // if (fixedBase) {
             
-            const fixedBase = true;
-            if (fixedBase) {
-                // if the base is fixed, set the start location to be the root
-                vec3.copy(base, bone.start);
-            } else {
-                // TODO: verify this is correct, untested
-                // otherwise project it backawrds from the end to the start by its length
-                const boneInnerToOuterUV = vec3.directionBetween(bone.end, bone.start, [0, 0, 0]);
-                const offset = vec3.multiplyScalar(boneInnerToOuterUV, bone.length, [0, 0, 0]);
-                vec3.sub(bone.end, offset, bone.start);
-            }
+            // if the base is fixed, set the start location to be the root
+            vec3.copy(base, bone.start);
+            
+            // } else {
+            //     // TODO: verify this is correct, untested
+            //     // otherwise project it backawrds from the end to the start by its length
+            //     const innerToOuterUV = vec3.directionBetween(bone.end, bone.start, _innerToOuterUV);
+            //     const offset = vec3.multiplyScalar(innerToOuterUV, bone.length, _offset);
+            //     vec3.sub(bone.end, offset, bone.start);
+            // }
 
             // get the inner-to-outer direction of this bone
-            const boneInnerToOuterUV = vec3.directionBetween(bone.end, bone.start, [0, 0, 0]);
+            const innerToOuterUV = vec3.directionBetween(bone.end, bone.start, _innerToOuterUV);
 
             // Set the new end location of this bone
-            const offset = vec3.multiplyScalar(boneInnerToOuterUV, bone.length, [0, 0, 0]);
-            const newEndLocation = vec3.add(bone.start, offset, [0, 0, 0]);
+            const offset = vec3.multiplyScalar(innerToOuterUV, bone.length, _offset);
+            const newEndLocation = vec3.add(bone.start, offset, _newEndLocation);
             vec3.copy(newEndLocation, bone.end);
             
             // if there are more bones, then set the start location of the next bone to be the end location of this bone
@@ -131,13 +134,13 @@ export const fabrik = (
             // this is not the base bone
 
             // get the inner-to-outer direction UV of this bone and the previous bone to use as a baseline
-            const boneInnerToOuterUV = vec3.directionBetween(bone.end, bone.start, [0, 0, 0]);
+            const innerToOuterUV = vec3.directionBetween(bone.end, bone.start, _innerToOuterUV);
             
             // TODO: used in constraints ?
             // const prevBoneInnerToOuterUV = vec3.directionBetween(bone.end, bone.start, [0, 0, 0]);
 
-            const offset = vec3.multiplyScalar(boneInnerToOuterUV, bone.length, [0, 0, 0]);
-            const newEndLocation = vec3.add(bone.start, offset, [0, 0, 0]);
+            const offset = vec3.multiplyScalar(innerToOuterUV, bone.length, _offset);
+            const newEndLocation = vec3.add(bone.start, offset, _newEndLocation);
 
             // set the new start joint location for this bone
             vec3.copy(newEndLocation, bone.end);
@@ -149,8 +152,6 @@ export const fabrik = (
             }
         }
     }
-
-    // TODO: if using in a "best solution solver" return the last target location an the distance between the current effector and the target?
 }
 
 export const fabrikFixedIterations = (chain: Chain, base: Vec3, target: Vec3, iterations: number) => {
