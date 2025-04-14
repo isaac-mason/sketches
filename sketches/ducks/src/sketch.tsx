@@ -121,11 +121,9 @@ const _rayOrigin = new Vector3();
 const _rayDirection = new Vector3();
 const _rayWorldHitPosition = new Vector3();
 const _impulse = new Vector3();
-const _linearVelocity = new Vector3();
 const _basePosition = new Vector3();
 const _targetPosition = new Vector3();
 const _legOffset = new Vector3();
-const _legTarget = new Vector3();
 
 const initLegHelper = (scene: Scene) => {
 	const rayOriginHelper = new Mesh(
@@ -437,16 +435,15 @@ const Crawler = ({
         //     true,
         // );
 
-		// /* apply horizontal velocity to move in circle */
-		// const speed = 2;
-		// const angle = (performance.now() / 1000) * speed;
-		// const x = Math.cos(angle) * 2;
-		// const z = Math.sin(angle) * 2;
-		// rigidBodyRef.current.setLinvel(
-		// 	new Vector3(x, rigidBodyRef.current.linvel().y, z),
-		// 	true,
-		// );
-		// rigidBodyRef.current.setAngvel(new Vector3(0, 0, 0), true);
+		/* apply horizontal velocity to move in circle */
+		const angle = (performance.now() / 1000) * 2;
+		const x = Math.cos(angle) * 3;
+		const z = Math.sin(angle) * 3;
+		rigidBodyRef.current.setLinvel(
+			new Vector3(x, rigidBodyRef.current.linvel().y, z),
+			true,
+		);
+		rigidBodyRef.current.setAngvel(new Vector3(0, 0, 0), true);
 		
 		// Update crawlerPosition and check for movement
 		_crawlerPosition.copy(rigidBodyRef.current.translation());
@@ -535,7 +532,7 @@ const Crawler = ({
 					currentPosition: undefined,
 					segments: initialSegments,
 					stepping: false,
-					stepProgress: 1, // Start as "completed step"
+					stepProgress: 1, // "completed" in
 					lastStepTime: 0,
 				};
 			}
@@ -694,7 +691,7 @@ const Crawler = ({
 			// Smooth between old and new segments
 			for (let i = 0; i < legState.segments.length; i++) {
 				_tempDirection.copy(legState.segments[i].direction)
-					.lerp(newSegments[i].direction, 0.1)
+					.lerp(newSegments[i].direction, 1)
 					.normalize();
 				
 				legState.segments[i].direction.copy(_tempDirection);

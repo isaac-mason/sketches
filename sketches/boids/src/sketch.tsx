@@ -3,13 +3,11 @@ import {
     Environment,
     OrbitControls,
     PerspectiveCamera,
-    TransformControls,
 } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-import { Leva, useControls } from 'leva';
+import { useControls } from 'leva';
 import { useEffect, useState } from 'react';
 import * as THREE from 'three';
-import { MeshPhysicalNodeMaterial } from 'three/webgpu';
 import { WebGPUCanvas, usePageVisible } from '../../../common';
 import Engine from '../lib/engine';
 import { Controls } from '../../../common/components/controls';
