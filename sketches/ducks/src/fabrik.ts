@@ -56,7 +56,11 @@ const _constraintAxis: Vec3 = [0, 0, 0];
 const _constraintRotationQuat = quat.create();
 const _constraintRotationMat = mat3.create();
 
-function applyBallConstraint(currentDir: Vec3, referenceDir: Vec3, rotor: number) {
+function applyBallConstraint(
+	currentDir: Vec3,
+	referenceDir: Vec3,
+	rotor: number,
+) {
 	const angle = vec3.angle(referenceDir, currentDir);
 	if (angle > rotor) {
 		vec3.cross(_constraintAxis, referenceDir, currentDir);
@@ -119,7 +123,11 @@ export const fabrik = (chain: Chain, base: Vec3, target: Vec3) => {
 
 			// constraints
 			if (bone.jointConstraint.type === JointConstraintType.BALL) {
-				applyBallConstraint(outerToInnerUV, outerBoneOuterToInnerUV, bone.jointConstraint.rotor);
+				applyBallConstraint(
+					outerToInnerUV,
+					outerBoneOuterToInnerUV,
+					bone.jointConstraint.rotor,
+				);
 			}
 
 			// set the new inner joint location to be the end joint location of this bone plus the
@@ -164,7 +172,6 @@ export const fabrik = (chain: Chain, base: Vec3, target: Vec3) => {
 			vec3.sub(innerToOuterUV, bone.end, bone.start);
 			vec3.normalize(innerToOuterUV, innerToOuterUV);
 
-
 			// Set the new end location of this bone
 			const offset = vec3.scale(_offset, innerToOuterUV, bone.length);
 			vec3.add(bone.end, bone.start, offset);
@@ -189,9 +196,12 @@ export const fabrik = (chain: Chain, base: Vec3, target: Vec3) => {
 
 			// constraints
 			if (bone.jointConstraint.type === JointConstraintType.BALL) {
-				applyBallConstraint(innerToOuterUV, prevBoneInnerToOuterUV, bone.jointConstraint.rotor);
+				applyBallConstraint(
+					innerToOuterUV,
+					prevBoneInnerToOuterUV,
+					bone.jointConstraint.rotor,
+				);
 			}
-
 
 			// TODO: used in constraints ?
 			// const prevBoneInnerToOuterUV = vec3.directionBetween(bone.end, bone.start, [0, 0, 0]);

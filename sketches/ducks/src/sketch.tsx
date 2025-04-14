@@ -85,7 +85,7 @@ type LegState = {
 	stepProgress: number;
 	/** timestamp of last step */
 	lastStepTime: number;
-	
+
 	chainHelper: ChainHelper | undefined;
 	footPlacementHelper: FootPlacementHelper | undefined;
 };
@@ -301,9 +301,7 @@ const updateCrawlerStepping = (crawler: CrawlerState, dt: number) => {
 		// if not grounded, stop stepping
 		if (!crawler.state.grounded) {
 			legState.stepping = false;
-			legState.effectorCurrentPosition.copy(
-				legState.footPlacementPosition,
-			);
+			legState.effectorCurrentPosition.copy(legState.footPlacementPosition);
 
 			continue;
 		}
@@ -619,14 +617,9 @@ const updateCrawlerDebugVisuals = (
 	}
 };
 
-const updateCrawlerVisuals = (
-	crawler: CrawlerState,
-	object: Object3D,
-) => {
+const updateCrawlerVisuals = (crawler: CrawlerState, object: Object3D) => {
 	for (const leg of crawler.def.legs) {
 		const legState = crawler.state.legs[leg.id];
-
-
 	}
 };
 
