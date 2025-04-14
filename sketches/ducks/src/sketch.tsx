@@ -26,7 +26,7 @@ import {
 } from 'three';
 import { WebGPUCanvas } from '../../../common/components/webgpu-canvas';
 import { type Chain, bone, fabrikFixedIterations } from './fabrik';
-import type { Vec3 } from './vec3';
+import type { Vec3 } from './math';
 
 import './styles.css';
 
@@ -361,7 +361,6 @@ const _currentEffectorPositionLocal = new Vector3();
 const updateCrawlerIK = (
 	crawler: CrawlerState,
 	crawlerObject: Object3D,
-	dt: number,
 ) => {
 	for (const leg of crawler.def.legs) {
 		const legState = crawler.state.legs[leg.id];
@@ -618,7 +617,7 @@ const updateCrawler = (
 	updateCrawlerSuspension(crawler, world, rigidBody);
 	updateCrawlerFootPlacement(crawler, crawlerObject, world, rigidBody);
 	updateCrawlerStepping(crawler, dt);
-	updateCrawlerIK(crawler, crawlerObject, dt);
+	updateCrawlerIK(crawler, crawlerObject);
 	updateCrawlerDebugVisuals(crawler, debug, crawlerObject, scene);
 };
 

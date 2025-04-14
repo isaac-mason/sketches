@@ -1806,9 +1806,11 @@ __metadata:
     "@react-three/drei": "npm:^10.0.4"
     "@react-three/fiber": "npm:^9.1.0"
     "@react-three/rapier": "npm:^2.1.0"
+    "@types/gl-matrix": "npm:^3.2.0"
     "@types/react": "npm:^19.1.0"
     "@types/react-dom": "npm:^19.1.1"
     "@types/three": "npm:^0.175.0"
+    gl-matrix: "npm:^3.4.3"
     react: "npm:^19.1.0"
     react-dom: "npm:^19.1.0"
     three: "npm:^0.175.0"
@@ -3892,6 +3894,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/gl-matrix@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "@types/gl-matrix@npm:3.2.0"
+  dependencies:
+    gl-matrix: "npm:*"
+  checksum: 10/1baa16f2eef299c9379e91f883b121fce97fb84975f6cf790365fb74edd2168ee06aa0cbf25425acbd63970f2b3eb6857a85fa8aa756613dcbe331b64b65e6c1
+  languageName: node
+  linkType: hard
+
 "@types/http-errors@npm:*":
   version: 2.0.4
   resolution: "@types/http-errors@npm:2.0.4"
@@ -5847,7 +5858,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"gl-matrix@npm:^3.4.3":
+"gl-matrix@npm:*, gl-matrix@npm:^3.4.3":
   version: 3.4.3
   resolution: "gl-matrix@npm:3.4.3"
   checksum: 10/25ca2f7c762b7547cf462614ac7e0b98cffb131899f014e60a7e50395f4e9304efbb31dc73921e5af2a355cff663bee984d2710765f6730853e90d1c54d5d8e3
