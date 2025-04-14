@@ -25,8 +25,13 @@ import {
 	type Vector3Tuple,
 } from 'three';
 import { WebGPUCanvas } from '../../../common/components/webgpu-canvas';
-import { type Chain, bone, fabrikFixedIterations } from './fabrik';
-import type { Vec3 } from './math';
+import {
+	type Chain,
+	JointConstraintType,
+	type Vec3,
+	bone,
+	fabrikFixedIterations,
+} from './fabrik';
 
 import './styles.css';
 
@@ -105,7 +110,12 @@ const initCrawler = (def: CrawlerDef) => {
 			const end = start.clone();
 			end.add(_legOffset.set(0, -1, 0).multiplyScalar(segmentLength));
 
-			chain.bones.push(bone(start.toArray(), end.toArray()));
+			chain.bones.push(
+				bone(start.toArray(), end.toArray(), {
+					type: JointConstraintType.BALL,
+					rotor: Math.PI / 2,
+				}),
+			);
 		}
 
 		legs[leg.id] = {
@@ -154,11 +164,11 @@ const updateCrawlerMovement = (
 };
 
 const updateCrawlerTimer = (crawler: CrawlerState, dt: number) => {
-	// Increment leg timer
+	// increment leg timer
 	crawler.state.legTimer += dt * 2;
 
-	// Update step cycle time - this drives the phase-based stepping
-	// Speed up or slow down by adjusting the multiplier (0.5 = slower cycle)
+	// update step cycle time - this drives the phase-based stepping
+	// speed up or slow down by adjusting the multiplier (0.5 = slower cycle)
 	crawler.state.stepCycleTime = (crawler.state.stepCycleTime + dt * 2) % 1;
 };
 
@@ -167,9 +177,7 @@ const updateCrawlerSuspension = (
 	world: World,
 	rigidBody: RapierRigidBody,
 ) => {
-	/* hovering controller */
 	_rayOrigin.copy(rigidBody.translation());
-	_rayOrigin.y -= 0.5;
 
 	_rayDirection.set(0, -1, 0);
 
@@ -358,10 +366,7 @@ const updateCrawlerStepping = (crawler: CrawlerState, dt: number) => {
 
 const _currentEffectorPositionLocal = new Vector3();
 
-const updateCrawlerIK = (
-	crawler: CrawlerState,
-	crawlerObject: Object3D,
-) => {
+const updateCrawlerIK = (crawler: CrawlerState, crawlerObject: Object3D) => {
 	for (const leg of crawler.def.legs) {
 		const legState = crawler.state.legs[leg.id];
 
@@ -705,39 +710,39 @@ const LEGS: LegDef[] = [
 		id: 'front-left',
 		attachmentOffset: [-0.3, -0.3, 0.3],
 		footPlacementOffset: [-0.8, 0, 0.8],
-		segments: 3,
-		legLength: 1.3, // Total leg length
-		phaseOffset: 0, // First in sequence
+		segments: 2,
+		legLength: 1.3,
+		phaseOffset: 0,
 	},
 	{
 		id: 'back-right',
 		attachmentOffset: [0.3, -0.3, -0.3],
 		footPlacementOffset: [0.8, 0, -0.8],
-		segments: 3,
+		segments: 2,
 		legLength: 1.3,
-		phaseOffset: 0.25, // Second in sequence
+		phaseOffset: 0.25,
 	},
 	{
 		id: 'front-right',
 		attachmentOffset: [0.3, -0.3, 0.3],
 		footPlacementOffset: [0.8, 0, 0.8],
-		segments: 3,
+		segments: 2,
 		legLength: 1.3,
-		phaseOffset: 0.5, // Third in sequence
+		phaseOffset: 0.5,
 	},
 	{
 		id: 'back-left',
 		attachmentOffset: [-0.3, -0.3, -0.3],
 		footPlacementOffset: [-0.8, 0, -0.8],
-		segments: 3,
+		segments: 2,
 		legLength: 1.3,
-		phaseOffset: 0.75, // Last in sequence
+		phaseOffset: 0.75,
 	},
 ];
 
 const CRAWLER_DEF: CrawlerDef = {
 	legs: LEGS,
-	height: 1,
+	height: 1.5,
 };
 
 export function Sketch() {

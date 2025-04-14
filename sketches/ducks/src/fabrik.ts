@@ -1,4 +1,6 @@
-import { vec3, type vec3 as Vec3, mat3 } from 'gl-matrix';
+import { vec3, mat3, quat } from 'gl-matrix';
+
+export type Vec3 = [number, number, number];
 
 export type Bone = {
 	start: Vec3;
@@ -9,19 +11,18 @@ export type Bone = {
 
 const _difference: Vec3 = [0, 0, 0];
 
-enum JointConstraintType {
+export enum JointConstraintType {
 	NONE = 0,
 	BALL = 1,
 }
 
-type JointConstraint =
+export type JointConstraint =
 	| {
 			type: JointConstraintType.NONE;
 	  }
 	| {
 			type: JointConstraintType.BALL;
-			axis: Vec3;
-			angle: number;
+			rotor: number;
 	  };
 
 export const bone = (
@@ -48,7 +49,25 @@ export type Chain = {
 const _outerBoneOuterToInnerUV: Vec3 = [0, 0, 0];
 const _outerToInnerUV: Vec3 = [0, 0, 0];
 const _innerToOuterUV: Vec3 = [0, 0, 0];
+const _prevBoneInnerToOuterUV: Vec3 = [0, 0, 0];
 const _offset: Vec3 = [0, 0, 0];
+
+const _constraintAxis: Vec3 = [0, 0, 0];
+const _constraintRotationQuat = quat.create();
+const _constraintRotationMat = mat3.create();
+
+function applyBallConstraint(currentDir: Vec3, referenceDir: Vec3, rotor: number) {
+	const angle = vec3.angle(referenceDir, currentDir);
+	if (angle > rotor) {
+		vec3.cross(_constraintAxis, referenceDir, currentDir);
+		vec3.normalize(_constraintAxis, _constraintAxis);
+
+		quat.setAxisAngle(_constraintRotationQuat, _constraintAxis, rotor);
+		mat3.fromQuat(_constraintRotationMat, _constraintRotationQuat);
+
+		vec3.transformMat3(currentDir, referenceDir, _constraintRotationMat);
+	}
+}
 
 /**
  * Forward And Backward Reaching Inverse Kinematics
@@ -73,10 +92,8 @@ export const fabrik = (chain: Chain, base: Vec3, target: Vec3) => {
 			vec3.sub(_outerToInnerUV, bone.start, bone.end);
 			vec3.normalize(outerToInnerUV, outerToInnerUV);
 
-
 			// calculate the new start position as:
 			// the end location plus the outer-to-inner direction UV multiplied by the length of the bone
-			// const offset = vec3.multiplyScalar(outerToInnerUV, bone.length, _offset);
 			const offset = vec3.scale(_offset, outerToInnerUV, bone.length);
 			vec3.add(bone.start, bone.end, offset);
 
@@ -99,6 +116,11 @@ export const fabrik = (chain: Chain, base: Vec3, target: Vec3) => {
 			const outerToInnerUV = _outerToInnerUV;
 			vec3.sub(outerToInnerUV, bone.start, bone.end);
 			vec3.normalize(outerToInnerUV, outerToInnerUV);
+
+			// constraints
+			if (bone.jointConstraint.type === JointConstraintType.BALL) {
+				applyBallConstraint(outerToInnerUV, outerBoneOuterToInnerUV, bone.jointConstraint.rotor);
+			}
 
 			// set the new inner joint location to be the end joint location of this bone plus the
 			// outer-to-inner direction unit vector multiplied by the length of the bone.
@@ -159,6 +181,16 @@ export const fabrik = (chain: Chain, base: Vec3, target: Vec3) => {
 			const innerToOuterUV = _innerToOuterUV;
 			vec3.sub(innerToOuterUV, bone.end, bone.start);
 			vec3.normalize(innerToOuterUV, innerToOuterUV);
+
+			const prevBone = chain.bones[i - 1];
+			const prevBoneInnerToOuterUV = _prevBoneInnerToOuterUV;
+			vec3.sub(prevBoneInnerToOuterUV, prevBone.end, prevBone.start);
+			vec3.normalize(prevBoneInnerToOuterUV, prevBoneInnerToOuterUV);
+
+			// constraints
+			if (bone.jointConstraint.type === JointConstraintType.BALL) {
+				applyBallConstraint(innerToOuterUV, prevBoneInnerToOuterUV, bone.jointConstraint.rotor);
+			}
 
 
 			// TODO: used in constraints ?
