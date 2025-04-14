@@ -17,6 +17,7 @@ import {
 	type Material,
 	Mesh,
 	MeshBasicMaterial,
+	type Object3D,
 	Quaternion,
 	type Scene,
 	SphereGeometry,
@@ -63,7 +64,6 @@ type LegState = {
 	footPlacementRayOrigin: Vector3;
 	footPlacementIdealPosition: Vector3;
 	effectorCurrentPosition: Vector3;
-	basePosition: Vector3;
 	chain: Chain;
 	stepping: boolean; // Whether the leg is currently in a stepping motion
 	stepProgress: number; // 0-1 value for step animation progress
@@ -110,9 +110,8 @@ const initCrawler = (def: CrawlerDef) => {
 
 		legs[leg.id] = {
 			id: leg.id,
-			footPlacementIdealPosition: new Vector3(),
 			footPlacementRayOrigin: new Vector3(),
-			basePosition: new Vector3(),
+			footPlacementIdealPosition: new Vector3(),
 			effectorCurrentPosition: new Vector3(),
 			stepping: false,
 			stepProgress: 1, // init as "completed" (0, 1)
@@ -163,7 +162,7 @@ const updateCrawlerTimer = (crawler: CrawlerState, dt: number) => {
 	crawler.state.stepCycleTime = (crawler.state.stepCycleTime + dt * 2) % 1;
 };
 
-const updateCrawlerHover = (
+const updateCrawlerSuspension = (
 	crawler: CrawlerState,
 	world: World,
 	rigidBody: RapierRigidBody,
@@ -218,6 +217,7 @@ const updateCrawlerHover = (
 
 const updateCrawlerFootPlacement = (
 	crawler: CrawlerState,
+	crawlerObject: Object3D,
 	world: World,
 	rigidBody: RapierRigidBody,
 ) => {
@@ -269,10 +269,8 @@ const updateCrawlerFootPlacement = (
 			_direction.subVectors(_end, _start).normalize();
 			_direction.multiplyScalar(leg.legLength);
 
-			_end.copy(crawler.state.position);
-			_end.add(_direction);
-
-			legState.footPlacementIdealPosition.copy(_end);
+			legState.footPlacementIdealPosition.copy(_direction);
+			crawlerObject.localToWorld(legState.footPlacementIdealPosition);
 		}
 	}
 };
@@ -280,10 +278,6 @@ const updateCrawlerFootPlacement = (
 const updateCrawlerStepping = (crawler: CrawlerState, dt: number) => {
 	for (const leg of crawler.def.legs) {
 		const legState = crawler.state.legs[leg.id];
-
-		// update base joint / attachment position
-		legState.basePosition.copy(crawler.state.position);
-		legState.basePosition.add(_legOffset.set(...leg.attachmentOffset));
 
 		// if not grounded, stop stepping
 		if (!crawler.state.grounded) {
@@ -362,21 +356,26 @@ const updateCrawlerStepping = (crawler: CrawlerState, dt: number) => {
 	}
 };
 
-const updateCrawlerIK = (crawler: CrawlerState, dt: number) => {
+const _currentEffectorPositionLocal = new Vector3();
+
+const updateCrawlerIK = (
+	crawler: CrawlerState,
+	crawlerObject: Object3D,
+	dt: number,
+) => {
 	for (const leg of crawler.def.legs) {
 		const legState = crawler.state.legs[leg.id];
 
-		_legOriginVec3[0] = legState.basePosition.x;
-		_legOriginVec3[1] = legState.basePosition.y;
-		_legOriginVec3[2] = legState.basePosition.z;
+		_currentEffectorPositionLocal.copy(legState.effectorCurrentPosition);
+		crawlerObject.worldToLocal(_currentEffectorPositionLocal);
 
-		_currentFootPositionVec3[0] = legState.effectorCurrentPosition.x;
-		_currentFootPositionVec3[1] = legState.effectorCurrentPosition.y;
-		_currentFootPositionVec3[2] = legState.effectorCurrentPosition.z;
+		_currentFootPositionVec3[0] = _currentEffectorPositionLocal.x;
+		_currentFootPositionVec3[1] = _currentEffectorPositionLocal.y;
+		_currentFootPositionVec3[2] = _currentEffectorPositionLocal.z;
 
 		fabrikFixedIterations(
 			legState.chain,
-			_legOriginVec3,
+			leg.attachmentOffset,
 			_currentFootPositionVec3,
 			5,
 		);
@@ -452,7 +451,7 @@ const disposeFootPlacementHelper = (helper: FootPlacementHelper) => {
 	}
 };
 
-const initChainHelper = (chain: Chain, scene: Scene) => {
+const initChainHelper = (chain: Chain, object: Object3D) => {
 	// cylinders for each bone
 	const boneMeshes: Mesh[] = [];
 	const boneGeometry = new CylinderGeometry(0.03, 0.03, 1, 8);
@@ -472,7 +471,7 @@ const initChainHelper = (chain: Chain, scene: Scene) => {
 		mesh.lookAt(...bone.end);
 		mesh.updateMatrixWorld();
 		mesh.scale.set(1, bone.length, 1);
-		scene.add(mesh);
+		object.add(mesh);
 		boneMeshes.push(mesh);
 
 		const jointMesh = new Mesh(
@@ -480,19 +479,19 @@ const initChainHelper = (chain: Chain, scene: Scene) => {
 			i === 0 ? baseMaterial : boneMaterial,
 		);
 		jointMesh.position.set(...bone.start);
-		scene.add(jointMesh);
+		object.add(jointMesh);
 		jointMeshes.push(jointMesh);
 	}
 
 	const attachmentGeometry = new SphereGeometry(0.12, 8, 8);
 	const attachmentMaterial = new MeshBasicMaterial({ color: 'purple' });
 	const attachmentMesh = new Mesh(attachmentGeometry, attachmentMaterial);
-	scene.add(attachmentMesh);
+	object.add(attachmentMesh);
 
 	const effectorMaterial = new MeshBasicMaterial({ color: 'red' });
 	const effectorMesh = new Mesh(jointGeometry, effectorMaterial);
 	effectorMesh.position.set(...chain.bones[chain.bones.length - 1].end);
-	scene.add(effectorMesh);
+	object.add(effectorMesh);
 
 	return {
 		boneMeshes,
@@ -513,7 +512,7 @@ const initChainHelper = (chain: Chain, scene: Scene) => {
 type ChainHelper = ReturnType<typeof initChainHelper>;
 
 const updateChainHelper = (
-	legState: LegState,
+	leg: LegDef,
 	chain: Chain,
 	chainHelper: ChainHelper,
 ) => {
@@ -537,7 +536,7 @@ const updateChainHelper = (
 	}
 
 	const attachmentMesh = chainHelper.attachmentMesh;
-	attachmentMesh.position.copy(legState.basePosition);
+	attachmentMesh.position.set(...leg.attachmentOffset);
 
 	const effectorMesh = chainHelper.effectorMesh;
 	effectorMesh.position.set(...chain.bones[chain.bones.length - 1].end);
@@ -568,6 +567,7 @@ const disposeChainHelper = (chainHelper: ChainHelper) => {
 const updateCrawlerDebugVisuals = (
 	crawler: CrawlerState,
 	debug: boolean,
+	object: Object3D,
 	scene: Scene,
 ) => {
 	for (const leg of crawler.def.legs) {
@@ -586,10 +586,10 @@ const updateCrawlerDebugVisuals = (
 			);
 
 			if (!legState.chainHelper) {
-				legState.chainHelper = initChainHelper(legState.chain, scene);
+				legState.chainHelper = initChainHelper(legState.chain, object);
 			}
 
-			updateChainHelper(legState, legState.chain, legState.chainHelper);
+			updateChainHelper(leg, legState.chain, legState.chainHelper);
 		} else {
 			if (legState.footPlacementHelper) {
 				disposeFootPlacementHelper(legState.footPlacementHelper);
@@ -606,19 +606,20 @@ const updateCrawlerDebugVisuals = (
 
 const updateCrawler = (
 	crawler: CrawlerState,
+	crawlerObject: Object3D,
+	scene: Scene,
 	world: World,
 	rigidBody: RapierRigidBody,
 	debug: boolean,
-	scene: Scene,
 	dt: number,
 ) => {
 	updateCrawlerMovement(crawler, rigidBody);
 	updateCrawlerTimer(crawler, dt);
-	updateCrawlerHover(crawler, world, rigidBody);
-	updateCrawlerFootPlacement(crawler, world, rigidBody);
+	updateCrawlerSuspension(crawler, world, rigidBody);
+	updateCrawlerFootPlacement(crawler, crawlerObject, world, rigidBody);
 	updateCrawlerStepping(crawler, dt);
-	updateCrawlerIK(crawler, dt);
-	updateCrawlerDebugVisuals(crawler, debug, scene);
+	updateCrawlerIK(crawler, crawlerObject, dt);
+	updateCrawlerDebugVisuals(crawler, debug, crawlerObject, scene);
 };
 
 const disposeCrawler = (crawler: CrawlerState) => {
@@ -656,7 +657,18 @@ const Crawler = ({ def, debug = false, ...rigidBodyProps }: CrawlerProps) => {
 		const rigidBody = rigidBodyRef.current;
 		if (!rigidBody) return;
 
-		updateCrawler(crawlerState, world, rigidBody, debug, scene, dt);
+		const crawlerObject = groupRef.current;
+		if (!crawlerObject) return;
+
+		updateCrawler(
+			crawlerState,
+			crawlerObject,
+			scene,
+			world,
+			rigidBody,
+			debug,
+			dt,
+		);
 	});
 
 	return (
