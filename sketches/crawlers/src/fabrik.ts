@@ -18,12 +18,12 @@ export enum JointConstraintType {
 
 export type JointConstraint =
 	| {
-			type: JointConstraintType.NONE;
-	  }
+		type: JointConstraintType.NONE;
+	}
 	| {
-			type: JointConstraintType.BALL;
-			rotor: number;
-	  };
+		type: JointConstraintType.BALL;
+		rotor: number;
+	};
 
 export const bone = (
 	start: Vec3,
@@ -98,8 +98,7 @@ export const fabrik = (chain: Chain, base: Vec3, target: Vec3) => {
 
 			// calculate the new start position as:
 			// the end location plus the outer-to-inner direction UV multiplied by the length of the bone
-			const offset = vec3.scale(_offset, outerToInnerUV, bone.length);
-			vec3.add(bone.start, bone.end, offset);
+			vec3.add(bone.start, bone.end, vec3.scale(_offset, outerToInnerUV, bone.length));
 
 			if (i > 0) {
 				// if this is not the base bone, set the end joint location of the previous bone to be the new start location
@@ -132,9 +131,7 @@ export const fabrik = (chain: Chain, base: Vec3, target: Vec3) => {
 
 			// set the new inner joint location to be the end joint location of this bone plus the
 			// outer-to-inner direction unit vector multiplied by the length of the bone.
-			// const offset = vec3.multiplyScalar(outerToInnerUV, bone.length, _offset);
-			const offset = vec3.scale(_offset, outerToInnerUV, bone.length);
-			vec3.add(bone.start, bone.end, offset);
+			vec3.add(bone.start, bone.end, vec3.scale(_offset, outerToInnerUV, bone.length));
 
 			// if we are not the base bone, also set the end joint locatio of the previous bone to be the new start location
 			// ie the bone closer to the base
@@ -146,6 +143,9 @@ export const fabrik = (chain: Chain, base: Vec3, target: Vec3) => {
 	}
 
 	/* backward pass from base to end effector */
+
+	// loop over all bones in the chain, from the base bone (0) to the end effector (numBones-1)
+
 	for (let i = 0; i < chain.bones.length; i++) {
 		const bone = chain.bones[i];
 
@@ -173,8 +173,7 @@ export const fabrik = (chain: Chain, base: Vec3, target: Vec3) => {
 			vec3.normalize(innerToOuterUV, innerToOuterUV);
 
 			// Set the new end location of this bone
-			const offset = vec3.scale(_offset, innerToOuterUV, bone.length);
-			vec3.add(bone.end, bone.start, offset);
+			vec3.add(bone.end, bone.start, vec3.scale(_offset, innerToOuterUV, bone.length));
 
 			// if there are more bones, then set the start location of the next bone to be the end location of this bone
 			if (i < chain.bones.length - 1) {
@@ -203,11 +202,8 @@ export const fabrik = (chain: Chain, base: Vec3, target: Vec3) => {
 				);
 			}
 
-			// TODO: used in constraints ?
-			// const prevBoneInnerToOuterUV = vec3.directionBetween(bone.end, bone.start, [0, 0, 0]);
-
-			const offset = vec3.scale(_offset, innerToOuterUV, bone.length);
-			vec3.add(bone.end, bone.start, offset);
+			// Set the new end location of this bone
+			vec3.add(bone.end, bone.start, vec3.scale(_offset, innerToOuterUV, bone.length));
 
 			if (i < chain.bones.length - 1) {
 				// if this is not the last bone / end effector, set the start joint location of the next bone to be the new end location
