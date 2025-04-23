@@ -9,18 +9,27 @@ import {
 	type RigidBodyProps,
 	useRapier,
 } from '@react-three/rapier';
-import { useEffect, useRef, useState } from 'react';
+import {
+	type Ref,
+	useEffect,
+	useImperativeHandle,
+	useRef,
+	useState,
+} from 'react';
 import {
 	type BufferGeometry,
 	CylinderGeometry,
 	type Group,
 	type Material,
+	Matrix4,
 	Mesh,
 	MeshBasicMaterial,
 	type Object3D,
 	Quaternion,
 	type Scene,
 	SphereGeometry,
+	Spherical,
+	Vector2,
 	Vector3,
 	type Vector3Tuple,
 } from 'three';
@@ -32,26 +41,30 @@ import {
 	bone,
 	fabrikFixedIterations,
 } from './fabrik';
+import { useControls as useLevaControls } from 'leva';
 
 import './styles.css';
+import { useControls } from './use-controls';
 
 const _footPlacementOffset = new Vector3();
 const _legOrigin = new Vector3();
 const _rayOrigin = new Vector3();
 const _rayDirection = new Vector3();
-const _rayWorldHitPosition = new Vector3();
+const _rayDistance = new Vector3();
 const _impulse = new Vector3();
 const _legOffset = new Vector3();
 const _currentEffectorPosition = new Vector3();
 const _midpoint = new Vector3();
 const _start = new Vector3();
 const _end = new Vector3();
-const _goal = new Vector3();
 const _direction = new Vector3();
 const _quaternion = new Quaternion();
+const _velocity = new Vector3();
+const _angularVelocity = new Vector3();
+const _currentEffectorPositionLocal = new Vector3();
+const _offset = new Vector3();
 
 const _currentFootPositionVec3: Vec3 = [0, 0, 0];
-const _legOriginVec3: Vec3 = [0, 0, 0];
 
 const UP = new Vector3(0, 1, 0);
 
@@ -75,6 +88,8 @@ type LegState = {
 	footPlacementRayOrigin: Vector3;
 	/** position from ideal foot placement */
 	footPlacementPosition: Vector3;
+	/** goal position */
+	effectorGoalPosition: Vector3;
 	/** current position of the end effector */
 	effectorCurrentPosition: Vector3;
 	/** the chain of bones for this leg */
@@ -85,8 +100,11 @@ type LegState = {
 	stepProgress: number;
 	/** timestamp of last step */
 	lastStepTime: number;
-
+	/** legs visuals */
+	legVisuals: LegVisuals | undefined;
+	/** ik chain debug visual */
 	chainHelper: ChainHelper | undefined;
+	/** foot placement debug visual */
 	footPlacementHelper: FootPlacementHelper | undefined;
 };
 
@@ -100,9 +118,10 @@ type CrawlerDef = {
 	height: number;
 };
 
-type CrawlerProps = RigidBodyProps & {
+type CrawlerProps = Omit<RigidBodyProps, 'ref'> & {
 	def: CrawlerDef;
 	debug?: boolean;
+	ref?: Ref<CrawlerState>;
 };
 
 const initCrawler = (def: CrawlerDef) => {
@@ -125,7 +144,7 @@ const initCrawler = (def: CrawlerDef) => {
 			chain.bones.push(
 				bone(start.toArray(), end.toArray(), {
 					type: JointConstraintType.BALL,
-					rotor: Math.PI / 2,
+					rotor: Math.PI / 4,
 				}),
 			);
 		}
@@ -133,11 +152,13 @@ const initCrawler = (def: CrawlerDef) => {
 		legs[leg.id] = {
 			footPlacementRayOrigin: new Vector3(),
 			footPlacementPosition: new Vector3(),
+			effectorGoalPosition: new Vector3(),
 			effectorCurrentPosition: new Vector3(),
 			stepping: false,
 			stepProgress: 1, // init as "completed" (0, 1)
 			lastStepTime: 0,
 			chain,
+			legVisuals: undefined,
 			footPlacementHelper: undefined,
 			chainHelper: undefined,
 		};
@@ -145,54 +166,84 @@ const initCrawler = (def: CrawlerDef) => {
 
 	return {
 		def,
+		input: {
+			direction: new Vector2(),
+		},
+		cmd: [] as Array<'jump'>,
 		state: {
 			legs,
-			legTimer: 0,
 			position: new Vector3(),
 			lastPosition: new Vector3(),
 			stepCycleTime: 0,
+			stepCycleSpeed: 2,
 			grounded: false,
+			jumping: false,
 			landing: false,
+			rigidBody: null as unknown as RapierRigidBody,
 		},
 	};
 };
 
 type CrawlerState = ReturnType<typeof initCrawler>;
 
-const updateCrawlerMovement = (
-	crawler: CrawlerState,
-	rigidBody: RapierRigidBody,
-) => {
-	/* update position */
+const updateCrawlerMovement = (crawler: CrawlerState, dt: number) => {
+	const rigidBody = crawler.state.rigidBody;
+
+	// update position from last step
 	crawler.state.position.copy(rigidBody.translation());
 
-	/* apply horizontal velocity to move in circle */
-	const angle = (performance.now() / 1000) * 2;
-	const x = Math.cos(angle) * 3;
-	const z = Math.sin(angle) * 3;
-	rigidBody.setLinvel(new Vector3(x, rigidBody.linvel().y, z), true);
-	rigidBody.setAngvel(new Vector3(0, 0, 0), true);
+	// HACK: in a real version of this we'd do this before the physics step and update positions after :)
+	// but this is just a quick r3f toy
+
+	// determine velocity from input
+	_velocity.set(crawler.input.direction.x, 0, crawler.input.direction.y);
+	_velocity.normalize();
+	_velocity.multiplyScalar(300);
+	_velocity.multiplyScalar(dt);
+
+	// preserve y velocity
+	_velocity.y = rigidBody.linvel().y;
+
+	// set velocity
+	rigidBody.setLinvel(_velocity, true);
+	rigidBody.setAngvel(_angularVelocity.set(0, 0, 0), true);
+
+	for (const cmd of crawler.cmd) {
+		if (cmd === 'jump') {
+			if (crawler.state.jumping || !crawler.state.grounded) continue;
+			crawler.state.jumping = true;
+			crawler.state.grounded = false;
+
+			const jumpImpulse = 100;
+			_impulse.set(0, jumpImpulse * dt, 0);
+			rigidBody.applyImpulse(_impulse, true);
+		}
+	}
+
+	crawler.cmd.length = 0;
+
+	// /* apply horizontal velocity to move in circle */
+	// const angle = (performance.now() / 1000) * 2;
+	// const x = Math.cos(angle) * 3;
+	// const z = Math.sin(angle) * 3;
+	// rigidBody.setLinvel(new Vector3(x, rigidBody.linvel().y, z), true);
+	// rigidBody.setAngvel(new Vector3(0, 0, 0), true);
 };
 
 const updateCrawlerTimer = (crawler: CrawlerState, dt: number) => {
-	// increment leg timer
-	crawler.state.legTimer += dt * 2;
-
 	// update step cycle time - this drives the phase-based stepping
-	// speed up or slow down by adjusting the multiplier (0.5 = slower cycle)
-	crawler.state.stepCycleTime = (crawler.state.stepCycleTime + dt * 2) % 1;
+	crawler.state.stepCycleTime =
+		(crawler.state.stepCycleTime + dt * crawler.state.stepCycleSpeed) % 1;
 };
 
-const updateCrawlerSuspension = (
-	crawler: CrawlerState,
-	world: World,
-	rigidBody: RapierRigidBody,
-) => {
+const updateCrawlerSuspension = (crawler: CrawlerState, world: World) => {
+	const rigidBody = crawler.state.rigidBody;
+
 	_rayOrigin.copy(rigidBody.translation());
 
 	_rayDirection.set(0, -1, 0);
 
-	const rayLength = crawler.def.height + 0.5;
+	const rayLength = crawler.def.height;
 	const ray = new Rapier.Ray(_rayOrigin, _rayDirection);
 
 	const rayColliderIntersection = world.castRayAndGetNormal(
@@ -210,23 +261,29 @@ const updateCrawlerSuspension = (
 	if (rayColliderIntersection?.timeOfImpact !== undefined) {
 		const rayHitDistance = rayColliderIntersection.timeOfImpact * rayLength;
 
-		const heightDesired = crawler.def.height;
-		const heightCurrent = rayHitDistance;
-		const springConstant = 1;
-		const springDamping = 0.2;
-		const currentVerticalVelocity = rigidBody.linvel().y;
-
-		const velocity =
-			(heightDesired - heightCurrent) * springConstant -
-			currentVerticalVelocity * springDamping;
-
-		_impulse.set(0, velocity, 0);
-
-		rigidBody.applyImpulse(_impulse, true);
-
 		if (rayHitDistance < crawler.def.height + 0.1) {
 			grounded = true;
 		}
+
+		if (grounded) {
+			const heightDesired = crawler.def.height;
+			const heightCurrent = rayHitDistance;
+			const springConstant = 1;
+			const springDamping = 0.2;
+			const currentVerticalVelocity = rigidBody.linvel().y;
+
+			const velocity =
+				(heightDesired - heightCurrent) * springConstant -
+				currentVerticalVelocity * springDamping;
+
+			_impulse.set(0, velocity, 0);
+
+			rigidBody.applyImpulse(_impulse, true);
+		}
+	}
+
+	if (crawler.state.jumping && grounded) {
+		crawler.state.jumping = false;
 	}
 
 	crawler.state.landing = !crawler.state.grounded && grounded;
@@ -238,8 +295,9 @@ const updateCrawlerFootPlacement = (
 	crawler: CrawlerState,
 	crawlerObject: Object3D,
 	world: World,
-	rigidBody: RapierRigidBody,
 ) => {
+	const rigidBody = crawler.state.rigidBody;
+
 	if (crawler.state.grounded) {
 		for (const leg of crawler.def.legs) {
 			const legState = crawler.state.legs[leg.id];
@@ -249,16 +307,21 @@ const updateCrawlerFootPlacement = (
 
 			_rayDirection.set(0, -1, 0);
 
-			const rayStartPos = _rayOrigin
+			_footPlacementOffset.set(...leg.footPlacementOffset);
+
+			legState.footPlacementRayOrigin
 				.copy(crawler.state.position)
-				.add(_footPlacementOffset.set(...leg.footPlacementOffset));
+				.add(_footPlacementOffset);
+			legState.footPlacementRayOrigin.y = _legOrigin.y;
 
-			rayStartPos.y = _legOrigin.y;
-
-			const ray = new Rapier.Ray(rayStartPos, _rayDirection);
+			const ray = new Rapier.Ray(
+				legState.footPlacementRayOrigin,
+				_rayDirection,
+			);
+			const rayLength = 10;
 			const rayColliderIntersection = world.castRayAndGetNormal(
 				ray,
-				crawler.def.height,
+				rayLength,
 				false,
 				undefined,
 				undefined,
@@ -266,16 +329,11 @@ const updateCrawlerFootPlacement = (
 				rigidBody,
 			);
 
-			const distance =
-				rayColliderIntersection?.timeOfImpact !== undefined
-					? rayColliderIntersection.timeOfImpact * crawler.def.height
-					: crawler.def.height;
-
-			_rayWorldHitPosition.copy(_rayDirection).multiplyScalar(distance);
-			_rayWorldHitPosition.add(rayStartPos);
-
-			legState.footPlacementRayOrigin.copy(rayStartPos);
-			legState.footPlacementPosition.copy(_rayWorldHitPosition);
+			const distance = _rayDistance
+				.copy(_rayDirection)
+				.multiplyScalar(rayColliderIntersection?.timeOfImpact ?? 1);
+			legState.footPlacementPosition.copy(legState.footPlacementRayOrigin);
+			legState.footPlacementPosition.add(distance);
 		}
 	} else {
 		// extend legs outwards
@@ -301,6 +359,7 @@ const updateCrawlerStepping = (crawler: CrawlerState, dt: number) => {
 		// if not grounded, stop stepping
 		if (!crawler.state.grounded) {
 			legState.stepping = false;
+			legState.effectorGoalPosition.copy(legState.footPlacementPosition);
 			legState.effectorCurrentPosition.copy(legState.footPlacementPosition);
 
 			continue;
@@ -310,13 +369,14 @@ const updateCrawlerStepping = (crawler: CrawlerState, dt: number) => {
 			...legState.chain.bones[legState.chain.bones.length - 1].end,
 		);
 
-		const distanceToDesired = currentEffectorPosition.distanceTo(
-			legState.footPlacementPosition,
-		);
+		const footPlacementToGoalDistance =
+			legState.effectorGoalPosition.distanceTo(legState.footPlacementPosition);
 
 		if (legState.stepping) {
 			// advance step progress
-			legState.stepProgress += dt * 3; // adjust for step speed
+			const linvel = crawler.state.rigidBody.linvel();
+			const speed = _velocity.copy(linvel).length();
+			legState.stepProgress += dt * 5 + dt * speed * 0.5; // adjust for step speed
 
 			if (legState.stepProgress >= 1) {
 				// step complete
@@ -336,30 +396,22 @@ const updateCrawlerStepping = (crawler: CrawlerState, dt: number) => {
 			const inStepPhase =
 				legPhase >= phaseWindowStart && legPhase <= phaseWindowEnd;
 
-			// periodic small adjustment steps
-			const smallDifferenceThreshold = 0.01;
-			const hasSmallDifference = distanceToDesired > smallDifferenceThreshold;
-			const timeThreshold = 3.0;
-			const needsPeriodicStep =
-				performance.now() - legState.lastStepTime > timeThreshold &&
-				hasSmallDifference;
+			const needsRegularStep = inStepPhase && footPlacementToGoalDistance > 0.2;
+			const needsEmergencyStep =
+				footPlacementToGoalDistance > 1.2 || crawler.state.landing;
 
-			// foot is far from desired position
-			const needsRegularStep = distanceToDesired > 0.5;
-
-			const needsToStep = needsRegularStep || needsPeriodicStep;
-
-			if ((inStepPhase || crawler.state.landing) && needsToStep) {
+			if (needsRegularStep || needsEmergencyStep) {
 				legState.stepping = true;
 				legState.stepProgress = 0;
+				legState.effectorGoalPosition.copy(legState.footPlacementPosition);
 			}
 		}
 
 		// determine current position for the step
 		if (legState.stepping) {
 			legState.effectorCurrentPosition.lerp(
-				legState.footPlacementPosition,
-				dt * 10,
+				legState.effectorGoalPosition,
+				legState.stepProgress,
 			);
 
 			// add a vertical component that peaks in the middle of the step
@@ -373,7 +425,6 @@ const updateCrawlerStepping = (crawler: CrawlerState, dt: number) => {
 	}
 };
 
-const _currentEffectorPositionLocal = new Vector3();
 
 const updateCrawlerIK = (crawler: CrawlerState, crawlerObject: Object3D) => {
 	for (const leg of crawler.def.legs) {
@@ -386,11 +437,44 @@ const updateCrawlerIK = (crawler: CrawlerState, crawlerObject: Object3D) => {
 		_currentFootPositionVec3[1] = _currentEffectorPositionLocal.y;
 		_currentFootPositionVec3[2] = _currentEffectorPositionLocal.z;
 
+		// reset the leg to face outwards from the attachment point facing out by the attachment offset
+		// this helps encourage more natural bone positions with an outward facing arc
+		for (let i = 0; i < legState.chain.bones.length; i++) {
+			const bone = legState.chain.bones[i];
+			const segmentLength = leg.legLength / leg.segments;
+			
+			_start.set(...leg.attachmentOffset);
+			_end.set(...leg.footPlacementOffset);
+			_direction.subVectors(_end, _start).normalize();
+			_offset.copy(_direction).multiplyScalar(segmentLength);
+			
+			if (i === 0) {
+				bone.start[0] = leg.attachmentOffset[0];
+				bone.start[1] = leg.attachmentOffset[1];
+				bone.start[2] = leg.attachmentOffset[2];
+
+				bone.end[0] = _offset.x;
+				bone.end[1] = _offset.y;
+				bone.end[2] = _offset.z;
+			} else {
+				const prevBone = legState.chain.bones[i - 1];
+
+				bone.start[0] = prevBone.end[0];
+				bone.start[1] = prevBone.end[1];
+				bone.start[2] = prevBone.end[2];
+
+				bone.end[0] = bone.start[0] + _offset.x;
+				bone.end[1] = bone.start[1] + _offset.y;
+				bone.end[2] = bone.start[2] + _offset.z;
+			}
+		}
+
+		// calculate the IK for this leg
 		fabrikFixedIterations(
 			legState.chain,
 			leg.attachmentOffset,
 			_currentFootPositionVec3,
-			5,
+			10,
 		);
 	}
 };
@@ -428,8 +512,8 @@ const initFootPlacementHelper = (scene: Scene) => {
 
 	return {
 		rayOriginHelper,
-		targetPositionHelper,
-		currentPositionHelper,
+		footPlacementPositionHelper: targetPositionHelper,
+		goalPositionHelper: currentPositionHelper,
 		geometries,
 		materials,
 	};
@@ -440,17 +524,20 @@ type FootPlacementHelper = ReturnType<typeof initFootPlacementHelper>;
 const updateFootPlacementHelper = (
 	helper: FootPlacementHelper,
 	rayOrigin: Vector3,
-	targetPosition: Vector3,
-	currentPosition: Vector3,
+	footPlacementPosition: Vector3,
+	goalPosition: Vector3,
 ) => {
 	helper.rayOriginHelper.position.copy(rayOrigin);
-	helper.targetPositionHelper.position.copy(targetPosition);
-	helper.currentPositionHelper.position.copy(currentPosition);
+	helper.footPlacementPositionHelper.position.copy(footPlacementPosition);
+	helper.goalPositionHelper.position.copy(goalPosition);
 };
 
 const disposeFootPlacementHelper = (helper: FootPlacementHelper) => {
-	const { rayOriginHelper, targetPositionHelper, currentPositionHelper } =
-		helper;
+	const {
+		rayOriginHelper,
+		footPlacementPositionHelper: targetPositionHelper,
+		goalPositionHelper: currentPositionHelper,
+	} = helper;
 
 	rayOriginHelper.removeFromParent();
 	targetPositionHelper.removeFromParent();
@@ -595,7 +682,7 @@ const updateCrawlerDebugVisuals = (
 				legState.footPlacementHelper,
 				legState.footPlacementRayOrigin,
 				legState.footPlacementPosition,
-				legState.effectorCurrentPosition,
+				legState.effectorGoalPosition,
 			);
 
 			if (!legState.chainHelper) {
@@ -617,9 +704,72 @@ const updateCrawlerDebugVisuals = (
 	}
 };
 
+const initLegVisuals = (chain: Chain, object: Object3D) => {
+	// cylinders for each bone
+	const boneMeshes: Mesh[] = [];
+	const boneGeometry = new CylinderGeometry(0.05, 0.025, 1, 8);
+	const boneMaterial = new MeshBasicMaterial({ color: 'orange' });
+
+	for (let i = 0; i < chain.bones.length; i++) {
+		const bone = chain.bones[i];
+
+		const mesh = new Mesh(boneGeometry, boneMaterial);
+		mesh.position.set(...bone.start);
+		mesh.lookAt(...bone.end);
+		mesh.updateMatrixWorld();
+		mesh.scale.set(1, bone.length, 1);
+		object.add(mesh);
+		boneMeshes.push(mesh);
+	}
+
+	return {
+		boneMeshes,
+		boneGeometry,
+		boneMaterial,
+	};
+};
+
+type LegVisuals = ReturnType<typeof initLegVisuals>;
+
+const updateLegVisuals = (
+	leg: LegDef,
+	chain: Chain,
+	legVisuals: LegVisuals,
+) => {
+	for (let i = 0; i < chain.bones.length; i++) {
+		const bone = chain.bones[i];
+		const boneMesh = legVisuals.boneMeshes[i];
+
+		_start.set(...bone.start);
+		_end.set(...bone.end);
+
+		_midpoint.addVectors(_start, _end).multiplyScalar(0.5);
+
+		_direction.subVectors(_end, _start).normalize();
+		_quaternion.setFromUnitVectors(UP, _direction);
+
+		boneMesh.position.copy(_midpoint);
+		boneMesh.quaternion.copy(_quaternion);
+	}
+};
+
+const disposeLegVisuals = (legVisuals: LegVisuals) => {
+	for (const mesh of legVisuals.boneMeshes) {
+		mesh.removeFromParent();
+		mesh.geometry.dispose();
+		(mesh.material as Material).dispose();
+	}
+};
+
 const updateCrawlerVisuals = (crawler: CrawlerState, object: Object3D) => {
 	for (const leg of crawler.def.legs) {
 		const legState = crawler.state.legs[leg.id];
+
+		if (!legState.legVisuals) {
+			legState.legVisuals = initLegVisuals(legState.chain, object);
+		}
+
+		updateLegVisuals(leg, legState.chain, legState.legVisuals);
 	}
 };
 
@@ -628,22 +778,26 @@ const updateCrawler = (
 	crawlerObject: Object3D,
 	scene: Scene,
 	world: World,
-	rigidBody: RapierRigidBody,
 	debug: boolean,
 	dt: number,
 ) => {
-	updateCrawlerMovement(crawler, rigidBody);
+	updateCrawlerMovement(crawler, dt);
 	updateCrawlerTimer(crawler, dt);
-	updateCrawlerSuspension(crawler, world, rigidBody);
-	updateCrawlerFootPlacement(crawler, crawlerObject, world, rigidBody);
+	updateCrawlerSuspension(crawler, world);
+	updateCrawlerFootPlacement(crawler, crawlerObject, world);
 	updateCrawlerStepping(crawler, dt);
 	updateCrawlerIK(crawler, crawlerObject);
 	updateCrawlerDebugVisuals(crawler, debug, crawlerObject, scene);
+	updateCrawlerVisuals(crawler, crawlerObject);
 };
 
 const disposeCrawler = (crawler: CrawlerState) => {
 	for (const leg of crawler.def.legs) {
 		const legState = crawler.state.legs[leg.id];
+
+		if (legState.legVisuals) {
+			disposeLegVisuals(legState.legVisuals);
+		}
 
 		if (legState.footPlacementHelper) {
 			disposeFootPlacementHelper(legState.footPlacementHelper);
@@ -655,7 +809,12 @@ const disposeCrawler = (crawler: CrawlerState) => {
 	}
 };
 
-const Crawler = ({ def, debug = false, ...rigidBodyProps }: CrawlerProps) => {
+const Crawler = ({
+	ref,
+	def,
+	debug = false,
+	...rigidBodyProps
+}: CrawlerProps) => {
 	const scene = useThree((state) => state.scene);
 
 	const { world } = useRapier();
@@ -664,8 +823,11 @@ const Crawler = ({ def, debug = false, ...rigidBodyProps }: CrawlerProps) => {
 
 	const [crawlerState, setCrawlerState] = useState<CrawlerState>();
 
+	const controls = useControls();
+
 	useEffect(() => {
 		const crawler = initCrawler(def);
+		crawler.state.rigidBody = rigidBodyRef.current;
 		setCrawlerState(crawler);
 
 		return () => {
@@ -675,30 +837,41 @@ const Crawler = ({ def, debug = false, ...rigidBodyProps }: CrawlerProps) => {
 	}, [def]);
 
 	useFrame((_, dt) => {
-		if (!crawlerState) return;
-
-		const rigidBody = rigidBodyRef.current;
-		if (!rigidBody) return;
-
 		const crawlerObject = groupRef.current;
-		if (!crawlerObject) return;
+		if (!crawlerState || !crawlerObject) return;
 
-		updateCrawler(
-			crawlerState,
-			crawlerObject,
-			scene,
-			world,
-			rigidBody,
-			debug,
-			dt,
-		);
+		/* update crawler input */
+		crawlerState.input.direction.set(0, 0);
+
+		if (controls.current.forward) {
+			crawlerState.input.direction.y = -1;
+		}
+		if (controls.current.backward) {
+			crawlerState.input.direction.y = 1;
+		}
+		if (controls.current.left) {
+			crawlerState.input.direction.x = -1;
+		}
+		if (controls.current.right) {
+			crawlerState.input.direction.x = 1;
+		}
+
+		if (controls.current.jump) {
+			crawlerState.cmd.push('jump');
+		}
+
+		/* update the crawler */
+		updateCrawler(crawlerState, crawlerObject, scene, world, debug, dt);
 	});
+
+	useImperativeHandle(ref, () => crawlerState!, [crawlerState]);
 
 	return (
 		<RigidBody
 			{...rigidBodyProps}
 			type="dynamic"
 			colliders="cuboid"
+			lockRotations
 			ref={rigidBodyRef}
 		>
 			<group ref={groupRef}>
@@ -711,16 +884,42 @@ const Crawler = ({ def, debug = false, ...rigidBodyProps }: CrawlerProps) => {
 	);
 };
 
-const Floor = () => (
+const Environment = () => (
 	<>
-		<RigidBody type="fixed" position={[0, -3, 0]}>
-			<CuboidCollider args={[100, 3, 100]} />
+		{/* floor */}
+		<RigidBody type="fixed" position={[0, -1, 0]}>
+			<CuboidCollider args={[20, 1, 20]} />
 		</RigidBody>
-
 		<mesh rotation={[-Math.PI / 2, 0, 0]}>
-			<circleGeometry args={[50, 64]} />
+			<circleGeometry args={[20, 64]} />
 			<meshStandardMaterial color="#999" />
 		</mesh>
+
+		{/* stairs */}
+		{[...Array(10)].map((_, i) => (
+			<RigidBody key={String(i)} type="fixed" shape="cuboid">
+				<mesh
+					position={[-2 + i * 2, -1 + i * 0.2, 0]}
+					rotation={[-Math.PI / 2, 0, 0]}
+				>
+					<boxGeometry args={[3, 3, 1]} />
+					<meshStandardMaterial color="#999" />
+				</mesh>
+			</RigidBody>
+		))}
+
+		{/* embedded cylinders */}
+		{[...Array(10)].map((_, i) => (
+			<RigidBody key={String(i)} type="fixed" shape="cylinder">
+				<mesh
+					position={[Math.random() * 10 - 5, -1.2, Math.random() * 10 - 5]}
+					rotation={[0, Math.random() * Math.PI * 2, 0]}
+				>
+					<cylinderGeometry args={[0.5, 0.5, 3, 32]} />
+					<meshStandardMaterial color="#999" />
+				</mesh>
+			</RigidBody>
+		))}
 	</>
 );
 
@@ -729,48 +928,50 @@ const LEGS: LegDef[] = [
 		id: 'front-left',
 		attachmentOffset: [-0.3, -0.3, 0.3],
 		footPlacementOffset: [-0.8, 0, 0.8],
-		segments: 2,
-		legLength: 1.3,
+		segments: 5,
+		legLength: 1.5,
 		phaseOffset: 0,
 	},
 	{
 		id: 'back-right',
 		attachmentOffset: [0.3, -0.3, -0.3],
 		footPlacementOffset: [0.8, 0, -0.8],
-		segments: 2,
-		legLength: 1.3,
+		segments: 5,
+		legLength: 1.5,
 		phaseOffset: 0.25,
 	},
 	{
 		id: 'front-right',
 		attachmentOffset: [0.3, -0.3, 0.3],
 		footPlacementOffset: [0.8, 0, 0.8],
-		segments: 2,
-		legLength: 1.3,
+		segments: 5,
+		legLength: 1.5,
 		phaseOffset: 0.5,
 	},
 	{
 		id: 'back-left',
 		attachmentOffset: [-0.3, -0.3, -0.3],
 		footPlacementOffset: [-0.8, 0, -0.8],
-		segments: 2,
-		legLength: 1.3,
+		segments: 5,
+		legLength: 1.5,
 		phaseOffset: 0.75,
 	},
 ];
 
 const CRAWLER_DEF: CrawlerDef = {
 	legs: LEGS,
-	height: 1.5,
+	height: 3,
 };
 
 export function Sketch() {
+	const { debug } = useLevaControls({ debug: true });
+
 	return (
 		<WebGPUCanvas gl={{ antialias: true }}>
-			<Physics debug>
-				<Crawler position={[0, 4, 0]} def={CRAWLER_DEF} debug />
+			<Physics debug={debug} timeStep="vary">
+				<Crawler position={[0, 4, 0]} def={CRAWLER_DEF} debug={debug} />
 
-				<Floor />
+				<Environment />
 			</Physics>
 
 			<ambientLight intensity={1.5} />

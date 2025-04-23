@@ -1792,6 +1792,7 @@ __metadata:
     "@types/react-dom": "npm:^19.1.1"
     "@types/three": "npm:^0.175.0"
     gl-matrix: "npm:^3.4.3"
+    leva: "npm:^0.10.0"
     react: "npm:^19.1.0"
     react-dom: "npm:^19.1.0"
     three: "npm:^0.175.0"
