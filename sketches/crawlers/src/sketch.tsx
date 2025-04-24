@@ -1,5 +1,5 @@
 import Rapier, { type World } from '@dimforge/rapier3d-compat';
-import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
+import { Helper, OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import {
 	CuboidCollider,
@@ -21,11 +21,14 @@ import {
 import {
 	type BufferGeometry,
 	CylinderGeometry,
+	DirectionalLightHelper,
 	type Group,
 	type Material,
 	Mesh,
 	MeshBasicMaterial,
 	type Object3D,
+	PCFShadowMap,
+	PCFSoftShadowMap,
 	Quaternion,
 	type Scene,
 	SphereGeometry,
@@ -712,6 +715,8 @@ const initLegVisuals = (chain: Chain, object: Object3D) => {
 		const bone = chain.bones[i];
 
 		const mesh = new Mesh(boneGeometry, boneMaterial);
+		mesh.castShadow = true;
+		mesh.receiveShadow = true;
 		mesh.position.set(...bone.start);
 		mesh.lookAt(...bone.end);
 		mesh.updateMatrixWorld();
@@ -873,7 +878,7 @@ const Crawler = ({
 			ref={rigidBodyRef}
 		>
 			<group ref={groupRef}>
-				<mesh>
+				<mesh receiveShadow castShadow>
 					<sphereGeometry args={[0.5, 32, 32]} />
 					<meshStandardMaterial color="orange" />
 				</mesh>
@@ -888,7 +893,7 @@ const Environment = () => (
 		<RigidBody type="fixed" position={[0, -1, 0]}>
 			<CuboidCollider args={[20, 1, 20]} />
 		</RigidBody>
-		<mesh rotation={[-Math.PI / 2, 0, 0]}>
+		<mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
 			<circleGeometry args={[20, 64]} />
 			<meshStandardMaterial color="#999" />
 		</mesh>
@@ -902,7 +907,7 @@ const Environment = () => (
 				position={[-2 + i * 2, -1 + i * 0.2, 0]}
 				rotation={[-Math.PI / 2, 0, 0]}
 			>
-				<mesh>
+				<mesh castShadow receiveShadow>
 					<boxGeometry args={[3, 3, 1]} />
 					<meshStandardMaterial color="#999" />
 				</mesh>
@@ -915,14 +920,15 @@ const Environment = () => (
 				key={String(i)}
 				type="fixed"
 				shape={undefined}
+				colliders={false}
 				position={[Math.random() * 10 - 5 - 10, -1.2, Math.random() * 10 - 5]}
 				rotation={[0, Math.random() * Math.PI * 2, 0]}
 			>
-				<mesh>
+				<mesh castShadow receiveShadow>
 					<cylinderGeometry args={[0.5, 0.5, 3, 32]} />
 					<meshStandardMaterial color="#999" />
 				</mesh>
-				<CylinderCollider args={[0.5, 3]} />
+				<CylinderCollider args={[1.5, 0.5]} />
 			</RigidBody>
 		))}
 	</>
@@ -956,7 +962,7 @@ export function Sketch() {
 	const { debug } = useLevaControls({ debug: true });
 
 	return (
-		<WebGPUCanvas gl={{ antialias: true }}>
+		<WebGPUCanvas gl={{ antialias: true }} shadows={{ type: PCFSoftShadowMap }}>
 			<Physics debug={debug} timeStep="vary">
 				<Crawler position={[0, 4, 0]} def={CRAWLER_DEF} debug={debug} />
 
@@ -964,7 +970,23 @@ export function Sketch() {
 			</Physics>
 
 			<ambientLight intensity={1.5} />
-			<directionalLight position={[0, 0, 5]} intensity={1.5} />
+
+			<directionalLight
+				position={[10, 10, 10]}
+				intensity={1.5}
+				castShadow
+				shadow-mapSize-height={1024}
+				shadow-mapSize-width={1024}
+				shadow-camera-near={0.1}
+				shadow-camera-far={30}
+				shadow-camera-left={-30}
+				shadow-camera-right={30}
+				shadow-camera-top={30}
+				shadow-camera-bottom={-30}
+				shadow-bias={-0.005}
+			>
+				{debug && <Helper type={DirectionalLightHelper} />}
+			</directionalLight>
 
 			<OrbitControls makeDefault />
 			<PerspectiveCamera makeDefault position={[0, 5, 15]} />
