@@ -928,44 +928,9 @@ const Environment = () => (
 	</>
 );
 
-// const LEGS: LegDef[] = [
-// 	{
-// 		id: 'front-left',
-// 		attachmentOffset: [-0.3, -0.3, 0.3],
-// 		footPlacementOffset: [-0.8, 0, 0.8],
-// 		segments: 5,
-// 		legLength: 1.5,
-// 		phaseOffset: 0,
-// 	},
-// 	{
-// 		id: 'back-right',
-// 		attachmentOffset: [0.3, -0.3, -0.3],
-// 		footPlacementOffset: [0.8, 0, -0.8],
-// 		segments: 5,
-// 		legLength: 1.5,
-// 		phaseOffset: 0.25,
-// 	},
-// 	{
-// 		id: 'front-right',
-// 		attachmentOffset: [0.3, -0.3, 0.3],
-// 		footPlacementOffset: [0.8, 0, 0.8],
-// 		segments: 5,
-// 		legLength: 1.5,
-// 		phaseOffset: 0.5,
-// 	},
-// 	{
-// 		id: 'back-left',
-// 		attachmentOffset: [-0.3, -0.3, -0.3],
-// 		footPlacementOffset: [-0.8, 0, -0.8],
-// 		segments: 5,
-// 		legLength: 1.5,
-// 		phaseOffset: 0.75,
-// 	},
-// ];
-
 const LEGS: LegDef[] = [];
 
-const N_LEGS = 8;
+const N_LEGS = 4;
 
 for (let i = 0; i < N_LEGS; i++) {
 	const angle = (i / N_LEGS) * Math.PI * 2 + Math.PI / 4;
@@ -974,12 +939,11 @@ for (let i = 0; i < N_LEGS; i++) {
 
 	LEGS.push({
 		id: `leg-${i}`,
-		attachmentOffset: [x, -0.3, z],
+		attachmentOffset: [x * 0.8, -0.3, z * 0.8],
 		footPlacementOffset: [x * 2, 0, z * 2],
 		segments: 5,
 		legLength: 1.5,
 		phaseOffset: i > N_LEGS / 2 ? i / N_LEGS - 1 : i / N_LEGS,
-		// phaseOffset: i / N_LEGS,
 	});
 }
 
