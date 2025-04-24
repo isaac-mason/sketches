@@ -15,6 +15,7 @@ import {
 	type Ref,
 	useEffect,
 	useImperativeHandle,
+	useMemo,
 	useRef,
 	useState,
 } from 'react';
@@ -26,6 +27,7 @@ import {
 	type Material,
 	Mesh,
 	MeshBasicMaterial,
+	MeshStandardMaterial,
 	type Object3D,
 	PCFShadowMap,
 	PCFSoftShadowMap,
@@ -215,7 +217,7 @@ const updateCrawlerMovement = (crawler: CrawlerState, dt: number) => {
 			crawler.state.jumping = true;
 			crawler.state.grounded = false;
 
-			const jumpImpulse = 100;
+			const jumpImpulse = 40;
 			_impulse.set(0, jumpImpulse * dt, 0);
 			rigidBody.applyImpulse(_impulse, true);
 		}
@@ -241,6 +243,7 @@ const updateCrawlerSuspension = (
 	crawler: CrawlerState,
 	crawlerObject: Object3D,
 	world: World,
+	dt: number,
 ) => {
 	const rigidBody = crawler.state.rigidBody;
 
@@ -264,25 +267,28 @@ const updateCrawlerSuspension = (
 	let grounded = false;
 
 	if (rayColliderIntersection?.timeOfImpact !== undefined) {
-		const rayHitDistance = rayColliderIntersection.timeOfImpact * rayLength;
-		console.log();
+		const distance = _rayDistance
+			.copy(_rayDirection)
+			.multiplyScalar(rayColliderIntersection?.timeOfImpact ?? 1);
+		const rayHitDistance = distance.length();
 
-		if (rayHitDistance < rayLength) {
+		if (rayHitDistance < crawler.def.height + 0.5) {
 			grounded = true;
 		}
 
 		if (grounded) {
 			const heightDesired = crawler.def.height;
 			const heightCurrent = rayHitDistance;
-			const springConstant = 1;
-			const springDamping = 0.2;
+
+			const springConstant = 5;
+			const springDamping = 2;
 			const currentVerticalVelocity = rigidBody.linvel().y;
 
 			const velocity =
 				(heightDesired - heightCurrent) * springConstant -
 				currentVerticalVelocity * springDamping;
 
-			_impulse.set(0, velocity, 0);
+			_impulse.set(0, velocity * dt, 0);
 
 			rigidBody.applyImpulse(_impulse, true);
 		}
@@ -556,18 +562,19 @@ const initChainHelper = (chain: Chain, object: Object3D) => {
 	// cylinders for each bone
 	const boneMeshes: Mesh[] = [];
 	const boneGeometry = new CylinderGeometry(0.03, 0.03, 1, 8);
-	const boneMaterial = new MeshBasicMaterial({ color: 'orange' });
+	const boneMaterial = new MeshBasicMaterial({ color: '#fff', depthTest: false });
 
 	const jointMeshes: Mesh[] = [];
 	const jointGeometry = new SphereGeometry(0.1, 8, 8);
-	const jointMaterial = new MeshBasicMaterial({ color: 'blue' });
+	const jointMaterial = new MeshBasicMaterial({ color: 'blue', depthTest: false });
 
-	const baseMaterial = new MeshBasicMaterial({ color: 'green' });
+	const baseMaterial = new MeshBasicMaterial({ color: 'green', depthTest: false });
 
 	for (let i = 0; i < chain.bones.length; i++) {
 		const bone = chain.bones[i];
 
 		const mesh = new Mesh(boneGeometry, boneMaterial);
+		mesh.renderOrder = 1;
 		mesh.position.set(...bone.start);
 		mesh.lookAt(...bone.end);
 		mesh.updateMatrixWorld();
@@ -585,12 +592,15 @@ const initChainHelper = (chain: Chain, object: Object3D) => {
 	}
 
 	const attachmentGeometry = new SphereGeometry(0.12, 8, 8);
-	const attachmentMaterial = new MeshBasicMaterial({ color: 'purple' });
+	const attachmentMaterial = new MeshBasicMaterial({ color: 'purple', depthTest: false });
 	const attachmentMesh = new Mesh(attachmentGeometry, attachmentMaterial);
+	attachmentMesh.position.set(...chain.bones[0].start);
+	attachmentMesh.renderOrder = 1;
 	object.add(attachmentMesh);
 
-	const effectorMaterial = new MeshBasicMaterial({ color: 'red' });
+	const effectorMaterial = new MeshBasicMaterial({ color: 'red', depthTest: false });
 	const effectorMesh = new Mesh(jointGeometry, effectorMaterial);
+	effectorMesh.renderOrder = 1;
 	effectorMesh.position.set(...chain.bones[chain.bones.length - 1].end);
 	object.add(effectorMesh);
 
@@ -636,11 +646,10 @@ const updateChainHelper = (
 		boneMesh.quaternion.copy(_quaternion);
 	}
 
-	const attachmentMesh = chainHelper.attachmentMesh;
-	attachmentMesh.position.set(...leg.attachmentOffset);
-
-	const effectorMesh = chainHelper.effectorMesh;
-	effectorMesh.position.set(...chain.bones[chain.bones.length - 1].end);
+	// update effector position
+	chainHelper.effectorMesh.position.set(
+		...chain.bones[chain.bones.length - 1].end,
+	);
 };
 
 const disposeChainHelper = (chainHelper: ChainHelper) => {
@@ -708,8 +717,8 @@ const updateCrawlerDebugVisuals = (
 const initLegVisuals = (chain: Chain, object: Object3D) => {
 	// cylinders for each bone
 	const boneMeshes: Mesh[] = [];
-	const boneGeometry = new CylinderGeometry(0.05, 0.025, 1, 8);
-	const boneMaterial = new MeshBasicMaterial({ color: 'orange' });
+	const boneGeometry = new CylinderGeometry(0.1, 0.05, 1, 8);
+	const boneMaterial = new MeshStandardMaterial({ color: 'orange' });
 
 	for (let i = 0; i < chain.bones.length; i++) {
 		const bone = chain.bones[i];
@@ -786,7 +795,7 @@ const updateCrawler = (
 ) => {
 	updateCrawlerMovement(crawler, dt);
 	updateCrawlerTimer(crawler, dt);
-	updateCrawlerSuspension(crawler, crawlerObject, world);
+	updateCrawlerSuspension(crawler, crawlerObject, world, dt);
 	updateCrawlerFootPlacement(crawler, crawlerObject, world);
 	updateCrawlerStepping(crawler, dt);
 	updateCrawlerIK(crawler, crawlerObject);
@@ -799,6 +808,7 @@ const disposeCrawler = (crawler: CrawlerState) => {
 		const legState = crawler.state.legs[leg.id];
 
 		if (legState.legVisuals) {
+			console.log('disposing leg visuals');
 			disposeLegVisuals(legState.legVisuals);
 		}
 
@@ -934,37 +944,44 @@ const Environment = () => (
 	</>
 );
 
-const LEGS: LegDef[] = [];
-
-const N_LEGS = 4;
-
-for (let i = 0; i < N_LEGS; i++) {
-	const angle = (i / N_LEGS) * Math.PI * 2 + Math.PI / 4;
-	const x = Math.cos(angle) * 0.5;
-	const z = Math.sin(angle) * 0.5;
-
-	LEGS.push({
-		id: `leg-${i}`,
-		attachmentOffset: [x * 0.8, -0.3, z * 0.8],
-		footPlacementOffset: [x * 2, 0, z * 2],
-		segments: 5,
-		legLength: 1.5,
-		phaseOffset: i > N_LEGS / 2 ? i / N_LEGS - 1 : i / N_LEGS,
-	});
-}
-
-const CRAWLER_DEF: CrawlerDef = {
-	legs: LEGS,
-	height: 10,
-};
-
 export function Sketch() {
-	const { debug } = useLevaControls({ debug: true });
+	// add attachRadius and footRadius controls
+	const { debug, height, nLegs, legLength, legSegments, attachRadius, footRadius } =
+		useLevaControls({
+			debug: false,
+			height: 2,
+			nLegs: 4,
+			legLength: 1.5,
+			legSegments: 5,
+			attachRadius: 0.5,
+			footRadius: 1,
+		});
+
+	const crawlerDef = useMemo(() => {
+		const legs: LegDef[] = [];
+
+		for (let i = 0; i < nLegs; i++) {
+			const angle = (i / nLegs) * Math.PI * 2 + Math.PI / 4;
+			const x = Math.cos(angle);
+			const z = Math.sin(angle);
+
+			legs.push({
+				id: `leg-${i}`,
+				attachmentOffset: [x * attachRadius, -0.2, z * attachRadius],
+				footPlacementOffset: [x * footRadius, 0, z * footRadius],
+				segments: legSegments,
+				legLength,
+				phaseOffset: i > nLegs / 2 ? i / nLegs - 1 : i / nLegs,
+			});
+		}
+
+		return { legs, height };
+	}, [height, nLegs, legLength, legSegments, attachRadius, footRadius]);
 
 	return (
 		<WebGPUCanvas gl={{ antialias: true }} shadows={{ type: PCFSoftShadowMap }}>
 			<Physics debug={debug} timeStep="vary">
-				<Crawler position={[0, 4, 0]} def={CRAWLER_DEF} debug={debug} />
+				<Crawler position={[0, 4, 0]} def={crawlerDef} debug={debug} />
 
 				<Environment />
 			</Physics>
@@ -975,14 +992,14 @@ export function Sketch() {
 				position={[10, 10, 10]}
 				intensity={1.5}
 				castShadow
-				shadow-mapSize-height={1024}
-				shadow-mapSize-width={1024}
+				shadow-mapSize-height={2048}
+				shadow-mapSize-width={2048}
 				shadow-camera-near={0.1}
 				shadow-camera-far={30}
 				shadow-camera-left={-30}
 				shadow-camera-right={30}
-				shadow-camera-top={30}
-				shadow-camera-bottom={-30}
+				shadow-camera-top={10}
+				shadow-camera-bottom={-5}
 				shadow-bias={-0.005}
 			>
 				{debug && <Helper type={DirectionalLightHelper} />}
