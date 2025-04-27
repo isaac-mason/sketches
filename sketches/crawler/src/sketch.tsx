@@ -84,6 +84,7 @@ const _currentEffectorPositionLocal = new Vector3();
 const _offset = new Vector3();
 const _cameraOffset = new Vector3();
 const _axis = new Vector3();
+const _movementVelocity = new Vector3();
 const _addVelocity = new Vector3();
 const _normal = new Vector3();
 
@@ -924,8 +925,8 @@ export const CrawlerGooglyEye = ({
 	eyeRadius = 0.1,
 	irisRadius = 0.05,
 	gravity = 0.981,
-	friction = 0.075,
-	bounciness = 0.5,
+	friction = 0.0001,
+	bounciness = 0.65,
 	...groupProps
 }: CrawlerGooglyEyeProps) => {
 	const eyeRef = useRef<Mesh>(null);
@@ -936,7 +937,6 @@ export const CrawlerGooglyEye = ({
 	const velocity = useRef(new Vector3());
 
 	const localPosition = useRef<Vector3>(new Vector3());
-	const localEyeVelocity = useRef(new Vector3());
 
 	useEffect(() => {
 		if (eyeRadius && !irisRadius) {
@@ -954,26 +954,29 @@ export const CrawlerGooglyEye = ({
 		}
 
 		// get velocity using current and previous position, gravity, friction
-		_addVelocity
-			.copy(prevWorldPosition.current)
-			.sub(currentWorldPosition.current)
-			.multiplyScalar(500)
+		// eyes face in movement direction
+		_movementVelocity
+			.copy(currentWorldPosition.current)
+			.sub(prevWorldPosition.current)
+			.multiplyScalar(200)
 			.clampLength(0, 7)
 			.multiplyScalar(delta);
+
+		_addVelocity.x = _movementVelocity.x;
+		_addVelocity.y =
+			Math.abs(_movementVelocity.y) > Math.abs(_movementVelocity.z)
+				? _movementVelocity.y
+				: -_movementVelocity.z;
+		_addVelocity.z = _addVelocity.y;
+
 		_addVelocity.y -= gravity * delta;
-		_addVelocity.x *= -1;
 
 		velocity.current.add(_addVelocity);
 
-		// velocity.current.y -= gravity * delta;
-		velocity.current.multiplyScalar(1 - friction);
-
-		// get velocity local to the eye
-		localEyeVelocity.current.copy(velocity.current);
-		localEyeVelocity.current.applyQuaternion(eyeRef.current.quaternion);
+		velocity.current.multiplyScalar(1 - friction * delta);
 
 		// update local position
-		localPosition.current.add(localEyeVelocity.current);
+		localPosition.current.add(velocity.current);
 		localPosition.current.z = 0;
 
 		// bounce and clamp
@@ -997,6 +1000,7 @@ export const CrawlerGooglyEye = ({
 
 		// update iris position
 		irisRef.current.position.copy(localPosition.current);
+		irisRef.current.position.z = 0.01;
 
 		// store previous position for next velocity calculation
 		prevWorldPosition.current.copy(currentWorldPosition.current);
@@ -1374,12 +1378,12 @@ const App = () => {
 		debug: false,
 		speed: {
 			label: 'Crawler Speed',
-			value: 300,
+			value: 200,
 			step: 1,
 		},
 		sprintMultiplier: {
 			label: 'Sprint Multiplier',
-			value: 2,
+			value: 1.8,
 			step: 0.01,
 		},
 		height: {
