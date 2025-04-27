@@ -25,5 +25,8 @@
         "container",
         "sketches/**/*"
     ],
-    "packageManager": "yarn@4.1.1"
+    "packageManager": "yarn@4.1.1",
+    "resolutions": {
+        "@dimforge/rapier3d-compat": "^0.15.0"
+    }
 }

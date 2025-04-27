@@ -1,18 +1,8 @@
 import Rapier from '@dimforge/rapier3d-compat';
-import {
-	Cylinder,
-	Helper,
-	OrbitControls,
-	PerspectiveCamera,
-} from '@react-three/drei';
+import { Helper, OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { type ThreeElements, useFrame } from '@react-three/fiber';
 import {
 	BallCollider,
-	ConvexHullCollider,
-	CuboidCollider,
-	CylinderCollider,
-	HeightfieldArgs,
-	HeightfieldCollider,
 	Physics,
 	type RapierContext,
 	type RapierRigidBody,
@@ -21,7 +11,7 @@ import {
 	useRapier,
 } from '@react-three/rapier';
 import { World } from 'arancini';
-import { Leva, useControls as useLevaControls } from 'leva';
+import { useControls as useLevaControls } from 'leva';
 import {
 	type Ref,
 	useEffect,
@@ -49,6 +39,8 @@ import {
 	Vector3,
 	type Vector3Tuple,
 } from 'three';
+import { Instructions } from '../../../common';
+import { Controls } from '../../../common/components/controls';
 import { WebGPUCanvas } from '../../../common/components/webgpu-canvas';
 import {
 	type Chain,
@@ -58,8 +50,6 @@ import {
 	fabrikFixedIterations,
 } from './fabrik';
 import { useControls } from './use-controls';
-import { Instructions } from '../../../common';
-import { Controls } from '../../../common/components/controls';
 
 type EntityType = {
 	crawler: CrawlerState;
@@ -1194,7 +1184,7 @@ const Environment = () => (
 	<>
 		{/* floor */}
 		<Heightfield />
-		
+
 		{/* flat platform & misc obstacles */}
 		<RigidBody type="fixed" position={[-15, 1, 0]} colliders="cuboid">
 			<mesh castShadow receiveShadow>
@@ -1216,7 +1206,7 @@ const Environment = () => (
 				</mesh>
 			</RigidBody>
 		))}
-		
+
 		<RigidBody type="fixed" position={[-21, 3.5, 0]} colliders="cuboid">
 			<mesh castShadow receiveShadow>
 				<boxGeometry args={[3, 1, 5]} />
@@ -1254,28 +1244,48 @@ const Environment = () => (
 		))}
 
 		{/* pillars */}
-		<RigidBody type="fixed" position={[9, -2, 0]} rotation={[0.2, 0, 0.1]} colliders="cuboid">
+		<RigidBody
+			type="fixed"
+			position={[9, -2, 0]}
+			rotation={[0.2, 0, 0.1]}
+			colliders="cuboid"
+		>
 			<mesh castShadow receiveShadow>
 				<boxGeometry args={[5, 10, 5]} />
 				<meshStandardMaterial color="purple" />
 			</mesh>
 		</RigidBody>
 
-		<RigidBody type="fixed" position={[14, 0, -3]} rotation={[0.2, 0, -0.1]} colliders="cuboid">
+		<RigidBody
+			type="fixed"
+			position={[14, 0, -3]}
+			rotation={[0.2, 0, -0.1]}
+			colliders="cuboid"
+		>
 			<mesh castShadow receiveShadow>
 				<boxGeometry args={[5, 10, 5]} />
 				<meshStandardMaterial color="skyblue" />
 			</mesh>
 		</RigidBody>
 
-		<RigidBody type="fixed" position={[15, -1, 5]} rotation={[-0.2, 0, 0.2]} colliders="cuboid">
+		<RigidBody
+			type="fixed"
+			position={[15, -1, 5]}
+			rotation={[-0.2, 0, 0.2]}
+			colliders="cuboid"
+		>
 			<mesh castShadow receiveShadow>
 				<boxGeometry args={[5, 10, 5]} />
 				<meshStandardMaterial color="#f5dd90" />
 			</mesh>
 		</RigidBody>
 
-		<RigidBody type="fixed" position={[21, -1, 0]} rotation={[0.4, 0, 0.2]} colliders="cuboid">
+		<RigidBody
+			type="fixed"
+			position={[21, -1, 0]}
+			rotation={[0.4, 0, 0.2]}
+			colliders="cuboid"
+		>
 			<mesh castShadow receiveShadow>
 				<boxGeometry args={[5, 10, 5]} />
 				<meshStandardMaterial color="hotpink" />
@@ -1618,6 +1628,7 @@ export function Sketch() {
 			>
 				<App />
 			</WebGPUCanvas>
+
 			<Instructions>
 				* wasd to move, space to jump, shift to sprint, c to crouch
 			</Instructions>

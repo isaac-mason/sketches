@@ -13,21 +13,21 @@
         "build": "vite build"
     },
     "dependencies": {
-        "@react-three/drei": "^10.0.4",
-        "@react-three/fiber": "^9.1.0",
+        "@react-three/drei": "^10.0.7",
+        "@react-three/fiber": "^9.1.2",
         "@react-three/rapier": "^2.1.0",
         "arancini": "^8.0.0",
         "gl-matrix": "^3.4.3",
         "leva": "^0.10.0",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",
-        "three": "^0.175.0"
+        "three": "^0.176.0"
     },
     "devDependencies": {
         "@types/gl-matrix": "^3.2.0",
         "@types/react": "^19.1.0",
         "@types/react-dom": "^19.1.1",
-        "@types/three": "^0.175.0",
+        "@types/three": "^0.176.0",
         "typescript": "^5.8.2",
         "vite": "^6.2.0"
     }
