@@ -1,10 +1,18 @@
 import Rapier from '@dimforge/rapier3d-compat';
-import { Cylinder, Helper, OrbitControls, PerspectiveCamera } from '@react-three/drei';
+import {
+	Cylinder,
+	Helper,
+	OrbitControls,
+	PerspectiveCamera,
+} from '@react-three/drei';
 import { type ThreeElements, useFrame } from '@react-three/fiber';
 import {
 	BallCollider,
+	ConvexHullCollider,
 	CuboidCollider,
 	CylinderCollider,
+	HeightfieldArgs,
+	HeightfieldCollider,
 	Physics,
 	type RapierContext,
 	type RapierRigidBody,
@@ -33,6 +41,7 @@ import {
 	MeshStandardMaterial,
 	type Object3D,
 	PCFSoftShadowMap,
+	PlaneGeometry,
 	Quaternion,
 	type Scene,
 	SphereGeometry,
@@ -295,7 +304,7 @@ const updateCrawlerSuspension = (
 	}
 
 	if (avgLegHeightRelative > 0) {
-		avgLegHeightRelative /= crawler.def.legs.length
+		avgLegHeightRelative /= crawler.def.legs.length;
 	}
 
 	if (avgLegHeightRelative > 0) {
@@ -391,11 +400,13 @@ const updateCrawlerFootPlacement = (
 				.add(_footPlacementOffset);
 			legState.footPlacementRayOrigin.y = _legOrigin.y + crawler.def.height / 2;
 
+			const rayLength = 10;
+
 			const ray = new Rapier.Ray(
 				legState.footPlacementRayOrigin,
 				_rayDirection,
 			);
-			const rayLength = 10;
+
 			const rayColliderIntersection = world.castRayAndGetNormal(
 				ray,
 				rayLength,
@@ -406,9 +417,9 @@ const updateCrawlerFootPlacement = (
 				rigidBody,
 			);
 
-			const distance = _rayDistance
-				.copy(_rayDirection)
-				.multiplyScalar(rayColliderIntersection?.timeOfImpact ?? 1);
+			const toi = rayColliderIntersection?.timeOfImpact ?? 1;
+			const distance = _rayDistance.copy(_rayDirection).multiplyScalar(toi);
+
 			legState.footPlacementPosition.copy(legState.footPlacementRayOrigin);
 			legState.footPlacementPosition.add(distance);
 		}
@@ -517,7 +528,8 @@ const updateCrawlerStepping = (
 			// add a vertical component that peaks in the middle of the step
 			const easedProgress = ease(legState.stepProgress);
 			if (easedProgress > 0 && easedProgress < 1) {
-				const arcFactor = Math.sin(easedProgress * Math.PI) * crawler.def.stepArcHeight;
+				const arcFactor =
+					Math.sin(easedProgress * Math.PI) * crawler.def.stepArcHeight;
 				legState.effectorCurrentPosition.y += arcFactor;
 			}
 		}
@@ -1127,16 +1139,104 @@ const BALLS: Array<{
 	},
 ];
 
+const heightFieldDepth = 50;
+const heightFieldWidth = 50;
+const heightFieldArray = Array.from({
+	length: heightFieldDepth * heightFieldWidth,
+}).map((_, index) => {
+	return Math.random();
+});
+const heightField = new Float32Array(heightFieldArray);
+
+const heightFieldGeometry = new PlaneGeometry(
+	heightFieldWidth,
+	heightFieldDepth,
+	heightFieldWidth - 1,
+	heightFieldDepth - 1,
+);
+
+heightField.forEach((v, index) => {
+	heightFieldGeometry.attributes.position.array[index * 3 + 2] = v;
+});
+heightFieldGeometry.scale(1, -1, 1);
+heightFieldGeometry.rotateX(-Math.PI / 2);
+heightFieldGeometry.rotateY(-Math.PI / 2);
+heightFieldGeometry.computeVertexNormals();
+
+const Heightfield = () => {
+	const { world } = useRapier();
+	useEffect(() => {
+		const heightfieldDesc = Rapier.ColliderDesc.heightfield(
+			heightFieldWidth - 1,
+			heightFieldWidth - 1,
+			heightField,
+			{ x: heightFieldWidth, y: 1, z: heightFieldDepth },
+		);
+
+		const collider = world.createCollider(heightfieldDesc);
+		collider.setTranslation({ x: 0, y: 0, z: 0 });
+
+		return () => {
+			world.removeCollider(collider, false);
+		};
+	});
+
+	return (
+		<>
+			<mesh geometry={heightFieldGeometry} receiveShadow>
+				<meshStandardMaterial side={2} color="#444" />
+			</mesh>
+		</>
+	);
+};
+
 const Environment = () => (
 	<>
 		{/* floor */}
-		<RigidBody type="fixed" position={[0, -1, 0]}>
-			<CuboidCollider args={[20, 1, 20]} />
+		<Heightfield />
+		
+		{/* flat platform & misc obstacles */}
+		<RigidBody type="fixed" position={[-15, 1, 0]} colliders="cuboid">
+			<mesh castShadow receiveShadow>
+				<boxGeometry args={[20, 1, 20]} />
+				<meshStandardMaterial color="#777" />
+			</mesh>
 		</RigidBody>
-		<mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-			<circleGeometry args={[20, 64]} />
-			<meshStandardMaterial color="#333" />
-		</mesh>
+
+		{[...Array(4)].map((_, i) => (
+			<RigidBody
+				key={String(i)}
+				type="fixed"
+				shape="cuboid"
+				position={[i * -2 - 15, 1 + i * 0.5, -5]}
+			>
+				<mesh castShadow receiveShadow>
+					<boxGeometry args={[3, 2 + i * 0.5, 5]} />
+					<meshStandardMaterial color="#ccc" />
+				</mesh>
+			</RigidBody>
+		))}
+		
+		<RigidBody type="fixed" position={[-21, 3.5, 0]} colliders="cuboid">
+			<mesh castShadow receiveShadow>
+				<boxGeometry args={[3, 1, 5]} />
+				<meshStandardMaterial color="#ccc" />
+			</mesh>
+		</RigidBody>
+
+		{[...Array(4)].map((_, i) => (
+			<RigidBody
+				key={String(i)}
+				type="fixed"
+				shape="cuboid"
+				position={[i * -2 - 15, 1 + i * 0.5, 5]}
+			>
+				<mesh castShadow receiveShadow>
+					<boxGeometry args={[3, 2 + i * 0.5, 5]} />
+					<meshStandardMaterial color="#ccc" />
+				</mesh>
+			</RigidBody>
+		))}
 
 		{/* stairs */}
 		{[...Array(10)].map((_, i) => (
@@ -1144,26 +1244,68 @@ const Environment = () => (
 				key={String(i)}
 				type="fixed"
 				shape="cuboid"
-				position={[i * 1.5 - 9, -1 + i * 0.2, 2]}
+				position={[i * 1.5 - 9, -0.5 + i * 0.2, 2]}
 			>
 				<mesh castShadow receiveShadow>
 					<boxGeometry args={[3, 3, 5]} />
-					<meshStandardMaterial color="#555" />
+					<meshStandardMaterial color="#777" />
 				</mesh>
 			</RigidBody>
 		))}
 
-		{/* spinning box */}
+		{/* pillars */}
+		<RigidBody type="fixed" position={[9, -2, 0]} rotation={[0.2, 0, 0.1]} colliders="cuboid">
+			<mesh castShadow receiveShadow>
+				<boxGeometry args={[5, 10, 5]} />
+				<meshStandardMaterial color="purple" />
+			</mesh>
+		</RigidBody>
+
+		<RigidBody type="fixed" position={[14, 0, -3]} rotation={[0.2, 0, -0.1]} colliders="cuboid">
+			<mesh castShadow receiveShadow>
+				<boxGeometry args={[5, 10, 5]} />
+				<meshStandardMaterial color="skyblue" />
+			</mesh>
+		</RigidBody>
+
+		<RigidBody type="fixed" position={[15, -1, 5]} rotation={[-0.2, 0, 0.2]} colliders="cuboid">
+			<mesh castShadow receiveShadow>
+				<boxGeometry args={[5, 10, 5]} />
+				<meshStandardMaterial color="#f5dd90" />
+			</mesh>
+		</RigidBody>
+
+		<RigidBody type="fixed" position={[21, -1, 0]} rotation={[0.4, 0, 0.2]} colliders="cuboid">
+			<mesh castShadow receiveShadow>
+				<boxGeometry args={[5, 10, 5]} />
+				<meshStandardMaterial color="hotpink" />
+			</mesh>
+		</RigidBody>
+
+		{/* spinning boxes */}
 		<RigidBody
 			type="kinematicVelocity"
-			position={[7, 1, 12]}
+			position={[15, 3, 12]}
 			rotation={[0, Math.PI / 2, 0]}
 			angularVelocity={[0, 0, 1]}
 			colliders="cuboid"
 		>
 			<mesh castShadow receiveShadow>
-				<boxGeometry args={[6, 2, 2]} />
+				<boxGeometry args={[6, 3, 3]} />
 				<meshStandardMaterial color="pink" />
+			</mesh>
+		</RigidBody>
+
+		<RigidBody
+			type="kinematicVelocity"
+			position={[15, 3, 20]}
+			rotation={[0, Math.PI / 2, 0]}
+			angularVelocity={[0, 0, 1]}
+			colliders="cuboid"
+		>
+			<mesh castShadow receiveShadow>
+				<boxGeometry args={[6, 5, 5]} />
+				<meshStandardMaterial color="skyblue" />
 			</mesh>
 		</RigidBody>
 
@@ -1237,7 +1379,7 @@ const App = () => {
 		},
 		jumpImpulse: {
 			label: 'Jump Impulse',
-			value: 5,
+			value: 7,
 			step: 1,
 		},
 		stepArcHeight: {
@@ -1290,7 +1432,7 @@ const App = () => {
 			value: 2,
 			step: 0.01,
 			min: 0.001,
-		}
+		},
 	});
 
 	const crawlerDef: CrawlerDef = useMemo(() => {
@@ -1454,7 +1596,7 @@ const App = () => {
 				shadow-camera-far={45}
 				shadow-camera-left={-30}
 				shadow-camera-right={30}
-				shadow-camera-top={10}
+				shadow-camera-top={15}
 				shadow-camera-bottom={-5}
 				shadow-bias={-0.005}
 			>
@@ -1479,7 +1621,7 @@ export function Sketch() {
 			<Instructions>
 				* wasd to move, space to jump, shift to sprint, c to crouch
 			</Instructions>
-			
+
 			<Controls />
 		</>
 	);
