@@ -1780,9 +1780,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@sketches/crawlers@workspace:sketches/crawlers":
+"@sketches/crawler@workspace:sketches/crawler":
   version: 0.0.0-use.local
-  resolution: "@sketches/crawlers@workspace:sketches/crawlers"
+  resolution: "@sketches/crawler@workspace:sketches/crawler"
   dependencies:
     "@react-three/drei": "npm:^10.0.4"
     "@react-three/fiber": "npm:^9.1.0"
@@ -1791,6 +1791,7 @@ __metadata:
     "@types/react": "npm:^19.1.0"
     "@types/react-dom": "npm:^19.1.1"
     "@types/three": "npm:^0.175.0"
+    arancini: "npm:^8.0.0"
     gl-matrix: "npm:^3.4.3"
     leva: "npm:^0.10.0"
     react: "npm:^19.1.0"
