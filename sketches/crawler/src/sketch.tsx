@@ -1,5 +1,5 @@
 import Rapier from '@dimforge/rapier3d-compat';
-import { Helper, OrbitControls, PerspectiveCamera } from '@react-three/drei';
+import { Cylinder, Helper, OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { type ThreeElements, useFrame } from '@react-three/fiber';
 import {
 	BallCollider,
@@ -13,7 +13,7 @@ import {
 	useRapier,
 } from '@react-three/rapier';
 import { World } from 'arancini';
-import { useControls as useLevaControls } from 'leva';
+import { Leva, useControls as useLevaControls } from 'leva';
 import {
 	type Ref,
 	useEffect,
@@ -27,6 +27,7 @@ import {
 	DirectionalLightHelper,
 	type Group,
 	type Material,
+	MathUtils,
 	Mesh,
 	MeshBasicMaterial,
 	MeshStandardMaterial,
@@ -48,6 +49,8 @@ import {
 	fabrikFixedIterations,
 } from './fabrik';
 import { useControls } from './use-controls';
+import { Instructions } from '../../../common';
+import { Controls } from '../../../common/components/controls';
 
 type EntityType = {
 	crawler: CrawlerState;
@@ -136,7 +139,15 @@ const ease = (x: number): number => {
 
 type CrawlerDef = {
 	legs: LegDef[];
+	speed: number;
+	sprintMultiplier: number;
 	height: number;
+	jumpImpulse: number;
+	stepArcHeight: number;
+	footPlacementStepDistanceThreshold: number;
+	footPlacementEmergencyStepDistanceThreshold: number;
+	stepSpeed: number;
+	stepCycleSpeed: number;
 };
 
 const initCrawler = (def: CrawlerDef) => {
@@ -183,13 +194,14 @@ const initCrawler = (def: CrawlerDef) => {
 		def,
 		input: {
 			direction: new Vector2(),
+			crouch: false,
+			sprint: false,
 		},
 		cmd: [] as Array<'jump'>,
 		state: {
 			legs,
 			position: new Vector3(),
 			stepCycleTime: 0,
-			stepCycleSpeed: 2,
 			grounded: false,
 			jumping: false,
 			lastJumpTime: 0,
@@ -208,7 +220,10 @@ const updateCrawlerMovement = (
 	// determine velocity from input
 	_velocity.set(crawler.input.direction.x, 0, crawler.input.direction.y);
 	_velocity.normalize();
-	_velocity.multiplyScalar(300);
+	_velocity.multiplyScalar(crawler.def.speed);
+	if (crawler.input.sprint) {
+		_velocity.multiplyScalar(crawler.def.sprintMultiplier);
+	}
 	_velocity.multiplyScalar(dt);
 
 	// preserve y velocity
@@ -228,8 +243,7 @@ const updateCrawlerMovement = (
 			crawler.state.lastJumpTime = performance.now();
 			crawler.state.grounded = false;
 
-			const jumpImpulse = 500;
-			_impulse.set(0, jumpImpulse * dt, 0);
+			_impulse.set(0, crawler.def.jumpImpulse, 0);
 			rigidBody.applyImpulse(_impulse, true);
 		}
 	}
@@ -248,7 +262,7 @@ const updateCrawlerPosition = (
 const updateCrawlerTimer = (crawler: CrawlerState, dt: number) => {
 	// update step cycle time - this drives the phase-based stepping
 	crawler.state.stepCycleTime =
-		(crawler.state.stepCycleTime + dt * crawler.state.stepCycleSpeed) % 1;
+		(crawler.state.stepCycleTime + dt * crawler.def.stepCycleSpeed) % 1;
 };
 
 const updateCrawlerSuspension = (
@@ -259,16 +273,39 @@ const updateCrawlerSuspension = (
 ) => {
 	if (
 		crawler.state.jumping &&
-		(crawler.state.lastJumpTime + 100 > performance.now() ||
+		(crawler.state.lastJumpTime + 300 > performance.now() ||
 			rigidBody.linvel().y > 0)
 	) {
 		return;
 	}
 
+	let desiredHeight = crawler.def.height;
+	if (crawler.input.crouch) {
+		desiredHeight /= 2;
+	}
+
+	const legHeightOrigin = crawler.state.position.y - crawler.def.height / 2;
+
+	let avgLegHeightRelative = 0;
+	for (const leg of crawler.def.legs) {
+		const legState = crawler.state.legs[leg.id];
+
+		avgLegHeightRelative +=
+			legState.effectorCurrentPosition.y - legHeightOrigin;
+	}
+
+	if (avgLegHeightRelative > 0) {
+		avgLegHeightRelative /= crawler.def.legs.length
+	}
+
+	if (avgLegHeightRelative > 0) {
+		desiredHeight += avgLegHeightRelative;
+	}
+
 	_rayOrigin.copy(rigidBody.translation());
 	_rayDirection.set(0, -1, 0);
 	const ray = new Rapier.Ray(_rayOrigin, _rayDirection);
-	const rayLength = crawler.def.height + 3;
+	const rayLength = desiredHeight + 5;
 
 	const rayColliderIntersection = world.castRayAndGetNormal(
 		ray,
@@ -293,7 +330,7 @@ const updateCrawlerSuspension = (
 		}
 
 		if (grounded) {
-			const heightDesired = crawler.def.height;
+			const heightDesired = desiredHeight;
 			const heightCurrent = rayHitDistance;
 
 			const springConstant = 10;
@@ -319,6 +356,19 @@ const updateCrawlerSuspension = (
 	crawler.state.grounded = grounded;
 };
 
+const remapClamp = (
+	value: number,
+	inMin: number,
+	inMax: number,
+	outMin: number,
+	outMax: number,
+) => {
+	const clampedValue = MathUtils.clamp(value, inMin, inMax);
+	return (
+		((clampedValue - inMin) / (inMax - inMin)) * (outMax - outMin) + outMin
+	);
+};
+
 const updateCrawlerFootPlacement = (
 	crawler: CrawlerState,
 	crawlerObject: Object3D,
@@ -339,7 +389,7 @@ const updateCrawlerFootPlacement = (
 			legState.footPlacementRayOrigin
 				.copy(crawler.state.position)
 				.add(_footPlacementOffset);
-			legState.footPlacementRayOrigin.y = _legOrigin.y;
+			legState.footPlacementRayOrigin.y = _legOrigin.y + crawler.def.height / 2;
 
 			const ray = new Rapier.Ray(
 				legState.footPlacementRayOrigin,
@@ -370,11 +420,26 @@ const updateCrawlerFootPlacement = (
 			_start.set(...leg.attachmentOffset);
 			_end.set(...leg.footPlacementOffset);
 
-			_direction.subVectors(_end, _start).normalize();
-			_direction.multiplyScalar(leg.legLength * 2);
+			_direction.subVectors(_end, _start);
+			_direction.y = 0;
+			_direction.normalize();
+			_direction.multiplyScalar(leg.legLength * 1.2);
 
 			legState.footPlacementPosition.copy(_direction);
 			crawlerObject.localToWorld(legState.footPlacementPosition);
+
+			legState.footPlacementPosition.y +=
+				Math.sin(performance.now() / 100 + leg.phaseOffset) * 0.75;
+
+			const verticalLinearVelocity = rigidBody.linvel().y;
+
+			legState.footPlacementPosition.y += remapClamp(
+				verticalLinearVelocity,
+				-2,
+				2,
+				0.5,
+				-0.5,
+			);
 		}
 	}
 };
@@ -391,7 +456,10 @@ const updateCrawlerStepping = (
 		if (!crawler.state.grounded) {
 			legState.stepping = false;
 			legState.effectorGoalPosition.copy(legState.footPlacementPosition);
-			legState.effectorCurrentPosition.copy(legState.footPlacementPosition);
+			legState.effectorCurrentPosition.lerp(
+				legState.effectorGoalPosition,
+				dt * 10,
+			);
 
 			continue;
 		}
@@ -403,7 +471,7 @@ const updateCrawlerStepping = (
 			// advance step progress
 			const linvel = rigidBody.linvel();
 			const speed = _velocity.copy(linvel).length();
-			legState.stepProgress += dt * 5 + dt * speed * 0.5; // adjust for step speed
+			legState.stepProgress += dt * crawler.def.stepSpeed + dt * speed * 0.5; // adjust for step speed
 
 			if (legState.stepProgress >= 1) {
 				// step complete
@@ -423,9 +491,14 @@ const updateCrawlerStepping = (
 			const inStepPhase =
 				legPhase >= phaseWindowStart && legPhase <= phaseWindowEnd;
 
-			const needsRegularStep = inStepPhase && footPlacementToGoalDistance > 0.1;
+			const needsRegularStep =
+				inStepPhase &&
+				footPlacementToGoalDistance >
+					crawler.def.footPlacementStepDistanceThreshold;
 			const needsEmergencyStep =
-				footPlacementToGoalDistance > 1 || crawler.state.landing;
+				footPlacementToGoalDistance >
+					crawler.def.footPlacementEmergencyStepDistanceThreshold ||
+				crawler.state.landing;
 
 			if (needsRegularStep || needsEmergencyStep) {
 				legState.stepping = true;
@@ -444,8 +517,7 @@ const updateCrawlerStepping = (
 			// add a vertical component that peaks in the middle of the step
 			const easedProgress = ease(legState.stepProgress);
 			if (easedProgress > 0 && easedProgress < 1) {
-				const arcHeight = 0.1;
-				const arcFactor = Math.sin(easedProgress * Math.PI) * arcHeight;
+				const arcFactor = Math.sin(easedProgress * Math.PI) * crawler.def.stepArcHeight;
 				legState.effectorCurrentPosition.y += arcFactor;
 			}
 		}
@@ -850,7 +922,7 @@ export const CrawlerGooglyEye = ({
 	eyeRadius = 0.1,
 	irisRadius = 0.05,
 	gravity = 0.981,
-	friction = 0.01,
+	friction = 0.075,
 	bounciness = 0.5,
 	...groupProps
 }: CrawlerGooglyEyeProps) => {
@@ -884,6 +956,7 @@ export const CrawlerGooglyEye = ({
 			.copy(prevWorldPosition.current)
 			.sub(currentWorldPosition.current)
 			.multiplyScalar(500)
+			.clampLength(0, 7)
 			.multiplyScalar(delta);
 		_addVelocity.y -= gravity * delta;
 		_addVelocity.x *= -1;
@@ -935,7 +1008,7 @@ export const CrawlerGooglyEye = ({
 			</mesh>
 
 			<mesh ref={irisRef} scale={[1, 1, 0.1]}>
-				<sphereGeometry args={[irisRadius ?? eyeRadius * 0.5, 12, 12]} />
+				<sphereGeometry args={[irisRadius, 12, 12]} />
 				<meshStandardMaterial color="black" roughness={0.2} />
 			</mesh>
 
@@ -1006,21 +1079,53 @@ const Crawler = ({
 				<BallCollider args={[0.5]} />
 
 				<CrawlerGooglyEye
-					position={[-0.25, 0.3, 0.5]}
+					position={[-0.25, 0.4, 0.5]}
 					rotation={[-0.6, 0, 0]}
 					eyeRadius={0.2}
-					irisRadius={0.05}
+					irisRadius={0.075}
 				/>
 				<CrawlerGooglyEye
-					position={[0.25, 0.3, 0.5]}
+					position={[0.25, 0.4, 0.5]}
 					rotation={[-0.6, 0, 0]}
 					eyeRadius={0.2}
-					irisRadius={0.05}
+					irisRadius={0.075}
 				/>
 			</group>
 		</RigidBody>
 	);
 };
+
+const BALLS: Array<{
+	position: [number, number, number];
+	color: string;
+	radius: number;
+}> = [
+	{
+		position: [-5, 5, 12],
+		color: 'skyblue',
+		radius: 1.2,
+	},
+	{
+		position: [0, 5, 15],
+		color: 'purple',
+		radius: 1,
+	},
+	{
+		position: [5, 5, 5],
+		color: 'pink',
+		radius: 0.8,
+	},
+	{
+		position: [-5, 5, 4],
+		color: 'aqua',
+		radius: 0.6,
+	},
+	{
+		position: [2, 5, 10],
+		color: 'peachpuff',
+		radius: 1.5,
+	},
+];
 
 const Environment = () => (
 	<>
@@ -1039,31 +1144,42 @@ const Environment = () => (
 				key={String(i)}
 				type="fixed"
 				shape="cuboid"
-				position={[-2 + i * 2, -1 + i * 0.2, 0]}
-				rotation={[-Math.PI / 2, 0, 0]}
+				position={[i * 1.5 - 9, -1 + i * 0.2, 2]}
 			>
 				<mesh castShadow receiveShadow>
-					<boxGeometry args={[3, 3, 1]} />
+					<boxGeometry args={[3, 3, 5]} />
 					<meshStandardMaterial color="#555" />
 				</mesh>
 			</RigidBody>
 		))}
 
-		{/* embedded cylinders */}
-		{[...Array(10)].map((_, i) => (
+		{/* spinning box */}
+		<RigidBody
+			type="kinematicVelocity"
+			position={[7, 1, 12]}
+			rotation={[0, Math.PI / 2, 0]}
+			angularVelocity={[0, 0, 1]}
+			colliders="cuboid"
+		>
+			<mesh castShadow receiveShadow>
+				<boxGeometry args={[6, 2, 2]} />
+				<meshStandardMaterial color="pink" />
+			</mesh>
+		</RigidBody>
+
+		{/* balls */}
+		{BALLS.map((ball, i) => (
 			<RigidBody
 				key={String(i)}
-				type="fixed"
-				shape={undefined}
-				colliders={false}
-				position={[Math.random() * 10 - 5 - 10, -1.2, Math.random() * 10 - 5]}
+				type="dynamic"
+				colliders="ball"
+				position={ball.position}
 				rotation={[0, Math.random() * Math.PI * 2, 0]}
 			>
 				<mesh castShadow receiveShadow>
-					<cylinderGeometry args={[0.5, 0.5, 3, 32]} />
-					<meshStandardMaterial color="#555" />
+					<sphereGeometry args={[ball.radius, 32, 32]} />
+					<meshStandardMaterial color={ball.color} />
 				</mesh>
-				<CylinderCollider args={[1.5, 0.5]} />
 			</RigidBody>
 		))}
 	</>
@@ -1088,23 +1204,96 @@ const App = () => {
 
 	const {
 		debug,
+		speed,
+		sprintMultiplier,
 		height,
+		jumpImpulse,
+		stepArcHeight,
+		footPlacementStepDistanceThreshold,
+		footPlacementEmergencyStepDistanceThreshold,
 		nLegs,
 		legLength,
 		legSegments,
 		attachRadius,
 		footRadius,
+		stepSpeed,
+		stepCycleSpeed,
 	} = useLevaControls({
 		debug: false,
-		height: 2,
-		nLegs: 4,
-		legLength: 1.5,
-		legSegments: 5,
-		attachRadius: 0.5,
-		footRadius: 1,
+		speed: {
+			label: 'Crawler Speed',
+			value: 300,
+			step: 1,
+		},
+		sprintMultiplier: {
+			label: 'Sprint Multiplier',
+			value: 2,
+			step: 0.01,
+		},
+		height: {
+			label: 'Crawler Height',
+			value: 2,
+			step: 0.01,
+		},
+		jumpImpulse: {
+			label: 'Jump Impulse',
+			value: 5,
+			step: 1,
+		},
+		stepArcHeight: {
+			label: 'Step Arc Height',
+			value: 0.1,
+			step: 0.01,
+		},
+		footPlacementStepDistanceThreshold: {
+			label: 'Step Distance Threshold',
+			value: 0.1,
+			step: 0.01,
+		},
+		footPlacementEmergencyStepDistanceThreshold: {
+			label: 'Emergency Step Distance Threshold',
+			value: 1,
+			step: 0.01,
+		},
+		nLegs: {
+			label: 'Number of Legs',
+			value: 4,
+			step: 1,
+		},
+		legLength: {
+			label: 'Leg Length',
+			value: 1.5,
+			step: 0.01,
+		},
+		legSegments: {
+			label: 'Leg Segments',
+			value: 5,
+			step: 1,
+		},
+		attachRadius: {
+			label: 'Attach Radius',
+			value: 0.5,
+			step: 0.01,
+		},
+		footRadius: {
+			label: 'Foot Placement Radius',
+			value: 1,
+			step: 0.01,
+		},
+		stepSpeed: {
+			label: 'Step Speed',
+			value: 5,
+			step: 0.01,
+		},
+		stepCycleSpeed: {
+			label: 'Step Cycle Speed',
+			value: 2,
+			step: 0.01,
+			min: 0.001,
+		}
 	});
 
-	const crawlerDef = useMemo(() => {
+	const crawlerDef: CrawlerDef = useMemo(() => {
 		const legs: LegDef[] = [];
 
 		for (let i = 0; i < nLegs; i++) {
@@ -1122,8 +1311,34 @@ const App = () => {
 			});
 		}
 
-		return { legs, height };
-	}, [height, nLegs, legLength, legSegments, attachRadius, footRadius]);
+		return {
+			legs,
+			speed,
+			sprintMultiplier,
+			height,
+			jumpImpulse,
+			stepArcHeight,
+			footPlacementStepDistanceThreshold,
+			footPlacementEmergencyStepDistanceThreshold,
+			stepSpeed,
+			stepCycleSpeed,
+		};
+	}, [
+		speed,
+		sprintMultiplier,
+		height,
+		jumpImpulse,
+		stepArcHeight,
+		footPlacementStepDistanceThreshold,
+		footPlacementEmergencyStepDistanceThreshold,
+		nLegs,
+		legLength,
+		legSegments,
+		attachRadius,
+		footRadius,
+		stepSpeed,
+		stepCycleSpeed,
+	]);
 
 	const cameraTarget = useRef<Vector3>(new Vector3());
 
@@ -1131,7 +1346,10 @@ const App = () => {
 		cameraTarget.current.set(0, 4, 0);
 	}, []);
 
-	useFrame(({ camera, scene }, dt) => {
+	useFrame(({ camera, scene }, frameDt) => {
+		// clamp delta
+		const dt = Math.min(frameDt, 0.1);
+
 		/* input */
 		const controlTargetCrawler = controlTargetCrawlerQuery.first;
 
@@ -1154,6 +1372,8 @@ const App = () => {
 			if (controls.current.right) {
 				input.direction.x = 1;
 			}
+			input.crouch = controls.current.crouch;
+			input.sprint = controls.current.sprint;
 
 			if (controls.current.jump) {
 				cmd.push('jump');
@@ -1213,7 +1433,7 @@ const App = () => {
 				<PhysicsRefCapture ref={rapierRef} />
 
 				<Crawler
-					position={[0, 4, 0]}
+					position={[0, 10, 2]}
 					def={crawlerDef}
 					debug={debug}
 					isControlTarget
@@ -1225,13 +1445,13 @@ const App = () => {
 			<ambientLight intensity={1.5} />
 
 			<directionalLight
-				position={[-10, 5, 10]}
+				position={[-15, 10, 15]}
 				intensity={1.5}
 				castShadow
 				shadow-mapSize-height={2048}
 				shadow-mapSize-width={2048}
 				shadow-camera-near={0.1}
-				shadow-camera-far={30}
+				shadow-camera-far={45}
 				shadow-camera-left={-30}
 				shadow-camera-right={30}
 				shadow-camera-top={10}
@@ -1249,8 +1469,18 @@ const App = () => {
 
 export function Sketch() {
 	return (
-		<WebGPUCanvas gl={{ antialias: true }} shadows={{ type: PCFSoftShadowMap }}>
-			<App />
-		</WebGPUCanvas>
+		<>
+			<WebGPUCanvas
+				gl={{ antialias: true }}
+				shadows={{ type: PCFSoftShadowMap }}
+			>
+				<App />
+			</WebGPUCanvas>
+			<Instructions>
+				* wasd to move, space to jump, shift to sprint, c to crouch
+			</Instructions>
+			
+			<Controls />
+		</>
 	);
 }

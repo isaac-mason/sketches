@@ -14,6 +14,8 @@ const keyControlMap = {
 	S: 'backward',
 	W: 'forward',
 	' ': 'jump',
+	Shift: 'sprint',
+	c: 'crouch',
 } as const;
 
 type KeyCode = keyof typeof keyControlMap;
