@@ -271,12 +271,6 @@ export function Sketch() {
                 <Box width={18} height={1} angle={0.4} position={[4, 10]} />
                 <Box width={12} height={1} position={[-4, 15]} />
 
-                <Billboard follow={true}>
-                    <Text color="orange" fontSize={0.5} position={[0, 3.5, 2]}>
-                        USE WASD TO MOVE
-                    </Text>
-                </Billboard>
-
                 <ambientLight intensity={1.5} />
                 <directionalLight position={[10, 40, 10]} intensity={1.5} />
             </Canvas>
