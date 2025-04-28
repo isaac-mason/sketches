@@ -138,6 +138,7 @@ const ease = (x: number): number => {
 };
 
 type CrawlerDef = {
+	color: string;
 	legs: LegDef[];
 	speed: number;
 	sprintMultiplier: number;
@@ -823,11 +824,15 @@ const updateCrawlerDebugVisuals = (
 	}
 };
 
-const initLegVisuals = (chain: Chain, object: Object3D) => {
+const initLegVisuals = (
+	crawlerDef: CrawlerDef,
+	chain: Chain,
+	object: Object3D,
+) => {
 	// cylinders for each bone
 	const boneMeshes: Mesh[] = [];
 	const boneGeometry = new CylinderGeometry(0.1, 0.05, 1, 8);
-	const boneMaterial = new MeshStandardMaterial({ color: 'orange' });
+	const boneMaterial = new MeshStandardMaterial({ color: crawlerDef.color });
 
 	for (let i = 0; i < chain.bones.length; i++) {
 		const bone = chain.bones[i];
@@ -887,7 +892,7 @@ const updateCrawlerVisuals = (crawler: CrawlerState, object: Object3D) => {
 		const legState = crawler.state.legs[leg.id];
 
 		if (!legState.legVisuals) {
-			legState.legVisuals = initLegVisuals(legState.chain, object);
+			legState.legVisuals = initLegVisuals(crawler.def, legState.chain, object);
 		}
 
 		updateLegVisuals(leg, legState.chain, legState.legVisuals);
@@ -1020,15 +1025,12 @@ export const CrawlerGooglyEye = ({
 
 			<mesh scale={[1, 1, 0.4]}>
 				<sphereGeometry args={[eyeRadius, 16, 16, 0, Math.PI]} />
-				<meshPhysicalMaterial
+				<meshStandardMaterial
 					transparent
-					opacity={0.3}
+					opacity={0.1}
 					color="#fff"
-					roughness={0.3}
-					transmission={1}
-					thickness={0.1}
-					ior={1.5}
-					clearcoat={1}
+					roughness={0.2}
+					metalness={0.5}
 				/>
 			</mesh>
 		</group>
@@ -1080,7 +1082,7 @@ const Crawler = ({
 			<group ref={groupRef}>
 				<mesh receiveShadow castShadow>
 					<sphereGeometry args={[0.5, 32, 32]} />
-					<meshStandardMaterial color="orange" />
+					<meshStandardMaterial color={def.color} />
 				</mesh>
 				<BallCollider args={[0.5]} />
 
@@ -1360,6 +1362,7 @@ const App = () => {
 
 	const {
 		debug,
+		color,
 		speed,
 		sprintMultiplier,
 		height,
@@ -1376,6 +1379,10 @@ const App = () => {
 		stepCycleSpeed,
 	} = useLevaControls({
 		debug: false,
+		color: {
+			label: 'Crawler Color',
+			value: '#ffa500',
+		},
 		speed: {
 			label: 'Crawler Speed',
 			value: 200,
@@ -1468,6 +1475,7 @@ const App = () => {
 		}
 
 		return {
+			color,
 			legs,
 			speed,
 			sprintMultiplier,
@@ -1480,6 +1488,7 @@ const App = () => {
 			stepCycleSpeed,
 		};
 	}, [
+		color,
 		speed,
 		sprintMultiplier,
 		height,
@@ -1601,17 +1610,17 @@ const App = () => {
 			<ambientLight intensity={1.5} />
 
 			<directionalLight
-				position={[-15, 10, 15]}
+				position={[-30, 20, 30]}
 				intensity={1.5}
 				castShadow
 				shadow-mapSize-height={2048}
 				shadow-mapSize-width={2048}
 				shadow-camera-near={0.1}
-				shadow-camera-far={45}
+				shadow-camera-far={100}
 				shadow-camera-left={-30}
 				shadow-camera-right={30}
 				shadow-camera-top={15}
-				shadow-camera-bottom={-5}
+				shadow-camera-bottom={-20}
 				shadow-bias={-0.005}
 			>
 				{debug && <Helper type={DirectionalLightHelper} />}
