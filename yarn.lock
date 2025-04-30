@@ -2778,6 +2778,28 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@sketches/snek@workspace:sketches/snek":
+  version: 0.0.0-use.local
+  resolution: "@sketches/snek@workspace:sketches/snek"
+  dependencies:
+    "@react-three/drei": "npm:^10.0.7"
+    "@react-three/fiber": "npm:^9.1.2"
+    "@types/gl-matrix": "npm:^3.2.0"
+    "@types/react": "npm:^19.1.0"
+    "@types/react-dom": "npm:^19.1.1"
+    "@types/three": "npm:^0.176.0"
+    arancini: "npm:^8.0.0"
+    gl-matrix: "npm:^3.4.3"
+    leva: "npm:^0.10.0"
+    react: "npm:^19.1.0"
+    react-dom: "npm:^19.1.0"
+    three: "npm:^0.176.0"
+    typescript: "npm:^5.8.2"
+    vite: "npm:^6.2.0"
+    zustand: "npm:^5.0.3"
+  languageName: unknown
+  linkType: soft
+
 "@sketches/sticky-notes@workspace:sketches/sticky-notes":
   version: 0.0.0-use.local
   resolution: "@sketches/sticky-notes@workspace:sketches/sticky-notes"
