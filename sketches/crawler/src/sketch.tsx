@@ -904,7 +904,6 @@ const disposeCrawler = (crawler: CrawlerState) => {
 		const legState = crawler.state.legs[leg.id];
 
 		if (legState.legVisuals) {
-			console.log('disposing leg visuals');
 			disposeLegVisuals(legState.legVisuals);
 		}
 
@@ -926,7 +925,7 @@ type CrawlerGooglyEyeProps = {
 	bounciness?: number;
 } & ThreeElements['group'];
 
-export const CrawlerGooglyEye = ({
+const CrawlerGooglyEye = ({
 	eyeRadius = 0.1,
 	irisRadius = 0.05,
 	gravity = 0.981,

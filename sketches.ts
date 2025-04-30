@@ -3,6 +3,7 @@ export const sketchesOrder = [
     'lines/image',
     'game-of-life',
     'crawler',
+    'snek',
     'sticky-notes',
     'meowtchmaker',
     'recast-navigation/busy-street-crossing',
