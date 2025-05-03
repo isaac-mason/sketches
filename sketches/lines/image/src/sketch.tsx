@@ -58,7 +58,7 @@ const LineImage = ({ src, numberLines, maxDistance, sampleSize, brightnessThresh
         }
 
         return positions
-    }, [width, height, texture.image])
+    }, [width, height, brightnessThreshold, texture.image])
 
     const lines = useMemo(() => {
         const lines: THREE.Vector3[][] = []
@@ -95,7 +95,7 @@ const LineImage = ({ src, numberLines, maxDistance, sampleSize, brightnessThresh
         <group ref={ref} scale={[0.03, 0.03, 0.03]}>
             <group position={[-width / 2, -height / 2, 0]}>
                 {lines.map((d, i) => (
-                    <Line vertices={d} map={texture} key={i} />
+                    <Line vertices={d} map={texture} key={String(i)} />
                 ))}
             </group>
         </group>
@@ -126,7 +126,7 @@ const Line = ({ vertices, map }: LineProps) => {
         })()
 
         return mat
-    }, [])
+    }, [map])
 
     return (
         <mesh>
@@ -145,7 +145,7 @@ export function Sketch() {
     })
 
     return (
-        <WebGPUCanvas camera={{ position: [0, 0.5, 10] }}>
+        <WebGPUCanvas camera={{ position: [0, 0.5, 10] }} gl={{ antialias: true }}>
             <LineImage src={plantImageUrl} {...config} key={Object.values(config).join('-')} />
 
             <OrbitControls makeDefault target={[0, 0.5, 0]} />
