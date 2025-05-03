@@ -1,9 +1,9 @@
 export const sketchesOrder = [
     'intro',
-    'lines/image',
-    'game-of-life',
     'crawler',
     'snek',
+    'game-of-life',
+    'lines/image',
     'sticky-notes',
     'meowtchmaker',
     'recast-navigation/busy-street-crossing',
