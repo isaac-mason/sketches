@@ -25,6 +25,6 @@
         "@types/react-dom": "^19.1.1",
         "@types/three": "^0.176.0",
         "typescript": "^5.8.2",
-        "vite": "^6.1.0"
+        "vite": "^6.2.7"
     }
 }
