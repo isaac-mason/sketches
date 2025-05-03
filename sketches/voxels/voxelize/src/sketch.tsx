@@ -107,7 +107,7 @@ const Voxelize = ({ children, cellSize, cellHeight }: VoxelizeProps) => {
         voxelize(voxels, orangeBlockType.index, positions, indices, cellSize, cellHeight)
 
         voxels.updateAll()
-    }, [])
+    }, [cellSize, cellHeight])
 
     return (
         <>
@@ -122,7 +122,7 @@ const Voxelize = ({ children, cellSize, cellHeight }: VoxelizeProps) => {
 
 export function Sketch() {
     return (
-        <WebGPUCanvas>
+        <WebGPUCanvas gl={{ antialias: true }}>
             <Voxelize cellSize={0.05} cellHeight={0.05}>
                 <mesh>
                     <torusKnotGeometry args={[1, 0.2, 128, 16]} />
