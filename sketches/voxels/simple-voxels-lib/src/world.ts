@@ -4,7 +4,7 @@ const _chunkCoordinate = new THREE.Vector3()
 const _chunkPosition = new THREE.Vector3()
 
 export const CHUNK_BITS = 4
-export const CHUNK_SIZE = Math.pow(2, CHUNK_BITS)
+export const CHUNK_SIZE = 2 ** CHUNK_BITS
 
 export const worldPositionToChunkPosition = (x: number, y: number, z: number, out = new THREE.Vector3()): THREE.Vector3 => {
     return out.set(x & (CHUNK_SIZE - 1), y & (CHUNK_SIZE - 1), z & (CHUNK_SIZE - 1))
@@ -88,7 +88,7 @@ export class World {
         return chunk.getBlock(x, y, z)
     }
 
-    setBlock(x: number, y: number, z: number, type: number = 0) {
+    setBlock(x: number, y: number, z: number, type = 0) {
         const chunkCoordinate = worldPositionToChunkCoordinate(x, y, z, _chunkCoordinate)
         const id = Chunk.id(chunkCoordinate.x, chunkCoordinate.y, chunkCoordinate.z)
         let chunk = this.chunks.get(id)
