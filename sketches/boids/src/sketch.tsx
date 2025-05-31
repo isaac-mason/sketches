@@ -67,8 +67,8 @@ const Boids = () => {
 
         const batchedMesh = new THREE.BatchedMesh(
             N,
-            geometry.attributes.position.count * 3,
-            geometry.index!.count * 3,
+            geometry.attributes.position.array.length,
+            geometry.index!.array.length,
             material,
         );
         setBatchedMesh(batchedMesh);
