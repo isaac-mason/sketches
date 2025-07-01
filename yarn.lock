@@ -12,22 +12,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@arancini/core@npm:8.0.0":
-  version: 8.0.0
-  resolution: "@arancini/core@npm:8.0.0"
-  checksum: 10/6bd1478c5a29532b97100acea9651af88ee35c95a68ee2f553c1670088d23097251d22cd6564cc57e31a406554ff92bc63a750946b92bb4c0f469356e0acb6ec
+"@arancini/core@npm:8.1.0":
+  version: 8.1.0
+  resolution: "@arancini/core@npm:8.1.0"
+  checksum: 10/035d3b48b418881fac068090149959d7b9cc4c8a9e1941b30ed250463293931b0423dfe65347a369cd330fd5665c81cfd54b06e029495feccfea0d969e88ace5
   languageName: node
   linkType: hard
 
-"@arancini/react@npm:8.0.0":
-  version: 8.0.0
-  resolution: "@arancini/react@npm:8.0.0"
+"@arancini/react@npm:8.1.0":
+  version: 8.1.0
+  resolution: "@arancini/react@npm:8.1.0"
   dependencies:
-    "@arancini/core": "npm:8.0.0"
+    "@arancini/core": "npm:8.1.0"
   peerDependencies:
-    react: ^18.0.0
-    react-dom: ^18.0.0
-  checksum: 10/e3c3f8f9264b802ca1fd9cb7095db8d542f32532372bb2652b04b1df2a761f317b123212921b7d9c4b911f628d3c77a080bf71405796a6f183249302ed73e1ce
+    react: ^19.0.0
+    react-dom: ^19.0.0
+  checksum: 10/aadc1ac8fa86a241e2bb1d51afed84f069bfcf2d6bbe860f4ed4d1afe41b399f8f465cb4503b6a5f18b7014802a4d2dd6cf14c0407bf7900b925a3981a52995f
   languageName: node
   linkType: hard
 
@@ -1791,7 +1791,7 @@ __metadata:
     "@types/react": "npm:^19.1.0"
     "@types/react-dom": "npm:^19.1.1"
     "@types/three": "npm:^0.176.0"
-    arancini: "npm:^8.0.0"
+    arancini: "npm:^8.1.0"
     gl-matrix: "npm:^3.4.3"
     leva: "npm:^0.10.0"
     react: "npm:^19.1.0"
@@ -2259,7 +2259,7 @@ __metadata:
     "@types/react": "npm:^19.1.0"
     "@types/react-dom": "npm:^19.1.1"
     "@types/three": "npm:^0.176.0"
-    arancini: "npm:^8.0.0"
+    arancini: "npm:^8.1.0"
     p2-es: "npm:^1.2.3"
     react: "npm:^19.1.0"
     react-dom: "npm:^19.1.0"
@@ -2317,7 +2317,7 @@ __metadata:
     "@types/react": "npm:^19.1.0"
     "@types/react-dom": "npm:^19.1.1"
     "@types/three": "npm:^0.176.0"
-    arancini: "npm:^8.0.0"
+    arancini: "npm:^8.1.0"
     p2-es: "npm:^1.2.3"
     react: "npm:^19.1.0"
     react-dom: "npm:^19.1.0"
@@ -2336,7 +2336,7 @@ __metadata:
     "@types/react": "npm:^19.1.0"
     "@types/react-dom": "npm:^19.1.1"
     "@types/three": "npm:^0.176.0"
-    arancini: "npm:^8.0.0"
+    arancini: "npm:^8.1.0"
     p2-es: "npm:^1.2.3"
     react: "npm:^19.1.0"
     react-dom: "npm:^19.1.0"
@@ -2355,7 +2355,7 @@ __metadata:
     "@types/react": "npm:^19.1.0"
     "@types/react-dom": "npm:^19.1.1"
     "@types/three": "npm:^0.176.0"
-    arancini: "npm:^8.0.0"
+    arancini: "npm:^8.1.0"
     p2-es: "npm:^1.2.3"
     react: "npm:^19.1.0"
     react-dom: "npm:^19.1.0"
@@ -2374,7 +2374,7 @@ __metadata:
     "@types/react": "npm:^19.1.0"
     "@types/react-dom": "npm:^19.1.1"
     "@types/three": "npm:^0.176.0"
-    arancini: "npm:^8.0.0"
+    arancini: "npm:^8.1.0"
     p2-es: "npm:^1.2.3"
     react: "npm:^19.1.0"
     react-dom: "npm:^19.1.0"
@@ -2639,7 +2639,7 @@ __metadata:
     "@types/react": "npm:^19.1.0"
     "@types/react-dom": "npm:^19.1.1"
     "@types/three": "npm:^0.176.0"
-    arancini: "npm:^8.0.0"
+    arancini: "npm:^8.1.0"
     react: "npm:^19.1.0"
     react-dom: "npm:^19.1.0"
     recast-navigation: "npm:^0.39.0"
@@ -2660,7 +2660,7 @@ __metadata:
     "@types/react": "npm:^19.1.0"
     "@types/react-dom": "npm:^19.1.1"
     "@types/three": "npm:^0.176.0"
-    arancini: "npm:^8.0.0"
+    arancini: "npm:^8.1.0"
     leva: "npm:^0.10.0"
     react: "npm:^19.1.0"
     react-dom: "npm:^19.1.0"
@@ -2682,7 +2682,7 @@ __metadata:
     "@types/react": "npm:^19.1.0"
     "@types/react-dom": "npm:^19.1.1"
     "@types/three": "npm:^0.176.0"
-    arancini: "npm:^8.0.0"
+    arancini: "npm:^8.1.0"
     leva: "npm:^0.10.0"
     react: "npm:^19.1.0"
     react-dom: "npm:^19.1.0"
@@ -2705,7 +2705,7 @@ __metadata:
     "@types/react": "npm:^19.1.0"
     "@types/react-dom": "npm:^19.1.1"
     "@types/three": "npm:^0.176.0"
-    arancini: "npm:^8.0.0"
+    arancini: "npm:^8.1.0"
     leva: "npm:^0.10.0"
     react: "npm:^19.1.0"
     react-dom: "npm:^19.1.0"
@@ -2729,7 +2729,7 @@ __metadata:
     "@types/react": "npm:^19.1.0"
     "@types/react-dom": "npm:^19.1.1"
     "@types/three": "npm:^0.176.0"
-    arancini: "npm:^8.0.0"
+    arancini: "npm:^8.1.0"
     leva: "npm:^0.10.0"
     react: "npm:^19.1.0"
     react-dom: "npm:^19.1.0"
@@ -2788,7 +2788,7 @@ __metadata:
     "@types/react": "npm:^19.1.0"
     "@types/react-dom": "npm:^19.1.1"
     "@types/three": "npm:^0.176.0"
-    arancini: "npm:^8.0.0"
+    arancini: "npm:^8.1.0"
     gl-matrix: "npm:^3.4.3"
     leva: "npm:^0.10.0"
     react: "npm:^19.1.0"
@@ -4233,16 +4233,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"arancini@npm:^8.0.0":
-  version: 8.0.0
-  resolution: "arancini@npm:8.0.0"
+"arancini@npm:^8.1.0":
+  version: 8.1.0
+  resolution: "arancini@npm:8.1.0"
   dependencies:
-    "@arancini/core": "npm:8.0.0"
-    "@arancini/react": "npm:8.0.0"
+    "@arancini/core": "npm:8.1.0"
+    "@arancini/react": "npm:8.1.0"
   peerDependencies:
-    react: ^18.0.0
-    react-dom: ^18.0.0
-  checksum: 10/1d29d5a846ebc40fa46f7526e3947534bc86792e3d2f1ab9d386a4301b84c92a2da0c71662b8ae253adb8c2144feedb3e22d455bb4633b8eee27f09e0d362918
+    react: ^19.0.0
+    react-dom: ^19.0.0
+  checksum: 10/e90d70123a1ea5cf234ec3f7f25de974a07a4a25f58b8b872fd6288ec640a84df11df03999851fa4f6ec321b65a39082c8e14c163689439a75537fc80e803b47
   languageName: node
   linkType: hard
 

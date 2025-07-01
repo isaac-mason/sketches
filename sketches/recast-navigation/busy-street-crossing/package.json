@@ -17,7 +17,7 @@
         "@react-three/drei": "^10.0.7",
         "@react-three/fiber": "^9.1.2",
         "@recast-navigation/three": "^0.39.0",
-        "arancini": "^8.0.0",
+        "arancini": "^8.1.0",
         "leva": "^0.10.0",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",

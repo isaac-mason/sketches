@@ -20,7 +20,7 @@
     "dependencies": {
         "@react-three/drei": "^10.0.7",
         "@react-three/fiber": "^9.1.2",
-        "arancini": "^8.0.0",
+        "arancini": "^8.1.0",
         "p2-es": "^1.2.3",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",

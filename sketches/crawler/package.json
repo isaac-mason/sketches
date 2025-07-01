@@ -16,7 +16,7 @@
         "@react-three/drei": "^10.0.7",
         "@react-three/fiber": "^9.1.2",
         "@react-three/rapier": "^2.1.0",
-        "arancini": "^8.0.0",
+        "arancini": "^8.1.0",
         "gl-matrix": "^3.4.3",
         "leva": "^0.10.0",
         "react": "^19.1.0",
