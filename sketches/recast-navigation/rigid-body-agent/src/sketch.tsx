@@ -78,7 +78,7 @@ export function Sketch() {
 
                 <Environment files={cityEnvironment} />
 
-                <PerspectiveCamera makeDefault position={[0, 10, 10]} rotation={[0, 0, 0]} />
+                <PerspectiveCamera makeDefault fov={60} position={[0, 10, 10]} rotation={[0, 0, 0]} />
             </Canvas>
 
             <Crosshair />

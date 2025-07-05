@@ -16,10 +16,10 @@
         "@react-three/drei": "^10.0.7",
         "@react-three/fiber": "^9.1.2",
         "@react-three/xr": "^6.6.11",
-        "@recast-navigation/three": "^0.39.0",
+        "@recast-navigation/three": "^0.41.0",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",
-        "recast-navigation": "^0.39.0",
+        "recast-navigation": "^0.41.0",
         "suspend-react": "^0.1.3",
         "three": "^0.178.0"
     },

@@ -1,142 +1,164 @@
-import { useConst } from '@/common/hooks/use-const'
-import { useInterval } from '@/common/hooks/use-interval'
-import { useFrame } from '@react-three/fiber'
-import { useRapier } from '@react-three/rapier'
-import { useEffect, useRef, useState } from 'react'
-import { NavMesh, NavMeshQuery, RecastConfig, UnsignedCharArray } from 'recast-navigation'
-import { NavMeshHelper, getPositionsAndIndices } from '@recast-navigation/three'
-import * as THREE from 'three'
-import { Entity, NavComponent, navQuery, traversableQuery } from '../ecs'
-import NavMeshGeneratorWorker from './navmesh-generator.worker?worker'
+import { useConst } from '@/common/hooks/use-const';
+import { useInterval } from '@/common/hooks/use-interval';
+import { useFrame } from '@react-three/fiber';
+import { useRapier } from '@react-three/rapier';
+import { useEffect, useRef, useState } from 'react';
+import {
+    NavMesh,
+    NavMeshQuery,
+    type RecastConfig,
+    UnsignedCharArray,
+} from 'recast-navigation';
+import {
+    NavMeshHelper,
+    getPositionsAndIndices,
+} from '@recast-navigation/three';
+import * as THREE from 'three';
+import { Entity, type NavComponent, navQuery, traversableQuery } from '../ecs';
+import NavMeshGeneratorWorker from './navmesh-generator.worker?worker';
 
 export const getTraversableMeshes = () => {
-    const traversable = traversableQuery.entities.map((e) => e.three)
+    const traversable = traversableQuery.entities.map((e) => e.three);
 
-    const traversableMeshes = new Set<THREE.Mesh>()
+    const traversableMeshes = new Set<THREE.Mesh>();
 
     for (const obj of traversable) {
         obj?.traverse((child) => {
             if (child instanceof THREE.Mesh) {
-                traversableMeshes.add(child)
+                traversableMeshes.add(child);
             }
-        })
+        });
     }
 
-    return Array.from(traversableMeshes)
-}
+    return Array.from(traversableMeshes);
+};
 
 export const NavMeshGenerator = () => {
-    const { rapier } = useRapier()
+    const { rapier } = useRapier();
 
-    const navMeshWorker = useRef<InstanceType<typeof NavMeshGeneratorWorker>>(undefined)
-    const inProgress = useRef(false)
-    const first = useRef(true)
+    const navMeshWorker =
+        useRef<InstanceType<typeof NavMeshGeneratorWorker>>(undefined);
+    const inProgress = useRef(false);
+    const first = useRef(true);
 
     const nav = useConst<NavComponent>(() => ({
         navMesh: undefined,
         navMeshQuery: undefined,
         navMeshVersion: 0,
-    }))
+    }));
 
     useEffect(() => {
-        const navMesh = new NavMesh()
-        const navMeshQuery = new NavMeshQuery(navMesh)
+        const navMesh = new NavMesh();
+        const navMeshQuery = new NavMeshQuery(navMesh);
 
-        nav.navMesh = navMesh
-        nav.navMeshQuery = navMeshQuery
+        nav.navMesh = navMesh;
+        nav.navMeshQuery = navMeshQuery;
 
-        const worker = new NavMeshGeneratorWorker()
+        const worker = new NavMeshGeneratorWorker();
 
-        worker.onmessage = ({ data: { navMeshData: serialisedNavMeshData } }) => {
-            inProgress.current = false
+        worker.onmessage = ({
+            data: { navMeshData: serialisedNavMeshData },
+        }) => {
+            inProgress.current = false;
 
-            const navMeshData = new UnsignedCharArray()
-            navMeshData.copy(serialisedNavMeshData)
+            const navMeshData = new UnsignedCharArray();
+            navMeshData.copy(serialisedNavMeshData);
 
-            navMesh.initSolo(navMeshData)
+            navMesh.initSolo(navMeshData);
 
-            nav.navMeshVersion++
-            first.current = false
-        }
+            nav.navMeshVersion++;
+            first.current = false;
+        };
 
-        navMeshWorker.current = worker
-        inProgress.current = false
+        navMeshWorker.current = worker;
+        inProgress.current = false;
 
         return () => {
-            navMeshWorker.current = undefined
-            inProgress.current = false
-            worker.terminate()
-            navMesh.destroy()
-            navMeshQuery.destroy()
-        }
-    }, [])
+            navMeshWorker.current = undefined;
+            inProgress.current = false;
+            worker.terminate();
+            navMesh.destroy();
+            navMeshQuery.destroy();
+        };
+    }, [nav]);
 
     useInterval(() => {
-        if (inProgress.current) return
+        if (inProgress.current) return;
 
         if (!first.current) {
             const dynamicRigidBodiesSleepStates = traversableQuery.entities
                 .filter((e) => e.rigidBody)
-                .filter((e) => e.rigidBody!.bodyType() === rapier.RigidBodyType.Dynamic)
-                .map(({ rigidBody }) => rigidBody!.isSleeping())
+                .filter(
+                    (e) =>
+                        e.rigidBody!.bodyType() ===
+                        rapier.RigidBodyType.Dynamic,
+                )
+                .map(({ rigidBody }) => rigidBody!.isSleeping());
 
-            if (dynamicRigidBodiesSleepStates.length === 0 || dynamicRigidBodiesSleepStates.every((x) => x)) return
+            if (
+                dynamicRigidBodiesSleepStates.length === 0 ||
+                dynamicRigidBodiesSleepStates.every((x) => x)
+            )
+                return;
         }
 
-        const traversableMeshes = getTraversableMeshes()
+        const traversableMeshes = getTraversableMeshes();
 
         // filter out meshes outside of some bounds
-        const bounds = new THREE.Box3()
-        bounds.min.set(-100, -100, -100)
-        bounds.max.set(100, 100, 100)
+        const bounds = new THREE.Box3();
+        bounds.min.set(-100, -100, -100);
+        bounds.max.set(100, 100, 100);
 
         const meshes = traversableMeshes.filter((mesh) => {
-            const box = new THREE.Box3().setFromObject(mesh)
-            return bounds.containsBox(box)
-        })
+            const box = new THREE.Box3().setFromObject(mesh);
+            return bounds.containsBox(box);
+        });
 
-        const [positions, indices] = getPositionsAndIndices(meshes)
+        const [positions, indices] = getPositionsAndIndices(meshes);
 
-        const cs = 0.2
-        const ch = 0.2
+        const cs = 0.2;
+        const ch = 0.2;
         const recastConfig: Partial<RecastConfig> = {
             cs,
             ch,
             walkableRadius: 0.5 / cs,
             walkableHeight: 2 / ch,
-        }
+        };
 
-        inProgress.current = true
-        navMeshWorker.current?.postMessage({ positions, indices, recastConfig }, [positions.buffer, indices.buffer])
-    }, 100)
+        inProgress.current = true;
+        navMeshWorker.current?.postMessage(
+            { positions, indices, recastConfig },
+            [positions.buffer, indices.buffer],
+        );
+    }, 100);
 
     return (
         <>
             <Entity nav={nav} />
         </>
-    )
-}
+    );
+};
 
 export const NavMeshDebug = () => {
-    const [helper, setHelper] = useState<NavMeshHelper>()
-    const prevNavMeshVersion = useRef<number>(0)
+    const [helper, setHelper] = useState<NavMeshHelper>();
+    const prevNavMeshVersion = useRef<number>(0);
 
     useFrame(() => {
-        const nav = navQuery.first
+        const nav = navQuery.first;
 
         if (!nav || !nav.nav.navMesh) {
             if (helper) {
-                setHelper(undefined)
+                setHelper(undefined);
             }
 
-            return
+            return;
         }
 
-        const navMesh = nav.nav.navMesh
-        const navMeshVersion = nav.nav.navMeshVersion
+        const navMesh = nav.nav.navMesh;
+        const navMeshVersion = nav.nav.navMeshVersion;
 
         if (navMeshVersion !== prevNavMeshVersion.current) {
-            prevNavMeshVersion.current = navMeshVersion
+            prevNavMeshVersion.current = navMeshVersion;
 
             const helper = new NavMeshHelper(navMesh, {
                 navMeshMaterial: new THREE.MeshStandardMaterial({
@@ -145,11 +167,11 @@ export const NavMeshDebug = () => {
                     transparent: true,
                     depthWrite: false,
                 }),
-            })
+            });
 
-            setHelper(helper)
+            setHelper(helper);
         }
-    })
+    });
 
-    return <>{helper && <primitive object={helper} />}</>
-}
+    return <>{helper && <primitive object={helper} />}</>;
+};
