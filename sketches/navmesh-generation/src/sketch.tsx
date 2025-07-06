@@ -6,8 +6,11 @@ import { Leva, useControls } from 'leva';
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 
-import { type CompactHeightfield, buildCompactHeightfield } from './navmesh/compact-heightfield';
-import { erodeWalkableArea } from './navmesh/compact-heightfield-area';
+import {
+    type CompactHeightfield,
+    buildCompactHeightfield,
+} from './navmesh/compact-heightfield';
+import { buildRegions, erodeWalkableArea } from './navmesh/compact-heightfield-area';
 import { getPositionsAndIndices } from './navmesh/get-positions-and-indices';
 import {
     type Heightfield,
@@ -45,7 +48,13 @@ const App = () => {
     const scene = useThree((state) => state.scene);
     const group = useRef<THREE.Group>(null!);
 
-    const { showMesh, showTriangleAreaIds, showHeightfield, showCompactHeightfieldSolid, showCompactHeightFieldDistances } = useControls({
+    const {
+        showMesh,
+        showTriangleAreaIds,
+        showHeightfield,
+        showCompactHeightfieldSolid,
+        showCompactHeightFieldDistances,
+    } = useControls({
         showMesh: {
             label: 'Show Mesh',
             value: true,
@@ -65,7 +74,7 @@ const App = () => {
         showCompactHeightFieldDistances: {
             label: 'Show Compact Heightfield Distances',
             value: false,
-        }
+        },
     });
 
     const [intermediates, setIntermediates] = useState<
@@ -109,18 +118,18 @@ const App = () => {
         const cellHeight = 0.2;
 
         const walkableRadiusWorld = 0.5;
-        const walkableRadiusVoxels = Math.ceil(
-            walkableRadiusWorld / cellSize,
-        );
+        const walkableRadiusVoxels = Math.ceil(walkableRadiusWorld / cellSize);
 
         const walkableClimbWorld = 1;
-        const walkableClimbVoxels = Math.ceil(
-            walkableClimbWorld / cellHeight,
-        );
+        const walkableClimbVoxels = Math.ceil(walkableClimbWorld / cellHeight);
         const walkableHeightWorld = 0.4;
         const walkableHeightVoxels = Math.ceil(
             walkableHeightWorld / cellHeight,
         );
+
+        const borderSize = 4;
+        const minRegionArea = 8;
+        const mergeRegionArea = 20;
 
         const bounds = calculateMeshBounds(positions, indices, box3.create());
         const [heightfieldWidth, heightfieldHeight] = calculateGridSize(
@@ -154,7 +163,11 @@ const App = () => {
         console.time('filter walkable surfaces');
 
         filterLowHangingWalkableObstacles(heightfield, walkableClimbVoxels);
-        filterLedgeSpans(heightfield, walkableHeightVoxels, walkableClimbVoxels);
+        filterLedgeSpans(
+            heightfield,
+            walkableHeightVoxels,
+            walkableClimbVoxels,
+        );
         filterWalkableLowHeightSpans(heightfield, walkableClimbVoxels);
 
         console.timeEnd('filter walkable surfaces');
@@ -165,11 +178,15 @@ const App = () => {
         // This will result more cache coherent data as well as the neighbours
         // between walkable cells will be calculated.
 
-        console.time("build compact heightfield");
+        console.time('build compact heightfield');
 
-        const compactHeightfield = buildCompactHeightfield(walkableHeightVoxels, walkableClimbVoxels, heightfield);
+        const compactHeightfield = buildCompactHeightfield(
+            walkableHeightVoxels,
+            walkableClimbVoxels,
+            heightfield,
+        );
 
-        console.timeEnd("build compact heightfield");
+        console.timeEnd('build compact heightfield');
 
         /* 6. erode the walkable area by the agent radius / walkable radius */
 
@@ -180,12 +197,20 @@ const App = () => {
         console.timeEnd('erode walkable area');
 
         /* 7. prepare for region partitioning by calculating a distance field along the walkable surface */
-        
+
         console.time('build compact heightfield distance field');
-        
+
         buildDistanceField(compactHeightfield);
 
         console.timeEnd('build compact heightfield distance field');
+
+        /* 8. partition the walkable surface into simple regions without holes */
+
+        console.time('build compact heightfield regions');
+
+        buildRegions(compactHeightfield, borderSize, minRegionArea, mergeRegionArea);
+
+        console.timeEnd('build compact heightfield regions');
 
         /* store intermediates for debugging */
         const intermediates: Intermediates = {
@@ -406,7 +431,7 @@ const App = () => {
         };
     }, [showHeightfield, intermediates, scene]);
 
-    // debug view of the compact heightfield - solid view 
+    // debug view of the compact heightfield - solid view
     useEffect(() => {
         if (!intermediates || !showCompactHeightfieldSolid) return;
 
@@ -450,7 +475,9 @@ const App = () => {
                         color = new THREE.Color(0x000000); // RGB(0,0,0)
                     } else {
                         // Hash area id to a color for other areas
-                        color = new THREE.Color(`hsl(${(area * 137.5) % 360}, 70%, 60%)`);
+                        color = new THREE.Color(
+                            `hsl(${(area * 137.5) % 360}, 70%, 60%)`,
+                        );
                     }
 
                     // Calculate the top surface Y coordinate - using Recast convention (s.y+1)*ch
@@ -486,16 +513,24 @@ const App = () => {
 
         // Create geometry
         const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
-        geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3));
-        geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(indices), 1));
+        geometry.setAttribute(
+            'position',
+            new THREE.BufferAttribute(new Float32Array(positions), 3),
+        );
+        geometry.setAttribute(
+            'color',
+            new THREE.BufferAttribute(new Float32Array(colors), 3),
+        );
+        geometry.setIndex(
+            new THREE.BufferAttribute(new Uint32Array(indices), 1),
+        );
 
         // Create material with vertex colors and transparency
         const material = new THREE.MeshBasicMaterial({
             vertexColors: true,
             transparent: true,
             opacity: 0.6,
-            side: THREE.DoubleSide
+            side: THREE.DoubleSide,
         });
 
         const mesh = new THREE.Mesh(geometry, material);
@@ -550,13 +585,15 @@ const App = () => {
 
                 for (let i = cell.index; i < cell.index + cell.count; i++) {
                     const span = chf.spans[i];
-                    
+
                     // Calculate the top surface Y coordinate
                     const fy = chf.bounds[0][1] + (span.y + 1) * chf.cellHeight; // bmin[1] + (s.y+1) * ch
 
                     // Get distance value and scale to 0-255 range
-                    const cd = Math.min(255, Math.floor(chf.distances[i] * dscale)) / 255.0;
-                    
+                    const cd =
+                        Math.min(255, Math.floor(chf.distances[i] * dscale)) /
+                        255.0;
+
                     // Create grayscale color where higher distances are brighter
                     const color = new THREE.Color(cd, cd, cd);
 
@@ -590,16 +627,24 @@ const App = () => {
 
         // Create geometry
         const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
-        geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3));
-        geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(indices), 1));
+        geometry.setAttribute(
+            'position',
+            new THREE.BufferAttribute(new Float32Array(positions), 3),
+        );
+        geometry.setAttribute(
+            'color',
+            new THREE.BufferAttribute(new Float32Array(colors), 3),
+        );
+        geometry.setIndex(
+            new THREE.BufferAttribute(new Uint32Array(indices), 1),
+        );
 
         // Create material with vertex colors and some transparency
         const material = new THREE.MeshBasicMaterial({
             vertexColors: true,
             transparent: true,
             opacity: 0.8,
-            side: THREE.DoubleSide
+            side: THREE.DoubleSide,
         });
 
         const mesh = new THREE.Mesh(geometry, material);
