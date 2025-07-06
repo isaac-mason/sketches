@@ -32,12 +32,11 @@ import {
     markWalkableTriangles,
 } from './navmesh/input-triangle-mesh';
 import { buildDistanceField, buildRegions } from './navmesh/regions';
+import { buildPolyMesh, type PolyMesh } from './navmesh/poly-mesh';
 import {
-    buildPolyMesh,
     buildPolyMeshDetail,
-    type PolyMesh,
     type PolyMeshDetail,
-} from './navmesh/poly-mesh';
+} from './navmesh/poly-mesh-detail';
 
 type Intermediates = {
     input: {
@@ -71,6 +70,7 @@ const App = () => {
         showCompactHeightFieldRegions,
         showRawContours,
         showSimplifiedContours,
+        showPolyMesh,
     } = useControls({
         showMesh: {
             label: 'Show Mesh',
@@ -104,6 +104,10 @@ const App = () => {
             label: 'Show Simplified Contours',
             value: false,
         },
+        showPolyMesh: {
+            label: 'Show Poly Mesh',
+            value: false,
+        },
     });
 
     const [intermediates, setIntermediates] = useState<
@@ -111,6 +115,8 @@ const App = () => {
     >();
 
     useEffect(() => {
+        console.time('navmesh generation');
+
         /* 1. get positions and indices from THREE.Mesh instances in the group */
 
         console.time('get positions and indices');
@@ -287,6 +293,8 @@ const App = () => {
 
         console.timeEnd('build detail mesh from contours');
 
+        console.timeEnd('navmesh generation');
+
         /* store intermediates for debugging */
         const intermediates: Intermediates = {
             input: {
@@ -300,6 +308,8 @@ const App = () => {
             polyMesh,
             polyMeshDetail,
         };
+
+        console.log('intermediates', intermediates);
 
         setIntermediates(intermediates);
     }, []);
@@ -1166,6 +1176,336 @@ const App = () => {
             pointMaterial.dispose();
         };
     }, [showSimplifiedContours, intermediates, scene]);
+
+    // debug view of the poly mesh
+    useEffect(() => {
+        if (!intermediates || !showPolyMesh) return;
+
+        const { polyMesh } = intermediates;
+
+        if (!polyMesh || polyMesh.nPolys === 0) return;
+
+        const nvp = polyMesh.maxVerticesPerPoly;
+        const cs = polyMesh.cs;
+        const ch = polyMesh.ch;
+        const orig = polyMesh.bounds[0]; // bmin
+
+        // Arrays for triangle geometry (polygon fills)
+        const triPositions: number[] = [];
+        const triColors: number[] = [];
+        const triIndices: number[] = [];
+
+        // Arrays for neighbor edges (internal edges)
+        const neighborLinePositions: number[] = [];
+        const neighborLineColors: number[] = [];
+
+        // Arrays for boundary edges (external edges)
+        const boundaryLinePositions: number[] = [];
+        const boundaryLineColors: number[] = [];
+
+        // Arrays for vertices (points)
+        const vertexPositions: number[] = [];
+        const vertexColors: number[] = [];
+
+        let triVertexIndex = 0;
+
+        // Helper function to convert area to color
+        const areaToColor = (area: number): THREE.Color => {
+            if (area === WALKABLE_AREA) {
+                return new THREE.Color()
+                    .setRGB(0, 192 / 255, 1)
+                    .multiplyScalar(0.25); // RGB(0,192,255) with alpha 64/255
+            }
+            if (area === NULL_AREA) {
+                return new THREE.Color().setRGB(0, 0, 0).multiplyScalar(0.25); // RGB(0,0,0) with alpha 64/255
+            }
+            // Hash area id to a color for other areas
+            const hash = area * 137.5;
+            const hue = hash % 360;
+            return new THREE.Color(`hsl(${hue}, 70%, 60%)`).multiplyScalar(0.5);
+        };
+
+        // Draw polygon triangles
+        for (let i = 0; i < polyMesh.nPolys; i++) {
+            const polyBase = i * nvp * 2;
+            const area = polyMesh.areas[i];
+            const color = areaToColor(area);
+
+            // Triangulate polygon by creating a triangle fan from vertex 0
+            for (let j = 2; j < nvp; j++) {
+                const v0 = polyMesh.polys[polyBase + 0];
+                const v1 = polyMesh.polys[polyBase + j - 1];
+                const v2 = polyMesh.polys[polyBase + j];
+
+                if (v2 === 0xffff) break; // MESH_NULL_IDX
+
+                // Add triangle vertices
+                const vertices = [v0, v1, v2];
+                for (let k = 0; k < 3; k++) {
+                    const vertIndex = vertices[k] * 3;
+                    const x = orig[0] + polyMesh.vertices[vertIndex] * cs;
+                    const y =
+                        orig[1] + (polyMesh.vertices[vertIndex + 1] + 1) * ch;
+                    const z = orig[2] + polyMesh.vertices[vertIndex + 2] * cs;
+
+                    triPositions.push(x, y, z);
+                    triColors.push(color.r, color.g, color.b);
+                }
+
+                // Add triangle indices
+                triIndices.push(
+                    triVertexIndex,
+                    triVertexIndex + 1,
+                    triVertexIndex + 2,
+                );
+                triVertexIndex += 3;
+            }
+        }
+
+        // Draw neighbor edges (internal edges)
+        const neighborColor = new THREE.Color()
+            .setRGB(0, 48 / 255, 64 / 255)
+            .multiplyScalar(0.125); // RGB(0,48,64) with alpha 32/255
+        for (let i = 0; i < polyMesh.nPolys; i++) {
+            const polyBase = i * nvp * 2;
+
+            for (let j = 0; j < nvp; j++) {
+                const v0 = polyMesh.polys[polyBase + j];
+                if (v0 === 0xffff) break; // MESH_NULL_IDX
+
+                const neighbor = polyMesh.polys[polyBase + nvp + j];
+                if (neighbor & 0x8000) continue; // Skip boundary edges
+
+                const nj =
+                    j + 1 >= nvp || polyMesh.polys[polyBase + j + 1] === 0xffff
+                        ? 0
+                        : j + 1;
+                const v1 = polyMesh.polys[polyBase + nj];
+
+                const vertices = [v0, v1];
+                for (let k = 0; k < 2; k++) {
+                    const vertIndex = vertices[k] * 3;
+                    const x = orig[0] + polyMesh.vertices[vertIndex] * cs;
+                    const y =
+                        orig[1] +
+                        (polyMesh.vertices[vertIndex + 1] + 1) * ch +
+                        0.1;
+                    const z = orig[2] + polyMesh.vertices[vertIndex + 2] * cs;
+
+                    neighborLinePositions.push(x, y, z);
+                    neighborLineColors.push(
+                        neighborColor.r,
+                        neighborColor.g,
+                        neighborColor.b,
+                    );
+                }
+            }
+        }
+
+        // Draw boundary edges (external edges)
+        const boundaryColor = new THREE.Color()
+            .setRGB(0, 48 / 255, 64 / 255)
+            .multiplyScalar(0.863); // RGB(0,48,64) with alpha 220/255
+        const portalColor = new THREE.Color()
+            .setRGB(1, 1, 1)
+            .multiplyScalar(0.5); // RGB(255,255,255) with alpha 128/255
+
+        for (let i = 0; i < polyMesh.nPolys; i++) {
+            const polyBase = i * nvp * 2;
+
+            for (let j = 0; j < nvp; j++) {
+                const v0 = polyMesh.polys[polyBase + j];
+                if (v0 === 0xffff) break; // MESH_NULL_IDX
+
+                const neighbor = polyMesh.polys[polyBase + nvp + j];
+                if ((neighbor & 0x8000) === 0) continue; // Skip non-boundary edges
+
+                const nj =
+                    j + 1 >= nvp || polyMesh.polys[polyBase + j + 1] === 0xffff
+                        ? 0
+                        : j + 1;
+                const v1 = polyMesh.polys[polyBase + nj];
+
+                // Check if this is a portal edge
+                const isPortal = (neighbor & 0xf) !== 0xf;
+                const edgeColor = isPortal ? portalColor : boundaryColor;
+
+                const vertices = [v0, v1];
+                for (let k = 0; k < 2; k++) {
+                    const vertIndex = vertices[k] * 3;
+                    const x = orig[0] + polyMesh.vertices[vertIndex] * cs;
+                    const y =
+                        orig[1] +
+                        (polyMesh.vertices[vertIndex + 1] + 1) * ch +
+                        0.1;
+                    const z = orig[2] + polyMesh.vertices[vertIndex + 2] * cs;
+
+                    boundaryLinePositions.push(x, y, z);
+                    boundaryLineColors.push(
+                        edgeColor.r,
+                        edgeColor.g,
+                        edgeColor.b,
+                    );
+                }
+            }
+        }
+
+        // Draw vertices (points)
+        const vertexColor = new THREE.Color()
+            .setRGB(0, 0, 0)
+            .multiplyScalar(0.863); // RGB(0,0,0) with alpha 220/255
+        for (let i = 0; i < polyMesh.nVertices; i++) {
+            const vertIndex = i * 3;
+            const x = orig[0] + polyMesh.vertices[vertIndex] * cs;
+            const y =
+                orig[1] + (polyMesh.vertices[vertIndex + 1] + 1) * ch + 0.1;
+            const z = orig[2] + polyMesh.vertices[vertIndex + 2] * cs;
+
+            vertexPositions.push(x, y, z);
+            vertexColors.push(vertexColor.r, vertexColor.g, vertexColor.b);
+        }
+
+        // Create triangle mesh geometry
+        const triGeometry = new THREE.BufferGeometry();
+        if (triPositions.length > 0) {
+            triGeometry.setAttribute(
+                'position',
+                new THREE.BufferAttribute(new Float32Array(triPositions), 3),
+            );
+            triGeometry.setAttribute(
+                'color',
+                new THREE.BufferAttribute(new Float32Array(triColors), 3),
+            );
+            triGeometry.setIndex(
+                new THREE.BufferAttribute(new Uint32Array(triIndices), 1),
+            );
+        }
+
+        const triMaterial = new THREE.MeshBasicMaterial({
+            vertexColors: true,
+            transparent: false,
+            opacity: 1.0,
+            side: THREE.DoubleSide,
+        });
+
+        const triMesh = new THREE.Mesh(triGeometry, triMaterial);
+        scene.add(triMesh);
+
+        // Create neighbor edges geometry
+        let neighborLines: THREE.LineSegments | null = null;
+        if (neighborLinePositions.length > 0) {
+            const neighborLineGeometry = new THREE.BufferGeometry();
+            neighborLineGeometry.setAttribute(
+                'position',
+                new THREE.BufferAttribute(
+                    new Float32Array(neighborLinePositions),
+                    3,
+                ),
+            );
+            neighborLineGeometry.setAttribute(
+                'color',
+                new THREE.BufferAttribute(
+                    new Float32Array(neighborLineColors),
+                    3,
+                ),
+            );
+
+            const neighborLineMaterial = new THREE.LineBasicMaterial({
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.5,
+                linewidth: 1.5,
+            });
+
+            neighborLines = new THREE.LineSegments(
+                neighborLineGeometry,
+                neighborLineMaterial,
+            );
+            scene.add(neighborLines);
+        }
+
+        // Create boundary edges geometry
+        let boundaryLines: THREE.LineSegments | null = null;
+        if (boundaryLinePositions.length > 0) {
+            const boundaryLineGeometry = new THREE.BufferGeometry();
+            boundaryLineGeometry.setAttribute(
+                'position',
+                new THREE.BufferAttribute(
+                    new Float32Array(boundaryLinePositions),
+                    3,
+                ),
+            );
+            boundaryLineGeometry.setAttribute(
+                'color',
+                new THREE.BufferAttribute(
+                    new Float32Array(boundaryLineColors),
+                    3,
+                ),
+            );
+
+            const boundaryLineMaterial = new THREE.LineBasicMaterial({
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.9,
+                linewidth: 2.5,
+            });
+
+            boundaryLines = new THREE.LineSegments(
+                boundaryLineGeometry,
+                boundaryLineMaterial,
+            );
+            scene.add(boundaryLines);
+        }
+
+        // Create vertex points geometry
+        let vertexPoints: THREE.Points | null = null;
+        if (vertexPositions.length > 0) {
+            const vertexGeometry = new THREE.BufferGeometry();
+            vertexGeometry.setAttribute(
+                'position',
+                new THREE.BufferAttribute(new Float32Array(vertexPositions), 3),
+            );
+            vertexGeometry.setAttribute(
+                'color',
+                new THREE.BufferAttribute(new Float32Array(vertexColors), 3),
+            );
+
+            const vertexMaterial = new THREE.PointsMaterial({
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.9,
+                size: 8,
+                sizeAttenuation: false,
+            });
+
+            vertexPoints = new THREE.Points(vertexGeometry, vertexMaterial);
+            scene.add(vertexPoints);
+        }
+
+        return () => {
+            scene.remove(triMesh);
+            triGeometry.dispose();
+            triMaterial.dispose();
+
+            if (neighborLines) {
+                scene.remove(neighborLines);
+                neighborLines.geometry.dispose();
+                (neighborLines.material as THREE.Material).dispose();
+            }
+
+            if (boundaryLines) {
+                scene.remove(boundaryLines);
+                boundaryLines.geometry.dispose();
+                (boundaryLines.material as THREE.Material).dispose();
+            }
+
+            if (vertexPoints) {
+                scene.remove(vertexPoints);
+                vertexPoints.geometry.dispose();
+                (vertexPoints.material as THREE.Material).dispose();
+            }
+        };
+    }, [showPolyMesh, intermediates, scene]);
 
     return (
         <>
