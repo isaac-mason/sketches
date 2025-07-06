@@ -31,12 +31,12 @@ import {
     calculateMeshBounds,
     markWalkableTriangles,
 } from './navmesh/input-triangle-mesh';
-import { buildDistanceField, buildRegions } from './navmesh/regions';
-import { buildPolyMesh, MESH_NULL_IDX, type PolyMesh } from './navmesh/poly-mesh';
+import { MESH_NULL_IDX, type PolyMesh, buildPolyMesh } from './navmesh/poly-mesh';
 import {
-    buildPolyMeshDetail,
     type PolyMeshDetail,
+    buildPolyMeshDetail,
 } from './navmesh/poly-mesh-detail';
+import { buildDistanceField, buildRegions } from './navmesh/regions';
 
 type Intermediates = {
     input: {
@@ -117,6 +117,31 @@ const App = () => {
     useEffect(() => {
         console.time('navmesh generation');
 
+        /* 0. define generation parameters */
+        const cellSize = 0.2;
+        const cellHeight = 0.2;
+
+        const walkableRadiusWorld = 0.5;
+        const walkableRadiusVoxels = Math.ceil(walkableRadiusWorld / cellSize);
+
+        const walkableClimbWorld = 1;
+        const walkableClimbVoxels = Math.ceil(walkableClimbWorld / cellHeight);
+        const walkableHeightWorld = 0.4;
+        const walkableHeightVoxels = Math.ceil(
+            walkableHeightWorld / cellHeight,
+        );
+
+        const borderSize = 4;
+        const minRegionArea = 8;
+        const mergeRegionArea = 20;
+
+        const maxSimplificationError = 1.3;
+        const maxEdgeLength = 12;
+
+        const maxVerticesPerPoly = 3;
+        const detailSampleDistance = 6;
+        const detailSampleMaxError = 1;
+
         /* 1. get positions and indices from THREE.Mesh instances in the group */
 
         console.time('get positions and indices');
@@ -148,30 +173,6 @@ const App = () => {
         /* 3. rasterize the triangles to a voxel heightfield */
 
         console.time('rasterize triangles');
-
-        const cellSize = 0.2;
-        const cellHeight = 0.2;
-
-        const walkableRadiusWorld = 0.5;
-        const walkableRadiusVoxels = Math.ceil(walkableRadiusWorld / cellSize);
-
-        const walkableClimbWorld = 1;
-        const walkableClimbVoxels = Math.ceil(walkableClimbWorld / cellHeight);
-        const walkableHeightWorld = 0.4;
-        const walkableHeightVoxels = Math.ceil(
-            walkableHeightWorld / cellHeight,
-        );
-
-        const borderSize = 4;
-        const minRegionArea = 8;
-        const mergeRegionArea = 20;
-
-        const maxSimplificationError = 1.3;
-        const maxEdgeLength = 12;
-
-        const maxVerticesPerPoly = 3;
-        const detailSampleDistance = 6;
-        const detailSampleMaxError = 1;
 
         const bounds = calculateMeshBounds(positions, indices, box3.create());
         const [heightfieldWidth, heightfieldHeight] = calculateGridSize(
