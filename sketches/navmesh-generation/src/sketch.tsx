@@ -23,6 +23,7 @@ import {
     markWalkableTriangles,
 } from './navmesh/input-triangle-mesh';
 import { WALKABLE_AREA, NULL_AREA } from './navmesh/area';
+import { buildDistanceField } from './navmesh/regions';
 
 type Intermediates = {
     input: {
@@ -44,7 +45,7 @@ const App = () => {
     const scene = useThree((state) => state.scene);
     const group = useRef<THREE.Group>(null!);
 
-    const { showMesh, showTriangleAreaIds, showHeightfield, showCompactHeightfieldSolid } = useControls({
+    const { showMesh, showTriangleAreaIds, showHeightfield, showCompactHeightfieldSolid, showCompactHeightFieldDistances } = useControls({
         showMesh: {
             label: 'Show Mesh',
             value: true,
@@ -61,6 +62,10 @@ const App = () => {
             label: 'Show Compact Heightfield Solid',
             value: false,
         },
+        showCompactHeightFieldDistances: {
+            label: 'Show Compact Heightfield Distances',
+            value: false,
+        }
     });
 
     const [intermediates, setIntermediates] = useState<
@@ -69,6 +74,7 @@ const App = () => {
 
     useEffect(() => {
         /* 1. get positions and indices from THREE.Mesh instances in the group */
+
         console.time('get positions and indices');
 
         const meshes: THREE.Mesh[] = [];
@@ -84,6 +90,7 @@ const App = () => {
         console.timeEnd('get positions and indices');
 
         /* 2. mark walkable triangles */
+
         console.time('mark walkable triangles');
 
         const triAreaIds: Uint8Array = new Uint8Array(indices.length / 3).fill(
@@ -95,6 +102,7 @@ const App = () => {
         console.timeEnd('mark walkable triangles');
 
         /* 3. rasterize the triangles to a voxel heightfield */
+
         console.time('rasterize triangles');
 
         const cellSize = 0.2;
@@ -138,6 +146,7 @@ const App = () => {
         console.timeEnd('rasterize triangles');
 
         /* 4. filter walkable surfaces */
+
         // Once all geoemtry is rasterized, we do initial pass of filtering to
         // remove unwanted overhangs caused by the conservative rasterization
         // as well as filter spans where the character cannot possibly stand.
@@ -151,6 +160,7 @@ const App = () => {
         console.timeEnd('filter walkable surfaces');
 
         /* 5. partition walkable surface to simple regions. */
+
         // Compact the heightfield so that it is faster to handle from now on.
         // This will result more cache coherent data as well as the neighbours
         // between walkable cells will be calculated.
@@ -170,7 +180,12 @@ const App = () => {
         console.timeEnd('erode walkable area');
 
         /* 7. prepare for region partitioning by calculating a distance field along the walkable surface */
-        // buildDistanceField()
+        
+        console.time('build compact heightfield distance field');
+        
+        buildDistanceField(compactHeightfield);
+
+        console.timeEnd('build compact heightfield distance field');
 
         /* store intermediates for debugging */
         const intermediates: Intermediates = {
@@ -492,6 +507,110 @@ const App = () => {
             material.dispose();
         };
     }, [showCompactHeightfieldSolid, intermediates, scene]);
+
+    // debug view of the compact heightfield - distance field
+    useEffect(() => {
+        if (!intermediates || !showCompactHeightFieldDistances) return;
+
+        const { compactHeightfield } = intermediates;
+        const chf = compactHeightfield;
+
+        // Check if distance field is available
+        if (!chf.distances) return;
+
+        // Calculate scaling factor for distance visualization
+        let maxd = chf.maxDistance;
+        if (maxd < 1.0) maxd = 1;
+        const dscale = 255.0 / maxd;
+
+        // Count total quads to create geometry
+        let totalQuads = 0;
+        for (let y = 0; y < chf.height; y++) {
+            for (let x = 0; x < chf.width; x++) {
+                const cell = chf.cells[x + y * chf.width];
+                totalQuads += cell.count;
+            }
+        }
+
+        if (totalQuads === 0) return;
+
+        // Create arrays for vertices, indices, and colors
+        const positions: number[] = [];
+        const indices: number[] = [];
+        const colors: number[] = [];
+
+        let indexOffset = 0;
+
+        // Iterate through all cells and their spans
+        for (let y = 0; y < chf.height; y++) {
+            for (let x = 0; x < chf.width; x++) {
+                const fx = chf.bounds[0][0] + x * chf.cellSize; // bmin[0] + x * cs
+                const fz = chf.bounds[0][2] + y * chf.cellSize; // bmin[2] + y * cs
+                const cell = chf.cells[x + y * chf.width];
+
+                for (let i = cell.index; i < cell.index + cell.count; i++) {
+                    const span = chf.spans[i];
+                    
+                    // Calculate the top surface Y coordinate
+                    const fy = chf.bounds[0][1] + (span.y + 1) * chf.cellHeight; // bmin[1] + (s.y+1) * ch
+
+                    // Get distance value and scale to 0-255 range
+                    const cd = Math.min(255, Math.floor(chf.distances[i] * dscale)) / 255.0;
+                    
+                    // Create grayscale color where higher distances are brighter
+                    const color = new THREE.Color(cd, cd, cd);
+
+                    // Create quad vertices (top surface of the span)
+                    // Vertex 0: (fx, fy, fz)
+                    positions.push(fx, fy, fz);
+                    colors.push(color.r, color.g, color.b);
+
+                    // Vertex 1: (fx, fy, fz + cs)
+                    positions.push(fx, fy, fz + chf.cellSize);
+                    colors.push(color.r, color.g, color.b);
+
+                    // Vertex 2: (fx + cs, fy, fz + cs)
+                    positions.push(fx + chf.cellSize, fy, fz + chf.cellSize);
+                    colors.push(color.r, color.g, color.b);
+
+                    // Vertex 3: (fx + cs, fy, fz)
+                    positions.push(fx + chf.cellSize, fy, fz);
+                    colors.push(color.r, color.g, color.b);
+
+                    // Create two triangles for the quad
+                    // Triangle 1: 0, 1, 2
+                    indices.push(indexOffset, indexOffset + 1, indexOffset + 2);
+                    // Triangle 2: 0, 2, 3
+                    indices.push(indexOffset, indexOffset + 2, indexOffset + 3);
+
+                    indexOffset += 4;
+                }
+            }
+        }
+
+        // Create geometry
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3));
+        geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(indices), 1));
+
+        // Create material with vertex colors and some transparency
+        const material = new THREE.MeshBasicMaterial({
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.8,
+            side: THREE.DoubleSide
+        });
+
+        const mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+
+        return () => {
+            scene.remove(mesh);
+            geometry.dispose();
+            material.dispose();
+        };
+    }, [showCompactHeightFieldDistances, intermediates, scene]);
 
     return (
         <>

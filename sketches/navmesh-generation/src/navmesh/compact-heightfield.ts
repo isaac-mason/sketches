@@ -50,6 +50,8 @@ export type CompactHeightfield = {
     spans: CompactHeightfieldSpan[];
     /** array containing area id data, size = spanCount */
     areas: number[];
+    /** array containing distance field data, size = spanCount */
+    distances: number[];
 };
 
 // Constants from recastnavigation
@@ -124,6 +126,7 @@ export const buildCompactHeightfield = (
         cells: new Array(xSize * zSize),
         spans: new Array(spanCount),
         areas: new Array(spanCount),
+        distances: new Array(spanCount).fill(0),
     };
 
     // Adjust upper bound to account for walkable height
