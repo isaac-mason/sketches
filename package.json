@@ -18,7 +18,7 @@
         "@types/node": "^22.13.10",
         "bun": "^1.2.4",
         "express": "^4.21.2",
-        "typescript": "^5.8.2"
+        "typescript": "^5.8.3"
     },
     "workspaces": [
         "common",

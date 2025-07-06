@@ -1,5 +1,5 @@
+import * as path from 'node:path'
 import { $ } from 'bun'
-import * as path from 'path'
 import { sketchesOrder } from '../sketches'
 
 export const rootDirectory = path.resolve(`${import.meta.dir}`, '..')

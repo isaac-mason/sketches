@@ -14,8 +14,8 @@
     },
     "dependencies": {
         "@pmndrs/assets": "^1.6.1",
-        "@react-three/drei": "^10.0.7",
-        "@react-three/fiber": "^9.1.2",
+        "@react-three/drei": "^10.4.4",
+        "@react-three/fiber": "^9.2.0",
         "leva": "^0.10.0",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",
@@ -23,10 +23,10 @@
         "three": "^0.178.0"
     },
     "devDependencies": {
-        "@types/react": "^19.1.0",
-        "@types/react-dom": "^19.1.1",
+        "@types/react": "^19.1.8",
+        "@types/react-dom": "^19.1.6",
         "@types/three": "^0.178.0",
-        "typescript": "^5.8.2",
-        "vite": "^6.2.0"
+        "typescript": "^5.8.3",
+        "vite": "^7.0.2"
     }
 }
