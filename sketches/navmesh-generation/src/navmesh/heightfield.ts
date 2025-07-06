@@ -476,11 +476,6 @@ export const rasterizeTriangles = (
 
         const areaID = triAreaIds[triIndex];
 
-        // Only rasterize walkable triangles (non-zero area IDs)
-        if (areaID === 0) {
-            continue;
-        }
-
         if (
             !rasterizeTriangle(
                 v0,

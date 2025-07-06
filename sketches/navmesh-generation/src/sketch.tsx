@@ -71,7 +71,7 @@ const NavTestModel = () => {
     const gltf = useGLTF('/nav-test.glb');
 
     return <primitive object={gltf.scene} />;
-}
+};
 
 const App = () => {
     const scene = useThree((state) => state.scene);
@@ -128,7 +128,7 @@ const App = () => {
         showPolyMeshDetail: {
             label: 'Show Poly Mesh Detail',
             value: false,
-        }
+        },
     });
 
     const [intermediates, setIntermediates] = useState<
@@ -232,7 +232,7 @@ const App = () => {
             walkableHeightVoxels,
             walkableClimbVoxels,
         );
-        filterWalkableLowHeightSpans(heightfield, walkableClimbVoxels);
+        filterWalkableLowHeightSpans(heightfield, walkableHeightVoxels);
 
         console.timeEnd('filter walkable surfaces');
 
@@ -379,7 +379,8 @@ const App = () => {
     useEffect(() => {
         if (!intermediates || !showCompactHeightFieldDistances) return;
 
-        const debugObject = createCompactHeightfieldDistancesHelper(intermediates);
+        const debugObject =
+            createCompactHeightfieldDistancesHelper(intermediates);
         scene.add(debugObject.object);
 
         return () => {
@@ -392,7 +393,8 @@ const App = () => {
     useEffect(() => {
         if (!intermediates || !showCompactHeightFieldRegions) return;
 
-        const debugObject = createCompactHeightfieldRegionsHelper(intermediates);
+        const debugObject =
+            createCompactHeightfieldRegionsHelper(intermediates);
         scene.add(debugObject.object);
 
         return () => {
