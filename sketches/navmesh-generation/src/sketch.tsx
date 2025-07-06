@@ -77,6 +77,7 @@ const App = () => {
         showRawContours,
         showSimplifiedContours,
         showPolyMesh,
+        showPolyMeshDetail,
     } = useControls({
         showMesh: {
             label: 'Show Mesh',
@@ -114,6 +115,10 @@ const App = () => {
             label: 'Show Poly Mesh',
             value: false,
         },
+        showPolyMeshDetail: {
+            label: 'Show Poly Mesh Detail',
+            value: false,
+        }
     });
 
     const [intermediates, setIntermediates] = useState<
@@ -1539,6 +1544,260 @@ const App = () => {
             }
         };
     }, [showPolyMesh, intermediates, scene]);
+
+    // debug view of the poly mesh detail
+    useEffect(() => {
+        if (!intermediates || !showPolyMeshDetail) return;
+
+        const { polyMeshDetail } = intermediates;
+
+        if (!polyMeshDetail || polyMeshDetail.nMeshes === 0) return;
+
+        // Arrays for triangle geometry (mesh fills)
+        const triPositions: number[] = [];
+        const triColors: number[] = [];
+        const triIndices: number[] = [];
+
+        // Arrays for internal edges
+        const internalLinePositions: number[] = [];
+        const internalLineColors: number[] = [];
+
+        // Arrays for external edges
+        const externalLinePositions: number[] = [];
+        const externalLineColors: number[] = [];
+
+        // Arrays for vertices (points)
+        const vertexPositions: number[] = [];
+        const vertexColors: number[] = [];
+
+        let triVertexIndex = 0;
+
+        // Helper function to generate submesh color
+        const submeshToColor = (submeshIndex: number): THREE.Color => {
+            // Generate a unique color for each submesh
+            const hash = submeshIndex * 137.5; // Use golden ratio approximation
+            const hue = hash % 360;
+            return new THREE.Color(`hsl(${hue}, 70%, 60%)`).multiplyScalar(0.3);
+        };
+
+        // Process each submesh
+        for (let i = 0; i < polyMeshDetail.nMeshes; i++) {
+            const meshBase = i * 4;
+            const vertBase = polyMeshDetail.meshes[meshBase];
+            const vertCount = polyMeshDetail.meshes[meshBase + 1];
+            const triBase = polyMeshDetail.meshes[meshBase + 2];
+            const triCount = polyMeshDetail.meshes[meshBase + 3];
+
+            const color = submeshToColor(i);
+
+            // Draw triangles for this submesh
+            for (let j = 0; j < triCount; j++) {
+                const triIndex = (triBase + j) * 4;
+                const t0 = polyMeshDetail.triangles[triIndex];
+                const t1 = polyMeshDetail.triangles[triIndex + 1];
+                const t2 = polyMeshDetail.triangles[triIndex + 2];
+
+                // Add triangle vertices
+                for (let k = 0; k < 3; k++) {
+                    const vertIndex = k === 0 ? t0 : k === 1 ? t1 : t2;
+                    const vBase = (vertBase + vertIndex) * 3;
+
+                    triPositions.push(
+                        polyMeshDetail.vertices[vBase],
+                        polyMeshDetail.vertices[vBase + 1],
+                        polyMeshDetail.vertices[vBase + 2]
+                    );
+                    triColors.push(color.r, color.g, color.b);
+                }
+
+                // Add triangle indices
+                triIndices.push(
+                    triVertexIndex,
+                    triVertexIndex + 1,
+                    triVertexIndex + 2
+                );
+                triVertexIndex += 3;
+            }
+
+            // Draw edges for this submesh
+            for (let j = 0; j < triCount; j++) {
+                const triIndex = (triBase + j) * 4;
+                const t0 = polyMeshDetail.triangles[triIndex];
+                const t1 = polyMeshDetail.triangles[triIndex + 1];
+                const t2 = polyMeshDetail.triangles[triIndex + 2];
+                const flags = polyMeshDetail.triangles[triIndex + 3];
+
+                // Get triangle vertices
+                const v0Base = (vertBase + t0) * 3;
+                const v1Base = (vertBase + t1) * 3;
+                const v2Base = (vertBase + t2) * 3;
+
+                const v0 = [
+                    polyMeshDetail.vertices[v0Base],
+                    polyMeshDetail.vertices[v0Base + 1],
+                    polyMeshDetail.vertices[v0Base + 2]
+                ];
+                const v1 = [
+                    polyMeshDetail.vertices[v1Base],
+                    polyMeshDetail.vertices[v1Base + 1],
+                    polyMeshDetail.vertices[v1Base + 2]
+                ];
+                const v2 = [
+                    polyMeshDetail.vertices[v2Base],
+                    polyMeshDetail.vertices[v2Base + 1],
+                    polyMeshDetail.vertices[v2Base + 2]
+                ];
+
+                // Draw each edge
+                const edges: [number[], number[], number][] = [
+                    [v0, v1, (flags >> 0) & 1], // edge 0
+                    [v1, v2, (flags >> 1) & 1], // edge 1
+                    [v2, v0, (flags >> 2) & 1]  // edge 2
+                ];
+
+                for (const [va, vb, isExternal] of edges) {
+                    if (isExternal) {
+                        // External edge (thicker, brighter)
+                        externalLinePositions.push(va[0], va[1], va[2]);
+                        externalLinePositions.push(vb[0], vb[1], vb[2]);
+                        externalLineColors.push(1, 1, 1); // White
+                        externalLineColors.push(1, 1, 1);
+                    } else {
+                        // Internal edge (thinner, darker)
+                        internalLinePositions.push(va[0], va[1], va[2]);
+                        internalLinePositions.push(vb[0], vb[1], vb[2]);
+                        internalLineColors.push(0.6, 0.6, 0.6); // Gray
+                        internalLineColors.push(0.6, 0.6, 0.6);
+                    }
+                }
+            }
+
+            // Draw vertices for this submesh
+            for (let j = 0; j < vertCount; j++) {
+                const vBase = (vertBase + j) * 3;
+                vertexPositions.push(
+                    polyMeshDetail.vertices[vBase],
+                    polyMeshDetail.vertices[vBase + 1],
+                    polyMeshDetail.vertices[vBase + 2]
+                );
+                vertexColors.push(1, 0, 0); // Red vertices
+            }
+        }
+
+        // Create triangle mesh
+        const triGeometry = new THREE.BufferGeometry();
+        triGeometry.setAttribute(
+            'position',
+            new THREE.BufferAttribute(new Float32Array(triPositions), 3)
+        );
+        triGeometry.setAttribute(
+            'color',
+            new THREE.BufferAttribute(new Float32Array(triColors), 3)
+        );
+        triGeometry.setIndex(
+            new THREE.BufferAttribute(new Uint32Array(triIndices), 1)
+        );
+
+        const triMaterial = new THREE.MeshBasicMaterial({
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.6,
+            side: THREE.DoubleSide
+        });
+
+        const triMesh = new THREE.Mesh(triGeometry, triMaterial);
+        scene.add(triMesh);
+
+        // Create internal edges
+        let internalLines: THREE.LineSegments | null = null;
+        if (internalLinePositions.length > 0) {
+            const internalGeometry = new THREE.BufferGeometry();
+            internalGeometry.setAttribute(
+                'position',
+                new THREE.BufferAttribute(new Float32Array(internalLinePositions), 3)
+            );
+            internalGeometry.setAttribute(
+                'color',
+                new THREE.BufferAttribute(new Float32Array(internalLineColors), 3)
+            );
+
+            const internalMaterial = new THREE.LineBasicMaterial({
+                vertexColors: true,
+                linewidth: 1
+            });
+
+            internalLines = new THREE.LineSegments(internalGeometry, internalMaterial);
+            scene.add(internalLines);
+        }
+
+        // Create external edges
+        let externalLines: THREE.LineSegments | null = null;
+        if (externalLinePositions.length > 0) {
+            const externalGeometry = new THREE.BufferGeometry();
+            externalGeometry.setAttribute(
+                'position',
+                new THREE.BufferAttribute(new Float32Array(externalLinePositions), 3)
+            );
+            externalGeometry.setAttribute(
+                'color',
+                new THREE.BufferAttribute(new Float32Array(externalLineColors), 3)
+            );
+
+            const externalMaterial = new THREE.LineBasicMaterial({
+                vertexColors: true,
+                linewidth: 3
+            });
+
+            externalLines = new THREE.LineSegments(externalGeometry, externalMaterial);
+            scene.add(externalLines);
+        }
+
+        // Create vertex points
+        let vertexPoints: THREE.Points | null = null;
+        if (vertexPositions.length > 0) {
+            const vertexGeometry = new THREE.BufferGeometry();
+            vertexGeometry.setAttribute(
+                'position',
+                new THREE.BufferAttribute(new Float32Array(vertexPositions), 3)
+            );
+            vertexGeometry.setAttribute(
+                'color',
+                new THREE.BufferAttribute(new Float32Array(vertexColors), 3)
+            );
+
+            const vertexMaterial = new THREE.PointsMaterial({
+                vertexColors: true,
+                size: 4
+            });
+
+            vertexPoints = new THREE.Points(vertexGeometry, vertexMaterial);
+            scene.add(vertexPoints);
+        }
+
+        return () => {
+            scene.remove(triMesh);
+            triGeometry.dispose();
+            triMaterial.dispose();
+
+            if (internalLines) {
+                scene.remove(internalLines);
+                internalLines.geometry.dispose();
+                (internalLines.material as THREE.Material).dispose();
+            }
+
+            if (externalLines) {
+                scene.remove(externalLines);
+                externalLines.geometry.dispose();
+                (externalLines.material as THREE.Material).dispose();
+            }
+
+            if (vertexPoints) {
+                scene.remove(vertexPoints);
+                vertexPoints.geometry.dispose();
+                (vertexPoints.material as THREE.Material).dispose();
+            }
+        };
+    }, [showPolyMeshDetail, intermediates, scene]);
 
     return (
         <>

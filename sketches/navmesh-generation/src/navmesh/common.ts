@@ -22,3 +22,12 @@ export const getDirOffsetX = (dir: number): number => {
 export const getDirOffsetY = (dir: number): number => {
     return DIR_OFFSETS[dir & 0x03][1];
 }
+
+export const getDirForOffset = (x: number, y: number): number => {
+    for (let i = 0; i < DIR_OFFSETS.length; i++) {
+        if (DIR_OFFSETS[i][0] === x && DIR_OFFSETS[i][1] === y) {
+            return i;
+        }
+    }
+    return 0; // Default to North if no match
+};
