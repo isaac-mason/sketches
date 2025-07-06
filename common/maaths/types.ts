@@ -1,0 +1,10 @@
+export type Vec2 = [x: number, y: number];
+export type Vec3 = [x: number, y: number, z: number];
+export type Vec4 = [x: number, y: number, z: number, w: number];
+export type Quat = [x: number, y: number, z: number, w: number];
+export type Quat2 = [x: number, y: number, z: number, w: number, x2: number, y2: number, z2: number, w2: number];
+export type Mat2 = [e1: number, e2: number, e3: number, e4: number];
+export type Mat3 = [e1: number, e2: number, e3: number, e4: number, e5: number, e6: number, e7: number, e8: number, e9: number];
+export type Mat4 = [e1: number, e2: number, e3: number, e4: number, e5: number, e6: number, e7: number, e8: number, e9: number, e10: number, e11: number, e12: number, e13: number, e14: number, e15: number, e16: number];
+export type Mat2d = [e1: number, e2: number, e3: number, e4: number, e5: number, e6: number];
+export type Box3 = [min: Vec3, max: Vec3];
