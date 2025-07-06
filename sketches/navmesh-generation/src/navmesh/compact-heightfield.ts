@@ -59,7 +59,6 @@ export const NOT_CONNECTED = 0x3f; // 63
 export const MAX_HEIGHT = 0xffff;
 export const MAX_LAYERS = NOT_CONNECTED - 1;
 
-
 /**
  * Helper function to set connection data in a span
  */

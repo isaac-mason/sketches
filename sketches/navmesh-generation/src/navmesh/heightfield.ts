@@ -455,9 +455,24 @@ export const rasterizeTriangles = (
         const i1 = indices[triIndex * 3 + 1];
         const i2 = indices[triIndex * 3 + 2];
 
-        const v0 = vec3.set(_v0, vertices[i0 * 3], vertices[i0 * 3 + 1], vertices[i0 * 3 + 2]);
-        const v1 = vec3.set(_v1, vertices[i1 * 3], vertices[i1 * 3 + 1], vertices[i1 * 3 + 2]);
-        const v2 = vec3.set(_v2, vertices[i2 * 3], vertices[i2 * 3 + 1], vertices[i2 * 3 + 2]);
+        const v0 = vec3.set(
+            _v0,
+            vertices[i0 * 3],
+            vertices[i0 * 3 + 1],
+            vertices[i0 * 3 + 2],
+        );
+        const v1 = vec3.set(
+            _v1,
+            vertices[i1 * 3],
+            vertices[i1 * 3 + 1],
+            vertices[i1 * 3 + 2],
+        );
+        const v2 = vec3.set(
+            _v2,
+            vertices[i2 * 3],
+            vertices[i2 * 3 + 1],
+            vertices[i2 * 3 + 2],
+        );
 
         const areaID = triAreaIds[triIndex];
 
@@ -484,7 +499,10 @@ export const rasterizeTriangles = (
     return true;
 };
 
-export const filterLowHangingWalkableObstacles = (heightfield: Heightfield, walkableClimb: number) => {
+export const filterLowHangingWalkableObstacles = (
+    heightfield: Heightfield,
+    walkableClimb: number,
+) => {
     const xSize = heightfield.width;
     const zSize = heightfield.height;
 
@@ -497,14 +515,18 @@ export const filterLowHangingWalkableObstacles = (heightfield: Heightfield, walk
             // For each span in the column...
             const columnIndex = x + z * xSize;
             let span = heightfield.spans[columnIndex];
-            
+
             while (span != null) {
                 const walkable = span.area !== NULL_AREA;
 
                 // If current span is not walkable, but there is walkable span just below it and the height difference
                 // is small enough for the agent to walk over, mark the current span as walkable too.
-                if (!walkable && previousWasWalkable && previousSpan && 
-                    span.max - previousSpan.max <= walkableClimb) {
+                if (
+                    !walkable &&
+                    previousWasWalkable &&
+                    previousSpan &&
+                    span.max - previousSpan.max <= walkableClimb
+                ) {
                     span.area = previousAreaID;
                 }
 
@@ -519,7 +541,11 @@ export const filterLowHangingWalkableObstacles = (heightfield: Heightfield, walk
     }
 };
 
-export const filterLedgeSpans = (heightfield: Heightfield, walkableHeight: number, walkableClimb: number) => {
+export const filterLedgeSpans = (
+    heightfield: Heightfield,
+    walkableHeight: number,
+    walkableClimb: number,
+) => {
     const xSize = heightfield.width;
     const zSize = heightfield.height;
 
@@ -537,7 +563,9 @@ export const filterLedgeSpans = (heightfield: Heightfield, walkableHeight: numbe
                 }
 
                 const floor = span.max;
-                const ceiling = span.next ? span.next.min : MAX_HEIGHTFIELD_HEIGHT;
+                const ceiling = span.next
+                    ? span.next.min
+                    : MAX_HEIGHTFIELD_HEIGHT;
 
                 // The difference between this walkable area and the lowest neighbor walkable area.
                 // This is the difference between the current span and all neighbor spans that have
@@ -553,7 +581,12 @@ export const filterLedgeSpans = (heightfield: Heightfield, walkableHeight: numbe
                     const neighborZ = z + DIR_OFFSETS[direction][1];
 
                     // Skip neighbours which are out of bounds.
-                    if (neighborX < 0 || neighborZ < 0 || neighborX >= xSize || neighborZ >= zSize) {
+                    if (
+                        neighborX < 0 ||
+                        neighborZ < 0 ||
+                        neighborX >= xSize ||
+                        neighborZ >= zSize
+                    ) {
                         lowestNeighborFloorDifference = -walkableClimb - 1;
                         break;
                     }
@@ -563,10 +596,15 @@ export const filterLedgeSpans = (heightfield: Heightfield, walkableHeight: numbe
 
                     // The most we can step down to the neighbor is the walkableClimb distance.
                     // Start with the area under the neighbor span
-                    let neighborCeiling = neighborSpan ? neighborSpan.min : MAX_HEIGHTFIELD_HEIGHT;
+                    let neighborCeiling = neighborSpan
+                        ? neighborSpan.min
+                        : MAX_HEIGHTFIELD_HEIGHT;
 
                     // Skip neighbour if the gap between the spans is too small.
-                    if (Math.min(ceiling, neighborCeiling) - floor >= walkableHeight) {
+                    if (
+                        Math.min(ceiling, neighborCeiling) - floor >=
+                        walkableHeight
+                    ) {
                         lowestNeighborFloorDifference = -walkableClimb - 1;
                         break;
                     }
@@ -574,24 +612,41 @@ export const filterLedgeSpans = (heightfield: Heightfield, walkableHeight: numbe
                     // For each span in the neighboring column...
                     while (neighborSpan != null) {
                         const neighborFloor = neighborSpan.max;
-                        neighborCeiling = neighborSpan.next ? neighborSpan.next.min : MAX_HEIGHTFIELD_HEIGHT;
+                        neighborCeiling = neighborSpan.next
+                            ? neighborSpan.next.min
+                            : MAX_HEIGHTFIELD_HEIGHT;
 
                         // Only consider neighboring areas that have enough overlap to be potentially traversable.
-                        if (Math.min(ceiling, neighborCeiling) - Math.max(floor, neighborFloor) < walkableHeight) {
+                        if (
+                            Math.min(ceiling, neighborCeiling) -
+                                Math.max(floor, neighborFloor) <
+                            walkableHeight
+                        ) {
                             // No space to traverse between them.
                             neighborSpan = neighborSpan.next || null;
                             continue;
                         }
 
                         const neighborFloorDifference = neighborFloor - floor;
-                        lowestNeighborFloorDifference = Math.min(lowestNeighborFloorDifference, neighborFloorDifference);
+                        lowestNeighborFloorDifference = Math.min(
+                            lowestNeighborFloorDifference,
+                            neighborFloorDifference,
+                        );
 
                         // Find min/max accessible neighbor height.
                         // Only consider neighbors that are at most walkableClimb away.
-                        if (Math.abs(neighborFloorDifference) <= walkableClimb) {
+                        if (
+                            Math.abs(neighborFloorDifference) <= walkableClimb
+                        ) {
                             // There is space to move to the neighbor cell and the slope isn't too much.
-                            lowestTraversableNeighborFloor = Math.min(lowestTraversableNeighborFloor, neighborFloor);
-                            highestTraversableNeighborFloor = Math.max(highestTraversableNeighborFloor, neighborFloor);
+                            lowestTraversableNeighborFloor = Math.min(
+                                lowestTraversableNeighborFloor,
+                                neighborFloor,
+                            );
+                            highestTraversableNeighborFloor = Math.max(
+                                highestTraversableNeighborFloor,
+                                neighborFloor,
+                            );
                         } else if (neighborFloorDifference < -walkableClimb) {
                             // We already know this will be considered a ledge span so we can early-out
                             break;
@@ -607,7 +662,11 @@ export const filterLedgeSpans = (heightfield: Heightfield, walkableHeight: numbe
                     span.area = NULL_AREA;
                 }
                 // If the difference between all neighbor floors is too large, this is a steep slope, so mark the span as an unwalkable ledge.
-                else if (highestTraversableNeighborFloor - lowestTraversableNeighborFloor > walkableClimb) {
+                else if (
+                    highestTraversableNeighborFloor -
+                        lowestTraversableNeighborFloor >
+                    walkableClimb
+                ) {
                     span.area = NULL_AREA;
                 }
 
@@ -633,8 +692,10 @@ export const filterWalkableLowHeightSpans = (
 
             while (span != null) {
                 const floor = span.max;
-                const ceiling = span.next ? span.next.min : MAX_HEIGHTFIELD_HEIGHT;
-                
+                const ceiling = span.next
+                    ? span.next.min
+                    : MAX_HEIGHTFIELD_HEIGHT;
+
                 if (ceiling - floor < walkableHeight) {
                     span.area = NULL_AREA;
                 }

@@ -1,6 +1,10 @@
-import { NULL_AREA } from "./area";
-import { DIR_OFFSETS } from "./common";
-import { type CompactHeightfield, getCon, NOT_CONNECTED } from "./compact-heightfield";
+import { NULL_AREA } from './area';
+import { DIR_OFFSETS } from './common';
+import {
+    type CompactHeightfield,
+    getCon,
+    NOT_CONNECTED,
+} from './compact-heightfield';
 
 export const erodeWalkableArea = (
     walkableRadiusVoxels: number,
