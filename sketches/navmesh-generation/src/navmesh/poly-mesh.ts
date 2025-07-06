@@ -312,9 +312,9 @@ const triangulate = (n: number, verts: number[], indices: number[], tris: number
     return ntris;
 };
 
-const countPolyVerts = (p: number[], maxVerticesPerPoly: number): number => {
+const countPolyVerts = (polys: number[], start: number, maxVerticesPerPoly: number): number => {
     for (let i = 0; i < maxVerticesPerPoly; i++) {
-        if (p[i] === MESH_NULL_IDX) return i;
+        if (polys[start + i] === MESH_NULL_IDX) return i;
     }
     return maxVerticesPerPoly;
 };
@@ -324,13 +324,14 @@ const uleft = (a: number[], b: number[], c: number[]): boolean => {
 };
 
 const getPolyMergeValue = (
-    pa: number[],
-    pb: number[],
+    polys: number[],
+    paStart: number,
+    pbStart: number,
     verts: number[],
     maxVerticesPerPoly: number
 ): { value: number; ea: number; eb: number } => {
-    const na = countPolyVerts(pa, maxVerticesPerPoly);
-    const nb = countPolyVerts(pb, maxVerticesPerPoly);
+    const na = countPolyVerts(polys, paStart, maxVerticesPerPoly);
+    const nb = countPolyVerts(polys, pbStart, maxVerticesPerPoly);
 
     if (na + nb - 2 > maxVerticesPerPoly) {
         return { value: -1, ea: -1, eb: -1 };
@@ -341,13 +342,13 @@ const getPolyMergeValue = (
 
     // Check if polygons share an edge
     for (let i = 0; i < na; i++) {
-        let va0 = pa[i];
-        let va1 = pa[(i + 1) % na];
+        let va0 = polys[paStart + i];
+        let va1 = polys[paStart + (i + 1) % na];
         if (va0 > va1) [va0, va1] = [va1, va0];
 
         for (let j = 0; j < nb; j++) {
-            let vb0 = pb[j];
-            let vb1 = pb[(j + 1) % nb];
+            let vb0 = polys[pbStart + j];
+            let vb1 = polys[pbStart + (j + 1) % nb];
             if (vb0 > vb1) [vb0, vb1] = [vb1, vb0];
 
             if (va0 === vb0 && va1 === vb1) {
@@ -363,26 +364,26 @@ const getPolyMergeValue = (
     }
 
     // Check convexity
-    const va = pa[(ea + na - 1) % na];
-    const vb = pa[ea];
-    const vc = pb[(eb + 2) % nb];
+    const va = polys[paStart + (ea + na - 1) % na];
+    const vb = polys[paStart + ea];
+    const vc = polys[pbStart + (eb + 2) % nb];
     if (!uleft([verts[va * 3], 0, verts[va * 3 + 2]], 
                [verts[vb * 3], 0, verts[vb * 3 + 2]], 
                [verts[vc * 3], 0, verts[vc * 3 + 2]])) {
         return { value: -1, ea: -1, eb: -1 };
     }
 
-    const va2 = pb[(eb + nb - 1) % nb];
-    const vb2 = pb[eb];
-    const vc2 = pa[(ea + 2) % na];
+    const va2 = polys[pbStart + (eb + nb - 1) % nb];
+    const vb2 = polys[pbStart + eb];
+    const vc2 = polys[paStart + (ea + 2) % na];
     if (!uleft([verts[va2 * 3], 0, verts[va2 * 3 + 2]], 
                [verts[vb2 * 3], 0, verts[vb2 * 3 + 2]], 
                [verts[vc2 * 3], 0, verts[vc2 * 3 + 2]])) {
         return { value: -1, ea: -1, eb: -1 };
     }
 
-    const vaEdge = pa[ea];
-    const vbEdge = pa[(ea + 1) % na];
+    const vaEdge = polys[paStart + ea];
+    const vbEdge = polys[paStart + (ea + 1) % na];
     const dx = verts[vaEdge * 3] - verts[vbEdge * 3];
     const dy = verts[vaEdge * 3 + 2] - verts[vbEdge * 3 + 2];
 
@@ -390,30 +391,36 @@ const getPolyMergeValue = (
 };
 
 const mergePolyVerts = (
-    pa: number[],
-    pb: number[],
+    polys: number[],
+    paStart: number,
+    pbStart: number,
     ea: number,
     eb: number,
-    tmp: number[],
+    tmpStart: number,
     maxVerticesPerPoly: number
 ): void => {
-    const na = countPolyVerts(pa, maxVerticesPerPoly);
-    const nb = countPolyVerts(pb, maxVerticesPerPoly);
+    const na = countPolyVerts(polys, paStart, maxVerticesPerPoly);
+    const nb = countPolyVerts(polys, pbStart, maxVerticesPerPoly);
 
-    tmp.fill(MESH_NULL_IDX);
+    // Clear tmp area
+    for (let i = 0; i < maxVerticesPerPoly; i++) {
+        polys[tmpStart + i] = MESH_NULL_IDX;
+    }
+    
     let n = 0;
 
     // Add pa
     for (let i = 0; i < na - 1; i++) {
-        tmp[n++] = pa[(ea + 1 + i) % na];
+        polys[tmpStart + n++] = polys[paStart + (ea + 1 + i) % na];
     }
     // Add pb
     for (let i = 0; i < nb - 1; i++) {
-        tmp[n++] = pb[(eb + 1 + i) % nb];
+        polys[tmpStart + n++] = polys[pbStart + (eb + 1 + i) % nb];
     }
 
+    // Copy back to pa
     for (let i = 0; i < maxVerticesPerPoly; i++) {
-        pa[i] = tmp[i];
+        polys[paStart + i] = polys[tmpStart + i];
     }
 };
 
@@ -424,8 +431,8 @@ const buildMeshAdjacency = (
     vertsPerPoly: number
 ): boolean => {
     const maxEdgeCount = npolys * vertsPerPoly;
-    const firstEdge = new Array(nverts + maxEdgeCount).fill(MESH_NULL_IDX);
-    const nextEdge = firstEdge.slice(nverts);
+    const firstEdge = new Array(nverts).fill(MESH_NULL_IDX);
+    const nextEdge = new Array(maxEdgeCount).fill(MESH_NULL_IDX);
     let edgeCount = 0;
 
     const edges: Edge[] = [];
@@ -534,7 +541,7 @@ export const buildPolyMesh = (
     const indices = new Array(maxVertsPerCont);
     const tris = new Array(maxVertsPerCont * 3);
     const polys = new Array((maxVertsPerCont + 1) * maxVerticesPerPoly).fill(MESH_NULL_IDX);
-    const tmpPoly = polys.slice(maxVertsPerCont * maxVerticesPerPoly);
+    const tmpPolyStart = maxVertsPerCont * maxVerticesPerPoly;
 
     const nv = { value: 0 };
 
@@ -597,9 +604,9 @@ export const buildPolyMesh = (
 
                 for (let j = 0; j < npolys - 1; j++) {
                     for (let k = j + 1; k < npolys; k++) {
-                        const pj = polys.slice(j * maxVerticesPerPoly, (j + 1) * maxVerticesPerPoly);
-                        const pk = polys.slice(k * maxVerticesPerPoly, (k + 1) * maxVerticesPerPoly);
-                        const result = getPolyMergeValue(pj, pk, mesh.vertices, maxVerticesPerPoly);
+                        const paStart = j * maxVerticesPerPoly;
+                        const pbStart = k * maxVerticesPerPoly;
+                        const result = getPolyMergeValue(polys, paStart, pbStart, mesh.vertices, maxVerticesPerPoly);
                         if (result.value > bestMergeVal) {
                             bestMergeVal = result.value;
                             bestPa = j;
@@ -611,18 +618,13 @@ export const buildPolyMesh = (
                 }
 
                 if (bestMergeVal > 0) {
-                    const pa = polys.slice(bestPa * maxVerticesPerPoly, (bestPa + 1) * maxVerticesPerPoly);
-                    const pb = polys.slice(bestPb * maxVerticesPerPoly, (bestPb + 1) * maxVerticesPerPoly);
-                    mergePolyVerts(pa, pb, bestEa, bestEb, tmpPoly, maxVerticesPerPoly);
-                    
-                    // Copy merged poly back to the original array
-                    for (let m = 0; m < maxVerticesPerPoly; m++) {
-                        polys[bestPa * maxVerticesPerPoly + m] = pa[m];
-                    }
+                    const paStart = bestPa * maxVerticesPerPoly;
+                    const pbStart = bestPb * maxVerticesPerPoly;
+                    mergePolyVerts(polys, paStart, pbStart, bestEa, bestEb, tmpPolyStart, maxVerticesPerPoly);
 
                     // Move last poly to fill gap
                     for (let m = 0; m < maxVerticesPerPoly; m++) {
-                        polys[bestPb * maxVerticesPerPoly + m] = polys[(npolys - 1) * maxVerticesPerPoly + m];
+                        polys[pbStart + m] = polys[(npolys - 1) * maxVerticesPerPoly + m];
                     }
                     npolys--;
                 } else {
