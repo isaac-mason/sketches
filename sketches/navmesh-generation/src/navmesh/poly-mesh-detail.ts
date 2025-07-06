@@ -93,12 +93,16 @@ const vcross2 = (p1: number[], p2: number[], p3: number[], p1Start = 0, p2Start 
     return u1 * v2 - v1 * u2;
 };
 
+const _circumCircleV1 = vec3.create();
+const _circumCircleV2 = vec3.create();
+const _circumCircleV3 = vec3.create();
+
 // Geometric utility functions
 const circumCircle = (p1: number[], p2: number[], p3: number[], c: number[], p1Start = 0, p2Start = 0, p3Start = 0, cStart = 0): [boolean, number] => {
     // Calculate the circle relative to p1, to avoid some precision issues.
-    const v1 = [0, 0, 0];
-    const v2 = vec3.create();
-    const v3 = vec3.create();
+    const v1 = _circumCircleV1;
+    const v2 = _circumCircleV2;
+    const v3 = _circumCircleV3;
     
     const p1Vec = getVec3(p1, p1Start);
     const p2Vec = getVec3(p2, p2Start);
