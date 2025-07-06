@@ -1,5 +1,6 @@
 import type { Box3 } from "@/common/maaths";
 import type { Heightfield } from "./heightfield";
+import { NULL_AREA } from "./area";
 
 export type CompactHeightfieldSpan = {
     /** the lower extent of the span. measured from the heightfields base. */
@@ -50,15 +51,71 @@ export type CompactHeightfield = {
     areas: number[];
 };
 
+
+// Constants from recastnavigation
+const RC_NOT_CONNECTED = 0x3f; // 63
+const MAX_HEIGHT = 0xffff;
+const MAX_LAYERS = RC_NOT_CONNECTED - 1;
+
+// Direction offsets for 4-directional neighbor access (N, E, S, W)
+const DIR_OFFSETS = [
+    [0, -1], // North (negative Z)
+    [1, 0],  // East (positive X)
+    [0, 1],  // South (positive Z)
+    [-1, 0], // West (negative X)
+];
+
+/**
+ * Helper function to set connection data in a span
+ */
+const setCon = (span: CompactHeightfieldSpan, dir: number, layerIndex: number) => {
+    const shift = dir * 6; // 6 bits per direction
+    const mask = 0x3f << shift; // 6-bit mask
+    span.con = (span.con & ~mask) | ((layerIndex & 0x3f) << shift);
+};
+
+/**
+ * Helper function to get connection data from a span
+ */
+const getCon = (span: CompactHeightfieldSpan, dir: number): number => {
+    const shift = dir * 6; // 6 bits per direction
+    return (span.con >> shift) & 0x3f;
+};
+
+/**
+ * Count the number of walkable spans in the heightfield
+ */
+const getHeightFieldSpanCount = (heightfield: Heightfield): number => {
+    const numCols = heightfield.width * heightfield.height;
+    let spanCount = 0;
+    
+    for (let columnIndex = 0; columnIndex < numCols; ++columnIndex) {
+        let span = heightfield.spans[columnIndex];
+        while (span != null) {
+            if (span.area !== NULL_AREA) {
+                spanCount++;
+            }
+            span = span.next || null;
+        }
+    }
+    
+    return spanCount;
+};
+
 export const buildCompactHeightfield = (
     walkableHeightVoxels: number,
     walkableClimbVoxels: number,
     heightfield: Heightfield,
 ): CompactHeightfield => {
+    const xSize = heightfield.width;
+    const zSize = heightfield.height;
+    const spanCount = getHeightFieldSpanCount(heightfield);
+
+    // Fill in header
     const compactHeightfield: CompactHeightfield = {
-        width: heightfield.width,
-        height: heightfield.height,
-        spanCount: 0,
+        width: xSize,
+        height: zSize,
+        spanCount,
         walkableHeightVoxels,
         walkableClimbVoxels,
         borderSize: 0,
@@ -67,17 +124,117 @@ export const buildCompactHeightfield = (
         bounds: structuredClone(heightfield.bounds),
         cellSize: heightfield.cellSize,
         cellHeight: heightfield.cellHeight,
-        cells: new Array(heightfield.width * heightfield.height).fill(null).map(() => {
-            return {
-                index: 0,
-                count: 0,
-            };
-        }),
-        spans: [],
-        areas: [],
+        cells: new Array(xSize * zSize),
+        spans: new Array(spanCount),
+        areas: new Array(spanCount),
     };
 
+    // Adjust upper bound to account for walkable height
+    compactHeightfield.bounds[1][1] += walkableHeightVoxels * heightfield.cellHeight;
 
+    // Initialize cells
+    for (let i = 0; i < xSize * zSize; i++) {
+        compactHeightfield.cells[i] = {
+            index: 0,
+            count: 0,
+        };
+    }
+
+    // Initialize spans
+    for (let i = 0; i < spanCount; i++) {
+        compactHeightfield.spans[i] = {
+            y: 0,
+            reg: 0,
+            con: 0,
+            h: 0,
+        };
+        compactHeightfield.areas[i] = NULL_AREA;
+    }
+
+    // Fill in cells and spans
+    let currentCellIndex = 0;
+    const numColumns = xSize * zSize;
+    
+    for (let columnIndex = 0; columnIndex < numColumns; ++columnIndex) {
+        let span = heightfield.spans[columnIndex];
+        
+        // If there are no spans at this cell, just leave the data to index=0, count=0.
+        if (span == null) {
+            continue;
+        }
+        
+        const cell = compactHeightfield.cells[columnIndex];
+        cell.index = currentCellIndex;
+        cell.count = 0;
+
+        while (span != null) {
+            if (span.area !== NULL_AREA) {
+                const bot = span.max;
+                const top = span.next ? span.next.min : MAX_HEIGHT;
+                
+                compactHeightfield.spans[currentCellIndex].y = Math.min(Math.max(bot, 0), 0xffff);
+                compactHeightfield.spans[currentCellIndex].h = Math.min(Math.max(top - bot, 0), 0xff);
+                compactHeightfield.areas[currentCellIndex] = span.area;
+                
+                currentCellIndex++;
+                cell.count++;
+            }
+            span = span.next || null;
+        }
+    }
+
+    // Find neighbour connections
+    let maxLayerIndex = 0;
+    const zStride = xSize; // for readability
+    
+    for (let z = 0; z < zSize; ++z) {
+        for (let x = 0; x < xSize; ++x) {
+            const cell = compactHeightfield.cells[x + z * zStride];
+            
+            for (let i = cell.index; i < cell.index + cell.count; ++i) {
+                const span = compactHeightfield.spans[i];
+
+                for (let dir = 0; dir < 4; ++dir) {
+                    setCon(span, dir, RC_NOT_CONNECTED);
+                    
+                    const neighborX = x + DIR_OFFSETS[dir][0];
+                    const neighborZ = z + DIR_OFFSETS[dir][1];
+                    
+                    // First check that the neighbour cell is in bounds.
+                    if (neighborX < 0 || neighborZ < 0 || neighborX >= xSize || neighborZ >= zSize) {
+                        continue;
+                    }
+
+                    // Iterate over all neighbour spans and check if any of them is
+                    // accessible from current cell.
+                    const neighborCell = compactHeightfield.cells[neighborX + neighborZ * zStride];
+                    
+                    for (let k = neighborCell.index; k < neighborCell.index + neighborCell.count; ++k) {
+                        const neighborSpan = compactHeightfield.spans[k];
+                        const bot = Math.max(span.y, neighborSpan.y);
+                        const top = Math.min(span.y + span.h, neighborSpan.y + neighborSpan.h);
+
+                        // Check that the gap between the spans is walkable,
+                        // and that the climb height between the gaps is not too high.
+                        if ((top - bot) >= walkableHeightVoxels && Math.abs(neighborSpan.y - span.y) <= walkableClimbVoxels) {
+                            // Mark direction as walkable.
+                            const layerIndex = k - neighborCell.index;
+                            if (layerIndex < 0 || layerIndex > MAX_LAYERS) {
+                                maxLayerIndex = Math.max(maxLayerIndex, layerIndex);
+                                continue;
+                            }
+                            setCon(span, dir, layerIndex);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (maxLayerIndex > MAX_LAYERS) {
+        console.warn(`buildCompactHeightfield: Heightfield has too many layers ${maxLayerIndex} (max: ${MAX_LAYERS})`);
+    }
 
     return compactHeightfield;
-}
+};
