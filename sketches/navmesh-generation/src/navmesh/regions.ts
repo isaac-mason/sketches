@@ -1,6 +1,7 @@
 import type { CompactHeightfield } from './compact-heightfield';
 import { getCon, NOT_CONNECTED } from './compact-heightfield';
 import { DIR_OFFSETS } from './common';
+import { NULL_AREA } from './area';
 
 /**
  * Calculate distance field using a two-pass distance transform algorithm
@@ -255,6 +256,870 @@ export const buildDistanceField = (compactHeightfield: CompactHeightfield) => {
     if (result === dst) {
         for (let i = 0; i < compactHeightfield.spanCount; i++) {
             compactHeightfield.distances[i] = dst[i];
+        }
+    }
+};
+
+export const buildRegions = (
+    compactHeightfield: CompactHeightfield,
+    borderSize: number,
+    minRegionArea: number,
+    mergeRegionArea: number,
+) => {
+    // Region building constants
+    const BORDER_REG = 0x8000;
+    const LOG_NB_STACKS = 3;
+    const NB_STACKS = 1 << LOG_NB_STACKS;
+    const expandIters = 8;
+
+    const w = compactHeightfield.width;
+    const h = compactHeightfield.height;
+
+    // Initialize region and distance buffers
+    const srcReg = new Array(compactHeightfield.spanCount).fill(0);
+    const srcDist = new Array(compactHeightfield.spanCount).fill(0);
+
+    let regionId = 1;
+    let level = (compactHeightfield.maxDistance + 1) & ~1;
+
+    // Level stack entry for region growing
+    interface LevelStackEntry {
+        x: number;
+        y: number;
+        index: number;
+    }
+
+    // Initialize level stacks
+    const lvlStacks: LevelStackEntry[][] = [];
+    for (let i = 0; i < NB_STACKS; i++) {
+        lvlStacks[i] = [];
+    }
+    const stack: LevelStackEntry[] = [];
+
+    // Paint border regions if border size is specified
+    if (borderSize > 0) {
+        const bw = Math.min(w, borderSize);
+        const bh = Math.min(h, borderSize);
+
+        // Paint border rectangles
+        paintRectRegion(0, bw, 0, h, regionId | BORDER_REG, compactHeightfield, srcReg);
+        regionId++;
+        paintRectRegion(w - bw, w, 0, h, regionId | BORDER_REG, compactHeightfield, srcReg);
+        regionId++;
+        paintRectRegion(0, w, 0, bh, regionId | BORDER_REG, compactHeightfield, srcReg);
+        regionId++;
+        paintRectRegion(0, w, h - bh, h, regionId | BORDER_REG, compactHeightfield, srcReg);
+        regionId++;
+    }
+
+    compactHeightfield.borderSize = borderSize;
+
+    let sId = -1;
+    while (level > 0) {
+        level = level >= 2 ? level - 2 : 0;
+        sId = (sId + 1) & (NB_STACKS - 1);
+
+        if (sId === 0) {
+            sortCellsByLevel(level, compactHeightfield, srcReg, NB_STACKS, lvlStacks, 1);
+        } else {
+            appendStacks(lvlStacks[sId - 1], lvlStacks[sId], srcReg);
+        }
+
+        // Expand current regions until no empty connected cells found
+        expandRegions(expandIters, level, compactHeightfield, srcReg, srcDist, lvlStacks[sId], false);
+
+        // Mark new regions with IDs
+        for (let j = 0; j < lvlStacks[sId].length; j++) {
+            const current = lvlStacks[sId][j];
+            const x = current.x;
+            const y = current.y;
+            const i = current.index;
+
+            if (i >= 0 && srcReg[i] === 0) {
+                if (floodRegion(x, y, i, level, regionId, compactHeightfield, srcReg, srcDist, stack)) {
+                    if (regionId === 0xFFFF) {
+                        throw new Error('Region ID overflow');
+                    }
+                    regionId++;
+                }
+            }
+        }
+    }
+
+    // Expand current regions until no empty connected cells found
+    expandRegions(expandIters * 8, 0, compactHeightfield, srcReg, srcDist, stack, true);
+
+    // Merge regions and filter out small regions
+    const overlaps: number[] = [];
+    compactHeightfield.maxRegions = regionId;
+    
+    if (!mergeAndFilterRegions(minRegionArea, mergeRegionArea, compactHeightfield, srcReg, overlaps)) {
+        throw new Error('Failed to merge and filter regions');
+    }
+
+    // Write the result to compact heightfield spans
+    for (let i = 0; i < compactHeightfield.spanCount; i++) {
+        compactHeightfield.spans[i].reg = srcReg[i];
+    }
+
+    return true;
+};
+
+/**
+ * Paint a rectangular region with the given region ID
+ */
+const paintRectRegion = (
+    minx: number,
+    maxx: number,
+    miny: number,
+    maxy: number,
+    regId: number,
+    compactHeightfield: CompactHeightfield,
+    srcReg: number[],
+) => {
+    const w = compactHeightfield.width;
+    for (let y = miny; y < maxy; y++) {
+        for (let x = minx; x < maxx; x++) {
+            const cell = compactHeightfield.cells[x + y * w];
+            for (let i = cell.index; i < cell.index + cell.count; i++) {
+                if (compactHeightfield.areas[i] !== NULL_AREA) {
+                    srcReg[i] = regId;
+                }
+            }
+        }
+    }
+};
+
+/**
+ * Sort cells by their distance level into stacks
+ */
+const sortCellsByLevel = (
+    startLevel: number,
+    compactHeightfield: CompactHeightfield,
+    srcReg: number[],
+    nbStacks: number,
+    stacks: { x: number; y: number; index: number }[][],
+    logLevelsPerStack: number,
+) => {
+    const w = compactHeightfield.width;
+    const h = compactHeightfield.height;
+    const adjustedStartLevel = startLevel >> logLevelsPerStack;
+
+    // Clear all stacks
+    for (let j = 0; j < nbStacks; j++) {
+        stacks[j].length = 0;
+    }
+
+    // Put all cells in the level range into appropriate stacks
+    for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+            const cell = compactHeightfield.cells[x + y * w];
+            for (let i = cell.index; i < cell.index + cell.count; i++) {
+                if (compactHeightfield.areas[i] === NULL_AREA || srcReg[i] !== 0) {
+                    continue;
+                }
+
+                const level = compactHeightfield.distances[i] >> logLevelsPerStack;
+                let sId = adjustedStartLevel - level;
+                if (sId >= nbStacks) {
+                    continue;
+                }
+                if (sId < 0) {
+                    sId = 0;
+                }
+
+                stacks[sId].push({ x, y, index: i });
+            }
+        }
+    }
+};
+
+/**
+ * Append entries from source stack to destination stack
+ */
+const appendStacks = (
+    srcStack: { x: number; y: number; index: number }[],
+    dstStack: { x: number; y: number; index: number }[],
+    srcReg: number[],
+) => {
+    for (let j = 0; j < srcStack.length; j++) {
+        const entry = srcStack[j];
+        if (entry.index < 0 || srcReg[entry.index] !== 0) {
+            continue;
+        }
+        dstStack.push(entry);
+    }
+};
+
+/**
+ * Flood fill a region starting from a given point
+ */
+const floodRegion = (
+    x: number,
+    y: number,
+    i: number,
+    level: number,
+    r: number,
+    compactHeightfield: CompactHeightfield,
+    srcReg: number[],
+    srcDist: number[],
+    stack: { x: number; y: number; index: number }[],
+): boolean => {
+    const BORDER_REG = 0x8000;
+    const w = compactHeightfield.width;
+    const area = compactHeightfield.areas[i];
+
+    // Flood fill mark region
+    stack.length = 0;
+    stack.push({ x, y, index: i });
+    srcReg[i] = r;
+    srcDist[i] = 0;
+
+    const lev = level >= 2 ? level - 2 : 0;
+    let count = 0;
+
+    while (stack.length > 0) {
+        const current = stack.pop()!;
+        const cx = current.x;
+        const cy = current.y;
+        const ci = current.index;
+
+        const span = compactHeightfield.spans[ci];
+
+        // Check if any neighbors already have a valid region set
+        let ar = 0;
+        for (let dir = 0; dir < 4; dir++) {
+            if (getCon(span, dir) !== NOT_CONNECTED) {
+                const ax = cx + DIR_OFFSETS[dir][0];
+                const ay = cy + DIR_OFFSETS[dir][1];
+                const ai = compactHeightfield.cells[ax + ay * w].index + getCon(span, dir);
+
+                if (compactHeightfield.areas[ai] !== area) {
+                    continue;
+                }
+
+                const nr = srcReg[ai];
+                if (nr & BORDER_REG) {
+                    continue;
+                }
+                if (nr !== 0 && nr !== r) {
+                    ar = nr;
+                    break;
+                }
+
+                const aSpan = compactHeightfield.spans[ai];
+                const dir2 = (dir + 1) & 0x3;
+                if (getCon(aSpan, dir2) !== NOT_CONNECTED) {
+                    const ax2 = ax + DIR_OFFSETS[dir2][0];
+                    const ay2 = ay + DIR_OFFSETS[dir2][1];
+                    const ai2 = compactHeightfield.cells[ax2 + ay2 * w].index + getCon(aSpan, dir2);
+
+                    if (compactHeightfield.areas[ai2] !== area) {
+                        continue;
+                    }
+
+                    const nr2 = srcReg[ai2];
+                    if (nr2 !== 0 && nr2 !== r) {
+                        ar = nr2;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (ar !== 0) {
+            srcReg[ci] = 0;
+            continue;
+        }
+
+        count++;
+
+        // Expand neighbors
+        for (let dir = 0; dir < 4; dir++) {
+            if (getCon(span, dir) !== NOT_CONNECTED) {
+                const ax = cx + DIR_OFFSETS[dir][0];
+                const ay = cy + DIR_OFFSETS[dir][1];
+                const ai = compactHeightfield.cells[ax + ay * w].index + getCon(span, dir);
+
+                if (compactHeightfield.areas[ai] !== area) {
+                    continue;
+                }
+                if (compactHeightfield.distances[ai] >= lev && srcReg[ai] === 0) {
+                    srcReg[ai] = r;
+                    srcDist[ai] = 0;
+                    stack.push({ x: ax, y: ay, index: ai });
+                }
+            }
+        }
+    }
+
+    return count > 0;
+};
+
+/**
+ * Expand regions iteratively
+ */
+const expandRegions = (
+    maxIter: number,
+    level: number,
+    compactHeightfield: CompactHeightfield,
+    srcReg: number[],
+    srcDist: number[],
+    stack: { x: number; y: number; index: number }[],
+    fillStack: boolean,
+) => {
+    const BORDER_REG = 0x8000;
+    const w = compactHeightfield.width;
+    const h = compactHeightfield.height;
+
+    if (fillStack) {
+        // Find cells revealed by the raised level
+        stack.length = 0;
+        for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+                const cell = compactHeightfield.cells[x + y * w];
+                for (let i = cell.index; i < cell.index + cell.count; i++) {
+                    if (
+                        compactHeightfield.distances[i] >= level &&
+                        srcReg[i] === 0 &&
+                        compactHeightfield.areas[i] !== NULL_AREA
+                    ) {
+                        stack.push({ x, y, index: i });
+                    }
+                }
+            }
+        }
+    } else {
+        // Mark cells which already have a region
+        for (let j = 0; j < stack.length; j++) {
+            const i = stack[j].index;
+            if (srcReg[i] !== 0) {
+                stack[j].index = -1;
+            }
+        }
+    }
+
+    interface DirtyEntry {
+        index: number;
+        region: number;
+        distance2: number;
+    }
+
+    const dirtyEntries: DirtyEntry[] = [];
+    let iter = 0;
+
+    while (stack.length > 0) {
+        let failed = 0;
+        dirtyEntries.length = 0;
+
+        for (let j = 0; j < stack.length; j++) {
+            const x = stack[j].x;
+            const y = stack[j].y;
+            const i = stack[j].index;
+
+            if (i < 0) {
+                failed++;
+                continue;
+            }
+
+            let r = srcReg[i];
+            let d2 = 0xffff;
+            const area = compactHeightfield.areas[i];
+            const span = compactHeightfield.spans[i];
+
+            for (let dir = 0; dir < 4; dir++) {
+                if (getCon(span, dir) === NOT_CONNECTED) continue;
+
+                const ax = x + DIR_OFFSETS[dir][0];
+                const ay = y + DIR_OFFSETS[dir][1];
+                const ai = compactHeightfield.cells[ax + ay * w].index + getCon(span, dir);
+
+                if (compactHeightfield.areas[ai] !== area) continue;
+
+                if (srcReg[ai] > 0 && (srcReg[ai] & BORDER_REG) === 0) {
+                    if (srcDist[ai] + 2 < d2) {
+                        r = srcReg[ai];
+                        d2 = srcDist[ai] + 2;
+                    }
+                }
+            }
+
+            if (r) {
+                stack[j].index = -1; // mark as used
+                dirtyEntries.push({ index: i, region: r, distance2: d2 });
+            } else {
+                failed++;
+            }
+        }
+
+        // Copy entries that differ to keep them in sync
+        for (let i = 0; i < dirtyEntries.length; i++) {
+            const entry = dirtyEntries[i];
+            srcReg[entry.index] = entry.region;
+            srcDist[entry.index] = entry.distance2;
+        }
+
+        if (failed === stack.length) {
+            break;
+        }
+
+        if (level > 0) {
+            iter++;
+            if (iter >= maxIter) {
+                break;
+            }
+        }
+    }
+};
+
+/**
+ * Region data structure for merging and filtering
+ */
+interface Region {
+    spanCount: number;
+    id: number;
+    areaType: number;
+    remap: boolean;
+    visited: boolean;
+    overlap: boolean;
+    connectsToBorder: boolean;
+    ymin: number;
+    ymax: number;
+    connections: number[];
+    floors: number[];
+}
+
+/**
+ * Merge and filter regions based on size criteria
+ */
+const mergeAndFilterRegions = (
+    minRegionArea: number,
+    mergeRegionSize: number,
+    compactHeightfield: CompactHeightfield,
+    srcReg: number[],
+    overlaps: number[],
+): boolean => {
+    const BORDER_REG = 0x8000;
+    const w = compactHeightfield.width;
+    const h = compactHeightfield.height;
+    const nreg = compactHeightfield.maxRegions + 1;
+
+    // Construct regions
+    const regions: Region[] = [];
+    for (let i = 0; i < nreg; i++) {
+        regions.push({
+            spanCount: 0,
+            id: i,
+            areaType: 0,
+            remap: false,
+            visited: false,
+            overlap: false,
+            connectsToBorder: false,
+            ymin: 0xffff,
+            ymax: 0,
+            connections: [],
+            floors: [],
+        });
+    }
+
+    // Find edge of a region and find connections around the contour
+    for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+            const cell = compactHeightfield.cells[x + y * w];
+            for (let i = cell.index; i < cell.index + cell.count; i++) {
+                const r = srcReg[i];
+                if (r === 0 || r >= nreg) continue;
+
+                const reg = regions[r];
+                reg.spanCount++;
+
+                // Update floors
+                for (let j = cell.index; j < cell.index + cell.count; j++) {
+                    if (i === j) continue;
+                    const floorId = srcReg[j];
+                    if (floorId === 0 || floorId >= nreg) continue;
+                    if (floorId === r) {
+                        reg.overlap = true;
+                    }
+                    addUniqueFloorRegion(reg, floorId);
+                }
+
+                // Have found contour
+                if (reg.connections.length > 0) continue;
+
+                reg.areaType = compactHeightfield.areas[i];
+
+                // Check if this cell is next to a border
+                let ndir = -1;
+                for (let dir = 0; dir < 4; dir++) {
+                    if (isSolidEdge(compactHeightfield, srcReg, x, y, i, dir)) {
+                        ndir = dir;
+                        break;
+                    }
+                }
+
+                if (ndir !== -1) {
+                    // The cell is at border - walk around the contour to find all neighbors
+                    walkContour(x, y, i, ndir, compactHeightfield, srcReg, reg.connections);
+                }
+            }
+        }
+    }
+
+    // Remove too small regions
+    const stack: number[] = [];
+    const trace: number[] = [];
+
+    for (let i = 0; i < nreg; i++) {
+        const reg = regions[i];
+        if (reg.id === 0 || (reg.id & BORDER_REG)) continue;
+        if (reg.spanCount === 0) continue;
+        if (reg.visited) continue;
+
+        // Count the total size of all connected regions
+        let connectsToBorder = false;
+        let spanCount = 0;
+        stack.length = 0;
+        trace.length = 0;
+
+        reg.visited = true;
+        stack.push(i);
+
+        while (stack.length > 0) {
+            const ri = stack.pop()!;
+            const creg = regions[ri];
+
+            spanCount += creg.spanCount;
+            trace.push(ri);
+
+            for (let j = 0; j < creg.connections.length; j++) {
+                if (creg.connections[j] & BORDER_REG) {
+                    connectsToBorder = true;
+                    continue;
+                }
+                const neireg = regions[creg.connections[j]];
+                if (neireg.visited) continue;
+                if (neireg.id === 0 || (neireg.id & BORDER_REG)) continue;
+
+                stack.push(neireg.id);
+                neireg.visited = true;
+            }
+        }
+
+        // If the accumulated region size is too small, remove it
+        if (spanCount < minRegionArea && !connectsToBorder) {
+            for (let j = 0; j < trace.length; j++) {
+                regions[trace[j]].spanCount = 0;
+                regions[trace[j]].id = 0;
+            }
+        }
+    }
+
+    // Merge too small regions to neighbor regions
+    let mergeCount = 0;
+    do {
+        mergeCount = 0;
+        for (let i = 0; i < nreg; i++) {
+            const reg = regions[i];
+            if (reg.id === 0 || (reg.id & BORDER_REG)) continue;
+            if (reg.overlap) continue;
+            if (reg.spanCount === 0) continue;
+
+            // Check to see if the region should be merged
+            if (reg.spanCount > mergeRegionSize && isRegionConnectedToBorder(reg)) {
+                continue;
+            }
+
+            // Find smallest neighbor region that connects to this one
+            let smallest = 0xfffffff;
+            let mergeId = reg.id;
+            for (let j = 0; j < reg.connections.length; j++) {
+                if (reg.connections[j] & BORDER_REG) continue;
+                const mreg = regions[reg.connections[j]];
+                if (mreg.id === 0 || (mreg.id & BORDER_REG) || mreg.overlap) continue;
+                if (
+                    mreg.spanCount < smallest &&
+                    canMergeWithRegion(reg, mreg) &&
+                    canMergeWithRegion(mreg, reg)
+                ) {
+                    smallest = mreg.spanCount;
+                    mergeId = mreg.id;
+                }
+            }
+
+            // Found new id
+            if (mergeId !== reg.id) {
+                const oldId = reg.id;
+                const target = regions[mergeId];
+
+                // Merge neighbors
+                if (mergeRegions(target, reg)) {
+                    // Fixup regions pointing to current region
+                    for (let j = 0; j < nreg; j++) {
+                        if (regions[j].id === 0 || (regions[j].id & BORDER_REG)) continue;
+                        if (regions[j].id === oldId) {
+                            regions[j].id = mergeId;
+                        }
+                        replaceNeighbor(regions[j], oldId, mergeId);
+                    }
+                    mergeCount++;
+                }
+            }
+        }
+    } while (mergeCount > 0);
+
+    // Compress region IDs
+    for (let i = 0; i < nreg; i++) {
+        regions[i].remap = false;
+        if (regions[i].id === 0) continue;
+        if (regions[i].id & BORDER_REG) continue;
+        regions[i].remap = true;
+    }
+
+    let regIdGen = 0;
+    for (let i = 0; i < nreg; i++) {
+        if (!regions[i].remap) continue;
+        const oldId = regions[i].id;
+        const newId = ++regIdGen;
+        for (let j = i; j < nreg; j++) {
+            if (regions[j].id === oldId) {
+                regions[j].id = newId;
+                regions[j].remap = false;
+            }
+        }
+    }
+    compactHeightfield.maxRegions = regIdGen;
+
+    // Remap regions
+    for (let i = 0; i < compactHeightfield.spanCount; i++) {
+        if ((srcReg[i] & BORDER_REG) === 0) {
+            srcReg[i] = regions[srcReg[i]].id;
+        }
+    }
+
+    // Return regions that we found to be overlapping
+    for (let i = 0; i < nreg; i++) {
+        if (regions[i].overlap) {
+            overlaps.push(regions[i].id);
+        }
+    }
+
+    return true;
+};
+
+// Helper functions for region merging and filtering
+
+const addUniqueFloorRegion = (reg: Region, n: number) => {
+    for (let i = 0; i < reg.floors.length; i++) {
+        if (reg.floors[i] === n) return;
+    }
+    reg.floors.push(n);
+};
+
+const isRegionConnectedToBorder = (reg: Region): boolean => {
+    for (let i = 0; i < reg.connections.length; i++) {
+        if (reg.connections[i] === 0) return true;
+    }
+    return false;
+};
+
+const canMergeWithRegion = (rega: Region, regb: Region): boolean => {
+    if (rega.areaType !== regb.areaType) return false;
+    let n = 0;
+    for (let i = 0; i < rega.connections.length; i++) {
+        if (rega.connections[i] === regb.id) n++;
+    }
+    if (n > 1) return false;
+    for (let i = 0; i < rega.floors.length; i++) {
+        if (rega.floors[i] === regb.id) return false;
+    }
+    return true;
+};
+
+const mergeRegions = (rega: Region, regb: Region): boolean => {
+    const aid = rega.id;
+    const bid = regb.id;
+
+    // Duplicate current neighborhood
+    const acon = [...rega.connections];
+    const bcon = regb.connections;
+
+    // Find insertion point on A
+    let insa = -1;
+    for (let i = 0; i < acon.length; i++) {
+        if (acon[i] === bid) {
+            insa = i;
+            break;
+        }
+    }
+    if (insa === -1) return false;
+
+    // Find insertion point on B
+    let insb = -1;
+    for (let i = 0; i < bcon.length; i++) {
+        if (bcon[i] === aid) {
+            insb = i;
+            break;
+        }
+    }
+    if (insb === -1) return false;
+
+    // Merge neighbors
+    rega.connections = [];
+    for (let i = 0; i < acon.length - 1; i++) {
+        rega.connections.push(acon[(insa + 1 + i) % acon.length]);
+    }
+    for (let i = 0; i < bcon.length - 1; i++) {
+        rega.connections.push(bcon[(insb + 1 + i) % bcon.length]);
+    }
+
+    removeAdjacentNeighbors(rega);
+
+    for (let j = 0; j < regb.floors.length; j++) {
+        addUniqueFloorRegion(rega, regb.floors[j]);
+    }
+    rega.spanCount += regb.spanCount;
+    regb.spanCount = 0;
+    regb.connections = [];
+
+    return true;
+};
+
+const removeAdjacentNeighbors = (reg: Region) => {
+    // Remove adjacent duplicates
+    for (let i = 0; i < reg.connections.length && reg.connections.length > 1; ) {
+        const ni = (i + 1) % reg.connections.length;
+        if (reg.connections[i] === reg.connections[ni]) {
+            // Remove duplicate
+            for (let j = i; j < reg.connections.length - 1; j++) {
+                reg.connections[j] = reg.connections[j + 1];
+            }
+            reg.connections.pop();
+        } else {
+            i++;
+        }
+    }
+};
+
+const replaceNeighbor = (reg: Region, oldId: number, newId: number) => {
+    let neiChanged = false;
+    for (let i = 0; i < reg.connections.length; i++) {
+        if (reg.connections[i] === oldId) {
+            reg.connections[i] = newId;
+            neiChanged = true;
+        }
+    }
+    for (let i = 0; i < reg.floors.length; i++) {
+        if (reg.floors[i] === oldId) {
+            reg.floors[i] = newId;
+        }
+    }
+    if (neiChanged) {
+        removeAdjacentNeighbors(reg);
+    }
+};
+
+const isSolidEdge = (
+    compactHeightfield: CompactHeightfield,
+    srcReg: number[],
+    x: number,
+    y: number,
+    i: number,
+    dir: number,
+): boolean => {
+    const span = compactHeightfield.spans[i];
+    let r = 0;
+    if (getCon(span, dir) !== NOT_CONNECTED) {
+        const ax = x + DIR_OFFSETS[dir][0];
+        const ay = y + DIR_OFFSETS[dir][1];
+        const ai = compactHeightfield.cells[ax + ay * compactHeightfield.width].index + getCon(span, dir);
+        r = srcReg[ai];
+    }
+    if (r === srcReg[i]) return false;
+    return true;
+};
+
+const walkContour = (
+    x: number,
+    y: number,
+    i: number,
+    dir: number,
+    compactHeightfield: CompactHeightfield,
+    srcReg: number[],
+    cont: number[],
+) => {
+    const startDir = dir;
+    const starti = i;
+
+    const ss = compactHeightfield.spans[i];
+    let curReg = 0;
+    if (getCon(ss, dir) !== NOT_CONNECTED) {
+        const ax = x + DIR_OFFSETS[dir][0];
+        const ay = y + DIR_OFFSETS[dir][1];
+        const ai = compactHeightfield.cells[ax + ay * compactHeightfield.width].index + getCon(ss, dir);
+        curReg = srcReg[ai];
+    }
+    cont.push(curReg);
+
+    let iter = 0;
+    let currentX = x;
+    let currentY = y;
+    let currentI = i;
+    let currentDir = dir;
+
+    while (++iter < 40000) {
+        const s = compactHeightfield.spans[currentI];
+
+        if (isSolidEdge(compactHeightfield, srcReg, currentX, currentY, currentI, currentDir)) {
+            // Choose the edge corner
+            let r = 0;
+            if (getCon(s, currentDir) !== NOT_CONNECTED) {
+                const ax = currentX + DIR_OFFSETS[currentDir][0];
+                const ay = currentY + DIR_OFFSETS[currentDir][1];
+                const ai = compactHeightfield.cells[ax + ay * compactHeightfield.width].index + getCon(s, currentDir);
+                r = srcReg[ai];
+            }
+            if (r !== curReg) {
+                curReg = r;
+                cont.push(curReg);
+            }
+
+            currentDir = (currentDir + 1) & 0x3; // Rotate CW
+        } else {
+            let ni = -1;
+            const nx = currentX + DIR_OFFSETS[currentDir][0];
+            const ny = currentY + DIR_OFFSETS[currentDir][1];
+            if (getCon(s, currentDir) !== NOT_CONNECTED) {
+                const nc = compactHeightfield.cells[nx + ny * compactHeightfield.width];
+                ni = nc.index + getCon(s, currentDir);
+            }
+            if (ni === -1) {
+                // Should not happen
+                return;
+            }
+            currentX = nx;
+            currentY = ny;
+            currentI = ni;
+            currentDir = (currentDir + 3) & 0x3; // Rotate CCW
+        }
+
+        if (starti === currentI && startDir === currentDir) {
+            break;
+        }
+    }
+
+    // Remove adjacent duplicates
+    if (cont.length > 1) {
+        for (let j = 0; j < cont.length; ) {
+            const nj = (j + 1) % cont.length;
+            if (cont[j] === cont[nj]) {
+                for (let k = j; k < cont.length - 1; k++) {
+                    cont[k] = cont[k + 1];
+                }
+                cont.pop();
+            } else {
+                j++;
+            }
         }
     }
 };

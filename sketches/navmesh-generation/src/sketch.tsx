@@ -6,11 +6,12 @@ import { Leva, useControls } from 'leva';
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 
+import { NULL_AREA, WALKABLE_AREA } from './navmesh/area';
 import {
     type CompactHeightfield,
     buildCompactHeightfield,
 } from './navmesh/compact-heightfield';
-import { buildRegions, erodeWalkableArea } from './navmesh/compact-heightfield-area';
+import { erodeWalkableArea } from './navmesh/compact-heightfield-area';
 import { getPositionsAndIndices } from './navmesh/get-positions-and-indices';
 import {
     type Heightfield,
@@ -25,8 +26,7 @@ import {
     calculateMeshBounds,
     markWalkableTriangles,
 } from './navmesh/input-triangle-mesh';
-import { WALKABLE_AREA, NULL_AREA } from './navmesh/area';
-import { buildDistanceField } from './navmesh/regions';
+import { buildDistanceField, buildRegions } from './navmesh/regions';
 
 type Intermediates = {
     input: {
@@ -54,6 +54,7 @@ const App = () => {
         showHeightfield,
         showCompactHeightfieldSolid,
         showCompactHeightFieldDistances,
+        showCompactHeightFieldRegions,
     } = useControls({
         showMesh: {
             label: 'Show Mesh',
@@ -73,6 +74,10 @@ const App = () => {
         },
         showCompactHeightFieldDistances: {
             label: 'Show Compact Heightfield Distances',
+            value: false,
+        },
+        showCompactHeightFieldRegions: {
+            label: 'Show Compact Heightfield Regions',
             value: false,
         },
     });
@@ -656,6 +661,124 @@ const App = () => {
             material.dispose();
         };
     }, [showCompactHeightFieldDistances, intermediates, scene]);
+
+    // debug view of the compact heightfield - regions
+    useEffect(() => {
+        if (!intermediates || !showCompactHeightFieldRegions) return;
+
+        const { compactHeightfield } = intermediates;
+        const chf = compactHeightfield;
+
+        // Count total quads to create geometry
+        let totalQuads = 0;
+        for (let y = 0; y < chf.height; y++) {
+            for (let x = 0; x < chf.width; x++) {
+                const cell = chf.cells[x + y * chf.width];
+                totalQuads += cell.count;
+            }
+        }
+
+        if (totalQuads === 0) return;
+
+        // Create arrays for vertices, indices, and colors
+        const positions: number[] = [];
+        const indices: number[] = [];
+        const colors: number[] = [];
+
+        let indexOffset = 0;
+
+        // Helper function to convert region ID to color (similar to duIntToCol)
+        const regionToColor = (regionId: number): THREE.Color => {
+            if (regionId === 0) {
+                // No region - black with some transparency
+                return new THREE.Color(0x000000);
+            }
+            
+            // Hash the region ID to generate a consistent color
+            // This mimics the duIntToCol function behavior
+            const hash = regionId * 137.5; // Use golden ratio approximation for good distribution
+            const hue = (hash % 360);
+            const saturation = 70 + (regionId % 30); // Vary saturation slightly
+            const lightness = 50 + (regionId % 25); // Vary lightness slightly
+            
+            return new THREE.Color(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
+        };
+
+        // Iterate through all cells and their spans
+        for (let y = 0; y < chf.height; y++) {
+            for (let x = 0; x < chf.width; x++) {
+                const fx = chf.bounds[0][0] + x * chf.cellSize; // bmin[0] + x * cs
+                const fz = chf.bounds[0][2] + y * chf.cellSize; // bmin[2] + y * cs
+                const cell = chf.cells[x + y * chf.width];
+
+                for (let i = cell.index; i < cell.index + cell.count; i++) {
+                    const span = chf.spans[i];
+                    
+                    // Calculate the surface Y coordinate (using span.y like in the C++ code)
+                    const fy = chf.bounds[0][1] + span.y * chf.cellHeight; // bmin[1] + s.y * ch
+
+                    // Get color based on region ID
+                    const color = regionToColor(span.reg);
+
+                    // Create quad vertices (surface of the span)
+                    // Vertex 0: (fx, fy, fz)
+                    positions.push(fx, fy, fz);
+                    colors.push(color.r, color.g, color.b);
+
+                    // Vertex 1: (fx, fy, fz + cs)
+                    positions.push(fx, fy, fz + chf.cellSize);
+                    colors.push(color.r, color.g, color.b);
+
+                    // Vertex 2: (fx + cs, fy, fz + cs)
+                    positions.push(fx + chf.cellSize, fy, fz + chf.cellSize);
+                    colors.push(color.r, color.g, color.b);
+
+                    // Vertex 3: (fx + cs, fy, fz)
+                    positions.push(fx + chf.cellSize, fy, fz);
+                    colors.push(color.r, color.g, color.b);
+
+                    // Create two triangles for the quad
+                    // Triangle 1: 0, 1, 2
+                    indices.push(indexOffset, indexOffset + 1, indexOffset + 2);
+                    // Triangle 2: 0, 2, 3
+                    indices.push(indexOffset, indexOffset + 2, indexOffset + 3);
+
+                    indexOffset += 4;
+                }
+            }
+        }
+
+        // Create geometry
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute(
+            'position',
+            new THREE.BufferAttribute(new Float32Array(positions), 3),
+        );
+        geometry.setAttribute(
+            'color',
+            new THREE.BufferAttribute(new Float32Array(colors), 3),
+        );
+        geometry.setIndex(
+            new THREE.BufferAttribute(new Uint32Array(indices), 1),
+        );
+
+        // Create material with vertex colors and transparency
+        const material = new THREE.MeshBasicMaterial({
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.9,
+            side: THREE.DoubleSide,
+        });
+
+        const mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+
+        return () => {
+            scene.remove(mesh);
+            geometry.dispose();
+            material.dispose();
+        };
+    }, [showCompactHeightFieldRegions, intermediates, scene]);
 
     return (
         <>

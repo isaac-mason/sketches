@@ -242,12 +242,3 @@ export const erodeWalkableArea = (
         }
     }
 };
-
-export const buildRegions = (
-    compactHeightfield: CompactHeightfield,
-    borderSize: number,
-    minRegionAre: number,
-    mergeRegionArea: number,
-) => {
-    
-}
