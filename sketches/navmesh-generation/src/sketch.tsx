@@ -1,11 +1,14 @@
 import { WebGPUCanvas } from '@/common/components/webgpu-canvas';
+import { Box3, box3 } from '@/common/maaths';
+import { OrbitControls, useGLTF } from '@react-three/drei';
+import { useThree } from '@react-three/fiber';
+import { Leva, useControls } from 'leva';
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+
 import { getPositionsAndIndices } from './navmesh/get-positions-and-indices';
-import { markWalkableTriangles } from './navmesh/input-triangle-mesh';
-import { useThree } from '@react-three/fiber';
-import { useControls } from 'leva';
-import { OrbitControls } from '@react-three/drei';
+import { type Heightfield, calculateGridSize, createHeightfield, rasterizeTriangles } from './navmesh/heightfield';
+import { calculateMeshBounds, markWalkableTriangles } from './navmesh/input-triangle-mesh';
 
 type Intermediates = {
     input: {
@@ -13,13 +16,22 @@ type Intermediates = {
         indices: Uint32Array;
     };
     triAreaIds: Uint8Array;
+    heightfield: Heightfield;
 };
 
-const Home = () => {
+const DungeonModel = () => {
+    const gltf = useGLTF('/dungeon.gltf');
+
+    return (
+        <primitive object={gltf.scene} />
+    );
+};
+
+const App = () => {
     const scene = useThree((state) => state.scene);
     const group = useRef<THREE.Group>(null!);
 
-    const { showMesh, showTriangleAreaIds } = useControls({
+    const { showMesh, showTriangleAreaIds, showHeightfield } = useControls({
         showMesh: {
             value: true,
             label: 'Show Mesh',
@@ -27,6 +39,10 @@ const Home = () => {
         showTriangleAreaIds: {
             value: false,
             label: 'Show Triangle Area IDs',
+        },
+        showHeightfield: {
+            value: false,
+            label: 'Show Heightfield',
         },
     })
 
@@ -51,6 +67,24 @@ const Home = () => {
 
         markWalkableTriangles(positions, indices, triAreaIds, 45);
 
+        /* 3. rasterize the triangles to a voxel heightfield */
+        const cellSize = 0.2;
+        const cellHeight = 0.2;
+
+        const walkableClimbVoxels = 2;
+
+        const bounds = calculateMeshBounds(positions, indices, box3.create());
+        const [heightfieldWidth, heightfieldHeight] = calculateGridSize(bounds, cellSize)
+        const heightfield = createHeightfield(heightfieldWidth, heightfieldHeight, bounds, cellSize, cellHeight);
+
+        rasterizeTriangles(
+            heightfield,
+            positions,
+            indices,
+            triAreaIds,
+            walkableClimbVoxels,
+        )
+
         /* store intermediates for debugging */
         const intermediates: Intermediates = {
             input: {
@@ -58,12 +92,13 @@ const Home = () => {
                 indices,
             },
             triAreaIds,
+            heightfield,
         };
 
         setIntermediates(intermediates);
     }, []);
 
-    // wireframe of walkable triangles with area ids based vertex colors
+    // debug view of walkable triangles with area ids based vertex colors
     useEffect(() => {
         if (!intermediates || !showTriangleAreaIds) return;
 
@@ -152,13 +187,106 @@ const Home = () => {
         };
     }, [showTriangleAreaIds, intermediates, scene])
 
+    // debug view of the heightfield
+    useEffect(() => {
+        if (!intermediates || !showHeightfield) return;
+
+        const { heightfield } = intermediates;
+        const areaToColor: Record<number, THREE.Color> = {};
+        
+        // Count total spans to determine instance count
+        let totalSpans = 0;
+        for (let z = 0; z < heightfield.height; z++) {
+            for (let x = 0; x < heightfield.width; x++) {
+                const columnIndex = x + z * heightfield.width;
+                let span = heightfield.spans[columnIndex];
+                while (span) {
+                    totalSpans++;
+                    span = span.next || null;
+                }
+            }
+        }
+
+        if (totalSpans === 0) return;
+
+        // Create instanced mesh
+        const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
+        const material = new THREE.MeshBasicMaterial();
+        const instancedMesh = new THREE.InstancedMesh(boxGeometry, material, totalSpans);
+
+        const matrix = new THREE.Matrix4();
+        const color = new THREE.Color();
+        
+        const heightfieldBoundsMin = heightfield.bounds[0];
+        const cellSize = heightfield.cellSize;
+        const cellHeight = heightfield.cellHeight;
+
+        let instanceIndex = 0;
+
+        // Iterate through all grid cells and their spans
+        for (let z = 0; z < heightfield.height; z++) {
+            for (let x = 0; x < heightfield.width; x++) {
+                const columnIndex = x + z * heightfield.width;
+                let span = heightfield.spans[columnIndex];
+                
+                while (span) {
+                    // Calculate world position
+                    const worldX = heightfieldBoundsMin[0] + (x + 0.5) * cellSize;
+                    const worldZ = heightfieldBoundsMin[2] + (z + 0.5) * cellSize;
+                    
+                    // Calculate span height and center Y
+                    const spanHeight = (span.max - span.min) * cellHeight;
+                    const worldY = heightfieldBoundsMin[1] + (span.min + (span.max - span.min) * 0.5) * cellHeight;
+
+                    // Set transform matrix (position and scale)
+                    matrix.makeScale(cellSize * 0.9, spanHeight, cellSize * 0.9);
+                    matrix.setPosition(worldX, worldY, worldZ);
+                    instancedMesh.setMatrixAt(instanceIndex, matrix);
+
+                    // Set color based on area ID
+                    let spanColor = areaToColor[span.area];
+                    if (!spanColor) {
+                        // Hash area id to a color
+                        spanColor = new THREE.Color(
+                            `hsl(${(span.area * 137.5) % 360}, 70%, 60%)`
+                        );
+                        areaToColor[span.area] = spanColor;
+                    }
+                    
+                    instancedMesh.setColorAt(instanceIndex, spanColor);
+                    
+                    instanceIndex++;
+                    span = span.next || null;
+                }
+            }
+        }
+
+        // Update the instanced mesh
+        instancedMesh.instanceMatrix.needsUpdate = true;
+        if (instancedMesh.instanceColor) {
+            instancedMesh.instanceColor.needsUpdate = true;
+        }
+
+        scene.add(instancedMesh);
+
+        return () => {
+            scene.remove(instancedMesh);
+            boxGeometry.dispose();
+            material.dispose();
+            instancedMesh.dispose();
+        };
+    }, [showHeightfield, intermediates, scene])
+
     return (
         <>
             <group ref={group} visible={showMesh}>
-                <mesh>
-                    <boxGeometry args={[1, 1, 1]} />
-                    <meshStandardMaterial color="orange" />
+                {/* floor */}
+                {/* <mesh>
+                    <boxGeometry args={[10, 0.2, 10]} />
+                    <meshStandardMaterial color="#333" />
                 </mesh>
+                 */}
+                <DungeonModel />
             </group>
 
             <ambientLight intensity={0.5} />
@@ -175,9 +303,20 @@ export function Sketch() {
     return (
         <>
             <h1>NavMesh Generation</h1>
+            
             <WebGPUCanvas>
-                <Home />
+                <App />
             </WebGPUCanvas>
+
+            <Leva
+                collapsed={false}
+                theme={{
+                    sizes: {
+                        rootWidth: '400px',
+                        controlWidth: '150px',
+                    },
+                }}
+            />
         </>
     );
 }

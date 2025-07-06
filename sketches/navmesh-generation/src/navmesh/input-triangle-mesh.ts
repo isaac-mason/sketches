@@ -1,4 +1,4 @@
-import { vec3, type Vec3 } from '@/common/maaths';
+import { type Box3, vec3, type Vec3 } from '@/common/maaths';
 import { WALKABLE_AREA } from './area';
 import type { ArrayLike } from './common';
 
@@ -59,9 +59,24 @@ export const markWalkableTriangles = (
         const i1 = inIndices[triStartIndex + 1];
         const i2 = inIndices[triStartIndex + 2];
 
-        const v0 = vec3.set(_v0, inVertices[i0 * 3], inVertices[i0 * 3 + 1], inVertices[i0 * 3 + 2]);
-        const v1 = vec3.set(_v1, inVertices[i1 * 3], inVertices[i1 * 3 + 1], inVertices[i1 * 3 + 2]);
-        const v2 = vec3.set(_v2, inVertices[i2 * 3], inVertices[i2 * 3 + 1], inVertices[i2 * 3 + 2]);
+        const v0 = vec3.set(
+            _v0,
+            inVertices[i0 * 3],
+            inVertices[i0 * 3 + 1],
+            inVertices[i0 * 3 + 2],
+        );
+        const v1 = vec3.set(
+            _v1,
+            inVertices[i1 * 3],
+            inVertices[i1 * 3 + 1],
+            inVertices[i1 * 3 + 2],
+        );
+        const v2 = vec3.set(
+            _v2,
+            inVertices[i2 * 3],
+            inVertices[i2 * 3 + 1],
+            inVertices[i2 * 3 + 2],
+        );
 
         calcTriNormal(v0, v1, v2, _triangleNormal);
 
@@ -69,4 +84,41 @@ export const markWalkableTriangles = (
             outTriAreaIds[i] = WALKABLE_AREA;
         }
     }
+};
+
+export const calculateMeshBounds = (
+    inVertices: ArrayLike<number>,
+    inIndices: ArrayLike<number>,
+    outBounds: Box3,
+): Box3 => {
+    outBounds[0][0] = Number.POSITIVE_INFINITY;
+    outBounds[0][1] = Number.POSITIVE_INFINITY;
+    outBounds[0][2] = Number.POSITIVE_INFINITY;
+
+    outBounds[1][0] = Number.NEGATIVE_INFINITY;
+    outBounds[1][1] = Number.NEGATIVE_INFINITY;
+    outBounds[1][2] = Number.NEGATIVE_INFINITY;
+
+    const numTris = inIndices.length / 3;
+
+    for (let i = 0; i < numTris; ++i) {
+        const triStartIndex = i * 3;
+
+        for (let j = 0; j < 3; ++j) {
+            const index = inIndices[triStartIndex + j];
+            const x = inVertices[index * 3];
+            const y = inVertices[index * 3 + 1];
+            const z = inVertices[index * 3 + 2];
+
+            outBounds[0][0] = Math.min(outBounds[0][0], x);
+            outBounds[0][1] = Math.min(outBounds[0][1], y);
+            outBounds[0][2] = Math.min(outBounds[0][2], z);
+
+            outBounds[1][0] = Math.max(outBounds[1][0], x);
+            outBounds[1][1] = Math.max(outBounds[1][1], y);
+            outBounds[1][2] = Math.max(outBounds[1][2], z);
+        }
+    }
+
+    return outBounds;
 };

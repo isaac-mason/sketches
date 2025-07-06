@@ -63,6 +63,13 @@ export function toDegree(a: number): number {
  * @param b The second number to test.
  * @returns True if the numbers are approximately equal, false otherwise.
  */
-export function equals(a: number, b: number): boolean {
-  return Math.abs(a - b) <= EPSILON * Math.max(1.0, Math.abs(a), Math.abs(b));
+export function equals(a: number, b: number, epsilon = EPSILON): boolean {
+  return Math.abs(a - b) <= epsilon * Math.max(1.0, Math.abs(a), Math.abs(b));
 }
+
+/**
+ * Clamp a value between min and max
+ */
+export const clamp = (value: number, min: number, max: number): number => {
+    return Math.max(min, Math.min(max, value));
+};

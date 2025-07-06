@@ -9,4 +9,4 @@ export * as vec3 from './vec3';
 export * as vec4 from './vec4';
 export * as quat from './quat';
 export * as quat2 from './quat2';
-// export * as box3 from './box3';
+export * as box3 from './box3';
