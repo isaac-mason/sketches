@@ -490,95 +490,167 @@ const calcAreaOfPolygon2D = (verts: number[], nverts: number): number => {
 const prev = (i: number, n: number): number => i - 1 >= 0 ? i - 1 : n - 1;
 const next = (i: number, n: number): number => i + 1 < n ? i + 1 : 0;
 
-const area2 = (a: number[], b: number[], c: number[]): number => {
-    return (b[0] - a[0]) * (c[2] - a[2]) - (c[0] - a[0]) * (b[2] - a[2]);
+const area2 = (
+    verticesA: number[], startVertexIdx: number, endVertexIdx: number, 
+    verticesB: number[], testVertexIdx: number
+): number => {
+    const startOffset = startVertexIdx * 4;
+    const endOffset = endVertexIdx * 4;
+    const testOffset = testVertexIdx * 4;
+    return (verticesA[endOffset] - verticesA[startOffset]) * (verticesB[testOffset + 2] - verticesA[startOffset + 2]) - 
+           (verticesB[testOffset] - verticesA[startOffset]) * (verticesA[endOffset + 2] - verticesA[startOffset + 2]);
 };
 
 const xorb = (x: boolean, y: boolean): boolean => {
     return !x !== !y;
 };
 
-const left = (a: number[], b: number[], c: number[]): boolean => {
-    return area2(a, b, c) < 0;
+const left = (
+    verticesA: number[], startVertexIdx: number, endVertexIdx: number, 
+    verticesB: number[], testVertexIdx: number
+): boolean => {
+    return area2(verticesA, startVertexIdx, endVertexIdx, verticesB, testVertexIdx) < 0;
 };
 
-const leftOn = (a: number[], b: number[], c: number[]): boolean => {
-    return area2(a, b, c) <= 0;
+const leftOn = (
+    verticesA: number[], startVertexIdx: number, endVertexIdx: number, 
+    verticesB: number[], testVertexIdx: number
+): boolean => {
+    return area2(verticesA, startVertexIdx, endVertexIdx, verticesB, testVertexIdx) <= 0;
 };
 
-const collinear = (a: number[], b: number[], c: number[]): boolean => {
-    return area2(a, b, c) === 0;
+const collinear = (
+    verticesA: number[], startVertexIdx: number, endVertexIdx: number, 
+    verticesB: number[], testVertexIdx: number
+): boolean => {
+    return area2(verticesA, startVertexIdx, endVertexIdx, verticesB, testVertexIdx) === 0;
 };
 
-const intersectProp = (a: number[], b: number[], c: number[], d: number[]): boolean => {
+const intersectProp = (
+    segmentVertices: number[], segmentStartIdx: number, segmentEndIdx: number, 
+    lineVertices: number[], lineStartIdx: number, lineEndIdx: number
+): boolean => {
     // Eliminate improper cases.
-    if (collinear(a, b, c) || collinear(a, b, d) ||
-        collinear(c, d, a) || collinear(c, d, b)) {
+    if (collinear(segmentVertices, segmentStartIdx, segmentEndIdx, lineVertices, lineStartIdx) || 
+        collinear(segmentVertices, segmentStartIdx, segmentEndIdx, lineVertices, lineEndIdx) ||
+        collinear(lineVertices, lineStartIdx, lineEndIdx, segmentVertices, segmentStartIdx) || 
+        collinear(lineVertices, lineStartIdx, lineEndIdx, segmentVertices, segmentEndIdx)) {
         return false;
     }
     
-    return xorb(left(a, b, c), left(a, b, d)) && xorb(left(c, d, a), left(c, d, b));
+    return xorb(left(segmentVertices, segmentStartIdx, segmentEndIdx, lineVertices, lineStartIdx), 
+                left(segmentVertices, segmentStartIdx, segmentEndIdx, lineVertices, lineEndIdx)) && 
+           xorb(left(lineVertices, lineStartIdx, lineEndIdx, segmentVertices, segmentStartIdx), 
+                left(lineVertices, lineStartIdx, lineEndIdx, segmentVertices, segmentEndIdx));
 };
 
-const between = (a: number[], b: number[], c: number[]): boolean => {
-    if (!collinear(a, b, c)) {
+const between = (
+    lineVertices: number[], lineStartIdx: number, lineEndIdx: number, 
+    testVertices: number[], testVertexIdx: number
+): boolean => {
+    if (!collinear(lineVertices, lineStartIdx, lineEndIdx, testVertices, testVertexIdx)) {
         return false;
     }
-    // If ab not vertical, check betweenness on x; else on y.
-    if (a[0] !== b[0]) {
-        return ((a[0] <= c[0]) && (c[0] <= b[0])) || ((a[0] >= c[0]) && (c[0] >= b[0]));
+    const lineStartOffset = lineStartIdx * 4;
+    const lineEndOffset = lineEndIdx * 4;
+    const testOffset = testVertexIdx * 4;
+    // If line not vertical, check betweenness on x; else on z.
+    if (lineVertices[lineStartOffset] !== lineVertices[lineEndOffset]) {
+        return ((lineVertices[lineStartOffset] <= testVertices[testOffset]) && (testVertices[testOffset] <= lineVertices[lineEndOffset])) || 
+               ((lineVertices[lineStartOffset] >= testVertices[testOffset]) && (testVertices[testOffset] >= lineVertices[lineEndOffset]));
     }
-    return ((a[2] <= c[2]) && (c[2] <= b[2])) || ((a[2] >= c[2]) && (c[2] >= b[2]));
+    return ((lineVertices[lineStartOffset + 2] <= testVertices[testOffset + 2]) && (testVertices[testOffset + 2] <= lineVertices[lineEndOffset + 2])) || 
+           ((lineVertices[lineStartOffset + 2] >= testVertices[testOffset + 2]) && (testVertices[testOffset + 2] >= lineVertices[lineEndOffset + 2]));
 };
 
-const intersect = (a: number[], b: number[], c: number[], d: number[]): boolean => {
-    if (intersectProp(a, b, c, d)) {
+const intersect = (
+    segmentVertices: number[], segmentStartIdx: number, segmentEndIdx: number, 
+    lineVertices: number[], lineStartIdx: number, lineEndIdx: number
+): boolean => {
+    if (intersectProp(segmentVertices, segmentStartIdx, segmentEndIdx, lineVertices, lineStartIdx, lineEndIdx)) {
         return true;
     }
-    if (between(a, b, c) || between(a, b, d) ||
-               between(c, d, a) || between(c, d, b)) {
+    if (between(segmentVertices, segmentStartIdx, segmentEndIdx, lineVertices, lineStartIdx) || 
+        between(segmentVertices, segmentStartIdx, segmentEndIdx, lineVertices, lineEndIdx) ||
+        between(lineVertices, lineStartIdx, lineEndIdx, segmentVertices, segmentStartIdx) || 
+        between(lineVertices, lineStartIdx, lineEndIdx, segmentVertices, segmentEndIdx)) {
         return true;
     }
     return false;
 };
 
-const vequal = (a: number[], b: number[]): boolean => {
-    return a[0] === b[0] && a[2] === b[2];
+const vequal = (verticesA: number[], vertexAIdx: number, verticesB: number[], vertexBIdx: number): boolean => {
+    const offsetA = vertexAIdx * 4;
+    const offsetB = vertexBIdx * 4;
+    return verticesA[offsetA] === verticesB[offsetB] && verticesA[offsetA + 2] === verticesB[offsetB + 2];
 };
 
-const intersectSegContour = (d0: number[], d1: number[], i: number, n: number, verts: number[]): boolean => {
-    // For each edge (k,k+1) of P
-    for (let k = 0; k < n; k++) {
-        const k1 = next(k, n);
-        // Skip edges incident to i.
-        if (i === k || i === k1) {
-            continue;
-        }
-        const p0 = verts.slice(k * 4, k * 4 + 4);
-        const p1 = verts.slice(k1 * 4, k1 * 4 + 4);
-        if (vequal(d0, p0) || vequal(d1, p0) || vequal(d0, p1) || vequal(d1, p1)) {
+
+const intersectSegContour = (
+    segmentVertices: number[], 
+    segmentStartIdx: number, 
+    segmentEndIdx: number, 
+    contourVertices: number[], 
+    skipVertexIdx: number, 
+    numContourVertices: number
+): boolean => {
+    // For each edge (k,k+1) of the contour
+    for (let k = 0; k < numContourVertices; k++) {
+        const k1 = next(k, numContourVertices);
+        // Skip edges incident to skipVertexIdx.
+        if (skipVertexIdx === k || skipVertexIdx === k1) {
             continue;
         }
         
-        if (intersect(d0, d1, p0, p1)) {
+        if (vequal(segmentVertices, segmentStartIdx, contourVertices, k) || 
+            vequal(segmentVertices, segmentEndIdx, contourVertices, k) || 
+            vequal(segmentVertices, segmentStartIdx, contourVertices, k1) || 
+            vequal(segmentVertices, segmentEndIdx, contourVertices, k1)) {
+            continue;
+        }
+        
+        if (intersect(segmentVertices, segmentStartIdx, segmentEndIdx, contourVertices, k, k1)) {
             return true;
         }
     }
     return false;
 };
 
-const inCone = (i: number, n: number, verts: number[], pj: number[]): boolean => {
-    const pi = verts.slice(i * 4, i * 4 + 4);
-    const pi1 = verts.slice(next(i, n) * 4, next(i, n) * 4 + 4);
-    const pin1 = verts.slice(prev(i, n) * 4, prev(i, n) * 4 + 4);
+// Helper function to check if a point is in the cone of a vertex - taking point coordinates directly
+const inConePoint = (vertices: number[], vertexIdx: number, numVertices: number, pointX: number, pointZ: number): boolean => {
+    const nextVertexIdx = next(vertexIdx, numVertices);
+    const prevVertexIdx = prev(vertexIdx, numVertices);
     
-    // If P[i] is a convex vertex [ i+1 left or on (i-1,i) ].
-    if (leftOn(pin1, pi, pi1)) {
-        return left(pi, pj, pin1) && left(pj, pi, pi1);
+    // If P[vertexIdx] is a convex vertex [ next left or on (prev,vertex) ].
+    const convex = leftOn(vertices, prevVertexIdx, vertexIdx, vertices, nextVertexIdx);
+    if (convex) {
+        // Check if point (pointX,pointZ) is left of line from vertex to prev vertex
+        // AND if next vertex is left of line from point to vertex
+        const vertex_x = vertices[vertexIdx * 4];
+        const vertex_z = vertices[vertexIdx * 4 + 2];
+        const prev_x = vertices[prevVertexIdx * 4];
+        const prev_z = vertices[prevVertexIdx * 4 + 2];
+        const next_x = vertices[nextVertexIdx * 4];
+        const next_z = vertices[nextVertexIdx * 4 + 2];
+        
+        const leftOfFirst = (pointX - vertex_x) * (prev_z - vertex_z) - (prev_x - vertex_x) * (pointZ - vertex_z) < 0;
+        const leftOfSecond = (next_x - pointX) * (vertex_z - pointZ) - (vertex_x - pointX) * (next_z - pointZ) < 0;
+        
+        return leftOfFirst && leftOfSecond;
     }
-    // Assume (i-1,i,i+1) not collinear.
-    // else P[i] is reflex.
-    return !(leftOn(pi, pj, pi1) && leftOn(pj, pi, pin1));
+    // Assume (prev,vertex,next) not collinear.
+    // else P[vertexIdx] is reflex.
+    const vertex_x = vertices[vertexIdx * 4];
+    const vertex_z = vertices[vertexIdx * 4 + 2];
+    const prev_x = vertices[prevVertexIdx * 4];
+    const prev_z = vertices[prevVertexIdx * 4 + 2];
+    const next_x = vertices[nextVertexIdx * 4];
+    const next_z = vertices[nextVertexIdx * 4 + 2];
+    
+    const leftOnFirst = (pointX - vertex_x) * (next_z - vertex_z) - (next_x - vertex_x) * (pointZ - vertex_z) <= 0;
+    const leftOnSecond = (prev_x - pointX) * (vertex_z - pointZ) - (vertex_x - pointX) * (prev_z - pointZ) <= 0;
+    
+    return !(leftOnFirst && leftOnSecond);
 };
 
 const removeDegenerateSegments = (simplified: number[]): void => {
@@ -588,10 +660,7 @@ const removeDegenerateSegments = (simplified: number[]): void => {
     for (let i = 0; i < npts; ++i) {
         const ni = next(i, npts);
         
-        const currentVert = simplified.slice(i * 4, i * 4 + 4);
-        const nextVert = simplified.slice(ni * 4, ni * 4 + 4);
-        
-        if (vequal(currentVert, nextVert)) {
+        if (vequal(simplified, i, simplified, ni)) {
             // Degenerate segment, remove.
             for (let j = i; j < Math.floor(simplified.length / 4) - 1; ++j) {
                 simplified[j * 4 + 0] = simplified[(j + 1) * 4 + 0];
@@ -704,6 +773,8 @@ const compareDiagDist = (a: PotentialDiagonal, b: PotentialDiagonal): number => 
     return 0;
 };
 
+const _diagonalVerts = new Array(8);
+
 const mergeRegionHoles = (region: ContourRegion): void => {
     // Sort holes from left to right.
     for (let i = 0; i < region.nholes; i++) {
@@ -737,27 +808,71 @@ const mergeRegionHoles = (region: ContourRegion): void => {
             // Find potential diagonals.
             // The 'best' vertex must be in the cone described by 3 consecutive vertices of the outline.
             let ndiags = 0;
-            const corner = hole.vertices.slice(bestVertex * 4, bestVertex * 4 + 4);
             for (let j = 0; j < outline.nVertices; j++) {
-                if (inCone(j, outline.nVertices, outline.vertices, corner)) {
-                    const dx = outline.vertices[j * 4 + 0] - corner[0];
-                    const dz = outline.vertices[j * 4 + 2] - corner[2];
+                const holeX = hole.vertices[bestVertex * 4 + 0];
+                const holeZ = hole.vertices[bestVertex * 4 + 2];
+                if (inConePoint(outline.vertices, j, outline.nVertices, holeX, holeZ)) {
+                    const dx = outline.vertices[j * 4 + 0] - holeX;
+                    const dz = outline.vertices[j * 4 + 2] - holeZ;
                     diags[ndiags].vert = j;
                     diags[ndiags].dist = dx * dx + dz * dz;
                     ndiags++;
                 }
             }
             // Sort potential diagonals by distance, we want to make the connection as short as possible.
-            diags.slice(0, ndiags).sort(compareDiagDist);
+            if (ndiags > 1) {
+                // In-place sort of the first ndiags elements
+                for (let a = 0; a < ndiags - 1; a++) {
+                    for (let b = a + 1; b < ndiags; b++) {
+                        if (diags[a].dist > diags[b].dist) {
+                            const temp = diags[a];
+                            diags[a] = diags[b];
+                            diags[b] = temp;
+                        }
+                    }
+                }
+            }
             
             // Find a diagonal that is not intersecting the outline not the remaining holes.
             index = -1;
             for (let j = 0; j < ndiags; j++) {
-                const pt = outline.vertices.slice(diags[j].vert * 4, diags[j].vert * 4 + 4);
-                let intersectFound = intersectSegContour(pt, corner, diags[j].vert, outline.nVertices, outline.vertices);
+                // Create a vertex array with the two endpoints of the diagonal
+                const diagonalVerts = _diagonalVerts;
+                
+                // Copy outline vertex
+                const outlineVertIdx = diags[j].vert * 4;
+                diagonalVerts[0] = outline.vertices[outlineVertIdx + 0];
+                diagonalVerts[1] = outline.vertices[outlineVertIdx + 1];
+                diagonalVerts[2] = outline.vertices[outlineVertIdx + 2];
+                diagonalVerts[3] = outline.vertices[outlineVertIdx + 3];
+                
+                // Copy hole vertex
+                const holeVertIdx = bestVertex * 4;
+                diagonalVerts[4] = hole.vertices[holeVertIdx + 0];
+                diagonalVerts[5] = hole.vertices[holeVertIdx + 1];
+                diagonalVerts[6] = hole.vertices[holeVertIdx + 2];
+                diagonalVerts[7] = hole.vertices[holeVertIdx + 3];
+                
+                let intersectFound = intersectSegContour(
+                    diagonalVerts, 
+                    0, 
+                    1, 
+                    outline.vertices, 
+                    diags[j].vert, 
+                    outline.nVertices
+                );
+                
                 for (let k = i; k < region.nholes && !intersectFound; k++) {
-                    intersectFound = intersectSegContour(pt, corner, -1, region.holes[k].contour.nVertices, region.holes[k].contour.vertices);
+                    intersectFound = intersectSegContour(
+                        diagonalVerts, 
+                        0, 
+                        1, 
+                        region.holes[k].contour.vertices, 
+                        -1, 
+                        region.holes[k].contour.nVertices
+                    );
                 }
+                
                 if (!intersectFound) {
                     index = diags[j].vert;
                     break;
@@ -950,7 +1065,10 @@ export const buildContours = (
             let index = 0;
             for (let i = 0; i < nregions; i++) {
                 if (regions[i].nholes > 0) {
-                    regions[i].holes = holes.slice(index, index + regions[i].nholes);
+                    regions[i].holes = new Array(regions[i].nholes);
+                    for (let j = 0; j < regions[i].nholes; j++) {
+                        regions[i].holes[j] = holes[index + j];
+                    }
                     index += regions[i].nholes;
                     regions[i].nholes = 0;
                 }

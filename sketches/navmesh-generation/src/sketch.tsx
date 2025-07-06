@@ -57,6 +57,12 @@ const DungeonModel = () => {
     return <primitive object={gltf.scene} />;
 };
 
+const NavTestModel = () => {
+    const gltf = useGLTF('/nav-test.glb');
+
+    return <primitive object={gltf.scene} />;
+}
+
 const App = () => {
     const scene = useThree((state) => state.scene);
     const group = useRef<THREE.Group>(null!);
@@ -118,15 +124,15 @@ const App = () => {
         console.time('navmesh generation');
 
         /* 0. define generation parameters */
-        const cellSize = 0.2;
-        const cellHeight = 0.2;
+        const cellSize = 0.1;
+        const cellHeight = 0.1;
 
-        const walkableRadiusWorld = 0.5;
+        const walkableRadiusWorld = 0.2;
         const walkableRadiusVoxels = Math.ceil(walkableRadiusWorld / cellSize);
 
-        const walkableClimbWorld = 1;
+        const walkableClimbWorld = 0.5;
         const walkableClimbVoxels = Math.ceil(walkableClimbWorld / cellHeight);
-        const walkableHeightWorld = 0.4;
+        const walkableHeightWorld = 0.25;
         const walkableHeightVoxels = Math.ceil(
             walkableHeightWorld / cellHeight,
         );
@@ -1537,7 +1543,8 @@ const App = () => {
     return (
         <>
             <group ref={group} visible={showMesh}>
-                <DungeonModel />
+                {/* <DungeonModel /> */}
+                <NavTestModel />
             </group>
 
             <ambientLight intensity={0.5} />
