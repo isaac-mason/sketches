@@ -37,6 +37,7 @@ import {
     buildPolyMeshDetail,
     type PolyMeshDetail,
 } from './navmesh/poly-mesh-detail';
+import { LineSegments2 } from 'three/examples/jsm/lines/webgpu/LineSegments2.js';
 
 type Intermediates = {
     input: {
@@ -803,7 +804,7 @@ const App = () => {
                     const fy = chf.bounds[0][1] + span.y * chf.cellHeight; // bmin[1] + s.y * ch
 
                     // Get color based on region ID
-                    const color = regionToColor(span.reg);
+                    const color = regionToColor(span.region);
 
                     // Create quad vertices (surface of the span)
                     // Vertex 0: (fx, fy, fz)
@@ -871,144 +872,165 @@ const App = () => {
 
         const { contourSet } = intermediates;
 
-        if (!contourSet.contours.length) return;
+        if (!contourSet || contourSet.contours.length === 0) return;
 
-        // Create arrays for line segments and points
+        const orig = contourSet.bounds[0]; // bmin
+        const cs = contourSet.cellSize;
+        const ch = contourSet.cellHeight;
+
+        // Arrays for line segments
         const linePositions: number[] = [];
         const lineColors: number[] = [];
+
+        // Arrays for points
         const pointPositions: number[] = [];
         const pointColors: number[] = [];
 
-        const bounds = contourSet.bounds;
-        const orig = bounds[0]; // bmin
-        const cs = contourSet.cellSize;
-        const ch = contourSet.cellHeight;
-        const alpha = 0.8;
-
         // Helper function to convert region ID to color (similar to duIntToCol)
-        const regionToColor = (regionId: number): THREE.Color => {
+        const regionToColor = (regionId: number, alpha = 1.0): THREE.Color => {
             if (regionId === 0) {
                 return new THREE.Color(0x000000);
             }
+
+            // Hash the region ID to generate a consistent color
             const hash = regionId * 137.5;
             const hue = hash % 360;
             const saturation = 70;
             const lightness = 60;
-            return new THREE.Color(
-                `hsl(${hue}, ${saturation}%, ${lightness}%)`,
-            );
+
+            const color = new THREE.Color(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
+            return color.multiplyScalar(alpha);
         };
 
-        // Helper function to darken color
+        // Helper function to darken color (similar to duDarkenCol)
         const darkenColor = (color: THREE.Color): THREE.Color => {
-            return new THREE.Color(color.r * 0.5, color.g * 0.5, color.b * 0.5);
+            return color.clone().multiplyScalar(0.5);
         };
 
-        // Process each contour
+        // Helper function to lerp between colors (similar to duLerpCol)
+        const lerpColor = (colorA: THREE.Color, colorB: THREE.Color, t: number): THREE.Color => {
+            return colorA.clone().lerp(colorB, t / 255.0);
+        };
+
+        // Draw lines for each contour
         for (let i = 0; i < contourSet.contours.length; ++i) {
             const c = contourSet.contours[i];
-            const color = regionToColor(c.reg);
-            const darkenedColor = darkenColor(color);
+            const color = regionToColor(c.reg, 0.8);
 
             // Draw raw contour lines
             for (let j = 0; j < c.nRawVertices; ++j) {
-                const v = j * 4;
-                const fx = orig[0] + c.rawVertices[v + 0] * cs;
-                const fy = orig[1] + (c.rawVertices[v + 1] + 1 + (i & 1)) * ch;
-                const fz = orig[2] + c.rawVertices[v + 2] * cs;
+                const v = c.rawVertices.slice(j * 4, j * 4 + 4);
+                const fx = orig[0] + v[0] * cs;
+                const fy = orig[1] + (v[1] + 1 + (i & 1)) * ch;
+                const fz = orig[2] + v[2] * cs;
 
-                // Add vertex
                 linePositions.push(fx, fy, fz);
                 lineColors.push(color.r, color.g, color.b);
 
-                // Add duplicate for line segments (except first vertex)
                 if (j > 0) {
                     linePositions.push(fx, fy, fz);
                     lineColors.push(color.r, color.g, color.b);
                 }
             }
 
-            // Close the loop - connect last vertex to first
-            const v0 = 0;
-            const fx = orig[0] + c.rawVertices[v0 + 0] * cs;
-            const fy = orig[1] + (c.rawVertices[v0 + 1] + 1 + (i & 1)) * ch;
-            const fz = orig[2] + c.rawVertices[v0 + 2] * cs;
-            linePositions.push(fx, fy, fz);
-            lineColors.push(color.r, color.g, color.b);
+            // Loop last segment
+            if (c.nRawVertices > 0) {
+                const v = c.rawVertices.slice(0, 4);
+                const fx = orig[0] + v[0] * cs;
+                const fy = orig[1] + (v[1] + 1 + (i & 1)) * ch;
+                const fz = orig[2] + v[2] * cs;
 
-            // Draw raw contour points
-            for (let j = 0; j < c.nRawVertices; ++j) {
-                const v = j * 4;
-                let off = 0;
-                let pointColor = darkenedColor;
-
-                // Check for border vertex
-                if (c.rawVertices[v + 3] & 0x10000) {
-                    // RC_BORDER_VERTEX equivalent
-                    pointColor = new THREE.Color(1, 1, 1); // White for border vertices
-                    off = ch * 2;
-                }
-
-                const fx = orig[0] + c.rawVertices[v + 0] * cs;
-                const fy =
-                    orig[1] + (c.rawVertices[v + 1] + 1 + (i & 1)) * ch + off;
-                const fz = orig[2] + c.rawVertices[v + 2] * cs;
-
-                pointPositions.push(fx, fy, fz);
-                pointColors.push(pointColor.r, pointColor.g, pointColor.b);
+                linePositions.push(fx, fy, fz);
+                lineColors.push(color.r, color.g, color.b);
             }
         }
 
-        // Create line geometry
-        const lineGeometry = new THREE.BufferGeometry();
-        lineGeometry.setAttribute(
-            'position',
-            new THREE.BufferAttribute(new Float32Array(linePositions), 3),
-        );
-        lineGeometry.setAttribute(
-            'color',
-            new THREE.BufferAttribute(new Float32Array(lineColors), 3),
-        );
+        // Draw points for each contour
+        for (let i = 0; i < contourSet.contours.length; ++i) {
+            const c = contourSet.contours[i];
+            const baseColor = regionToColor(c.reg, 0.8);
+            const color = darkenColor(baseColor);
 
-        const lineMaterial = new THREE.LineBasicMaterial({
-            vertexColors: true,
-            transparent: true,
-            opacity: alpha,
-            linewidth: 2,
-        });
+            for (let j = 0; j < c.nRawVertices; ++j) {
+                const v = c.rawVertices.slice(j * 4, j * 4 + 4);
+                let off = 0;
+                let colv = color;
 
-        const lines = new THREE.LineSegments(lineGeometry, lineMaterial);
-        scene.add(lines);
+                if (v[3] & 0x10000) { // BORDER_VERTEX
+                    colv = new THREE.Color(1, 1, 1);
+                    off = ch * 2;
+                }
 
-        // Create point geometry
-        const pointGeometry = new THREE.BufferGeometry();
-        pointGeometry.setAttribute(
-            'position',
-            new THREE.BufferAttribute(new Float32Array(pointPositions), 3),
-        );
-        pointGeometry.setAttribute(
-            'color',
-            new THREE.BufferAttribute(new Float32Array(pointColors), 3),
-        );
+                const fx = orig[0] + v[0] * cs;
+                const fy = orig[1] + (v[1] + 1 + (i & 1)) * ch + off;
+                const fz = orig[2] + v[2] * cs;
 
-        const pointMaterial = new THREE.PointsMaterial({
-            vertexColors: true,
-            transparent: true,
-            opacity: alpha,
-            size: 5,
-            sizeAttenuation: false,
-        });
+                pointPositions.push(fx, fy, fz);
+                pointColors.push(colv.r, colv.g, colv.b);
+            }
+        }
 
-        const points = new THREE.Points(pointGeometry, pointMaterial);
-        scene.add(points);
+        // Create line segments geometry
+        let lineSegments: THREE.LineSegments | null = null;
+        if (linePositions.length > 0) {
+            const lineGeometry = new THREE.BufferGeometry();
+            lineGeometry.setAttribute(
+                'position',
+                new THREE.BufferAttribute(new Float32Array(linePositions), 3),
+            );
+            lineGeometry.setAttribute(
+                'color',
+                new THREE.BufferAttribute(new Float32Array(lineColors), 3),
+            );
+
+            const lineMaterial = new THREE.LineBasicMaterial({
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.8,
+                linewidth: 2.0,
+            });
+
+            lineSegments = new THREE.LineSegments(lineGeometry, lineMaterial);
+            scene.add(lineSegments);
+        }
+
+        // Create points geometry
+        let points: THREE.Points | null = null;
+        if (pointPositions.length > 0) {
+            const pointGeometry = new THREE.BufferGeometry();
+            pointGeometry.setAttribute(
+                'position',
+                new THREE.BufferAttribute(new Float32Array(pointPositions), 3),
+            );
+            pointGeometry.setAttribute(
+                'color',
+                new THREE.BufferAttribute(new Float32Array(pointColors), 3),
+            );
+
+            const pointMaterial = new THREE.PointsMaterial({
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.9,
+                size: 6,
+                sizeAttenuation: false,
+            });
+
+            points = new THREE.Points(pointGeometry, pointMaterial);
+            scene.add(points);
+        }
 
         return () => {
-            scene.remove(lines);
-            scene.remove(points);
-            lineGeometry.dispose();
-            lineMaterial.dispose();
-            pointGeometry.dispose();
-            pointMaterial.dispose();
+            if (lineSegments) {
+                scene.remove(lineSegments);
+                lineSegments.geometry.dispose();
+                (lineSegments.material as THREE.Material).dispose();
+            }
+
+            if (points) {
+                scene.remove(points);
+                points.geometry.dispose();
+                (points.material as THREE.Material).dispose();
+            }
         };
     }, [showRawContours, intermediates, scene]);
 
@@ -1018,162 +1040,167 @@ const App = () => {
 
         const { contourSet } = intermediates;
 
-        if (!contourSet.contours.length) return;
+        if (!contourSet || contourSet.contours.length === 0) return;
 
-        // Create arrays for line segments and points
+        const orig = contourSet.bounds[0]; // bmin
+        const cs = contourSet.cellSize;
+        const ch = contourSet.cellHeight;
+
+        // Arrays for line segments
         const linePositions: number[] = [];
         const lineColors: number[] = [];
+
+        // Arrays for points
         const pointPositions: number[] = [];
         const pointColors: number[] = [];
 
-        const bounds = contourSet.bounds;
-        const orig = bounds[0]; // bmin
-        const cs = contourSet.cellSize;
-        const ch = contourSet.cellHeight;
-        const alpha = 0.9;
-
-        // Helper function to convert region ID to color
-        const regionToColor = (regionId: number): THREE.Color => {
+        // Helper function to convert region ID to color (similar to duIntToCol)
+        const regionToColor = (regionId: number, alpha = 1.0): THREE.Color => {
             if (regionId === 0) {
                 return new THREE.Color(0x000000);
             }
+
+            // Hash the region ID to generate a consistent color
             const hash = regionId * 137.5;
             const hue = hash % 360;
             const saturation = 70;
             const lightness = 60;
-            return new THREE.Color(
-                `hsl(${hue}, ${saturation}%, ${lightness}%)`,
-            );
+
+            const color = new THREE.Color(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
+            return color.multiplyScalar(alpha);
         };
 
-        // Helper function to darken color
+        // Helper function to darken color (similar to duDarkenCol)
         const darkenColor = (color: THREE.Color): THREE.Color => {
-            return new THREE.Color(color.r * 0.5, color.g * 0.5, color.b * 0.5);
+            return color.clone().multiplyScalar(0.5);
         };
 
-        // Helper function to interpolate colors
-        const lerpColor = (
-            color1: THREE.Color,
-            color2: THREE.Color,
-            factor: number,
-        ): THREE.Color => {
-            return new THREE.Color(
-                color1.r + (color2.r - color1.r) * factor,
-                color1.g + (color2.g - color1.g) * factor,
-                color1.b + (color2.b - color1.b) * factor,
-            );
+        // Helper function to lerp between colors (similar to duLerpCol)
+        const lerpColor = (colorA: THREE.Color, colorB: THREE.Color, t: number): THREE.Color => {
+            return colorA.clone().lerp(colorB, t / 255.0);
         };
 
-        // Process each contour
+        // Draw lines for each contour
         for (let i = 0; i < contourSet.contours.length; ++i) {
             const c = contourSet.contours[i];
+            if (c.nVertices === 0) continue;
 
-            if (!c.nVertices) continue;
-
-            const color = regionToColor(c.reg);
+            const baseColor = regionToColor(c.reg, 0.8);
             const whiteColor = new THREE.Color(1, 1, 1);
-            const borderColor = lerpColor(color, whiteColor, 0.5); // Blend color with white
-            const darkenedColor = darkenColor(color);
+            const borderColor = lerpColor(baseColor, whiteColor, 128);
 
-            // Draw simplified contour lines
             for (let j = 0, k = c.nVertices - 1; j < c.nVertices; k = j++) {
-                const va = k * 4;
-                const vb = j * 4;
-
+                const va = c.vertices.slice(k * 4, k * 4 + 4);
+                const vb = c.vertices.slice(j * 4, j * 4 + 4);
+                
                 // Check if this is an area border edge
-                const isAreaBorder = (c.vertices[va + 3] & 0x20000) !== 0; // RC_AREA_BORDER equivalent
-                const edgeColor = isAreaBorder ? borderColor : color;
+                const isAreaBorder = (va[3] & 0x20000) !== 0; // RC_AREA_BORDER equivalent
+                const col = isAreaBorder ? borderColor : baseColor;
 
-                // First vertex
-                const fx1 = orig[0] + c.vertices[va + 0] * cs;
-                const fy1 = orig[1] + (c.vertices[va + 1] + 1 + (i & 1)) * ch;
-                const fz1 = orig[2] + c.vertices[va + 2] * cs;
+                // First vertex of the line
+                const fx1 = orig[0] + va[0] * cs;
+                const fy1 = orig[1] + (va[1] + 1 + (i & 1)) * ch;
+                const fz1 = orig[2] + va[2] * cs;
 
-                // Second vertex
-                const fx2 = orig[0] + c.vertices[vb + 0] * cs;
-                const fy2 = orig[1] + (c.vertices[vb + 1] + 1 + (i & 1)) * ch;
-                const fz2 = orig[2] + c.vertices[vb + 2] * cs;
+                // Second vertex of the line
+                const fx2 = orig[0] + vb[0] * cs;
+                const fy2 = orig[1] + (vb[1] + 1 + (i & 1)) * ch;
+                const fz2 = orig[2] + vb[2] * cs;
 
                 // Add line segment
                 linePositions.push(fx1, fy1, fz1);
-                lineColors.push(edgeColor.r, edgeColor.g, edgeColor.b);
+                lineColors.push(col.r, col.g, col.b);
                 linePositions.push(fx2, fy2, fz2);
-                lineColors.push(edgeColor.r, edgeColor.g, edgeColor.b);
-            }
-
-            // Draw simplified contour points
-            for (let j = 0; j < c.nVertices; ++j) {
-                const v = j * 4;
-                let off = 0;
-                let pointColor = darkenedColor;
-
-                // Check for border vertex
-                if (c.vertices[v + 3] & 0x10000) {
-                    // RC_BORDER_VERTEX equivalent
-                    pointColor = new THREE.Color(1, 1, 1); // White for border vertices
-                    off = ch * 2;
-                }
-
-                const fx = orig[0] + c.vertices[v + 0] * cs;
-                const fy =
-                    orig[1] + (c.vertices[v + 1] + 1 + (i & 1)) * ch + off;
-                const fz = orig[2] + c.vertices[v + 2] * cs;
-
-                pointPositions.push(fx, fy, fz);
-                pointColors.push(pointColor.r, pointColor.g, pointColor.b);
+                lineColors.push(col.r, col.g, col.b);
             }
         }
 
-        // Create line geometry
-        const lineGeometry = new THREE.BufferGeometry();
-        lineGeometry.setAttribute(
-            'position',
-            new THREE.BufferAttribute(new Float32Array(linePositions), 3),
-        );
-        lineGeometry.setAttribute(
-            'color',
-            new THREE.BufferAttribute(new Float32Array(lineColors), 3),
-        );
+        // Draw points for each contour
+        for (let i = 0; i < contourSet.contours.length; ++i) {
+            const c = contourSet.contours[i];
+            const baseColor = regionToColor(c.reg, 0.8);
+            const color = darkenColor(baseColor);
 
-        const lineMaterial = new THREE.LineBasicMaterial({
-            vertexColors: true,
-            transparent: true,
-            opacity: alpha,
-            linewidth: 3,
-        });
+            for (let j = 0; j < c.nVertices; ++j) {
+                const v = c.vertices.slice(j * 4, j * 4 + 4);
+                let off = 0;
+                let colv = color;
 
-        const lines = new THREE.LineSegments(lineGeometry, lineMaterial);
-        scene.add(lines);
+                if (v[3] & 0x10000) { // BORDER_VERTEX equivalent
+                    colv = new THREE.Color(1, 1, 1);
+                    off = ch * 2;
+                }
 
-        // Create point geometry
-        const pointGeometry = new THREE.BufferGeometry();
-        pointGeometry.setAttribute(
-            'position',
-            new THREE.BufferAttribute(new Float32Array(pointPositions), 3),
-        );
-        pointGeometry.setAttribute(
-            'color',
-            new THREE.BufferAttribute(new Float32Array(pointColors), 3),
-        );
+                const fx = orig[0] + v[0] * cs;
+                const fy = orig[1] + (v[1] + 1 + (i & 1)) * ch + off;
+                const fz = orig[2] + v[2] * cs;
 
-        const pointMaterial = new THREE.PointsMaterial({
-            vertexColors: true,
-            transparent: true,
-            opacity: alpha,
-            size: 6,
-            sizeAttenuation: false,
-        });
+                pointPositions.push(fx, fy, fz);
+                pointColors.push(colv.r, colv.g, colv.b);
+            }
+        }
 
-        const points = new THREE.Points(pointGeometry, pointMaterial);
-        scene.add(points);
+        // Create line segments geometry
+        let lineSegments: THREE.LineSegments | null = null;
+        if (linePositions.length > 0) {
+            const lineGeometry = new THREE.BufferGeometry();
+            lineGeometry.setAttribute(
+                'position',
+                new THREE.BufferAttribute(new Float32Array(linePositions), 3),
+            );
+            lineGeometry.setAttribute(
+                'color',
+                new THREE.BufferAttribute(new Float32Array(lineColors), 3),
+            );
+
+            const lineMaterial = new THREE.LineBasicMaterial({
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.9,
+                linewidth: 2.5,
+            });
+
+            lineSegments = new THREE.LineSegments(lineGeometry, lineMaterial);
+            scene.add(lineSegments);
+        }
+
+        // Create points geometry
+        let points: THREE.Points | null = null;
+        if (pointPositions.length > 0) {
+            const pointGeometry = new THREE.BufferGeometry();
+            pointGeometry.setAttribute(
+                'position',
+                new THREE.BufferAttribute(new Float32Array(pointPositions), 3),
+            );
+            pointGeometry.setAttribute(
+                'color',
+                new THREE.BufferAttribute(new Float32Array(pointColors), 3),
+            );
+
+            const pointMaterial = new THREE.PointsMaterial({
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.9,
+                size: 8,
+                sizeAttenuation: false,
+            });
+
+            points = new THREE.Points(pointGeometry, pointMaterial);
+            scene.add(points);
+        }
 
         return () => {
-            scene.remove(lines);
-            scene.remove(points);
-            lineGeometry.dispose();
-            lineMaterial.dispose();
-            pointGeometry.dispose();
-            pointMaterial.dispose();
+            if (lineSegments) {
+                scene.remove(lineSegments);
+                lineSegments.geometry.dispose();
+                (lineSegments.material as THREE.Material).dispose();
+            }
+
+            if (points) {
+                scene.remove(points);
+                points.geometry.dispose();
+                (points.material as THREE.Material).dispose();
+            }
         };
     }, [showSimplifiedContours, intermediates, scene]);
 

@@ -1,5 +1,5 @@
 import { vec3, box3, clamp, type Vec3, type Box3 } from '@/common/maaths';
-import { DIR_OFFSETS, type ArrayLike } from './common';
+import { getDirOffsetX, getDirOffsetY, type ArrayLike } from './common';
 import { NULL_AREA } from './area';
 
 export type HeightfieldSpan = {
@@ -577,8 +577,8 @@ export const filterLedgeSpans = (
                 let highestTraversableNeighborFloor = span.max;
 
                 for (let direction = 0; direction < 4; ++direction) {
-                    const neighborX = x + DIR_OFFSETS[direction][0];
-                    const neighborZ = z + DIR_OFFSETS[direction][1];
+                    const neighborX = x + getDirOffsetX(direction);
+                    const neighborZ = z + getDirOffsetY(direction);
 
                     // Skip neighbours which are out of bounds.
                     if (

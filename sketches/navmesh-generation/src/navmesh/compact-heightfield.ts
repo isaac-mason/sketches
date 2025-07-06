@@ -7,7 +7,7 @@ export type CompactHeightfieldSpan = {
     /** the lower extent of the span. measured from the heightfields base. */
     y: number;
     /** the id of the region the span belongs to, or zero if not in a region */
-    reg: number;
+    region: number;
     /** packed neighbour connection data */
     con: number;
     /** the height of the span, measured from y */
@@ -144,7 +144,7 @@ export const buildCompactHeightfield = (
     for (let i = 0; i < spanCount; i++) {
         compactHeightfield.spans[i] = {
             y: 0,
-            reg: 0,
+            region: 0,
             con: 0,
             h: 0,
         };

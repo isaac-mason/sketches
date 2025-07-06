@@ -3,6 +3,12 @@ import { getCon, NOT_CONNECTED } from './compact-heightfield';
 import { DIR_OFFSETS } from './common';
 import { NULL_AREA } from './area';
 
+export const BORDER_REG = 0x8000;
+
+const LOG_NB_STACKS = 3;
+const NB_STACKS = 1 << LOG_NB_STACKS;
+const expandIters = 8;
+
 /**
  * Calculate distance field using a two-pass distance transform algorithm
  */
@@ -267,11 +273,6 @@ export const buildRegions = (
     mergeRegionArea: number,
 ) => {
     // Region building constants
-    const BORDER_REG = 0x8000;
-    const LOG_NB_STACKS = 3;
-    const NB_STACKS = 1 << LOG_NB_STACKS;
-    const expandIters = 8;
-
     const w = compactHeightfield.width;
     const h = compactHeightfield.height;
 
@@ -434,7 +435,7 @@ export const buildRegions = (
 
     // Write the result to compact heightfield spans
     for (let i = 0; i < compactHeightfield.spanCount; i++) {
-        compactHeightfield.spans[i].reg = srcReg[i];
+        compactHeightfield.spans[i].region = srcReg[i];
     }
 
     return true;
