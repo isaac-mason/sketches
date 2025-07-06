@@ -1,11 +1,21 @@
 import { vec3, box3, clamp, type Vec3, type Box3 } from '@/common/maaths';
 import type { ArrayLike } from './common';
+import { NULL_AREA } from './area';
 
 // Constants from recastnavigation
 const RC_SPAN_MAX_HEIGHT = 0x1fff; // 8191
 const RC_AXIS_X = 0;
 const RC_AXIS_Y = 1;
 const RC_AXIS_Z = 2;
+const MAX_HEIGHTFIELD_HEIGHT = 0xffff;
+
+// Direction offsets for 4-directional neighbor access (N, E, S, W)
+const DIR_OFFSETS = [
+    [0, -1], // North (negative Z)
+    [1, 0],  // East (positive X)
+    [0, 1],  // South (positive Z)
+    [-1, 0], // West (negative X)
+];
 
 export type HeightfieldSpan = {
     /** the lower limit of the span */
@@ -15,7 +25,7 @@ export type HeightfieldSpan = {
     /** the area id assigned to the span */
     area: number;
     /** the next heightfield span */
-    next?: HeightfieldSpan;
+    next: HeightfieldSpan | null;
 };
 
 export type Heightfield = {
@@ -85,7 +95,7 @@ const addSpan = (
         min,
         max,
         area: areaID,
-        next: undefined,
+        next: null,
     };
 
     const columnIndex = x + z * heightfield.width;
@@ -121,7 +131,7 @@ const addSpan = (
             // Remove the current span since it's now merged with newSpan
             const next = currentSpan.next || null;
             if (previousSpan) {
-                previousSpan.next = next || undefined;
+                previousSpan.next = next || null;
             } else {
                 heightfield.spans[columnIndex] = next;
             }
@@ -135,7 +145,7 @@ const addSpan = (
         previousSpan.next = newSpan;
     } else {
         // This span should go before the others in the list
-        newSpan.next = heightfield.spans[columnIndex] || undefined;
+        newSpan.next = heightfield.spans[columnIndex] || null;
         heightfield.spans[columnIndex] = newSpan;
     }
 
@@ -481,4 +491,165 @@ export const rasterizeTriangles = (
     }
 
     return true;
+};
+
+export const filterLowHangingWalkableObstacles = (heightfield: Heightfield, walkableClimb: number) => {
+    const xSize = heightfield.width;
+    const zSize = heightfield.height;
+
+    for (let z = 0; z < zSize; ++z) {
+        for (let x = 0; x < xSize; ++x) {
+            let previousSpan: HeightfieldSpan | null = null;
+            let previousWasWalkable = false;
+            let previousAreaID = NULL_AREA;
+
+            // For each span in the column...
+            const columnIndex = x + z * xSize;
+            let span = heightfield.spans[columnIndex];
+            
+            while (span != null) {
+                const walkable = span.area !== NULL_AREA;
+
+                // If current span is not walkable, but there is walkable span just below it and the height difference
+                // is small enough for the agent to walk over, mark the current span as walkable too.
+                if (!walkable && previousWasWalkable && previousSpan && 
+                    span.max - previousSpan.max <= walkableClimb) {
+                    span.area = previousAreaID;
+                }
+
+                // Copy the original walkable value regardless of whether we changed it.
+                // This prevents multiple consecutive non-walkable spans from being erroneously marked as walkable.
+                previousWasWalkable = walkable;
+                previousAreaID = span.area;
+                previousSpan = span;
+                span = span.next || null;
+            }
+        }
+    }
+};
+
+export const filterLedgeSpans = (heightfield: Heightfield, walkableHeight: number, walkableClimb: number) => {
+    const xSize = heightfield.width;
+    const zSize = heightfield.height;
+
+    // Mark spans that are adjacent to a ledge as unwalkable
+    for (let z = 0; z < zSize; ++z) {
+        for (let x = 0; x < xSize; ++x) {
+            const columnIndex = x + z * xSize;
+            let span = heightfield.spans[columnIndex];
+
+            while (span != null) {
+                // Skip non-walkable spans
+                if (span.area === NULL_AREA) {
+                    span = span.next || null;
+                    continue;
+                }
+
+                const floor = span.max;
+                const ceiling = span.next ? span.next.min : MAX_HEIGHTFIELD_HEIGHT;
+
+                // The difference between this walkable area and the lowest neighbor walkable area.
+                // This is the difference between the current span and all neighbor spans that have
+                // enough space for an agent to move between, but not accounting at all for surface slope.
+                let lowestNeighborFloorDifference = MAX_HEIGHTFIELD_HEIGHT;
+
+                // Min and max height of accessible neighbours.
+                let lowestTraversableNeighborFloor = span.max;
+                let highestTraversableNeighborFloor = span.max;
+
+                for (let direction = 0; direction < 4; ++direction) {
+                    const neighborX = x + DIR_OFFSETS[direction][0];
+                    const neighborZ = z + DIR_OFFSETS[direction][1];
+
+                    // Skip neighbours which are out of bounds.
+                    if (neighborX < 0 || neighborZ < 0 || neighborX >= xSize || neighborZ >= zSize) {
+                        lowestNeighborFloorDifference = -walkableClimb - 1;
+                        break;
+                    }
+
+                    const neighborColumnIndex = neighborX + neighborZ * xSize;
+                    let neighborSpan = heightfield.spans[neighborColumnIndex];
+
+                    // The most we can step down to the neighbor is the walkableClimb distance.
+                    // Start with the area under the neighbor span
+                    let neighborCeiling = neighborSpan ? neighborSpan.min : MAX_HEIGHTFIELD_HEIGHT;
+
+                    // Skip neighbour if the gap between the spans is too small.
+                    if (Math.min(ceiling, neighborCeiling) - floor >= walkableHeight) {
+                        lowestNeighborFloorDifference = -walkableClimb - 1;
+                        break;
+                    }
+
+                    // For each span in the neighboring column...
+                    while (neighborSpan != null) {
+                        const neighborFloor = neighborSpan.max;
+                        neighborCeiling = neighborSpan.next ? neighborSpan.next.min : MAX_HEIGHTFIELD_HEIGHT;
+
+                        // Only consider neighboring areas that have enough overlap to be potentially traversable.
+                        if (Math.min(ceiling, neighborCeiling) - Math.max(floor, neighborFloor) < walkableHeight) {
+                            // No space to traverse between them.
+                            neighborSpan = neighborSpan.next || null;
+                            continue;
+                        }
+
+                        const neighborFloorDifference = neighborFloor - floor;
+                        lowestNeighborFloorDifference = Math.min(lowestNeighborFloorDifference, neighborFloorDifference);
+
+                        // Find min/max accessible neighbor height.
+                        // Only consider neighbors that are at most walkableClimb away.
+                        if (Math.abs(neighborFloorDifference) <= walkableClimb) {
+                            // There is space to move to the neighbor cell and the slope isn't too much.
+                            lowestTraversableNeighborFloor = Math.min(lowestTraversableNeighborFloor, neighborFloor);
+                            highestTraversableNeighborFloor = Math.max(highestTraversableNeighborFloor, neighborFloor);
+                        } else if (neighborFloorDifference < -walkableClimb) {
+                            // We already know this will be considered a ledge span so we can early-out
+                            break;
+                        }
+
+                        neighborSpan = neighborSpan.next || null;
+                    }
+                }
+
+                // The current span is close to a ledge if the magnitude of the drop to any neighbour span is greater than the walkableClimb distance.
+                // That is, there is a gap that is large enough to let an agent move between them, but the drop (surface slope) is too large to allow it.
+                if (lowestNeighborFloorDifference < -walkableClimb) {
+                    span.area = NULL_AREA;
+                }
+                // If the difference between all neighbor floors is too large, this is a steep slope, so mark the span as an unwalkable ledge.
+                else if (highestTraversableNeighborFloor - lowestTraversableNeighborFloor > walkableClimb) {
+                    span.area = NULL_AREA;
+                }
+
+                span = span.next || null;
+            }
+        }
+    }
+};
+
+export const filterWalkableLowHeightSpans = (
+    heightfield: Heightfield,
+    walkableHeight: number,
+) => {
+    const xSize = heightfield.width;
+    const zSize = heightfield.height;
+
+    // Remove walkable flag from spans which do not have enough
+    // space above them for the agent to stand there.
+    for (let z = 0; z < zSize; ++z) {
+        for (let x = 0; x < xSize; ++x) {
+            const columnIndex = x + z * xSize;
+            let span = heightfield.spans[columnIndex];
+
+            while (span != null) {
+                const floor = span.max;
+                const ceiling = span.next ? span.next.min : MAX_HEIGHTFIELD_HEIGHT;
+                
+                if (ceiling - floor < walkableHeight) {
+                    span.area = NULL_AREA;
+                }
+
+                span = span.next || null;
+            }
+        }
+    }
 };

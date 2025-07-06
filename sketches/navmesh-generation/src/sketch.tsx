@@ -11,6 +11,9 @@ import {
     type Heightfield,
     calculateGridSize,
     createHeightfield,
+    filterLedgeSpans,
+    filterLowHangingWalkableObstacles,
+    filterWalkableLowHeightSpans,
     rasterizeTriangles,
 } from './navmesh/heightfield';
 import {
@@ -89,7 +92,14 @@ const App = () => {
         const cellSize = 0.2;
         const cellHeight = 0.2;
 
-        const walkableClimbVoxels = 2;
+        const walkableClimbWorld = 1;
+        const walkableClimbVoxels = Math.ceil(
+            walkableClimbWorld / cellHeight,
+        );
+        const walkableHeightWorld = 0.4;
+        const walkableHeightVoxels = Math.ceil(
+            walkableHeightWorld / cellHeight,
+        );
 
         const bounds = calculateMeshBounds(positions, indices, box3.create());
         const [heightfieldWidth, heightfieldHeight] = calculateGridSize(
@@ -113,6 +123,19 @@ const App = () => {
         );
 
         console.timeEnd('rasterize triangles');
+
+        /* 4. filter walkable surfaces */
+        // Once all geoemtry is rasterized, we do initial pass of filtering to
+        // remove unwanted overhangs caused by the conservative rasterization
+        // as well as filter spans where the character cannot possibly stand.
+
+        console.time('filter walkable surfaces');
+
+        filterLowHangingWalkableObstacles(heightfield, walkableClimbVoxels);
+        filterLedgeSpans(heightfield, walkableHeightVoxels, walkableClimbVoxels);
+        filterWalkableLowHeightSpans(heightfield, walkableClimbVoxels);
+
+        console.timeEnd('filter walkable surfaces');
 
         /* store intermediates for debugging */
         const intermediates: Intermediates = {
