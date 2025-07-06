@@ -807,6 +807,12 @@ const mergeRegionHoles = (region: ContourRegion): void => {
         for (let iter = 0; iter < hole.nVertices; iter++) {
             // Find potential diagonals.
             // The 'best' vertex must be in the cone described by 3 consecutive vertices of the outline.
+			// ..o j-1
+			//   |
+			//   |   * best
+			//   |
+			// j o-----o j+1
+			//         :
             let ndiags = 0;
             for (let j = 0; j < outline.nVertices; j++) {
                 const holeX = hole.vertices[bestVertex * 4 + 0];
@@ -902,8 +908,8 @@ export const buildContours = (
     maxEdgeLength: number,
     buildFlags: ContourBuildFlags
 ): ContourSet => {
-    const w = compactHeightfield.width;
-    const h = compactHeightfield.height;
+    const width = compactHeightfield.width;
+    const height = compactHeightfield.height;
     const borderSize = compactHeightfield.borderSize;
     
     // Initialize contour set
@@ -918,8 +924,8 @@ export const buildContours = (
         maxError: maxSimplificationError
     };
     
+    // If the heightfield was build with borderSize, remove the offset.
     if (borderSize > 0) {
-        // If the heightfield was build with bordersize, remove the offset.
         const pad = borderSize * compactHeightfield.cellSize;
         contourSet.bounds[0][0] += pad;
         contourSet.bounds[0][2] += pad;
@@ -927,14 +933,12 @@ export const buildContours = (
         contourSet.bounds[1][2] -= pad;
     }
     
-    // const maxContours = Math.max(compactHeightfield.maxRegions, 8);
-    
     const flags = new Array(compactHeightfield.spanCount).fill(0);
     
     // Mark boundaries.
-    for (let y = 0; y < h; ++y) {
-        for (let x = 0; x < w; ++x) {
-            const c = compactHeightfield.cells[x + y * w];
+    for (let y = 0; y < height; ++y) {
+        for (let x = 0; x < width; ++x) {
+            const c = compactHeightfield.cells[x + y * width];
             for (let i = c.index; i < c.index + c.count; ++i) {
                 let res = 0;
                 const s = compactHeightfield.spans[i];
@@ -947,7 +951,7 @@ export const buildContours = (
                     if (getCon(s, dir) !== NOT_CONNECTED) {
                         const ax = x + getDirOffsetX(dir);
                         const ay = y + getDirOffsetY(dir);
-                        const ai = compactHeightfield.cells[ax + ay * w].index + getCon(s, dir);
+                        const ai = compactHeightfield.cells[ax + ay * width].index + getCon(s, dir);
                         r = compactHeightfield.spans[ai].region;
                     }
                     if (r === compactHeightfield.spans[i].region) {
@@ -962,9 +966,9 @@ export const buildContours = (
     const verts: number[] = [];
     const simplified: number[] = [];
     
-    for (let y = 0; y < h; ++y) {
-        for (let x = 0; x < w; ++x) {
-            const c = compactHeightfield.cells[x + y * w];
+    for (let y = 0; y < height; ++y) {
+        for (let x = 0; x < width; ++x) {
+            const c = compactHeightfield.cells[x + y * width];
             for (let i = c.index; i < c.index + c.count; ++i) {
                 if (flags[i] === 0 || flags[i] === 0xf) {
                     flags[i] = 0;
@@ -987,9 +991,9 @@ export const buildContours = (
                 if (Math.floor(simplified.length / 4) >= 3) {
                     const cont: Contour = {
                         nVertices: Math.floor(simplified.length / 4),
-                        vertices: [...simplified],
+                        vertices: simplified.slice(),
                         nRawVertices: Math.floor(verts.length / 4),
-                        rawVertices: [...verts],
+                        rawVertices: verts.slice(),
                         reg: reg,
                         area: area
                     };
@@ -1052,7 +1056,7 @@ export const buildContours = (
             
             for (let i = 0; i < contourSet.contours.length; ++i) {
                 const cont = contourSet.contours[i];
-                // Positively would contours are outlines, negative holes.
+                // Positively wound contours are outlines, negative holes.
                 if (winding[i] > 0) {
                     if (regions[cont.reg].outline) {
                         console.error(`buildContours: Multiple outlines for region ${cont.reg}.`);
