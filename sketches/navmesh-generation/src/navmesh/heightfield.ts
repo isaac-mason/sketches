@@ -155,7 +155,7 @@ const dividePoly = (
     axis: number,
 ): [number, number] => {
     // How far positive or negative away from the separating axis is each vertex
-    const inVertAxisDelta: number[] = new Array(12);
+    const inVertAxisDelta = _inVertAxisDelta;
     for (let inVert = 0; inVert < inVertsCount; ++inVert) {
         inVertAxisDelta[inVert] = axisOffset - inVerts[inVert * 3 + axis];
     }
@@ -230,6 +230,20 @@ const dividePoly = (
 
 const _triangleBounds = box3.create();
 
+// Reusable buffers for polygon clipping to avoid allocations
+const _inVerts = new Array(7 * 3);
+const _inRow = new Array(7 * 3);
+const _p1 = new Array(7 * 3);
+const _p2 = new Array(7 * 3);
+
+// Reusable buffer for dividePoly vertex axis deltas
+const _inVertAxisDelta = new Array(12);
+
+// Reusable Vec3 buffers for triangle vertices
+const _v0 = vec3.create();
+const _v1 = vec3.create();
+const _v2 = vec3.create();
+
 /**
  * Rasterize a single triangle to the heightfield
  */
@@ -283,11 +297,10 @@ const rasterizeTriangle = (
     z1 = clamp(z1, 0, h - 1);
 
     // Clip the triangle into all grid cells it touches
-    const buf = new Array(7 * 3 * 4);
-    let inVerts = new Array(7 * 3);
-    let inRow = new Array(7 * 3);
-    let p1 = new Array(7 * 3);
-    let p2 = new Array(7 * 3);
+    let inVerts = _inVerts;
+    let inRow = _inRow;
+    let p1 = _p1;
+    let p2 = _p2;
 
     // Copy triangle vertices
     inVerts[0] = v0[0];
@@ -441,21 +454,9 @@ export const rasterizeTriangles = (
         const i1 = indices[triIndex * 3 + 1];
         const i2 = indices[triIndex * 3 + 2];
 
-        const v0: Vec3 = [
-            vertices[i0 * 3],
-            vertices[i0 * 3 + 1],
-            vertices[i0 * 3 + 2],
-        ];
-        const v1: Vec3 = [
-            vertices[i1 * 3],
-            vertices[i1 * 3 + 1],
-            vertices[i1 * 3 + 2],
-        ];
-        const v2: Vec3 = [
-            vertices[i2 * 3],
-            vertices[i2 * 3 + 1],
-            vertices[i2 * 3 + 2],
-        ];
+        const v0 = vec3.set(_v0, vertices[i0 * 3], vertices[i0 * 3 + 1], vertices[i0 * 3 + 2]);
+        const v1 = vec3.set(_v1, vertices[i1 * 3], vertices[i1 * 3 + 1], vertices[i1 * 3 + 2]);
+        const v2 = vec3.set(_v2, vertices[i2 * 3], vertices[i2 * 3 + 1], vertices[i2 * 3 + 2]);
 
         const areaID = triAreaIds[triIndex];
 
