@@ -38,8 +38,10 @@ export type ContourSet = {
 }
 
 export enum ContourBuildFlags {
-	RC_CONTOUR_TESS_WALL_EDGES = 0x01,	///< Tessellate solid (impassable) edges during contour simplification.
-	RC_CONTOUR_TESS_AREA_EDGES = 0x02	///< Tessellate edges between areas during contour simplification.
+    /** tessellate solid (impassable) edges during contour simplification */
+	CONTOUR_TESS_WALL_EDGES = 0x01,
+    /** tessellate edges between areas during contour simplification */
+	CONTOUR_TESS_AREA_EDGES = 0x02,
 }
 
 const NOT_CONNECTED = 0x3f;
@@ -48,46 +50,38 @@ const BORDER_VERTEX = 0x10000;
 const AREA_BORDER = 0x20000;
 const CONTOUR_REG_MASK = 0xffff;
 
-/**
- * Gets the offset for a given direction
- */
-const getDirOffsetX = (dir: number): number => DIR_OFFSETS[dir][0];
-const getDirOffsetY = (dir: number): number => DIR_OFFSETS[dir][1];
+// Additional constants for hole merging
+const MESH_NULL_IDX = 0xffff;
 
 /**
- * Array-like structure that can dynamically grow
+ * Structure for contour holes
  */
-class IntArray {
-    private data: number[] = [];
-    
-    push(value: number): void {
-        this.data.push(value);
-    }
-    
-    clear(): void {
-        this.data.length = 0;
-    }
-    
-    resize(size: number): void {
-        this.data.length = size;
-    }
-    
-    size(): number {
-        return this.data.length;
-    }
-    
-    get(index: number): number {
-        return this.data[index];
-    }
-    
-    set(index: number, value: number): void {
-        this.data[index] = value;
-    }
-    
-    getData(): number[] {
-        return this.data;
-    }
-}
+type ContourHole = {
+    contour: Contour;
+    minx: number;
+    minz: number;
+    leftmost: number;
+};
+
+/**
+ * Structure for contour regions
+ */
+type ContourRegion = {
+    outline: Contour | null;
+    holes: ContourHole[];
+    nholes: number;
+};
+
+/**
+ * Structure for potential diagonals
+ */
+type PotentialDiagonal = {
+    vert: number;
+    dist: number;
+};
+
+const getDirOffsetX = (dir: number): number => DIR_OFFSETS[dir][0];
+const getDirOffsetY = (dir: number): number => DIR_OFFSETS[dir][1];
 
 /**
  * Gets the corner height for contour generation
@@ -174,7 +168,7 @@ const walkContour = (
     i: number,
     chf: CompactHeightfield,
     flags: Uint8Array,
-    points: IntArray
+    points: number[]
 ): void => {
     // Choose the first non-connected edge
     let dir = 0;
@@ -289,16 +283,16 @@ const distancePtSeg = (
  * Simplify a contour by removing unnecessary vertices
  */
 const simplifyContour = (
-    points: IntArray,
-    simplified: IntArray,
+    points: number[],
+    simplified: number[],
     maxError: number,
     maxEdgeLen: number,
     buildFlags: ContourBuildFlags
 ): void => {
     // Add initial points.
     let hasConnections = false;
-    for (let i = 0; i < points.size(); i += 4) {
-        if ((points.get(i + 3) & CONTOUR_REG_MASK) !== 0) {
+    for (let i = 0; i < points.length; i += 4) {
+        if ((points[i + 3] & CONTOUR_REG_MASK) !== 0) {
             hasConnections = true;
             break;
         }
@@ -307,46 +301,46 @@ const simplifyContour = (
     if (hasConnections) {
         // The contour has some portals to other regions.
         // Add a new point to every location where the region changes.
-        for (let i = 0, ni = points.size() / 4; i < ni; ++i) {
+        for (let i = 0, ni = points.length / 4; i < ni; ++i) {
             const ii = (i + 1) % ni;
-            const differentRegs = (points.get(i * 4 + 3) & CONTOUR_REG_MASK) !== (points.get(ii * 4 + 3) & CONTOUR_REG_MASK);
-            const areaBorders = (points.get(i * 4 + 3) & AREA_BORDER) !== (points.get(ii * 4 + 3) & AREA_BORDER);
+            const differentRegs = (points[i * 4 + 3] & CONTOUR_REG_MASK) !== (points[ii * 4 + 3] & CONTOUR_REG_MASK);
+            const areaBorders = (points[i * 4 + 3] & AREA_BORDER) !== (points[ii * 4 + 3] & AREA_BORDER);
             if (differentRegs || areaBorders) {
-                simplified.push(points.get(i * 4 + 0));
-                simplified.push(points.get(i * 4 + 1));
-                simplified.push(points.get(i * 4 + 2));
+                simplified.push(points[i * 4 + 0]);
+                simplified.push(points[i * 4 + 1]);
+                simplified.push(points[i * 4 + 2]);
                 simplified.push(i);
             }
         }
     }
     
-    if (simplified.size() === 0) {
+    if (simplified.length === 0) {
         // If there is no connections at all,
         // create some initial points for the simplification process.
         // Find lower-left and upper-right vertices of the contour.
-        let llx = points.get(0);
-        let lly = points.get(1);
-        let llz = points.get(2);
+        let llx = points[0];
+        let lly = points[1];
+        let llz = points[2];
         let lli = 0;
-        let urx = points.get(0);
-        let ury = points.get(1);
-        let urz = points.get(2);
+        let urx = points[0];
+        let ury = points[1];
+        let urz = points[2];
         let uri = 0;
-        for (let i = 0; i < points.size(); i += 4) {
-            const x = points.get(i + 0);
-            const y = points.get(i + 1);
-            const z = points.get(i + 2);
+        for (let i = 0; i < points.length; i += 4) {
+            const x = points[i + 0];
+            const y = points[i + 1];
+            const z = points[i + 2];
             if (x < llx || (x === llx && z < llz)) {
                 llx = x;
                 lly = y;
                 llz = z;
-                lli = i / 4;
+                lli = Math.floor(i / 4);
             }
             if (x > urx || (x === urx && z > urz)) {
                 urx = x;
                 ury = y;
                 urz = z;
-                uri = i / 4;
+                uri = Math.floor(i / 4);
             }
         }
         simplified.push(llx);
@@ -362,17 +356,17 @@ const simplifyContour = (
     
     // Add points until all raw points are within
     // error tolerance to the simplified shape.
-    const pn = points.size() / 4;
-    for (let i = 0; i < simplified.size() / 4; ) {
-        const ii = (i + 1) % (simplified.size() / 4);
+    const pn = points.length / 4;
+    for (let i = 0; i < simplified.length / 4; ) {
+        const ii = (i + 1) % (simplified.length / 4);
         
-        let ax = simplified.get(i * 4 + 0);
-        let az = simplified.get(i * 4 + 2);
-        const ai = simplified.get(i * 4 + 3);
+        let ax = simplified[i * 4 + 0];
+        let az = simplified[i * 4 + 2];
+        const ai = simplified[i * 4 + 3];
 
-        let bx = simplified.get(ii * 4 + 0);
-        let bz = simplified.get(ii * 4 + 2);
-        const bi = simplified.get(ii * 4 + 3);
+        let bx = simplified[ii * 4 + 0];
+        let bz = simplified[ii * 4 + 2];
+        const bi = simplified[ii * 4 + 3];
 
         // Find maximum deviation from the segment.
         let maxd = 0;
@@ -392,16 +386,20 @@ const simplifyContour = (
             cinc = pn - 1;
             ci = (bi + cinc) % pn;
             endi = ai;
-            // Swap
-            [ax, bx] = [bx, ax];
-            [az, bz] = [bz, az];
+            // Swap ax/bx and az/bz (equivalent to rcSwap in C++)
+            const tempX = ax;
+            const tempZ = az;
+            ax = bx;
+            az = bz;
+            bx = tempX;
+            bz = tempZ;
         }
         
         // Tessellate only outer edges or edges between areas.
-        if ((points.get(ci * 4 + 3) & CONTOUR_REG_MASK) === 0 ||
-            (points.get(ci * 4 + 3) & AREA_BORDER)) {
+        if ((points[ci * 4 + 3] & CONTOUR_REG_MASK) === 0 ||
+            (points[ci * 4 + 3] & AREA_BORDER)) {
             while (ci !== endi) {
-                const d = distancePtSeg(points.get(ci * 4 + 0), points.get(ci * 4 + 2), ax, az, bx, bz);
+                const d = distancePtSeg(points[ci * 4 + 0], points[ci * 4 + 2], ax, az, bx, bz);
                 if (d > maxd) {
                     maxd = d;
                     maxi = ci;
@@ -414,36 +412,36 @@ const simplifyContour = (
         // add new point, else continue to next segment.
         if (maxi !== -1 && maxd > (maxError * maxError)) {
             // Add space for the new point.
-            simplified.resize(simplified.size() + 4);
-            const n = simplified.size() / 4;
+            simplified.length = simplified.length + 4;
+            const n = simplified.length / 4;
             for (let j = n - 1; j > i; --j) {
-                simplified.set(j * 4 + 0, simplified.get((j - 1) * 4 + 0));
-                simplified.set(j * 4 + 1, simplified.get((j - 1) * 4 + 1));
-                simplified.set(j * 4 + 2, simplified.get((j - 1) * 4 + 2));
-                simplified.set(j * 4 + 3, simplified.get((j - 1) * 4 + 3));
+                simplified[j * 4 + 0] = simplified[(j - 1) * 4 + 0];
+                simplified[j * 4 + 1] = simplified[(j - 1) * 4 + 1];
+                simplified[j * 4 + 2] = simplified[(j - 1) * 4 + 2];
+                simplified[j * 4 + 3] = simplified[(j - 1) * 4 + 3];
             }
             // Add the point.
-            simplified.set((i + 1) * 4 + 0, points.get(maxi * 4 + 0));
-            simplified.set((i + 1) * 4 + 1, points.get(maxi * 4 + 1));
-            simplified.set((i + 1) * 4 + 2, points.get(maxi * 4 + 2));
-            simplified.set((i + 1) * 4 + 3, maxi);
+            simplified[(i + 1) * 4 + 0] = points[maxi * 4 + 0];
+            simplified[(i + 1) * 4 + 1] = points[maxi * 4 + 1];
+            simplified[(i + 1) * 4 + 2] = points[maxi * 4 + 2];
+            simplified[(i + 1) * 4 + 3] = maxi;
         } else {
             ++i;
         }
     }
     
     // Split too long edges.
-    if (maxEdgeLen > 0 && (buildFlags & (ContourBuildFlags.RC_CONTOUR_TESS_WALL_EDGES | ContourBuildFlags.RC_CONTOUR_TESS_AREA_EDGES)) !== 0) {
-        for (let i = 0; i < simplified.size() / 4; ) {
-            const ii = (i + 1) % (simplified.size() / 4);
+    if (maxEdgeLen > 0 && (buildFlags & (ContourBuildFlags.CONTOUR_TESS_WALL_EDGES | ContourBuildFlags.CONTOUR_TESS_AREA_EDGES)) !== 0) {
+        for (let i = 0; i < simplified.length / 4; ) {
+            const ii = (i + 1) % (simplified.length / 4);
             
-            const ax = simplified.get(i * 4 + 0);
-            const az = simplified.get(i * 4 + 2);
-            const ai = simplified.get(i * 4 + 3);
+            const ax = simplified[i * 4 + 0];
+            const az = simplified[i * 4 + 2];
+            const ai = simplified[i * 4 + 3];
             
-            const bx = simplified.get(ii * 4 + 0);
-            const bz = simplified.get(ii * 4 + 2);
-            const bi = simplified.get(ii * 4 + 3);
+            const bx = simplified[ii * 4 + 0];
+            const bz = simplified[ii * 4 + 2];
+            const bi = simplified[ii * 4 + 3];
             
             // Find maximum deviation from the segment.
             let maxi = -1;
@@ -452,11 +450,11 @@ const simplifyContour = (
             // Tessellate only outer edges or edges between areas.
             let tess = false;
             // Wall edges.
-            if ((buildFlags & ContourBuildFlags.RC_CONTOUR_TESS_WALL_EDGES) && (points.get(ci * 4 + 3) & CONTOUR_REG_MASK) === 0) {
+            if ((buildFlags & ContourBuildFlags.CONTOUR_TESS_WALL_EDGES) && (points[ci * 4 + 3] & CONTOUR_REG_MASK) === 0) {
                 tess = true;
             }
             // Edges between areas.
-            if ((buildFlags & ContourBuildFlags.RC_CONTOUR_TESS_AREA_EDGES) && (points.get(ci * 4 + 3) & AREA_BORDER)) {
+            if ((buildFlags & ContourBuildFlags.CONTOUR_TESS_AREA_EDGES) && (points[ci * 4 + 3] & AREA_BORDER)) {
                 tess = true;
             }
             
@@ -482,34 +480,314 @@ const simplifyContour = (
             // add new point, else continue to next segment.
             if (maxi !== -1) {
                 // Add space for the new point.
-                simplified.resize(simplified.size() + 4);
-                const n = simplified.size() / 4;
+                simplified.length = simplified.length + 4;
+                const n = simplified.length / 4;
                 for (let j = n - 1; j > i; --j) {
-                    simplified.set(j * 4 + 0, simplified.get((j - 1) * 4 + 0));
-                    simplified.set(j * 4 + 1, simplified.get((j - 1) * 4 + 1));
-                    simplified.set(j * 4 + 2, simplified.get((j - 1) * 4 + 2));
-                    simplified.set(j * 4 + 3, simplified.get((j - 1) * 4 + 3));
+                    simplified[j * 4 + 0] = simplified[(j - 1) * 4 + 0];
+                    simplified[j * 4 + 1] = simplified[(j - 1) * 4 + 1];
+                    simplified[j * 4 + 2] = simplified[(j - 1) * 4 + 2];
+                    simplified[j * 4 + 3] = simplified[(j - 1) * 4 + 3];
                 }
                 // Add the point.
-                simplified.set((i + 1) * 4 + 0, points.get(maxi * 4 + 0));
-                simplified.set((i + 1) * 4 + 1, points.get(maxi * 4 + 1));
-                simplified.set((i + 1) * 4 + 2, points.get(maxi * 4 + 2));
-                simplified.set((i + 1) * 4 + 3, maxi);
+                simplified[(i + 1) * 4 + 0] = points[maxi * 4 + 0];
+                simplified[(i + 1) * 4 + 1] = points[maxi * 4 + 1];
+                simplified[(i + 1) * 4 + 2] = points[maxi * 4 + 2];
+                simplified[(i + 1) * 4 + 3] = maxi;
             } else {
                 ++i;
             }
         }
     }
     
-    for (let i = 0; i < simplified.size() / 4; ++i) {
+    for (let i = 0; i < simplified.length / 4; ++i) {
         // The edge vertex flag is take from the current raw point,
         // and the neighbour region is take from the next raw point.
-        const ai = (simplified.get(i * 4 + 3) + 1) % pn;
-        const bi = simplified.get(i * 4 + 3);
-        simplified.set(i * 4 + 3, 
-            (points.get(ai * 4 + 3) & (CONTOUR_REG_MASK | AREA_BORDER)) | 
-            (points.get(bi * 4 + 3) & BORDER_VERTEX)
-        );
+        const ai = (simplified[i * 4 + 3] + 1) % pn;
+        const bi = simplified[i * 4 + 3];
+        simplified[i * 4 + 3] = 
+            (points[ai * 4 + 3] & (CONTOUR_REG_MASK | AREA_BORDER)) | 
+            (points[bi * 4 + 3] & BORDER_VERTEX);
+    }
+};
+
+/**
+ * Helper functions for geometric calculations
+ */
+
+// TODO: these are the same as in RecastMesh.cpp, consider using the same.
+// Last time I checked the if version got compiled using cmov, which was a lot faster than module (with idiv).
+const prev = (i: number, n: number): number => i - 1 >= 0 ? i - 1 : n - 1;
+const next = (i: number, n: number): number => i + 1 < n ? i + 1 : 0;
+
+const area2 = (a: number[], b: number[], c: number[]): number => {
+    return (b[0] - a[0]) * (c[2] - a[2]) - (c[0] - a[0]) * (b[2] - a[2]);
+};
+
+// Exclusive or: true iff exactly one argument is true.
+// The arguments are negated to ensure that they are 0/1
+// values. Then the bitwise Xor operator may apply.
+// (This idea is due to Michael Baldwin.)
+const xorb = (x: boolean, y: boolean): boolean => {
+    return !x !== !y;
+};
+
+// Returns true iff c is strictly to the left of the directed
+// line through a to b.
+const left = (a: number[], b: number[], c: number[]): boolean => {
+    return area2(a, b, c) < 0;
+};
+
+const leftOn = (a: number[], b: number[], c: number[]): boolean => {
+    return area2(a, b, c) <= 0;
+};
+
+const collinear = (a: number[], b: number[], c: number[]): boolean => {
+    return area2(a, b, c) === 0;
+};
+
+// Returns true iff ab properly intersects cd: they share
+// a point interior to both segments. The properness of the
+// intersection is ensured by using strict leftness.
+const intersectProp = (a: number[], b: number[], c: number[], d: number[]): boolean => {
+    // Eliminate improper cases.
+    if (collinear(a, b, c) || collinear(a, b, d) ||
+        collinear(c, d, a) || collinear(c, d, b)) {
+        return false;
+    }
+    
+    return xorb(left(a, b, c), left(a, b, d)) && xorb(left(c, d, a), left(c, d, b));
+};
+
+// Returns T iff (a,b,c) are collinear and point c lies
+// on the closed segment ab.
+const between = (a: number[], b: number[], c: number[]): boolean => {
+    if (!collinear(a, b, c)) {
+        return false;
+    }
+    // If ab not vertical, check betweenness on x; else on y.
+    if (a[0] !== b[0]) {
+        return ((a[0] <= c[0]) && (c[0] <= b[0])) || ((a[0] >= c[0]) && (c[0] >= b[0]));
+    }
+    return ((a[2] <= c[2]) && (c[2] <= b[2])) || ((a[2] >= c[2]) && (c[2] >= b[2]));
+};
+
+// Returns true iff segments ab and cd intersect, properly or improperly.
+const intersect = (a: number[], b: number[], c: number[], d: number[]): boolean => {
+    if (intersectProp(a, b, c, d)) {
+        return true;
+    }
+    if (between(a, b, c) || between(a, b, d) ||
+               between(c, d, a) || between(c, d, b)) {
+        return true;
+    }
+    return false;
+};
+
+const vequal = (a: number[], b: number[]): boolean => {
+    return a[0] === b[0] && a[2] === b[2];
+};
+
+const intersectSegContour = (d0: number[], d1: number[], i: number, n: number, verts: number[]): boolean => {
+    // For each edge (k,k+1) of P
+    for (let k = 0; k < n; k++) {
+        const k1 = next(k, n);
+        // Skip edges incident to i.
+        if (i === k || i === k1) {
+            continue;
+        }
+        const p0 = [verts[k * 4], 0, verts[k * 4 + 2]];
+        const p1 = [verts[k1 * 4], 0, verts[k1 * 4 + 2]];
+        if (vequal(d0, p0) || vequal(d1, p0) || vequal(d0, p1) || vequal(d1, p1)) {
+            continue;
+        }
+        
+        if (intersect(d0, d1, p0, p1)) {
+            return true;
+        }
+    }
+    return false;
+};
+
+const inCone = (i: number, n: number, verts: number[], pj: number[]): boolean => {
+    const pi = [verts[i * 4], 0, verts[i * 4 + 2]];
+    const pi1 = [verts[next(i, n) * 4], 0, verts[next(i, n) * 4 + 2]];
+    const pin1 = [verts[prev(i, n) * 4], 0, verts[prev(i, n) * 4 + 2]];
+    
+    // If P[i] is a convex vertex [ i+1 left or on (i-1,i) ].
+    if (leftOn(pin1, pi, pi1)) {
+        return left(pi, pj, pin1) && left(pj, pi, pi1);
+    }
+    // Assume (i-1,i,i+1) not collinear.
+    // else P[i] is reflex.
+    return !(leftOn(pi, pj, pi1) && leftOn(pj, pi, pin1));
+};
+
+/**
+ * Merge contours
+ */
+const mergeContours = (ca: Contour, cb: Contour, ia: number, ib: number): boolean => {
+    const maxVerts = ca.nVertices + cb.nVertices + 2;
+    const verts = new Array<number>(maxVerts * 4);
+    
+    let nv = 0;
+    
+    // Copy contour A.
+    for (let i = 0; i <= ca.nVertices; ++i) {
+        const dst = nv * 4;
+        const src = ((ia + i) % ca.nVertices) * 4;
+        verts[dst + 0] = ca.vertices[src + 0];
+        verts[dst + 1] = ca.vertices[src + 1];
+        verts[dst + 2] = ca.vertices[src + 2];
+        verts[dst + 3] = ca.vertices[src + 3];
+        nv++;
+    }
+
+    // Copy contour B
+    for (let i = 0; i <= cb.nVertices; ++i) {
+        const dst = nv * 4;
+        const src = ((ib + i) % cb.nVertices) * 4;
+        verts[dst + 0] = cb.vertices[src + 0];
+        verts[dst + 1] = cb.vertices[src + 1];
+        verts[dst + 2] = cb.vertices[src + 2];
+        verts[dst + 3] = cb.vertices[src + 3];
+        nv++;
+    }
+    
+    ca.vertices = verts;
+    ca.nVertices = nv;
+    
+    cb.vertices = [];
+    cb.nVertices = 0;
+    
+    return true;
+};
+
+// Finds the lowest leftmost vertex of a contour.
+const findLeftMostVertex = (contour: Contour): { minx: number, minz: number, leftmost: number } => {
+    let minx = contour.vertices[0];
+    let minz = contour.vertices[2];
+    let leftmost = 0;
+    for (let i = 1; i < contour.nVertices; i++) {
+        const x = contour.vertices[i * 4 + 0];
+        const z = contour.vertices[i * 4 + 2];
+        if (x < minx || (x === minx && z < minz)) {
+            minx = x;
+            minz = z;
+            leftmost = i;
+        }
+    }
+    return { minx, minz, leftmost };
+};
+
+const compareHoles = (a: ContourHole, b: ContourHole): number => {
+    if (a.minx === b.minx) {
+        if (a.minz < b.minz) {
+            return -1;
+        }
+        if (a.minz > b.minz) {
+            return 1;
+        }
+    } else {
+        if (a.minx < b.minx) {
+            return -1;
+        }
+        if (a.minx > b.minx) {
+            return 1;
+        }
+    }
+    return 0;
+};
+
+const compareDiagDist = (a: PotentialDiagonal, b: PotentialDiagonal): number => {
+    if (a.dist < b.dist) {
+        return -1;
+    }
+    if (a.dist > b.dist) {
+        return 1;
+    }
+    return 0;
+};
+
+const mergeRegionHoles = (region: ContourRegion): void => {
+    // Sort holes from left to right.
+    for (let i = 0; i < region.nholes; i++) {
+        const result = findLeftMostVertex(region.holes[i].contour);
+        region.holes[i].minx = result.minx;
+        region.holes[i].minz = result.minz;
+        region.holes[i].leftmost = result.leftmost;
+    }
+    
+    region.holes.sort(compareHoles);
+    
+    let maxVerts = region.outline!.nVertices;
+    for (let i = 0; i < region.nholes; i++) {
+        maxVerts += region.holes[i].contour.nVertices;
+    }
+    
+    const diags: PotentialDiagonal[] = new Array(maxVerts);
+    for (let i = 0; i < maxVerts; i++) {
+        diags[i] = { vert: 0, dist: 0 };
+    }
+    
+    const outline = region.outline!;
+    
+    // Merge holes into the outline one by one.
+    for (let i = 0; i < region.nholes; i++) {
+        const hole = region.holes[i].contour;
+        
+        let index = -1;
+        let bestVertex = region.holes[i].leftmost;
+        for (let iter = 0; iter < hole.nVertices; iter++) {
+            // Find potential diagonals.
+            // The 'best' vertex must be in the cone described by 3 consecutive vertices of the outline.
+            // ..o j-1
+            //   |
+            //   |   * best
+            //   |
+            // j o-----o j+1
+            //         :
+            let ndiags = 0;
+            const corner = [hole.vertices[bestVertex * 4], 0, hole.vertices[bestVertex * 4 + 2]];
+            for (let j = 0; j < outline.nVertices; j++) {
+                if (inCone(j, outline.nVertices, outline.vertices, corner)) {
+                    const dx = outline.vertices[j * 4 + 0] - corner[0];
+                    const dz = outline.vertices[j * 4 + 2] - corner[2];
+                    diags[ndiags].vert = j;
+                    diags[ndiags].dist = dx * dx + dz * dz;
+                    ndiags++;
+                }
+            }
+            // Sort potential diagonals by distance, we want to make the connection as short as possible.
+            diags.slice(0, ndiags).sort(compareDiagDist);
+            
+            // Find a diagonal that is not intersecting the outline not the remaining holes.
+            index = -1;
+            for (let j = 0; j < ndiags; j++) {
+                const pt = [outline.vertices[diags[j].vert * 4], 0, outline.vertices[diags[j].vert * 4 + 2]];
+                let intersectFound = intersectSegContour(pt, corner, diags[j].vert, outline.nVertices, outline.vertices);
+                for (let k = i; k < region.nholes && !intersectFound; k++) {
+                    intersectFound = intersectSegContour(pt, corner, -1, region.holes[k].contour.nVertices, region.holes[k].contour.vertices);
+                }
+                if (!intersectFound) {
+                    index = diags[j].vert;
+                    break;
+                }
+            }
+            // If found non-intersecting diagonal, stop looking.
+            if (index !== -1) {
+                break;
+            }
+            // All the potential diagonals for the current vertex were intersecting, try next vertex.
+            bestVertex = (bestVertex + 1) % hole.nVertices;
+        }
+        
+        if (index === -1) {
+            console.warn('mergeHoles: Failed to find merge points for outline and hole.');
+            continue;
+        }
+        if (!mergeContours(outline, hole, index, bestVertex)) {
+            console.warn('mergeHoles: Failed to merge contours.');
+        }
     }
 };
 
@@ -529,23 +807,23 @@ const calcAreaOfPolygon2D = (verts: number[], nverts: number): number => {
 /**
  * Remove degenerate segments from simplified contour
  */
-const removeDegenerateSegments = (simplified: IntArray): void => {
+const removeDegenerateSegments = (simplified: number[]): void => {
     // Remove adjacent vertices which are equal on xz-plane,
     // or else the triangulator will get confused.
-    let npts = simplified.size() / 4;
+    let npts = simplified.length / 4;
     for (let i = 0; i < npts; ++i) {
         const ni = (i + 1) % npts;
         
-        if (simplified.get(i * 4) === simplified.get(ni * 4) && 
-            simplified.get(i * 4 + 2) === simplified.get(ni * 4 + 2)) {
+        if (simplified[i * 4] === simplified[ni * 4] && 
+            simplified[i * 4 + 2] === simplified[ni * 4 + 2]) {
             // Degenerate segment, remove.
-            for (let j = i; j < simplified.size() / 4 - 1; ++j) {
-                simplified.set(j * 4 + 0, simplified.get((j + 1) * 4 + 0));
-                simplified.set(j * 4 + 1, simplified.get((j + 1) * 4 + 1));
-                simplified.set(j * 4 + 2, simplified.get((j + 1) * 4 + 2));
-                simplified.set(j * 4 + 3, simplified.get((j + 1) * 4 + 3));
+            for (let j = i; j < simplified.length / 4 - 1; ++j) {
+                simplified[j * 4 + 0] = simplified[(j + 1) * 4 + 0];
+                simplified[j * 4 + 1] = simplified[(j + 1) * 4 + 1];
+                simplified[j * 4 + 2] = simplified[(j + 1) * 4 + 2];
+                simplified[j * 4 + 3] = simplified[(j + 1) * 4 + 3];
             }
-            simplified.resize(simplified.size() - 4);
+            simplified.length = simplified.length - 4;
             npts--;
             i--; // Check this index again
         }
@@ -564,10 +842,7 @@ export const buildContours = (
     
     const contourSet: ContourSet = {
         contours: [],
-        bounds: [
-            [compactHeightfield.bounds[0][0], compactHeightfield.bounds[0][1], compactHeightfield.bounds[0][2]],
-            [compactHeightfield.bounds[1][0], compactHeightfield.bounds[1][1], compactHeightfield.bounds[1][2]]
-        ],
+        bounds: structuredClone(compactHeightfield.bounds),
         cellSize: compactHeightfield.cellSize,
         cellHeight: compactHeightfield.cellHeight,
         width: compactHeightfield.width - compactHeightfield.borderSize * 2,
@@ -575,6 +850,8 @@ export const buildContours = (
         borderSize: compactHeightfield.borderSize,
         maxError: maxSimplificationError
     };
+    
+    let maxContours = Math.max(256, 8); // Start with reasonable initial size
     
     if (borderSize > 0) {
         // If the heightfield was build with bordersize, remove the offset.
@@ -615,8 +892,8 @@ export const buildContours = (
         }
     }
     
-    const verts = new IntArray();
-    const simplified = new IntArray();
+    const verts: number[] = [];
+    const simplified: number[] = [];
     
     for (let y = 0; y < h; ++y) {
         for (let x = 0; x < w; ++x) {
@@ -632,8 +909,8 @@ export const buildContours = (
                 }
                 const area = compactHeightfield.areas[i];
                 
-                verts.clear();
-                simplified.clear();
+                verts.length = 0;
+                simplified.length = 0;
                 
                 walkContour(x, y, i, compactHeightfield, flags, verts);
                 simplifyContour(verts, simplified, maxSimplificationError, maxEdgeLength, buildFlags);
@@ -641,19 +918,28 @@ export const buildContours = (
                 
                 // Store region->contour remap info.
                 // Create contour.
-                if (simplified.size() / 4 >= 3) {
+                if (simplified.length / 4 >= 3) {
+                    // Check if we need to expand the contours array
+                    if (contourSet.contours.length >= maxContours) {
+                        // Allocate more contours.
+                        // This happens when a region has holes.
+                        const oldMax = maxContours;
+                        maxContours *= 2;
+                        console.warn(`rcBuildContours: Expanding max contours from ${oldMax} to ${maxContours}.`);
+                    }
+                    
                     const cont: Contour = {
-                        nVertices: simplified.size() / 4,
-                        vertices: new Array(simplified.size()),
-                        nRawVertices: verts.size() / 4,
-                        rawVertices: new Array(verts.size()),
+                        nVertices: simplified.length / 4,
+                        vertices: new Array(simplified.length),
+                        nRawVertices: verts.length / 4,
+                        rawVertices: new Array(verts.length),
                         reg,
                         area
                     };
                     
                     // Copy simplified vertices
-                    for (let j = 0; j < simplified.size(); ++j) {
-                        cont.vertices[j] = simplified.get(j);
+                    for (let j = 0; j < simplified.length; ++j) {
+                        cont.vertices[j] = simplified[j];
                     }
                     if (borderSize > 0) {
                         // If the heightfield was build with bordersize, remove the offset.
@@ -664,8 +950,8 @@ export const buildContours = (
                     }
                     
                     // Copy raw vertices
-                    for (let j = 0; j < verts.size(); ++j) {
-                        cont.rawVertices[j] = verts.get(j);
+                    for (let j = 0; j < verts.length; ++j) {
+                        cont.rawVertices[j] = verts[j];
                     }
                     if (borderSize > 0) {
                         // If the heightfield was build with bordersize, remove the offset.
@@ -695,9 +981,78 @@ export const buildContours = (
             }
         }
         
-        // Note: For simplicity, we're not implementing the full hole merging logic here
-        // as it's quite complex and involves geometric algorithms for finding valid
-        // connections between holes and outlines. The basic contour tracing is implemented.
+        if (nholes > 0) {
+            // Collect outline contour and holes contours per region.
+            // We assume that there is one outline and multiple holes.
+            const maxRegions = 256; // Reasonable maximum for most cases
+            const regions: ContourRegion[] = new Array(maxRegions);
+            for (let i = 0; i < maxRegions; i++) {
+                regions[i] = {
+                    outline: null,
+                    holes: [],
+                    nholes: 0
+                };
+            }
+            
+            const holes: ContourHole[] = new Array(contourSet.contours.length);
+            for (let i = 0; i < holes.length; i++) {
+                holes[i] = {
+                    contour: contourSet.contours[0], // Will be set properly below
+                    minx: 0,
+                    minz: 0,
+                    leftmost: 0
+                };
+            }
+            
+            for (let i = 0; i < contourSet.contours.length; ++i) {
+                const cont = contourSet.contours[i];
+                // Positively wound contours are outlines, negative holes.
+                if (winding[i] > 0) {
+                    if (regions[cont.reg]?.outline) {
+                        console.error(`rcBuildContours: Multiple outlines for region ${cont.reg}.`);
+                    }
+                    if (cont.reg < maxRegions) {
+                        regions[cont.reg].outline = cont;
+                    }
+                } else {
+                    if (cont.reg < maxRegions) {
+                        regions[cont.reg].nholes++;
+                    }
+                }
+            }
+            let index = 0;
+            for (let i = 0; i < maxRegions; i++) {
+                if (regions[i].nholes > 0) {
+                    regions[i].holes = holes.slice(index, index + regions[i].nholes);
+                    index += regions[i].nholes;
+                    regions[i].nholes = 0;
+                }
+            }
+            for (let i = 0; i < contourSet.contours.length; ++i) {
+                const cont = contourSet.contours[i];
+                if (cont.reg < maxRegions) {
+                    const reg = regions[cont.reg];
+                    if (winding[i] < 0) {
+                        reg.holes[reg.nholes++].contour = cont;
+                    }
+                }
+            }
+            
+            // Finally merge each regions holes into the outline.
+            for (let i = 0; i < maxRegions; i++) {
+                const reg = regions[i];
+                if (!reg.nholes) continue;
+                
+                if (reg.outline) {
+                    mergeRegionHoles(reg);
+                } else {
+                    // The region does not have an outline.
+                    // This can happen if the contour becomes self-overlapping because of
+                    // too aggressive simplification settings.
+                    console.error(`rcBuildContours: Bad outline for region ${i}, contour simplification is likely too aggressive.`);
+                }
+            }
+        }
     }
     
     return contourSet;

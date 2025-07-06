@@ -267,7 +267,7 @@ const App = () => {
             compactHeightfield,
             maxSimplificationError,
             maxEdgeLength,
-            ContourBuildFlags.RC_CONTOUR_TESS_WALL_EDGES,
+            ContourBuildFlags.CONTOUR_TESS_WALL_EDGES,
         );
 
         console.timeEnd('trace and simplify region contours');
