@@ -7,8 +7,16 @@ import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 
 import { getPositionsAndIndices } from './navmesh/get-positions-and-indices';
-import { type Heightfield, calculateGridSize, createHeightfield, rasterizeTriangles } from './navmesh/heightfield';
-import { calculateMeshBounds, markWalkableTriangles } from './navmesh/input-triangle-mesh';
+import {
+    type Heightfield,
+    calculateGridSize,
+    createHeightfield,
+    rasterizeTriangles,
+} from './navmesh/heightfield';
+import {
+    calculateMeshBounds,
+    markWalkableTriangles,
+} from './navmesh/input-triangle-mesh';
 
 type Intermediates = {
     input: {
@@ -22,9 +30,7 @@ type Intermediates = {
 const DungeonModel = () => {
     const gltf = useGLTF('/dungeon.gltf');
 
-    return (
-        <primitive object={gltf.scene} />
-    );
+    return <primitive object={gltf.scene} />;
 };
 
 const App = () => {
@@ -44,12 +50,16 @@ const App = () => {
             value: false,
             label: 'Show Heightfield',
         },
-    })
+    });
 
-    const [intermediates, setIntermediates] = useState<Intermediates | undefined>();
+    const [intermediates, setIntermediates] = useState<
+        Intermediates | undefined
+    >();
 
     useEffect(() => {
         /* 1. get positions and indices from THREE.Mesh instances in the group */
+        console.time('get positions and indices');
+
         const meshes: THREE.Mesh[] = [];
 
         group.current.traverse((child) => {
@@ -60,22 +70,39 @@ const App = () => {
 
         const [positions, indices] = getPositionsAndIndices(meshes);
 
+        console.timeEnd('get positions and indices');
+
         /* 2. mark walkable triangles */
-        const triAreaIds: Uint8Array = new Uint8Array(
-            indices.length / 3,
-        ).fill(0);
+        console.time('mark walkable triangles');
+
+        const triAreaIds: Uint8Array = new Uint8Array(indices.length / 3).fill(
+            0,
+        );
 
         markWalkableTriangles(positions, indices, triAreaIds, 45);
 
+        console.timeEnd('mark walkable triangles');
+
         /* 3. rasterize the triangles to a voxel heightfield */
+        console.time('rasterize triangles');
+
         const cellSize = 0.2;
         const cellHeight = 0.2;
 
         const walkableClimbVoxels = 2;
 
         const bounds = calculateMeshBounds(positions, indices, box3.create());
-        const [heightfieldWidth, heightfieldHeight] = calculateGridSize(bounds, cellSize)
-        const heightfield = createHeightfield(heightfieldWidth, heightfieldHeight, bounds, cellSize, cellHeight);
+        const [heightfieldWidth, heightfieldHeight] = calculateGridSize(
+            bounds,
+            cellSize,
+        );
+        const heightfield = createHeightfield(
+            heightfieldWidth,
+            heightfieldHeight,
+            bounds,
+            cellSize,
+            cellHeight,
+        );
 
         rasterizeTriangles(
             heightfield,
@@ -83,7 +110,9 @@ const App = () => {
             indices,
             triAreaIds,
             walkableClimbVoxels,
-        )
+        );
+
+        console.timeEnd('rasterize triangles');
 
         /* store intermediates for debugging */
         const intermediates: Intermediates = {
@@ -115,11 +144,15 @@ const App = () => {
         let indicesIndex = 0;
         let vertexColorsIndex = 0;
 
-        for (let triangle = 0; triangle < input.indices.length / 3; triangle++) {
+        for (
+            let triangle = 0;
+            triangle < input.indices.length / 3;
+            triangle++
+        ) {
             const areaId = triAreaIds[triangle];
 
             let color = areaToColor[areaId];
-            
+
             if (!color) {
                 // hash area id to a color
                 color = new THREE.Color(
@@ -128,17 +161,26 @@ const App = () => {
                 areaToColor[areaId] = color;
             }
 
-            positions[positionsIndex++] = input.positions[input.indices[triangle * 3] * 3];
-            positions[positionsIndex++] = input.positions[input.indices[triangle * 3] * 3 + 1];
-            positions[positionsIndex++] = input.positions[input.indices[triangle * 3] * 3 + 2];
+            positions[positionsIndex++] =
+                input.positions[input.indices[triangle * 3] * 3];
+            positions[positionsIndex++] =
+                input.positions[input.indices[triangle * 3] * 3 + 1];
+            positions[positionsIndex++] =
+                input.positions[input.indices[triangle * 3] * 3 + 2];
 
-            positions[positionsIndex++] = input.positions[input.indices[triangle * 3 + 1] * 3];
-            positions[positionsIndex++] = input.positions[input.indices[triangle * 3 + 1] * 3 + 1];
-            positions[positionsIndex++] = input.positions[input.indices[triangle * 3 + 1] * 3 + 2];
+            positions[positionsIndex++] =
+                input.positions[input.indices[triangle * 3 + 1] * 3];
+            positions[positionsIndex++] =
+                input.positions[input.indices[triangle * 3 + 1] * 3 + 1];
+            positions[positionsIndex++] =
+                input.positions[input.indices[triangle * 3 + 1] * 3 + 2];
 
-            positions[positionsIndex++] = input.positions[input.indices[triangle * 3 + 2] * 3];
-            positions[positionsIndex++] = input.positions[input.indices[triangle * 3 + 2] * 3 + 1];
-            positions[positionsIndex++] = input.positions[input.indices[triangle * 3 + 2] * 3 + 2];
+            positions[positionsIndex++] =
+                input.positions[input.indices[triangle * 3 + 2] * 3];
+            positions[positionsIndex++] =
+                input.positions[input.indices[triangle * 3 + 2] * 3 + 1];
+            positions[positionsIndex++] =
+                input.positions[input.indices[triangle * 3 + 2] * 3 + 2];
 
             indices[indicesIndex++] = triangle * 3;
             indices[indicesIndex++] = triangle * 3 + 1;
@@ -163,7 +205,9 @@ const App = () => {
             'position',
             new THREE.BufferAttribute(new Float32Array(positions), 3),
         );
-        geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(indices), 1));
+        geometry.setIndex(
+            new THREE.BufferAttribute(new Uint32Array(indices), 1),
+        );
         geometry.setAttribute(
             'color',
             new THREE.BufferAttribute(new Float32Array(vertexColors), 3),
@@ -185,7 +229,7 @@ const App = () => {
             geometry.dispose();
             material.dispose();
         };
-    }, [showTriangleAreaIds, intermediates, scene])
+    }, [showTriangleAreaIds, intermediates, scene]);
 
     // debug view of the heightfield
     useEffect(() => {
@@ -193,7 +237,7 @@ const App = () => {
 
         const { heightfield } = intermediates;
         const areaToColor: Record<number, THREE.Color> = {};
-        
+
         // Count total spans to determine instance count
         let totalSpans = 0;
         for (let z = 0; z < heightfield.height; z++) {
@@ -212,11 +256,15 @@ const App = () => {
         // Create instanced mesh
         const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
         const material = new THREE.MeshBasicMaterial();
-        const instancedMesh = new THREE.InstancedMesh(boxGeometry, material, totalSpans);
+        const instancedMesh = new THREE.InstancedMesh(
+            boxGeometry,
+            material,
+            totalSpans,
+        );
 
         const matrix = new THREE.Matrix4();
         const color = new THREE.Color();
-        
+
         const heightfieldBoundsMin = heightfield.bounds[0];
         const cellSize = heightfield.cellSize;
         const cellHeight = heightfield.cellHeight;
@@ -228,18 +276,26 @@ const App = () => {
             for (let x = 0; x < heightfield.width; x++) {
                 const columnIndex = x + z * heightfield.width;
                 let span = heightfield.spans[columnIndex];
-                
+
                 while (span) {
                     // Calculate world position
-                    const worldX = heightfieldBoundsMin[0] + (x + 0.5) * cellSize;
-                    const worldZ = heightfieldBoundsMin[2] + (z + 0.5) * cellSize;
-                    
+                    const worldX =
+                        heightfieldBoundsMin[0] + (x + 0.5) * cellSize;
+                    const worldZ =
+                        heightfieldBoundsMin[2] + (z + 0.5) * cellSize;
+
                     // Calculate span height and center Y
                     const spanHeight = (span.max - span.min) * cellHeight;
-                    const worldY = heightfieldBoundsMin[1] + (span.min + (span.max - span.min) * 0.5) * cellHeight;
+                    const worldY =
+                        heightfieldBoundsMin[1] +
+                        (span.min + (span.max - span.min) * 0.5) * cellHeight;
 
                     // Set transform matrix (position and scale)
-                    matrix.makeScale(cellSize * 0.9, spanHeight, cellSize * 0.9);
+                    matrix.makeScale(
+                        cellSize * 0.9,
+                        spanHeight,
+                        cellSize * 0.9,
+                    );
                     matrix.setPosition(worldX, worldY, worldZ);
                     instancedMesh.setMatrixAt(instanceIndex, matrix);
 
@@ -248,13 +304,13 @@ const App = () => {
                     if (!spanColor) {
                         // Hash area id to a color
                         spanColor = new THREE.Color(
-                            `hsl(${(span.area * 137.5) % 360}, 70%, 60%)`
+                            `hsl(${(span.area * 137.5) % 360}, 70%, 60%)`,
                         );
                         areaToColor[span.area] = spanColor;
                     }
-                    
+
                     instancedMesh.setColorAt(instanceIndex, spanColor);
-                    
+
                     instanceIndex++;
                     span = span.next || null;
                 }
@@ -275,7 +331,7 @@ const App = () => {
             material.dispose();
             instancedMesh.dispose();
         };
-    }, [showHeightfield, intermediates, scene])
+    }, [showHeightfield, intermediates, scene]);
 
     return (
         <>
@@ -303,7 +359,7 @@ export function Sketch() {
     return (
         <>
             <h1>NavMesh Generation</h1>
-            
+
             <WebGPUCanvas>
                 <App />
             </WebGPUCanvas>
