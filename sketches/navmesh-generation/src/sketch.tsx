@@ -6,6 +6,7 @@ import { Leva, useControls } from 'leva';
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 
+import { type CompactHeightfield, buildCompactHeightfield } from './navmesh/compact-heightfield';
 import { getPositionsAndIndices } from './navmesh/get-positions-and-indices';
 import {
     type Heightfield,
@@ -28,6 +29,7 @@ type Intermediates = {
     };
     triAreaIds: Uint8Array;
     heightfield: Heightfield;
+    compactHeightfield: CompactHeightfield;
 };
 
 const DungeonModel = () => {
@@ -137,6 +139,17 @@ const App = () => {
 
         console.timeEnd('filter walkable surfaces');
 
+        /* 5. partition walkable surface to simple regions. */
+        // Compact the heightfield so that it is faster to handle from now on.
+        // This will result more cache coherent data as well as the neighbours
+        // between walkable cells will be calculated.
+
+        console.time("build compact heightfield");
+
+        const compactHeightfield = buildCompactHeightfield(walkableHeightVoxels, walkableClimbVoxels, heightfield);
+
+        console.timeEnd("build compact heightfield");
+
         /* store intermediates for debugging */
         const intermediates: Intermediates = {
             input: {
@@ -145,6 +158,7 @@ const App = () => {
             },
             triAreaIds,
             heightfield,
+            compactHeightfield,
         };
 
         setIntermediates(intermediates);
