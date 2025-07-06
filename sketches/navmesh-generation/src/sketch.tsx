@@ -6,7 +6,7 @@ import { Leva, useControls } from 'leva';
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 
-import { type CompactHeightfield, buildCompactHeightfield } from './navmesh/compact-heightfield';
+import { type CompactHeightfield, buildCompactHeightfield, erodeWalkableArea } from './navmesh/compact-heightfield';
 import { getPositionsAndIndices } from './navmesh/get-positions-and-indices';
 import {
     type Heightfield,
@@ -99,6 +99,11 @@ const App = () => {
         const cellSize = 0.2;
         const cellHeight = 0.2;
 
+        const walkableRadiusWorld = 0.5;
+        const walkableRadiusVoxels = Math.ceil(
+            walkableRadiusWorld / cellSize,
+        );
+
         const walkableClimbWorld = 1;
         const walkableClimbVoxels = Math.ceil(
             walkableClimbWorld / cellHeight,
@@ -154,6 +159,14 @@ const App = () => {
         const compactHeightfield = buildCompactHeightfield(walkableHeightVoxels, walkableClimbVoxels, heightfield);
 
         console.timeEnd("build compact heightfield");
+
+        /* erode the walkable area by the agent radius / walkable radius */
+
+        console.time('erode walkable area');
+
+        erodeWalkableArea(walkableRadiusVoxels, compactHeightfield);
+
+        console.timeEnd('erode walkable area');
 
         /* store intermediates for debugging */
         const intermediates: Intermediates = {

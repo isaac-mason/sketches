@@ -238,3 +238,10 @@ export const buildCompactHeightfield = (
 
     return compactHeightfield;
 };
+
+export const erodeWalkableArea = (
+    walkableRadiusVoxels: number,
+    compactHeightfield: CompactHeightfield,
+) => {
+
+};
