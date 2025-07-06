@@ -337,6 +337,155 @@ const diagonal = (
     );
 };
 
+const diagonalieLoose = (
+    startVertexIdx: number,
+    endVertexIdx: number,
+    polygonVertexCount: number,
+    vertices: number[],
+    vertexIndices: number[],
+): boolean => {
+    const diagonalStart = [
+        vertices[(vertexIndices[startVertexIdx] & 0x0fffffff) * 4],
+        vertices[(vertexIndices[startVertexIdx] & 0x0fffffff) * 4 + 1],
+        vertices[(vertexIndices[startVertexIdx] & 0x0fffffff) * 4 + 2],
+    ];
+    const diagonalEnd = [
+        vertices[(vertexIndices[endVertexIdx] & 0x0fffffff) * 4],
+        vertices[(vertexIndices[endVertexIdx] & 0x0fffffff) * 4 + 1],
+        vertices[(vertexIndices[endVertexIdx] & 0x0fffffff) * 4 + 2],
+    ];
+
+    for (let k = 0; k < polygonVertexCount; k++) {
+        const k1 = next(k, polygonVertexCount);
+        if (
+            !(
+                k === startVertexIdx ||
+                k1 === startVertexIdx ||
+                k === endVertexIdx ||
+                k1 === endVertexIdx
+            )
+        ) {
+            const edgeStart = [
+                vertices[(vertexIndices[k] & 0x0fffffff) * 4],
+                vertices[(vertexIndices[k] & 0x0fffffff) * 4 + 1],
+                vertices[(vertexIndices[k] & 0x0fffffff) * 4 + 2],
+            ];
+            const edgeEnd = [
+                vertices[(vertexIndices[k1] & 0x0fffffff) * 4],
+                vertices[(vertexIndices[k1] & 0x0fffffff) * 4 + 1],
+                vertices[(vertexIndices[k1] & 0x0fffffff) * 4 + 2],
+            ];
+
+            if (
+                vequal(diagonalStart, edgeStart) ||
+                vequal(diagonalEnd, edgeStart) ||
+                vequal(diagonalStart, edgeEnd) ||
+                vequal(diagonalEnd, edgeEnd)
+            ) {
+                continue;
+            }
+
+            if (intersectProp(diagonalStart, diagonalEnd, edgeStart, edgeEnd)) {
+                return false;
+            }
+        }
+    }
+    return true;
+};
+
+const inConeLoose = (
+    coneVertexIdx: number,
+    testVertexIdx: number,
+    polygonVertexCount: number,
+    vertices: number[],
+    vertexIndices: number[],
+): boolean => {
+    const coneVertex = [
+        vertices[(vertexIndices[coneVertexIdx] & 0x0fffffff) * 4],
+        vertices[(vertexIndices[coneVertexIdx] & 0x0fffffff) * 4 + 1],
+        vertices[(vertexIndices[coneVertexIdx] & 0x0fffffff) * 4 + 2],
+    ];
+    const testVertex = [
+        vertices[(vertexIndices[testVertexIdx] & 0x0fffffff) * 4],
+        vertices[(vertexIndices[testVertexIdx] & 0x0fffffff) * 4 + 1],
+        vertices[(vertexIndices[testVertexIdx] & 0x0fffffff) * 4 + 2],
+    ];
+    const nextVertex = [
+        vertices[
+            (vertexIndices[next(coneVertexIdx, polygonVertexCount)] &
+                0x0fffffff) *
+                4
+        ],
+        vertices[
+            (vertexIndices[next(coneVertexIdx, polygonVertexCount)] &
+                0x0fffffff) *
+                4 +
+                1
+        ],
+        vertices[
+            (vertexIndices[next(coneVertexIdx, polygonVertexCount)] &
+                0x0fffffff) *
+                4 +
+                2
+        ],
+    ];
+    const prevVertex = [
+        vertices[
+            (vertexIndices[prev(coneVertexIdx, polygonVertexCount)] &
+                0x0fffffff) *
+                4
+        ],
+        vertices[
+            (vertexIndices[prev(coneVertexIdx, polygonVertexCount)] &
+                0x0fffffff) *
+                4 +
+                1
+        ],
+        vertices[
+            (vertexIndices[prev(coneVertexIdx, polygonVertexCount)] &
+                0x0fffffff) *
+                4 +
+                2
+        ],
+    ];
+
+    if (leftOn(prevVertex, coneVertex, nextVertex)) {
+        return (
+            leftOn(coneVertex, testVertex, prevVertex) &&
+            leftOn(testVertex, coneVertex, nextVertex)
+        );
+    }
+    return !(
+        leftOn(coneVertex, testVertex, nextVertex) &&
+        leftOn(testVertex, coneVertex, prevVertex)
+    );
+};
+
+const diagonalLoose = (
+    startVertexIdx: number,
+    endVertexIdx: number,
+    polygonVertexCount: number,
+    vertices: number[],
+    vertexIndices: number[],
+): boolean => {
+    return (
+        inConeLoose(
+            startVertexIdx,
+            endVertexIdx,
+            polygonVertexCount,
+            vertices,
+            vertexIndices,
+        ) &&
+        diagonalieLoose(
+            startVertexIdx,
+            endVertexIdx,
+            polygonVertexCount,
+            vertices,
+            vertexIndices,
+        )
+    );
+};
+
 const triangulate = (
     polygonVertexCount: number,
     vertices: number[],
@@ -394,7 +543,7 @@ const triangulate = (
             for (let i = 0; i < nv; i++) {
                 const i1 = next(i, nv);
                 const i2 = next(i1, nv);
-                if (diagonal(i, i2, nv, vertices, vertexIndices)) {
+                if (diagonalLoose(i, i2, nv, vertices, vertexIndices)) {
                     // Using loose version would be better but simplified
                     const p0 = [
                         vertices[(vertexIndices[i] & 0x0fffffff) * 4],
@@ -886,6 +1035,25 @@ export const buildPolyMesh = (
 
     mesh.nVertices = nv.value;
 
+    // Remove edge vertices
+    for (let i = 0; i < mesh.nVertices; i++) {
+        if (vflags[i]) {
+            if (!canRemoveVertex(mesh, i)) {
+                continue;
+            }
+            if (!removeVertex(mesh, i, maxTris)) {
+                console.error(`Failed to remove edge vertex ${i}`);
+                throw new Error(`Failed to remove edge vertex ${i}`);
+            }
+            // Remove vertex - Note: mesh.nVertices is already decremented inside removeVertex()!
+            // Fixup vertex flags
+            for (let j = i; j < mesh.nVertices; j++) {
+                vflags[j] = vflags[j + 1];
+            }
+            i--;
+        }
+    }
+
     // Build mesh adjacency
     if (
         !buildMeshAdjacency(
@@ -895,6 +1063,594 @@ export const buildPolyMesh = (
             maxVerticesPerPoly,
         )
     ) {
+        throw new Error('Failed to build mesh adjacency');
+    }
+
+    // Find portal edges
+    if (mesh.borderSize > 0) {
+        const w = contourSet.width;
+        const h = contourSet.height;
+        for (let i = 0; i < mesh.nPolys; i++) {
+            const polyStart = i * 2 * maxVerticesPerPoly;
+            for (let j = 0; j < maxVerticesPerPoly; j++) {
+                if (mesh.polys[polyStart + j] === MESH_NULL_IDX) break;
+                // Skip connected edges
+                if (mesh.polys[polyStart + maxVerticesPerPoly + j] !== MESH_NULL_IDX) {
+                    continue;
+                }
+                
+                let nj = j + 1;
+                if (nj >= maxVerticesPerPoly || mesh.polys[polyStart + nj] === MESH_NULL_IDX) {
+                    nj = 0;
+                }
+                
+                const va = [
+                    mesh.vertices[mesh.polys[polyStart + j] * 3],
+                    mesh.vertices[mesh.polys[polyStart + j] * 3 + 1],
+                    mesh.vertices[mesh.polys[polyStart + j] * 3 + 2],
+                ];
+                const vb = [
+                    mesh.vertices[mesh.polys[polyStart + nj] * 3],
+                    mesh.vertices[mesh.polys[polyStart + nj] * 3 + 1],
+                    mesh.vertices[mesh.polys[polyStart + nj] * 3 + 2],
+                ];
+
+                if (va[0] === 0 && vb[0] === 0) {
+                    mesh.polys[polyStart + maxVerticesPerPoly + j] = 0x8000 | 0;
+                } else if (va[2] === h && vb[2] === h) {
+                    mesh.polys[polyStart + maxVerticesPerPoly + j] = 0x8000 | 1;
+                } else if (va[0] === w && vb[0] === w) {
+                    mesh.polys[polyStart + maxVerticesPerPoly + j] = 0x8000 | 2;
+                } else if (va[2] === 0 && vb[2] === 0) {
+                    mesh.polys[polyStart + maxVerticesPerPoly + j] = 0x8000 | 3;
+                }
+            }
+        }
+    }
+
+    // Allocate and initialize mesh flags array
+    mesh.flags = new Array(mesh.nPolys).fill(0);
+
+    return mesh;
+};
+
+const canRemoveVertex = (
+    mesh: PolyMesh,
+    remVertexIdx: number,
+): boolean => {
+    const nvp = mesh.maxVerticesPerPoly;
+
+    // Count number of polygons to remove
+    let numTouchedVerts = 0;
+    let numRemainingEdges = 0;
+
+    for (let i = 0; i < mesh.nPolys; i++) {
+        const polyStart = i * nvp * 2;
+        const nv = countPolyVerts(mesh.polys, polyStart, nvp);
+        let numRemoved = 0;
+        let numVerts = 0;
+
+        for (let j = 0; j < nv; j++) {
+            if (mesh.polys[polyStart + j] === remVertexIdx) {
+                numTouchedVerts++;
+                numRemoved++;
+            }
+            numVerts++;
+        }
+
+        if (numRemoved) {
+            numRemainingEdges += numVerts - (numRemoved + 1);
+        }
+    }
+
+    // There would be too few edges remaining to create a polygon
+    if (numRemainingEdges <= 2) {
+        return false;
+    }
+
+    // Find edges which share the removed vertex
+    const maxEdges = numTouchedVerts * 2;
+    const edges: number[] = new Array(maxEdges * 3);
+    let nedges = 0;
+
+    for (let i = 0; i < mesh.nPolys; i++) {
+        const polyStart = i * nvp * 2;
+        const nv = countPolyVerts(mesh.polys, polyStart, nvp);
+
+        // Collect edges which touch the removed vertex
+        for (let j = 0, k = nv - 1; j < nv; k = j++) {
+            if (mesh.polys[polyStart + j] === remVertexIdx || mesh.polys[polyStart + k] === remVertexIdx) {
+                // Arrange edge so that a=rem
+                let a = mesh.polys[polyStart + j];
+                let b = mesh.polys[polyStart + k];
+                if (b === remVertexIdx) {
+                    [a, b] = [b, a];
+                }
+
+                // Check if the edge exists
+                let exists = false;
+                for (let m = 0; m < nedges; m++) {
+                    const e = m * 3;
+                    if (edges[e + 1] === b) {
+                        // Exists, increment vertex share count
+                        edges[e + 2]++;
+                        exists = true;
+                        break;
+                    }
+                }
+
+                // Add new edge
+                if (!exists) {
+                    const e = nedges * 3;
+                    edges[e] = a;
+                    edges[e + 1] = b;
+                    edges[e + 2] = 1;
+                    nedges++;
+                }
+            }
+        }
+    }
+
+    // There should be no more than 2 open edges
+    let numOpenEdges = 0;
+    for (let i = 0; i < nedges; i++) {
+        if (edges[i * 3 + 2] < 2) {
+            numOpenEdges++;
+        }
+    }
+
+    return numOpenEdges <= 2;
+};
+
+const removeVertex = (
+    mesh: PolyMesh,
+    remVertexIdx: number,
+    maxTris: number,
+): boolean => {
+    const nvp = mesh.maxVerticesPerPoly;
+
+    // Count number of polygons to remove
+    let numRemovedVerts = 0;
+    for (let i = 0; i < mesh.nPolys; i++) {
+        const polyStart = i * nvp * 2;
+        const nv = countPolyVerts(mesh.polys, polyStart, nvp);
+        for (let j = 0; j < nv; j++) {
+            if (mesh.polys[polyStart + j] === remVertexIdx) {
+                numRemovedVerts++;
+            }
+        }
+    }
+
+    const edges: number[] = new Array(numRemovedVerts * nvp * 4);
+    let nedges = 0;
+    const hole: number[] = new Array(numRemovedVerts * nvp);
+    let nhole = 0;
+    const hreg: number[] = new Array(numRemovedVerts * nvp);
+    let nhreg = 0;
+    const harea: number[] = new Array(numRemovedVerts * nvp);
+    let nharea = 0;
+
+    for (let i = 0; i < mesh.nPolys; i++) {
+        const polyStart = i * nvp * 2;
+        const nv = countPolyVerts(mesh.polys, polyStart, nvp);
+        let hasRem = false;
+        
+        for (let j = 0; j < nv; j++) {
+            if (mesh.polys[polyStart + j] === remVertexIdx) {
+                hasRem = true;
+                break;
+            }
+        }
+
+        if (hasRem) {
+            // Collect edges which do not touch the removed vertex
+            for (let j = 0, k = nv - 1; j < nv; k = j++) {
+                if (mesh.polys[polyStart + j] !== remVertexIdx && mesh.polys[polyStart + k] !== remVertexIdx) {
+                    const e = nedges * 4;
+                    edges[e] = mesh.polys[polyStart + k];
+                    edges[e + 1] = mesh.polys[polyStart + j];
+                    edges[e + 2] = mesh.regions[i];
+                    edges[e + 3] = mesh.areas[i];
+                    nedges++;
+                }
+            }
+
+            // Remove the polygon
+            const lastPolyStart = (mesh.nPolys - 1) * nvp * 2;
+            if (polyStart !== lastPolyStart) {
+                for (let j = 0; j < nvp * 2; j++) {
+                    mesh.polys[polyStart + j] = mesh.polys[lastPolyStart + j];
+                }
+            }
+            
+            // Clear the last polygon
+            for (let j = 0; j < nvp; j++) {
+                mesh.polys[lastPolyStart + nvp + j] = MESH_NULL_IDX;
+            }
+            
+            mesh.regions[i] = mesh.regions[mesh.nPolys - 1];
+            mesh.areas[i] = mesh.areas[mesh.nPolys - 1];
+            mesh.nPolys--;
+            i--; // Reprocess this slot
+        }
+    }
+
+    // Remove vertex
+    for (let i = remVertexIdx; i < mesh.nVertices - 1; i++) {
+        mesh.vertices[i * 3] = mesh.vertices[(i + 1) * 3];
+        mesh.vertices[i * 3 + 1] = mesh.vertices[(i + 1) * 3 + 1];
+        mesh.vertices[i * 3 + 2] = mesh.vertices[(i + 1) * 3 + 2];
+    }
+    mesh.nVertices--;
+
+    // Adjust indices to match the removed vertex layout
+    for (let i = 0; i < mesh.nPolys; i++) {
+        const polyStart = i * nvp * 2;
+        const nv = countPolyVerts(mesh.polys, polyStart, nvp);
+        for (let j = 0; j < nv; j++) {
+            if (mesh.polys[polyStart + j] > remVertexIdx) {
+                mesh.polys[polyStart + j]--;
+            }
+        }
+    }
+
+    for (let i = 0; i < nedges; i++) {
+        if (edges[i * 4] > remVertexIdx) edges[i * 4]--;
+        if (edges[i * 4 + 1] > remVertexIdx) edges[i * 4 + 1]--;
+    }
+
+    if (nedges === 0) {
+        return true;
+    }
+
+    // Helper functions for hole building
+    const pushFront = (v: number, arr: number[], an: { value: number }) => {
+        an.value++;
+        for (let i = an.value - 1; i > 0; i--) {
+            arr[i] = arr[i - 1];
+        }
+        arr[0] = v;
+    };
+
+    const pushBack = (v: number, arr: number[], an: { value: number }) => {
+        arr[an.value] = v;
+        an.value++;
+    };
+
+    // Start with one vertex, keep appending connected segments
+    const nholeRef = { value: 0 };
+    const nhregRef = { value: 0 };
+    const nhareaRef = { value: 0 };
+
+    pushBack(edges[0], hole, nholeRef);
+    pushBack(edges[2], hreg, nhregRef);
+    pushBack(edges[3], harea, nhareaRef);
+
+    nhole = nholeRef.value;
+    nhreg = nhregRef.value;
+    nharea = nhareaRef.value;
+
+    while (nedges > 0) {
+        let match = false;
+
+        for (let i = 0; i < nedges; i++) {
+            const ea = edges[i * 4];
+            const eb = edges[i * 4 + 1];
+            const r = edges[i * 4 + 2];
+            const a = edges[i * 4 + 3];
+            let add = false;
+
+            if (hole[0] === eb) {
+                // The segment matches the beginning of the hole boundary
+                pushFront(ea, hole, nholeRef);
+                pushFront(r, hreg, nhregRef);
+                pushFront(a, harea, nhareaRef);
+                add = true;
+            } else if (hole[nhole - 1] === ea) {
+                // The segment matches the end of the hole boundary
+                pushBack(eb, hole, nholeRef);
+                pushBack(r, hreg, nhregRef);
+                pushBack(a, harea, nhareaRef);
+                add = true;
+            }
+
+            if (add) {
+                // The edge segment was added, remove it
+                edges[i * 4] = edges[(nedges - 1) * 4];
+                edges[i * 4 + 1] = edges[(nedges - 1) * 4 + 1];
+                edges[i * 4 + 2] = edges[(nedges - 1) * 4 + 2];
+                edges[i * 4 + 3] = edges[(nedges - 1) * 4 + 3];
+                nedges--;
+                match = true;
+                i--;
+            }
+
+            nhole = nholeRef.value;
+            nhreg = nhregRef.value;
+            nharea = nhareaRef.value;
+        }
+
+        if (!match) {
+            break;
+        }
+    }
+
+    // Generate temp vertex array for triangulation
+    const tris: number[] = new Array(nhole * 3);
+    const tverts: number[] = new Array(nhole * 4);
+    const thole: number[] = new Array(nhole);
+
+    for (let i = 0; i < nhole; i++) {
+        const pi = hole[i];
+        tverts[i * 4] = mesh.vertices[pi * 3];
+        tverts[i * 4 + 1] = mesh.vertices[pi * 3 + 1];
+        tverts[i * 4 + 2] = mesh.vertices[pi * 3 + 2];
+        tverts[i * 4 + 3] = 0;
+        thole[i] = i;
+    }
+
+    // Triangulate the hole
+    let ntris = triangulate(nhole, tverts, thole, tris);
+    if (ntris < 0) {
+        ntris = -ntris;
+        console.warn('removeVertex: triangulate() returned bad results');
+    }
+
+    // Merge the hole triangles back to polygons
+    const polys: number[] = new Array((ntris + 1) * nvp);
+    const pregs: number[] = new Array(ntris);
+    const pareas: number[] = new Array(ntris);
+
+    polys.fill(MESH_NULL_IDX);
+
+    // Build initial polygons
+    let npolys = 0;
+    for (let j = 0; j < ntris; j++) {
+        const t = [tris[j * 3], tris[j * 3 + 1], tris[j * 3 + 2]];
+        if (t[0] !== t[1] && t[0] !== t[2] && t[1] !== t[2]) {
+            polys[npolys * nvp] = hole[t[0]];
+            polys[npolys * nvp + 1] = hole[t[1]];
+            polys[npolys * nvp + 2] = hole[t[2]];
+
+            // If this polygon covers multiple region types then mark it as such
+            if (hreg[t[0]] !== hreg[t[1]] || hreg[t[1]] !== hreg[t[2]]) {
+                pregs[npolys] = RC_MULTIPLE_REGS;
+            } else {
+                pregs[npolys] = hreg[t[0]];
+            }
+
+            pareas[npolys] = harea[t[0]];
+            npolys++;
+        }
+    }
+
+    if (npolys === 0) {
+        return true;
+    }
+
+    // Merge polygons
+    if (nvp > 3) {
+        const tmpPoly = polys.slice(ntris * nvp);
+
+        while (true) {
+            // Find best polygons to merge
+            let bestMergeVal = 0;
+            let bestPa = 0;
+            let bestPb = 0;
+            let bestEa = 0;
+            let bestEb = 0;
+
+            for (let j = 0; j < npolys - 1; j++) {
+                const pjStart = j * nvp;
+                for (let k = j + 1; k < npolys; k++) {
+                    const pkStart = k * nvp;
+                    const result = getPolyMergeValue(
+                        polys,
+                        pjStart,
+                        pkStart,
+                        mesh.vertices,
+                        nvp,
+                    );
+                    if (result.value > bestMergeVal) {
+                        bestMergeVal = result.value;
+                        bestPa = j;
+                        bestPb = k;
+                        bestEa = result.ea;
+                        bestEb = result.eb;
+                    }
+                }
+            }
+
+            if (bestMergeVal > 0) {
+                // Found best, merge
+                const paStart = bestPa * nvp;
+                const pbStart = bestPb * nvp;
+                mergePolyVerts(
+                    polys,
+                    paStart,
+                    pbStart,
+                    bestEa,
+                    bestEb,
+                    ntris * nvp,
+                    nvp,
+                );
+
+                if (pregs[bestPa] !== pregs[bestPb]) {
+                    pregs[bestPa] = RC_MULTIPLE_REGS;
+                }
+
+                const lastStart = (npolys - 1) * nvp;
+                if (pbStart !== lastStart) {
+                    for (let m = 0; m < nvp; m++) {
+                        polys[pbStart + m] = polys[lastStart + m];
+                    }
+                }
+                pregs[bestPb] = pregs[npolys - 1];
+                pareas[bestPb] = pareas[npolys - 1];
+                npolys--;
+            } else {
+                // Could not merge any polygons, stop
+                break;
+            }
+        }
+    }
+
+    // Store polygons
+    for (let i = 0; i < npolys; i++) {
+        if (mesh.nPolys >= maxTris) break;
+
+        const meshPolyStart = mesh.nPolys * nvp * 2;
+        const polyStart = i * nvp;
+
+        // Clear the polygon
+        for (let j = 0; j < nvp * 2; j++) {
+            mesh.polys[meshPolyStart + j] = MESH_NULL_IDX;
+        }
+
+        for (let j = 0; j < nvp; j++) {
+            mesh.polys[meshPolyStart + j] = polys[polyStart + j];
+        }
+
+        mesh.regions[mesh.nPolys] = pregs[i];
+        mesh.areas[mesh.nPolys] = pareas[i];
+        mesh.nPolys++;
+
+        if (mesh.nPolys > maxTris) {
+            console.error(`removeVertex: Too many polygons ${mesh.nPolys} (max:${maxTris})`);
+            return false;
+        }
+    }
+
+    return true;
+};
+
+export const mergePolyMeshes = (
+    meshes: PolyMesh[],
+): PolyMesh | null => {
+    if (!meshes.length) {
+        return null;
+    }
+
+    const mesh: PolyMesh = {
+        vertices: [],
+        polys: [],
+        regions: [],
+        flags: [],
+        areas: [],
+        nVertices: 0,
+        nPolys: 0,
+        maxPolys: 0,
+        maxVerticesPerPoly: meshes[0].maxVerticesPerPoly,
+        bounds: structuredClone(meshes[0].bounds),
+        cellSize: meshes[0].cellSize,
+        cellHeight: meshes[0].cellHeight,
+        borderSize: meshes[0].borderSize,
+        maxEdgeError: meshes[0].maxEdgeError,
+    };
+
+    // Calculate bounds and totals
+    let maxVerts = 0;
+    let maxPolys = 0;
+    let maxVertsPerMesh = 0;
+
+    for (const pmesh of meshes) {
+        mesh.bounds[0][0] = Math.min(mesh.bounds[0][0], pmesh.bounds[0][0]);
+        mesh.bounds[0][1] = Math.min(mesh.bounds[0][1], pmesh.bounds[0][1]);
+        mesh.bounds[0][2] = Math.min(mesh.bounds[0][2], pmesh.bounds[0][2]);
+        mesh.bounds[1][0] = Math.max(mesh.bounds[1][0], pmesh.bounds[1][0]);
+        mesh.bounds[1][1] = Math.max(mesh.bounds[1][1], pmesh.bounds[1][1]);
+        mesh.bounds[1][2] = Math.max(mesh.bounds[1][2], pmesh.bounds[1][2]);
+        maxVertsPerMesh = Math.max(maxVertsPerMesh, pmesh.nVertices);
+        maxVerts += pmesh.nVertices;
+        maxPolys += pmesh.nPolys;
+    }
+
+    // Allocate arrays
+    mesh.vertices = new Array(maxVerts * 3);
+    mesh.polys = new Array(maxPolys * 2 * mesh.maxVerticesPerPoly).fill(MESH_NULL_IDX);
+    mesh.regions = new Array(maxPolys).fill(0);
+    mesh.areas = new Array(maxPolys).fill(0);
+    mesh.flags = new Array(maxPolys).fill(0);
+    mesh.maxPolys = maxPolys;
+
+    const nextVert = new Array(maxVerts).fill(0);
+    const firstVert = new Array(VERTEX_BUCKET_COUNT).fill(-1);
+    const vremap = new Array(maxVertsPerMesh);
+
+    const nv = { value: 0 };
+
+    for (const pmesh of meshes) {
+        const ox = Math.floor((pmesh.bounds[0][0] - mesh.bounds[0][0]) / mesh.cellSize + 0.5);
+        const oz = Math.floor((pmesh.bounds[0][2] - mesh.bounds[0][2]) / mesh.cellSize + 0.5);
+
+        const isMinX = ox === 0;
+        const isMinZ = oz === 0;
+        const isMaxX = Math.floor((mesh.bounds[1][0] - pmesh.bounds[1][0]) / mesh.cellSize + 0.5) === 0;
+        const isMaxZ = Math.floor((mesh.bounds[1][2] - pmesh.bounds[1][2]) / mesh.cellSize + 0.5) === 0;
+        const isOnBorder = isMinX || isMinZ || isMaxX || isMaxZ;
+
+        // Add vertices
+        for (let j = 0; j < pmesh.nVertices; j++) {
+            const v = [
+                pmesh.vertices[j * 3] + ox,
+                pmesh.vertices[j * 3 + 1],
+                pmesh.vertices[j * 3 + 2] + oz,
+            ];
+            vremap[j] = addVertex(
+                v[0],
+                v[1],
+                v[2],
+                mesh.vertices,
+                firstVert,
+                nextVert,
+                nv,
+            );
+        }
+
+        // Add polygons
+        for (let j = 0; j < pmesh.nPolys; j++) {
+            const tgtStart = mesh.nPolys * 2 * mesh.maxVerticesPerPoly;
+            const srcStart = j * 2 * mesh.maxVerticesPerPoly;
+
+            mesh.regions[mesh.nPolys] = pmesh.regions[j];
+            mesh.areas[mesh.nPolys] = pmesh.areas[j];
+            mesh.flags[mesh.nPolys] = pmesh.flags[j];
+            mesh.nPolys++;
+
+            for (let k = 0; k < mesh.maxVerticesPerPoly; k++) {
+                if (pmesh.polys[srcStart + k] === MESH_NULL_IDX) break;
+                mesh.polys[tgtStart + k] = vremap[pmesh.polys[srcStart + k]];
+            }
+
+            if (isOnBorder) {
+                for (let k = mesh.maxVerticesPerPoly; k < mesh.maxVerticesPerPoly * 2; k++) {
+                    const srcVal = pmesh.polys[srcStart + k];
+                    if ((srcVal & 0x8000) && srcVal !== 0xffff) {
+                        const dir = srcVal & 0xf;
+                        switch (dir) {
+                            case 0: // Portal x-
+                                if (isMinX) mesh.polys[tgtStart + k] = srcVal;
+                                break;
+                            case 1: // Portal z+
+                                if (isMaxZ) mesh.polys[tgtStart + k] = srcVal;
+                                break;
+                            case 2: // Portal x+
+                                if (isMaxX) mesh.polys[tgtStart + k] = srcVal;
+                                break;
+                            case 3: // Portal z-
+                                if (isMinZ) mesh.polys[tgtStart + k] = srcVal;
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    mesh.nVertices = nv.value;
+
+    // Calculate adjacency
+    if (!buildMeshAdjacency(mesh.polys, mesh.nPolys, mesh.nVertices, mesh.maxVerticesPerPoly)) {
         throw new Error('Failed to build mesh adjacency');
     }
 
