@@ -32,12 +32,11 @@ import {
     markWalkableTriangles,
 } from './navmesh/input-triangle-mesh';
 import { buildDistanceField, buildRegions } from './navmesh/regions';
-import { buildPolyMesh, type PolyMesh } from './navmesh/poly-mesh';
+import { buildPolyMesh, MESH_NULL_IDX, type PolyMesh } from './navmesh/poly-mesh';
 import {
     buildPolyMeshDetail,
     type PolyMeshDetail,
 } from './navmesh/poly-mesh-detail';
-import { LineSegments2 } from 'three/examples/jsm/lines/webgpu/LineSegments2.js';
 
 type Intermediates = {
     input: {
@@ -1213,8 +1212,8 @@ const App = () => {
         if (!polyMesh || polyMesh.nPolys === 0) return;
 
         const nvp = polyMesh.maxVerticesPerPoly;
-        const cs = polyMesh.cs;
-        const ch = polyMesh.ch;
+        const cs = polyMesh.cellSize;
+        const ch = polyMesh.cellHeight;
         const orig = polyMesh.bounds[0]; // bmin
 
         // Arrays for triangle geometry (polygon fills)
@@ -1264,7 +1263,7 @@ const App = () => {
                 const v1 = polyMesh.polys[polyBase + j - 1];
                 const v2 = polyMesh.polys[polyBase + j];
 
-                if (v2 === 0xffff) break; // MESH_NULL_IDX
+                if (v2 === MESH_NULL_IDX) break;
 
                 // Add triangle vertices
                 const vertices = [v0, v1, v2];
@@ -1298,13 +1297,13 @@ const App = () => {
 
             for (let j = 0; j < nvp; j++) {
                 const v0 = polyMesh.polys[polyBase + j];
-                if (v0 === 0xffff) break; // MESH_NULL_IDX
+                if (v0 === MESH_NULL_IDX) break;
 
                 const neighbor = polyMesh.polys[polyBase + nvp + j];
                 if (neighbor & 0x8000) continue; // Skip boundary edges
 
                 const nj =
-                    j + 1 >= nvp || polyMesh.polys[polyBase + j + 1] === 0xffff
+                    j + 1 >= nvp || polyMesh.polys[polyBase + j + 1] === MESH_NULL_IDX
                         ? 0
                         : j + 1;
                 const v1 = polyMesh.polys[polyBase + nj];
@@ -1342,13 +1341,13 @@ const App = () => {
 
             for (let j = 0; j < nvp; j++) {
                 const v0 = polyMesh.polys[polyBase + j];
-                if (v0 === 0xffff) break; // MESH_NULL_IDX
+                if (v0 === MESH_NULL_IDX) break;
 
                 const neighbor = polyMesh.polys[polyBase + nvp + j];
                 if ((neighbor & 0x8000) === 0) continue; // Skip non-boundary edges
 
                 const nj =
-                    j + 1 >= nvp || polyMesh.polys[polyBase + j + 1] === 0xffff
+                    j + 1 >= nvp || polyMesh.polys[polyBase + j + 1] === MESH_NULL_IDX
                         ? 0
                         : j + 1;
                 const v1 = polyMesh.polys[polyBase + nj];

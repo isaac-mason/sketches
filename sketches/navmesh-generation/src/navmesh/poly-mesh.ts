@@ -10,7 +10,7 @@ export type PolyMesh = {
     /** Polygon and neighbor data. Length: maxpolys * 2 * nvp */
     polys: number[];
     /** The region id assigned to each polygon. Length: maxpolys */
-    regs: number[];
+    regions: number[];
     /** The user defined flags for each polygon. Length: maxpolys */
     flags: number[];
     /** The area id assigned to each polygon. Length: maxpolys */
@@ -26,9 +26,9 @@ export type PolyMesh = {
     /** the bounds in world space */
     bounds: Box3;
     /** The size of each cell. (On the xz-plane.) */
-    cs: number;
+    cellSize: number;
     /** The height of each cell. (The minimum increment along the y-axis.) */
-    ch: number;
+    cellHeight: number;
     /** The AABB border size used to generate the source data from which the mesh was derived */
     borderSize: number;
     /** The max error of the polygon edges in the mesh */
@@ -36,7 +36,8 @@ export type PolyMesh = {
 };
 
 // Constants
-const RC_MESH_NULL_IDX = 0xffff;
+export const MESH_NULL_IDX = 0xffff;
+export const BORDER_VERTEX = 0x10000;
 const VERTEX_BUCKET_COUNT = 1 << 12;
 const RC_MULTIPLE_REGS = 0;
 
@@ -313,7 +314,7 @@ const triangulate = (n: number, verts: number[], indices: number[], tris: number
 
 const countPolyVerts = (p: number[], maxVerticesPerPoly: number): number => {
     for (let i = 0; i < maxVerticesPerPoly; i++) {
-        if (p[i] === RC_MESH_NULL_IDX) return i;
+        if (p[i] === MESH_NULL_IDX) return i;
     }
     return maxVerticesPerPoly;
 };
@@ -399,7 +400,7 @@ const mergePolyVerts = (
     const na = countPolyVerts(pa, maxVerticesPerPoly);
     const nb = countPolyVerts(pb, maxVerticesPerPoly);
 
-    tmp.fill(RC_MESH_NULL_IDX);
+    tmp.fill(MESH_NULL_IDX);
     let n = 0;
 
     // Add pa
@@ -423,23 +424,23 @@ const buildMeshAdjacency = (
     vertsPerPoly: number
 ): boolean => {
     const maxEdgeCount = npolys * vertsPerPoly;
-    const firstEdge = new Array(nverts + maxEdgeCount).fill(RC_MESH_NULL_IDX);
+    const firstEdge = new Array(nverts + maxEdgeCount).fill(MESH_NULL_IDX);
     const nextEdge = firstEdge.slice(nverts);
     let edgeCount = 0;
 
     const edges: Edge[] = [];
 
     for (let i = 0; i < nverts; i++) {
-        firstEdge[i] = RC_MESH_NULL_IDX;
+        firstEdge[i] = MESH_NULL_IDX;
     }
 
     // Build edges
     for (let i = 0; i < npolys; i++) {
-        const t = polys.slice(i * vertsPerPoly * 2, i * vertsPerPoly * 2 + vertsPerPoly * 2);
+        const tStart = i * vertsPerPoly * 2;
         for (let j = 0; j < vertsPerPoly; j++) {
-            if (t[j] === RC_MESH_NULL_IDX) break;
-            const v0 = t[j];
-            const v1 = (j + 1 >= vertsPerPoly || t[j + 1] === RC_MESH_NULL_IDX) ? t[0] : t[j + 1];
+            if (polys[tStart + j] === MESH_NULL_IDX) break;
+            const v0 = polys[tStart + j];
+            const v1 = (j + 1 >= vertsPerPoly || polys[tStart + j + 1] === MESH_NULL_IDX) ? polys[tStart] : polys[tStart + j + 1];
             if (v0 < v1) {
                 const edge: Edge = {
                     vert: [v0, v1],
@@ -456,13 +457,13 @@ const buildMeshAdjacency = (
 
     // Match edges
     for (let i = 0; i < npolys; i++) {
-        const t = polys.slice(i * vertsPerPoly * 2, i * vertsPerPoly * 2 + vertsPerPoly * 2);
+        const tStart = i * vertsPerPoly * 2;
         for (let j = 0; j < vertsPerPoly; j++) {
-            if (t[j] === RC_MESH_NULL_IDX) break;
-            const v0 = t[j];
-            const v1 = (j + 1 >= vertsPerPoly || t[j + 1] === RC_MESH_NULL_IDX) ? t[0] : t[j + 1];
+            if (polys[tStart + j] === MESH_NULL_IDX) break;
+            const v0 = polys[tStart + j];
+            const v1 = (j + 1 >= vertsPerPoly || polys[tStart + j + 1] === MESH_NULL_IDX) ? polys[tStart] : polys[tStart + j + 1];
             if (v0 > v1) {
-                for (let e = firstEdge[v1]; e !== RC_MESH_NULL_IDX; e = nextEdge[e]) {
+                for (let e = firstEdge[v1]; e !== MESH_NULL_IDX; e = nextEdge[e]) {
                     const edge = edges[e];
                     if (edge.vert[1] === v0 && edge.poly[0] === edge.poly[1]) {
                         edge.poly[1] = i;
@@ -492,8 +493,6 @@ export const buildPolyMesh = (
     contourSet: ContourSet,
     maxVerticesPerPoly: number,
 ): PolyMesh => {
-    const nvp = maxVerticesPerPoly;
-    
     // Calculate sizes
     let maxVertices = 0;
     let maxTris = 0;
@@ -514,17 +513,17 @@ export const buildPolyMesh = (
     // Initialize mesh
     const mesh: PolyMesh = {
         vertices: new Array(maxVertices * 3).fill(0),
-        polys: new Array(maxTris * nvp * 2).fill(RC_MESH_NULL_IDX),
-        regs: new Array(maxTris).fill(0),
+        polys: new Array(maxTris * maxVerticesPerPoly * 2).fill(MESH_NULL_IDX),
+        regions: new Array(maxTris).fill(0),
         flags: new Array(maxTris).fill(0),
         areas: new Array(maxTris).fill(0),
         nVertices: 0,
         nPolys: 0,
         maxPolys: maxTris,
-        maxVerticesPerPoly: nvp,
+        maxVerticesPerPoly,
         bounds: structuredClone(contourSet.bounds) as Box3,
-        cs: contourSet.cellSize,
-        ch: contourSet.cellHeight,
+        cellSize: contourSet.cellSize,
+        cellHeight: contourSet.cellHeight,
         borderSize: contourSet.borderSize,
         maxEdgeError: contourSet.maxError
     };
@@ -534,8 +533,8 @@ export const buildPolyMesh = (
     const firstVert = new Array(VERTEX_BUCKET_COUNT).fill(-1);
     const indices = new Array(maxVertsPerCont);
     const tris = new Array(maxVertsPerCont * 3);
-    const polys = new Array((maxVertsPerCont + 1) * nvp).fill(RC_MESH_NULL_IDX);
-    const tmpPoly = polys.slice(maxVertsPerCont * nvp);
+    const polys = new Array((maxVertsPerCont + 1) * maxVerticesPerPoly).fill(MESH_NULL_IDX);
+    const tmpPoly = polys.slice(maxVertsPerCont * maxVerticesPerPoly);
 
     const nv = { value: 0 };
 
@@ -566,21 +565,21 @@ export const buildPolyMesh = (
                 cont.vertices[j * 4 + 3]
             ];
             indices[j] = addVertex(v[0], v[1], v[2], mesh.vertices, firstVert, nextVert, nv);
-            if (v[3] & 0x10000) { // BORDER_VERTEX
+            if (v[3] & BORDER_VERTEX) {
                 vflags[indices[j]] = 1;
             }
         }
 
         // Build initial polygons
         let npolys = 0;
-        polys.fill(RC_MESH_NULL_IDX, 0, maxVertsPerCont * nvp);
+        polys.fill(MESH_NULL_IDX, 0, maxVertsPerCont * maxVerticesPerPoly);
 
         for (let j = 0; j < ntris; j++) {
             const t = [tris[j * 3], tris[j * 3 + 1], tris[j * 3 + 2]];
             if (t[0] !== t[1] && t[0] !== t[2] && t[1] !== t[2]) {
-                polys[npolys * nvp] = indices[t[0]];
-                polys[npolys * nvp + 1] = indices[t[1]];
-                polys[npolys * nvp + 2] = indices[t[2]];
+                polys[npolys * maxVerticesPerPoly] = indices[t[0]];
+                polys[npolys * maxVerticesPerPoly + 1] = indices[t[1]];
+                polys[npolys * maxVerticesPerPoly + 2] = indices[t[2]];
                 npolys++;
             }
         }
@@ -588,7 +587,7 @@ export const buildPolyMesh = (
         if (npolys === 0) continue;
 
         // Merge polygons
-        if (nvp > 3) {
+        if (maxVerticesPerPoly > 3) {
             while (true) {
                 let bestMergeVal = 0;
                 let bestPa = 0;
@@ -597,10 +596,10 @@ export const buildPolyMesh = (
                 let bestEb = 0;
 
                 for (let j = 0; j < npolys - 1; j++) {
-                    const pj = polys.slice(j * nvp, (j + 1) * nvp);
                     for (let k = j + 1; k < npolys; k++) {
-                        const pk = polys.slice(k * nvp, (k + 1) * nvp);
-                        const result = getPolyMergeValue(pj, pk, mesh.vertices, nvp);
+                        const pj = polys.slice(j * maxVerticesPerPoly, (j + 1) * maxVerticesPerPoly);
+                        const pk = polys.slice(k * maxVerticesPerPoly, (k + 1) * maxVerticesPerPoly);
+                        const result = getPolyMergeValue(pj, pk, mesh.vertices, maxVerticesPerPoly);
                         if (result.value > bestMergeVal) {
                             bestMergeVal = result.value;
                             bestPa = j;
@@ -612,19 +611,18 @@ export const buildPolyMesh = (
                 }
 
                 if (bestMergeVal > 0) {
-                    const pa = polys.slice(bestPa * nvp, (bestPa + 1) * nvp);
-                    const pb = polys.slice(bestPb * nvp, (bestPb + 1) * nvp);
-                    mergePolyVerts(pa, pb, bestEa, bestEb, tmpPoly, nvp);
+                    const pa = polys.slice(bestPa * maxVerticesPerPoly, (bestPa + 1) * maxVerticesPerPoly);
+                    const pb = polys.slice(bestPb * maxVerticesPerPoly, (bestPb + 1) * maxVerticesPerPoly);
+                    mergePolyVerts(pa, pb, bestEa, bestEb, tmpPoly, maxVerticesPerPoly);
                     
-                    // Copy merged poly back
-                    for (let m = 0; m < nvp; m++) {
-                        polys[bestPa * nvp + m] = pa[m];
+                    // Copy merged poly back to the original array
+                    for (let m = 0; m < maxVerticesPerPoly; m++) {
+                        polys[bestPa * maxVerticesPerPoly + m] = pa[m];
                     }
 
                     // Move last poly to fill gap
-                    const lastPoly = polys.slice((npolys - 1) * nvp, npolys * nvp);
-                    for (let m = 0; m < nvp; m++) {
-                        polys[bestPb * nvp + m] = lastPoly[m];
+                    for (let m = 0; m < maxVerticesPerPoly; m++) {
+                        polys[bestPb * maxVerticesPerPoly + m] = polys[(npolys - 1) * maxVerticesPerPoly + m];
                     }
                     npolys--;
                 } else {
@@ -635,12 +633,12 @@ export const buildPolyMesh = (
 
         // Store polygons
         for (let j = 0; j < npolys; j++) {
-            const p = mesh.polys.slice(mesh.nPolys * nvp * 2, (mesh.nPolys + 1) * nvp * 2);
-            const q = polys.slice(j * nvp, (j + 1) * nvp);
-            for (let k = 0; k < nvp; k++) {
-                p[k] = q[k];
+            const pStart = mesh.nPolys * maxVerticesPerPoly * 2;
+            const qStart = j * maxVerticesPerPoly;
+            for (let k = 0; k < maxVerticesPerPoly; k++) {
+                mesh.polys[pStart + k] = polys[qStart + k];
             }
-            mesh.regs[mesh.nPolys] = cont.reg;
+            mesh.regions[mesh.nPolys] = cont.reg;
             mesh.areas[mesh.nPolys] = cont.area;
             mesh.nPolys++;
             
@@ -653,7 +651,7 @@ export const buildPolyMesh = (
     mesh.nVertices = nv.value;
 
     // Build mesh adjacency
-    if (!buildMeshAdjacency(mesh.polys, mesh.nPolys, mesh.nVertices, nvp)) {
+    if (!buildMeshAdjacency(mesh.polys, mesh.nPolys, mesh.nVertices, maxVerticesPerPoly)) {
         throw new Error('Failed to build mesh adjacency');
     }
 
