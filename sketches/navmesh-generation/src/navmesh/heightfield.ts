@@ -1,21 +1,6 @@
 import { vec3, box3, clamp, type Vec3, type Box3 } from '@/common/maaths';
-import type { ArrayLike } from './common';
+import { DIR_OFFSETS, type ArrayLike } from './common';
 import { NULL_AREA } from './area';
-
-// Constants from recastnavigation
-const RC_SPAN_MAX_HEIGHT = 0x1fff; // 8191
-const RC_AXIS_X = 0;
-const RC_AXIS_Y = 1;
-const RC_AXIS_Z = 2;
-const MAX_HEIGHTFIELD_HEIGHT = 0xffff;
-
-// Direction offsets for 4-directional neighbor access (N, E, S, W)
-const DIR_OFFSETS = [
-    [0, -1], // North (negative Z)
-    [1, 0],  // East (positive X)
-    [0, 1],  // South (positive Z)
-    [-1, 0], // West (negative X)
-];
 
 export type HeightfieldSpan = {
     /** the lower limit of the span */
@@ -42,6 +27,12 @@ export type Heightfield = {
     /** the heightfield of spans, (width*height) */
     spans: (HeightfieldSpan | null)[];
 };
+
+const SPAN_MAX_HEIGHT = 0x1fff; // 8191
+const AXIS_X = 0;
+const AXIS_Y = 1;
+const AXIS_Z = 2;
+const MAX_HEIGHTFIELD_HEIGHT = 0xffff;
 
 export const calculateGridSize = (
     bounds: Box3,
@@ -334,7 +325,7 @@ const rasterizeTriangle = (
             inRow,
             p1,
             cellZ + cellSize,
-            RC_AXIS_Z,
+            AXIS_Z,
         );
 
         // Swap arrays
@@ -379,7 +370,7 @@ const rasterizeTriangle = (
                 p1,
                 p2,
                 cx + cellSize,
-                RC_AXIS_X,
+                AXIS_X,
             );
 
             // Swap arrays
@@ -423,12 +414,12 @@ const rasterizeTriangle = (
             const spanMinCellIndex = clamp(
                 Math.floor(spanMin * inverseCellHeight),
                 0,
-                RC_SPAN_MAX_HEIGHT,
+                SPAN_MAX_HEIGHT,
             );
             const spanMaxCellIndex = clamp(
                 Math.ceil(spanMax * inverseCellHeight),
                 spanMinCellIndex + 1,
-                RC_SPAN_MAX_HEIGHT,
+                SPAN_MAX_HEIGHT,
             );
 
             if (

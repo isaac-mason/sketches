@@ -6,7 +6,8 @@ import { Leva, useControls } from 'leva';
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 
-import { type CompactHeightfield, buildCompactHeightfield, erodeWalkableArea } from './navmesh/compact-heightfield';
+import { type CompactHeightfield, buildCompactHeightfield } from './navmesh/compact-heightfield';
+import { erodeWalkableArea } from './navmesh/compact-heightfield-area';
 import { getPositionsAndIndices } from './navmesh/get-positions-and-indices';
 import {
     type Heightfield,
@@ -160,13 +161,16 @@ const App = () => {
 
         console.timeEnd("build compact heightfield");
 
-        /* erode the walkable area by the agent radius / walkable radius */
+        /* 6. erode the walkable area by the agent radius / walkable radius */
 
         console.time('erode walkable area');
 
         erodeWalkableArea(walkableRadiusVoxels, compactHeightfield);
 
         console.timeEnd('erode walkable area');
+
+        /* 7. prepare for region partitioning by calculating a distance field along the walkable surface */
+        // buildDistanceField()
 
         /* store intermediates for debugging */
         const intermediates: Intermediates = {
