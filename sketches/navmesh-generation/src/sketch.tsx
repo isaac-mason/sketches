@@ -32,6 +32,12 @@ import {
     markWalkableTriangles,
 } from './navmesh/input-triangle-mesh';
 import { buildDistanceField, buildRegions } from './navmesh/regions';
+import {
+    buildPolyMesh,
+    buildPolyMeshDetail,
+    type PolyMesh,
+    type PolyMeshDetail,
+} from './navmesh/poly-mesh';
 
 type Intermediates = {
     input: {
@@ -42,6 +48,8 @@ type Intermediates = {
     heightfield: Heightfield;
     compactHeightfield: CompactHeightfield;
     contourSet: ContourSet;
+    polyMesh: PolyMesh;
+    polyMeshDetail: PolyMeshDetail;
 };
 
 const DungeonModel = () => {
@@ -155,6 +163,10 @@ const App = () => {
         const maxSimplificationError = 1.3;
         const maxEdgeLength = 12;
 
+        const maxVerticesPerPoly = 3;
+        const detailSampleDistance = 6;
+        const detailSampleMaxError = 1;
+
         const bounds = calculateMeshBounds(positions, indices, box3.create());
         const [heightfieldWidth, heightfieldHeight] = calculateGridSize(
             bounds,
@@ -254,6 +266,27 @@ const App = () => {
 
         console.timeEnd('trace and simplify region contours');
 
+        /* 10. build polygons mesh from contours */
+
+        console.time('build polygons mesh from contours');
+
+        const polyMesh = buildPolyMesh(contourSet, maxVerticesPerPoly);
+
+        console.timeEnd('build polygons mesh from contours');
+
+        /* 11. create detail mesh which allows to access approximate height on each polygon */
+
+        console.time('build detail mesh from contours');
+
+        const polyMeshDetail = buildPolyMeshDetail(
+            polyMesh,
+            compactHeightfield,
+            detailSampleDistance,
+            detailSampleMaxError,
+        );
+
+        console.timeEnd('build detail mesh from contours');
+
         /* store intermediates for debugging */
         const intermediates: Intermediates = {
             input: {
@@ -264,6 +297,8 @@ const App = () => {
             heightfield,
             compactHeightfield,
             contourSet,
+            polyMesh,
+            polyMeshDetail,
         };
 
         setIntermediates(intermediates);
@@ -825,7 +860,7 @@ const App = () => {
         if (!intermediates || !showRawContours) return;
 
         const { contourSet } = intermediates;
-        
+
         if (!contourSet.contours.length) return;
 
         // Create arrays for line segments and points
@@ -849,7 +884,9 @@ const App = () => {
             const hue = hash % 360;
             const saturation = 70;
             const lightness = 60;
-            return new THREE.Color(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
+            return new THREE.Color(
+                `hsl(${hue}, ${saturation}%, ${lightness}%)`,
+            );
         };
 
         // Helper function to darken color
@@ -896,13 +933,15 @@ const App = () => {
                 let pointColor = darkenedColor;
 
                 // Check for border vertex
-                if (c.rawVertices[v + 3] & 0x10000) { // RC_BORDER_VERTEX equivalent
+                if (c.rawVertices[v + 3] & 0x10000) {
+                    // RC_BORDER_VERTEX equivalent
                     pointColor = new THREE.Color(1, 1, 1); // White for border vertices
                     off = ch * 2;
                 }
 
                 const fx = orig[0] + c.rawVertices[v + 0] * cs;
-                const fy = orig[1] + (c.rawVertices[v + 1] + 1 + (i & 1)) * ch + off;
+                const fy =
+                    orig[1] + (c.rawVertices[v + 1] + 1 + (i & 1)) * ch + off;
                 const fz = orig[2] + c.rawVertices[v + 2] * cs;
 
                 pointPositions.push(fx, fy, fz);
@@ -914,11 +953,11 @@ const App = () => {
         const lineGeometry = new THREE.BufferGeometry();
         lineGeometry.setAttribute(
             'position',
-            new THREE.BufferAttribute(new Float32Array(linePositions), 3)
+            new THREE.BufferAttribute(new Float32Array(linePositions), 3),
         );
         lineGeometry.setAttribute(
             'color',
-            new THREE.BufferAttribute(new Float32Array(lineColors), 3)
+            new THREE.BufferAttribute(new Float32Array(lineColors), 3),
         );
 
         const lineMaterial = new THREE.LineBasicMaterial({
@@ -935,11 +974,11 @@ const App = () => {
         const pointGeometry = new THREE.BufferGeometry();
         pointGeometry.setAttribute(
             'position',
-            new THREE.BufferAttribute(new Float32Array(pointPositions), 3)
+            new THREE.BufferAttribute(new Float32Array(pointPositions), 3),
         );
         pointGeometry.setAttribute(
             'color',
-            new THREE.BufferAttribute(new Float32Array(pointColors), 3)
+            new THREE.BufferAttribute(new Float32Array(pointColors), 3),
         );
 
         const pointMaterial = new THREE.PointsMaterial({
@@ -968,7 +1007,7 @@ const App = () => {
         if (!intermediates || !showSimplifiedContours) return;
 
         const { contourSet } = intermediates;
-        
+
         if (!contourSet.contours.length) return;
 
         // Create arrays for line segments and points
@@ -992,7 +1031,9 @@ const App = () => {
             const hue = hash % 360;
             const saturation = 70;
             const lightness = 60;
-            return new THREE.Color(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
+            return new THREE.Color(
+                `hsl(${hue}, ${saturation}%, ${lightness}%)`,
+            );
         };
 
         // Helper function to darken color
@@ -1001,18 +1042,22 @@ const App = () => {
         };
 
         // Helper function to interpolate colors
-        const lerpColor = (color1: THREE.Color, color2: THREE.Color, factor: number): THREE.Color => {
+        const lerpColor = (
+            color1: THREE.Color,
+            color2: THREE.Color,
+            factor: number,
+        ): THREE.Color => {
             return new THREE.Color(
                 color1.r + (color2.r - color1.r) * factor,
                 color1.g + (color2.g - color1.g) * factor,
-                color1.b + (color2.b - color1.b) * factor
+                color1.b + (color2.b - color1.b) * factor,
             );
         };
 
         // Process each contour
         for (let i = 0; i < contourSet.contours.length; ++i) {
             const c = contourSet.contours[i];
-            
+
             if (!c.nVertices) continue;
 
             const color = regionToColor(c.reg);
@@ -1024,7 +1069,7 @@ const App = () => {
             for (let j = 0, k = c.nVertices - 1; j < c.nVertices; k = j++) {
                 const va = k * 4;
                 const vb = j * 4;
-                
+
                 // Check if this is an area border edge
                 const isAreaBorder = (c.vertices[va + 3] & 0x20000) !== 0; // RC_AREA_BORDER equivalent
                 const edgeColor = isAreaBorder ? borderColor : color;
@@ -1053,13 +1098,15 @@ const App = () => {
                 let pointColor = darkenedColor;
 
                 // Check for border vertex
-                if (c.vertices[v + 3] & 0x10000) { // RC_BORDER_VERTEX equivalent
+                if (c.vertices[v + 3] & 0x10000) {
+                    // RC_BORDER_VERTEX equivalent
                     pointColor = new THREE.Color(1, 1, 1); // White for border vertices
                     off = ch * 2;
                 }
 
                 const fx = orig[0] + c.vertices[v + 0] * cs;
-                const fy = orig[1] + (c.vertices[v + 1] + 1 + (i & 1)) * ch + off;
+                const fy =
+                    orig[1] + (c.vertices[v + 1] + 1 + (i & 1)) * ch + off;
                 const fz = orig[2] + c.vertices[v + 2] * cs;
 
                 pointPositions.push(fx, fy, fz);
@@ -1071,11 +1118,11 @@ const App = () => {
         const lineGeometry = new THREE.BufferGeometry();
         lineGeometry.setAttribute(
             'position',
-            new THREE.BufferAttribute(new Float32Array(linePositions), 3)
+            new THREE.BufferAttribute(new Float32Array(linePositions), 3),
         );
         lineGeometry.setAttribute(
             'color',
-            new THREE.BufferAttribute(new Float32Array(lineColors), 3)
+            new THREE.BufferAttribute(new Float32Array(lineColors), 3),
         );
 
         const lineMaterial = new THREE.LineBasicMaterial({
@@ -1092,11 +1139,11 @@ const App = () => {
         const pointGeometry = new THREE.BufferGeometry();
         pointGeometry.setAttribute(
             'position',
-            new THREE.BufferAttribute(new Float32Array(pointPositions), 3)
+            new THREE.BufferAttribute(new Float32Array(pointPositions), 3),
         );
         pointGeometry.setAttribute(
             'color',
-            new THREE.BufferAttribute(new Float32Array(pointColors), 3)
+            new THREE.BufferAttribute(new Float32Array(pointColors), 3),
         );
 
         const pointMaterial = new THREE.PointsMaterial({
@@ -1123,12 +1170,6 @@ const App = () => {
     return (
         <>
             <group ref={group} visible={showMesh}>
-                {/* floor */}
-                {/* <mesh>
-                    <boxGeometry args={[10, 0.2, 10]} />
-                    <meshStandardMaterial color="#333" />
-                </mesh>
-                 */}
                 <DungeonModel />
             </group>
 
@@ -1136,8 +1177,6 @@ const App = () => {
             <directionalLight position={[5, 5, 5]} intensity={1} />
 
             <OrbitControls />
-
-            {/* walkable triangles */}
         </>
     );
 };
