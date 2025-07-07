@@ -94,7 +94,7 @@ const addSpan = (
     let currentSpan = heightfield.spans[columnIndex];
 
     // Insert the new span, possibly merging it with existing spans
-    while (currentSpan != null) {
+    while (currentSpan !== null) {
         if (currentSpan.min > newSpan.max) {
             // Current span is completely after the new span, break
             break;
@@ -131,7 +131,7 @@ const addSpan = (
     }
 
     // Insert new span after prev
-    if (previousSpan != null) {
+    if (previousSpan !== null) {
         newSpan.next = previousSpan.next;
         previousSpan.next = newSpan;
     } else {
@@ -511,7 +511,7 @@ export const filterLowHangingWalkableObstacles = (
             const columnIndex = x + z * xSize;
             let span = heightfield.spans[columnIndex];
 
-            while (span != null) {
+            while (span !== null) {
                 const walkable = span.area !== NULL_AREA;
 
                 // If current span is not walkable, but there is walkable span just below it and the height difference
@@ -550,7 +550,7 @@ export const filterLedgeSpans = (
             const columnIndex = x + z * xSize;
             let span = heightfield.spans[columnIndex];
 
-            while (span != null) {
+            while (span !== null) {
                 // Skip non-walkable spans
                 if (span.area === NULL_AREA) {
                     span = span.next;
@@ -605,7 +605,7 @@ export const filterLedgeSpans = (
                     }
 
                     // For each span in the neighboring column...
-                    while (neighborSpan != null) {
+                    while (neighborSpan !== null) {
                         const neighborFloor = neighborSpan.max;
                         neighborCeiling = neighborSpan.next
                             ? neighborSpan.next.min
@@ -685,7 +685,7 @@ export const filterWalkableLowHeightSpans = (
             const columnIndex = x + z * xSize;
             let span = heightfield.spans[columnIndex];
 
-            while (span != null) {
+            while (span !== null) {
                 const floor = span.max;
                 const ceiling = span.next
                     ? span.next.min
