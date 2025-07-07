@@ -1,11 +1,10 @@
 import * as THREE from 'three';
-import type { CompactHeightfield } from './navmesh/compact-heightfield';
-import type { ContourSet } from './navmesh/contour-set';
-import type { Heightfield } from './navmesh/heightfield';
-import type { PolyMesh } from './navmesh/poly-mesh';
-import type { PolyMeshDetail } from './navmesh/poly-mesh-detail';
-import { NULL_AREA, WALKABLE_AREA } from './navmesh/area';
-import { MESH_NULL_IDX } from './navmesh/common';
+import { MESH_NULL_IDX, NULL_AREA, WALKABLE_AREA } from '../navmesh/common';
+import type { CompactHeightfield } from '../navmesh/compact-heightfield';
+import type { ContourSet } from '../navmesh/contour-set';
+import type { Heightfield } from '../navmesh/heightfield';
+import type { PolyMesh } from '../navmesh/poly-mesh';
+import type { PolyMeshDetail } from '../navmesh/poly-mesh-detail';
 
 type Intermediates = {
     input: {
