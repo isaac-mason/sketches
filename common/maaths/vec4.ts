@@ -388,12 +388,12 @@ export function dot(a: Vec4, b: Vec4): number {
  * @returns result
  */
 export function cross(out: Vec4, u: Vec4, v: Vec4, w: Vec4): Vec4 {
-    const A = v[0] * w[1] - v[1] * w[0],
-        B = v[0] * w[2] - v[2] * w[0],
-        C = v[0] * w[3] - v[3] * w[0],
-        D = v[1] * w[2] - v[2] * w[1],
-        E = v[1] * w[3] - v[3] * w[1],
-        F = v[2] * w[3] - v[3] * w[2];
+    const A = v[0] * w[1] - v[1] * w[0];
+    const B = v[0] * w[2] - v[2] * w[0];
+    const C = v[0] * w[3] - v[3] * w[0];
+    const D = v[1] * w[2] - v[2] * w[1];
+    const E = v[1] * w[3] - v[3] * w[1];
+    const F = v[2] * w[3] - v[3] * w[2];
     const G = u[0];
     const H = u[1];
     const I = u[2];
@@ -468,10 +468,10 @@ export function random(out: Vec4, scale?: number): Vec4 {
  * @returns out
  */
 export function transformMat4(out: Vec4, a: Vec4, m: Mat4): Vec4 {
-    const x = a[0],
-        y = a[1],
-        z = a[2],
-        w = a[3];
+    const x = a[0];
+    const y = a[1];
+    const z = a[2];
+    const w = a[3];
     out[0] = m[0] * x + m[4] * y + m[8] * z + m[12] * w;
     out[1] = m[1] * x + m[5] * y + m[9] * z + m[13] * w;
     out[2] = m[2] * x + m[6] * y + m[10] * z + m[14] * w;
@@ -488,13 +488,13 @@ export function transformMat4(out: Vec4, a: Vec4, m: Mat4): Vec4 {
  * @returns out
  */
 export function transformQuat(out: Vec4, a: Vec4, q: Quat): Vec4 {
-    const x = a[0],
-        y = a[1],
-        z = a[2];
-    const qx = q[0],
-        qy = q[1],
-        qz = q[2],
-        qw = q[3];
+    const x = a[0];
+    const y = a[1];
+    const z = a[2];
+    const qx = q[0];
+    const qy = q[1];
+    const qz = q[2];
+    const qw = q[3];
 
     // calculate quat * vec
     const ix = qw * x + qy * z - qz * y;
@@ -531,7 +531,7 @@ export function zero(out: Vec4): Vec4 {
  * @returns string representation of the vector
  */
 export function str(a: Vec4): string {
-    return 'vec4(' + a[0] + ', ' + a[1] + ', ' + a[2] + ', ' + a[3] + ')';
+    return `vec4(${a[0]}, ${a[1]}, ${a[2]}, ${a[3]})`;
 }
 
 /**
@@ -553,14 +553,14 @@ export function exactEquals(a: Vec4, b: Vec4): boolean {
  * @returns True if the vectors are equal, false otherwise.
  */
 export function equals(a: Vec4, b: Vec4): boolean {
-    const a0 = a[0],
-        a1 = a[1],
-        a2 = a[2],
-        a3 = a[3];
-    const b0 = b[0],
-        b1 = b[1],
-        b2 = b[2],
-        b3 = b[3];
+    const a0 = a[0];
+    const a1 = a[1];
+    const a2 = a[2];
+    const a3 = a[3];
+    const b0 = b[0];
+    const b1 = b[1];
+    const b2 = b[2];
+    const b3 = b[3];
     return (
         Math.abs(a0 - b0) <=
             common.EPSILON * Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&

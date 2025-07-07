@@ -37,7 +37,7 @@ export function identity(out: Quat): Quat {
  * @returns out
  **/
 export function setAxisAngle(out: Quat, axis: Vec3, rad: number): Quat {
-    rad = rad * 0.5;
+    rad *= 0.5;
     const s = Math.sin(rad);
     out[0] = s * axis[0];
     out[1] = s * axis[1];
@@ -97,14 +97,14 @@ export function getAngle(a: Quat, b: Quat): number {
  * @returns out
  */
 export function multiply(out: Quat, a: Quat, b: Quat): Quat {
-    const ax = a[0],
-        ay = a[1],
-        az = a[2],
-        aw = a[3];
-    const bx = b[0],
-        by = b[1],
-        bz = b[2],
-        bw = b[3];
+    const ax = a[0];
+    const ay = a[1];
+    const az = a[2];
+    const aw = a[3];
+    const bx = b[0];
+    const by = b[1];
+    const bz = b[2];
+    const bw = b[3];
 
     out[0] = ax * bw + aw * bx + ay * bz - az * by;
     out[1] = ay * bw + aw * by + az * bx - ax * bz;
@@ -124,12 +124,12 @@ export function multiply(out: Quat, a: Quat, b: Quat): Quat {
 export function rotateX(out: Quat, a: Quat, rad: number): Quat {
     rad *= 0.5;
 
-    const ax = a[0],
-        ay = a[1],
-        az = a[2],
-        aw = a[3];
-    const bx = Math.sin(rad),
-        bw = Math.cos(rad);
+    const ax = a[0];
+    const ay = a[1];
+    const az = a[2];
+    const aw = a[3];
+    const bx = Math.sin(rad);
+    const bw = Math.cos(rad);
 
     out[0] = ax * bw + aw * bx;
     out[1] = ay * bw + az * bx;
@@ -149,12 +149,12 @@ export function rotateX(out: Quat, a: Quat, rad: number): Quat {
 export function rotateY(out: Quat, a: Quat, rad: number): Quat {
     rad *= 0.5;
 
-    const ax = a[0],
-        ay = a[1],
-        az = a[2],
-        aw = a[3];
-    const by = Math.sin(rad),
-        bw = Math.cos(rad);
+    const ax = a[0];
+    const ay = a[1];
+    const az = a[2];
+    const aw = a[3];
+    const by = Math.sin(rad);
+    const bw = Math.cos(rad);
 
     out[0] = ax * bw - az * by;
     out[1] = ay * bw + aw * by;
@@ -174,12 +174,12 @@ export function rotateY(out: Quat, a: Quat, rad: number): Quat {
 export function rotateZ(out: Quat, a: Quat, rad: number): Quat {
     rad *= 0.5;
 
-    const ax = a[0],
-        ay = a[1],
-        az = a[2],
-        aw = a[3];
-    const bz = Math.sin(rad),
-        bw = Math.cos(rad);
+    const ax = a[0];
+    const ay = a[1];
+    const az = a[2];
+    const aw = a[3];
+    const bz = Math.sin(rad);
+    const bw = Math.cos(rad);
 
     out[0] = ax * bw + ay * bz;
     out[1] = ay * bw - ax * bz;
@@ -198,9 +198,9 @@ export function rotateZ(out: Quat, a: Quat, rad: number): Quat {
  * @returns out
  */
 export function calculateW(out: Quat, a: Quat): Quat {
-    const x = a[0],
-        y = a[1],
-        z = a[2];
+    const x = a[0];
+    const y = a[1];
+    const z = a[2];
 
     out[0] = x;
     out[1] = y;
@@ -217,10 +217,10 @@ export function calculateW(out: Quat, a: Quat): Quat {
  * @returns out
  */
 export function exp(out: Quat, a: Quat): Quat {
-    const x = a[0],
-        y = a[1],
-        z = a[2],
-        w = a[3];
+    const x = a[0];
+    const y = a[1];
+    const z = a[2];
+    const w = a[3];
 
     const r = Math.sqrt(x * x + y * y + z * z);
     const et = Math.exp(w);
@@ -242,10 +242,10 @@ export function exp(out: Quat, a: Quat): Quat {
  * @returns out
  */
 export function ln(out: Quat, a: Quat): Quat {
-    const x = a[0],
-        y = a[1],
-        z = a[2],
-        w = a[3];
+    const x = a[0];
+    const y = a[1];
+    const z = a[2];
+    const w = a[3];
 
     const r = Math.sqrt(x * x + y * y + z * z);
     const t = r > 0 ? Math.atan2(r, w) / r : 0;
@@ -285,16 +285,20 @@ export function pow(out: Quat, a: Quat, b: number): Quat {
 export function slerp(out: Quat, a: Quat, b: Quat, t: number): Quat {
     // benchmarks:
     //    http://jsperf.com/quaternion-slerp-implementations
-    const ax = a[0],
-        ay = a[1],
-        az = a[2],
-        aw = a[3];
-    let bx = b[0],
-        by = b[1],
-        bz = b[2],
-        bw = b[3];
+    const ax = a[0];
+    const ay = a[1];
+    const az = a[2];
+    const aw = a[3];
+    let bx = b[0];
+    let by = b[1];
+    let bz = b[2];
+    let bw = b[3];
 
-    let omega, cosom, sinom, scale0, scale1;
+    let omega: number;
+    let cosom: number;
+    let sinom: number;
+    let scale0: number;
+    let scale1: number;
 
     // calc cosine
     cosom = ax * bx + ay * by + az * bz + aw * bw;
@@ -359,10 +363,10 @@ export function random(out: Quat): Quat {
  * @returns out
  */
 export function invert(out: Quat, a: Quat): Quat {
-    const a0 = a[0],
-        a1 = a[1],
-        a2 = a[2],
-        a3 = a[3];
+    const a0 = a[0];
+    const a1 = a[1];
+    const a2 = a[2];
+    const a3 = a[3];
     const dot = a0 * a0 + a1 * a1 + a2 * a2 + a3 * a3;
     const invDot = dot ? 1.0 / dot : 0;
 
@@ -405,7 +409,7 @@ export function fromMat3(out: Quat, m: Mat3): Quat {
     // Algorithm in Ken Shoemake's article in 1987 SIGGRAPH course notes
     // article "Quaternion Calculus and Fast Animation".
     const fTrace = m[0] + m[4] + m[8];
-    let fRoot;
+    let fRoot: number;
 
     if (fTrace > 0.0) {
         // |w| > 1/2, may as well choose w > 1/2
@@ -471,7 +475,7 @@ export function fromEuler(out: Quat, x: number, y: number, z: number): Quat {
  * @returns string representation of the vector
  */
 export function str(a: Quat): string {
-    return 'quat(' + a[0] + ', ' + a[1] + ', ' + a[2] + ', ' + a[3] + ')';
+    return `quat(${a[0]}, ${a[1]}, ${a[2]}, ${a[3]})`;
 }
 
 /**
@@ -632,6 +636,7 @@ export const rotationTo = (() => {
 
     return (out: Quat, a: Vec3, b: Vec3): Quat => {
         const dot = vec3.dot(a, b);
+
         if (dot < -0.999999) {
             vec3.cross(tmpvec3, xUnitVec3, a);
             if (vec3.length(tmpvec3) < 0.000001)
@@ -639,20 +644,22 @@ export const rotationTo = (() => {
             vec3.normalize(tmpvec3, tmpvec3);
             setAxisAngle(out, tmpvec3, Math.PI);
             return out;
-        } else if (dot > 0.999999) {
+        }
+        
+        if (dot > 0.999999) {
             out[0] = 0;
             out[1] = 0;
             out[2] = 0;
             out[3] = 1;
             return out;
-        } else {
-            vec3.cross(tmpvec3, a, b);
-            out[0] = tmpvec3[0];
-            out[1] = tmpvec3[1];
-            out[2] = tmpvec3[2];
-            out[3] = 1 + dot;
-            return normalize(out, out);
         }
+
+        vec3.cross(tmpvec3, a, b);
+        out[0] = tmpvec3[0];
+        out[1] = tmpvec3[1];
+        out[2] = tmpvec3[2];
+        out[3] = 1 + dot;
+        return normalize(out, out);
     };
 })();
 

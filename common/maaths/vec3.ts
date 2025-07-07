@@ -357,12 +357,12 @@ export function dot(a: Vec3, b: Vec3): number {
  * @returns out
  */
 export function cross(out: Vec3, a: Vec3, b: Vec3): Vec3 {
-    const ax = a[0],
-        ay = a[1],
-        az = a[2];
-    const bx = b[0],
-        by = b[1],
-        bz = b[2];
+    const ax = a[0];
+    const ay = a[1];
+    const az = a[2];
+    const bx = b[0];
+    const by = b[1];
+    const bz = b[2];
 
     out[0] = ay * bz - az * by;
     out[1] = az * bx - ax * bz;
@@ -527,9 +527,9 @@ export function transformMat4(out: Vec3, a: Vec3, m: Mat4): Vec3 {
  * @returns out
  */
 export function transformMat3(out: Vec3, a: Vec3, m: Mat3): Vec3 {
-    const x = a[0],
-        y = a[1],
-        z = a[2];
+    const x = a[0];
+    const y = a[1];
+    const z = a[2];
     out[0] = x * m[0] + y * m[3] + z * m[6];
     out[1] = x * m[1] + y * m[4] + z * m[7];
     out[2] = x * m[2] + y * m[5] + z * m[8];
@@ -547,22 +547,22 @@ export function transformMat3(out: Vec3, a: Vec3, m: Mat3): Vec3 {
  */
 export function transformQuat(out: Vec3, a: Vec3, q: Quat): Vec3 {
     // benchmarks: https://jsperf.com/quaternion-transform-vec3-implementations-fixed
-    const qx = q[0],
-        qy = q[1],
-        qz = q[2],
-        qw = q[3];
-    const x = a[0],
-        y = a[1],
-        z = a[2];
+    const qx = q[0];
+    const qy = q[1];
+    const qz = q[2];
+    const qw = q[3];
+    const x = a[0];
+    const y = a[1];
+    const z = a[2];
     // var qvec = [qx, qy, qz];
     // var uv = vec3.cross([], qvec, a);
-    let uvx = qy * z - qz * y,
-        uvy = qz * x - qx * z,
-        uvz = qx * y - qy * x;
+    let uvx = qy * z - qz * y;
+    let uvy = qz * x - qx * z;
+    let uvz = qx * y - qy * x;
     // var uuv = vec3.cross([], qvec, uv);
-    let uuvx = qy * uvz - qz * uvy,
-        uuvy = qz * uvx - qx * uvz,
-        uuvz = qx * uvy - qy * uvx;
+    let uuvx = qy * uvz - qz * uvy;
+    let uuvy = qz * uvx - qx * uvz;
+    let uuvz = qx * uvy - qy * uvx;
     // vec3.scale(uv, uv, 2 * w);
     const w2 = qw * 2;
     uvx *= w2;
@@ -588,8 +588,8 @@ export function transformQuat(out: Vec3, a: Vec3, q: Quat): Vec3 {
  * @returns out
  */
 export function rotateX(out: Vec3, a: Vec3, b: Vec3, rad: number): Vec3 {
-    const p = [],
-        r = [];
+    const p = [];
+    const r = [];
     //Translate point to the origin
     p[0] = a[0] - b[0];
     p[1] = a[1] - b[1];
@@ -617,8 +617,8 @@ export function rotateX(out: Vec3, a: Vec3, b: Vec3, rad: number): Vec3 {
  * @returns out
  */
 export function rotateY(out: Vec3, a: Vec3, b: Vec3, rad: number): Vec3 {
-    const p = [],
-        r = [];
+    const p = [];
+    const r = [];
     //Translate point to the origin
     p[0] = a[0] - b[0];
     p[1] = a[1] - b[1];
@@ -646,8 +646,8 @@ export function rotateY(out: Vec3, a: Vec3, b: Vec3, rad: number): Vec3 {
  * @returns out
  */
 export function rotateZ(out: Vec3, a: Vec3, b: Vec3, rad: number): Vec3 {
-    const p = [],
-        r = [];
+    const p = [];
+    const r = [];
     //Translate point to the origin
     p[0] = a[0] - b[0];
     p[1] = a[1] - b[1];
@@ -673,16 +673,16 @@ export function rotateZ(out: Vec3, a: Vec3, b: Vec3, rad: number): Vec3 {
  * @returns The angle in radians
  */
 export function angle(a: Vec3, b: Vec3): number {
-    const ax = a[0],
-        ay = a[1],
-        az = a[2],
-        bx = b[0],
-        by = b[1],
-        bz = b[2],
-        mag = Math.sqrt(
+    const ax = a[0];
+    const ay = a[1];
+    const az = a[2];
+    const bx = b[0];
+    const by = b[1];
+    const bz = b[2];
+    const mag = Math.sqrt(
             (ax * ax + ay * ay + az * az) * (bx * bx + by * by + bz * bz),
-        ),
-        cosine = mag && dot(a, b) / mag;
+        );
+    const cosine = mag && dot(a, b) / mag;
     return Math.acos(Math.min(Math.max(cosine, -1), 1));
 }
 
@@ -706,7 +706,7 @@ export function zero(out: Vec3): Vec3 {
  * @returns string representation of the vector
  */
 export function str(a: Vec3): string {
-    return 'vec3(' + a[0] + ', ' + a[1] + ', ' + a[2] + ')';
+    return `vec3(${a[0]}, ${a[1]}, ${a[2]})`;
 }
 
 /**
@@ -728,12 +728,12 @@ export function exactEquals(a: Vec3, b: Vec3): boolean {
  * @returns True if the vectors are equal, false otherwise.
  */
 export function equals(a: Vec3, b: Vec3): boolean {
-    const a0 = a[0],
-        a1 = a[1],
-        a2 = a[2];
-    const b0 = b[0],
-        b1 = b[1],
-        b2 = b[2];
+    const a0 = a[0];
+    const a1 = a[1];
+    const a2 = a[2];
+    const b0 = b[0];
+    const b1 = b[1];
+    const b2 = b[2];
     return (
         Math.abs(a0 - b0) <=
             common.EPSILON * Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&

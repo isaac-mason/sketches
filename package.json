@@ -7,8 +7,8 @@
         "dev": "NODE_TLS_REJECT_UNAUTHORIZED=0 bun dev/dev.ts",
         "build": "bun dev/build.ts",
         "preview": "vite preview",
-        "format": "yarn biome format --write sketches/.",
-        "lint": "yarn biome lint --write sketches/."
+        "format": "yarn biome format --write sketches/. common/.",
+        "lint": "yarn biome lint --write sketches/. common/."
     },
     "devDependencies": {
         "@biomejs/biome": "^1.9.4",

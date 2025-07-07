@@ -127,12 +127,12 @@ export function set(
  * @returns out, or null if source matrix is not invertible
  */
 export function invert(out: Mat2d, a: Mat2d): Mat2d | null {
-    const aa = a[0],
-        ab = a[1],
-        ac = a[2],
-        ad = a[3];
-    const atx = a[4],
-        aty = a[5];
+    const aa = a[0];
+    const ab = a[1];
+    const ac = a[2];
+    const ad = a[3];
+    const atx = a[4];
+    const aty = a[5];
 
     let det = aa * ad - ab * ac;
     if (!det) {
@@ -168,18 +168,18 @@ export function determinant(a: Mat2d): number {
  * @returns out
  */
 export function multiply(out: Mat2d, a: Mat2d, b: Mat2d): Mat2d {
-    const a0 = a[0],
-        a1 = a[1],
-        a2 = a[2],
-        a3 = a[3],
-        a4 = a[4],
-        a5 = a[5];
-    const b0 = b[0],
-        b1 = b[1],
-        b2 = b[2],
-        b3 = b[3],
-        b4 = b[4],
-        b5 = b[5];
+    const a0 = a[0];
+    const a1 = a[1];
+    const a2 = a[2];
+    const a3 = a[3];
+    const a4 = a[4];
+    const a5 = a[5];
+    const b0 = b[0];
+    const b1 = b[1];
+    const b2 = b[2];
+    const b3 = b[3];
+    const b4 = b[4];
+    const b5 = b[5];
     out[0] = a0 * b0 + a2 * b1;
     out[1] = a1 * b0 + a3 * b1;
     out[2] = a0 * b2 + a2 * b3;
@@ -198,12 +198,12 @@ export function multiply(out: Mat2d, a: Mat2d, b: Mat2d): Mat2d {
  * @returns out
  */
 export function rotate(out: Mat2d, a: Mat2d, rad: number): Mat2d {
-    const a0 = a[0],
-        a1 = a[1],
-        a2 = a[2],
-        a3 = a[3],
-        a4 = a[4],
-        a5 = a[5];
+    const a0 = a[0];
+    const a1 = a[1];
+    const a2 = a[2];
+    const a3 = a[3];
+    const a4 = a[4];
+    const a5 = a[5];
     const s = Math.sin(rad);
     const c = Math.cos(rad);
     out[0] = a0 * c + a2 * s;
@@ -224,14 +224,14 @@ export function rotate(out: Mat2d, a: Mat2d, rad: number): Mat2d {
  * @returns out
  **/
 export function scale(out: Mat2d, a: Mat2d, v: Vec2): Mat2d {
-    const a0 = a[0],
-        a1 = a[1],
-        a2 = a[2],
-        a3 = a[3],
-        a4 = a[4],
-        a5 = a[5];
-    const v0 = v[0],
-        v1 = v[1];
+    const a0 = a[0];
+    const a1 = a[1];
+    const a2 = a[2];
+    const a3 = a[3];
+    const a4 = a[4];
+    const a5 = a[5];
+    const v0 = v[0];
+    const v1 = v[1];
     out[0] = a0 * v0;
     out[1] = a1 * v0;
     out[2] = a2 * v1;
@@ -250,14 +250,14 @@ export function scale(out: Mat2d, a: Mat2d, v: Vec2): Mat2d {
  * @returns out
  **/
 export function translate(out: Mat2d, a: Mat2d, v: Vec2): Mat2d {
-    const a0 = a[0],
-        a1 = a[1],
-        a2 = a[2],
-        a3 = a[3],
-        a4 = a[4],
-        a5 = a[5];
-    const v0 = v[0],
-        v1 = v[1];
+    const a0 = a[0];
+    const a1 = a[1];
+    const a2 = a[2];
+    const a3 = a[3];
+    const a4 = a[4];
+    const a5 = a[5];
+    const v0 = v[0];
+    const v1 = v[1];
     out[0] = a0;
     out[1] = a1;
     out[2] = a2;
@@ -279,8 +279,8 @@ export function translate(out: Mat2d, a: Mat2d, v: Vec2): Mat2d {
  * @returns out
  */
 export function fromRotation(out: Mat2d, rad: number): Mat2d {
-    const s = Math.sin(rad),
-        c = Math.cos(rad);
+    const s = Math.sin(rad);
+    const c = Math.cos(rad);
     out[0] = c;
     out[1] = s;
     out[2] = -s;
@@ -340,19 +340,7 @@ export function fromTranslation(out: Mat2d, v: Vec2): Mat2d {
  */
 export function str(a: Mat2d): string {
     return (
-        'mat2d(' +
-        a[0] +
-        ', ' +
-        a[1] +
-        ', ' +
-        a[2] +
-        ', ' +
-        a[3] +
-        ', ' +
-        a[4] +
-        ', ' +
-        a[5] +
-        ')'
+        `mat2d(${a[0]}, ${a[1]}, ${a[2]}, ${a[3]}, ${a[4]}, ${a[5]})`
     );
 }
 
@@ -478,18 +466,18 @@ export function exactEquals(a: Mat2d, b: Mat2d): boolean {
  * @returns True if the matrices are equal, false otherwise.
  */
 export function equals(a: Mat2d, b: Mat2d): boolean {
-    const a0 = a[0],
-        a1 = a[1],
-        a2 = a[2],
-        a3 = a[3],
-        a4 = a[4],
-        a5 = a[5];
-    const b0 = b[0],
-        b1 = b[1],
-        b2 = b[2],
-        b3 = b[3],
-        b4 = b[4],
-        b5 = b[5];
+    const a0 = a[0];
+    const a1 = a[1];
+    const a2 = a[2];
+    const a3 = a[3];
+    const a4 = a[4];
+    const a5 = a[5];
+    const b0 = b[0];
+    const b1 = b[1];
+    const b2 = b[2];
+    const b3 = b[3];
+    const b4 = b[4];
+    const b5 = b[5];
     return (
         Math.abs(a0 - b0) <=
             common.EPSILON * Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&

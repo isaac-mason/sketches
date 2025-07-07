@@ -224,8 +224,8 @@ export function scaleAndAdd(out: Vec2, a: Vec2, b: Vec2, scale: number): Vec2 {
  * @returns distance between a and b
  */
 export function distance(a: Vec2, b: Vec2): number {
-    const x = b[0] - a[0],
-        y = b[1] - a[1];
+    const x = b[0] - a[0];
+    const y = b[1] - a[1];
     return Math.sqrt(x * x + y * y);
 }
 
@@ -237,8 +237,8 @@ export function distance(a: Vec2, b: Vec2): number {
  * @returns squared distance between a and b
  */
 export function squaredDistance(a: Vec2, b: Vec2): number {
-    const x = b[0] - a[0],
-        y = b[1] - a[1];
+    const x = b[0] - a[0];
+    const y = b[1] - a[1];
     return x * x + y * y;
 }
 
@@ -249,8 +249,8 @@ export function squaredDistance(a: Vec2, b: Vec2): number {
  * @returns length of a
  */
 export function length(a: Vec2): number {
-    const x = a[0],
-        y = a[1];
+    const x = a[0];
+    const y = a[1];
     return Math.sqrt(x * x + y * y);
 }
 
@@ -261,8 +261,8 @@ export function length(a: Vec2): number {
  * @returns squared length of a
  */
 export function squaredLength(a: Vec2): number {
-    const x = a[0],
-        y = a[1];
+    const x = a[0];
+    const y = a[1];
     return x * x + y * y;
 }
 
@@ -300,8 +300,8 @@ export function inverse(out: Vec2, a: Vec2): Vec2 {
  * @returns out
  */
 export function normalize(out: Vec2, a: Vec2): Vec2 {
-    const x = a[0],
-        y = a[1];
+    const x = a[0];
+    const y = a[1];
     let len = x * x + y * y;
     if (len > 0) {
         //TODO: evaluate use of glm_invsqrt here?
@@ -349,8 +349,8 @@ export function cross(out: Vec3, a: Vec2, b: Vec2): Vec3 {
  * @returns out
  */
 export function lerp(out: Vec2, a: Vec2, b: Vec2, t: number): Vec2 {
-    const ax = a[0],
-        ay = a[1];
+    const ax = a[0];
+    const ay = a[1];
     out[0] = ax + t * (b[0] - ax);
     out[1] = ay + t * (b[1] - ay);
     return out;
@@ -380,8 +380,8 @@ export function random(out: Vec2, scale?: number): Vec2 {
  * @returns out
  */
 export function transformMat2(out: Vec2, a: Vec2, m: Mat2): Vec2 {
-    const x = a[0],
-        y = a[1];
+    const x = a[0];
+    const y = a[1];
     out[0] = m[0] * x + m[2] * y;
     out[1] = m[1] * x + m[3] * y;
     return out;
@@ -396,8 +396,8 @@ export function transformMat2(out: Vec2, a: Vec2, m: Mat2): Vec2 {
  * @returns out
  */
 export function transformMat2d(out: Vec2, a: Vec2, m: Mat2d): Vec2 {
-    const x = a[0],
-        y = a[1];
+    const x = a[0];
+    const y = a[1];
     out[0] = m[0] * x + m[2] * y + m[4];
     out[1] = m[1] * x + m[3] * y + m[5];
     return out;
@@ -413,8 +413,8 @@ export function transformMat2d(out: Vec2, a: Vec2, m: Mat2d): Vec2 {
  * @returns out
  */
 export function transformMat3(out: Vec2, a: Vec2, m: Mat3): Vec2 {
-    const x = a[0],
-        y = a[1];
+    const x = a[0];
+    const y = a[1];
     out[0] = m[0] * x + m[3] * y + m[6];
     out[1] = m[1] * x + m[4] * y + m[7];
     return out;
@@ -448,10 +448,10 @@ export function transformMat4(out: Vec2, a: Vec2, m: Mat4): Vec2 {
  */
 export function rotate(out: Vec2, a: Vec2, b: Vec2, rad: number): Vec2 {
     //Translate point to the origin
-    const p0 = a[0] - b[0],
-        p1 = a[1] - b[1],
-        sinC = Math.sin(rad),
-        cosC = Math.cos(rad);
+    const p0 = a[0] - b[0];
+    const p1 = a[1] - b[1];
+    const sinC = Math.sin(rad);
+    const cosC = Math.cos(rad);
 
     //perform rotation and translate to correct position
     out[0] = p0 * cosC - p1 * sinC + b[0];
@@ -467,14 +467,14 @@ export function rotate(out: Vec2, a: Vec2, b: Vec2, rad: number): Vec2 {
  * @returns The angle in radians
  */
 export function angle(a: Vec2, b: Vec2): number {
-    const x1 = a[0],
-        y1 = a[1],
-        x2 = b[0],
-        y2 = b[1],
-        // mag is the product of the magnitudes of a and b
-        mag = Math.sqrt((x1 * x1 + y1 * y1) * (x2 * x2 + y2 * y2)),
-        // mag &&.. short circuits if mag == 0
-        cosine = mag && (x1 * x2 + y1 * y2) / mag;
+    const x1 = a[0];
+    const y1 = a[1];
+    const x2 = b[0];
+    const y2 = b[1];
+    // mag is the product of the magnitudes of a and b
+    const mag = Math.sqrt((x1 * x1 + y1 * y1) * (x2 * x2 + y2 * y2));
+    // mag &&.. short circuits if mag == 0
+    const cosine = mag && (x1 * x2 + y1 * y2) / mag;
     // Math.min(Math.max(cosine, -1), 1) clamps the cosine between -1 and 1
     return Math.acos(Math.min(Math.max(cosine, -1), 1));
 }
@@ -498,7 +498,7 @@ export function zero(out: Vec2): Vec2 {
  * @returns string representation of the vector
  */
 export function str(a: Vec2): string {
-    return 'vec2(' + a[0] + ', ' + a[1] + ')';
+    return `vec2(${a[0]}, ${a[1]})`;
 }
 
 /**
@@ -520,10 +520,10 @@ export function exactEquals(a: Vec2, b: Vec2): boolean {
  * @returns True if the vectors are equal, false otherwise.
  */
 export function equals(a: Vec2, b: Vec2): boolean {
-    const a0 = a[0],
-        a1 = a[1];
-    const b0 = b[0],
-        b1 = b[1];
+    const a0 = a[0];
+    const a1 = a[1];
+    const b0 = b[0];
+    const b1 = b[1];
     return (
         Math.abs(a0 - b0) <=
             common.EPSILON * Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&

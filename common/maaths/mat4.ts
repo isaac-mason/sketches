@@ -184,11 +184,11 @@ export function identity(out: Mat4): Mat4 {
 export function transpose(out: Mat4, a: Mat4): Mat4 {
 	// If we are transposing ourselves we can skip a few steps but have to cache some values
 	if (out === a) {
-		const a01 = a[1],
-			a02 = a[2],
-			a03 = a[3];
-		const a12 = a[6],
-			a13 = a[7];
+		const a01 = a[1];
+		const a02 = a[2];
+		const a03 = a[3];
+		const a12 = a[6];
+		const a13 = a[7];
 		const a23 = a[11];
 
 		out[1] = a[4];
@@ -233,22 +233,22 @@ export function transpose(out: Mat4, a: Mat4): Mat4 {
  * @returns out, or null if source matrix is not invertible
  */
 export function invert(out: Mat4, a: Mat4): Mat4 | null {
-	const a00 = a[0],
-		a01 = a[1],
-		a02 = a[2],
-		a03 = a[3];
-	const a10 = a[4],
-		a11 = a[5],
-		a12 = a[6],
-		a13 = a[7];
-	const a20 = a[8],
-		a21 = a[9],
-		a22 = a[10],
-		a23 = a[11];
-	const a30 = a[12],
-		a31 = a[13],
-		a32 = a[14],
-		a33 = a[15];
+	const a00 = a[0];
+	const a01 = a[1];
+	const a02 = a[2];
+	const a03 = a[3];
+	const a10 = a[4];
+	const a11 = a[5];
+	const a12 = a[6];
+	const a13 = a[7];
+	const a20 = a[8];
+	const a21 = a[9];
+	const a22 = a[10];
+	const a23 = a[11];
+	const a30 = a[12];
+	const a31 = a[13];
+	const a32 = a[14];
+	const a33 = a[15];
 
 	const b00 = a00 * a11 - a01 * a10;
 	const b01 = a00 * a12 - a02 * a10;
@@ -299,22 +299,22 @@ export function invert(out: Mat4, a: Mat4): Mat4 | null {
  * @returns out
  */
 export function adjoint(out: Mat4, a: Mat4): Mat4 {
-	const a00 = a[0],
-		a01 = a[1],
-		a02 = a[2],
-		a03 = a[3];
-	const a10 = a[4],
-		a11 = a[5],
-		a12 = a[6],
-		a13 = a[7];
-	const a20 = a[8],
-		a21 = a[9],
-		a22 = a[10],
-		a23 = a[11];
-	const a30 = a[12],
-		a31 = a[13],
-		a32 = a[14],
-		a33 = a[15];
+	const a00 = a[0];
+	const a01 = a[1];
+	const a02 = a[2];
+	const a03 = a[3];
+	const a10 = a[4];
+	const a11 = a[5];
+	const a12 = a[6];
+	const a13 = a[7];
+	const a20 = a[8];
+	const a21 = a[9];
+	const a22 = a[10];
+	const a23 = a[11];
+	const a30 = a[12];
+	const a31 = a[13];
+	const a32 = a[14];
+	const a33 = a[15];
 
 	const b00 = a00 * a11 - a01 * a10;
 	const b01 = a00 * a12 - a02 * a10;
@@ -355,22 +355,22 @@ export function adjoint(out: Mat4, a: Mat4): Mat4 {
  * @returns determinant of a
  */
 export function determinant(a: Mat4): number {
-	const a00 = a[0],
-		a01 = a[1],
-		a02 = a[2],
-		a03 = a[3];
-	const a10 = a[4],
-		a11 = a[5],
-		a12 = a[6],
-		a13 = a[7];
-	const a20 = a[8],
-		a21 = a[9],
-		a22 = a[10],
-		a23 = a[11];
-	const a30 = a[12],
-		a31 = a[13],
-		a32 = a[14],
-		a33 = a[15];
+	const a00 = a[0];
+	const a01 = a[1];
+	const a02 = a[2];
+	const a03 = a[3];
+	const a10 = a[4];
+	const a11 = a[5];
+	const a12 = a[6];
+	const a13 = a[7];
+	const a20 = a[8];
+	const a21 = a[9];
+	const a22 = a[10];
+	const a23 = a[11];
+	const a30 = a[12];
+	const a31 = a[13];
+	const a32 = a[14];
+	const a33 = a[15];
 
 	const b0 = a00 * a11 - a01 * a10;
 	const b1 = a00 * a12 - a02 * a10;
@@ -396,28 +396,28 @@ export function determinant(a: Mat4): number {
  * @returns out
  */
 export function multiply(out: Mat4, a: Mat4, b: Mat4): Mat4 {
-	const a00 = a[0],
-		a01 = a[1],
-		a02 = a[2],
-		a03 = a[3];
-	const a10 = a[4],
-		a11 = a[5],
-		a12 = a[6],
-		a13 = a[7];
-	const a20 = a[8],
-		a21 = a[9],
-		a22 = a[10],
-		a23 = a[11];
-	const a30 = a[12],
-		a31 = a[13],
-		a32 = a[14],
-		a33 = a[15];
+	const a00 = a[0];
+	const a01 = a[1];
+	const a02 = a[2];
+	const a03 = a[3];
+	const a10 = a[4];
+	const a11 = a[5];
+	const a12 = a[6];
+	const a13 = a[7];
+	const a20 = a[8];
+	const a21 = a[9];
+	const a22 = a[10];
+	const a23 = a[11];
+	const a30 = a[12];
+	const a31 = a[13];
+	const a32 = a[14];
+	const a33 = a[15];
 
 	// Cache only the current line of the second matrix
-	let b0 = b[0],
-		b1 = b[1],
-		b2 = b[2],
-		b3 = b[3];
+	let b0 = b[0];
+	let b1 = b[1];
+	let b2 = b[2];
+	let b3 = b[3];
 	out[0] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
 	out[1] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
 	out[2] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
@@ -461,12 +461,21 @@ export function multiply(out: Mat4, a: Mat4, b: Mat4): Mat4 {
  * @returns out
  */
 export function translate(out: Mat4, a: Mat4, v: Vec3): Mat4 {
-	const x = v[0],
-		y = v[1],
-		z = v[2];
-	let a00, a01, a02, a03;
-	let a10, a11, a12, a13;
-	let a20, a21, a22, a23;
+	const x = v[0];
+	const y = v[1];
+	const z = v[2];
+	let a00: number;
+	let a01: number;
+	let a02: number;
+	let a03: number;
+	let a10: number;
+	let a11: number;
+	let a12: number;
+	let a13: number;
+	let a20: number;
+	let a21: number;
+	let a22: number;
+	let a23: number;
 
 	if (a === out) {
 		out[12] = a[0] * x + a[4] * y + a[8] * z + a[12];
@@ -518,9 +527,9 @@ export function translate(out: Mat4, a: Mat4, v: Vec3): Mat4 {
  * @returns out
  **/
 export function scale(out: Mat4, a: Mat4, v: Vec3): Mat4 {
-	const x = v[0],
-		y = v[1],
-		z = v[2];
+	const x = v[0];
+	const y = v[1];
+	const z = v[2];
 
 	out[0] = a[0] * x;
 	out[1] = a[1] * x;
@@ -551,17 +560,10 @@ export function scale(out: Mat4, a: Mat4, v: Vec3): Mat4 {
  * @returns out
  */
 export function rotate(out: Mat4, a: Mat4, rad: number, axis: Vec3): Mat4 | null {
-	let x = axis[0],
-		y = axis[1],
-		z = axis[2];
+	let x = axis[0];
+	let y = axis[1];
+	let z = axis[2];
 	let len = Math.sqrt(x * x + y * y + z * z);
-	let s, c, t;
-	let a00, a01, a02, a03;
-	let a10, a11, a12, a13;
-	let a20, a21, a22, a23;
-	let b00, b01, b02;
-	let b10, b11, b12;
-	let b20, b21, b22;
 
 	if (len < common.EPSILON) {
 		return null;
@@ -572,33 +574,33 @@ export function rotate(out: Mat4, a: Mat4, rad: number, axis: Vec3): Mat4 | null
 	y *= len;
 	z *= len;
 
-	s = Math.sin(rad);
-	c = Math.cos(rad);
-	t = 1 - c;
+	const s = Math.sin(rad);
+	const c = Math.cos(rad);
+	const t = 1 - c;
 
-	a00 = a[0];
-	a01 = a[1];
-	a02 = a[2];
-	a03 = a[3];
-	a10 = a[4];
-	a11 = a[5];
-	a12 = a[6];
-	a13 = a[7];
-	a20 = a[8];
-	a21 = a[9];
-	a22 = a[10];
-	a23 = a[11];
+	const a00 = a[0];
+	const a01 = a[1];
+	const a02 = a[2];
+	const a03 = a[3];
+	const a10 = a[4];
+	const a11 = a[5];
+	const a12 = a[6];
+	const a13 = a[7];
+	const a20 = a[8];
+	const a21 = a[9];
+	const a22 = a[10];
+	const a23 = a[11];
 
 	// Construct the elements of the rotation matrix
-	b00 = x * x * t + c;
-	b01 = y * x * t + z * s;
-	b02 = z * x * t - y * s;
-	b10 = x * y * t - z * s;
-	b11 = y * y * t + c;
-	b12 = z * y * t + x * s;
-	b20 = x * z * t + y * s;
-	b21 = y * z * t - x * s;
-	b22 = z * z * t + c;
+	const b00 = x * x * t + c;
+	const b01 = y * x * t + z * s;
+	const b02 = z * x * t - y * s;
+	const b10 = x * y * t - z * s;
+	const b11 = y * y * t + c;
+	const b12 = z * y * t + x * s;
+	const b20 = x * z * t + y * s;
+	const b21 = y * z * t - x * s;
+	const b22 = z * z * t + c;
 
 	// Perform rotation-specific matrix multiplication
 	out[0] = a00 * b00 + a10 * b01 + a20 * b02;
@@ -831,11 +833,10 @@ export function fromScaling(out: Mat4, v: Vec3): Mat4 {
  * @returns out
  */
 export function fromRotation(out: Mat4, rad: number, axis: Vec3): Mat4 | null {
-	let x = axis[0],
-		y = axis[1],
-		z = axis[2];
+	let x = axis[0];
+	let y = axis[1];
+	let z = axis[2];
 	let len = Math.sqrt(x * x + y * y + z * z);
-	let s, c, t;
 
 	if (len < common.EPSILON) {
 		return null;
@@ -846,9 +847,9 @@ export function fromRotation(out: Mat4, rad: number, axis: Vec3): Mat4 | null {
 	y *= len;
 	z *= len;
 
-	s = Math.sin(rad);
-	c = Math.cos(rad);
-	t = 1 - c;
+	const s = Math.sin(rad);
+	const c = Math.cos(rad);
+	const t = 1 - c;
 
 	// Perform rotation-specific matrix multiplication
 	out[0] = x * x * t + c;
@@ -992,10 +993,10 @@ export function fromZRotation(out: Mat4, rad: number): Mat4 {
  */
 export function fromRotationTranslation(out: Mat4, q: Quat | Quat2, v: Vec3): Mat4 {
 	// Quaternion math
-	const x = q[0],
-		y = q[1],
-		z = q[2],
-		w = q[3];
+	const x = q[0];
+	const y = q[1];
+	const z = q[2];
+	const w = q[3];
 	const x2 = x + x;
 	const y2 = y + y;
 	const z2 = z + z;
@@ -1039,14 +1040,14 @@ export function fromRotationTranslation(out: Mat4, q: Quat | Quat2, v: Vec3): Ma
  */
 export function fromQuat2(out: Mat4, a: Quat2): Mat4 {
 	const translation = new common.ARRAY_TYPE(3) as Vec3;
-	const bx = -a[0],
-		by = -a[1],
-		bz = -a[2],
-		bw = a[3],
-		ax = a[4],
-		ay = a[5],
-		az = a[6],
-		aw = a[7];
+	const bx = -a[0];
+	const by = -a[1];
+	const bz = -a[2];
+	const bw = a[3];
+	const ax = a[4];
+	const ay = a[5];
+	const az = a[6];
+	const aw = a[7];
 
 	const magnitude = bx * bx + by * by + bz * bz + bw * bw;
 	//Only scale if it makes sense
@@ -1260,10 +1261,10 @@ export function decompose(out_r: Quat, out_t: Vec3, out_s: Vec3, mat: Mat4): Qua
  */
 export function fromRotationTranslationScale(out: Mat4, q: Quat, v: Vec3, s: Vec3): Mat4 {
 	// Quaternion math
-	const x = q[0],
-		y = q[1],
-		z = q[2],
-		w = q[3];
+	const x = q[0];
+	const y = q[1];
+	const z = q[2];
+	const w = q[3];
 	const x2 = x + x;
 	const y2 = y + y;
 	const z2 = z + z;
@@ -1323,10 +1324,10 @@ export function fromRotationTranslationScale(out: Mat4, q: Quat, v: Vec3, s: Vec
  */
 export function fromRotationTranslationScaleOrigin(out: Mat4, q: Quat, v: Vec3, s: Vec3, o: Vec3): Mat4 {
 	// Quaternion math
-	const x = q[0],
-		y = q[1],
-		z = q[2],
-		w = q[3];
+	const x = q[0];
+	const y = q[1];
+	const z = q[2];
+	const w = q[3];
 	const x2 = x + x;
 	const y2 = y + y;
 	const z2 = z + z;
@@ -1388,10 +1389,10 @@ export function fromRotationTranslationScaleOrigin(out: Mat4, q: Quat, v: Vec3, 
  * @returns out
  */
 export function fromQuat(out: Mat4, q: Quat): Mat4 {
-	const x = q[0],
-		y = q[1],
-		z = q[2],
-		w = q[3];
+	const x = q[0];
+	const y = q[1];
+	const z = q[2];
+	const w = q[3];
 	const x2 = x + x;
 	const y2 = y + y;
 	const z2 = z + z;
@@ -1493,7 +1494,7 @@ export function perspectiveNO(out: Mat4, fovy: number, aspect: number, near: num
 	out[12] = 0;
 	out[13] = 0;
 	out[15] = 0;
-	if (far != null && far !== Infinity) {
+	if (far != null && far !== Number.POSITIVE_INFINITY) {
 		const nf = 1 / (near - far);
 		out[10] = (far + near) * nf;
 		out[14] = 2 * far * near * nf;
@@ -1539,7 +1540,7 @@ export function perspectiveZO(out: Mat4, fovy: number, aspect: number, near: num
 	out[12] = 0;
 	out[13] = 0;
 	out[15] = 0;
-	if (far != null && far !== Infinity) {
+	if (far != null && far !== Number.POSITIVE_INFINITY) {
 		const nf = 1 / (near - far);
 		out[10] = far * nf;
 		out[14] = far * near * nf;
@@ -1679,7 +1680,16 @@ export function orthoZO(out: Mat4, left: number, right: number, bottom: number, 
  * @returns {import("./types").Mat4} out
  */
 export function lookAt(out: Mat4, eye: Vec3, center: Vec3, up: Vec3): Mat4 {
-	let x0, x1, x2, y0, y1, y2, z0, z1, z2, len;
+	let x0: number;
+	let x1: number;
+	let x2: number;
+	let y0: number;
+	let y1: number;
+	let y2: number;
+	let z0: number;
+	let z1: number;
+	let z2: number;
+	let len: number;
 	const eyex = eye[0];
 	const eyey = eye[1];
 	const eyez = eye[2];
@@ -1768,16 +1778,16 @@ export function lookAt(out: Mat4, eye: Vec3, center: Vec3, up: Vec3): Mat4 {
  * @returns {import("./types").Mat4} out
  */
 export function targetTo(out: Mat4, eye: Vec3, target: Vec3, up: Vec3): Mat4 {
-	const eyex = eye[0],
-		eyey = eye[1],
-		eyez = eye[2],
-		upx = up[0],
-		upy = up[1],
-		upz = up[2];
+	const eyex = eye[0];
+	const eyey = eye[1];
+	const eyez = eye[2];
+	const upx = up[0];
+	const upy = up[1];
+	const upz = up[2];
 
-	let z0 = eyex - target[0],
-		z1 = eyey - target[1],
-		z2 = eyez - target[2];
+	let z0 = eyex - target[0];
+	let z1 = eyey - target[1];
+	let z2 = eyez - target[2];
 
 	let len = z0 * z0 + z1 * z1 + z2 * z2;
 	if (len > 0) {
@@ -1787,9 +1797,9 @@ export function targetTo(out: Mat4, eye: Vec3, target: Vec3, up: Vec3): Mat4 {
 		z2 *= len;
 	}
 
-	let x0 = upy * z2 - upz * z1,
-		x1 = upz * z0 - upx * z2,
-		x2 = upx * z1 - upy * z0;
+	let x0 = upy * z2 - upz * z1;
+	let x1 = upz * z0 - upx * z2;
+	let x2 = upx * z1 - upy * z0;
 
 	len = x0 * x0 + x1 * x1 + x2 * x2;
 	if (len > 0) {
@@ -1826,39 +1836,7 @@ export function targetTo(out: Mat4, eye: Vec3, target: Vec3, up: Vec3): Mat4 {
  */
 export function str(a: Mat4): string {
 	return (
-		"mat4(" +
-		a[0] +
-		", " +
-		a[1] +
-		", " +
-		a[2] +
-		", " +
-		a[3] +
-		", " +
-		a[4] +
-		", " +
-		a[5] +
-		", " +
-		a[6] +
-		", " +
-		a[7] +
-		", " +
-		a[8] +
-		", " +
-		a[9] +
-		", " +
-		a[10] +
-		", " +
-		a[11] +
-		", " +
-		a[12] +
-		", " +
-		a[13] +
-		", " +
-		a[14] +
-		", " +
-		a[15] +
-		")"
+		`mat4(${a[0]}, ${a[1]}, ${a[2]}, ${a[3]}, ${a[4]}, ${a[5]}, ${a[6]}, ${a[7]}, ${a[8]}, ${a[9]}, ${a[10]}, ${a[11]}, ${a[12]}, ${a[13]}, ${a[14]}, ${a[15]})`
 	);
 }
 
@@ -2038,39 +2016,39 @@ export function exactEquals(a: Mat4, b: Mat4): boolean {
  * @returns {Boolean} True if the matrices are equal, false otherwise.
  */
 export function equals(a: Mat4, b: Mat4): boolean {
-	const a0 = a[0],
-		a1 = a[1],
-		a2 = a[2],
-		a3 = a[3];
-	const a4 = a[4],
-		a5 = a[5],
-		a6 = a[6],
-		a7 = a[7];
-	const a8 = a[8],
-		a9 = a[9],
-		a10 = a[10],
-		a11 = a[11];
-	const a12 = a[12],
-		a13 = a[13],
-		a14 = a[14],
-		a15 = a[15];
+	const a0 = a[0];
+	const a1 = a[1];
+	const a2 = a[2];
+	const a3 = a[3];
+	const a4 = a[4];
+	const a5 = a[5];
+	const a6 = a[6];
+	const a7 = a[7];
+	const a8 = a[8];
+	const a9 = a[9];
+	const a10 = a[10];
+	const a11 = a[11];
+	const a12 = a[12];
+	const a13 = a[13];
+	const a14 = a[14];
+	const a15 = a[15];
 
-	const b0 = b[0],
-		b1 = b[1],
-		b2 = b[2],
-		b3 = b[3];
-	const b4 = b[4],
-		b5 = b[5],
-		b6 = b[6],
-		b7 = b[7];
-	const b8 = b[8],
-		b9 = b[9],
-		b10 = b[10],
-		b11 = b[11];
-	const b12 = b[12],
-		b13 = b[13],
-		b14 = b[14],
-		b15 = b[15];
+	const b0 = b[0];
+	const b1 = b[1];
+	const b2 = b[2];
+	const b3 = b[3];
+	const b4 = b[4];
+	const b5 = b[5];
+	const b6 = b[6];
+	const b7 = b[7];
+	const b8 = b[8];
+	const b9 = b[9];
+	const b10 = b[10];
+	const b11 = b[11];
+	const b12 = b[12];
+	const b13 = b[13];
+	const b14 = b[14];
+	const b15 = b[15];
 
 	return (
 		Math.abs(a0 - b0) <= common.EPSILON * Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&
