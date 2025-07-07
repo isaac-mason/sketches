@@ -5,7 +5,7 @@ import type { Heightfield } from './navmesh/heightfield';
 import type { PolyMesh } from './navmesh/poly-mesh';
 import type { PolyMeshDetail } from './navmesh/poly-mesh-detail';
 import { NULL_AREA, WALKABLE_AREA } from './navmesh/area';
-import { MESH_NULL_IDX } from './navmesh/poly-mesh';
+import { MESH_NULL_IDX } from './navmesh/common';
 
 type Intermediates = {
     input: {

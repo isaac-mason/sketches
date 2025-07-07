@@ -1,5 +1,6 @@
 import type { Box3, Vec3 } from '@/common/maaths';
 import type { ContourSet } from './contour-set';
+import { BORDER_VERTEX, MESH_NULL_IDX, MULTIPLE_REGS } from './common';
 
 /**
  * Represents a polygon mesh suitable for use in building a navigation mesh.
@@ -35,11 +36,7 @@ export type PolyMesh = {
     maxEdgeError: number;
 };
 
-// Constants
-export const MESH_NULL_IDX = 0xffff;
-export const BORDER_VERTEX = 0x10000;
 const VERTEX_BUCKET_COUNT = 1 << 12;
-const RC_MULTIPLE_REGS = 0;
 
 // Edge structure for mesh adjacency
 type Edge = {
@@ -1414,7 +1411,7 @@ const removeVertex = (
 
             // If this polygon covers multiple region types then mark it as such
             if (hreg[t[0]] !== hreg[t[1]] || hreg[t[1]] !== hreg[t[2]]) {
-                pregs[npolys] = RC_MULTIPLE_REGS;
+                pregs[npolys] = MULTIPLE_REGS;
             } else {
                 pregs[npolys] = hreg[t[0]];
             }
@@ -1476,7 +1473,7 @@ const removeVertex = (
                 );
 
                 if (pregs[bestPa] !== pregs[bestPb]) {
-                    pregs[bestPa] = RC_MULTIPLE_REGS;
+                    pregs[bestPa] = MULTIPLE_REGS;
                 }
 
                 const lastStart = (npolys - 1) * nvp;

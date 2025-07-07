@@ -31,3 +31,9 @@ export const getDirForOffset = (x: number, y: number): number => {
     }
     return 0; // Default to North if no match
 };
+
+// Constants
+export const MULTIPLE_REGS = 0;
+export const MESH_NULL_IDX = 0xffff;
+export const BORDER_VERTEX = 0x10000;
+
