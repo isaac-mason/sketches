@@ -1,4 +1,4 @@
-import type { Box3 } from '@/common/maaths';
+import type { Box3, Vec3 } from '@/common/maaths';
 import type { ContourSet } from './contour-set';
 
 /**
@@ -852,6 +852,9 @@ const buildMeshAdjacency = (
     return true;
 };
 
+const _va: Vec3 = [0, 0, 0];
+const _vb: Vec3 = [0, 0, 0];
+
 export const buildPolyMesh = (
     contourSet: ContourSet,
     maxVerticesPerPoly: number,
@@ -901,7 +904,7 @@ export const buildPolyMesh = (
     );
     const tmpPolyStart = maxVertsPerCont * maxVerticesPerPoly;
 
-    const nv = { value: 0 };
+    const vertexCount = { value: 0 };
 
     // Process each contour
     for (let i = 0; i < contourSet.contours.length; i++) {
@@ -936,7 +939,7 @@ export const buildPolyMesh = (
                 mesh.vertices,
                 firstVert,
                 nextVert,
-                nv,
+                vertexCount,
             );
             if (v[3] & BORDER_VERTEX) {
                 vflags[indices[j]] = 1;
@@ -1033,7 +1036,7 @@ export const buildPolyMesh = (
         }
     }
 
-    mesh.nVertices = nv.value;
+    mesh.nVertices = vertexCount.value;
 
     // Remove edge vertices
     for (let i = 0; i < mesh.nVertices; i++) {
@@ -1084,24 +1087,21 @@ export const buildPolyMesh = (
                     nj = 0;
                 }
                 
-                const va = [
-                    mesh.vertices[mesh.polys[polyStart + j] * 3],
-                    mesh.vertices[mesh.polys[polyStart + j] * 3 + 1],
-                    mesh.vertices[mesh.polys[polyStart + j] * 3 + 2],
-                ];
-                const vb = [
-                    mesh.vertices[mesh.polys[polyStart + nj] * 3],
-                    mesh.vertices[mesh.polys[polyStart + nj] * 3 + 1],
-                    mesh.vertices[mesh.polys[polyStart + nj] * 3 + 2],
-                ];
+                _va[0] = mesh.vertices[mesh.polys[polyStart + j] * 3];
+                _va[1] = mesh.vertices[mesh.polys[polyStart + j] * 3 + 1];
+                _va[2] = mesh.vertices[mesh.polys[polyStart + j] * 3 + 2];
+                
+                _vb[0] = mesh.vertices[mesh.polys[polyStart + nj] * 3];
+                _vb[1] = mesh.vertices[mesh.polys[polyStart + nj] * 3 + 1];
+                _vb[2] = mesh.vertices[mesh.polys[polyStart + nj] * 3 + 2];
 
-                if (va[0] === 0 && vb[0] === 0) {
+                if (_va[0] === 0 && _vb[0] === 0) {
                     mesh.polys[polyStart + maxVerticesPerPoly + j] = 0x8000 | 0;
-                } else if (va[2] === h && vb[2] === h) {
+                } else if (_va[2] === h && _vb[2] === h) {
                     mesh.polys[polyStart + maxVerticesPerPoly + j] = 0x8000 | 1;
-                } else if (va[0] === w && vb[0] === w) {
+                } else if (_va[0] === w && _vb[0] === w) {
                     mesh.polys[polyStart + maxVerticesPerPoly + j] = 0x8000 | 2;
-                } else if (va[2] === 0 && vb[2] === 0) {
+                } else if (_va[2] === 0 && _vb[2] === 0) {
                     mesh.polys[polyStart + maxVerticesPerPoly + j] = 0x8000 | 3;
                 }
             }
