@@ -187,7 +187,7 @@ const boxBlur = (
     threshold: number,
     src: number[],
     dst: number[],
-): number[] => {
+): void => {
     const w = compactHeightfield.width;
     const h = compactHeightfield.height;
 
@@ -235,8 +235,6 @@ const boxBlur = (
             }
         }
     }
-
-    return dst;
 };
 
 export const buildDistanceField = (compactHeightfield: CompactHeightfield) => {
@@ -251,19 +249,18 @@ export const buildDistanceField = (compactHeightfield: CompactHeightfield) => {
     compactHeightfield.maxDistance = maxDist;
 
     // Apply box blur
-    const result = boxBlur(
-        compactHeightfield,
-        1,
-        compactHeightfield.distances,
-        dst,
-    );
+    boxBlur(compactHeightfield, 1, compactHeightfield.distances, dst);
 
-    // If the result is the destination array, copy it back to the heightfield
-    if (result === dst) {
-        for (let i = 0; i < compactHeightfield.spanCount; i++) {
-            compactHeightfield.distances[i] = dst[i];
-        }
+    // Copy the box blur result back to the heightfield
+    for (let i = 0; i < compactHeightfield.spanCount; i++) {
+        compactHeightfield.distances[i] = dst[i];
     }
+};
+
+type LevelStackEntry = {
+    x: number;
+    y: number;
+    index: number;
 };
 
 export const buildRegions = (
@@ -282,13 +279,6 @@ export const buildRegions = (
 
     let regionId = 1;
     let level = (compactHeightfield.maxDistance + 1) & ~1;
-
-    // Level stack entry for region growing
-    interface LevelStackEntry {
-        x: number;
-        y: number;
-        index: number;
-    }
 
     // Initialize level stacks
     const lvlStacks: LevelStackEntry[][] = [];
@@ -645,6 +635,12 @@ const floodRegion = (
     return count > 0;
 };
 
+type DirtyEntry = {
+    index: number;
+    region: number;
+    distance2: number;
+};
+
 /**
  * Expand regions iteratively
  */
@@ -686,12 +682,6 @@ const expandRegions = (
                 stack[j].index = -1;
             }
         }
-    }
-
-    interface DirtyEntry {
-        index: number;
-        region: number;
-        distance2: number;
     }
 
     const dirtyEntries: DirtyEntry[] = [];
@@ -766,7 +756,7 @@ const expandRegions = (
 /**
  * Region data structure for merging and filtering
  */
-interface Region {
+type Region = {
     spanCount: number;
     id: number;
     areaType: number;
@@ -778,7 +768,7 @@ interface Region {
     ymax: number;
     connections: number[];
     floors: number[];
-}
+};
 
 /**
  * Merge and filter regions based on size criteria
