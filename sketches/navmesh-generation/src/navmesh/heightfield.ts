@@ -103,7 +103,7 @@ const addSpan = (
         if (currentSpan.max < newSpan.min) {
             // Current span is completely before the new span. Keep going
             previousSpan = currentSpan;
-            currentSpan = currentSpan.next || null;
+            currentSpan = currentSpan.next;
         } else {
             // The new span overlaps with an existing span. Merge them
             if (currentSpan.min < newSpan.min) {
@@ -120,9 +120,9 @@ const addSpan = (
             }
 
             // Remove the current span since it's now merged with newSpan
-            const next = currentSpan.next || null;
+            const next = currentSpan.next;
             if (previousSpan) {
-                previousSpan.next = next || null;
+                previousSpan.next = next;
             } else {
                 heightfield.spans[columnIndex] = next;
             }
@@ -136,7 +136,7 @@ const addSpan = (
         previousSpan.next = newSpan;
     } else {
         // This span should go before the others in the list
-        newSpan.next = heightfield.spans[columnIndex] || null;
+        newSpan.next = heightfield.spans[columnIndex];
         heightfield.spans[columnIndex] = newSpan;
     }
 
@@ -530,7 +530,7 @@ export const filterLowHangingWalkableObstacles = (
                 previousWasWalkable = walkable;
                 previousAreaID = span.area;
                 previousSpan = span;
-                span = span.next || null;
+                span = span.next;
             }
         }
     }
@@ -553,7 +553,7 @@ export const filterLedgeSpans = (
             while (span != null) {
                 // Skip non-walkable spans
                 if (span.area === NULL_AREA) {
-                    span = span.next || null;
+                    span = span.next;
                     continue;
                 }
 
@@ -618,7 +618,7 @@ export const filterLedgeSpans = (
                             walkableHeight
                         ) {
                             // No space to traverse between them.
-                            neighborSpan = neighborSpan.next || null;
+                            neighborSpan = neighborSpan.next;
                             continue;
                         }
 
@@ -647,7 +647,7 @@ export const filterLedgeSpans = (
                             break;
                         }
 
-                        neighborSpan = neighborSpan.next || null;
+                        neighborSpan = neighborSpan.next;
                     }
                 }
 
@@ -665,7 +665,7 @@ export const filterLedgeSpans = (
                     span.area = NULL_AREA;
                 }
 
-                span = span.next || null;
+                span = span.next;
             }
         }
     }
@@ -695,7 +695,7 @@ export const filterWalkableLowHeightSpans = (
                     span.area = NULL_AREA;
                 }
 
-                span = span.next || null;
+                span = span.next;
             }
         }
     }

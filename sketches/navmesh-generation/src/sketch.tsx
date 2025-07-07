@@ -20,8 +20,8 @@ import {
 import {
     type CompactHeightfield,
     buildCompactHeightfield,
+    erodeWalkableArea,
 } from './navmesh/compact-heightfield';
-import { erodeWalkableArea } from './navmesh/compact-heightfield-area';
 import {
     ContourBuildFlags,
     type ContourSet,
