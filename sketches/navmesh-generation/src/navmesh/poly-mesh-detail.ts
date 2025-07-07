@@ -7,7 +7,8 @@ import {
     getDirOffsetY,
 } from './common';
 import type { CompactHeightfield } from './compact-heightfield';
-import { NOT_CONNECTED, getCon } from './compact-heightfield';
+import { getCon } from './compact-heightfield';
+import { NOT_CONNECTED } from './common';
 import type { PolyMesh } from './poly-mesh';
 
 /**

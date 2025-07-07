@@ -1,6 +1,6 @@
 import type { Box3 } from '@/common/maaths';
 import type { Heightfield } from './heightfield';
-import { NULL_AREA } from './area';
+import { MAX_HEIGHT, MAX_LAYERS, NOT_CONNECTED, NULL_AREA } from "./common";
 import { DIR_OFFSETS } from './common';
 
 export type CompactHeightfieldSpan = {
@@ -53,10 +53,6 @@ export type CompactHeightfield = {
     /** array containing distance field data, size = spanCount */
     distances: number[];
 };
-
-export const NOT_CONNECTED = 0x3f; // 63
-export const MAX_HEIGHT = 0xffff;
-export const MAX_LAYERS = NOT_CONNECTED - 1;
 
 /**
  * Helper function to set connection data in a span

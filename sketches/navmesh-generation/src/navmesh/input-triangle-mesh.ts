@@ -1,5 +1,5 @@
-import { type Box3, vec3, type Vec3 } from '@/common/maaths';
-import { WALKABLE_AREA } from './area';
+import { type Box3, type Vec3, vec3 } from '@/common/maaths';
+import { WALKABLE_AREA } from "./common";
 import type { ArrayLike } from './common';
 
 const _edge0 = vec3.create();

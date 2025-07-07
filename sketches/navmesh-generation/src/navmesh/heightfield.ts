@@ -1,6 +1,6 @@
 import { vec3, box3, clamp, type Vec3, type Box3 } from '@/common/maaths';
 import { getDirOffsetX, getDirOffsetY, type ArrayLike } from './common';
-import { NULL_AREA } from './area';
+import { NULL_AREA, AXIS_X, AXIS_Z } from "./common";
 
 export type HeightfieldSpan = {
     /** the lower limit of the span */
@@ -29,9 +29,6 @@ export type Heightfield = {
 };
 
 const SPAN_MAX_HEIGHT = 0x1fff; // 8191
-const AXIS_X = 0;
-const AXIS_Y = 1;
-const AXIS_Z = 2;
 const MAX_HEIGHTFIELD_HEIGHT = 0xffff;
 
 export const calculateGridSize = (

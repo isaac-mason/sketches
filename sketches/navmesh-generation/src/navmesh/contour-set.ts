@@ -1,13 +1,9 @@
 import type { Box3 } from '@/common/maaths';
-import type { CompactHeightfield } from './compact-heightfield';
-import { getCon, NOT_CONNECTED } from './compact-heightfield';
-import { BORDER_REG } from './regions';
+import { AREA_BORDER, BORDER_VERTEX, CONTOUR_REG_MASK, NOT_CONNECTED } from './common';
+import { BORDER_REG } from './common';
 import { getDirOffsetX, getDirOffsetY } from './common';
-
-// Constants for contour building
-const CONTOUR_REG_MASK = 0xffff;
-const AREA_BORDER = 0x20000;
-const BORDER_VERTEX = 0x10000;
+import type { CompactHeightfield } from './compact-heightfield';
+import { getCon } from './compact-heightfield';
 
 // Maximum number of iterations for contour walking to prevent infinite loops
 const MAX_CONTOUR_WALK_ITERATIONS = 40000;

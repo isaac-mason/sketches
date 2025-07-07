@@ -1,13 +1,12 @@
 import type { CompactHeightfield } from './compact-heightfield';
-import { getCon, NOT_CONNECTED } from './compact-heightfield';
-import { DIR_OFFSETS } from './common';
-import { NULL_AREA } from './area';
-
-export const BORDER_REG = 0x8000;
+import { getCon } from './compact-heightfield';
+import { NOT_CONNECTED } from './common';
+import { BORDER_REG, DIR_OFFSETS } from './common';
+import { NULL_AREA } from "./common";
 
 const LOG_NB_STACKS = 3;
 const NB_STACKS = 1 << LOG_NB_STACKS;
-const expandIters = 8;
+const EXPAND_ITERS = 8;
 
 /**
  * Calculate distance field using a two-pass distance transform algorithm
@@ -357,7 +356,7 @@ export const buildRegions = (
 
         // Expand current regions until no empty connected cells found
         expandRegions(
-            expandIters,
+            EXPAND_ITERS,
             level,
             compactHeightfield,
             srcReg,
@@ -398,7 +397,7 @@ export const buildRegions = (
 
     // Expand current regions until no empty connected cells found
     expandRegions(
-        expandIters * 8,
+        EXPAND_ITERS * 8,
         0,
         compactHeightfield,
         srcReg,
@@ -535,7 +534,6 @@ const floodRegion = (
     srcDist: number[],
     stack: { x: number; y: number; index: number }[],
 ): boolean => {
-    const BORDER_REG = 0x8000;
     const w = compactHeightfield.width;
     const area = compactHeightfield.areas[i];
 
@@ -653,7 +651,6 @@ const expandRegions = (
     stack: { x: number; y: number; index: number }[],
     fillStack: boolean,
 ) => {
-    const BORDER_REG = 0x8000;
     const w = compactHeightfield.width;
     const h = compactHeightfield.height;
 
@@ -780,7 +777,6 @@ const mergeAndFilterRegions = (
     srcReg: number[],
     overlaps: number[],
 ): boolean => {
-    const BORDER_REG = 0x8000;
     const w = compactHeightfield.width;
     const h = compactHeightfield.height;
     const nreg = compactHeightfield.maxRegions + 1;

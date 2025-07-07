@@ -33,7 +33,21 @@ export const getDirForOffset = (x: number, y: number): number => {
 };
 
 // Constants
+export const AXIS_X = 0;
+export const AXIS_Y = 1;
+export const AXIS_Z = 2;
+
 export const MULTIPLE_REGS = 0;
 export const MESH_NULL_IDX = 0xffff;
 export const BORDER_VERTEX = 0x10000;
+export const CONTOUR_REG_MASK = 0xffff;
+export const AREA_BORDER = 0x20000;
+
+export const NULL_AREA = 0;
+export const WALKABLE_AREA = 1;
+export const BORDER_REG = 0x8000;
+
+export const NOT_CONNECTED = 0x3f; // 63
+export const MAX_HEIGHT = 0xffff;
+export const MAX_LAYERS = NOT_CONNECTED - 1;
 

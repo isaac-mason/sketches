@@ -6,6 +6,7 @@ import { Leva, useControls } from 'leva';
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 
+import { getPositionsAndIndices } from './three/get-positions-and-indices';
 import {
     createCompactHeightfieldDistancesHelper,
     createCompactHeightfieldRegionsHelper,
@@ -16,7 +17,8 @@ import {
     createRawContoursHelper,
     createSimplifiedContoursHelper,
     createTriangleAreaIdsHelper,
-} from './debug';
+} from './three/navmesh-debug';
+
 import {
     type CompactHeightfield,
     buildCompactHeightfield,
@@ -27,7 +29,6 @@ import {
     type ContourSet,
     buildContours,
 } from './navmesh/contour-set';
-import { getPositionsAndIndices } from './navmesh/get-positions-and-indices';
 import {
     type Heightfield,
     calculateGridSize,
