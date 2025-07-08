@@ -1479,12 +1479,6 @@ export const buildPolyMeshDetail = (
         nTriangles: 0,
     };
 
-    let vcap = nPolyVerts + Math.floor(nPolyVerts / 2);
-    let tcap = vcap * 2;
-
-    dmesh.vertices = new Array(vcap * 3);
-    dmesh.triangles = new Array(tcap * 4);
-
     for (let i = 0; i < polyMesh.nPolys; ++i) {
         const p = i * nvp * 2;
 
@@ -1575,46 +1569,16 @@ export const buildPolyMeshDetail = (
         dmesh.meshes[i * 4 + 2] = dmesh.nTriangles;
         dmesh.meshes[i * 4 + 3] = ntris;
 
-        // Store vertices, allocate more memory if necessary.
-        if (dmesh.nVertices + nverts.value > vcap) {
-            while (dmesh.nVertices + nverts.value > vcap) {
-                vcap += 256;
-            }
-
-            const newv = new Array(vcap * 3);
-            if (dmesh.nVertices) {
-                for (let j = 0; j < dmesh.nVertices * 3; j++) {
-                    newv[j] = dmesh.vertices[j];
-                }
-            }
-            dmesh.vertices = newv;
-        }
+        // Store vertices 
         for (let j = 0; j < nverts.value; ++j) {
-            dmesh.vertices[dmesh.nVertices * 3] = verts[j * 3];
-            dmesh.vertices[dmesh.nVertices * 3 + 1] = verts[j * 3 + 1];
-            dmesh.vertices[dmesh.nVertices * 3 + 2] = verts[j * 3 + 2];
+            dmesh.vertices.push(verts[j * 3], verts[j * 3 + 1], verts[j * 3 + 2]);
             dmesh.nVertices++;
         }
 
-        // Store triangles, allocate more memory if necessary.
-        if (dmesh.nTriangles + ntris > tcap) {
-            while (dmesh.nTriangles + ntris > tcap) {
-                tcap += 256;
-            }
-            const newt = new Array(tcap * 4);
-            if (dmesh.nTriangles) {
-                for (let j = 0; j < dmesh.nTriangles * 4; j++) {
-                    newt[j] = dmesh.triangles[j];
-                }
-            }
-            dmesh.triangles = newt;
-        }
+        // Store triangles
         for (let j = 0; j < ntris; ++j) {
             const t = j * 4;
-            dmesh.triangles[dmesh.nTriangles * 4] = tris[t];
-            dmesh.triangles[dmesh.nTriangles * 4 + 1] = tris[t + 1];
-            dmesh.triangles[dmesh.nTriangles * 4 + 2] = tris[t + 2];
-            dmesh.triangles[dmesh.nTriangles * 4 + 3] = tris[t + 3];
+            dmesh.triangles.push(tris[t], tris[t + 1], tris[t + 2], tris[t + 3]);
             dmesh.nTriangles++;
         }
     }

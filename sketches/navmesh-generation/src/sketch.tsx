@@ -5,8 +5,28 @@ import { useThree } from '@react-three/fiber';
 import { Leva, useControls } from 'leva';
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-
-import { getPositionsAndIndices } from './three/get-positions-and-indices';
+import {
+    type CompactHeightfield,
+    ContourBuildFlags,
+    type ContourSet,
+    type Heightfield,
+    type PolyMesh, 
+    type PolyMeshDetail,
+    buildCompactHeightfield,
+    buildContours,
+    buildDistanceField,buildPolyMesh, 
+    buildPolyMeshDetail,
+    buildRegions,
+    calculateGridSize,
+    calculateMeshBounds,
+    createHeightfield,
+    erodeWalkableArea,
+    filterLedgeSpans,
+    filterLowHangingWalkableObstacles,
+    filterWalkableLowHeightSpans,
+    markWalkableTriangles,
+    rasterizeTriangles
+} from './lib/generate';
 import {
     createCompactHeightfieldDistancesHelper,
     createCompactHeightfieldRegionsHelper,
@@ -17,37 +37,8 @@ import {
     createRawContoursHelper,
     createSimplifiedContoursHelper,
     createTriangleAreaIdsHelper,
-} from './three/navmesh-debug';
-
-import {
-    type CompactHeightfield,
-    buildCompactHeightfield,
-    erodeWalkableArea,
-} from './navmesh/compact-heightfield';
-import {
-    ContourBuildFlags,
-    type ContourSet,
-    buildContours,
-} from './navmesh/contour-set';
-import {
-    type Heightfield,
-    calculateGridSize,
-    createHeightfield,
-    filterLedgeSpans,
-    filterLowHangingWalkableObstacles,
-    filterWalkableLowHeightSpans,
-    rasterizeTriangles,
-} from './navmesh/heightfield';
-import {
-    calculateMeshBounds,
-    markWalkableTriangles,
-} from './navmesh/input-triangle-mesh';
-import { type PolyMesh, buildPolyMesh } from './navmesh/poly-mesh';
-import {
-    type PolyMeshDetail,
-    buildPolyMeshDetail,
-} from './navmesh/poly-mesh-detail';
-import { buildDistanceField, buildRegions } from './navmesh/regions';
+    getPositionsAndIndices,
+} from './lib/three';
 
 type Intermediates = {
     input: {
@@ -160,7 +151,7 @@ const App = () => {
         const maxSimplificationError = 1.3;
         const maxEdgeLength = 12;
 
-        const maxVerticesPerPoly = 3;
+        const maxVerticesPerPoly = 5;
         const detailSampleDistance = 6;
         const detailSampleMaxError = 1;
 

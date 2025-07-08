@@ -51,3 +51,12 @@ export const NOT_CONNECTED = 0x3f; // 63
 export const MAX_HEIGHT = 0xffff;
 export const MAX_LAYERS = NOT_CONNECTED - 1;
 
+// A flag that indicates that an entity links to an external entity.
+// (E.g. A polygon edge is a portal that links to another polygon.)
+export const POLY_NEIS_FLAG_EXT_LINK = 0x8000;
+
+// A value that indicates the entity does not link to anything.
+export const POLY_NEIS_FLAG_NULL_LINK = 0xffffffff;
+
+// A flag that indicates that an off-mesh connection can be traversed in both directions. (Is bidirectional.)
+// export const POLY_NEIS_FLAG_OFFMESH_CON_BIDIR = 1;
