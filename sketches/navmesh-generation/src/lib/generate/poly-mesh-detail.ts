@@ -84,43 +84,27 @@ const _tempVec2B: Vec2 = vec2.create();
 const _tempVec2C: Vec2 = vec2.create();
 const _tempVec2D: Vec2 = vec2.create();
 
-// Pre-allocated Vec2 objects for overlapSegSeg2d function
-const _overlapSegA: Vec2 = vec2.create();
-const _overlapSegB: Vec2 = vec2.create();
-const _overlapSegC: Vec2 = vec2.create();
-const _overlapSegD: Vec2 = vec2.create();
-const _overlapSegAB: Vec2 = vec2.create();
-const _overlapSegAD: Vec2 = vec2.create();
-const _overlapSegAC: Vec2 = vec2.create();
-const _overlapSegCD: Vec2 = vec2.create();
-const _overlapSegCA: Vec2 = vec2.create();
-
 // Helper to extract 2D vector from 3D array (x, z components)
 const getVec2XZ = (out: Vec2, arr: number[], index: number): Vec2 => {
-    out[0] = arr[index];     // x component
+    out[0] = arr[index]; // x component
     out[1] = arr[index + 2]; // z component (skip y)
     return out;
 };
 
-// Math utility functions using vec2 library for 2D operations
-
-
-// Pre-allocated Vec3 objects for circumCircle function
 const _circumCircleP1: Vec3 = vec3.create();
 const _circumCircleP2: Vec3 = vec3.create();
 const _circumCircleP3: Vec3 = vec3.create();
 const _circumCircleCenter: Vec3 = vec3.create();
 const _circumCircleResultVec: Vec3 = vec3.create();
 
-// Module-scope CircumCircleResult object to avoid allocations
+const _circumCircleV1 = vec3.create();
+const _circumCircleV2 = vec3.create();
+const _circumCircleV3 = vec3.create();
+
 const _circumCircleResult: CircumCircleResult = {
     success: false,
     radius: 0,
 };
-
-const _circumCircleV1 = vec3.create();
-const _circumCircleV2 = vec3.create();
-const _circumCircleV3 = vec3.create();
 
 // Geometric utility functions
 const circumCircle = (
@@ -147,7 +131,7 @@ const circumCircle = (
     vec2.subtract(_tempVec2B, _tempVec2B, _tempVec2A); // v2 - v1
     vec2.subtract(_tempVec2C, _tempVec2C, _tempVec2A); // v3 - v1
     const cp = _tempVec2B[0] * _tempVec2C[1] - _tempVec2B[1] * _tempVec2C[0];
-    
+
     if (Math.abs(cp) > EPS) {
         getVec2XZ(_tempVec2A, v1, 0);
         getVec2XZ(_tempVec2B, v2, 0);
@@ -185,44 +169,11 @@ const circumCircle = (
     result.radius = 0;
 };
 
-// Pre-allocated Vec3 objects for distToTriMesh function
-const _distPtTriA: Vec3 = vec3.create();
-const _distPtTriB: Vec3 = vec3.create();
-const _distPtTriC: Vec3 = vec3.create();
-const _distPtTriP: Vec3 = vec3.create();
-
-// Pre-allocated Vec3 objects for distPtTri function
 const _distPtTriV0: Vec3 = vec3.create();
 const _distPtTriV1: Vec3 = vec3.create();
 const _distPtTriV2: Vec3 = vec3.create();
 
-// Pre-allocated Vec3 objects for distancePtSeg function
-const _distPtSegPt: Vec3 = vec3.create();
-const _distPtSegP: Vec3 = vec3.create();
-const _distPtSegQ: Vec3 = vec3.create();
-
-// Pre-allocated Vec2 objects for distancePtSeg2d function
-const _distPtSeg2dPt: Vec2 = vec2.create();
-const _distPtSeg2dP: Vec2 = vec2.create();
-const _distPtSeg2dQ: Vec2 = vec2.create();
-
-// Pre-allocated Vec2 objects for distToPoly function
-const _distToPolyPt: Vec2 = vec2.create();
-const _distToPolyVj: Vec2 = vec2.create();
-const _distToPolyVi: Vec2 = vec2.create();
-const _distToPolyP: Vec2 = vec2.create();
-
-// Pre-allocated Vec2 objects for polyMinExtent function
-const _polyMinExtentPt: Vec2 = vec2.create();
-const _polyMinExtentP1: Vec2 = vec2.create();
-const _polyMinExtentP2: Vec2 = vec2.create();
-
-const distPtTri = (
-    p: Vec3,
-    a: Vec3,
-    b: Vec3,
-    c: Vec3,
-): number => {
+const distPtTri = (p: Vec3, a: Vec3, b: Vec3, c: Vec3): number => {
     const v0 = _distPtTriV0;
     const v1 = _distPtTriV1;
     const v2 = _distPtTriV2;
@@ -234,7 +185,7 @@ const distPtTri = (
     getVec2XZ(_tempVec2A, v0, 0);
     getVec2XZ(_tempVec2B, v1, 0);
     getVec2XZ(_tempVec2C, v2, 0);
-    
+
     const dot00 = vec2.dot(_tempVec2A, _tempVec2A);
     const dot01 = vec2.dot(_tempVec2A, _tempVec2B);
     const dot02 = vec2.dot(_tempVec2A, _tempVec2C);
@@ -255,17 +206,16 @@ const distPtTri = (
     return Number.MAX_VALUE;
 };
 
-const distancePtSeg = (
-    pt: Vec3,
-    p: Vec3,
-    q: Vec3,
-): number => {
+const _distPtSegP: Vec3 = vec3.create();
+const _distPtSegQ: Vec3 = vec3.create();
+
+const distancePtSeg = (pt: Vec3, p: Vec3, q: Vec3): number => {
     const pq = _distPtSegP;
     const d_vec = _distPtSegQ;
-    
-    vec3.subtract(pq, q, p);  // pq = q - p
-    vec3.subtract(d_vec, pt, p);  // d_vec = pt - p
-    
+
+    vec3.subtract(pq, q, p); // pq = q - p
+    vec3.subtract(d_vec, pt, p); // d_vec = pt - p
+
     const d = vec3.dot(pq, pq);
     let t = vec3.dot(pq, d_vec);
     if (d > 0) t /= d;
@@ -275,24 +225,23 @@ const distancePtSeg = (
     // Calculate closest point on segment: p + t * pq
     vec3.scale(pq, pq, t);
     vec3.add(pq, p, pq);
-    
+
     // Calculate distance vector: closest_point - pt
     vec3.subtract(pq, pq, pt);
-    
-    return vec3.dot(pq, pq);  // Return squared distance
+
+    return vec3.dot(pq, pq); // Return squared distance
 };
 
-const distancePtSeg2d = (
-    pt: Vec2,
-    p: Vec2,
-    q: Vec2,
-): number => {
+const _distPtSeg2dP: Vec2 = vec2.create();
+const _distPtSeg2dQ: Vec2 = vec2.create();
+
+const distancePtSeg2d = (pt: Vec2, p: Vec2, q: Vec2): number => {
     const pq = _distPtSeg2dP;
     const d_vec = _distPtSeg2dQ;
-    
-    vec2.subtract(pq, q, p);  // pq = q - p
-    vec2.subtract(d_vec, pt, p);  // d_vec = pt - p
-    
+
+    vec2.subtract(pq, q, p); // pq = q - p
+    vec2.subtract(d_vec, pt, p); // d_vec = pt - p
+
     const d = vec2.dot(pq, pq);
     let t = vec2.dot(pq, d_vec);
     if (d > 0) t /= d;
@@ -302,17 +251,20 @@ const distancePtSeg2d = (
     // Calculate closest point on segment: p + t * pq
     vec2.scale(pq, pq, t);
     vec2.add(pq, p, pq);
-    
+
     // Calculate distance vector: closest_point - pt
     vec2.subtract(pq, pq, pt);
-    
-    return vec2.dot(pq, pq);  // Return squared distance
+
+    return vec2.dot(pq, pq); // Return squared distance
 };
+
+const _distPtTriA: Vec3 = vec3.create();
+const _distPtTriB: Vec3 = vec3.create();
+const _distPtTriC: Vec3 = vec3.create();
 
 const distToTriMesh = (
     p: Vec3,
     verts: number[],
-    nverts: number,
     tris: number[],
     ntris: number,
 ): number => {
@@ -321,11 +273,11 @@ const distToTriMesh = (
         const va = tris[i * 4 + 0] * 3;
         const vb = tris[i * 4 + 1] * 3;
         const vc = tris[i * 4 + 2] * 3;
-        
+
         getVec3(_distPtTriA, verts, va);
         getVec3(_distPtTriB, verts, vb);
         getVec3(_distPtTriC, verts, vc);
-        
+
         const d = distPtTri(p, _distPtTriA, _distPtTriB, _distPtTriC);
         if (d < dmin) dmin = d;
     }
@@ -333,17 +285,17 @@ const distToTriMesh = (
     return dmin;
 };
 
-const distToPoly = (
-    nvert: number,
-    verts: number[],
-    p: Vec3,
-): number => {
+const _distToPolyVj: Vec2 = vec2.create();
+const _distToPolyVi: Vec2 = vec2.create();
+const _distToPolyP: Vec2 = vec2.create();
+
+const distToPoly = (nvert: number, verts: number[], p: Vec3): number => {
     let dmin = Number.MAX_VALUE;
     let c = 0;
-    
+
     // Extract 2D point from Vec3 (XZ plane)
     getVec2XZ(_distToPolyP, [p[0], p[1], p[2]], 0);
-    
+
     for (let i = 0, j = nvert - 1; i < nvert; j = i++) {
         const vi = i * 3;
         const vj = j * 3;
@@ -358,7 +310,10 @@ const distToPoly = (
         }
         getVec2XZ(_distToPolyVj, verts, vj);
         getVec2XZ(_distToPolyVi, verts, vi);
-        dmin = Math.min(dmin, distancePtSeg2d(_distToPolyP, _distToPolyVj, _distToPolyVi));
+        dmin = Math.min(
+            dmin,
+            distancePtSeg2d(_distToPolyP, _distToPolyVj, _distToPolyVi),
+        );
     }
     return c ? -dmin : dmin;
 };
@@ -371,6 +326,10 @@ const getJitterX = (i: number): number => {
 const getJitterY = (i: number): number => {
     return (((i * 0xd8163841) & 0xffff) / 65535.0) * 2.0 - 1.0;
 };
+
+const _polyMinExtentPt: Vec2 = vec2.create();
+const _polyMinExtentP1: Vec2 = vec2.create();
+const _polyMinExtentP2: Vec2 = vec2.create();
 
 // Calculate minimum extend of the polygon.
 const polyMinExtent = (verts: number[], nverts: number): number => {
@@ -385,7 +344,11 @@ const polyMinExtent = (verts: number[], nverts: number): number => {
             getVec2XZ(_polyMinExtentPt, verts, j * 3);
             getVec2XZ(_polyMinExtentP1, verts, p1);
             getVec2XZ(_polyMinExtentP2, verts, p2);
-            const d = distancePtSeg2d(_polyMinExtentPt, _polyMinExtentP1, _polyMinExtentP2);
+            const d = distancePtSeg2d(
+                _polyMinExtentPt,
+                _polyMinExtentP1,
+                _polyMinExtentP2,
+            );
             maxEdgeDist = Math.max(maxEdgeDist, d);
         }
         minDist = Math.min(minDist, maxEdgeDist);
@@ -560,8 +523,9 @@ const completeFacet = (
         getVec2XZ(_tempVec2C, points, u * 3);
         vec2.subtract(_tempVec2B, _tempVec2B, _tempVec2A); // t - s
         vec2.subtract(_tempVec2C, _tempVec2C, _tempVec2A); // u - s
-        const crossProduct = _tempVec2B[0] * _tempVec2C[1] - _tempVec2B[1] * _tempVec2C[0];
-        
+        const crossProduct =
+            _tempVec2B[0] * _tempVec2C[1] - _tempVec2B[1] * _tempVec2C[0];
+
         if (crossProduct > EPS_FACET) {
             if (r < 0) {
                 // The circle is not updated yet, do it now.
@@ -670,29 +634,30 @@ const updateLeftFace = (
     }
 };
 
+const _overlapSegAB: Vec2 = vec2.create();
+const _overlapSegAD: Vec2 = vec2.create();
+const _overlapSegAC: Vec2 = vec2.create();
+const _overlapSegCD: Vec2 = vec2.create();
+const _overlapSegCA: Vec2 = vec2.create();
+
 // Segment overlap checking
-const overlapSegSeg2d = (
-    a: Vec2,
-    b: Vec2,
-    c: Vec2,
-    d: Vec2,
-): boolean => {
+const overlapSegSeg2d = (a: Vec2, b: Vec2, c: Vec2, d: Vec2): boolean => {
     // Calculate cross products for line segment intersection test
     const ab = _overlapSegAB;
     const ad = _overlapSegAD;
     const ac = _overlapSegAC;
-    
+
     vec2.subtract(ab, b, a); // b - a
     vec2.subtract(ad, d, a); // d - a
     const a1 = ab[0] * ad[1] - ab[1] * ad[0];
-    
+
     vec2.subtract(ac, c, a); // c - a
     const a2 = ab[0] * ac[1] - ab[1] * ac[0];
-    
+
     if (a1 * a2 < 0.0) {
         const cd = _overlapSegCD;
         const ca = _overlapSegCA;
-        
+
         vec2.subtract(cd, d, c); // d - c
         vec2.subtract(ca, a, c); // a - c
         const a3 = cd[0] * ca[1] - cd[1] * ca[0];
@@ -724,7 +689,14 @@ const overlapEdges = (
         getVec2XZ(_overlapEdgesT0, pts, t0 * 3);
         getVec2XZ(_overlapEdgesS1, pts, s1 * 3);
         getVec2XZ(_overlapEdgesT1, pts, t1 * 3);
-        if (overlapSegSeg2d(_overlapEdgesS0, _overlapEdgesT0, _overlapEdgesS1, _overlapEdgesT1))
+        if (
+            overlapSegSeg2d(
+                _overlapEdgesS0,
+                _overlapEdgesT0,
+                _overlapEdgesS1,
+                _overlapEdgesT1,
+            )
+        )
             return true;
     }
     return false;
@@ -830,7 +802,6 @@ const delaunayHull = (
 
 // Hull triangulation function (fallback when delaunay is not used)
 const triangulateHull = (
-    nverts: number,
     verts: number[],
     nhull: number,
     hull: number[],
@@ -854,7 +825,7 @@ const triangulateHull = (
         getVec2XZ(_tempVec2A, verts, pv);
         getVec2XZ(_tempVec2B, verts, cv);
         getVec2XZ(_tempVec2C, verts, nv);
-        
+
         const d =
             vec2.distance(_tempVec2A, _tempVec2B) +
             vec2.distance(_tempVec2B, _tempVec2C) +
@@ -888,7 +859,7 @@ const triangulateHull = (
         getVec2XZ(_tempVec2B, verts, nvleft);
         getVec2XZ(_tempVec2C, verts, cvright);
         getVec2XZ(_tempVec2D, verts, nvright);
-        
+
         const dleft =
             vec2.distance(_tempVec2A, _tempVec2B) +
             vec2.distance(_tempVec2B, _tempVec2C);
@@ -947,6 +918,18 @@ const push3 = (queue: number[], v1: number, v2: number, v3: number): void => {
     queue.push(v1, v2, v3);
 };
 
+const SEED_ARRAY_WITH_POLY_CENTER_OFFSET = [
+    [0, 0],
+    [-1, -1],
+    [0, -1],
+    [1, -1],
+    [1, 0],
+    [1, 1],
+    [0, 1],
+    [-1, 1],
+    [-1, 0],
+];
+
 // Seed array with polygon center for height data collection
 const seedArrayWithPolyCenter = (
     chf: CompactHeightfield,
@@ -961,17 +944,7 @@ const seedArrayWithPolyCenter = (
     // Note: Reads to the compact heightfield are offset by border size (bs)
     // since border size offset is already removed from the polymesh vertices.
 
-    const offset = [
-        [0, 0],
-        [-1, -1],
-        [0, -1],
-        [1, -1],
-        [1, 0],
-        [1, 1],
-        [0, 1],
-        [-1, 1],
-        [-1, 0],
-    ];
+    const offset = SEED_ARRAY_WITH_POLY_CENTER_OFFSET;
 
     // Find cell closest to a poly vertex
     let startCellX = 0;
@@ -1156,7 +1129,16 @@ const getHeightData = (
 
     // if the polygon does not contain any points from the current region or if it could potentially be overlapping polygons
     if (empty) {
-        seedArrayWithPolyCenter(chf, poly, polyStart, nPolys, verts, bs, hp, queue);
+        seedArrayWithPolyCenter(
+            chf,
+            poly,
+            polyStart,
+            nPolys,
+            verts,
+            bs,
+            hp,
+            queue,
+        );
     }
 
     let head = 0;
@@ -1323,7 +1305,11 @@ const buildPolyDetail = (
                     getVec3(_buildPolyDetailEdgePt, edge, m * 3);
                     getVec3(_buildPolyDetailEdgeA, edge, va);
                     getVec3(_buildPolyDetailEdgeB, edge, vb);
-                    const dev = distancePtSeg(_buildPolyDetailEdgePt, _buildPolyDetailEdgeA, _buildPolyDetailEdgeB);
+                    const dev = distancePtSeg(
+                        _buildPolyDetailEdgePt,
+                        _buildPolyDetailEdgeA,
+                        _buildPolyDetailEdgeB,
+                    );
                     if (dev > maxd) {
                         maxd = dev;
                         maxi = m;
@@ -1374,13 +1360,13 @@ const buildPolyDetail = (
 
     // If the polygon minimum extent is small, do not try to add internal points.
     if (minExtent < sampleDist * 2) {
-        triangulateHull(nverts.value, verts, nhull, hull, nin, tris);
+        triangulateHull(verts, nhull, hull, nin, tris);
         setTriFlags(tris, nhull, hull);
         return true;
     }
 
     // Tessellate the base mesh using triangulateHull
-    triangulateHull(nverts.value, verts, nhull, hull, nin, tris);
+    triangulateHull(verts, nhull, hull, nin, tris);
 
     if (tris.length === 0) {
         console.warn(
@@ -1415,7 +1401,11 @@ const buildPolyDetail = (
                 ];
                 // Make sure the samples are not too close to the edges.
                 vec3.set(_buildPolyDetailGridPt, pt[0], pt[1], pt[2]);
-                if (distToPoly(nin, inVerts, _buildPolyDetailGridPt) > -sampleDist / 2) continue;
+                if (
+                    distToPoly(nin, inVerts, _buildPolyDetailGridPt) >
+                    -sampleDist / 2
+                )
+                    continue;
                 samples.push(x);
                 samples.push(
                     getHeight(
@@ -1455,7 +1445,6 @@ const buildPolyDetail = (
                 const d = distToTriMesh(
                     _buildPolyDetailSamplePt,
                     verts,
-                    nverts.value,
                     tris,
                     tris.length / 4,
                 );
@@ -1497,8 +1486,6 @@ const buildPolyDetail = (
     return true;
 };
 
-const _tempVerts = new Array(256 * 3);
-
 export const buildPolyMeshDetail = (
     polyMesh: PolyMesh,
     compactHeightfield: CompactHeightfield,
@@ -1531,8 +1518,8 @@ export const buildPolyMeshDetail = (
     const tris: number[] = [];
     const arr: number[] = [];
     const samples: number[] = [];
-    const verts: number[] = [];;
-    
+    const verts: number[] = [];
+
     const hp: HeightPatch = {
         data: [],
         xmin: 0,
@@ -1665,16 +1652,25 @@ export const buildPolyMeshDetail = (
         dmesh.meshes[i * 4 + 2] = dmesh.nTriangles;
         dmesh.meshes[i * 4 + 3] = ntris;
 
-        // Store vertices 
+        // Store vertices
         for (let j = 0; j < nverts.value; ++j) {
-            dmesh.vertices.push(verts[j * 3], verts[j * 3 + 1], verts[j * 3 + 2]);
+            dmesh.vertices.push(
+                verts[j * 3],
+                verts[j * 3 + 1],
+                verts[j * 3 + 2],
+            );
             dmesh.nVertices++;
         }
 
         // Store triangles
         for (let j = 0; j < ntris; ++j) {
             const t = j * 4;
-            dmesh.triangles.push(tris[t], tris[t + 1], tris[t + 2], tris[t + 3]);
+            dmesh.triangles.push(
+                tris[t],
+                tris[t + 1],
+                tris[t + 2],
+                tris[t + 3],
+            );
             dmesh.nTriangles++;
         }
     }
