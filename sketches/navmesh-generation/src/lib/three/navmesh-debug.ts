@@ -5,6 +5,7 @@ import type { ContourSet } from '../generate/contour-set';
 import type { Heightfield } from '../generate/heightfield';
 import type { PolyMesh } from '../generate/poly-mesh';
 import type { PolyMeshDetail } from '../generate/poly-mesh-detail';
+import type { PointSet } from '../generate/point-set';
 
 type DebugObject = {
     object: THREE.Object3D;
@@ -1573,6 +1574,131 @@ export function createTriangleMeshWithAreasHelper(positions: ArrayLike<number>, 
             lineMaterial.dispose();
         });
     }
+
+    return {
+        object: group,
+        dispose: () => {
+            for (const dispose of disposables) {
+                dispose();
+            }
+        },
+    };
+}
+
+export function createPointSetHelper(pointSet: PointSet): DebugObject {
+    if (pointSet.positions.length === 0) {
+        const emptyGroup = new THREE.Group();
+        return {
+            object: emptyGroup,
+            dispose: () => {},
+        };
+    }
+
+    // Arrays for point geometry
+    const pointPositions: number[] = [];
+    const pointColors: number[] = [];
+
+    // Helper function to convert area to color
+    const areaToColor = (area: number): THREE.Color => {
+        if (area === 0) {
+            return new THREE.Color(0.2, 0.2, 0.2); // Gray for non-walkable
+        }
+
+        // Hash the area ID to generate a consistent color
+        const hash = area * 137.5; // Use golden ratio approximation for good distribution
+        const hue = hash % 360;
+        const saturation = 70 + (area % 30); // Vary saturation slightly
+        const lightness = 50 + (area % 25); // Vary lightness slightly
+
+        return new THREE.Color(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
+    };
+
+    // Process each point (positions are already in world space)
+    const numPoints = pointSet.positions.length / 3;
+    for (let i = 0; i < numPoints; i++) {
+        const worldX = pointSet.positions[i * 3];
+        const worldY = pointSet.positions[i * 3 + 1] + 0.01; // Small offset above surface for visibility
+        const worldZ = pointSet.positions[i * 3 + 2];
+        const area = pointSet.areas[i];
+
+        // Add position
+        pointPositions.push(worldX, worldY, worldZ);
+
+        // Add color based on area
+        const color = areaToColor(area);
+        pointColors.push(color.r, color.g, color.b);
+    }
+
+    const group = new THREE.Group();
+    const disposables: (() => void)[] = [];
+
+    // Create point cloud geometry
+    const pointGeometry = new THREE.BufferGeometry();
+    pointGeometry.setAttribute(
+        'position',
+        new THREE.BufferAttribute(new Float32Array(pointPositions), 3)
+    );
+    pointGeometry.setAttribute(
+        'color',
+        new THREE.BufferAttribute(new Float32Array(pointColors), 3)
+    );
+
+    // Create point material
+    const pointMaterial = new THREE.PointsMaterial({
+        size: 0.1,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.9,
+        sizeAttenuation: true,
+    });
+
+    const points = new THREE.Points(pointGeometry, pointMaterial);
+    group.add(points);
+
+    disposables.push(() => {
+        pointGeometry.dispose();
+        pointMaterial.dispose();
+    });
+
+    // Optionally create small spheres for better visibility
+    const sphereGeometry = new THREE.SphereGeometry(0.03, 8, 6);
+    const instancedMesh = new THREE.InstancedMesh(
+        sphereGeometry,
+        new THREE.MeshBasicMaterial({ vertexColors: true }),
+        numPoints
+    );
+
+    const matrix = new THREE.Matrix4();
+
+    for (let i = 0; i < numPoints; i++) {
+        const worldX = pointPositions[i * 3];
+        const worldY = pointPositions[i * 3 + 1];
+        const worldZ = pointPositions[i * 3 + 2];
+        const area = pointSet.areas[i];
+
+        // Set position
+        matrix.setPosition(worldX, worldY, worldZ);
+        instancedMesh.setMatrixAt(i, matrix);
+
+        // Set color
+        const areaColor = areaToColor(area);
+        instancedMesh.setColorAt(i, areaColor);
+    }
+
+    instancedMesh.instanceMatrix.needsUpdate = true;
+    if (instancedMesh.instanceColor) {
+        instancedMesh.instanceColor.needsUpdate = true;
+    }
+
+    group.add(instancedMesh);
+
+    disposables.push(() => {
+        sphereGeometry.dispose();
+        if (instancedMesh.material instanceof THREE.Material) {
+            instancedMesh.material.dispose();
+        }
+        instancedMesh.dispose();
+    });
 
     return {
         object: group,

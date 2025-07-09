@@ -28,12 +28,15 @@ import {
     filterWalkableLowHeightSpans,
     markWalkableTriangles,
     rasterizeTriangles,
+    compactHeightfieldToPointSet,
+    type PointSet,
 } from './lib/generate';
 import {
     createCompactHeightfieldDistancesHelper,
     createCompactHeightfieldRegionsHelper,
     createCompactHeightfieldSolidHelper,
     createHeightfieldHelper,
+    createPointSetHelper,
     createPolyMeshDetailHelper,
     createPolyMeshHelper,
     createRawContoursHelper,
@@ -484,11 +487,7 @@ type AltIntermediates = {
     triAreaIds: Uint8Array;
     heightfield: Heightfield;
     compactHeightfield: CompactHeightfield;
-    result: {
-        positions: ArrayLike<number>;
-        indices: ArrayLike<number>;
-        areas: ArrayLike<number>;
-    };
+    pointSet: PointSet;
 };
 
 const Alt = () => {
@@ -500,7 +499,7 @@ const Alt = () => {
         showTriangleAreaIds,
         showHeightfield,
         showCompactHeightfieldSolid,
-        showTriangleMesh,
+        showPointSet,
     } = useControls('alt generation options', {
         showMesh: {
             label: 'Show Mesh',
@@ -518,8 +517,8 @@ const Alt = () => {
             label: 'Show Compact Heightfield Solid',
             value: false,
         },
-        showTriangleMesh: {
-            label: 'Show Triangle Mesh',
+        showPointSet: {
+            label: 'Show Point Set',
             value: true,
         },
     });
@@ -642,17 +641,13 @@ const Alt = () => {
 
         console.timeEnd('erode walkable area');
 
-        /* 7. todo */
+        /* 7. generate point set from compact heightfield */
 
-        console.time('todo');
+        console.time('generate point set');
 
-        const result = {
-            positions: [],
-            indices: [],
-            areas: [],
-        };
+        const pointSet = compactHeightfieldToPointSet(compactHeightfield);
 
-        console.timeEnd('todo');
+        console.timeEnd('generate point set');
 
         console.timeEnd('navmesh generation');
 
@@ -665,7 +660,7 @@ const Alt = () => {
             triAreaIds,
             heightfield,
             compactHeightfield,
-            result,
+            pointSet,
         };
 
         console.log('intermediates', intermediates);
@@ -717,22 +712,18 @@ const Alt = () => {
         };
     }, [showCompactHeightfieldSolid, intermediates, scene]);
 
-    // debug view of the triangle mesh with areas
+    // debug view of the point set
     useEffect(() => {
-        if (!intermediates || !showTriangleMesh) return;
+        if (!intermediates || !showPointSet) return;
 
-        const debugObject = createTriangleMeshWithAreasHelper(
-            intermediates.result.positions,
-            intermediates.result.indices,
-            intermediates.result.areas,
-        );
+        const debugObject = createPointSetHelper(intermediates.pointSet);
         scene.add(debugObject.object);
 
         return () => {
             scene.remove(debugObject.object);
             debugObject.dispose();
         };
-    }, [showTriangleMesh, intermediates, scene]);
+    }, [showPointSet, intermediates, scene]);
 
     return (
         <>
