@@ -1,32 +1,18 @@
 import * as THREE from 'three';
-import { MESH_NULL_IDX, NULL_AREA, WALKABLE_AREA } from '../generate/common';
+import { type ArrayLike, MESH_NULL_IDX, NULL_AREA, WALKABLE_AREA } from '../generate/common';
 import type { CompactHeightfield } from '../generate/compact-heightfield';
 import type { ContourSet } from '../generate/contour-set';
 import type { Heightfield } from '../generate/heightfield';
 import type { PolyMesh } from '../generate/poly-mesh';
 import type { PolyMeshDetail } from '../generate/poly-mesh-detail';
 
-type Intermediates = {
-    input: {
-        positions: Float32Array;
-        indices: Uint32Array;
-    };
-    triAreaIds: Uint8Array;
-    heightfield: Heightfield;
-    compactHeightfield: CompactHeightfield;
-    contourSet: ContourSet;
-    polyMesh: PolyMesh;
-    polyMeshDetail: PolyMeshDetail;
-};
-
 type DebugObject = {
     object: THREE.Object3D;
     dispose: () => void;
 };
 
-export function createTriangleAreaIdsHelper(intermediates: Intermediates): DebugObject {
+export function createTriangleAreaIdsHelper(input: { positions: Float32Array, indices: Uint32Array }, triAreaIds: ArrayLike<number>): DebugObject {
     const areaToColor: Record<number, THREE.Color> = {};
-    const { input, triAreaIds } = intermediates;
 
     const geometry = new THREE.BufferGeometry();
     const positions: number[] = [];
@@ -106,8 +92,7 @@ export function createTriangleAreaIdsHelper(intermediates: Intermediates): Debug
     };
 }
 
-export function createHeightfieldHelper(intermediates: Intermediates): DebugObject {
-    const { heightfield } = intermediates;
+export function createHeightfieldHelper(heightfield: Heightfield): DebugObject {
     const areaToColor: Record<number, THREE.Color> = {};
 
     // Count total spans to determine instance count
@@ -200,8 +185,7 @@ export function createHeightfieldHelper(intermediates: Intermediates): DebugObje
     };
 }
 
-export function createCompactHeightfieldSolidHelper(intermediates: Intermediates): DebugObject {
-    const { compactHeightfield } = intermediates;
+export function createCompactHeightfieldSolidHelper(compactHeightfield: CompactHeightfield): DebugObject {
     const chf = compactHeightfield;
 
     // Count total quads to create geometry
@@ -312,8 +296,7 @@ export function createCompactHeightfieldSolidHelper(intermediates: Intermediates
     };
 }
 
-export function createCompactHeightfieldDistancesHelper(intermediates: Intermediates): DebugObject {
-    const { compactHeightfield } = intermediates;
+export function createCompactHeightfieldDistancesHelper(compactHeightfield: CompactHeightfield): DebugObject {
     const chf = compactHeightfield;
 
     // Check if distance field is available
@@ -432,8 +415,7 @@ export function createCompactHeightfieldDistancesHelper(intermediates: Intermedi
     };
 }
 
-export function createCompactHeightfieldRegionsHelper(intermediates: Intermediates): DebugObject {
-    const { compactHeightfield } = intermediates;
+export function createCompactHeightfieldRegionsHelper(compactHeightfield: CompactHeightfield): DebugObject {
     const chf = compactHeightfield;
 
     // Count total quads to create geometry
@@ -552,9 +534,7 @@ export function createCompactHeightfieldRegionsHelper(intermediates: Intermediat
     };
 }
 
-export function createRawContoursHelper(intermediates: Intermediates): DebugObject {
-    const { contourSet } = intermediates;
-
+export function createRawContoursHelper(contourSet: ContourSet): DebugObject {
     if (!contourSet || contourSet.contours.length === 0) {
         const emptyGroup = new THREE.Group();
         return {
@@ -725,9 +705,7 @@ export function createRawContoursHelper(intermediates: Intermediates): DebugObje
     };
 }
 
-export function createSimplifiedContoursHelper(intermediates: Intermediates): DebugObject {
-    const { contourSet } = intermediates;
-
+export function createSimplifiedContoursHelper(contourSet: ContourSet): DebugObject {
     if (!contourSet || contourSet.contours.length === 0) {
         const emptyGroup = new THREE.Group();
         return {
@@ -905,9 +883,7 @@ export function createSimplifiedContoursHelper(intermediates: Intermediates): De
     };
 }
 
-export function createPolyMeshHelper(intermediates: Intermediates): DebugObject {
-    const { polyMesh } = intermediates;
-
+export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
     if (!polyMesh || polyMesh.nPolys === 0) {
         const emptyGroup = new THREE.Group();
         return {
@@ -1201,9 +1177,7 @@ export function createPolyMeshHelper(intermediates: Intermediates): DebugObject 
     };
 }
 
-export function createPolyMeshDetailHelper(intermediates: Intermediates): DebugObject {
-    const { polyMeshDetail } = intermediates;
-
+export function createPolyMeshDetailHelper(polyMeshDetail: PolyMeshDetail): DebugObject {
     if (!polyMeshDetail || polyMeshDetail.nMeshes === 0) {
         const emptyGroup = new THREE.Group();
         return {
@@ -1453,6 +1427,150 @@ export function createPolyMeshDetailHelper(intermediates: Intermediates): DebugO
         disposables.push(() => {
             vertexGeometry.dispose();
             vertexMaterial.dispose();
+        });
+    }
+
+    return {
+        object: group,
+        dispose: () => {
+            for (const dispose of disposables) {
+                dispose();
+            }
+        },
+    };
+}
+
+export function createTriangleMeshWithAreasHelper(positions: ArrayLike<number>, indices: ArrayLike<number>, areas: ArrayLike<number>): DebugObject {
+    if (positions.length === 0 || indices.length === 0) {
+        const emptyGroup = new THREE.Group();
+        return {
+            object: emptyGroup,
+            dispose: () => {},
+        };
+    }
+
+    // Arrays for triangle geometry
+    const triPositions: number[] = [];
+    const triColors: number[] = [];
+    const triIndices: number[] = [];
+
+    // Arrays for wireframe edges
+    const linePositions: number[] = [];
+    const lineColors: number[] = [];
+
+    // Helper function to convert area to color
+    const areaToColor = (area: number): THREE.Color => {
+        if (area === 0) {
+            return new THREE.Color(0.2, 0.2, 0.2); // Gray for non-walkable
+        }
+        // Hash area id to generate a consistent color
+        const hash = area * 137.5;
+        const hue = hash % 360;
+        return new THREE.Color(`hsl(${hue}, 70%, 60%)`);
+    };
+
+    // Create triangles with colors based on area
+    for (let i = 0; i < indices.length; i += 3) {
+        const triIndex = Math.floor(i / 3);
+        const area = areas[triIndex];
+        const color = areaToColor(area);
+
+        // Add triangle vertices
+        for (let j = 0; j < 3; j++) {
+            const vertIndex = indices[i + j] * 3;
+            triPositions.push(
+                positions[vertIndex],
+                positions[vertIndex + 1],
+                positions[vertIndex + 2]
+            );
+            triColors.push(color.r, color.g, color.b);
+        }
+
+        // Add triangle indices
+        const baseIndex = (i / 3) * 3;
+        triIndices.push(baseIndex, baseIndex + 1, baseIndex + 2);
+
+        // Add wireframe edges
+        const wireColor = color.clone().multiplyScalar(0.7); // Darker version for wireframe
+        for (let j = 0; j < 3; j++) {
+            const v1Index = indices[i + j] * 3;
+            const v2Index = indices[i + ((j + 1) % 3)] * 3;
+
+            // First vertex of edge
+            linePositions.push(
+                positions[v1Index],
+                positions[v1Index + 1] + 0.01, // Slightly offset to avoid z-fighting
+                positions[v1Index + 2]
+            );
+            lineColors.push(wireColor.r, wireColor.g, wireColor.b);
+
+            // Second vertex of edge
+            linePositions.push(
+                positions[v2Index],
+                positions[v2Index + 1] + 0.01,
+                positions[v2Index + 2]
+            );
+            lineColors.push(wireColor.r, wireColor.g, wireColor.b);
+        }
+    }
+
+    const group = new THREE.Group();
+    const disposables: (() => void)[] = [];
+
+    // Create triangle mesh
+    if (triPositions.length > 0) {
+        const triGeometry = new THREE.BufferGeometry();
+        triGeometry.setAttribute(
+            'position',
+            new THREE.BufferAttribute(new Float32Array(triPositions), 3)
+        );
+        triGeometry.setAttribute(
+            'color',
+            new THREE.BufferAttribute(new Float32Array(triColors), 3)
+        );
+        triGeometry.setIndex(new THREE.BufferAttribute(new Uint32Array(triIndices), 1));
+
+        const triMaterial = new THREE.MeshBasicMaterial({
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.7,
+            side: THREE.DoubleSide,
+        });
+
+        const triMesh = new THREE.Mesh(triGeometry, triMaterial);
+        group.add(triMesh);
+
+        disposables.push(() => {
+            triGeometry.dispose();
+            triMaterial.dispose();
+        });
+    }
+
+    // Create wireframe lines
+    if (linePositions.length > 0) {
+        const lineGeometry = new THREE.BufferGeometry();
+        lineGeometry.setAttribute(
+            'position',
+            new THREE.BufferAttribute(new Float32Array(linePositions), 3)
+        );
+        lineGeometry.setAttribute(
+            'color',
+            new THREE.BufferAttribute(new Float32Array(lineColors), 3)
+        );
+
+        const lineMaterial = new THREE.LineBasicMaterial({
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.8,
+            linewidth: 1.5,
+        });
+
+        const lineSegments = new THREE.LineSegments(lineGeometry, lineMaterial);
+        group.add(lineSegments);
+
+        disposables.push(() => {
+            lineGeometry.dispose();
+            lineMaterial.dispose();
         });
     }
 

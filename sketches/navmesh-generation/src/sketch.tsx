@@ -6,15 +6,17 @@ import { Leva, useControls } from 'leva';
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import {
+    type ArrayLike,
     type CompactHeightfield,
     ContourBuildFlags,
     type ContourSet,
     type Heightfield,
-    type PolyMesh, 
+    type PolyMesh,
     type PolyMeshDetail,
     buildCompactHeightfield,
     buildContours,
-    buildDistanceField,buildPolyMesh, 
+    buildDistanceField,
+    buildPolyMesh,
     buildPolyMeshDetail,
     buildRegions,
     calculateGridSize,
@@ -25,7 +27,7 @@ import {
     filterLowHangingWalkableObstacles,
     filterWalkableLowHeightSpans,
     markWalkableTriangles,
-    rasterizeTriangles
+    rasterizeTriangles,
 } from './lib/generate';
 import {
     createCompactHeightfieldDistancesHelper,
@@ -37,21 +39,9 @@ import {
     createRawContoursHelper,
     createSimplifiedContoursHelper,
     createTriangleAreaIdsHelper,
+    createTriangleMeshWithAreasHelper,
     getPositionsAndIndices,
 } from './lib/three';
-
-type Intermediates = {
-    input: {
-        positions: Float32Array;
-        indices: Uint32Array;
-    };
-    triAreaIds: Uint8Array;
-    heightfield: Heightfield;
-    compactHeightfield: CompactHeightfield;
-    contourSet: ContourSet;
-    polyMesh: PolyMesh;
-    polyMeshDetail: PolyMeshDetail;
-};
 
 const DungeonModel = () => {
     const gltf = useGLTF('/dungeon.gltf');
@@ -65,7 +55,20 @@ const NavTestModel = () => {
     return <primitive object={gltf.scene} />;
 };
 
-const App = () => {
+type RecastLikeIntermediates = {
+    input: {
+        positions: Float32Array;
+        indices: Uint32Array;
+    };
+    triAreaIds: Uint8Array;
+    heightfield: Heightfield;
+    compactHeightfield: CompactHeightfield;
+    contourSet: ContourSet;
+    polyMesh: PolyMesh;
+    polyMeshDetail: PolyMeshDetail;
+};
+
+const RecastLike = () => {
     const scene = useThree((state) => state.scene);
     const group = useRef<THREE.Group>(null!);
 
@@ -80,7 +83,7 @@ const App = () => {
         showSimplifiedContours,
         showPolyMesh,
         showPolyMeshDetail,
-    } = useControls({
+    } = useControls('recast-like generation options', {
         showMesh: {
             label: 'Show Mesh',
             value: true,
@@ -124,7 +127,7 @@ const App = () => {
     });
 
     const [intermediates, setIntermediates] = useState<
-        Intermediates | undefined
+        RecastLikeIntermediates | undefined
     >();
 
     useEffect(() => {
@@ -310,7 +313,7 @@ const App = () => {
         console.timeEnd('navmesh generation');
 
         /* store intermediates for debugging */
-        const intermediates: Intermediates = {
+        const intermediates: RecastLikeIntermediates = {
             input: {
                 positions,
                 indices,
@@ -332,7 +335,10 @@ const App = () => {
     useEffect(() => {
         if (!intermediates || !showTriangleAreaIds) return;
 
-        const debugObject = createTriangleAreaIdsHelper(intermediates);
+        const debugObject = createTriangleAreaIdsHelper(
+            intermediates.input,
+            intermediates.triAreaIds,
+        );
         scene.add(debugObject.object);
 
         return () => {
@@ -345,7 +351,7 @@ const App = () => {
     useEffect(() => {
         if (!intermediates || !showHeightfield) return;
 
-        const debugObject = createHeightfieldHelper(intermediates);
+        const debugObject = createHeightfieldHelper(intermediates.heightfield);
         scene.add(debugObject.object);
 
         return () => {
@@ -358,7 +364,9 @@ const App = () => {
     useEffect(() => {
         if (!intermediates || !showCompactHeightfieldSolid) return;
 
-        const debugObject = createCompactHeightfieldSolidHelper(intermediates);
+        const debugObject = createCompactHeightfieldSolidHelper(
+            intermediates.compactHeightfield,
+        );
         scene.add(debugObject.object);
 
         return () => {
@@ -371,8 +379,9 @@ const App = () => {
     useEffect(() => {
         if (!intermediates || !showCompactHeightFieldDistances) return;
 
-        const debugObject =
-            createCompactHeightfieldDistancesHelper(intermediates);
+        const debugObject = createCompactHeightfieldDistancesHelper(
+            intermediates.compactHeightfield,
+        );
         scene.add(debugObject.object);
 
         return () => {
@@ -385,8 +394,9 @@ const App = () => {
     useEffect(() => {
         if (!intermediates || !showCompactHeightFieldRegions) return;
 
-        const debugObject =
-            createCompactHeightfieldRegionsHelper(intermediates);
+        const debugObject = createCompactHeightfieldRegionsHelper(
+            intermediates.compactHeightfield,
+        );
         scene.add(debugObject.object);
 
         return () => {
@@ -399,7 +409,7 @@ const App = () => {
     useEffect(() => {
         if (!intermediates || !showRawContours) return;
 
-        const debugObject = createRawContoursHelper(intermediates);
+        const debugObject = createRawContoursHelper(intermediates.contourSet);
         scene.add(debugObject.object);
 
         return () => {
@@ -412,7 +422,9 @@ const App = () => {
     useEffect(() => {
         if (!intermediates || !showSimplifiedContours) return;
 
-        const debugObject = createSimplifiedContoursHelper(intermediates);
+        const debugObject = createSimplifiedContoursHelper(
+            intermediates.contourSet,
+        );
         scene.add(debugObject.object);
 
         return () => {
@@ -425,7 +437,7 @@ const App = () => {
     useEffect(() => {
         if (!intermediates || !showPolyMesh) return;
 
-        const debugObject = createPolyMeshHelper(intermediates);
+        const debugObject = createPolyMeshHelper(intermediates.polyMesh);
         scene.add(debugObject.object);
 
         return () => {
@@ -438,7 +450,9 @@ const App = () => {
     useEffect(() => {
         if (!intermediates || !showPolyMeshDetail) return;
 
-        const debugObject = createPolyMeshDetailHelper(intermediates);
+        const debugObject = createPolyMeshDetailHelper(
+            intermediates.polyMeshDetail,
+        );
         scene.add(debugObject.object);
 
         return () => {
@@ -462,13 +476,299 @@ const App = () => {
     );
 };
 
+type AltIntermediates = {
+    input: {
+        positions: Float32Array;
+        indices: Uint32Array;
+    };
+    triAreaIds: Uint8Array;
+    heightfield: Heightfield;
+    compactHeightfield: CompactHeightfield;
+    result: {
+        positions: ArrayLike<number>;
+        indices: ArrayLike<number>;
+        areas: ArrayLike<number>;
+    };
+};
+
+const Alt = () => {
+    const scene = useThree((state) => state.scene);
+    const group = useRef<THREE.Group>(null!);
+
+    const {
+        showMesh,
+        showTriangleAreaIds,
+        showHeightfield,
+        showCompactHeightfieldSolid,
+        showTriangleMesh,
+    } = useControls('alt generation options', {
+        showMesh: {
+            label: 'Show Mesh',
+            value: true,
+        },
+        showTriangleAreaIds: {
+            label: 'Show Triangle Area IDs',
+            value: false,
+        },
+        showHeightfield: {
+            label: 'Show Heightfield',
+            value: false,
+        },
+        showCompactHeightfieldSolid: {
+            label: 'Show Compact Heightfield Solid',
+            value: false,
+        },
+        showTriangleMesh: {
+            label: 'Show Triangle Mesh',
+            value: true,
+        },
+    });
+
+    const [intermediates, setIntermediates] = useState<
+        AltIntermediates | undefined
+    >();
+
+    useEffect(() => {
+        console.time('navmesh generation');
+
+        /* 0. define generation parameters */
+        const cellSize = 0.1;
+        const cellHeight = 0.1;
+
+        const walkableRadiusWorld = 0.2;
+        const walkableRadiusVoxels = Math.ceil(walkableRadiusWorld / cellSize);
+
+        const walkableClimbWorld = 0.5;
+        const walkableClimbVoxels = Math.ceil(walkableClimbWorld / cellHeight);
+        const walkableHeightWorld = 0.25;
+        const walkableHeightVoxels = Math.ceil(
+            walkableHeightWorld / cellHeight,
+        );
+
+        /* 1. get positions and indices from THREE.Mesh instances in the group */
+
+        console.time('get positions and indices');
+
+        const meshes: THREE.Mesh[] = [];
+
+        group.current.traverse((child) => {
+            if (child instanceof THREE.Mesh) {
+                meshes.push(child);
+            }
+        });
+
+        const [positions, indices] = getPositionsAndIndices(meshes);
+
+        console.timeEnd('get positions and indices');
+
+        /* 2. mark walkable triangles */
+
+        console.time('mark walkable triangles');
+
+        const triAreaIds: Uint8Array = new Uint8Array(indices.length / 3).fill(
+            0,
+        );
+
+        markWalkableTriangles(positions, indices, triAreaIds, 45);
+
+        console.timeEnd('mark walkable triangles');
+
+        /* 3. rasterize the triangles to a voxel heightfield */
+
+        console.time('rasterize triangles');
+
+        const bounds = calculateMeshBounds(positions, indices, box3.create());
+        const [heightfieldWidth, heightfieldHeight] = calculateGridSize(
+            bounds,
+            cellSize,
+        );
+        const heightfield = createHeightfield(
+            heightfieldWidth,
+            heightfieldHeight,
+            bounds,
+            cellSize,
+            cellHeight,
+        );
+
+        rasterizeTriangles(
+            heightfield,
+            positions,
+            indices,
+            triAreaIds,
+            walkableClimbVoxels,
+        );
+
+        console.timeEnd('rasterize triangles');
+
+        /* 4. filter walkable surfaces */
+
+        // Once all geoemtry is rasterized, we do initial pass of filtering to
+        // remove unwanted overhangs caused by the conservative rasterization
+        // as well as filter spans where the character cannot possibly stand.
+
+        console.time('filter walkable surfaces');
+
+        filterLowHangingWalkableObstacles(heightfield, walkableClimbVoxels);
+        filterLedgeSpans(
+            heightfield,
+            walkableHeightVoxels,
+            walkableClimbVoxels,
+        );
+        filterWalkableLowHeightSpans(heightfield, walkableHeightVoxels);
+
+        console.timeEnd('filter walkable surfaces');
+
+        /* 5. partition walkable surface to simple regions. */
+
+        // Compact the heightfield so that it is faster to handle from now on.
+        // This will result more cache coherent data as well as the neighbours
+        // between walkable cells will be calculated.
+
+        console.time('build compact heightfield');
+
+        const compactHeightfield = buildCompactHeightfield(
+            walkableHeightVoxels,
+            walkableClimbVoxels,
+            heightfield,
+        );
+
+        console.timeEnd('build compact heightfield');
+
+        /* 6. erode the walkable area by the agent radius / walkable radius */
+
+        console.time('erode walkable area');
+
+        erodeWalkableArea(walkableRadiusVoxels, compactHeightfield);
+
+        console.timeEnd('erode walkable area');
+
+        /* 7. todo */
+
+        console.time('todo');
+
+        const result = {
+            positions: [],
+            indices: [],
+            areas: [],
+        };
+
+        console.timeEnd('todo');
+
+        console.timeEnd('navmesh generation');
+
+        /* store intermediates for debugging */
+        const intermediates: AltIntermediates = {
+            input: {
+                positions,
+                indices,
+            },
+            triAreaIds,
+            heightfield,
+            compactHeightfield,
+            result,
+        };
+
+        console.log('intermediates', intermediates);
+
+        setIntermediates(intermediates);
+    }, []);
+
+    // debug view of walkable triangles with area ids based vertex colors
+    useEffect(() => {
+        if (!intermediates || !showTriangleAreaIds) return;
+
+        const debugObject = createTriangleAreaIdsHelper(
+            intermediates.input,
+            intermediates.triAreaIds,
+        );
+        scene.add(debugObject.object);
+
+        return () => {
+            scene.remove(debugObject.object);
+            debugObject.dispose();
+        };
+    }, [showTriangleAreaIds, intermediates, scene]);
+
+    // debug view of the heightfield
+    useEffect(() => {
+        if (!intermediates || !showHeightfield) return;
+
+        const debugObject = createHeightfieldHelper(intermediates.heightfield);
+        scene.add(debugObject.object);
+
+        return () => {
+            scene.remove(debugObject.object);
+            debugObject.dispose();
+        };
+    }, [showHeightfield, intermediates, scene]);
+
+    // debug view of the compact heightfield - solid view
+    useEffect(() => {
+        if (!intermediates || !showCompactHeightfieldSolid) return;
+
+        const debugObject = createCompactHeightfieldSolidHelper(
+            intermediates.compactHeightfield,
+        );
+        scene.add(debugObject.object);
+
+        return () => {
+            scene.remove(debugObject.object);
+            debugObject.dispose();
+        };
+    }, [showCompactHeightfieldSolid, intermediates, scene]);
+
+    // debug view of the triangle mesh with areas
+    useEffect(() => {
+        if (!intermediates || !showTriangleMesh) return;
+
+        const debugObject = createTriangleMeshWithAreasHelper(
+            intermediates.result.positions,
+            intermediates.result.indices,
+            intermediates.result.areas,
+        );
+        scene.add(debugObject.object);
+
+        return () => {
+            scene.remove(debugObject.object);
+            debugObject.dispose();
+        };
+    }, [showTriangleMesh, intermediates, scene]);
+
+    return (
+        <>
+            <group ref={group} visible={showMesh}>
+                {/* <DungeonModel /> */}
+                <NavTestModel />
+            </group>
+
+            <ambientLight intensity={0.5} />
+            <directionalLight position={[5, 5, 5]} intensity={1} />
+
+            <OrbitControls />
+        </>
+    );
+};
+
 export function Sketch() {
+    const { method } = useControls('generation method', {
+        method: {
+            value: 'recast-like',
+            options: {
+                'Recast-like': 'recast-like',
+                alt: 'alt',
+            },
+        },
+    });
+
+    console.log('method', method);
+
     return (
         <>
             <h1>NavMesh Generation</h1>
 
             <WebGPUCanvas>
-                <App />
+                {method === 'recast-like' && <RecastLike />}
+                {method === 'alt' && <Alt />}
             </WebGPUCanvas>
 
             <Leva

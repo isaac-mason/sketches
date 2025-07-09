@@ -20,7 +20,7 @@ export enum NavMeshPolyType {
     // OFFMESH_CONNECTION = 1,
 }
 
-export type NavMeshPolyarn  = { 
+export type NavMeshPoly = { 
     /** the indices of the polygon's vertices. vertices are stored in NavMeshTile.vertices */
     polygonIndices: number[];
     /** the indices of the polygon's links. links are stored in NavMeshTile.links */
