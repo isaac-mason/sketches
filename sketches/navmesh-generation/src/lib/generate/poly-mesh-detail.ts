@@ -78,11 +78,12 @@ const setVec3 = (
     arr[index + 2] = z;
 };
 
-// Temporary vectors for 2D math operations (reused to avoid allocations)
-const _tempVec2A: Vec2 = vec2.create();
-const _tempVec2B: Vec2 = vec2.create();
-const _tempVec2C: Vec2 = vec2.create();
-const _tempVec2D: Vec2 = vec2.create();
+
+const _circumCircleV1Proj: Vec2 = vec2.create();
+const _circumCircleV2Proj: Vec2 = vec2.create();
+const _circumCircleV3Proj: Vec2 = vec2.create();
+const _circumCircleCenter2D: Vec2 = vec2.create();
+const _circumCircleRadiusCalc: Vec2 = vec2.create();
 
 // Helper to extract 2D vector from 3D array (x, z components)
 const getVec2XZ = (out: Vec2, arr: number[], index: number): Vec2 => {
@@ -125,20 +126,20 @@ const circumCircle = (
     vec3.subtract(v3, p3, p1);
 
     // Calculate cross product for 2D vectors (v2 - v1) × (v3 - v1)
-    getVec2XZ(_tempVec2A, v1, 0);
-    getVec2XZ(_tempVec2B, v2, 0);
-    getVec2XZ(_tempVec2C, v3, 0);
-    vec2.subtract(_tempVec2B, _tempVec2B, _tempVec2A); // v2 - v1
-    vec2.subtract(_tempVec2C, _tempVec2C, _tempVec2A); // v3 - v1
-    const cp = _tempVec2B[0] * _tempVec2C[1] - _tempVec2B[1] * _tempVec2C[0];
+    getVec2XZ(_circumCircleV1Proj, v1, 0);
+    getVec2XZ(_circumCircleV2Proj, v2, 0);
+    getVec2XZ(_circumCircleV3Proj, v3, 0);
+    vec2.subtract(_circumCircleV2Proj, _circumCircleV2Proj, _circumCircleV1Proj); // v2 - v1
+    vec2.subtract(_circumCircleV3Proj, _circumCircleV3Proj, _circumCircleV1Proj); // v3 - v1
+    const cp = _circumCircleV2Proj[0] * _circumCircleV3Proj[1] - _circumCircleV2Proj[1] * _circumCircleV3Proj[0];
 
     if (Math.abs(cp) > EPS) {
-        getVec2XZ(_tempVec2A, v1, 0);
-        getVec2XZ(_tempVec2B, v2, 0);
-        getVec2XZ(_tempVec2C, v3, 0);
-        const v1Sq = vec2.dot(_tempVec2A, _tempVec2A);
-        const v2Sq = vec2.dot(_tempVec2B, _tempVec2B);
-        const v3Sq = vec2.dot(_tempVec2C, _tempVec2C);
+        getVec2XZ(_circumCircleV1Proj, v1, 0);
+        getVec2XZ(_circumCircleV2Proj, v2, 0);
+        getVec2XZ(_circumCircleV3Proj, v3, 0);
+        const v1Sq = vec2.dot(_circumCircleV1Proj, _circumCircleV1Proj);
+        const v2Sq = vec2.dot(_circumCircleV2Proj, _circumCircleV2Proj);
+        const v3Sq = vec2.dot(_circumCircleV3Proj, _circumCircleV3Proj);
         c[0] =
             (v1Sq * (v2[2] - v3[2]) +
                 v2Sq * (v3[2] - v1[2]) +
@@ -150,9 +151,9 @@ const circumCircle = (
                 v2Sq * (v1[0] - v3[0]) +
                 v3Sq * (v2[0] - v1[0])) /
             (2 * cp);
-        getVec2XZ(_tempVec2A, c, 0);
-        getVec2XZ(_tempVec2B, v1, 0);
-        const r = vec2.distance(_tempVec2A, _tempVec2B);
+        getVec2XZ(_circumCircleCenter2D, c, 0);
+        getVec2XZ(_circumCircleRadiusCalc, v1, 0);
+        const r = vec2.distance(_circumCircleCenter2D, _circumCircleRadiusCalc);
 
         const cVec = vec3.copy(_circumCircleCenter, c);
         const resultVec = _circumCircleResultVec;
@@ -173,6 +174,10 @@ const _distPtTriV0: Vec3 = vec3.create();
 const _distPtTriV1: Vec3 = vec3.create();
 const _distPtTriV2: Vec3 = vec3.create();
 
+const _distPtTriVec0: Vec2 = vec2.create();
+const _distPtTriVec1: Vec2 = vec2.create();
+const _distPtTriVec2: Vec2 = vec2.create();
+
 const distPtTri = (p: Vec3, a: Vec3, b: Vec3, c: Vec3): number => {
     const v0 = _distPtTriV0;
     const v1 = _distPtTriV1;
@@ -182,15 +187,15 @@ const distPtTri = (p: Vec3, a: Vec3, b: Vec3, c: Vec3): number => {
     vec3.subtract(v1, b, a);
     vec3.subtract(v2, p, a);
 
-    getVec2XZ(_tempVec2A, v0, 0);
-    getVec2XZ(_tempVec2B, v1, 0);
-    getVec2XZ(_tempVec2C, v2, 0);
+    getVec2XZ(_distPtTriVec0, v0, 0);
+    getVec2XZ(_distPtTriVec1, v1, 0);
+    getVec2XZ(_distPtTriVec2, v2, 0);
 
-    const dot00 = vec2.dot(_tempVec2A, _tempVec2A);
-    const dot01 = vec2.dot(_tempVec2A, _tempVec2B);
-    const dot02 = vec2.dot(_tempVec2A, _tempVec2C);
-    const dot11 = vec2.dot(_tempVec2B, _tempVec2B);
-    const dot12 = vec2.dot(_tempVec2B, _tempVec2C);
+    const dot00 = vec2.dot(_distPtTriVec0, _distPtTriVec0);
+    const dot01 = vec2.dot(_distPtTriVec0, _distPtTriVec1);
+    const dot02 = vec2.dot(_distPtTriVec0, _distPtTriVec2);
+    const dot11 = vec2.dot(_distPtTriVec1, _distPtTriVec1);
+    const dot12 = vec2.dot(_distPtTriVec1, _distPtTriVec2);
 
     // Compute barycentric coordinates
     const invDenom = 1.0 / (dot00 * dot11 - dot01 * dot01);
@@ -481,6 +486,11 @@ const addEdge = (
 };
 
 const _completeFacetC = vec3.create();
+const _completeFacetPointS: Vec2 = vec2.create();
+const _completeFacetPointT: Vec2 = vec2.create();
+const _completeFacetPointU: Vec2 = vec2.create();
+const _completeFacetCircleCenter: Vec2 = vec2.create();
+const _completeFacetDistanceCalc: Vec2 = vec2.create();
 
 // Triangle completion function for Delaunay triangulation
 const completeFacet = (
@@ -518,13 +528,13 @@ const completeFacet = (
     for (let u = 0; u < nPoints; ++u) {
         if (u === s || u === t) continue;
         // Calculate cross product to check if points are in correct order for triangle
-        getVec2XZ(_tempVec2A, points, s * 3);
-        getVec2XZ(_tempVec2B, points, t * 3);
-        getVec2XZ(_tempVec2C, points, u * 3);
-        vec2.subtract(_tempVec2B, _tempVec2B, _tempVec2A); // t - s
-        vec2.subtract(_tempVec2C, _tempVec2C, _tempVec2A); // u - s
+        getVec2XZ(_completeFacetPointS, points, s * 3);
+        getVec2XZ(_completeFacetPointT, points, t * 3);
+        getVec2XZ(_completeFacetPointU, points, u * 3);
+        vec2.subtract(_completeFacetPointT, _completeFacetPointT, _completeFacetPointS); // t - s
+        vec2.subtract(_completeFacetPointU, _completeFacetPointU, _completeFacetPointS); // u - s
         const crossProduct =
-            _tempVec2B[0] * _tempVec2C[1] - _tempVec2B[1] * _tempVec2C[0];
+            _completeFacetPointT[0] * _completeFacetPointU[1] - _completeFacetPointT[1] * _completeFacetPointU[0];
 
         if (crossProduct > EPS_FACET) {
             if (r < 0) {
@@ -543,9 +553,9 @@ const completeFacet = (
                 r = _circumCircleResult.radius;
                 continue;
             }
-            getVec2XZ(_tempVec2A, c, 0);
-            getVec2XZ(_tempVec2B, points, u * 3);
-            const d = vec2.distance(_tempVec2A, _tempVec2B);
+            getVec2XZ(_completeFacetCircleCenter, c, 0);
+            getVec2XZ(_completeFacetDistanceCalc, points, u * 3);
+            const d = vec2.distance(_completeFacetCircleCenter, _completeFacetDistanceCalc);
             const tol = 0.001;
 
             if (d > r * (1 + tol)) {
@@ -822,14 +832,14 @@ const triangulateHull = (
         const cv = hull[i] * 3;
         const nv = hull[ni] * 3;
         // Calculate triangle perimeter using 2D distances
-        getVec2XZ(_tempVec2A, verts, pv);
-        getVec2XZ(_tempVec2B, verts, cv);
-        getVec2XZ(_tempVec2C, verts, nv);
+        getVec2XZ(_triangulateHullPrev, verts, pv);
+        getVec2XZ(_triangulateHullCurrent, verts, cv);
+        getVec2XZ(_triangulateHullNext, verts, nv);
 
         const d =
-            vec2.distance(_tempVec2A, _tempVec2B) +
-            vec2.distance(_tempVec2B, _tempVec2C) +
-            vec2.distance(_tempVec2C, _tempVec2A);
+            vec2.distance(_triangulateHullPrev, _triangulateHullCurrent) +
+            vec2.distance(_triangulateHullCurrent, _triangulateHullNext) +
+            vec2.distance(_triangulateHullNext, _triangulateHullPrev);
         if (d < dmin) {
             start = i;
             left = ni;
@@ -855,17 +865,17 @@ const triangulateHull = (
         const cvright = hull[right] * 3;
         const nvright = hull[nright] * 3;
         // Calculate distances for left and right triangulation options
-        getVec2XZ(_tempVec2A, verts, cvleft);
-        getVec2XZ(_tempVec2B, verts, nvleft);
-        getVec2XZ(_tempVec2C, verts, cvright);
-        getVec2XZ(_tempVec2D, verts, nvright);
+        getVec2XZ(_triangulateHullPrev, verts, cvleft);
+        getVec2XZ(_triangulateHullCurrent, verts, nvleft);
+        getVec2XZ(_triangulateHullNext, verts, cvright);
+        getVec2XZ(_triangulateHullRight, verts, nvright);
 
         const dleft =
-            vec2.distance(_tempVec2A, _tempVec2B) +
-            vec2.distance(_tempVec2B, _tempVec2C);
+            vec2.distance(_triangulateHullPrev, _triangulateHullCurrent) +
+            vec2.distance(_triangulateHullCurrent, _triangulateHullNext);
         const dright =
-            vec2.distance(_tempVec2C, _tempVec2D) +
-            vec2.distance(_tempVec2A, _tempVec2D);
+            vec2.distance(_triangulateHullNext, _triangulateHullRight) +
+            vec2.distance(_triangulateHullPrev, _triangulateHullRight);
 
         if (dleft < dright) {
             tris.push(hull[left]);
@@ -1485,6 +1495,11 @@ const buildPolyDetail = (
 
     return true;
 };
+
+const _triangulateHullPrev: Vec2 = vec2.create();
+const _triangulateHullCurrent: Vec2 = vec2.create(); 
+const _triangulateHullNext: Vec2 = vec2.create();
+const _triangulateHullRight: Vec2 = vec2.create();
 
 export const buildPolyMeshDetail = (
     polyMesh: PolyMesh,
