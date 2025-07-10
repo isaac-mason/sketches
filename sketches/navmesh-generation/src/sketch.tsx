@@ -6,7 +6,6 @@ import { Leva, useControls } from 'leva';
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import {
-    type ArrayLike,
     type CompactHeightfield,
     ContourBuildFlags,
     type ContourSet,
@@ -30,6 +29,9 @@ import {
     rasterizeTriangles,
     compactHeightfieldToPointSet,
     type PointSet,
+    pointSetToTriangleMesh,
+    reduceTriangleMesh,
+    type TriangleMesh,
 } from './lib/generate';
 import {
     createCompactHeightfieldDistancesHelper,
@@ -270,12 +272,40 @@ const RecastLike = () => {
 
         console.time('build compact heightfield regions');
 
+        // Partition the heightfield so that we can use simple algorithm later to triangulate the walkable areas.
+        // There are 3 partitioning methods, each with some pros and cons:
+        // 1) Watershed partitioning
+        //   - the classic Recast partitioning
+        //   - creates the nicest tessellation
+        //   - usually slowest
+        //   - partitions the heightfield into nice regions without holes or overlaps
+        //   - the are some corner cases where this method creates produces holes and overlaps
+        //      - holes may appear when a small obstacles is close to large open area (triangulation can handle this)
+        //      - overlaps may occur if you have narrow spiral corridors (i.e stairs), this make triangulation to fail
+        //   * generally the best choice if you precompute the navmesh, use this if you have large open areas
+        // 2) Monotone partitioning
+        //   - fastest
+        //   - partitions the heightfield into regions without holes and overlaps (guaranteed)
+        //   - creates long thin polygons, which sometimes causes paths with detours
+        //   * use this if you want fast navmesh generation
+        // 3) Layer partitoining
+        //   - quite fast
+        //   - partitions the heighfield into non-overlapping regions
+        //   - relies on the triangulation code to cope with holes (thus slower than monotone partitioning)
+        //   - produces better triangles than monotone partitioning
+        //   - does not have the corner cases of watershed partitioning
+        //   - can be slow and create a bit ugly tessellation (still better than monotone)
+        //     if you have large open areas with small obstacles (not a problem if you use tiles)
+        //   * good choice to use for tiled navmesh with medium and small sized tiles
+
         buildRegions(
             compactHeightfield,
             borderSize,
             minRegionArea,
             mergeRegionArea,
         );
+        // buildRegionsMonotone(compactHeightfield, borderSize, minRegionArea, mergeRegionArea);
+        // buildLayerRegions(compactHeightfield, borderSize, minRegionArea);
 
         console.timeEnd('build compact heightfield regions');
 
@@ -488,6 +518,8 @@ type AltIntermediates = {
     heightfield: Heightfield;
     compactHeightfield: CompactHeightfield;
     pointSet: PointSet;
+    triangleMesh: TriangleMesh;
+    reducedTriangleMesh: TriangleMesh;
 };
 
 const Alt = () => {
@@ -500,6 +532,8 @@ const Alt = () => {
         showHeightfield,
         showCompactHeightfieldSolid,
         showPointSet,
+        showTriangleMesh,
+        showReducedTriangleMesh,
     } = useControls('alt generation options', {
         showMesh: {
             label: 'Show Mesh',
@@ -519,6 +553,14 @@ const Alt = () => {
         },
         showPointSet: {
             label: 'Show Point Set',
+            value: true,
+        },
+        showTriangleMesh: {
+            label: 'Show Triangle Mesh',
+            value: true,
+        },
+        showReducedTriangleMesh: {
+            label: 'Show Reduced Triangle Mesh',
             value: true,
         },
     });
@@ -649,6 +691,22 @@ const Alt = () => {
 
         console.timeEnd('generate point set');
 
+        /* 8. generate triangle mesh from point set */
+
+        console.time('point set to triangle mesh');
+
+        const triangleMesh = pointSetToTriangleMesh(pointSet);
+
+        console.timeEnd('point set to triangle mesh');
+
+        /* 9. reduce the triangle mesh */
+
+        console.time('reduce triangle mesh');
+
+        const reducedTriangleMesh = reduceTriangleMesh(triangleMesh);
+
+        console.timeEnd('reduce triangle mesh');
+
         console.timeEnd('navmesh generation');
 
         /* store intermediates for debugging */
@@ -661,6 +719,8 @@ const Alt = () => {
             heightfield,
             compactHeightfield,
             pointSet,
+            triangleMesh,
+            reducedTriangleMesh,
         };
 
         console.log('intermediates', intermediates);
@@ -724,6 +784,40 @@ const Alt = () => {
             debugObject.dispose();
         };
     }, [showPointSet, intermediates, scene]);
+
+    // debug view of the triangle mesh
+    useEffect(() => {
+        if (!intermediates || !showTriangleMesh) return;
+
+        const debugObject = createTriangleMeshWithAreasHelper(
+            intermediates.triangleMesh.positions,
+            intermediates.triangleMesh.indices,
+            intermediates.triAreaIds,
+        );
+        scene.add(debugObject.object);
+
+        return () => {
+            scene.remove(debugObject.object);
+            debugObject.dispose();
+        };
+    }, [showTriangleMesh, intermediates, scene]);
+
+    // debug view of the reduced triangle mesh
+    useEffect(() => {
+        if (!intermediates || !showReducedTriangleMesh) return;
+
+        const debugObject = createTriangleMeshWithAreasHelper(
+            intermediates.reducedTriangleMesh.positions,
+            intermediates.reducedTriangleMesh.indices,
+            intermediates.triAreaIds,
+        );
+        scene.add(debugObject.object);
+
+        return () => {
+            scene.remove(debugObject.object);
+            debugObject.dispose();
+        };
+    }, [showReducedTriangleMesh, intermediates, scene]);
 
     return (
         <>

@@ -1616,9 +1616,9 @@ export function createPointSetHelper(pointSet: PointSet): DebugObject {
     // Process each point (positions are already in world space)
     const numPoints = pointSet.positions.length / 3;
     for (let i = 0; i < numPoints; i++) {
-        const worldX = pointSet.positions[i * 3];
-        const worldY = pointSet.positions[i * 3 + 1] + 0.01; // Small offset above surface for visibility
-        const worldZ = pointSet.positions[i * 3 + 2];
+        const worldX = pointSet.bounds[0][0] + pointSet.positions[i * 3];
+        const worldY = pointSet.bounds[0][1] + pointSet.positions[i * 3 + 1] + 0.01; // Small offset above surface for visibility
+        const worldZ = pointSet.bounds[0][2] + pointSet.positions[i * 3 + 2];
         const area = pointSet.areas[i];
 
         // Add position

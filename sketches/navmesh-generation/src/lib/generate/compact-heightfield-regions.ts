@@ -1234,3 +1234,518 @@ const walkContour = (
         }
     }
 };
+
+const NULL_NEI = 0xffff;
+
+type SweepSpan = {
+    rid: number;    // row id
+    id: number;     // region id
+    ns: number;     // number samples
+    nei: number;    // neighbour id
+};
+
+/**
+ * Build regions using monotone partitioning algorithm.
+ * This is an alternative to the watershed-based buildRegions function.
+ * Monotone partitioning creates regions by sweeping the heightfield and
+ * does not generate overlapping regions.
+ */
+export const buildRegionsMonotone = (
+    compactHeightfield: CompactHeightfield,
+    borderSize: number,
+    minRegionArea: number,
+    mergeRegionArea: number,
+): boolean => {
+    const w = compactHeightfield.width;
+    const h = compactHeightfield.height;
+    let id = 1;
+
+    const srcReg = new Array(compactHeightfield.spanCount).fill(0);
+    const nsweeps = Math.max(compactHeightfield.width, compactHeightfield.height);
+    const sweeps: SweepSpan[] = new Array(nsweeps);
+
+    // Initialize sweeps array
+    for (let i = 0; i < nsweeps; i++) {
+        sweeps[i] = { rid: 0, id: 0, ns: 0, nei: 0 };
+    }
+
+    // Mark border regions
+    if (borderSize > 0) {
+        const bw = Math.min(w, borderSize);
+        const bh = Math.min(h, borderSize);
+
+        paintRectRegion(0, bw, 0, h, id | BORDER_REG, compactHeightfield, srcReg);
+        id++;
+        paintRectRegion(w - bw, w, 0, h, id | BORDER_REG, compactHeightfield, srcReg);
+        id++;
+        paintRectRegion(0, w, 0, bh, id | BORDER_REG, compactHeightfield, srcReg);
+        id++;
+        paintRectRegion(0, w, h - bh, h, id | BORDER_REG, compactHeightfield, srcReg);
+        id++;
+    }
+
+    compactHeightfield.borderSize = borderSize;
+
+    const prev: number[] = new Array(256);
+
+    // Sweep one line at a time
+    for (let y = borderSize; y < h - borderSize; y++) {
+        // Collect spans from this row
+        if (prev.length < id + 1) {
+            prev.length = id + 1;
+        }
+        prev.fill(0, 0, id);
+        let rid = 1;
+
+        for (let x = borderSize; x < w - borderSize; x++) {
+            const cell = compactHeightfield.cells[x + y * w];
+
+            for (let i = cell.index; i < cell.index + cell.count; i++) {
+                const span = compactHeightfield.spans[i];
+                if (compactHeightfield.areas[i] === NULL_AREA) continue;
+
+                // Check -x direction
+                let previd = 0;
+                if (getCon(span, 0) !== NOT_CONNECTED) {
+                    const ax = x + DIR_OFFSETS[0][0];
+                    const ay = y + DIR_OFFSETS[0][1];
+                    const ai = compactHeightfield.cells[ax + ay * w].index + getCon(span, 0);
+                    if (
+                        (srcReg[ai] & BORDER_REG) === 0 &&
+                        compactHeightfield.areas[i] === compactHeightfield.areas[ai]
+                    ) {
+                        previd = srcReg[ai];
+                    }
+                }
+
+                if (!previd) {
+                    previd = rid++;
+                    sweeps[previd].rid = previd;
+                    sweeps[previd].ns = 0;
+                    sweeps[previd].nei = 0;
+                }
+
+                // Check -y direction
+                if (getCon(span, 3) !== NOT_CONNECTED) {
+                    const ax = x + DIR_OFFSETS[3][0];
+                    const ay = y + DIR_OFFSETS[3][1];
+                    const ai = compactHeightfield.cells[ax + ay * w].index + getCon(span, 3);
+                    if (
+                        srcReg[ai] &&
+                        (srcReg[ai] & BORDER_REG) === 0 &&
+                        compactHeightfield.areas[i] === compactHeightfield.areas[ai]
+                    ) {
+                        const nr = srcReg[ai];
+                        if (!sweeps[previd].nei || sweeps[previd].nei === nr) {
+                            sweeps[previd].nei = nr;
+                            sweeps[previd].ns++;
+                            prev[nr]++;
+                        } else {
+                            sweeps[previd].nei = NULL_NEI;
+                        }
+                    }
+                }
+
+                srcReg[i] = previd;
+            }
+        }
+
+        // Create unique ID
+        for (let i = 1; i < rid; i++) {
+            if (
+                sweeps[i].nei !== NULL_NEI &&
+                sweeps[i].nei !== 0 &&
+                prev[sweeps[i].nei] === sweeps[i].ns
+            ) {
+                sweeps[i].id = sweeps[i].nei;
+            } else {
+                sweeps[i].id = id++;
+            }
+        }
+
+        // Remap IDs
+        for (let x = borderSize; x < w - borderSize; x++) {
+            const cell = compactHeightfield.cells[x + y * w];
+
+            for (let i = cell.index; i < cell.index + cell.count; i++) {
+                if (srcReg[i] > 0 && srcReg[i] < rid) {
+                    srcReg[i] = sweeps[srcReg[i]].id;
+                }
+            }
+        }
+    }
+
+    // Merge regions and filter out small regions
+    const overlaps: number[] = [];
+    compactHeightfield.maxRegions = id;
+
+    if (
+        !mergeAndFilterRegions(
+            minRegionArea,
+            mergeRegionArea,
+            compactHeightfield,
+            srcReg,
+            overlaps,
+        )
+    ) {
+        return false;
+    }
+
+    // Store the result
+    for (let i = 0; i < compactHeightfield.spanCount; i++) {
+        compactHeightfield.spans[i].region = srcReg[i];
+    }
+
+    return true;
+};
+
+/**
+ * Add unique connection to region
+ */
+const addUniqueConnection = (reg: Region, n: number) => {
+    for (let i = 0; i < reg.connections.length; i++) {
+        if (reg.connections[i] === n) return;
+    }
+    reg.connections.push(n);
+};
+
+/**
+ * Merge and filter layer regions
+ */
+const mergeAndFilterLayerRegions = (
+    minRegionArea: number,
+    compactHeightfield: CompactHeightfield,
+    srcReg: number[],
+    maxRegionId: { value: number },
+): boolean => {
+    const w = compactHeightfield.width;
+    const h = compactHeightfield.height;
+    const nreg = maxRegionId.value + 1;
+
+    // Construct regions
+    const regions: Region[] = [];
+    for (let i = 0; i < nreg; i++) {
+        regions.push({
+            spanCount: 0,
+            id: i,
+            areaType: 0,
+            remap: false,
+            visited: false,
+            overlap: false,
+            connectsToBorder: false,
+            ymin: 0xffff,
+            ymax: 0,
+            connections: [],
+            floors: [],
+        });
+    }
+
+    // Find region neighbours and overlapping regions
+    const lregs: number[] = [];
+    for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+            const cell = compactHeightfield.cells[x + y * w];
+            lregs.length = 0;
+
+            for (let i = cell.index; i < cell.index + cell.count; i++) {
+                const span = compactHeightfield.spans[i];
+                const area = compactHeightfield.areas[i];
+                const ri = srcReg[i];
+                if (ri === 0 || ri >= nreg) continue;
+                const reg = regions[ri];
+
+                reg.spanCount++;
+                reg.areaType = area;
+                reg.ymin = Math.min(reg.ymin, span.y);
+                reg.ymax = Math.max(reg.ymax, span.y);
+
+                // Collect all region layers
+                lregs.push(ri);
+
+                // Update neighbours
+                for (let dir = 0; dir < 4; dir++) {
+                    if (getCon(span, dir) !== NOT_CONNECTED) {
+                        const ax = x + DIR_OFFSETS[dir][0];
+                        const ay = y + DIR_OFFSETS[dir][1];
+                        const ai = compactHeightfield.cells[ax + ay * w].index + getCon(span, dir);
+                        const rai = srcReg[ai];
+                        if (rai > 0 && rai < nreg && rai !== ri) {
+                            addUniqueConnection(reg, rai);
+                        }
+                        if (rai & BORDER_REG) {
+                            reg.connectsToBorder = true;
+                        }
+                    }
+                }
+            }
+
+            // Update overlapping regions
+            for (let i = 0; i < lregs.length - 1; i++) {
+                for (let j = i + 1; j < lregs.length; j++) {
+                    if (lregs[i] !== lregs[j]) {
+                        const ri = regions[lregs[i]];
+                        const rj = regions[lregs[j]];
+                        addUniqueFloorRegion(ri, lregs[j]);
+                        addUniqueFloorRegion(rj, lregs[i]);
+                    }
+                }
+            }
+        }
+    }
+
+    // Create 2D layers from regions
+    let layerId = 1;
+
+    for (let i = 0; i < nreg; i++) {
+        regions[i].id = 0;
+    }
+
+    // Merge monotone regions to create non-overlapping areas
+    const stack: number[] = [];
+    for (let i = 1; i < nreg; i++) {
+        const root = regions[i];
+        // Skip already visited
+        if (root.id !== 0) continue;
+
+        // Start search
+        root.id = layerId;
+        stack.length = 0;
+        stack.push(i);
+
+        while (stack.length > 0) {
+            // Pop front
+            const regIndex = stack.shift()!;
+            const reg = regions[regIndex];
+
+            const ncons = reg.connections.length;
+            for (let j = 0; j < ncons; j++) {
+                const nei = reg.connections[j];
+                const regn = regions[nei];
+                // Skip already visited
+                if (regn.id !== 0) continue;
+                // Skip if different area type
+                if (reg.areaType !== regn.areaType) continue;
+                // Skip if the neighbour is overlapping root region
+                let overlap = false;
+                for (let k = 0; k < root.floors.length; k++) {
+                    if (root.floors[k] === nei) {
+                        overlap = true;
+                        break;
+                    }
+                }
+                if (overlap) continue;
+
+                // Deepen
+                stack.push(nei);
+
+                // Mark layer id
+                regn.id = layerId;
+                // Merge current layers to root
+                for (let k = 0; k < regn.floors.length; k++) {
+                    addUniqueFloorRegion(root, regn.floors[k]);
+                }
+                root.ymin = Math.min(root.ymin, regn.ymin);
+                root.ymax = Math.max(root.ymax, regn.ymax);
+                root.spanCount += regn.spanCount;
+                regn.spanCount = 0;
+                root.connectsToBorder = root.connectsToBorder || regn.connectsToBorder;
+            }
+        }
+
+        layerId++;
+    }
+
+    // Remove small regions
+    for (let i = 0; i < nreg; i++) {
+        if (
+            regions[i].spanCount > 0 &&
+            regions[i].spanCount < minRegionArea &&
+            !regions[i].connectsToBorder
+        ) {
+            const reg = regions[i].id;
+            for (let j = 0; j < nreg; j++) {
+                if (regions[j].id === reg) {
+                    regions[j].id = 0;
+                }
+            }
+        }
+    }
+
+    // Compress region IDs
+    for (let i = 0; i < nreg; i++) {
+        regions[i].remap = false;
+        if (regions[i].id === 0) continue;
+        if (regions[i].id & BORDER_REG) continue;
+        regions[i].remap = true;
+    }
+
+    let regIdGen = 0;
+    for (let i = 0; i < nreg; i++) {
+        if (!regions[i].remap) continue;
+        const oldId = regions[i].id;
+        const newId = ++regIdGen;
+        for (let j = i; j < nreg; j++) {
+            if (regions[j].id === oldId) {
+                regions[j].id = newId;
+                regions[j].remap = false;
+            }
+        }
+    }
+    maxRegionId.value = regIdGen;
+
+    // Remap regions
+    for (let i = 0; i < compactHeightfield.spanCount; i++) {
+        if ((srcReg[i] & BORDER_REG) === 0) {
+            srcReg[i] = regions[srcReg[i]].id;
+        }
+    }
+
+    return true;
+};
+
+/**
+ * Build layer regions using sweep-line algorithm.
+ * This creates regions that can be used for building navigation mesh layers.
+ * Layer regions handle overlapping walkable areas by creating separate layers.
+ */
+export const buildLayerRegions = (
+    compactHeightfield: CompactHeightfield,
+    borderSize: number,
+    minRegionArea: number,
+): boolean => {
+    const w = compactHeightfield.width;
+    const h = compactHeightfield.height;
+    let id = 1;
+
+    const srcReg = new Array(compactHeightfield.spanCount).fill(0);
+    const nsweeps = Math.max(compactHeightfield.width, compactHeightfield.height);
+    const sweeps: SweepSpan[] = new Array(nsweeps);
+
+    // Initialize sweeps array
+    for (let i = 0; i < nsweeps; i++) {
+        sweeps[i] = { rid: 0, id: 0, ns: 0, nei: 0 };
+    }
+
+    // Mark border regions
+    if (borderSize > 0) {
+        const bw = Math.min(w, borderSize);
+        const bh = Math.min(h, borderSize);
+
+        paintRectRegion(0, bw, 0, h, id | BORDER_REG, compactHeightfield, srcReg);
+        id++;
+        paintRectRegion(w - bw, w, 0, h, id | BORDER_REG, compactHeightfield, srcReg);
+        id++;
+        paintRectRegion(0, w, 0, bh, id | BORDER_REG, compactHeightfield, srcReg);
+        id++;
+        paintRectRegion(0, w, h - bh, h, id | BORDER_REG, compactHeightfield, srcReg);
+        id++;
+    }
+
+    compactHeightfield.borderSize = borderSize;
+
+    const prev: number[] = new Array(256);
+
+    // Sweep one line at a time
+    for (let y = borderSize; y < h - borderSize; y++) {
+        // Collect spans from this row
+        if (prev.length < id + 1) {
+            prev.length = id + 1;
+        }
+        prev.fill(0, 0, id);
+        let rid = 1;
+
+        for (let x = borderSize; x < w - borderSize; x++) {
+            const cell = compactHeightfield.cells[x + y * w];
+
+            for (let i = cell.index; i < cell.index + cell.count; i++) {
+                const span = compactHeightfield.spans[i];
+                if (compactHeightfield.areas[i] === NULL_AREA) continue;
+
+                // Check -x direction
+                let previd = 0;
+                if (getCon(span, 0) !== NOT_CONNECTED) {
+                    const ax = x + DIR_OFFSETS[0][0];
+                    const ay = y + DIR_OFFSETS[0][1];
+                    const ai = compactHeightfield.cells[ax + ay * w].index + getCon(span, 0);
+                    if (
+                        (srcReg[ai] & BORDER_REG) === 0 &&
+                        compactHeightfield.areas[i] === compactHeightfield.areas[ai]
+                    ) {
+                        previd = srcReg[ai];
+                    }
+                }
+
+                if (!previd) {
+                    previd = rid++;
+                    sweeps[previd].rid = previd;
+                    sweeps[previd].ns = 0;
+                    sweeps[previd].nei = 0;
+                }
+
+                // Check -y direction
+                if (getCon(span, 3) !== NOT_CONNECTED) {
+                    const ax = x + DIR_OFFSETS[3][0];
+                    const ay = y + DIR_OFFSETS[3][1];
+                    const ai = compactHeightfield.cells[ax + ay * w].index + getCon(span, 3);
+                    if (
+                        srcReg[ai] &&
+                        (srcReg[ai] & BORDER_REG) === 0 &&
+                        compactHeightfield.areas[i] === compactHeightfield.areas[ai]
+                    ) {
+                        const nr = srcReg[ai];
+                        if (!sweeps[previd].nei || sweeps[previd].nei === nr) {
+                            sweeps[previd].nei = nr;
+                            sweeps[previd].ns++;
+                            prev[nr]++;
+                        } else {
+                            sweeps[previd].nei = NULL_NEI;
+                        }
+                    }
+                }
+
+                srcReg[i] = previd;
+            }
+        }
+
+        // Create unique ID
+        for (let i = 1; i < rid; i++) {
+            if (
+                sweeps[i].nei !== NULL_NEI &&
+                sweeps[i].nei !== 0 &&
+                prev[sweeps[i].nei] === sweeps[i].ns
+            ) {
+                sweeps[i].id = sweeps[i].nei;
+            } else {
+                sweeps[i].id = id++;
+            }
+        }
+
+        // Remap IDs
+        for (let x = borderSize; x < w - borderSize; x++) {
+            const cell = compactHeightfield.cells[x + y * w];
+
+            for (let i = cell.index; i < cell.index + cell.count; i++) {
+                if (srcReg[i] > 0 && srcReg[i] < rid) {
+                    srcReg[i] = sweeps[srcReg[i]].id;
+                }
+            }
+        }
+    }
+
+    // Merge monotone regions to layers and remove small regions
+    compactHeightfield.maxRegions = id;
+    const maxRegionIdRef = { value: compactHeightfield.maxRegions };
+    
+    if (!mergeAndFilterLayerRegions(minRegionArea, compactHeightfield, srcReg, maxRegionIdRef)) {
+        return false;
+    }
+    
+    compactHeightfield.maxRegions = maxRegionIdRef.value;
+
+    // Store the result
+    for (let i = 0; i < compactHeightfield.spanCount; i++) {
+        compactHeightfield.spans[i].region = srcReg[i];
+    }
+
+    return true;
+};

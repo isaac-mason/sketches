@@ -1,7 +1,6 @@
 import type { Box3 } from '@/common/maaths';
+import { DIR_OFFSETS, MAX_HEIGHT, MAX_LAYERS, NOT_CONNECTED, NULL_AREA } from "./common";
 import type { Heightfield } from './heightfield';
-import { MAX_HEIGHT, MAX_LAYERS, NOT_CONNECTED, NULL_AREA } from "./common";
-import { DIR_OFFSETS } from './common';
 
 export type CompactHeightfieldSpan = {
     /** the lower extent of the span. measured from the heightfields base. */
@@ -500,4 +499,259 @@ export const erodeWalkableArea = (
             compactHeightfield.areas[spanIndex] = NULL_AREA;
         }
     }
+};
+
+/**
+ * Helper function to test if a point is inside a polygon (2D)
+ */
+const pointInPoly = (numVerts: number, verts: number[], point: number[]): boolean => {
+    let inside = false;
+    let j = numVerts - 1;
+    
+    for (let i = 0; i < numVerts; j = i++) {
+        const xi = verts[i * 3];     // x coordinate of vertex i
+        const zi = verts[i * 3 + 2]; // z coordinate of vertex i
+        const xj = verts[j * 3];     // x coordinate of vertex j
+        const zj = verts[j * 3 + 2]; // z coordinate of vertex j
+        
+        if (((zi > point[2]) !== (zj > point[2])) &&
+            (point[0] < (xj - xi) * (point[2] - zi) / (zj - zi) + xi)) {
+            inside = !inside;
+        }
+    }
+    
+    return inside;
+};
+
+/**
+ * Marks spans in the heightfield that intersect the specified box area with the given area ID.
+ */
+export const markBoxArea = (
+    boxMinBounds: number[],
+    boxMaxBounds: number[],
+    areaId: number,
+    compactHeightfield: CompactHeightfield,
+) => {
+    const xSize = compactHeightfield.width;
+    const zSize = compactHeightfield.height;
+    const zStride = xSize; // For readability
+
+    // Find the footprint of the box area in grid cell coordinates.
+    let minX = Math.floor((boxMinBounds[0] - compactHeightfield.bounds[0][0]) / compactHeightfield.cellSize);
+    const minY = Math.floor((boxMinBounds[1] - compactHeightfield.bounds[0][1]) / compactHeightfield.cellHeight);
+    let minZ = Math.floor((boxMinBounds[2] - compactHeightfield.bounds[0][2]) / compactHeightfield.cellSize);
+    let maxX = Math.floor((boxMaxBounds[0] - compactHeightfield.bounds[0][0]) / compactHeightfield.cellSize);
+    const maxY = Math.floor((boxMaxBounds[1] - compactHeightfield.bounds[0][1]) / compactHeightfield.cellHeight);
+    let maxZ = Math.floor((boxMaxBounds[2] - compactHeightfield.bounds[0][2]) / compactHeightfield.cellSize);
+
+    // Early-out if the box is outside the bounds of the grid.
+    if (maxX < 0) return;
+    if (minX >= xSize) return;
+    if (maxZ < 0) return;
+    if (minZ >= zSize) return;
+
+    // Clamp relevant bound coordinates to the grid.
+    if (minX < 0) minX = 0;
+    if (maxX >= xSize) maxX = xSize - 1;
+    if (minZ < 0) minZ = 0;
+    if (maxZ >= zSize) maxZ = zSize - 1;
+
+    // Mark relevant cells.
+    for (let z = minZ; z <= maxZ; ++z) {
+        for (let x = minX; x <= maxX; ++x) {
+            const cell = compactHeightfield.cells[x + z * zStride];
+            const maxSpanIndex = cell.index + cell.count;
+            
+            for (let spanIndex = cell.index; spanIndex < maxSpanIndex; ++spanIndex) {
+                const span = compactHeightfield.spans[spanIndex];
+
+                // Skip if the span is outside the box extents.
+                if (span.y < minY || span.y > maxY) {
+                    continue;
+                }
+
+                // Skip if the span has been removed.
+                if (compactHeightfield.areas[spanIndex] === NULL_AREA) {
+                    continue;
+                }
+
+                // Mark the span.
+                compactHeightfield.areas[spanIndex] = areaId;
+            }
+        }
+    }
+};
+
+/**
+ * Marks spans in the heightfield that intersect the specified convex polygon area with the given area ID.
+ */
+export const markPolyArea = (
+    verts: number[],
+    numVerts: number,
+    minY: number,
+    maxY: number,
+    areaId: number,
+    compactHeightfield: CompactHeightfield,
+) => {
+    const xSize = compactHeightfield.width;
+    const zSize = compactHeightfield.height;
+    const zStride = xSize; // For readability
+
+    // Compute the bounding box of the polygon
+    const bmin = [verts[0], minY, verts[2]];
+    const bmax = [verts[0], maxY, verts[2]];
+    
+    for (let i = 1; i < numVerts; ++i) {
+        const vertIndex = i * 3;
+        bmin[0] = Math.min(bmin[0], verts[vertIndex]);
+        bmin[2] = Math.min(bmin[2], verts[vertIndex + 2]);
+        bmax[0] = Math.max(bmax[0], verts[vertIndex]);
+        bmax[2] = Math.max(bmax[2], verts[vertIndex + 2]);
+    }
+
+    // Compute the grid footprint of the polygon
+    let minx = Math.floor((bmin[0] - compactHeightfield.bounds[0][0]) / compactHeightfield.cellSize);
+    const miny = Math.floor((bmin[1] - compactHeightfield.bounds[0][1]) / compactHeightfield.cellHeight);
+    let minz = Math.floor((bmin[2] - compactHeightfield.bounds[0][2]) / compactHeightfield.cellSize);
+    let maxx = Math.floor((bmax[0] - compactHeightfield.bounds[0][0]) / compactHeightfield.cellSize);
+    const maxy = Math.floor((bmax[1] - compactHeightfield.bounds[0][1]) / compactHeightfield.cellHeight);
+    let maxz = Math.floor((bmax[2] - compactHeightfield.bounds[0][2]) / compactHeightfield.cellSize);
+
+    // Early-out if the polygon lies entirely outside the grid.
+    if (maxx < 0) return;
+    if (minx >= xSize) return;
+    if (maxz < 0) return;
+    if (minz >= zSize) return;
+
+    // Clamp the polygon footprint to the grid
+    if (minx < 0) minx = 0;
+    if (maxx >= xSize) maxx = xSize - 1;
+    if (minz < 0) minz = 0;
+    if (maxz >= zSize) maxz = zSize - 1;
+
+    // TODO: Optimize.
+    for (let z = minz; z <= maxz; ++z) {
+        for (let x = minx; x <= maxx; ++x) {
+            const cell = compactHeightfield.cells[x + z * zStride];
+            const maxSpanIndex = cell.index + cell.count;
+            
+            for (let spanIndex = cell.index; spanIndex < maxSpanIndex; ++spanIndex) {
+                const span = compactHeightfield.spans[spanIndex];
+
+                // Skip if span is removed.
+                if (compactHeightfield.areas[spanIndex] === NULL_AREA) {
+                    continue;
+                }
+
+                // Skip if y extents don't overlap.
+                if (span.y < miny || span.y > maxy) {
+                    continue;
+                }
+
+                const point = [
+                    compactHeightfield.bounds[0][0] + (x + 0.5) * compactHeightfield.cellSize,
+                    0,
+                    compactHeightfield.bounds[0][2] + (z + 0.5) * compactHeightfield.cellSize
+                ];
+                
+                if (pointInPoly(numVerts, verts, point)) {
+                    compactHeightfield.areas[spanIndex] = areaId;
+                }
+            }
+        }
+    }
+};
+
+/**
+ * Helper function to perform insertion sort on a small array
+ */
+const insertSort = (arr: number[], length: number) => {
+    for (let i = 1; i < length; ++i) {
+        const key = arr[i];
+        let j = i - 1;
+        while (j >= 0 && arr[j] > key) {
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = key;
+    }
+};
+
+const _neighborAreas = new Array(9);
+
+/**
+ * Applies a median filter to walkable area types (based on area id), removing noise.
+ * filter is usually applied after applying area id's using functions
+ * such as #markBoxArea, #markConvexPolyArea, and #markCylinderArea.
+ */
+export const medianFilterWalkableArea = (compactHeightfield: CompactHeightfield): boolean => {
+    const xSize = compactHeightfield.width;
+    const zSize = compactHeightfield.height;
+    const zStride = xSize; // For readability
+
+    // Create a temporary array to store the filtered areas
+    const areas = new Uint8Array(compactHeightfield.spanCount);
+    areas.fill(0xff);
+
+    for (let z = 0; z < zSize; ++z) {
+        for (let x = 0; x < xSize; ++x) {
+            const cell = compactHeightfield.cells[x + z * zStride];
+            const maxSpanIndex = cell.index + cell.count;
+            
+            for (let spanIndex = cell.index; spanIndex < maxSpanIndex; ++spanIndex) {
+                const span = compactHeightfield.spans[spanIndex];
+                
+                if (compactHeightfield.areas[spanIndex] === NULL_AREA) {
+                    areas[spanIndex] = compactHeightfield.areas[spanIndex];
+                    continue;
+                }
+
+                // Collect neighbor areas (including center cell)
+                for (let neighborIndex = 0; neighborIndex < 9; ++neighborIndex) {
+                    _neighborAreas[neighborIndex] = compactHeightfield.areas[spanIndex];
+                }
+
+                // Check all 4 cardinal directions
+                for (let dir = 0; dir < 4; ++dir) {
+                    if (getCon(span, dir) === NOT_CONNECTED) {
+                        continue;
+                    }
+                    
+                    const aX = x + DIR_OFFSETS[dir][0];
+                    const aZ = z + DIR_OFFSETS[dir][1];
+                    const aIndex = compactHeightfield.cells[aX + aZ * zStride].index + getCon(span, dir);
+                    
+                    if (compactHeightfield.areas[aIndex] !== NULL_AREA) {
+                        _neighborAreas[dir * 2 + 0] = compactHeightfield.areas[aIndex];
+                    }
+
+                    // Check diagonal neighbor
+                    const aSpan = compactHeightfield.spans[aIndex];
+                    const dir2 = (dir + 1) & 0x3;
+                    const neighborConnection2 = getCon(aSpan, dir2);
+                    
+                    if (neighborConnection2 !== NOT_CONNECTED) {
+                        const bX = aX + DIR_OFFSETS[dir2][0];
+                        const bZ = aZ + DIR_OFFSETS[dir2][1];
+                        const bIndex = compactHeightfield.cells[bX + bZ * zStride].index + neighborConnection2;
+                        
+                        if (compactHeightfield.areas[bIndex] !== NULL_AREA) {
+                            _neighborAreas[dir * 2 + 1] = compactHeightfield.areas[bIndex];
+                        }
+                    }
+                }
+                
+                // Sort and take median (middle value)
+                insertSort(_neighborAreas, 9);
+                areas[spanIndex] = _neighborAreas[4];
+            }
+        }
+    }
+
+    // Copy filtered areas back to the heightfield
+    for (let i = 0; i < compactHeightfield.spanCount; ++i) {
+        compactHeightfield.areas[i] = areas[i];
+    }
+
+    return true;
 };
