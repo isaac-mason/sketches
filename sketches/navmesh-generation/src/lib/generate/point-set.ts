@@ -249,15 +249,20 @@ const findSeedTriangle = (grid: Grid, radius: number): SeedResult | null => {
     for (const cell of grid.cells) {
         if (cell.length === 0) continue;
         
-        // Compute average normal
+        // Only consider unused points
+        const unusedPoints = cell.filter(p => !p.used);
+        if (unusedPoints.length === 0) continue;
+        
+        // Compute average normal from unused points
         const avgNormal = vec3.create();
-        for (const p of cell) {
+        for (const p of unusedPoints) {
             vec3.add(avgNormal, avgNormal, p.normal);
         }
         vec3.normalize(avgNormal, avgNormal);
         
-        for (const p1 of cell) {
-            const neighborhood = getSphericalNeighborhood(grid, p1.pos, [p1.pos]);
+        for (const p1 of unusedPoints) {
+            const neighborhood = getSphericalNeighborhood(grid, p1.pos, [p1.pos])
+                .filter(p => !p.used); // Only consider unused neighbors
             
             // Sort by distance
             neighborhood.sort((a, b) => 
@@ -463,51 +468,13 @@ const findReverseEdgeOnFront = (edge: MeshEdge): MeshEdge | null => {
     return null;
 };
 
-/**
- * Performs the BPA (Ball Pivoting Algorithm) to convert a PointSet into a walkable triangle mesh.
- */
-export const pointSetToWalkableTriangleMeshBPA = (
-    pointSet: PointSet,
-    walkableSlopeAngle: number,
+const runBPAFromSeed = (
+    seedResult: SeedResult,
+    grid: Grid,
     radius: number,
-): TriangleMesh => {
-    // Convert PointSet to points with normals (assuming y-up)
-    const points: { pos: Vec3; normal: Vec3 }[] = [];
-    for (let i = 0; i < pointSet.positions.length; i += 3) {
-        points.push({
-            pos: vec3.fromValues(
-                pointSet.positions[i],
-                pointSet.positions[i + 1],
-                pointSet.positions[i + 2]
-            ),
-            normal: vec3.fromValues(0, 1, 0) // y-up normal
-        });
-    }
-    
-    if (points.length === 0) {
-        return {
-            positions: [],
-            indices: [],
-            areas: [],
-            bounds: pointSet.bounds
-        };
-    }
-    
-    const grid = createGrid(points, radius);
-    const seedResult = findSeedTriangle(grid, radius);
-    
-    if (!seedResult) {
-        return {
-            positions: [],
-            indices: [],
-            areas: [],
-            bounds: pointSet.bounds
-        };
-    }
-    
-    const triangles: Triangle[] = [];
-    const edges: MeshEdge[] = [];
-    
+    triangles: Triangle[],
+    edges: MeshEdge[]
+): void => {
     const { f: seed, ballCenter } = seedResult;
     outputTriangle(seed, triangles);
     
@@ -538,9 +505,9 @@ export const pointSetToWalkableTriangleMeshBPA = (
     e1.prev = e0; e1.next = e2;
     e2.prev = e1; e2.next = e0;
     
-    seed[0].edges = [e0, e2];
-    seed[1].edges = [e0, e1];
-    seed[2].edges = [e1, e2];
+    seed[0].edges.push(e0, e2);
+    seed[1].edges.push(e0, e1);
+    seed[2].edges.push(e1, e2);
     
     const front: MeshEdge[] = [e0, e1, e2];
     
@@ -562,6 +529,54 @@ export const pointSetToWalkableTriangleMeshBPA = (
         } else {
             e_ij.status = EdgeStatus.boundary;
         }
+    }
+};
+
+/**
+ * Performs the BPA (Ball Pivoting Algorithm) to convert a PointSet into a walkable triangle mesh.
+ * Handles multiple disconnected regions by running BPA multiple times.
+ */
+export const pointSetToWalkableTriangleMeshBPA = (
+    pointSet: PointSet,
+    walkableSlopeAngle: number,
+    radius: number,
+): TriangleMesh => {
+    // Convert PointSet to points with normals (assuming y-up)
+    const points: { pos: Vec3; normal: Vec3 }[] = [];
+    for (let i = 0; i < pointSet.positions.length; i += 3) {
+        points.push({
+            pos: vec3.fromValues(
+                pointSet.positions[i],
+                pointSet.positions[i + 1],
+                pointSet.positions[i + 2]
+            ),
+            normal: vec3.fromValues(0, 1, 0) // y-up normal
+        });
+    }
+    
+    if (points.length === 0) {
+        return {
+            positions: [],
+            indices: [],
+            areas: [],
+            bounds: pointSet.bounds
+        };
+    }
+    
+    const grid = createGrid(points, radius);
+    const triangles: Triangle[] = [];
+    const edges: MeshEdge[] = [];
+    
+    // Keep finding new seed triangles and running BPA until no more unused points exist
+    while (true) {
+        const seedResult = findSeedTriangle(grid, radius);
+        if (!seedResult) {
+            // No more seed triangles found, we're done
+            break;
+        }
+        
+        // Run BPA from this seed to create one connected component
+        runBPAFromSeed(seedResult, grid, radius, triangles, edges);
     }
     
     // Convert triangles to flat arrays
