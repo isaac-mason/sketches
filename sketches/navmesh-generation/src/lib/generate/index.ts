@@ -8,3 +8,4 @@ export * from './input-triangle-mesh';
 export * from './point-set';
 export * from './poly-mesh';
 export * from './poly-mesh-detail';
+export * from "./triangle-mesh-raycast";

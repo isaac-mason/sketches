@@ -5,7 +5,7 @@ import type { ContourSet } from '../generate/contour-set';
 import type { Heightfield } from '../generate/heightfield';
 import type { PolyMesh } from '../generate/poly-mesh';
 import type { PolyMeshDetail } from '../generate/poly-mesh-detail';
-import type { PointSet } from '../generate/point-set';
+import type { PointSet, TriangleMesh } from '../generate/point-set';
 
 type DebugObject = {
     object: THREE.Object3D;
@@ -1441,7 +1441,9 @@ export function createPolyMeshDetailHelper(polyMeshDetail: PolyMeshDetail): Debu
     };
 }
 
-export function createTriangleMeshWithAreasHelper(positions: ArrayLike<number>, indices: ArrayLike<number>, areas: ArrayLike<number>): DebugObject {
+export function createTriangleMeshWithAreasHelper(triangleMesh: TriangleMesh): DebugObject {
+    const { positions, indices, areas, bounds } = triangleMesh;
+
     if (positions.length === 0 || indices.length === 0) {
         const emptyGroup = new THREE.Group();
         return {
@@ -1449,6 +1451,8 @@ export function createTriangleMeshWithAreasHelper(positions: ArrayLike<number>, 
             dispose: () => {},
         };
     }
+
+    const [boundsMinX, boundsMinY, boundsMinZ] = bounds[0];
 
     // Arrays for triangle geometry
     const triPositions: number[] = [];
@@ -1480,9 +1484,9 @@ export function createTriangleMeshWithAreasHelper(positions: ArrayLike<number>, 
         for (let j = 0; j < 3; j++) {
             const vertIndex = indices[i + j] * 3;
             triPositions.push(
-                positions[vertIndex],
-                positions[vertIndex + 1],
-                positions[vertIndex + 2]
+                boundsMinX + positions[vertIndex],
+                boundsMinY + positions[vertIndex + 1],
+                boundsMinZ + positions[vertIndex + 2]
             );
             triColors.push(color.r, color.g, color.b);
         }
@@ -1499,17 +1503,17 @@ export function createTriangleMeshWithAreasHelper(positions: ArrayLike<number>, 
 
             // First vertex of edge
             linePositions.push(
-                positions[v1Index],
-                positions[v1Index + 1] + 0.01, // Slightly offset to avoid z-fighting
-                positions[v1Index + 2]
+                boundsMinX + positions[v1Index],
+                boundsMinY + positions[v1Index + 1] + 0.01, // Slightly offset to avoid z-fighting
+                boundsMinZ + positions[v1Index + 2]
             );
             lineColors.push(wireColor.r, wireColor.g, wireColor.b);
 
             // Second vertex of edge
             linePositions.push(
-                positions[v2Index],
-                positions[v2Index + 1] + 0.01,
-                positions[v2Index + 2]
+                boundsMinX + positions[v2Index],
+                boundsMinY + positions[v2Index + 1] + 0.01,
+                boundsMinZ + positions[v2Index + 2]
             );
             lineColors.push(wireColor.r, wireColor.g, wireColor.b);
         }

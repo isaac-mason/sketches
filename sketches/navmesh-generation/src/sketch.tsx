@@ -27,11 +27,10 @@ import {
     filterWalkableLowHeightSpans,
     markWalkableTriangles,
     rasterizeTriangles,
-    compactHeightfieldToPointSet,
     type PointSet,
-    pointSetToTriangleMesh,
-    reduceTriangleMesh,
+    pointSetToWalkableTriangleMeshBPA,
     type TriangleMesh,
+    triangleMeshToPointSet,
 } from './lib/generate';
 import {
     createCompactHeightfieldDistancesHelper,
@@ -514,9 +513,6 @@ type AltIntermediates = {
         positions: Float32Array;
         indices: Uint32Array;
     };
-    triAreaIds: Uint8Array;
-    heightfield: Heightfield;
-    compactHeightfield: CompactHeightfield;
     pointSet: PointSet;
     triangleMesh: TriangleMesh;
     reducedTriangleMesh: TriangleMesh;
@@ -528,9 +524,6 @@ const Alt = () => {
 
     const {
         showMesh,
-        showTriangleAreaIds,
-        showHeightfield,
-        showCompactHeightfieldSolid,
         showPointSet,
         showTriangleMesh,
         showReducedTriangleMesh,
@@ -538,18 +531,6 @@ const Alt = () => {
         showMesh: {
             label: 'Show Mesh',
             value: true,
-        },
-        showTriangleAreaIds: {
-            label: 'Show Triangle Area IDs',
-            value: false,
-        },
-        showHeightfield: {
-            label: 'Show Heightfield',
-            value: false,
-        },
-        showCompactHeightfieldSolid: {
-            label: 'Show Compact Heightfield Solid',
-            value: false,
         },
         showPointSet: {
             label: 'Show Point Set',
@@ -561,7 +542,7 @@ const Alt = () => {
         },
         showReducedTriangleMesh: {
             label: 'Show Reduced Triangle Mesh',
-            value: true,
+            value: false,
         },
     });
 
@@ -573,18 +554,9 @@ const Alt = () => {
         console.time('navmesh generation');
 
         /* 0. define generation parameters */
-        const cellSize = 0.1;
-        const cellHeight = 0.1;
-
-        const walkableRadiusWorld = 0.2;
-        const walkableRadiusVoxels = Math.ceil(walkableRadiusWorld / cellSize);
-
-        const walkableClimbWorld = 0.5;
-        const walkableClimbVoxels = Math.ceil(walkableClimbWorld / cellHeight);
-        const walkableHeightWorld = 0.25;
-        const walkableHeightVoxels = Math.ceil(
-            walkableHeightWorld / cellHeight,
-        );
+        const cellSize = 0.4;
+        const walkableSlopeAngle = 45; // degrees
+        const walkableHeight = 2;
 
         /* 1. get positions and indices from THREE.Mesh instances in the group */
 
@@ -602,108 +574,35 @@ const Alt = () => {
 
         console.timeEnd('get positions and indices');
 
-        /* 2. mark walkable triangles */
+        /* 2. generate walkable points using raycast-based approach */
 
-        console.time('mark walkable triangles');
-
-        const triAreaIds: Uint8Array = new Uint8Array(indices.length / 3).fill(
-            0,
-        );
-
-        markWalkableTriangles(positions, indices, triAreaIds, 45);
-
-        console.timeEnd('mark walkable triangles');
-
-        /* 3. rasterize the triangles to a voxel heightfield */
-
-        console.time('rasterize triangles');
+        console.time('generate walkable points via raycasting');
 
         const bounds = calculateMeshBounds(positions, indices, box3.create());
-        const [heightfieldWidth, heightfieldHeight] = calculateGridSize(
-            bounds,
-            cellSize,
-        );
-        const heightfield = createHeightfield(
-            heightfieldWidth,
-            heightfieldHeight,
-            bounds,
-            cellSize,
-            cellHeight,
-        );
 
-        rasterizeTriangles(
-            heightfield,
-            positions,
-            indices,
-            triAreaIds,
-            walkableClimbVoxels,
-        );
+        const pointSet = triangleMeshToPointSet(positions, indices, bounds, {
+            gridSize: cellSize,
+            walkableSlopeAngle,
+            walkableHeight,
+            maxRayDistance: 1000,
+        });
 
-        console.timeEnd('rasterize triangles');
+        console.timeEnd('generate walkable points via raycasting');
 
-        /* 4. filter walkable surfaces */
-
-        // Once all geoemtry is rasterized, we do initial pass of filtering to
-        // remove unwanted overhangs caused by the conservative rasterization
-        // as well as filter spans where the character cannot possibly stand.
-
-        console.time('filter walkable surfaces');
-
-        filterLowHangingWalkableObstacles(heightfield, walkableClimbVoxels);
-        filterLedgeSpans(
-            heightfield,
-            walkableHeightVoxels,
-            walkableClimbVoxels,
-        );
-        filterWalkableLowHeightSpans(heightfield, walkableHeightVoxels);
-
-        console.timeEnd('filter walkable surfaces');
-
-        /* 5. partition walkable surface to simple regions. */
-
-        // Compact the heightfield so that it is faster to handle from now on.
-        // This will result more cache coherent data as well as the neighbours
-        // between walkable cells will be calculated.
-
-        console.time('build compact heightfield');
-
-        const compactHeightfield = buildCompactHeightfield(
-            walkableHeightVoxels,
-            walkableClimbVoxels,
-            heightfield,
-        );
-
-        console.timeEnd('build compact heightfield');
-
-        /* 6. erode the walkable area by the agent radius / walkable radius */
-
-        console.time('erode walkable area');
-
-        erodeWalkableArea(walkableRadiusVoxels, compactHeightfield);
-
-        console.timeEnd('erode walkable area');
-
-        /* 7. generate point set from compact heightfield */
-
-        console.time('generate point set');
-
-        const pointSet = compactHeightfieldToPointSet(compactHeightfield);
-
-        console.timeEnd('generate point set');
-
-        /* 8. generate triangle mesh from point set */
+        /* 3. generate triangle mesh from point set */
 
         console.time('point set to triangle mesh');
 
-        const triangleMesh = pointSetToTriangleMesh(pointSet);
+        const triangleMesh = pointSetToWalkableTriangleMeshBPA(pointSet, walkableSlopeAngle, cellSize * 1.5);
 
         console.timeEnd('point set to triangle mesh');
 
-        /* 9. reduce the triangle mesh */
+        /* 4. reduce the triangle mesh */
 
         console.time('reduce triangle mesh');
 
-        const reducedTriangleMesh = reduceTriangleMesh(triangleMesh);
+        // const reducedTriangleMesh = reduceTriangleMesh(triangleMesh);
+        const reducedTriangleMesh = triangleMesh;
 
         console.timeEnd('reduce triangle mesh');
 
@@ -715,9 +614,6 @@ const Alt = () => {
                 positions,
                 indices,
             },
-            triAreaIds,
-            heightfield,
-            compactHeightfield,
             pointSet,
             triangleMesh,
             reducedTriangleMesh,
@@ -727,50 +623,6 @@ const Alt = () => {
 
         setIntermediates(intermediates);
     }, []);
-
-    // debug view of walkable triangles with area ids based vertex colors
-    useEffect(() => {
-        if (!intermediates || !showTriangleAreaIds) return;
-
-        const debugObject = createTriangleAreaIdsHelper(
-            intermediates.input,
-            intermediates.triAreaIds,
-        );
-        scene.add(debugObject.object);
-
-        return () => {
-            scene.remove(debugObject.object);
-            debugObject.dispose();
-        };
-    }, [showTriangleAreaIds, intermediates, scene]);
-
-    // debug view of the heightfield
-    useEffect(() => {
-        if (!intermediates || !showHeightfield) return;
-
-        const debugObject = createHeightfieldHelper(intermediates.heightfield);
-        scene.add(debugObject.object);
-
-        return () => {
-            scene.remove(debugObject.object);
-            debugObject.dispose();
-        };
-    }, [showHeightfield, intermediates, scene]);
-
-    // debug view of the compact heightfield - solid view
-    useEffect(() => {
-        if (!intermediates || !showCompactHeightfieldSolid) return;
-
-        const debugObject = createCompactHeightfieldSolidHelper(
-            intermediates.compactHeightfield,
-        );
-        scene.add(debugObject.object);
-
-        return () => {
-            scene.remove(debugObject.object);
-            debugObject.dispose();
-        };
-    }, [showCompactHeightfieldSolid, intermediates, scene]);
 
     // debug view of the point set
     useEffect(() => {
@@ -790,10 +642,9 @@ const Alt = () => {
         if (!intermediates || !showTriangleMesh) return;
 
         const debugObject = createTriangleMeshWithAreasHelper(
-            intermediates.triangleMesh.positions,
-            intermediates.triangleMesh.indices,
-            intermediates.triAreaIds,
+            intermediates.triangleMesh,
         );
+        debugObject.object.position.y += 0.01
         scene.add(debugObject.object);
 
         return () => {
@@ -807,9 +658,7 @@ const Alt = () => {
         if (!intermediates || !showReducedTriangleMesh) return;
 
         const debugObject = createTriangleMeshWithAreasHelper(
-            intermediates.reducedTriangleMesh.positions,
-            intermediates.reducedTriangleMesh.indices,
-            intermediates.triAreaIds,
+            intermediates.reducedTriangleMesh,
         );
         scene.add(debugObject.object);
 

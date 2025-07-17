@@ -1,17 +1,172 @@
 import { type Vec3, vec3 } from '@/common/maaths';
+import type { Box3 } from '@/common/maaths';
+import type { PointSet } from './point-set';
+import { NULL_AREA, WALKABLE_AREA } from './common';
+
+/**
+ * Options for triangle mesh to point set conversion
+ */
+export type TriangleMeshToPointSetOptions = {
+    /** Grid spacing for raycast origins */
+    gridSize: number;
+    /** Maximum walkable slope angle in degrees */
+    walkableSlopeAngle: number;
+    /** Minimum walkable height clearance */
+    walkableHeight: number;
+    /** Maximum raycast distance */
+    maxRayDistance?: number;
+};
+
+/**
+ * Generate walkable points from triangle mesh using raycast-based approach
+ *
+ * This function:
+ * 1. Creates a regular grid of raycast origins above the world
+ * 2. Casts rays downward from each grid point
+ * 3. Collects all hits along each ray
+ * 4. Determines walkability based on surface normal and overhead clearance
+ * 5. Returns a PointSet containing walkable points and their area classifications
+ */
+export const triangleMeshToPointSet = (
+    positions: Float32Array,
+    indices: Uint32Array,
+    bounds: Box3,
+    options: TriangleMeshToPointSetOptions,
+): PointSet => {
+    const mesh = createTriangleMeshBvh(positions, indices);
+
+    const {
+        gridSize,
+        walkableSlopeAngle,
+        walkableHeight,
+        maxRayDistance = 1000,
+    } = options;
+
+    const walkableSlopeCos = Math.cos((walkableSlopeAngle * Math.PI) / 180);
+
+    // Create pointSet after we have gridSize available
+    const pointSet: PointSet = {
+        positions: [],
+        areas: [],
+        bounds: [vec3.clone(bounds[0]), vec3.clone(bounds[1])],
+    };
+
+    const rayOrigin = vec3.create();
+    const rayDirection: Vec3 = [0, -1, 0]; // Ray pointing downward
+
+    // Start raycasting from above the highest point in the bounds
+    const rayStartY = bounds[1][1] + 10;
+
+    // Iterate over grid points in XZ plane
+    const [minX, minZ] = [bounds[0][0], bounds[0][2]];
+    const [maxX, maxZ] = [bounds[1][0], bounds[1][2]];
+
+    let totalHits = 0;
+    let totalRays = 0;
+
+    for (let x = minX; x <= maxX; x += gridSize) {
+        for (let z = minZ; z <= maxZ; z += gridSize) {
+            totalRays++;
+            // Set ray origin at this grid point, starting from above
+            vec3.set(rayOrigin, x, rayStartY, z);
+
+            // Cast ray downward and collect all hits
+            const hits = raycastTriangleMeshAll(
+                mesh,
+                {
+                    origin: rayOrigin,
+                    direction: rayDirection,
+                },
+                { maxDistance: maxRayDistance },
+            );
+
+            totalHits += hits.length;
+
+            // Process hits to determine walkability
+            processRayHits(hits, walkableSlopeCos, walkableHeight, pointSet);
+        }
+    }
+
+    return pointSet;
+};
+
+/**
+ * Process ray hits to determine walkable ground points
+ */
+const processRayHits = (
+    hits: RaycastHit[],
+    walkableSlopeCos: number,
+    walkableHeight: number,
+    pointSet: PointSet,
+): void => {
+    const boundsMin = pointSet.bounds[0];
+
+    for (let i = 0; i < hits.length; i++) {
+        const hit = hits[i];
+
+        // Check if surface is walkable based on slope
+        const isWalkableSlope = hit.normal[1] >= walkableSlopeCos; // Y component of normal
+
+        if (!isWalkableSlope) {
+            // This is a wall or steep slope - mark as non-walkable
+            // Convert world coordinates to bounds-relative coordinates
+            pointSet.positions.push(
+                hit.point[0] - boundsMin[0],
+                hit.point[1] - boundsMin[1],
+                hit.point[2] - boundsMin[2],
+            );
+            pointSet.areas.push(NULL_AREA);
+            continue;
+        }
+
+        // Check if there's enough overhead clearance
+        let hasOverheadClearance = true;
+
+        // Look for any non-walkable surface (ceiling) within walkableHeight above this point
+        for (let j = 0; j < hits.length; j++) {
+            if (j === i) continue;
+
+            const otherHit = hits[j];
+            const heightDiff = otherHit.point[1] - hit.point[1];
+
+            // If there's another surface above within walkableHeight
+            if (heightDiff > 0 && heightDiff < walkableHeight) {
+                // Check if the overhead surface is non-walkable (ceiling)
+                const isOverheadNonWalkable =
+                    otherHit.normal[1] < walkableSlopeCos;
+                if (isOverheadNonWalkable || otherHit.normal[1] < -0.5) {
+                    // Ceiling facing down
+                    hasOverheadClearance = false;
+                    break;
+                }
+            }
+        }
+
+        // Determine final area classification
+        const area = hasOverheadClearance ? WALKABLE_AREA : NULL_AREA;
+
+        // Convert world coordinates to bounds-relative coordinates
+        pointSet.positions.push(
+            hit.point[0] - boundsMin[0],
+            hit.point[1] - boundsMin[1],
+            hit.point[2] - boundsMin[2],
+        );
+        pointSet.areas.push(area);
+    }
+};
 
 /**
  * Represents a ray with origin and direction
  */
-export type Ray = {
+type Ray = {
     origin: Vec3;
     direction: Vec3;
-}
+};
 
 /**
  * Result of a ray-triangle intersection
  */
-export type RaycastHit = {
+type RaycastHit = {
     /** Distance along the ray where intersection occurred */
     distance: number;
     /** World position of the intersection point */
@@ -22,19 +177,19 @@ export type RaycastHit = {
     barycentric: Vec3;
     /** Index of the triangle that was hit (triangle index, not vertex index) */
     triangleIndex: number;
-}
+};
 
 /**
  * Configuration for raycasting
  */
-export type RaycastOptions = {
+type RaycastOptions = {
     /** Maximum distance to check for intersections. Default: Number.POSITIVE_INFINITY */
     maxDistance?: number;
     /** Whether to cull back-facing triangles. Default: true */
     cullBackFace?: boolean;
     /** Minimum distance to avoid self-intersection. Default: 0.0001 */
     minDistance?: number;
-}
+};
 
 // Temporary vectors for raycast calculations
 const _edge1 = vec3.create();
@@ -60,15 +215,19 @@ const _max = vec3.create();
  * @param options Raycast options
  * @returns Hit result or null if no intersection
  */
-export const rayTriangleIntersection = (
+const rayTriangleIntersection = (
     out: RaycastHit,
     ray: Ray,
     v0: Vec3,
     v1: Vec3,
     v2: Vec3,
-    options: RaycastOptions = {}
+    options: RaycastOptions = {},
 ): RaycastHit | null => {
-    const { maxDistance = Number.POSITIVE_INFINITY, cullBackFace = true, minDistance = 0.0001 } = options;
+    const {
+        maxDistance = Number.POSITIVE_INFINITY,
+        cullBackFace = true,
+        minDistance = 0.0001,
+    } = options;
 
     // Calculate edges
     vec3.subtract(_edge1, v1, v0);
@@ -140,32 +299,24 @@ export const rayTriangleIntersection = (
     out.triangleIndex = -1;
 
     return out;
-}
-
-/**
- * Get a point along a ray at a given distance
- * @param out Output vector to store the result
- * @param ray The ray
- * @param distance Distance along the ray
- * @returns The output vector for chaining
- */
-export const getPointOnRay = (out: Vec3, ray: Ray, distance: number): Vec3 => {
-    vec3.scaleAndAdd(out, ray.origin, ray.direction, distance);
-    return out;
-}
+};
 
 /**
  * Axis-Aligned Bounding Box
  */
-export type AABB = {
+type AABB = {
     min: Vec3;
     max: Vec3;
-}
+};
 
 /**
  * Test ray intersection with axis-aligned bounding box
  */
-export const rayAABBIntersection = (ray: Ray, aabb: AABB, maxDistance: number): boolean => {
+const rayAABBIntersection = (
+    ray: Ray,
+    aabb: AABB,
+    maxDistance: number,
+): boolean => {
     let tmin = 0;
     let tmax = maxDistance;
 
@@ -194,7 +345,7 @@ export const rayAABBIntersection = (ray: Ray, aabb: AABB, maxDistance: number): 
     }
 
     return tmax >= 0;
-}
+};
 
 // ============================================================================
 // Triangle Mesh Raycasting - Optimized for Nav Mesh Generation
@@ -203,102 +354,118 @@ export const rayAABBIntersection = (ray: Ray, aabb: AABB, maxDistance: number): 
 /**
  * Triangle with precomputed spatial data - optimized for nav mesh generation
  */
-export type Triangle = {
+type Triangle = {
     v0: Vec3;
     v1: Vec3;
     v2: Vec3;
     index: number;
     bounds: AABB;
     centroid: Vec3;
-}
+};
 
 /**
  * BVH Node for triangles
  */
-export type TriangleBVHNode = {
+type TriangleBVHNode = {
     bounds: AABB;
     // Leaf node
     triangles?: Triangle[];
     // Internal node
     left?: TriangleBVHNode;
     right?: TriangleBVHNode;
-}
+};
 
 /**
  * Triangle mesh with prebuilt BVH for fast raycasting
  */
-export type TriangleMesh = {
+type TriangleMeshBvh = {
     triangles: Triangle[];
-    bvh: TriangleBVHNode | null;
-}
+    bvh: TriangleBVHNode;
+};
 
 /**
  * Create a triangle with precomputed bounds and centroid
  */
-export const createTriangle = (v0: Vec3, v1: Vec3, v2: Vec3, index: number): Triangle => {
+const createTriangle = (
+    v0: Vec3,
+    v1: Vec3,
+    v2: Vec3,
+    index: number,
+): Triangle => {
     const triangle = {
         v0: vec3.clone(v0),
         v1: vec3.clone(v1),
         v2: vec3.clone(v2),
-        index
+        index,
     };
-    
+
     const bounds = calculateTriangleBounds(triangle);
     const centroid = calculateTriangleCentroid(triangle);
-    
+
     return {
         ...triangle,
         bounds,
-        centroid
+        centroid,
     };
-}
+};
 
 /**
  * Calculate triangle bounds directly
  */
-const calculateTriangleBounds = (triangle: Pick<Triangle, 'v0' | 'v1' | 'v2'>): AABB => {
+const calculateTriangleBounds = (
+    triangle: Pick<Triangle, 'v0' | 'v1' | 'v2'>,
+): AABB => {
     const { v0, v1, v2 } = triangle;
-    
-    vec3.set(_min,
+
+    vec3.set(
+        _min,
         Math.min(v0[0], v1[0], v2[0]),
         Math.min(v0[1], v1[1], v2[1]),
-        Math.min(v0[2], v1[2], v2[2])
+        Math.min(v0[2], v1[2], v2[2]),
     );
-    
-    vec3.set(_max,
+
+    vec3.set(
+        _max,
         Math.max(v0[0], v1[0], v2[0]),
         Math.max(v0[1], v1[1], v2[1]),
-        Math.max(v0[2], v1[2], v2[2])
+        Math.max(v0[2], v1[2], v2[2]),
     );
-    
+
     return {
         min: vec3.clone(_min),
-        max: vec3.clone(_max)
+        max: vec3.clone(_max),
     };
-}
+};
 
 /**
  * Calculate triangle centroid directly
  */
-const calculateTriangleCentroid = (triangle: Pick<Triangle, 'v0' | 'v1' | 'v2'>): Vec3 => {
+const calculateTriangleCentroid = (
+    triangle: Pick<Triangle, 'v0' | 'v1' | 'v2'>,
+): Vec3 => {
     const { v0, v1, v2 } = triangle;
     return [
         (v0[0] + v1[0] + v2[0]) / 3,
         (v0[1] + v1[1] + v2[1]) / 3,
-        (v0[2] + v1[2] + v2[2]) / 3
+        (v0[2] + v1[2] + v2[2]) / 3,
     ];
-}
+};
 
 /**
  * Create triangle mesh from positions and indices with prebuilt BVH
  */
-export const createTriangleMesh = (
-    positions: number[],
-    indices: number[],
-    maxTrianglesPerLeaf = 8
-): TriangleMesh => {
+const createTriangleMeshBvh = (
+    positions: ArrayLike<number>,
+    indices: ArrayLike<number>,
+    maxTrianglesPerLeaf = 8,
+): TriangleMeshBvh => {
     if (positions.length === 0 || indices.length === 0) {
-        return { triangles: [], bvh: null };
+        return {
+            triangles: [],
+            bvh: {
+                bounds: { min: [0, 0, 0], max: [0, 0, 0] },
+            },
+        };
     }
 
     if (indices.length % 3 !== 0) {
@@ -325,10 +492,10 @@ export const createTriangleMesh = (
     }
 
     // Build BVH
-    const bvh = triangles.length > 0 ? buildTriangleBVH(triangles, 0, 20, maxTrianglesPerLeaf) : null;
+    const bvh = buildTriangleBVH(triangles, 0, 20, maxTrianglesPerLeaf);
 
     return { triangles, bvh };
-}
+};
 
 /**
  * Build BVH for triangles using median split on longest axis
@@ -337,7 +504,7 @@ const buildTriangleBVH = (
     triangles: Triangle[],
     depth: number,
     maxDepth: number,
-    maxTrianglesPerLeaf: number
+    maxTrianglesPerLeaf: number,
 ): TriangleBVHNode => {
     // Calculate bounding box for all triangles
     const bounds = calculateTrianglesBounds(triangles);
@@ -364,9 +531,14 @@ const buildTriangleBVH = (
     return {
         bounds,
         left: buildTriangleBVH(left, depth + 1, maxDepth, maxTrianglesPerLeaf),
-        right: buildTriangleBVH(right, depth + 1, maxDepth, maxTrianglesPerLeaf)
+        right: buildTriangleBVH(
+            right,
+            depth + 1,
+            maxDepth,
+            maxTrianglesPerLeaf,
+        ),
     };
-}
+};
 
 /**
  * Calculate bounding box for array of triangles
@@ -388,23 +560,11 @@ const calculateTrianglesBounds = (triangles: Triangle[]): AABB => {
         }
     }
 
-    return { 
-        min: vec3.clone(_min), 
-        max: vec3.clone(_max) 
+    return {
+        min: vec3.clone(_min),
+        max: vec3.clone(_max),
     };
-}
-
-/**
- * Raycast against triangle mesh - optimized for nav mesh generation
- */
-export const raycastTriangleMesh = (
-    mesh: TriangleMesh,
-    ray: Ray,
-    options: RaycastOptions = {}
-): RaycastHit | null => {
-    if (!mesh.bvh) return null;
-    return raycastBVHNode(ray, mesh.bvh, options);
-}
+};
 
 /**
  * Raycast against BVH node
@@ -412,7 +572,7 @@ export const raycastTriangleMesh = (
 const raycastBVHNode = (
     ray: Ray,
     node: TriangleBVHNode,
-    options: RaycastOptions
+    options: RaycastOptions,
 ): RaycastHit | null => {
     // Test ray against bounding box
     const maxDistance = options.maxDistance || Number.POSITIVE_INFINITY;
@@ -426,10 +586,17 @@ const raycastBVHNode = (
         let closestDistance = maxDistance;
 
         for (const triangle of node.triangles) {
-            const hit = rayTriangleIntersection(_tempHit, ray, triangle.v0, triangle.v1, triangle.v2, {
-                ...options,
-                maxDistance: closestDistance
-            });
+            const hit = rayTriangleIntersection(
+                _tempHit,
+                ray,
+                triangle.v0,
+                triangle.v1,
+                triangle.v2,
+                {
+                    ...options,
+                    maxDistance: closestDistance,
+                },
+            );
 
             if (hit && hit.distance < closestDistance) {
                 closestDistance = hit.distance;
@@ -441,7 +608,7 @@ const raycastBVHNode = (
                         point: vec3.clone(hit.point),
                         normal: vec3.clone(hit.normal),
                         barycentric: vec3.clone(hit.barycentric),
-                        triangleIndex: hit.triangleIndex
+                        triangleIndex: hit.triangleIndex,
                     };
                 } else {
                     closestHit.distance = hit.distance;
@@ -458,12 +625,14 @@ const raycastBVHNode = (
 
     // Internal node - test children
     const leftHit = node.left ? raycastBVHNode(ray, node.left, options) : null;
-    const rightHit = node.right ? raycastBVHNode(ray, node.right, options) : null;
+    const rightHit = node.right
+        ? raycastBVHNode(ray, node.right, options)
+        : null;
 
     if (!leftHit) return rightHit;
     if (!rightHit) return leftHit;
     return leftHit.distance < rightHit.distance ? leftHit : rightHit;
-}
+};
 
 // Temporary hit object for reuse in BVH traversal
 const _tempHit: RaycastHit = {
@@ -471,23 +640,23 @@ const _tempHit: RaycastHit = {
     point: vec3.create(),
     normal: vec3.create(),
     barycentric: vec3.create(),
-    triangleIndex: -1
+    triangleIndex: -1,
 };
 
 /**
  * Raycast against triangle mesh and return all hits - for nav mesh generation
  */
-export const raycastTriangleMeshAll = (
-    mesh: TriangleMesh,
+const raycastTriangleMeshAll = (
+    mesh: TriangleMeshBvh,
     ray: Ray,
-    options: RaycastOptions = {}
+    options: RaycastOptions = {},
 ): RaycastHit[] => {
     if (!mesh.bvh) return [];
-    
+
     const hits: RaycastHit[] = [];
     raycastBVHNodeAll(ray, mesh.bvh, hits, options);
     return hits.sort((a, b) => a.distance - b.distance);
-}
+};
 
 /**
  * Raycast against BVH node and collect all hits
@@ -496,7 +665,7 @@ const raycastBVHNodeAll = (
     ray: Ray,
     node: TriangleBVHNode,
     hits: RaycastHit[],
-    options: RaycastOptions
+    options: RaycastOptions,
 ): void => {
     // Test ray against bounding box
     const maxDistance = options.maxDistance || Number.POSITIVE_INFINITY;
@@ -507,7 +676,14 @@ const raycastBVHNodeAll = (
     // Leaf node - test triangles
     if (node.triangles) {
         for (const triangle of node.triangles) {
-            const hit = rayTriangleIntersection(_tempHit, ray, triangle.v0, triangle.v1, triangle.v2, options);
+            const hit = rayTriangleIntersection(
+                _tempHit,
+                ray,
+                triangle.v0,
+                triangle.v1,
+                triangle.v2,
+                options,
+            );
             if (hit) {
                 hit.triangleIndex = triangle.index;
                 // Clone the temp hit to add to results
@@ -516,7 +692,7 @@ const raycastBVHNodeAll = (
                     point: vec3.clone(hit.point),
                     normal: vec3.clone(hit.normal),
                     barycentric: vec3.clone(hit.barycentric),
-                    triangleIndex: hit.triangleIndex
+                    triangleIndex: hit.triangleIndex,
                 });
             }
         }
@@ -526,4 +702,4 @@ const raycastBVHNodeAll = (
     // Internal node - test children
     if (node.left) raycastBVHNodeAll(ray, node.left, hits, options);
     if (node.right) raycastBVHNodeAll(ray, node.right, hits, options);
-}
+};
