@@ -48,11 +48,11 @@ import {
     getPositionsAndIndices,
 } from './lib/three';
 
-// const DungeonModel = () => {
-//     const gltf = useGLTF('/dungeon.gltf');
+const DungeonModel = () => {
+    const gltf = useGLTF('/dungeon.gltf');
 
-//     return <primitive object={gltf.scene} />;
-// };
+    return <primitive object={gltf.scene} />;
+};
 
 const NavTestModel = () => {
     const gltf = useGLTF('/nav-test.glb');
@@ -567,22 +567,22 @@ const HeightfieldBPA = () => {
         console.time('navmesh generation');
 
         /* 0. define generation parameters */
-        const cellSize = 0.2;
-        const cellHeight = 0.15;
+        const cellSize = 1;
+        const cellHeight = 0.2;
 
-        const walkableRadiusWorld = 0.2;
+        const walkableRadiusWorld = 0.1;
         const walkableRadiusVoxels = Math.ceil(walkableRadiusWorld / cellSize);
 
-        const walkableClimbWorld = 0.5;
+        const walkableClimbWorld = 1;
         const walkableClimbVoxels = Math.ceil(walkableClimbWorld / cellHeight);
         const walkableHeightWorld = 0.25;
         const walkableHeightVoxels = Math.ceil(
             walkableHeightWorld / cellHeight,
         );
 
-        const walkableSlopeAngleDegrees = 45;
+        const walkableSlopeAngleDegrees = 60;
 
-        const bpaRadius = 0.4;
+        const bpaRadius = cellSize * 1.5;
 
         /* 1. get positions and indices from THREE.Mesh instances in the group */
 
@@ -802,8 +802,8 @@ const HeightfieldBPA = () => {
     return (
         <>
             <group ref={group} visible={showMesh}>
-                {/* <DungeonModel /> */}
-                <NavTestModel />
+                <DungeonModel />
+                {/* <NavTestModel /> */}
             </group>
 
             <ambientLight intensity={0.5} />
@@ -860,7 +860,7 @@ const RaycastBPA = () => {
         console.time('navmesh generation');
 
         /* 0. define generation parameters */
-        const cellSize = 0.4;
+        const cellSize = 2;
         const walkableSlopeAngleDegrees = 60;
         const walkableHeight = 2;
         const bpaRadius = cellSize * 1.2;
@@ -982,8 +982,8 @@ const RaycastBPA = () => {
     return (
         <>
             <group ref={group} visible={showMesh}>
-                {/* <DungeonModel /> */}
-                <NavTestModel />
+                <DungeonModel />
+                {/* <NavTestModel /> */}
             </group>
 
             <ambientLight intensity={0.5} />

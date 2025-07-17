@@ -29,8 +29,10 @@ export const createFindNearestPolyResult = (): FindNearestPolyResult => {
     };
 };
 
-export const findNearestPoly = (navMesh: NavMesh, center: Vec3, halfExtents: Vec3, queryFilter: QueryFilter, result: FindNearestPolyResult): FindNearestPolyResult => {
+export const findNearestPoly = (result: FindNearestPolyResult, navMesh: NavMesh, center: Vec3, halfExtents: Vec3, queryFilter: QueryFilter): FindNearestPolyResult => {
+    // ...
 
+    return result;
 }
 
 // queryPolygons
