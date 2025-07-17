@@ -1,18 +1,29 @@
 import * as THREE from 'three';
-import { type ArrayLike, MESH_NULL_IDX, NULL_AREA, WALKABLE_AREA } from '../generate/common';
-import type { CompactHeightfield } from '../generate/compact-heightfield';
-import type { ContourSet } from '../generate/contour-set';
-import type { Heightfield } from '../generate/heightfield';
-import type { PolyMesh } from '../generate/poly-mesh';
-import type { PolyMeshDetail } from '../generate/poly-mesh-detail';
-import type { PointSet, TriangleMesh } from '../generate/point-set';
+import type {
+    CompactHeightfield,
+    ContourSet,
+    Heightfield,
+    PointSet,
+    PolyMesh,
+    PolyMeshDetail,
+    TriangleMesh,
+} from '../generate';
+import {
+    type ArrayLike,
+    MESH_NULL_IDX,
+    NULL_AREA,
+    WALKABLE_AREA,
+} from '../generate';
 
 type DebugObject = {
     object: THREE.Object3D;
     dispose: () => void;
 };
 
-export function createTriangleAreaIdsHelper(input: { positions: Float32Array, indices: Uint32Array }, triAreaIds: ArrayLike<number>): DebugObject {
+export function createTriangleAreaIdsHelper(
+    input: { positions: Float32Array; indices: Uint32Array },
+    triAreaIds: ArrayLike<number>,
+): DebugObject {
     const areaToColor: Record<number, THREE.Color> = {};
 
     const geometry = new THREE.BufferGeometry();
@@ -31,21 +42,32 @@ export function createTriangleAreaIdsHelper(input: { positions: Float32Array, in
 
         if (!color) {
             // hash area id to a color
-            color = new THREE.Color(`hsl(${(areaId * 137.5) % 360}, 100%, 50%)`);
+            color = new THREE.Color(
+                `hsl(${(areaId * 137.5) % 360}, 100%, 50%)`,
+            );
             areaToColor[areaId] = color;
         }
 
-        positions[positionsIndex++] = input.positions[input.indices[triangle * 3] * 3];
-        positions[positionsIndex++] = input.positions[input.indices[triangle * 3] * 3 + 1];
-        positions[positionsIndex++] = input.positions[input.indices[triangle * 3] * 3 + 2];
+        positions[positionsIndex++] =
+            input.positions[input.indices[triangle * 3] * 3];
+        positions[positionsIndex++] =
+            input.positions[input.indices[triangle * 3] * 3 + 1];
+        positions[positionsIndex++] =
+            input.positions[input.indices[triangle * 3] * 3 + 2];
 
-        positions[positionsIndex++] = input.positions[input.indices[triangle * 3 + 1] * 3];
-        positions[positionsIndex++] = input.positions[input.indices[triangle * 3 + 1] * 3 + 1];
-        positions[positionsIndex++] = input.positions[input.indices[triangle * 3 + 1] * 3 + 2];
+        positions[positionsIndex++] =
+            input.positions[input.indices[triangle * 3 + 1] * 3];
+        positions[positionsIndex++] =
+            input.positions[input.indices[triangle * 3 + 1] * 3 + 1];
+        positions[positionsIndex++] =
+            input.positions[input.indices[triangle * 3 + 1] * 3 + 2];
 
-        positions[positionsIndex++] = input.positions[input.indices[triangle * 3 + 2] * 3];
-        positions[positionsIndex++] = input.positions[input.indices[triangle * 3 + 2] * 3 + 1];
-        positions[positionsIndex++] = input.positions[input.indices[triangle * 3 + 2] * 3 + 2];
+        positions[positionsIndex++] =
+            input.positions[input.indices[triangle * 3 + 2] * 3];
+        positions[positionsIndex++] =
+            input.positions[input.indices[triangle * 3 + 2] * 3 + 1];
+        positions[positionsIndex++] =
+            input.positions[input.indices[triangle * 3 + 2] * 3 + 2];
 
         indices[indicesIndex++] = triangle * 3;
         indices[indicesIndex++] = triangle * 3 + 1;
@@ -120,7 +142,11 @@ export function createHeightfieldHelper(heightfield: Heightfield): DebugObject {
     // Create instanced mesh
     const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
     const material = new THREE.MeshBasicMaterial();
-    const instancedMesh = new THREE.InstancedMesh(boxGeometry, material, totalSpans);
+    const instancedMesh = new THREE.InstancedMesh(
+        boxGeometry,
+        material,
+        totalSpans,
+    );
 
     const matrix = new THREE.Matrix4();
 
@@ -186,7 +212,9 @@ export function createHeightfieldHelper(heightfield: Heightfield): DebugObject {
     };
 }
 
-export function createCompactHeightfieldSolidHelper(compactHeightfield: CompactHeightfield): DebugObject {
+export function createCompactHeightfieldSolidHelper(
+    compactHeightfield: CompactHeightfield,
+): DebugObject {
     const chf = compactHeightfield;
 
     // Count total quads to create geometry
@@ -232,7 +260,9 @@ export function createCompactHeightfieldSolidHelper(compactHeightfield: CompactH
                     color = new THREE.Color(0x000000); // RGB(0,0,0)
                 } else {
                     // Hash area id to a color for other areas
-                    color = new THREE.Color(`hsl(${(area * 137.5) % 360}, 70%, 60%)`);
+                    color = new THREE.Color(
+                        `hsl(${(area * 137.5) % 360}, 70%, 60%)`,
+                    );
                 }
 
                 // Calculate the top surface Y coordinate - using Recast convention (s.y+1)*ch
@@ -297,7 +327,9 @@ export function createCompactHeightfieldSolidHelper(compactHeightfield: CompactH
     };
 }
 
-export function createCompactHeightfieldDistancesHelper(compactHeightfield: CompactHeightfield): DebugObject {
+export function createCompactHeightfieldDistancesHelper(
+    compactHeightfield: CompactHeightfield,
+): DebugObject {
     const chf = compactHeightfield;
 
     // Check if distance field is available
@@ -352,7 +384,9 @@ export function createCompactHeightfieldDistancesHelper(compactHeightfield: Comp
                 const fy = chf.bounds[0][1] + (span.y + 1) * chf.cellHeight; // bmin[1] + (s.y+1) * ch
 
                 // Get distance value and scale to 0-255 range
-                const cd = Math.min(255, Math.floor(chf.distances[i] * dscale)) / 255.0;
+                const cd =
+                    Math.min(255, Math.floor(chf.distances[i] * dscale)) /
+                    255.0;
 
                 // Create grayscale color where higher distances are brighter
                 const color = new THREE.Color(cd, cd, cd);
@@ -416,7 +450,9 @@ export function createCompactHeightfieldDistancesHelper(compactHeightfield: Comp
     };
 }
 
-export function createCompactHeightfieldRegionsHelper(compactHeightfield: CompactHeightfield): DebugObject {
+export function createCompactHeightfieldRegionsHelper(
+    compactHeightfield: CompactHeightfield,
+): DebugObject {
     const chf = compactHeightfield;
 
     // Count total quads to create geometry
@@ -568,7 +604,9 @@ export function createRawContoursHelper(contourSet: ContourSet): DebugObject {
         const saturation = 70;
         const lightness = 60;
 
-        const color = new THREE.Color(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
+        const color = new THREE.Color(
+            `hsl(${hue}, ${saturation}%, ${lightness}%)`,
+        );
         return color.multiplyScalar(alpha);
     };
 
@@ -706,7 +744,9 @@ export function createRawContoursHelper(contourSet: ContourSet): DebugObject {
     };
 }
 
-export function createSimplifiedContoursHelper(contourSet: ContourSet): DebugObject {
+export function createSimplifiedContoursHelper(
+    contourSet: ContourSet,
+): DebugObject {
     if (!contourSet || contourSet.contours.length === 0) {
         const emptyGroup = new THREE.Group();
         return {
@@ -739,7 +779,9 @@ export function createSimplifiedContoursHelper(contourSet: ContourSet): DebugObj
         const saturation = 70;
         const lightness = 60;
 
-        const color = new THREE.Color(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
+        const color = new THREE.Color(
+            `hsl(${hue}, ${saturation}%, ${lightness}%)`,
+        );
         return color.multiplyScalar(alpha);
     };
 
@@ -749,7 +791,11 @@ export function createSimplifiedContoursHelper(contourSet: ContourSet): DebugObj
     };
 
     // Helper function to lerp between colors (similar to duLerpCol)
-    const lerpColor = (colorA: THREE.Color, colorB: THREE.Color, t: number): THREE.Color => {
+    const lerpColor = (
+        colorA: THREE.Color,
+        colorB: THREE.Color,
+        t: number,
+    ): THREE.Color => {
         return colorA.clone().lerp(colorB, t / 255.0);
     };
 
@@ -960,7 +1006,11 @@ export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
             }
 
             // Add triangle indices
-            triIndices.push(triVertexIndex, triVertexIndex + 1, triVertexIndex + 2);
+            triIndices.push(
+                triVertexIndex,
+                triVertexIndex + 1,
+                triVertexIndex + 2,
+            );
             triVertexIndex += 3;
         }
     }
@@ -980,7 +1030,8 @@ export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
             if (neighbor & 0x8000) continue; // Skip boundary edges
 
             const nj =
-                j + 1 >= nvp || polyMesh.polys[polyBase + j + 1] === MESH_NULL_IDX
+                j + 1 >= nvp ||
+                polyMesh.polys[polyBase + j + 1] === MESH_NULL_IDX
                     ? 0
                     : j + 1;
             const v1 = polyMesh.polys[polyBase + nj];
@@ -989,11 +1040,16 @@ export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
             for (let k = 0; k < 2; k++) {
                 const vertIndex = vertices[k] * 3;
                 const x = orig[0] + polyMesh.vertices[vertIndex] * cs;
-                const y = orig[1] + (polyMesh.vertices[vertIndex + 1] + 1) * ch + 0.1;
+                const y =
+                    orig[1] + (polyMesh.vertices[vertIndex + 1] + 1) * ch + 0.1;
                 const z = orig[2] + polyMesh.vertices[vertIndex + 2] * cs;
 
                 neighborLinePositions.push(x, y, z);
-                neighborLineColors.push(neighborColor.r, neighborColor.g, neighborColor.b);
+                neighborLineColors.push(
+                    neighborColor.r,
+                    neighborColor.g,
+                    neighborColor.b,
+                );
             }
         }
     }
@@ -1002,9 +1058,7 @@ export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
     const boundaryColor = new THREE.Color()
         .setRGB(0, 48 / 255, 64 / 255)
         .multiplyScalar(0.863); // RGB(0,48,64) with alpha 220/255
-    const portalColor = new THREE.Color()
-        .setRGB(1, 1, 1)
-        .multiplyScalar(0.5); // RGB(255,255,255) with alpha 128/255
+    const portalColor = new THREE.Color().setRGB(1, 1, 1).multiplyScalar(0.5); // RGB(255,255,255) with alpha 128/255
 
     for (let i = 0; i < polyMesh.nPolys; i++) {
         const polyBase = i * nvp * 2;
@@ -1017,7 +1071,10 @@ export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
             if ((neighbor & 0x8000) === 0) continue; // Skip non-boundary edges
 
             const nj =
-                j + 1 >= nvp || polyMesh.polys[polyBase + j + 1] === MESH_NULL_IDX ? 0 : j + 1;
+                j + 1 >= nvp ||
+                polyMesh.polys[polyBase + j + 1] === MESH_NULL_IDX
+                    ? 0
+                    : j + 1;
             const v1 = polyMesh.polys[polyBase + nj];
 
             // Check if this is a portal edge
@@ -1028,7 +1085,8 @@ export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
             for (let k = 0; k < 2; k++) {
                 const vertIndex = vertices[k] * 3;
                 const x = orig[0] + polyMesh.vertices[vertIndex] * cs;
-                const y = orig[1] + (polyMesh.vertices[vertIndex + 1] + 1) * ch + 0.1;
+                const y =
+                    orig[1] + (polyMesh.vertices[vertIndex + 1] + 1) * ch + 0.1;
                 const z = orig[2] + polyMesh.vertices[vertIndex + 2] * cs;
 
                 boundaryLinePositions.push(x, y, z);
@@ -1038,9 +1096,7 @@ export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
     }
 
     // Draw vertices (points)
-    const vertexColor = new THREE.Color()
-        .setRGB(0, 0, 0)
-        .multiplyScalar(0.863); // RGB(0,0,0) with alpha 220/255
+    const vertexColor = new THREE.Color().setRGB(0, 0, 0).multiplyScalar(0.863); // RGB(0,0,0) with alpha 220/255
     for (let i = 0; i < polyMesh.nVertices; i++) {
         const vertIndex = i * 3;
         const x = orig[0] + polyMesh.vertices[vertIndex] * cs;
@@ -1065,7 +1121,9 @@ export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
             'color',
             new THREE.BufferAttribute(new Float32Array(triColors), 3),
         );
-        triGeometry.setIndex(new THREE.BufferAttribute(new Uint32Array(triIndices), 1));
+        triGeometry.setIndex(
+            new THREE.BufferAttribute(new Uint32Array(triIndices), 1),
+        );
     }
 
     const triMaterial = new THREE.MeshBasicMaterial({
@@ -1088,7 +1146,10 @@ export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
         const neighborLineGeometry = new THREE.BufferGeometry();
         neighborLineGeometry.setAttribute(
             'position',
-            new THREE.BufferAttribute(new Float32Array(neighborLinePositions), 3),
+            new THREE.BufferAttribute(
+                new Float32Array(neighborLinePositions),
+                3,
+            ),
         );
         neighborLineGeometry.setAttribute(
             'color',
@@ -1102,7 +1163,10 @@ export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
             linewidth: 1.5,
         });
 
-        const neighborLines = new THREE.LineSegments(neighborLineGeometry, neighborLineMaterial);
+        const neighborLines = new THREE.LineSegments(
+            neighborLineGeometry,
+            neighborLineMaterial,
+        );
         group.add(neighborLines);
 
         disposables.push(() => {
@@ -1116,7 +1180,10 @@ export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
         const boundaryLineGeometry = new THREE.BufferGeometry();
         boundaryLineGeometry.setAttribute(
             'position',
-            new THREE.BufferAttribute(new Float32Array(boundaryLinePositions), 3),
+            new THREE.BufferAttribute(
+                new Float32Array(boundaryLinePositions),
+                3,
+            ),
         );
         boundaryLineGeometry.setAttribute(
             'color',
@@ -1130,7 +1197,10 @@ export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
             linewidth: 2.5,
         });
 
-        const boundaryLines = new THREE.LineSegments(boundaryLineGeometry, boundaryLineMaterial);
+        const boundaryLines = new THREE.LineSegments(
+            boundaryLineGeometry,
+            boundaryLineMaterial,
+        );
         group.add(boundaryLines);
 
         disposables.push(() => {
@@ -1178,7 +1248,9 @@ export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
     };
 }
 
-export function createPolyMeshDetailHelper(polyMeshDetail: PolyMeshDetail): DebugObject {
+export function createPolyMeshDetailHelper(
+    polyMeshDetail: PolyMeshDetail,
+): DebugObject {
     if (!polyMeshDetail || polyMeshDetail.nMeshes === 0) {
         const emptyGroup = new THREE.Group();
         return {
@@ -1239,13 +1311,17 @@ export function createPolyMeshDetailHelper(polyMeshDetail: PolyMeshDetail): Debu
                 triPositions.push(
                     polyMeshDetail.vertices[vBase],
                     polyMeshDetail.vertices[vBase + 1],
-                    polyMeshDetail.vertices[vBase + 2]
+                    polyMeshDetail.vertices[vBase + 2],
                 );
                 triColors.push(color.r, color.g, color.b);
             }
 
             // Add triangle indices
-            triIndices.push(triVertexIndex, triVertexIndex + 1, triVertexIndex + 2);
+            triIndices.push(
+                triVertexIndex,
+                triVertexIndex + 1,
+                triVertexIndex + 2,
+            );
             triVertexIndex += 3;
         }
 
@@ -1265,37 +1341,41 @@ export function createPolyMeshDetailHelper(polyMeshDetail: PolyMeshDetail): Debu
             const v0 = [
                 polyMeshDetail.vertices[v0Base],
                 polyMeshDetail.vertices[v0Base + 1],
-                polyMeshDetail.vertices[v0Base + 2]
+                polyMeshDetail.vertices[v0Base + 2],
             ];
             const v1 = [
                 polyMeshDetail.vertices[v1Base],
                 polyMeshDetail.vertices[v1Base + 1],
-                polyMeshDetail.vertices[v1Base + 2]
+                polyMeshDetail.vertices[v1Base + 2],
             ];
             const v2 = [
                 polyMeshDetail.vertices[v2Base],
                 polyMeshDetail.vertices[v2Base + 1],
-                polyMeshDetail.vertices[v2Base + 2]
+                polyMeshDetail.vertices[v2Base + 2],
             ];
 
             // Draw each edge
             const edges: [number[], number[], number][] = [
                 [v0, v1, (flags >> 0) & 1],
                 [v1, v2, (flags >> 1) & 1],
-                [v2, v0, (flags >> 2) & 1]
+                [v2, v0, (flags >> 2) & 1],
             ];
 
             for (const [va, vb, isExternal] of edges) {
-                const positions = isExternal ? externalLinePositions : internalLinePositions;
-                const colors = isExternal ? externalLineColors : internalLineColors;
+                const positions = isExternal
+                    ? externalLinePositions
+                    : internalLinePositions;
+                const colors = isExternal
+                    ? externalLineColors
+                    : internalLineColors;
 
                 // Add edge vertices
                 positions.push(va[0], va[1], va[2]);
                 positions.push(vb[0], vb[1], vb[2]);
 
                 // Add edge colors
-                const edgeColor = isExternal 
-                    ? new THREE.Color(0.3, 0.3, 0.3) 
+                const edgeColor = isExternal
+                    ? new THREE.Color(0.3, 0.3, 0.3)
                     : new THREE.Color(0.1, 0.1, 0.1);
                 colors.push(edgeColor.r, edgeColor.g, edgeColor.b);
                 colors.push(edgeColor.r, edgeColor.g, edgeColor.b);
@@ -1308,7 +1388,7 @@ export function createPolyMeshDetailHelper(polyMeshDetail: PolyMeshDetail): Debu
             vertexPositions.push(
                 polyMeshDetail.vertices[vBase],
                 polyMeshDetail.vertices[vBase + 1],
-                polyMeshDetail.vertices[vBase + 2]
+                polyMeshDetail.vertices[vBase + 2],
             );
 
             const vertColor = new THREE.Color(0.2, 0.2, 0.2);
@@ -1323,19 +1403,21 @@ export function createPolyMeshDetailHelper(polyMeshDetail: PolyMeshDetail): Debu
     const triGeometry = new THREE.BufferGeometry();
     triGeometry.setAttribute(
         'position',
-        new THREE.BufferAttribute(new Float32Array(triPositions), 3)
+        new THREE.BufferAttribute(new Float32Array(triPositions), 3),
     );
     triGeometry.setAttribute(
         'color',
-        new THREE.BufferAttribute(new Float32Array(triColors), 3)
+        new THREE.BufferAttribute(new Float32Array(triColors), 3),
     );
-    triGeometry.setIndex(new THREE.BufferAttribute(new Uint32Array(triIndices), 1));
+    triGeometry.setIndex(
+        new THREE.BufferAttribute(new Uint32Array(triIndices), 1),
+    );
 
     const triMaterial = new THREE.MeshBasicMaterial({
         vertexColors: true,
         transparent: true,
         opacity: 0.6,
-        side: THREE.DoubleSide
+        side: THREE.DoubleSide,
     });
 
     const triMesh = new THREE.Mesh(triGeometry, triMaterial);
@@ -1351,11 +1433,14 @@ export function createPolyMeshDetailHelper(polyMeshDetail: PolyMeshDetail): Debu
         const internalGeometry = new THREE.BufferGeometry();
         internalGeometry.setAttribute(
             'position',
-            new THREE.BufferAttribute(new Float32Array(internalLinePositions), 3)
+            new THREE.BufferAttribute(
+                new Float32Array(internalLinePositions),
+                3,
+            ),
         );
         internalGeometry.setAttribute(
             'color',
-            new THREE.BufferAttribute(new Float32Array(internalLineColors), 3)
+            new THREE.BufferAttribute(new Float32Array(internalLineColors), 3),
         );
 
         const internalMaterial = new THREE.LineBasicMaterial({
@@ -1365,7 +1450,10 @@ export function createPolyMeshDetailHelper(polyMeshDetail: PolyMeshDetail): Debu
             linewidth: 1.0,
         });
 
-        const internalLines = new THREE.LineSegments(internalGeometry, internalMaterial);
+        const internalLines = new THREE.LineSegments(
+            internalGeometry,
+            internalMaterial,
+        );
         group.add(internalLines);
 
         disposables.push(() => {
@@ -1379,11 +1467,14 @@ export function createPolyMeshDetailHelper(polyMeshDetail: PolyMeshDetail): Debu
         const externalGeometry = new THREE.BufferGeometry();
         externalGeometry.setAttribute(
             'position',
-            new THREE.BufferAttribute(new Float32Array(externalLinePositions), 3)
+            new THREE.BufferAttribute(
+                new Float32Array(externalLinePositions),
+                3,
+            ),
         );
         externalGeometry.setAttribute(
             'color',
-            new THREE.BufferAttribute(new Float32Array(externalLineColors), 3)
+            new THREE.BufferAttribute(new Float32Array(externalLineColors), 3),
         );
 
         const externalMaterial = new THREE.LineBasicMaterial({
@@ -1393,7 +1484,10 @@ export function createPolyMeshDetailHelper(polyMeshDetail: PolyMeshDetail): Debu
             linewidth: 2.0,
         });
 
-        const externalLines = new THREE.LineSegments(externalGeometry, externalMaterial);
+        const externalLines = new THREE.LineSegments(
+            externalGeometry,
+            externalMaterial,
+        );
         group.add(externalLines);
 
         disposables.push(() => {
@@ -1407,11 +1501,11 @@ export function createPolyMeshDetailHelper(polyMeshDetail: PolyMeshDetail): Debu
         const vertexGeometry = new THREE.BufferGeometry();
         vertexGeometry.setAttribute(
             'position',
-            new THREE.BufferAttribute(new Float32Array(vertexPositions), 3)
+            new THREE.BufferAttribute(new Float32Array(vertexPositions), 3),
         );
         vertexGeometry.setAttribute(
             'color',
-            new THREE.BufferAttribute(new Float32Array(vertexColors), 3)
+            new THREE.BufferAttribute(new Float32Array(vertexColors), 3),
         );
 
         const vertexMaterial = new THREE.PointsMaterial({
@@ -1441,7 +1535,9 @@ export function createPolyMeshDetailHelper(polyMeshDetail: PolyMeshDetail): Debu
     };
 }
 
-export function createTriangleMeshWithAreasHelper(triangleMesh: TriangleMesh): DebugObject {
+export function createTriangleMeshWithAreasHelper(
+    triangleMesh: TriangleMesh,
+): DebugObject {
     const { positions, indices, areas, bounds } = triangleMesh;
 
     if (positions.length === 0 || indices.length === 0) {
@@ -1486,7 +1582,7 @@ export function createTriangleMeshWithAreasHelper(triangleMesh: TriangleMesh): D
             triPositions.push(
                 boundsMinX + positions[vertIndex],
                 boundsMinY + positions[vertIndex + 1],
-                boundsMinZ + positions[vertIndex + 2]
+                boundsMinZ + positions[vertIndex + 2],
             );
             triColors.push(color.r, color.g, color.b);
         }
@@ -1496,7 +1592,7 @@ export function createTriangleMeshWithAreasHelper(triangleMesh: TriangleMesh): D
         triIndices.push(baseIndex, baseIndex + 1, baseIndex + 2);
 
         // Add wireframe edges
-        const wireColor = color.clone().multiplyScalar(0.7); // Darker version for wireframe
+        const wireColor = color.clone().multiplyScalar(0.3); // Darker version for wireframe
         for (let j = 0; j < 3; j++) {
             const v1Index = indices[i + j] * 3;
             const v2Index = indices[i + ((j + 1) % 3)] * 3;
@@ -1505,7 +1601,7 @@ export function createTriangleMeshWithAreasHelper(triangleMesh: TriangleMesh): D
             linePositions.push(
                 boundsMinX + positions[v1Index],
                 boundsMinY + positions[v1Index + 1] + 0.01, // Slightly offset to avoid z-fighting
-                boundsMinZ + positions[v1Index + 2]
+                boundsMinZ + positions[v1Index + 2],
             );
             lineColors.push(wireColor.r, wireColor.g, wireColor.b);
 
@@ -1513,7 +1609,7 @@ export function createTriangleMeshWithAreasHelper(triangleMesh: TriangleMesh): D
             linePositions.push(
                 boundsMinX + positions[v2Index],
                 boundsMinY + positions[v2Index + 1] + 0.01,
-                boundsMinZ + positions[v2Index + 2]
+                boundsMinZ + positions[v2Index + 2],
             );
             lineColors.push(wireColor.r, wireColor.g, wireColor.b);
         }
@@ -1527,13 +1623,15 @@ export function createTriangleMeshWithAreasHelper(triangleMesh: TriangleMesh): D
         const triGeometry = new THREE.BufferGeometry();
         triGeometry.setAttribute(
             'position',
-            new THREE.BufferAttribute(new Float32Array(triPositions), 3)
+            new THREE.BufferAttribute(new Float32Array(triPositions), 3),
         );
         triGeometry.setAttribute(
             'color',
-            new THREE.BufferAttribute(new Float32Array(triColors), 3)
+            new THREE.BufferAttribute(new Float32Array(triColors), 3),
         );
-        triGeometry.setIndex(new THREE.BufferAttribute(new Uint32Array(triIndices), 1));
+        triGeometry.setIndex(
+            new THREE.BufferAttribute(new Uint32Array(triIndices), 1),
+        );
 
         const triMaterial = new THREE.MeshBasicMaterial({
             vertexColors: true,
@@ -1556,11 +1654,11 @@ export function createTriangleMeshWithAreasHelper(triangleMesh: TriangleMesh): D
         const lineGeometry = new THREE.BufferGeometry();
         lineGeometry.setAttribute(
             'position',
-            new THREE.BufferAttribute(new Float32Array(linePositions), 3)
+            new THREE.BufferAttribute(new Float32Array(linePositions), 3),
         );
         lineGeometry.setAttribute(
             'color',
-            new THREE.BufferAttribute(new Float32Array(lineColors), 3)
+            new THREE.BufferAttribute(new Float32Array(lineColors), 3),
         );
 
         const lineMaterial = new THREE.LineBasicMaterial({
@@ -1621,7 +1719,8 @@ export function createPointSetHelper(pointSet: PointSet): DebugObject {
     const numPoints = pointSet.positions.length / 3;
     for (let i = 0; i < numPoints; i++) {
         const worldX = pointSet.bounds[0][0] + pointSet.positions[i * 3];
-        const worldY = pointSet.bounds[0][1] + pointSet.positions[i * 3 + 1] + 0.01; // Small offset above surface for visibility
+        const worldY =
+            pointSet.bounds[0][1] + pointSet.positions[i * 3 + 1] + 0.01; // Small offset above surface for visibility
         const worldZ = pointSet.bounds[0][2] + pointSet.positions[i * 3 + 2];
         const area = pointSet.areas[i];
 
@@ -1640,11 +1739,11 @@ export function createPointSetHelper(pointSet: PointSet): DebugObject {
     const pointGeometry = new THREE.BufferGeometry();
     pointGeometry.setAttribute(
         'position',
-        new THREE.BufferAttribute(new Float32Array(pointPositions), 3)
+        new THREE.BufferAttribute(new Float32Array(pointPositions), 3),
     );
     pointGeometry.setAttribute(
         'color',
-        new THREE.BufferAttribute(new Float32Array(pointColors), 3)
+        new THREE.BufferAttribute(new Float32Array(pointColors), 3),
     );
 
     // Create point material
@@ -1669,7 +1768,7 @@ export function createPointSetHelper(pointSet: PointSet): DebugObject {
     const instancedMesh = new THREE.InstancedMesh(
         sphereGeometry,
         new THREE.MeshBasicMaterial({ vertexColors: true }),
-        numPoints
+        numPoints,
     );
 
     const matrix = new THREE.Matrix4();
