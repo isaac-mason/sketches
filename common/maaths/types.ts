@@ -8,3 +8,5 @@ export type Mat3 = [e1: number, e2: number, e3: number, e4: number, e5: number, 
 export type Mat4 = [e1: number, e2: number, e3: number, e4: number, e5: number, e6: number, e7: number, e8: number, e9: number, e10: number, e11: number, e12: number, e13: number, e14: number, e15: number, e16: number];
 export type Mat2d = [e1: number, e2: number, e3: number, e4: number, e5: number, e6: number];
 export type Box3 = [min: Vec3, max: Vec3];
+export type EulerOrder = 'xyz' | 'xzy' | 'yxz' | 'yzx' | 'zxy' | 'zyx';
+export type Euler = [x: number, y: number, z: number, order?: EulerOrder];

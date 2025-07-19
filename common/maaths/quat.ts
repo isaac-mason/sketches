@@ -2,7 +2,7 @@ import * as common from './common';
 import * as mat3 from './mat3';
 import * as vec3 from './vec3';
 import * as vec4 from './vec4';
-import type { Quat, Vec3, Mat3 } from './types';
+import type { Quat, Vec3, Mat3, EulerOrder } from './types';
 
 /**
  * Creates a new identity quat
@@ -439,19 +439,25 @@ export function fromMat3(out: Quat, m: Mat3): Quat {
 }
 
 /**
- * Creates a quaternion from the given euler angle x, y, z.
+ * Creates a quaternion from the given euler angle x, y, z using the provided intrinsic order for the conversion.
  *
  * @param out the receiving quaternion
- * @param x Rotation around X axis in radians
- * @param y Rotation around Y axis in radians
- * @param z Rotation around Z axis in radians
- * @returns out
+ * @param x Angle to rotate around X axis in degrees.
+ * @param y Angle to rotate around Y axis in degrees.
+ * @param z Angle to rotate around Z axis in degrees.
+ * @param order Intrinsic order for conversion, default is zyx.
  */
-export function fromEuler(out: Quat, x: number, y: number, z: number): Quat {
-    const halfToRad = (0.5 * Math.PI) / 180.0;
+export function fromEuler(
+    out: Quat,
+    x: number,
+    y: number,
+    z: number,
+    order: EulerOrder = common.ANGLE_ORDER,
+): Quat {
+    const halfToRad = Math.PI / 360;
     x *= halfToRad;
-    y *= halfToRad;
     z *= halfToRad;
+    y *= halfToRad;
 
     const sx = Math.sin(x);
     const cx = Math.cos(x);
@@ -460,10 +466,52 @@ export function fromEuler(out: Quat, x: number, y: number, z: number): Quat {
     const sz = Math.sin(z);
     const cz = Math.cos(z);
 
-    out[0] = sx * cy * cz - cx * sy * sz;
-    out[1] = cx * sy * cz + sx * cy * sz;
-    out[2] = cx * cy * sz - sx * sy * cz;
-    out[3] = cx * cy * cz + sx * sy * sz;
+    switch (order) {
+        case 'xyz':
+            out[0] = sx * cy * cz + cx * sy * sz;
+            out[1] = cx * sy * cz - sx * cy * sz;
+            out[2] = cx * cy * sz + sx * sy * cz;
+            out[3] = cx * cy * cz - sx * sy * sz;
+            break;
+
+        case 'xzy':
+            out[0] = sx * cy * cz - cx * sy * sz;
+            out[1] = cx * sy * cz - sx * cy * sz;
+            out[2] = cx * cy * sz + sx * sy * cz;
+            out[3] = cx * cy * cz + sx * sy * sz;
+            break;
+
+        case 'yxz':
+            out[0] = sx * cy * cz + cx * sy * sz;
+            out[1] = cx * sy * cz - sx * cy * sz;
+            out[2] = cx * cy * sz - sx * sy * cz;
+            out[3] = cx * cy * cz + sx * sy * sz;
+            break;
+
+        case 'yzx':
+            out[0] = sx * cy * cz + cx * sy * sz;
+            out[1] = cx * sy * cz + sx * cy * sz;
+            out[2] = cx * cy * sz - sx * sy * cz;
+            out[3] = cx * cy * cz - sx * sy * sz;
+            break;
+
+        case 'zxy':
+            out[0] = sx * cy * cz - cx * sy * sz;
+            out[1] = cx * sy * cz + sx * cy * sz;
+            out[2] = cx * cy * sz + sx * sy * cz;
+            out[3] = cx * cy * cz - sx * sy * sz;
+            break;
+
+        case 'zyx':
+            out[0] = sx * cy * cz - cx * sy * sz;
+            out[1] = cx * sy * cz + sx * cy * sz;
+            out[2] = cx * cy * sz - sx * sy * cz;
+            out[3] = cx * cy * cz + sx * sy * sz;
+            break;
+
+        default:
+            throw new Error(`Unknown angle order ${order}`);
+    }
 
     return out;
 }
@@ -645,7 +693,7 @@ export const rotationTo = (() => {
             setAxisAngle(out, tmpvec3, Math.PI);
             return out;
         }
-        
+
         if (dot > 0.999999) {
             out[0] = 0;
             out[1] = 0;
