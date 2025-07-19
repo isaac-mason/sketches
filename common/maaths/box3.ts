@@ -6,6 +6,7 @@ export const create = (): Box3 => {
         [Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY],
     ];
 }
+
 /**
  * Check whether two bounding boxes overlap
  */
