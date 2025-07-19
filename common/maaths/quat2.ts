@@ -177,7 +177,7 @@ export function fromMat4(out: Quat2, a: Mat4): Quat2 {
 	//TODO Optimize this
 	const outer = quat.create();
 	mat4.getRotation(outer, a);
-	const t = new common.ARRAY_TYPE(3) as Vec3;
+	const t = [0, 0, 0] as Vec3;
 	mat4.getTranslation(t, a);
 	fromRotationTranslation(out, outer, t);
 	return out;

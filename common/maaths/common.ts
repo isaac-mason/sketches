@@ -5,9 +5,6 @@
 // Configuration Constants
 export const EPSILON = 0.000001;
 
-export let ARRAY_TYPE =
-  typeof Float32Array !== "undefined" ? Float32Array : Array;
-
 export const RANDOM = Math.random;
 export const ANGLE_ORDER = "zyx";
 
@@ -21,15 +18,6 @@ export function round(a: number): number {
   if (a >= 0) return Math.round(a);
 
   return a % 0.5 === 0 ? Math.floor(a) : Math.round(a);
-}
-
-/**
- * Sets the type of array used when creating new vectors and matrices
- *
- * @param type Array type, such as Float32Array or Array
- */
-export function setMatrixArrayType(type: Float32ArrayConstructor | ArrayConstructor): void {
-  ARRAY_TYPE = type;
 }
 
 const degree = Math.PI / 180;

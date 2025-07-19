@@ -17,10 +17,7 @@ export function create(): Vec2 {
  * @returns a new 2D vector
  */
 export function clone(a: Vec2): Vec2 {
-    const out = create();
-    out[0] = a[0];
-    out[1] = a[1];
-    return out;
+    return [a[0], a[1]];
 }
 
 /**
@@ -31,10 +28,7 @@ export function clone(a: Vec2): Vec2 {
  * @returns a new 2D vector
  */
 export function fromValues(x: number, y: number): Vec2 {
-    const out = new common.ARRAY_TYPE(2) as Vec2;
-    out[0] = x;
-    out[1] = y;
-    return out;
+    return [x, y];
 }
 
 /**

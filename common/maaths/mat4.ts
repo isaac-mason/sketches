@@ -1039,7 +1039,7 @@ export function fromRotationTranslation(out: Mat4, q: Quat | Quat2, v: Vec3): Ma
  * @returns mat4 receiving operation result
  */
 export function fromQuat2(out: Mat4, a: Quat2): Mat4 {
-	const translation = new common.ARRAY_TYPE(3) as Vec3;
+	const translation = [0, 0, 0] as Vec3;
 	const bx = -a[0];
 	const by = -a[1];
 	const bz = -a[2];
@@ -1119,7 +1119,7 @@ export function getScaling(out: Vec3, mat: Mat4): Vec3 {
  * @return out
  */
 export function getRotation(out: Quat, mat: Mat4): Quat {
-	const scaling = new common.ARRAY_TYPE(3) as Vec3;
+	const scaling = [0, 0, 0] as Vec3;
 	getScaling(scaling, mat);
 
 	const is1 = 1 / scaling[0];
