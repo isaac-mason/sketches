@@ -61,3 +61,32 @@ export function equals(a: number, b: number, epsilon = EPSILON): boolean {
 export const clamp = (value: number, min: number, max: number): number => {
     return Math.max(min, Math.min(max, value));
 };
+
+/**
+ * Remaps a number from one range to another.
+ */
+export function remap(
+	number: number,
+	inLow: number,
+	inHigh: number,
+	outLow: number,
+	outHigh: number,
+): number {
+	const scale = (number - inLow) / (inHigh - inLow);
+	return outLow + scale * (outHigh - outLow);
+}
+
+/**
+ * Remaps a number from one range to another, clamping the result to the output range.
+ */
+export function remapClamp(
+	value: number,
+	inLow: number,
+	inHigh: number,
+	outLow: number,
+	outHigh: number,
+): number {
+	const scale = (value - inLow) / (inHigh - inLow);
+	const remapped = outLow + scale * (outHigh - outLow);
+	return Math.max(outLow, Math.min(outHigh, remapped));
+}
