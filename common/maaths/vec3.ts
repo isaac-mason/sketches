@@ -507,9 +507,9 @@ export function random(out: Vec3, scale?: number): Vec3 {
  * @returns out
  */
 export function transformMat4(out: Vec3, a: Vec3, m: Mat4): Vec3 {
-    const x = a[0],
-        y = a[1],
-        z = a[2];
+    const x = a[0];
+    const y = a[1];
+    const z = a[2];
     let w = m[3] * x + m[7] * y + m[11] * z + m[15];
     w = w || 1.0;
     out[0] = (m[0] * x + m[4] * y + m[8] * z + m[12]) / w;

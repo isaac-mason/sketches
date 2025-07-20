@@ -1,7 +1,7 @@
-import * as common from "./common";
-import * as quat from "./quat";
-import * as mat4 from "./mat4";
-import type { Quat2, Quat, Vec3, Mat4 } from "./types";
+import * as common from './common';
+import * as quat from './quat';
+import * as mat4 from './mat4';
+import type { Quat2, Quat, Vec3, Mat4 } from './types';
 
 /**
  * Creates a new identity dual quat
@@ -9,15 +9,10 @@ import type { Quat2, Quat, Vec3, Mat4 } from "./types";
  * @returns a new dual quaternion [real -> rotation, dual -> translation]
  */
 export function create(): Quat2 {
-	return [
-		0,
-		0,
-		0,
-		1, // real part
-		0,
-		0,
-		0,
-		0, // dual part
+    // biome-ignore format:skip
+    return [
+		0, 0, 0, 1, // real part
+		0, 0, 0, 0, // dual part
 	];
 }
 
@@ -29,16 +24,16 @@ export function create(): Quat2 {
  * @function
  */
 export function clone(a: Quat2): Quat2 {
-	const dq = create();
-	dq[0] = a[0];
-	dq[1] = a[1];
-	dq[2] = a[2];
-	dq[3] = a[3];
-	dq[4] = a[4];
-	dq[5] = a[5];
-	dq[6] = a[6];
-	dq[7] = a[7];
-	return dq;
+    const dq = create();
+    dq[0] = a[0];
+    dq[1] = a[1];
+    dq[2] = a[2];
+    dq[3] = a[3];
+    dq[4] = a[4];
+    dq[5] = a[5];
+    dq[6] = a[6];
+    dq[7] = a[7];
+    return dq;
 }
 
 /**
@@ -55,17 +50,26 @@ export function clone(a: Quat2): Quat2 {
  * @returns new dual quaternion
  * @function
  */
-export function fromValues(x1: number, y1: number, z1: number, w1: number, x2: number, y2: number, z2: number, w2: number): Quat2 {
-	const dq = create();
-	dq[0] = x1;
-	dq[1] = y1;
-	dq[2] = z1;
-	dq[3] = w1;
-	dq[4] = x2;
-	dq[5] = y2;
-	dq[6] = z2;
-	dq[7] = w2;
-	return dq;
+export function fromValues(
+    x1: number,
+    y1: number,
+    z1: number,
+    w1: number,
+    x2: number,
+    y2: number,
+    z2: number,
+    w2: number,
+): Quat2 {
+    const dq = create();
+    dq[0] = x1;
+    dq[1] = y1;
+    dq[2] = z1;
+    dq[3] = w1;
+    dq[4] = x2;
+    dq[5] = y2;
+    dq[6] = z2;
+    dq[7] = w2;
+    return dq;
 }
 
 /**
@@ -81,20 +85,28 @@ export function fromValues(x1: number, y1: number, z1: number, w1: number, x2: n
  * @returns new dual quaternion
  * @function
  */
-export function fromRotationTranslationValues(x1: number, y1: number, z1: number, w1: number, x2: number, y2: number, z2: number): Quat2 {
-	const dq = create();
-	dq[0] = x1;
-	dq[1] = y1;
-	dq[2] = z1;
-	dq[3] = w1;
-	const ax = x2 * 0.5;
-	const ay = y2 * 0.5;
-	const az = z2 * 0.5;
-	dq[4] = ax * w1 + ay * z1 - az * y1;
-	dq[5] = ay * w1 + az * x1 - ax * z1;
-	dq[6] = az * w1 + ax * y1 - ay * x1;
-	dq[7] = -ax * x1 - ay * y1 - az * z1;
-	return dq;
+export function fromRotationTranslationValues(
+    x1: number,
+    y1: number,
+    z1: number,
+    w1: number,
+    x2: number,
+    y2: number,
+    z2: number,
+): Quat2 {
+    const dq = create();
+    dq[0] = x1;
+    dq[1] = y1;
+    dq[2] = z1;
+    dq[3] = w1;
+    const ax = x2 * 0.5;
+    const ay = y2 * 0.5;
+    const az = z2 * 0.5;
+    dq[4] = ax * w1 + ay * z1 - az * y1;
+    dq[5] = ay * w1 + az * x1 - ax * z1;
+    dq[6] = az * w1 + ax * y1 - ay * x1;
+    dq[7] = -ax * x1 - ay * y1 - az * z1;
+    return dq;
 }
 
 /**
@@ -107,22 +119,22 @@ export function fromRotationTranslationValues(x1: number, y1: number, z1: number
  * @function
  */
 export function fromRotationTranslation(out: Quat2, q: Quat, t: Vec3): Quat2 {
-	const ax = t[0] * 0.5;
-	const ay = t[1] * 0.5;
-	const az = t[2] * 0.5;
-	const bx = q[0];
-	const by = q[1];
-	const bz = q[2];
-	const bw = q[3];
-	out[0] = bx;
-	out[1] = by;
-	out[2] = bz;
-	out[3] = bw;
-	out[4] = ax * bw + ay * bz - az * by;
-	out[5] = ay * bw + az * bx - ax * bz;
-	out[6] = az * bw + ax * by - ay * bx;
-	out[7] = -ax * bx - ay * by - az * bz;
-	return out;
+    const ax = t[0] * 0.5;
+    const ay = t[1] * 0.5;
+    const az = t[2] * 0.5;
+    const bx = q[0];
+    const by = q[1];
+    const bz = q[2];
+    const bw = q[3];
+    out[0] = bx;
+    out[1] = by;
+    out[2] = bz;
+    out[3] = bw;
+    out[4] = ax * bw + ay * bz - az * by;
+    out[5] = ay * bw + az * bx - ax * bz;
+    out[6] = az * bw + ax * by - ay * bx;
+    out[7] = -ax * bx - ay * by - az * bz;
+    return out;
 }
 
 /**
@@ -134,15 +146,15 @@ export function fromRotationTranslation(out: Quat2, q: Quat, t: Vec3): Quat2 {
  * @function
  */
 export function fromTranslation(out: Quat2, t: Vec3): Quat2 {
-	out[0] = 0;
-	out[1] = 0;
-	out[2] = 0;
-	out[3] = 1;
-	out[4] = t[0] * 0.5;
-	out[5] = t[1] * 0.5;
-	out[6] = t[2] * 0.5;
-	out[7] = 0;
-	return out;
+    out[0] = 0;
+    out[1] = 0;
+    out[2] = 0;
+    out[3] = 1;
+    out[4] = t[0] * 0.5;
+    out[5] = t[1] * 0.5;
+    out[6] = t[2] * 0.5;
+    out[7] = 0;
+    return out;
 }
 
 /**
@@ -154,15 +166,15 @@ export function fromTranslation(out: Quat2, t: Vec3): Quat2 {
  * @function
  */
 export function fromRotation(out: Quat2, q: Quat): Quat2 {
-	out[0] = q[0];
-	out[1] = q[1];
-	out[2] = q[2];
-	out[3] = q[3];
-	out[4] = 0;
-	out[5] = 0;
-	out[6] = 0;
-	out[7] = 0;
-	return out;
+    out[0] = q[0];
+    out[1] = q[1];
+    out[2] = q[2];
+    out[3] = q[3];
+    out[4] = 0;
+    out[5] = 0;
+    out[6] = 0;
+    out[7] = 0;
+    return out;
 }
 
 /**
@@ -174,13 +186,13 @@ export function fromRotation(out: Quat2, q: Quat): Quat2 {
  * @function
  */
 export function fromMat4(out: Quat2, a: Mat4): Quat2 {
-	//TODO Optimize this
-	const outer = quat.create();
-	mat4.getRotation(outer, a);
-	const t = [0, 0, 0] as Vec3;
-	mat4.getTranslation(t, a);
-	fromRotationTranslation(out, outer, t);
-	return out;
+    //TODO Optimize this
+    const outer = quat.create();
+    mat4.getRotation(outer, a);
+    const t = [0, 0, 0] as Vec3;
+    mat4.getTranslation(t, a);
+    fromRotationTranslation(out, outer, t);
+    return out;
 }
 
 /**
@@ -192,15 +204,15 @@ export function fromMat4(out: Quat2, a: Mat4): Quat2 {
  * @function
  */
 export function copy(out: Quat2, a: Quat2): Quat2 {
-	out[0] = a[0];
-	out[1] = a[1];
-	out[2] = a[2];
-	out[3] = a[3];
-	out[4] = a[4];
-	out[5] = a[5];
-	out[6] = a[6];
-	out[7] = a[7];
-	return out;
+    out[0] = a[0];
+    out[1] = a[1];
+    out[2] = a[2];
+    out[3] = a[3];
+    out[4] = a[4];
+    out[5] = a[5];
+    out[6] = a[6];
+    out[7] = a[7];
+    return out;
 }
 
 /**
@@ -210,15 +222,15 @@ export function copy(out: Quat2, a: Quat2): Quat2 {
  * @returns out
  */
 export function identity(out: Quat2): Quat2 {
-	out[0] = 0;
-	out[1] = 0;
-	out[2] = 0;
-	out[3] = 1;
-	out[4] = 0;
-	out[5] = 0;
-	out[6] = 0;
-	out[7] = 0;
-	return out;
+    out[0] = 0;
+    out[1] = 0;
+    out[2] = 0;
+    out[3] = 1;
+    out[4] = 0;
+    out[5] = 0;
+    out[6] = 0;
+    out[7] = 0;
+    return out;
 }
 
 /**
@@ -236,17 +248,27 @@ export function identity(out: Quat2): Quat2 {
  * @returns out
  * @function
  */
-export function set(out: Quat2, x1: number, y1: number, z1: number, w1: number, x2: number, y2: number, z2: number, w2: number): Quat2 {
-	out[0] = x1;
-	out[1] = y1;
-	out[2] = z1;
-	out[3] = w1;
+export function set(
+    out: Quat2,
+    x1: number,
+    y1: number,
+    z1: number,
+    w1: number,
+    x2: number,
+    y2: number,
+    z2: number,
+    w2: number,
+): Quat2 {
+    out[0] = x1;
+    out[1] = y1;
+    out[2] = z1;
+    out[3] = w1;
 
-	out[4] = x2;
-	out[5] = y2;
-	out[6] = z2;
-	out[7] = w2;
-	return out;
+    out[4] = x2;
+    out[5] = y2;
+    out[6] = z2;
+    out[7] = w2;
+    return out;
 }
 
 /**
@@ -264,11 +286,11 @@ export const getReal = quat.copy;
  * @return dual part
  */
 export function getDual(out: Quat, a: Quat2): Quat {
-	out[0] = a[4];
-	out[1] = a[5];
-	out[2] = a[6];
-	out[3] = a[7];
-	return out;
+    out[0] = a[4];
+    out[1] = a[5];
+    out[2] = a[6];
+    out[3] = a[7];
+    return out;
 }
 
 /**
@@ -290,11 +312,11 @@ export const setReal = quat.copy;
  * @function
  */
 export function setDual(out: Quat2, q: Quat): Quat2 {
-	out[4] = q[0];
-	out[5] = q[1];
-	out[6] = q[2];
-	out[7] = q[3];
-	return out;
+    out[4] = q[0];
+    out[5] = q[1];
+    out[6] = q[2];
+    out[7] = q[3];
+    return out;
 }
 
 /**
@@ -304,18 +326,18 @@ export function setDual(out: Quat2, q: Quat): Quat2 {
  * @return translation
  */
 export function getTranslation(out: Vec3, a: Quat2): Vec3 {
-	const ax = a[4];
-	const ay = a[5];
-	const az = a[6];
-	const aw = a[7];
-	const bx = -a[0];
-	const by = -a[1];
-	const bz = -a[2];
-	const bw = a[3];
-	out[0] = (ax * bw + aw * bx + ay * bz - az * by) * 2;
-	out[1] = (ay * bw + aw * by + az * bx - ax * bz) * 2;
-	out[2] = (az * bw + aw * bz + ax * by - ay * bx) * 2;
-	return out;
+    const ax = a[4];
+    const ay = a[5];
+    const az = a[6];
+    const aw = a[7];
+    const bx = -a[0];
+    const by = -a[1];
+    const bz = -a[2];
+    const bw = a[3];
+    out[0] = (ax * bw + aw * bx + ay * bz - az * by) * 2;
+    out[1] = (ay * bw + aw * by + az * bx - ax * bz) * 2;
+    out[2] = (az * bw + aw * bz + ax * by - ay * bx) * 2;
+    return out;
 }
 
 /**
@@ -327,26 +349,26 @@ export function getTranslation(out: Vec3, a: Quat2): Vec3 {
  * @returns out
  */
 export function translate(out: Quat2, a: Quat2, v: Vec3): Quat2 {
-	const ax1 = a[0];
-	const ay1 = a[1];
-	const az1 = a[2];
-	const aw1 = a[3];
-	const bx1 = v[0] * 0.5;
-	const by1 = v[1] * 0.5;
-	const bz1 = v[2] * 0.5;
-	const ax2 = a[4];
-	const ay2 = a[5];
-	const az2 = a[6];
-	const aw2 = a[7];
-	out[0] = ax1;
-	out[1] = ay1;
-	out[2] = az1;
-	out[3] = aw1;
-	out[4] = aw1 * bx1 + ay1 * bz1 - az1 * by1 + ax2;
-	out[5] = aw1 * by1 + az1 * bx1 - ax1 * bz1 + ay2;
-	out[6] = aw1 * bz1 + ax1 * by1 - ay1 * bx1 + az2;
-	out[7] = -ax1 * bx1 - ay1 * by1 - az1 * bz1 + aw2;
-	return out;
+    const ax1 = a[0];
+    const ay1 = a[1];
+    const az1 = a[2];
+    const aw1 = a[3];
+    const bx1 = v[0] * 0.5;
+    const by1 = v[1] * 0.5;
+    const bz1 = v[2] * 0.5;
+    const ax2 = a[4];
+    const ay2 = a[5];
+    const az2 = a[6];
+    const aw2 = a[7];
+    out[0] = ax1;
+    out[1] = ay1;
+    out[2] = az1;
+    out[3] = aw1;
+    out[4] = aw1 * bx1 + ay1 * bz1 - az1 * by1 + ax2;
+    out[5] = aw1 * by1 + az1 * bx1 - ax1 * bz1 + ay2;
+    out[6] = aw1 * bz1 + ax1 * by1 - ay1 * bx1 + az2;
+    out[7] = -ax1 * bx1 - ay1 * by1 - az1 * bz1 + aw2;
+    return out;
 }
 
 /**
@@ -358,28 +380,28 @@ export function translate(out: Quat2, a: Quat2, v: Vec3): Quat2 {
  * @returns out
  */
 export function rotateX(out: Quat2, a: Quat2, rad: number): Quat2 {
-	let bx = -a[0];
-	let by = -a[1];
-	let bz = -a[2];
-	let bw = a[3];
-	const ax = a[4];
-	const ay = a[5];
-	const az = a[6];
-	const aw = a[7];
-	const ax1 = ax * bw + aw * bx + ay * bz - az * by;
-	const ay1 = ay * bw + aw * by + az * bx - ax * bz;
-	const az1 = az * bw + aw * bz + ax * by - ay * bx;
-	const aw1 = aw * bw - ax * bx - ay * by - az * bz;
-	quat.rotateX(out as any, a as any, rad);
-	bx = out[0];
-	by = out[1];
-	bz = out[2];
-	bw = out[3];
-	out[4] = ax1 * bw + aw1 * bx + ay1 * bz - az1 * by;
-	out[5] = ay1 * bw + aw1 * by + az1 * bx - ax1 * bz;
-	out[6] = az1 * bw + aw1 * bz + ax1 * by - ay1 * bx;
-	out[7] = aw1 * bw - ax1 * bx - ay1 * by - az1 * bz;
-	return out;
+    let bx = -a[0];
+    let by = -a[1];
+    let bz = -a[2];
+    let bw = a[3];
+    const ax = a[4];
+    const ay = a[5];
+    const az = a[6];
+    const aw = a[7];
+    const ax1 = ax * bw + aw * bx + ay * bz - az * by;
+    const ay1 = ay * bw + aw * by + az * bx - ax * bz;
+    const az1 = az * bw + aw * bz + ax * by - ay * bx;
+    const aw1 = aw * bw - ax * bx - ay * by - az * bz;
+    quat.rotateX(out as unknown as Quat, a as unknown as Quat, rad);
+    bx = out[0];
+    by = out[1];
+    bz = out[2];
+    bw = out[3];
+    out[4] = ax1 * bw + aw1 * bx + ay1 * bz - az1 * by;
+    out[5] = ay1 * bw + aw1 * by + az1 * bx - ax1 * bz;
+    out[6] = az1 * bw + aw1 * bz + ax1 * by - ay1 * bx;
+    out[7] = aw1 * bw - ax1 * bx - ay1 * by - az1 * bz;
+    return out;
 }
 
 /**
@@ -391,28 +413,28 @@ export function rotateX(out: Quat2, a: Quat2, rad: number): Quat2 {
  * @returns out
  */
 export function rotateY(out: Quat2, a: Quat2, rad: number): Quat2 {
-	let bx = -a[0];
-	let by = -a[1];
-	let bz = -a[2];
-	let bw = a[3];
-	const ax = a[4];
-	const ay = a[5];
-	const az = a[6];
-	const aw = a[7];
-	const ax1 = ax * bw + aw * bx + ay * bz - az * by;
-	const ay1 = ay * bw + aw * by + az * bx - ax * bz;
-	const az1 = az * bw + aw * bz + ax * by - ay * bx;
-	const aw1 = aw * bw - ax * bx - ay * by - az * bz;
-	quat.rotateY(out as any, a as any, rad);
-	bx = out[0];
-	by = out[1];
-	bz = out[2];
-	bw = out[3];
-	out[4] = ax1 * bw + aw1 * bx + ay1 * bz - az1 * by;
-	out[5] = ay1 * bw + aw1 * by + az1 * bx - ax1 * bz;
-	out[6] = az1 * bw + aw1 * bz + ax1 * by - ay1 * bx;
-	out[7] = aw1 * bw - ax1 * bx - ay1 * by - az1 * bz;
-	return out;
+    let bx = -a[0];
+    let by = -a[1];
+    let bz = -a[2];
+    let bw = a[3];
+    const ax = a[4];
+    const ay = a[5];
+    const az = a[6];
+    const aw = a[7];
+    const ax1 = ax * bw + aw * bx + ay * bz - az * by;
+    const ay1 = ay * bw + aw * by + az * bx - ax * bz;
+    const az1 = az * bw + aw * bz + ax * by - ay * bx;
+    const aw1 = aw * bw - ax * bx - ay * by - az * bz;
+    quat.rotateY(out as unknown as Quat, a as unknown as Quat, rad);
+    bx = out[0];
+    by = out[1];
+    bz = out[2];
+    bw = out[3];
+    out[4] = ax1 * bw + aw1 * bx + ay1 * bz - az1 * by;
+    out[5] = ay1 * bw + aw1 * by + az1 * bx - ax1 * bz;
+    out[6] = az1 * bw + aw1 * bz + ax1 * by - ay1 * bx;
+    out[7] = aw1 * bw - ax1 * bx - ay1 * by - az1 * bz;
+    return out;
 }
 
 /**
@@ -424,28 +446,28 @@ export function rotateY(out: Quat2, a: Quat2, rad: number): Quat2 {
  * @returns out
  */
 export function rotateZ(out: Quat2, a: Quat2, rad: number): Quat2 {
-	let bx = -a[0];
-	let by = -a[1];
-	let bz = -a[2];
-	let bw = a[3];
-	const ax = a[4];
-	const ay = a[5];
-	const az = a[6];
-	const aw = a[7];
-	const ax1 = ax * bw + aw * bx + ay * bz - az * by;
-	const ay1 = ay * bw + aw * by + az * bx - ax * bz;
-	const az1 = az * bw + aw * bz + ax * by - ay * bx;
-	const aw1 = aw * bw - ax * bx - ay * by - az * bz;
-	quat.rotateZ(out as any, a as any, rad);
-	bx = out[0];
-	by = out[1];
-	bz = out[2];
-	bw = out[3];
-	out[4] = ax1 * bw + aw1 * bx + ay1 * bz - az1 * by;
-	out[5] = ay1 * bw + aw1 * by + az1 * bx - ax1 * bz;
-	out[6] = az1 * bw + aw1 * bz + ax1 * by - ay1 * bx;
-	out[7] = aw1 * bw - ax1 * bx - ay1 * by - az1 * bz;
-	return out;
+    let bx = -a[0];
+    let by = -a[1];
+    let bz = -a[2];
+    let bw = a[3];
+    const ax = a[4];
+    const ay = a[5];
+    const az = a[6];
+    const aw = a[7];
+    const ax1 = ax * bw + aw * bx + ay * bz - az * by;
+    const ay1 = ay * bw + aw * by + az * bx - ax * bz;
+    const az1 = az * bw + aw * bz + ax * by - ay * bx;
+    const aw1 = aw * bw - ax * bx - ay * by - az * bz;
+    quat.rotateZ(out as unknown as Quat, a as unknown as Quat, rad);
+    bx = out[0];
+    by = out[1];
+    bz = out[2];
+    bw = out[3];
+    out[4] = ax1 * bw + aw1 * bx + ay1 * bz - az1 * by;
+    out[5] = ay1 * bw + aw1 * by + az1 * bx - ax1 * bz;
+    out[6] = az1 * bw + aw1 * bz + ax1 * by - ay1 * bx;
+    out[7] = aw1 * bw - ax1 * bx - ay1 * by - az1 * bz;
+    return out;
 }
 
 /**
@@ -457,28 +479,28 @@ export function rotateZ(out: Quat2, a: Quat2, rad: number): Quat2 {
  * @returns out
  */
 export function rotateByQuatAppend(out: Quat2, a: Quat2, q: Quat): Quat2 {
-	const qx = q[0];
-	const qy = q[1];
-	const qz = q[2];
-	const qw = q[3];
-	let ax = a[0];
-	let ay = a[1];
-	let az = a[2];
-	let aw = a[3];
+    const qx = q[0];
+    const qy = q[1];
+    const qz = q[2];
+    const qw = q[3];
+    let ax = a[0];
+    let ay = a[1];
+    let az = a[2];
+    let aw = a[3];
 
-	out[0] = ax * qw + aw * qx + ay * qz - az * qy;
-	out[1] = ay * qw + aw * qy + az * qx - ax * qz;
-	out[2] = az * qw + aw * qz + ax * qy - ay * qx;
-	out[3] = aw * qw - ax * qx - ay * qy - az * qz;
-	ax = a[4];
-	ay = a[5];
-	az = a[6];
-	aw = a[7];
-	out[4] = ax * qw + aw * qx + ay * qz - az * qy;
-	out[5] = ay * qw + aw * qy + az * qx - ax * qz;
-	out[6] = az * qw + aw * qz + ax * qy - ay * qx;
-	out[7] = aw * qw - ax * qx - ay * qy - az * qz;
-	return out;
+    out[0] = ax * qw + aw * qx + ay * qz - az * qy;
+    out[1] = ay * qw + aw * qy + az * qx - ax * qz;
+    out[2] = az * qw + aw * qz + ax * qy - ay * qx;
+    out[3] = aw * qw - ax * qx - ay * qy - az * qz;
+    ax = a[4];
+    ay = a[5];
+    az = a[6];
+    aw = a[7];
+    out[4] = ax * qw + aw * qx + ay * qz - az * qy;
+    out[5] = ay * qw + aw * qy + az * qx - ax * qz;
+    out[6] = az * qw + aw * qz + ax * qy - ay * qx;
+    out[7] = aw * qw - ax * qx - ay * qy - az * qz;
+    return out;
 }
 
 /**
@@ -490,28 +512,28 @@ export function rotateByQuatAppend(out: Quat2, a: Quat2, q: Quat): Quat2 {
  * @returns out
  */
 export function rotateByQuatPrepend(out: Quat2, q: Quat, a: Quat2): Quat2 {
-	const qx = q[0];
-	const qy = q[1];
-	const qz = q[2];
-	const qw = q[3];
-	let bx = a[0];
-	let by = a[1];
-	let bz = a[2];
-	let bw = a[3];
+    const qx = q[0];
+    const qy = q[1];
+    const qz = q[2];
+    const qw = q[3];
+    let bx = a[0];
+    let by = a[1];
+    let bz = a[2];
+    let bw = a[3];
 
-	out[0] = qx * bw + qw * bx + qy * bz - qz * by;
-	out[1] = qy * bw + qw * by + qz * bx - qx * bz;
-	out[2] = qz * bw + qw * bz + qx * by - qy * bx;
-	out[3] = qw * bw - qx * bx - qy * by - qz * bz;
-	bx = a[4];
-	by = a[5];
-	bz = a[6];
-	bw = a[7];
-	out[4] = qx * bw + qw * bx + qy * bz - qz * by;
-	out[5] = qy * bw + qw * by + qz * bx - qx * bz;
-	out[6] = qz * bw + qw * bz + qx * by - qy * bx;
-	out[7] = qw * bw - qx * bx - qy * by - qz * bz;
-	return out;
+    out[0] = qx * bw + qw * bx + qy * bz - qz * by;
+    out[1] = qy * bw + qw * by + qz * bx - qx * bz;
+    out[2] = qz * bw + qw * bz + qx * by - qy * bx;
+    out[3] = qw * bw - qx * bx - qy * by - qz * bz;
+    bx = a[4];
+    by = a[5];
+    bz = a[6];
+    bw = a[7];
+    out[4] = qx * bw + qw * bx + qy * bz - qz * by;
+    out[5] = qy * bw + qw * by + qz * bx - qx * bz;
+    out[6] = qz * bw + qw * bz + qx * by - qy * bx;
+    out[7] = qw * bw - qx * bx - qy * by - qz * bz;
+    return out;
 }
 
 /**
@@ -523,39 +545,46 @@ export function rotateByQuatPrepend(out: Quat2, q: Quat, a: Quat2): Quat2 {
  * @param rad how far the rotation should be
  * @returns out
  */
-export function rotateAroundAxis(out: Quat2, a: Quat2, axis: Vec3, rad: number): Quat2 {
-	//Special case for rad = 0
-	if (Math.abs(rad) < common.EPSILON) {
-		return copy(out, a);
-	}
-	const axisLength = Math.sqrt(axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]);
+export function rotateAroundAxis(
+    out: Quat2,
+    a: Quat2,
+    axis: Vec3,
+    rad: number,
+): Quat2 {
+    //Special case for rad = 0
+    if (Math.abs(rad) < common.EPSILON) {
+        return copy(out, a);
+    }
+    const axisLength = Math.sqrt(
+        axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2],
+    );
 
-	rad = rad * 0.5;
-	const s = Math.sin(rad);
-	const bx = (s * axis[0]) / axisLength;
-	const by = (s * axis[1]) / axisLength;
-	const bz = (s * axis[2]) / axisLength;
-	const bw = Math.cos(rad);
+    rad = rad * 0.5;
+    const s = Math.sin(rad);
+    const bx = (s * axis[0]) / axisLength;
+    const by = (s * axis[1]) / axisLength;
+    const bz = (s * axis[2]) / axisLength;
+    const bw = Math.cos(rad);
 
-	const ax1 = a[0];
-	const ay1 = a[1];
-	const az1 = a[2];
-	const aw1 = a[3];
-	out[0] = ax1 * bw + aw1 * bx + ay1 * bz - az1 * by;
-	out[1] = ay1 * bw + aw1 * by + az1 * bx - ax1 * bz;
-	out[2] = az1 * bw + aw1 * bz + ax1 * by - ay1 * bx;
-	out[3] = aw1 * bw - ax1 * bx - ay1 * by - az1 * bz;
+    const ax1 = a[0];
+    const ay1 = a[1];
+    const az1 = a[2];
+    const aw1 = a[3];
+    out[0] = ax1 * bw + aw1 * bx + ay1 * bz - az1 * by;
+    out[1] = ay1 * bw + aw1 * by + az1 * bx - ax1 * bz;
+    out[2] = az1 * bw + aw1 * bz + ax1 * by - ay1 * bx;
+    out[3] = aw1 * bw - ax1 * bx - ay1 * by - az1 * bz;
 
-	const ax = a[4];
-	const ay = a[5];
-	const az = a[6];
-	const aw = a[7];
-	out[4] = ax * bw + aw * bx + ay * bz - az * by;
-	out[5] = ay * bw + aw * by + az * bx - ax * bz;
-	out[6] = az * bw + aw * bz + ax * by - ay * bx;
-	out[7] = aw * bw - ax * bx - ay * by - az * bz;
+    const ax = a[4];
+    const ay = a[5];
+    const az = a[6];
+    const aw = a[7];
+    out[4] = ax * bw + aw * bx + ay * bz - az * by;
+    out[5] = ay * bw + aw * by + az * bx - ax * bz;
+    out[6] = az * bw + aw * bz + ax * by - ay * bx;
+    out[7] = aw * bw - ax * bx - ay * by - az * bz;
 
-	return out;
+    return out;
 }
 
 /**
@@ -568,15 +597,15 @@ export function rotateAroundAxis(out: Quat2, a: Quat2, axis: Vec3, rad: number):
  * @function
  */
 export function add(out: Quat2, a: Quat2, b: Quat2): Quat2 {
-	out[0] = a[0] + b[0];
-	out[1] = a[1] + b[1];
-	out[2] = a[2] + b[2];
-	out[3] = a[3] + b[3];
-	out[4] = a[4] + b[4];
-	out[5] = a[5] + b[5];
-	out[6] = a[6] + b[6];
-	out[7] = a[7] + b[7];
-	return out;
+    out[0] = a[0] + b[0];
+    out[1] = a[1] + b[1];
+    out[2] = a[2] + b[2];
+    out[3] = a[3] + b[3];
+    out[4] = a[4] + b[4];
+    out[5] = a[5] + b[5];
+    out[6] = a[6] + b[6];
+    out[7] = a[7] + b[7];
+    return out;
 }
 
 /**
@@ -588,31 +617,63 @@ export function add(out: Quat2, a: Quat2, b: Quat2): Quat2 {
  * @returns out
  */
 export function multiply(out: Quat2, a: Quat2, b: Quat2): Quat2 {
-	const ax0 = a[0];
-	const ay0 = a[1];
-	const az0 = a[2];
-	const aw0 = a[3];
-	const bx1 = b[4];
-	const by1 = b[5];
-	const bz1 = b[6];
-	const bw1 = b[7];
-	const ax1 = a[4];
-	const ay1 = a[5];
-	const az1 = a[6];
-	const aw1 = a[7];
-	const bx0 = b[0];
-	const by0 = b[1];
-	const bz0 = b[2];
-	const bw0 = b[3];
-	out[0] = ax0 * bw0 + aw0 * bx0 + ay0 * bz0 - az0 * by0;
-	out[1] = ay0 * bw0 + aw0 * by0 + az0 * bx0 - ax0 * bz0;
-	out[2] = az0 * bw0 + aw0 * bz0 + ax0 * by0 - ay0 * bx0;
-	out[3] = aw0 * bw0 - ax0 * bx0 - ay0 * by0 - az0 * bz0;
-	out[4] = ax0 * bw1 + aw0 * bx1 + ay0 * bz1 - az0 * by1 + ax1 * bw0 + aw1 * bx0 + ay1 * bz0 - az1 * by0;
-	out[5] = ay0 * bw1 + aw0 * by1 + az0 * bx1 - ax0 * bz1 + ay1 * bw0 + aw1 * by0 + az1 * bx0 - ax1 * bz0;
-	out[6] = az0 * bw1 + aw0 * bz1 + ax0 * by1 - ay0 * bx1 + az1 * bw0 + aw1 * bz0 + ax1 * by0 - ay1 * bx0;
-	out[7] = aw0 * bw1 - ax0 * bx1 - ay0 * by1 - az0 * bz1 + aw1 * bw0 - ax1 * bx0 - ay1 * by0 - az1 * bz0;
-	return out;
+    const ax0 = a[0];
+    const ay0 = a[1];
+    const az0 = a[2];
+    const aw0 = a[3];
+    const bx1 = b[4];
+    const by1 = b[5];
+    const bz1 = b[6];
+    const bw1 = b[7];
+    const ax1 = a[4];
+    const ay1 = a[5];
+    const az1 = a[6];
+    const aw1 = a[7];
+    const bx0 = b[0];
+    const by0 = b[1];
+    const bz0 = b[2];
+    const bw0 = b[3];
+    out[0] = ax0 * bw0 + aw0 * bx0 + ay0 * bz0 - az0 * by0;
+    out[1] = ay0 * bw0 + aw0 * by0 + az0 * bx0 - ax0 * bz0;
+    out[2] = az0 * bw0 + aw0 * bz0 + ax0 * by0 - ay0 * bx0;
+    out[3] = aw0 * bw0 - ax0 * bx0 - ay0 * by0 - az0 * bz0;
+    out[4] =
+        ax0 * bw1 +
+        aw0 * bx1 +
+        ay0 * bz1 -
+        az0 * by1 +
+        ax1 * bw0 +
+        aw1 * bx0 +
+        ay1 * bz0 -
+        az1 * by0;
+    out[5] =
+        ay0 * bw1 +
+        aw0 * by1 +
+        az0 * bx1 -
+        ax0 * bz1 +
+        ay1 * bw0 +
+        aw1 * by0 +
+        az1 * bx0 -
+        ax1 * bz0;
+    out[6] =
+        az0 * bw1 +
+        aw0 * bz1 +
+        ax0 * by1 -
+        ay0 * bx1 +
+        az1 * bw0 +
+        aw1 * bz0 +
+        ax1 * by0 -
+        ay1 * bx0;
+    out[7] =
+        aw0 * bw1 -
+        ax0 * bx1 -
+        ay0 * by1 -
+        az0 * bz1 +
+        aw1 * bw0 -
+        ax1 * bx0 -
+        ay1 * by0 -
+        az1 * bz0;
+    return out;
 }
 
 /**
@@ -631,15 +692,15 @@ export const mul = multiply;
  * @function
  */
 export function scale(out: Quat2, a: Quat2, b: number): Quat2 {
-	out[0] = a[0] * b;
-	out[1] = a[1] * b;
-	out[2] = a[2] * b;
-	out[3] = a[3] * b;
-	out[4] = a[4] * b;
-	out[5] = a[5] * b;
-	out[6] = a[6] * b;
-	out[7] = a[7] * b;
-	return out;
+    out[0] = a[0] * b;
+    out[1] = a[1] * b;
+    out[2] = a[2] * b;
+    out[3] = a[3] * b;
+    out[4] = a[4] * b;
+    out[5] = a[5] * b;
+    out[6] = a[6] * b;
+    out[7] = a[7] * b;
+    return out;
 }
 
 /**
@@ -663,19 +724,19 @@ export const dot = quat.dot;
  * @returns out
  */
 export function lerp(out: Quat2, a: Quat2, b: Quat2, t: number): Quat2 {
-	const mt = 1 - t;
-	if (dot(a as any, b as any) < 0) t = -t;
+    const mt = 1 - t;
+    if (dot(a as unknown as Quat, b as unknown as Quat) < 0) t = -t;
 
-	out[0] = a[0] * mt + b[0] * t;
-	out[1] = a[1] * mt + b[1] * t;
-	out[2] = a[2] * mt + b[2] * t;
-	out[3] = a[3] * mt + b[3] * t;
-	out[4] = a[4] * mt + b[4] * t;
-	out[5] = a[5] * mt + b[5] * t;
-	out[6] = a[6] * mt + b[6] * t;
-	out[7] = a[7] * mt + b[7] * t;
+    out[0] = a[0] * mt + b[0] * t;
+    out[1] = a[1] * mt + b[1] * t;
+    out[2] = a[2] * mt + b[2] * t;
+    out[3] = a[3] * mt + b[3] * t;
+    out[4] = a[4] * mt + b[4] * t;
+    out[5] = a[5] * mt + b[5] * t;
+    out[6] = a[6] * mt + b[6] * t;
+    out[7] = a[7] * mt + b[7] * t;
 
-	return out;
+    return out;
 }
 
 /**
@@ -686,16 +747,16 @@ export function lerp(out: Quat2, a: Quat2, b: Quat2, t: number): Quat2 {
  * @returns out
  */
 export function invert(out: Quat2, a: Quat2): Quat2 {
-	const sqlen = squaredLength(a as any);
-	out[0] = -a[0] / sqlen;
-	out[1] = -a[1] / sqlen;
-	out[2] = -a[2] / sqlen;
-	out[3] = a[3] / sqlen;
-	out[4] = -a[4] / sqlen;
-	out[5] = -a[5] / sqlen;
-	out[6] = -a[6] / sqlen;
-	out[7] = a[7] / sqlen;
-	return out;
+    const sqlen = squaredLength(a as unknown as Quat);
+    out[0] = -a[0] / sqlen;
+    out[1] = -a[1] / sqlen;
+    out[2] = -a[2] / sqlen;
+    out[3] = a[3] / sqlen;
+    out[4] = -a[4] / sqlen;
+    out[5] = -a[5] / sqlen;
+    out[6] = -a[6] / sqlen;
+    out[7] = a[7] / sqlen;
+    return out;
 }
 
 /**
@@ -707,15 +768,15 @@ export function invert(out: Quat2, a: Quat2): Quat2 {
  * @returns out
  */
 export function conjugate(out: Quat2, a: Quat2): Quat2 {
-	out[0] = -a[0];
-	out[1] = -a[1];
-	out[2] = -a[2];
-	out[3] = a[3];
-	out[4] = -a[4];
-	out[5] = -a[5];
-	out[6] = -a[6];
-	out[7] = a[7];
-	return out;
+    out[0] = -a[0];
+    out[1] = -a[1];
+    out[2] = -a[2];
+    out[3] = a[3];
+    out[4] = -a[4];
+    out[5] = -a[5];
+    out[6] = -a[6];
+    out[7] = a[7];
+    return out;
 }
 
 /**
@@ -757,33 +818,33 @@ export const sqrLen = squaredLength;
  * @function
  */
 export function normalize(out: Quat2, a: Quat2): Quat2 {
-	let magnitude = squaredLength(a as any);
-	if (magnitude > 0) {
-		magnitude = Math.sqrt(magnitude);
+    let magnitude = squaredLength(a as unknown as Quat);
+    if (magnitude > 0) {
+        magnitude = Math.sqrt(magnitude);
 
-		const a0 = a[0] / magnitude;
-		const a1 = a[1] / magnitude;
-		const a2 = a[2] / magnitude;
-		const a3 = a[3] / magnitude;
+        const a0 = a[0] / magnitude;
+        const a1 = a[1] / magnitude;
+        const a2 = a[2] / magnitude;
+        const a3 = a[3] / magnitude;
 
-		const b0 = a[4];
-		const b1 = a[5];
-		const b2 = a[6];
-		const b3 = a[7];
+        const b0 = a[4];
+        const b1 = a[5];
+        const b2 = a[6];
+        const b3 = a[7];
 
-		const a_dot_b = a0 * b0 + a1 * b1 + a2 * b2 + a3 * b3;
+        const a_dot_b = a0 * b0 + a1 * b1 + a2 * b2 + a3 * b3;
 
-		out[0] = a0;
-		out[1] = a1;
-		out[2] = a2;
-		out[3] = a3;
+        out[0] = a0;
+        out[1] = a1;
+        out[2] = a2;
+        out[3] = a3;
 
-		out[4] = (b0 - a0 * a_dot_b) / magnitude;
-		out[5] = (b1 - a1 * a_dot_b) / magnitude;
-		out[6] = (b2 - a2 * a_dot_b) / magnitude;
-		out[7] = (b3 - a3 * a_dot_b) / magnitude;
-	}
-	return out;
+        out[4] = (b0 - a0 * a_dot_b) / magnitude;
+        out[5] = (b1 - a1 * a_dot_b) / magnitude;
+        out[6] = (b2 - a2 * a_dot_b) / magnitude;
+        out[7] = (b3 - a3 * a_dot_b) / magnitude;
+    }
+    return out;
 }
 
 /**
@@ -793,9 +854,7 @@ export function normalize(out: Quat2, a: Quat2): Quat2 {
  * @returns string representation of the dual quat
  */
 export function str(a: Quat2): string {
-	return (
-		`quat2(${a[0]}, ${a[1]}, ${a[2]}, ${a[3]}, ${a[4]}, ${a[5]}, ${a[6]}, ${a[7]})`
-	);
+    return `quat2(${a[0]}, ${a[1]}, ${a[2]}, ${a[3]}, ${a[4]}, ${a[5]}, ${a[6]}, ${a[7]})`;
 }
 
 /**
@@ -806,16 +865,16 @@ export function str(a: Quat2): string {
  * @returns true if the dual quaternions are equal, false otherwise.
  */
 export function exactEquals(a: Quat2, b: Quat2): boolean {
-	return (
-		a[0] === b[0] &&
-		a[1] === b[1] &&
-		a[2] === b[2] &&
-		a[3] === b[3] &&
-		a[4] === b[4] &&
-		a[5] === b[5] &&
-		a[6] === b[6] &&
-		a[7] === b[7]
-	);
+    return (
+        a[0] === b[0] &&
+        a[1] === b[1] &&
+        a[2] === b[2] &&
+        a[3] === b[3] &&
+        a[4] === b[4] &&
+        a[5] === b[5] &&
+        a[6] === b[6] &&
+        a[7] === b[7]
+    );
 }
 
 /**
@@ -826,30 +885,38 @@ export function exactEquals(a: Quat2, b: Quat2): boolean {
  * @returns true if the dual quats are equal, false otherwise.
  */
 export function equals(a: Quat2, b: Quat2): boolean {
-	const a0 = a[0];
-	const a1 = a[1];
-	const a2 = a[2];
-	const a3 = a[3];
-	const a4 = a[4];
-	const a5 = a[5];
-	const a6 = a[6];
-	const a7 = a[7];
-	const b0 = b[0];
-	const b1 = b[1];
-	const b2 = b[2];
-	const b3 = b[3];
-	const b4 = b[4];
-	const b5 = b[5];
-	const b6 = b[6];
-	const b7 = b[7];
-	return (
-		Math.abs(a0 - b0) <= common.EPSILON * Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&
-		Math.abs(a1 - b1) <= common.EPSILON * Math.max(1.0, Math.abs(a1), Math.abs(b1)) &&
-		Math.abs(a2 - b2) <= common.EPSILON * Math.max(1.0, Math.abs(a2), Math.abs(b2)) &&
-		Math.abs(a3 - b3) <= common.EPSILON * Math.max(1.0, Math.abs(a3), Math.abs(b3)) &&
-		Math.abs(a4 - b4) <= common.EPSILON * Math.max(1.0, Math.abs(a4), Math.abs(b4)) &&
-		Math.abs(a5 - b5) <= common.EPSILON * Math.max(1.0, Math.abs(a5), Math.abs(b5)) &&
-		Math.abs(a6 - b6) <= common.EPSILON * Math.max(1.0, Math.abs(a6), Math.abs(b6)) &&
-		Math.abs(a7 - b7) <= common.EPSILON * Math.max(1.0, Math.abs(a7), Math.abs(b7))
-	);
+    const a0 = a[0];
+    const a1 = a[1];
+    const a2 = a[2];
+    const a3 = a[3];
+    const a4 = a[4];
+    const a5 = a[5];
+    const a6 = a[6];
+    const a7 = a[7];
+    const b0 = b[0];
+    const b1 = b[1];
+    const b2 = b[2];
+    const b3 = b[3];
+    const b4 = b[4];
+    const b5 = b[5];
+    const b6 = b[6];
+    const b7 = b[7];
+    return (
+        Math.abs(a0 - b0) <=
+            common.EPSILON * Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&
+        Math.abs(a1 - b1) <=
+            common.EPSILON * Math.max(1.0, Math.abs(a1), Math.abs(b1)) &&
+        Math.abs(a2 - b2) <=
+            common.EPSILON * Math.max(1.0, Math.abs(a2), Math.abs(b2)) &&
+        Math.abs(a3 - b3) <=
+            common.EPSILON * Math.max(1.0, Math.abs(a3), Math.abs(b3)) &&
+        Math.abs(a4 - b4) <=
+            common.EPSILON * Math.max(1.0, Math.abs(a4), Math.abs(b4)) &&
+        Math.abs(a5 - b5) <=
+            common.EPSILON * Math.max(1.0, Math.abs(a5), Math.abs(b5)) &&
+        Math.abs(a6 - b6) <=
+            common.EPSILON * Math.max(1.0, Math.abs(a6), Math.abs(b6)) &&
+        Math.abs(a7 - b7) <=
+            common.EPSILON * Math.max(1.0, Math.abs(a7), Math.abs(b7))
+    );
 }
