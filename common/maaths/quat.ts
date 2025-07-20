@@ -2,7 +2,7 @@ import * as common from './common';
 import * as mat3 from './mat3';
 import * as vec3 from './vec3';
 import * as vec4 from './vec4';
-import type { Quat, Vec3, Mat3, EulerOrder } from './types';
+import type { Quat, Vec3, Mat3, EulerOrder, Euler } from './types';
 
 /**
  * Creates a new identity quat
@@ -439,78 +439,73 @@ export function fromMat3(out: Quat, m: Mat3): Quat {
 }
 
 /**
- * Creates a quaternion from the given euler angle x, y, z using the provided intrinsic order for the conversion.
- *
+ * Creates a quaternion from the given euler
  * @param out the receiving quaternion
- * @param x Angle to rotate around X axis in degrees.
- * @param y Angle to rotate around Y axis in degrees.
- * @param z Angle to rotate around Z axis in degrees.
- * @param order Intrinsic order for conversion, default is zyx.
+ * @param euler the euler to create the quaternion from
+ * @returns out
  */
-export function fromEuler(
-    out: Quat,
-    x: number,
-    y: number,
-    z: number,
-    order: EulerOrder = common.ANGLE_ORDER,
-): Quat {
-    const halfToRad = Math.PI / 360;
-    x *= halfToRad;
-    z *= halfToRad;
-    y *= halfToRad;
+export function fromEuler(out: Quat, euler: Euler): Quat {
+    const x = euler[0];
+    const y = euler[1];
+    const z = euler[2];
+    const order = euler[3] || 'xyz';
 
-    const sx = Math.sin(x);
-    const cx = Math.cos(x);
-    const sy = Math.sin(y);
-    const cy = Math.cos(y);
-    const sz = Math.sin(z);
-    const cz = Math.cos(z);
+    const cos = Math.cos;
+    const sin = Math.sin;
+
+    const c1 = cos(x / 2);
+    const c2 = cos(y / 2);
+    const c3 = cos(z / 2);
+
+    const s1 = sin(x / 2);
+    const s2 = sin(y / 2);
+    const s3 = sin(z / 2);
 
     switch (order) {
         case 'xyz':
-            out[0] = sx * cy * cz + cx * sy * sz;
-            out[1] = cx * sy * cz - sx * cy * sz;
-            out[2] = cx * cy * sz + sx * sy * cz;
-            out[3] = cx * cy * cz - sx * sy * sz;
-            break;
-
-        case 'xzy':
-            out[0] = sx * cy * cz - cx * sy * sz;
-            out[1] = cx * sy * cz - sx * cy * sz;
-            out[2] = cx * cy * sz + sx * sy * cz;
-            out[3] = cx * cy * cz + sx * sy * sz;
+            out[0] = s1 * c2 * c3 + c1 * s2 * s3;
+            out[1] = c1 * s2 * c3 - s1 * c2 * s3;
+            out[2] = c1 * c2 * s3 + s1 * s2 * c3;
+            out[3] = c1 * c2 * c3 - s1 * s2 * s3;
             break;
 
         case 'yxz':
-            out[0] = sx * cy * cz + cx * sy * sz;
-            out[1] = cx * sy * cz - sx * cy * sz;
-            out[2] = cx * cy * sz - sx * sy * cz;
-            out[3] = cx * cy * cz + sx * sy * sz;
-            break;
-
-        case 'yzx':
-            out[0] = sx * cy * cz + cx * sy * sz;
-            out[1] = cx * sy * cz + sx * cy * sz;
-            out[2] = cx * cy * sz - sx * sy * cz;
-            out[3] = cx * cy * cz - sx * sy * sz;
+            out[0] = s1 * c2 * c3 + c1 * s2 * s3;
+            out[1] = c1 * s2 * c3 - s1 * c2 * s3;
+            out[2] = c1 * c2 * s3 - s1 * s2 * c3;
+            out[3] = c1 * c2 * c3 + s1 * s2 * s3;
             break;
 
         case 'zxy':
-            out[0] = sx * cy * cz - cx * sy * sz;
-            out[1] = cx * sy * cz + sx * cy * sz;
-            out[2] = cx * cy * sz + sx * sy * cz;
-            out[3] = cx * cy * cz - sx * sy * sz;
+            out[0] = s1 * c2 * c3 - c1 * s2 * s3;
+            out[1] = c1 * s2 * c3 + s1 * c2 * s3;
+            out[2] = c1 * c2 * s3 + s1 * s2 * c3;
+            out[3] = c1 * c2 * c3 - s1 * s2 * s3;
             break;
 
         case 'zyx':
-            out[0] = sx * cy * cz - cx * sy * sz;
-            out[1] = cx * sy * cz + sx * cy * sz;
-            out[2] = cx * cy * sz - sx * sy * cz;
-            out[3] = cx * cy * cz + sx * sy * sz;
+            out[0] = s1 * c2 * c3 - c1 * s2 * s3;
+            out[1] = c1 * s2 * c3 + s1 * c2 * s3;
+            out[2] = c1 * c2 * s3 - s1 * s2 * c3;
+            out[3] = c1 * c2 * c3 + s1 * s2 * s3;
+            break;
+
+        case 'yzx':
+            out[0] = s1 * c2 * c3 + c1 * s2 * s3;
+            out[1] = c1 * s2 * c3 + s1 * c2 * s3;
+            out[2] = c1 * c2 * s3 - s1 * s2 * c3;
+            out[3] = c1 * c2 * c3 - s1 * s2 * s3;
+            break;
+
+        case 'xzy':
+            out[0] = s1 * c2 * c3 - c1 * s2 * s3;
+            out[1] = c1 * s2 * c3 - s1 * c2 * s3;
+            out[2] = c1 * c2 * s3 + s1 * s2 * c3;
+            out[3] = c1 * c2 * c3 + s1 * s2 * s3;
             break;
 
         default:
-            throw new Error(`Unknown angle order ${order}`);
+            console.warn(`fromEuler() encountered an unknown order: ${order}`);
     }
 
     return out;
