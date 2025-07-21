@@ -1,4 +1,4 @@
-import type { Vec3 } from '@/common/maaths';
+import { vec3, type Vec3 } from "@/common/maaths";
 import type { NavMesh, NavMeshPoly, NavMeshTile, PolyRef } from './nav-mesh';
 import { err, ok } from '../result';
 

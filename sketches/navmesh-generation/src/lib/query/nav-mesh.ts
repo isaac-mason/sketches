@@ -1,5 +1,6 @@
 import type { Box3, Vec2, Vec3 } from '@/common/maaths';
 import { POLY_NEIS_FLAG_EXT_LINK } from '../generate';
+import { buildNavMeshBvTree } from './nav-mesh-bv-tree';
 
 /** a serialised polygon reference, in the format `${tile salt}.${tile index}.${index of polygon within tile}` */
 export type PolyRef = `${number},${number},${number}`;
@@ -29,14 +30,19 @@ export const desPolyRef = (polyRef: PolyRef): DeserialisedPolyRef => {
 export type NavMesh = {
     /** the world space origin of the navigation mesh's tiles */
     origin: Vec3;
+
     /** the width of each tile along the x axis */
     tileWidth: number;
+
     /** the height of each tile along the z axis */
     tileHeight: number;
+
     /** map of tile ids to tiles */
     tiles: Record<string, NavMeshTile>;
+
     /** map of tile position hashes to tile ids */
     tilePositionHashToTileId: Record<string, number>;
+
     /** the tile id counter */
     tileIdCounter: number;
 };
@@ -52,12 +58,16 @@ export type NavMesh = {
 export type NavMeshPoly = {
     /** the indices of the polygon's vertices. vertices are stored in NavMeshTile.vertices */
     vertices: number[];
+
     /** packed data representing neighbor polygons references and flags for each edge */
     neis: number[];
+
     /** the user defined flags for this polygon */
     flags: number;
+
     /** the user defined area id for this polygon */
     area: number;
+
     // /* the type of the poly */
     // TODO: may implement off mesh connections differently, tbd
     // type: NavMeshPolyType;
@@ -94,38 +104,34 @@ export type NavMeshPolyDetail = {
     trianglesCount: number;
 };
 
-export type NavMeshBvNode = {
-    /** bounds of the bv node */
-    bounds: Box3;
-    /** the node's index */
-    i: number;
-};
-
 /** the source data used to create a navigation mesh tile */
 export type NavMeshTileParams = {
-    /** the polygon mesh vertices, [x1, y1, z1, ...] */
-    vertices: number[];
+    /** the polygon mesh parameters */
+    polyMesh: {
+        /** the polygon mesh vertices, [x1, y1, z1, ...] */
+        vertices: number[];
 
-    /** the number of vertices in the polygon mesh */
-    nVertices: number;
+        /** the number of vertices in the polygon mesh */
+        nVertices: number;
 
-    /** the polygon data */
-    polys: number[];
+        /** the polygon data */
+        polys: number[];
 
-    /** the polygon flags */
-    polyFlags: number[];
+        /** the polygon flags */
+        polyFlags: number[];
 
-    /** the polygon area ids */
-    polyAreas: number[];
+        /** the polygon area ids */
+        polyAreas: number[];
 
-    /** the number of polygons in the mesh */
-    nPolys: number;
+        /** the number of polygons in the mesh */
+        nPolys: number;
 
-    /** the maximum number of vertices per polygon [Limit: >= 3] */
-    maxVerticesPerPoly: number;
+        /** the maximum number of vertices per polygon [Limit: >= 3] */
+        maxVerticesPerPoly: number;
+    };
 
     /** (optional) height detail attributes */
-    detail?: {
+    detailMesh?: {
         /** the detail mesh sub-mesh data */
         detailMeshes: number[];
 
@@ -160,8 +166,27 @@ export type NavMeshTileParams = {
     /** the bounds of the tile */
     bounds: Box3;
 
-    /** whether to build a bv tree for the tile for fast querying */
+    /** whether to build a bounding volume tree for the tile */
     buildBvTree: boolean;
+
+    /**
+     * The xz-plane cell size of the polygon mesh.
+     * If this tile was generated with voxelization, it should be the voxel cell size.
+     * If the tile was created with a different method, use a value that approximates the level of precision required for the tile.
+     * This is used to:
+     * - quantize the tile's bounding volume tree, for all dimensions (x, y, z)
+     * - ...
+     */
+    cellSize: number;
+
+    /**
+     * The y-axis cell height of the polygon mesh.
+     * If this tile was generated with voxelization, it should be the voxel cell height.
+     * If the tile was created with a different method, use a value that approximates the level of precision required for the tile.
+     * This is used to:
+     * - ...
+     */
+    cellHeight: number;
 
     // TODO: necessary for nav mesh querying?
     // float walkableHeight;	///< The agent height. [Unit: wu]
@@ -169,6 +194,20 @@ export type NavMeshTileParams = {
     // float walkableClimb;	///< The agent maximum traversable ledge. (Up/Down) [Unit: wu]
     // float cs;				///< The xz-plane cell size of the polygon mesh. [Limit: > 0] [Unit: wu]
     // float ch;				///< The y-axis cell height of the polygon mesh. [Limit: > 0] [Unit: wu]
+};
+
+export type NavMeshBvNode = {
+    /** bounds of the bv node */
+    bounds: Box3;
+    /** the node's index */
+    i: number;
+};
+
+export type NavMeshTileBvTree = {
+    /** the tile bounding volume nodes */
+    nodes: NavMeshBvNode[];
+    /** the quantisation factor for the bounding volume tree */
+    quantFactor: number;
 };
 
 export type NavMeshTile = {
@@ -180,6 +219,9 @@ export type NavMeshTile = {
 
     /** nav mesh tile vertices */
     vertices: number[];
+
+    /** the detail meshes */
+    detailMeshes: NavMeshPolyDetail[];
 
     /** the detail mesh's unique vertices */
     detailVertices: number[];
@@ -193,8 +235,18 @@ export type NavMeshTile = {
     /** the tile links */
     links: NavMeshLink[];
 
-    /** the tile bounding volume nodes */
-    bvTree: NavMeshBvNode[] | null;
+    /** the tile's bounding volume tree */
+    bvTree: NavMeshTileBvTree | null;
+
+    /**
+     * The xz-plane cell size of the polygon mesh.
+     */
+    cellSize: number;
+
+    /**
+     * The y-axis cell height of the polygon mesh.
+     */
+    cellHeight: number;
 
     // TODO: evaluate if necessary for nav mesh querying
     // float walkableHeight;	///< The agent height. [Unit: wu]
@@ -224,30 +276,36 @@ export const createNavMeshTile = (params: NavMeshTileParams): NavMeshTile => {
     const tile: NavMeshTile = {
         id: 0,
         bounds: structuredClone(params.bounds),
-        vertices: params.vertices,
-        detailVertices: params.detail?.detailVertices || [],
-        detailTriangles: params.detail?.detailTriangles || [],
+        vertices: params.polyMesh.vertices,
+        detailMeshes: [],
+        detailVertices: [],
+        detailTriangles: [],
         polys: [],
         links: [],
         bvTree: null,
+        cellSize: params.cellSize,
+        cellHeight: params.cellHeight,
     };
 
-    const nvp = params.maxVerticesPerPoly;
+    const nvp = params.polyMesh.maxVerticesPerPoly;
     const MESH_NULL_IDX = 0xffff;
 
     // create polys from input data
-    for (let i = 0; i < params.nPolys; i++) {
+    for (let i = 0; i < params.polyMesh.nPolys; i++) {
         const poly: NavMeshPoly = {
             vertices: [],
             neis: [],
-            flags: params.polyFlags[i],
-            area: params.polyAreas[i],
+            flags: params.polyMesh.polyFlags[i],
+            area: params.polyMesh.polyAreas[i],
         };
 
         // extract polygon data for this polygon
         const polyStart = i * nvp * 2;
-        const vertIndices = params.polys.slice(polyStart, polyStart + nvp);
-        const neiData = params.polys.slice(
+        const vertIndices = params.polyMesh.polys.slice(
+            polyStart,
+            polyStart + nvp,
+        );
+        const neiData = params.polyMesh.polys.slice(
             polyStart + nvp,
             polyStart + nvp * 2,
         );
@@ -288,46 +346,76 @@ export const createNavMeshTile = (params: NavMeshTileParams): NavMeshTile => {
     }
 
     // create detail triangles if not provided
-    if (!params.detail) {
+    if (!params.detailMesh) {
         createDetailMeshFromPolys(tile);
+    } else {
+        tile.detailMeshes = [];
+        tile.detailVertices = params.detailMesh.detailVertices;
+        tile.detailTriangles = params.detailMesh.detailTriangles;
+
+        for (let i = 0; i < params.detailMesh.detailMeshes.length; i += 4) {
+            const detailMesh: NavMeshPolyDetail = {
+                verticesBase: params.detailMesh.detailMeshes[i],
+                trianglesBase: params.detailMesh.detailMeshes[i + 1],
+                verticesCount: params.detailMesh.detailMeshes[i + 2],
+                trianglesCount: params.detailMesh.detailMeshes[i + 3],
+            };
+            tile.detailMeshes.push(detailMesh);
+        }
+    }
+
+    // build bv tree if requested
+    if (params.buildBvTree) {
+        buildNavMeshBvTree(tile);
     }
 
     // create internal links within the tile
     createInternalLinks(tile);
-
-    // TODO: create BV tree if requested
-    if (params.buildBvTree) {
-        // createBvTree(tile);
-    }
 
     return tile;
 };
 
 const createDetailMeshFromPolys = (tile: NavMeshTile) => {
     const detailTriangles: number[] = [];
+    const detailMeshes: NavMeshPolyDetail[] = [];
 
+    let tbase = 0;
+    
     for (let i = 0; i < tile.polys.length; i++) {
         const poly = tile.polys[i];
-        const vertCount = poly.vertices.length;
-
-        // triangulate polygon using simple fan triangulation
-        // each triangle uses vertex 0 and two consecutive vertices
-        for (let j = 2; j < vertCount; j++) {
-            // triangle vertices (local indices within the polygon)
-            detailTriangles.push(0); // first vertex
-            detailTriangles.push(j - 1); // previous vertex
-            detailTriangles.push(j); // current vertex
-
-            // edge flags - bit for each edge that belongs to poly boundary
-            let edgeFlags = 1 << 2; // edge 2 is always a polygon boundary
-            if (j === 2) edgeFlags |= 1 << 0; // first triangle, edge 0 is boundary
-            if (j === vertCount - 1) edgeFlags |= 1 << 4; // last triangle, edge 1 is boundary
-
+        const nv = poly.vertices.length;
+        
+        // Create detail mesh descriptor for this polygon
+        const detailMesh: NavMeshPolyDetail = {
+            verticesBase: 0,      // No additional detail vertices when triangulating from polys
+            verticesCount: 0,     // No additional detail vertices when triangulating from polys
+            trianglesBase: tbase, // Starting triangle index
+            trianglesCount: nv - 2  // Number of triangles in fan triangulation
+        };
+        
+        detailMeshes.push(detailMesh);
+        
+        // Triangulate polygon using fan triangulation (local indices within the polygon)
+        for (let j = 2; j < nv; j++) {
+            // Create triangle using vertex 0 and two consecutive vertices
+            detailTriangles.push(0);           // first vertex (local index)
+            detailTriangles.push(j - 1);      // previous vertex (local index)  
+            detailTriangles.push(j);          // current vertex (local index)
+            
+            // Edge flags - bit for each edge that belongs to poly boundary
+            let edgeFlags = 1 << 2;  // edge 2 is always a polygon boundary
+            if (j === 2) edgeFlags |= 1 << 0;      // first triangle, edge 0 is boundary
+            if (j === nv - 1) edgeFlags |= 1 << 4; // last triangle, edge 1 is boundary
+            
             detailTriangles.push(edgeFlags);
+            tbase++;
         }
     }
 
+    tile.detailMeshes = detailMeshes;
     tile.detailTriangles = detailTriangles;
+    // No additional detail vertices needed when triangulating from polygon vertices
+    tile.detailVertices = [];
 };
 
 const createInternalLinks = (tile: NavMeshTile) => {

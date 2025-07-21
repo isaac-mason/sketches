@@ -8,6 +8,7 @@ import type {
     PolyMeshDetail,
     TriangleMesh,
 } from '../generate';
+import type { NavMesh, NavMeshTile } from '../query';
 import {
     type ArrayLike,
     MESH_NULL_IDX,
@@ -1802,6 +1803,133 @@ export function createPointSetHelper(pointSet: PointSet): DebugObject {
         }
         instancedMesh.dispose();
     });
+
+    return {
+        object: group,
+        dispose: () => {
+            for (const dispose of disposables) {
+                dispose();
+            }
+        },
+    };
+}
+
+export function createNavMeshTileBvTreeHelper(navMeshTile: NavMeshTile): DebugObject {
+    const group = new THREE.Group();
+    const disposables: (() => void)[] = [];
+
+    if (!navMeshTile.bvTree || navMeshTile.bvTree.nodes.length === 0) {
+        return {
+            object: group,
+            dispose: () => {
+                for (const dispose of disposables) {
+                    dispose();
+                }
+            },
+        };
+    }
+
+    // Arrays for wireframe box edges
+    const linePositions: number[] = [];
+    const lineColors: number[] = [];
+
+    // Color for BV tree nodes (white with transparency)
+    const nodeColor = new THREE.Color(1, 1, 1);
+
+    // Calculate inverse quantization factor (cs = 1.0f / tile->header->bvQuantFactor)
+    const cs = 1.0 / navMeshTile.bvTree.quantFactor;
+
+    // Draw BV nodes - only internal nodes (leaf indices are positive, internal are negative)
+    for (let i = 0; i < navMeshTile.bvTree.nodes.length; i++) {
+        const node = navMeshTile.bvTree.nodes[i];
+        
+        // Leaf indices are positive.
+        if (node.i < 0) continue;
+
+        // Calculate world coordinates from quantized bounds
+        const minX = navMeshTile.bounds[0][0] + node.bounds[0][0] * cs;
+        const minY = navMeshTile.bounds[0][1] + node.bounds[0][1] * cs;
+        const minZ = navMeshTile.bounds[0][2] + node.bounds[0][2] * cs;
+        const maxX = navMeshTile.bounds[0][0] + node.bounds[1][0] * cs;
+        const maxY = navMeshTile.bounds[0][1] + node.bounds[1][1] * cs;
+        const maxZ = navMeshTile.bounds[0][2] + node.bounds[1][2] * cs;
+
+        // Create wireframe box edges
+        // Bottom face
+        linePositions.push(minX, minY, minZ, maxX, minY, minZ);
+        linePositions.push(maxX, minY, minZ, maxX, minY, maxZ);
+        linePositions.push(maxX, minY, maxZ, minX, minY, maxZ);
+        linePositions.push(minX, minY, maxZ, minX, minY, minZ);
+
+        // Top face
+        linePositions.push(minX, maxY, minZ, maxX, maxY, minZ);
+        linePositions.push(maxX, maxY, minZ, maxX, maxY, maxZ);
+        linePositions.push(maxX, maxY, maxZ, minX, maxY, maxZ);
+        linePositions.push(minX, maxY, maxZ, minX, maxY, minZ);
+
+        // Vertical edges
+        linePositions.push(minX, minY, minZ, minX, maxY, minZ);
+        linePositions.push(maxX, minY, minZ, maxX, maxY, minZ);
+        linePositions.push(maxX, minY, maxZ, maxX, maxY, maxZ);
+        linePositions.push(minX, minY, maxZ, minX, maxY, maxZ);
+
+        // Add colors for all line segments (24 vertices = 12 line segments)
+        for (let j = 0; j < 24; j++) {
+            lineColors.push(nodeColor.r, nodeColor.g, nodeColor.b);
+        }
+    }
+
+    // Create line segments geometry
+    if (linePositions.length > 0) {
+        const lineGeometry = new THREE.BufferGeometry();
+        lineGeometry.setAttribute(
+            'position',
+            new THREE.BufferAttribute(new Float32Array(linePositions), 3),
+        );
+        lineGeometry.setAttribute(
+            'color',
+            new THREE.BufferAttribute(new Float32Array(lineColors), 3),
+        );
+
+        const lineMaterial = new THREE.LineBasicMaterial({
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.5,
+            linewidth: 1.0,
+        });
+
+        const lineSegments = new THREE.LineSegments(lineGeometry, lineMaterial);
+        group.add(lineSegments);
+
+        disposables.push(() => {
+            lineGeometry.dispose();
+            lineMaterial.dispose();
+        });
+    }
+
+    return {
+        object: group,
+        dispose: () => {
+            for (const dispose of disposables) {
+                dispose();
+            }
+        },
+    };
+}
+
+export function createNavMeshBvTreeHelper(navMesh: NavMesh): DebugObject {
+    const group = new THREE.Group();
+    const disposables: (() => void)[] = [];
+
+    // Draw BV tree for all tiles in the nav mesh
+    for (const tileId in navMesh.tiles) {
+        const tile = navMesh.tiles[tileId];
+        if (!tile) continue;
+
+        const tileHelper = createNavMeshTileBvTreeHelper(tile);
+        group.add(tileHelper.object);
+        disposables.push(tileHelper.dispose);
+    }
 
     return {
         object: group,

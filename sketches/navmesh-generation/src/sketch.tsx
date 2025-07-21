@@ -10,8 +10,10 @@ import {
     ContourBuildFlags,
     type ContourSet,
     type Heightfield,
+    type PointSet,
     type PolyMesh,
     type PolyMeshDetail,
+    type TriangleMesh,
     buildCompactHeightfield,
     buildContours,
     buildDistanceField,
@@ -20,24 +22,24 @@ import {
     buildRegions,
     calculateGridSize,
     calculateMeshBounds,
+    compactHeightfieldToPointSet,
     createHeightfield,
     erodeWalkableArea,
     filterLedgeSpans,
     filterLowHangingWalkableObstacles,
     filterWalkableLowHeightSpans,
     markWalkableTriangles,
-    rasterizeTriangles,
-    type PointSet,
     pointSetToWalkableTriangleMeshBPA,
-    type TriangleMesh,
+    rasterizeTriangles,
     triangleMeshToPointSet,
-    compactHeightfieldToPointSet,
 } from './lib/generate';
+import { type NavMesh, type NavMeshTileParams, navMesh } from './lib/query';
 import {
     createCompactHeightfieldDistancesHelper,
     createCompactHeightfieldRegionsHelper,
     createCompactHeightfieldSolidHelper,
     createHeightfieldHelper,
+    createNavMeshBvTreeHelper,
     createPointSetHelper,
     createPolyMeshDetailHelper,
     createPolyMeshHelper,
@@ -47,7 +49,6 @@ import {
     createTriangleMeshWithAreasHelper,
     getPositionsAndIndices,
 } from './lib/three';
-import { navMesh, type NavMeshTileParams } from './lib/query';
 
 const DungeonModel = () => {
     const gltf = useGLTF('/dungeon.gltf');
@@ -89,6 +90,7 @@ const RecastLike = () => {
         showSimplifiedContours,
         showPolyMesh,
         showPolyMeshDetail,
+        showNavMeshBvTree,
     } = useControls('recast-like generation options', {
         showMesh: {
             label: 'Show Mesh',
@@ -130,11 +132,17 @@ const RecastLike = () => {
             label: 'Show Poly Mesh Detail',
             value: true,
         },
+        showNavMeshBvTree: {
+            label: 'Show Nav Mesh BV Tree',
+            value: false,
+        },
     });
 
     const [intermediates, setIntermediates] = useState<
         RecastLikeIntermediates | undefined
     >();
+
+    const [nav, setNav] = useState<NavMesh | undefined>();
 
     useEffect(() => {
         console.time('navmesh generation');
@@ -369,14 +377,16 @@ const RecastLike = () => {
         const nav = navMesh.create();
 
         const navMeshTileParams: NavMeshTileParams = {
-            vertices: polyMesh.vertices,
-            nVertices: polyMesh.nVertices,
-            polys: polyMesh.polys,
-            polyFlags: polyMesh.flags,
-            polyAreas: polyMesh.areas,
-            nPolys: polyMesh.nPolys,
-            maxVerticesPerPoly: polyMesh.maxVerticesPerPoly,
-            detail: {
+            polyMesh: {
+                vertices: polyMesh.vertices,
+                nVertices: polyMesh.nVertices,
+                polys: polyMesh.polys,
+                polyFlags: polyMesh.flags,
+                polyAreas: polyMesh.areas,
+                nPolys: polyMesh.nPolys,
+                maxVerticesPerPoly: polyMesh.maxVerticesPerPoly,
+            },
+            detailMesh: {
                 detailMeshes: polyMeshDetail.meshes,
                 detailVertices: polyMeshDetail.vertices,
                 detailTriangles: polyMeshDetail.triangles,
@@ -389,14 +399,17 @@ const RecastLike = () => {
             tileLayer: 0,
             bounds: bounds,
             buildBvTree: true,
+            cellSize,
+            cellHeight,
         }
 
         const tile = navMesh.createNavMeshTile(navMeshTileParams);
-
+        
         navMesh.addTile(nav, tile, navMeshTileParams.tileX, navMeshTileParams.tileY, navMeshTileParams.tileLayer, );
 
         console.log("nav", nav, tile)
 
+        setNav(nav);
     }, []);
 
     // debug view of walkable triangles with area ids based vertex colors
@@ -528,6 +541,21 @@ const RecastLike = () => {
             debugObject.dispose();
         };
     }, [showPolyMeshDetail, intermediates, scene]);
+
+    // debug view of the nav mesh BV tree
+    useEffect(() => {
+        if (!nav || !showNavMeshBvTree) return;
+
+        const debugObject = createNavMeshBvTreeHelper(
+            nav
+        )
+        scene.add(debugObject.object);
+
+        return () => {
+            scene.remove(debugObject.object);
+            debugObject.dispose();
+        };
+    }, [showNavMeshBvTree, nav, scene]);
 
     return (
         <>
