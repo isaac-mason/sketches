@@ -10,6 +10,7 @@ import {
     ContourBuildFlags,
     type ContourSet,
     type Heightfield,
+    type NavMeshTileParams,
     type PointSet,
     type PolyMesh,
     type PolyMeshDetail,
@@ -24,6 +25,7 @@ import {
     calculateMeshBounds,
     compactHeightfieldToPointSet,
     createHeightfield,
+    createNavMeshTile,
     erodeWalkableArea,
     filterLedgeSpans,
     filterLowHangingWalkableObstacles,
@@ -33,13 +35,14 @@ import {
     rasterizeTriangles,
     triangleMeshToPointSet,
 } from './lib/generate';
-import { type NavMesh, type NavMeshTileParams, navMesh } from './lib/query';
+import { type NavMesh, navMesh } from './lib/query';
 import {
     createCompactHeightfieldDistancesHelper,
     createCompactHeightfieldRegionsHelper,
     createCompactHeightfieldSolidHelper,
     createHeightfieldHelper,
     createNavMeshBvTreeHelper,
+    createNavMeshHelper,
     createPointSetHelper,
     createPolyMeshDetailHelper,
     createPolyMeshHelper,
@@ -91,6 +94,7 @@ const RecastLike = () => {
         showPolyMesh,
         showPolyMeshDetail,
         showNavMeshBvTree,
+        showNavMesh,
     } = useControls('recast-like generation options', {
         showMesh: {
             label: 'Show Mesh',
@@ -136,6 +140,10 @@ const RecastLike = () => {
             label: 'Show Nav Mesh BV Tree',
             value: false,
         },
+        showNavMesh: {
+            label: 'Show Nav Mesh',
+            value: false,
+        }
     });
 
     const [intermediates, setIntermediates] = useState<
@@ -372,7 +380,7 @@ const RecastLike = () => {
 
         setIntermediates(intermediates);
 
-        /* create the nav mesh */
+        /* create a single tile nav mesh */
 
         const nav = navMesh.create();
 
@@ -403,9 +411,9 @@ const RecastLike = () => {
             cellHeight,
         }
 
-        const tile = navMesh.createNavMeshTile(navMeshTileParams);
-        
-        navMesh.addTile(nav, tile, navMeshTileParams.tileX, navMeshTileParams.tileY, navMeshTileParams.tileLayer, );
+        const tile = createNavMeshTile(navMeshTileParams);
+
+        navMesh.addTile(nav, tile, navMeshTileParams.tileX, navMeshTileParams.tileY, navMeshTileParams.tileLayer);
 
         console.log("nav", nav, tile)
 
@@ -556,6 +564,19 @@ const RecastLike = () => {
             debugObject.dispose();
         };
     }, [showNavMeshBvTree, nav, scene]);
+
+    // debug view of the nav mesh
+    useEffect(() => {
+        if (!nav || !showNavMesh) return;
+
+        const debugObject = createNavMeshHelper(nav);
+        scene.add(debugObject.object);
+
+        return () => {
+            scene.remove(debugObject.object);
+            debugObject.dispose();
+        };
+    }, [showNavMesh, nav, scene]);
 
     return (
         <>

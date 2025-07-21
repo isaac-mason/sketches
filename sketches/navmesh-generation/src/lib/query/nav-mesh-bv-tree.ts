@@ -1,4 +1,5 @@
-import type { Box3, Vec3 } from '@/common/maaths';
+import type { Box3 } from '@/common/maaths';
+import { MESH_NULL_IDX } from '../generate';
 import type { NavMeshTile, NavMeshBvNode } from "./nav-mesh";
 
 const compareItemX = (a: NavMeshBvNode, b: NavMeshBvNode): number => {
@@ -158,16 +159,14 @@ export const buildNavMeshBvTree = (navMeshTile: NavMeshTile): void => {
             if (ndv > 0) {
                 // Get first detail vertex
                 const firstVertIndex = vb * 3;
-                const bmin: Vec3 = [
-                    navMeshTile.detailVertices[firstVertIndex],
-                    navMeshTile.detailVertices[firstVertIndex + 1],
-                    navMeshTile.detailVertices[firstVertIndex + 2]
-                ];
-                const bmax: Vec3 = [
-                    navMeshTile.detailVertices[firstVertIndex],
-                    navMeshTile.detailVertices[firstVertIndex + 1],
-                    navMeshTile.detailVertices[firstVertIndex + 2]
-                ];
+
+                item.bounds[0][0] = navMeshTile.detailVertices[firstVertIndex];
+                item.bounds[0][1] = navMeshTile.detailVertices[firstVertIndex + 1];
+                item.bounds[0][2] = navMeshTile.detailVertices[firstVertIndex + 2];
+
+                item.bounds[1][0] = navMeshTile.detailVertices[firstVertIndex];
+                item.bounds[1][1] = navMeshTile.detailVertices[firstVertIndex + 1];
+                item.bounds[1][2] = navMeshTile.detailVertices[firstVertIndex + 2];
                 
                 // Find min/max across all detail vertices
                 for (let j = 1; j < ndv; j++) {
@@ -175,24 +174,24 @@ export const buildNavMeshBvTree = (navMeshTile: NavMeshTile): void => {
                     const x = navMeshTile.detailVertices[vertIndex];
                     const y = navMeshTile.detailVertices[vertIndex + 1];
                     const z = navMeshTile.detailVertices[vertIndex + 2];
-                    
-                    if (x < bmin[0]) bmin[0] = x;
-                    if (y < bmin[1]) bmin[1] = y;
-                    if (z < bmin[2]) bmin[2] = z;
-                    
-                    if (x > bmax[0]) bmax[0] = x;
-                    if (y > bmax[1]) bmax[1] = y;
-                    if (z > bmax[2]) bmax[2] = z;
+
+                    if (x < item.bounds[0][0]) item.bounds[0][0] = x;
+                    if (y < item.bounds[0][1]) item.bounds[0][1] = y;
+                    if (z < item.bounds[0][2]) item.bounds[0][2] = z;
+
+                    if (x > item.bounds[1][0]) item.bounds[1][0] = x;
+                    if (y > item.bounds[1][1]) item.bounds[1][1] = y;
+                    if (z > item.bounds[1][2]) item.bounds[1][2] = z;
                 }
                 
                 // BV-tree uses cellSize for all dimensions, quantize relative to tile bounds
-                item.bounds[0][0] = (bmin[0] - navMeshTile.bounds[0][0]) * quantFactor;
-                item.bounds[0][1] = (bmin[1] - navMeshTile.bounds[0][1]) * quantFactor;
-                item.bounds[0][2] = (bmin[2] - navMeshTile.bounds[0][2]) * quantFactor;
-                
-                item.bounds[1][0] = (bmax[0] - navMeshTile.bounds[0][0]) * quantFactor;
-                item.bounds[1][1] = (bmax[1] - navMeshTile.bounds[0][1]) * quantFactor;
-                item.bounds[1][2] = (bmax[2] - navMeshTile.bounds[0][2]) * quantFactor;
+                item.bounds[0][0] = (item.bounds[0][0] - navMeshTile.bounds[0][0]) * quantFactor;
+                item.bounds[0][1] = (item.bounds[0][1] - navMeshTile.bounds[0][1]) * quantFactor;
+                item.bounds[0][2] = (item.bounds[0][2] - navMeshTile.bounds[0][2]) * quantFactor;
+
+                item.bounds[1][0] = (item.bounds[1][0] - navMeshTile.bounds[0][0]) * quantFactor;
+                item.bounds[1][1] = (item.bounds[1][1] - navMeshTile.bounds[0][1]) * quantFactor;
+                item.bounds[1][2] = (item.bounds[1][2] - navMeshTile.bounds[0][2]) * quantFactor;
             }
         } else {
             // Use polygon vertices
@@ -200,47 +199,32 @@ export const buildNavMeshBvTree = (navMeshTile: NavMeshTile): void => {
             const nvp = poly.vertices.length;
             
             if (nvp > 0) {
-                // Get first vertex
                 const firstVertIndex = poly.vertices[0] * 3;
-                const bmin: Vec3 = [
-                    navMeshTile.vertices[firstVertIndex],
-                    navMeshTile.vertices[firstVertIndex + 1],
-                    navMeshTile.vertices[firstVertIndex + 2]
-                ];
-                const bmax: Vec3 = [
-                    navMeshTile.vertices[firstVertIndex],
-                    navMeshTile.vertices[firstVertIndex + 1],
-                    navMeshTile.vertices[firstVertIndex + 2]
-                ];
-                
-                // Find min/max across all polygon vertices
+            
+                item.bounds[0][0] = item.bounds[1][0] = navMeshTile.vertices[firstVertIndex];
+                item.bounds[0][1] = item.bounds[1][1] = navMeshTile.vertices[firstVertIndex + 1];
+                item.bounds[0][2] = item.bounds[1][2] = navMeshTile.vertices[firstVertIndex + 2];
+
                 for (let j = 1; j < nvp; j++) {
-                    const vertIndex = poly.vertices[j] * 3;
+                    const vertexIndex = poly.vertices[j];
+                    if (vertexIndex === MESH_NULL_IDX) break;
+                    const vertIndex = vertexIndex * 3;
                     const x = navMeshTile.vertices[vertIndex];
                     const y = navMeshTile.vertices[vertIndex + 1];
                     const z = navMeshTile.vertices[vertIndex + 2];
-                    
-                    if (x < bmin[0]) bmin[0] = x;
-                    if (y < bmin[1]) bmin[1] = y;
-                    if (z < bmin[2]) bmin[2] = z;
-                    
-                    if (x > bmax[0]) bmax[0] = x;
-                    if (y > bmax[1]) bmax[1] = y;
-                    if (z > bmax[2]) bmax[2] = z;
-                }
-                
-                // Remap y coordinate using cellHeight to cellSize ratio
-                bmin[1] = Math.floor(bmin[1] * navMeshTile.cellHeight / navMeshTile.cellSize);
-                bmax[1] = Math.ceil(bmax[1] * navMeshTile.cellHeight / navMeshTile.cellSize);
-                
-                // Quantize bounds
-                item.bounds[0][0] = bmin[0];
-                item.bounds[0][1] = bmin[1];
-                item.bounds[0][2] = bmin[2];
-                
-                item.bounds[1][0] = bmax[0];
-                item.bounds[1][1] = bmax[1];
-                item.bounds[1][2] = bmax[2];
+
+                    if (x < item.bounds[0][0]) item.bounds[0][0] = x;
+                    if (y < item.bounds[0][1]) item.bounds[0][1] = y;
+                    if (z < item.bounds[0][2]) item.bounds[0][2] = z;
+
+                    if (x > item.bounds[1][0]) item.bounds[1][0] = x;
+                    if (y > item.bounds[1][1]) item.bounds[1][1] = y;
+                    if (z > item.bounds[1][2]) item.bounds[1][2] = z;
+                }   
+
+                // Remap y
+                item.bounds[0][1] = Math.floor(item.bounds[0][1] * navMeshTile.cellHeight / navMeshTile.cellSize);
+                item.bounds[1][1] = Math.ceil(item.bounds[1][1] * navMeshTile.cellHeight / navMeshTile.cellSize);
             }
         }
         

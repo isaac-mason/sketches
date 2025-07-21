@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import type {
+    ArrayLike,
     CompactHeightfield,
     ContourSet,
     Heightfield,
@@ -8,13 +9,12 @@ import type {
     PolyMeshDetail,
     TriangleMesh,
 } from '../generate';
-import type { NavMesh, NavMeshTile } from '../query';
 import {
-    type ArrayLike,
     MESH_NULL_IDX,
     NULL_AREA,
     WALKABLE_AREA,
 } from '../generate';
+import type { NavMesh, NavMeshTile } from '../query';
 
 type DebugObject = {
     object: THREE.Object3D;
@@ -1929,6 +1929,311 @@ export function createNavMeshBvTreeHelper(navMesh: NavMesh): DebugObject {
         const tileHelper = createNavMeshTileBvTreeHelper(tile);
         group.add(tileHelper.object);
         disposables.push(tileHelper.dispose);
+    }
+
+    return {
+        object: group,
+        dispose: () => {
+            for (const dispose of disposables) {
+                dispose();
+            }
+        },
+    };
+}
+
+export function createNavMeshHelper(navMesh: NavMesh): DebugObject {
+    const group = new THREE.Group();
+    const disposables: (() => void)[] = [];
+
+    // Helper functions similar to Detour's debug utilities
+    const intToCol = (val: number, alpha = 255) => {
+        // Hash the value to generate a consistent color
+        const hash = val * 137.5; // Use golden ratio approximation
+        const hue = hash % 360;
+        return new THREE.Color(`hsl(${hue}, 70%, 60%)`).multiplyScalar(alpha / 255.0);
+    };
+
+    const areaToCol = (area: number): THREE.Color => {
+        if (area === WALKABLE_AREA) {
+            return new THREE.Color().setRGB(0, 192 / 255, 1); // Blue for walkable
+        }
+        if (area === NULL_AREA) {
+            return new THREE.Color().setRGB(0, 0, 0); // Black for null area
+        }
+        // Hash area id to a color for other areas
+        const hash = area * 137.5;
+        const hue = hash % 360;
+        return new THREE.Color(`hsl(${hue}, 70%, 60%)`);
+    };
+
+    const transCol = (color: THREE.Color, alpha: number): THREE.Color => {
+        return color.clone().multiplyScalar(alpha / 255.0);
+    };
+
+    const darkenCol = (color: THREE.Color): THREE.Color => {
+        return color.clone().multiplyScalar(0.5);
+    };
+
+    // Process each tile in the navmesh
+    for (const tileId in navMesh.tiles) {
+        const tile = navMesh.tiles[tileId];
+        if (!tile) continue;
+
+        const tileNum = Number.parseInt(tileId);
+        const tileColor = intToCol(tileNum, 128);
+
+        // Arrays for triangle geometry (main mesh)
+        const triPositions: number[] = [];
+        const triColors: number[] = [];
+        const triIndices: number[] = [];
+
+        // Arrays for inter-poly boundaries (internal edges)
+        const interPolyLinePositions: number[] = [];
+        const interPolyLineColors: number[] = [];
+
+        // Arrays for outer poly boundaries (external edges)
+        const outerPolyLinePositions: number[] = [];
+        const outerPolyLineColors: number[] = [];
+
+        // Arrays for vertices (points)
+        const vertexPositions: number[] = [];
+        const vertexColors: number[] = [];
+
+        let triVertexIndex = 0;
+
+        // Draw triangles for each polygon
+        for (let i = 0; i < tile.polys.length; i++) {
+            const poly = tile.polys[i];
+            
+            // Skip off-mesh connections (not implemented yet)
+            // if (poly.type === NavMeshPolyType.OFFMESH_CONNECTION) continue;
+
+            const polyDetail = tile.detailMeshes[i];
+            if (!polyDetail) continue;
+
+            // Determine polygon color
+            const col = transCol(areaToCol(poly.area), 64);
+
+            // Draw detail triangles for this polygon
+            for (let j = 0; j < polyDetail.trianglesCount; j++) {
+                const triBase = (polyDetail.trianglesBase + j) * 4; // Triangles are stored as 4 elements each
+                const t0 = tile.detailTriangles[triBase];
+                const t1 = tile.detailTriangles[triBase + 1];
+                const t2 = tile.detailTriangles[triBase + 2];
+                // Note: tile.detailTriangles[triBase + 3] contains flags
+
+                // Get triangle vertices
+                for (let k = 0; k < 3; k++) {
+                    const vertIndex = k === 0 ? t0 : k === 1 ? t1 : t2;
+                    let vx: number;
+                    let vy: number;
+                    let vz: number;
+
+                    if (vertIndex < poly.vertices.length) {
+                        // Vertex from main polygon - index through poly.vertices and transform to world space
+                        const polyVertIndex = poly.vertices[vertIndex];
+                        const vBase = polyVertIndex * 3;
+                        vx = tile.bounds[0][0] + tile.vertices[vBase] * tile.cellSize;
+                        vy = tile.bounds[0][1] + tile.vertices[vBase + 1] * tile.cellHeight;
+                        vz = tile.bounds[0][2] + tile.vertices[vBase + 2] * tile.cellSize;
+                    } else {
+                        // Vertex from detail mesh - transform to world space
+                        const detailVertIndex = (polyDetail.verticesBase + vertIndex - poly.vertices.length) * 3;
+                        vx = tile.bounds[0][0] + tile.detailVertices[detailVertIndex];
+                        vy = tile.bounds[0][1] + tile.detailVertices[detailVertIndex + 1];
+                        vz = tile.bounds[0][2] + tile.detailVertices[detailVertIndex + 2];
+                    }
+
+                    triPositions.push(vx, vy, vz);
+                    triColors.push(col.r, col.g, col.b);
+                }
+
+                // Add triangle indices
+                triIndices.push(
+                    triVertexIndex,
+                    triVertexIndex + 1,
+                    triVertexIndex + 2,
+                );
+                triVertexIndex += 3;
+            }
+        }
+
+        // Draw polygon boundaries
+        const drawPolyBoundaries = (isInner: boolean) => {
+            const linePositions = isInner ? interPolyLinePositions : outerPolyLinePositions;
+            const lineColors = isInner ? interPolyLineColors : outerPolyLineColors;
+            const color = isInner 
+                ? new THREE.Color().setRGB(0, 48 / 255, 64 / 255).multiplyScalar(32 / 255)
+                : new THREE.Color().setRGB(0, 48 / 255, 64 / 255).multiplyScalar(220 / 255);
+
+            for (let i = 0; i < tile.polys.length; i++) {
+                const poly = tile.polys[i];
+                
+                for (let j = 0; j < poly.vertices.length; j++) {
+                    const nj = (j + 1) % poly.vertices.length;
+                    const nei = poly.neis[j];
+                    
+                    // Check if this is the type of boundary we want
+                    const isBoundary = (nei & 0x8000) !== 0;
+                    if (isInner && isBoundary) continue; // Skip boundary edges for inner
+                    if (!isInner && !isBoundary) continue; // Skip non-boundary edges for outer
+
+                    // Get edge vertices - transform to world space
+                    const polyVertIndex1 = poly.vertices[j];
+                    const polyVertIndex2 = poly.vertices[nj];
+                    
+                    const v1Base = polyVertIndex1 * 3;
+                    const v2Base = polyVertIndex2 * 3;
+
+                    const v1x = tile.bounds[0][0] + tile.vertices[v1Base] * tile.cellSize;
+                    const v1y = tile.bounds[0][1] + tile.vertices[v1Base + 1] * tile.cellHeight + 0.1; // Slightly offset up
+                    const v1z = tile.bounds[0][2] + tile.vertices[v1Base + 2] * tile.cellSize;
+
+                    const v2x = tile.bounds[0][0] + tile.vertices[v2Base] * tile.cellSize;
+                    const v2y = tile.bounds[0][1] + tile.vertices[v2Base + 1] * tile.cellHeight + 0.1;
+                    const v2z = tile.bounds[0][2] + tile.vertices[v2Base + 2] * tile.cellSize;
+
+                    // Add line segment
+                    linePositions.push(v1x, v1y, v1z);
+                    lineColors.push(color.r, color.g, color.b);
+                    linePositions.push(v2x, v2y, v2z);
+                    lineColors.push(color.r, color.g, color.b);
+                }
+            }
+        };
+
+        // Draw inter-poly boundaries (internal edges)
+        drawPolyBoundaries(true);
+        
+        // Draw outer poly boundaries (external edges)
+        drawPolyBoundaries(false);
+
+        // Draw vertices - transform to world space
+        const vertexColor = new THREE.Color().setRGB(0, 0, 0).multiplyScalar(196 / 255);
+        for (let i = 0; i < tile.vertices.length; i += 3) {
+            const worldX = tile.bounds[0][0] + tile.vertices[i] * tile.cellSize;
+            const worldY = tile.bounds[0][1] + tile.vertices[i + 1] * tile.cellHeight;
+            const worldZ = tile.bounds[0][2] + tile.vertices[i + 2] * tile.cellSize;
+            
+            vertexPositions.push(worldX, worldY, worldZ);
+            vertexColors.push(vertexColor.r, vertexColor.g, vertexColor.b);
+        }
+
+        // Create triangle mesh
+        if (triPositions.length > 0) {
+            const triGeometry = new THREE.BufferGeometry();
+            triGeometry.setAttribute(
+                'position',
+                new THREE.BufferAttribute(new Float32Array(triPositions), 3),
+            );
+            triGeometry.setAttribute(
+                'color',
+                new THREE.BufferAttribute(new Float32Array(triColors), 3),
+            );
+            triGeometry.setIndex(
+                new THREE.BufferAttribute(new Uint32Array(triIndices), 1),
+            );
+
+            const triMaterial = new THREE.MeshBasicMaterial({
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.8,
+                side: THREE.DoubleSide,
+            });
+
+            const triMesh = new THREE.Mesh(triGeometry, triMaterial);
+            group.add(triMesh);
+
+            disposables.push(() => {
+                triGeometry.dispose();
+                triMaterial.dispose();
+            });
+        }
+
+        // Create inter-poly boundary lines
+        if (interPolyLinePositions.length > 0) {
+            const interPolyGeometry = new THREE.BufferGeometry();
+            interPolyGeometry.setAttribute(
+                'position',
+                new THREE.BufferAttribute(new Float32Array(interPolyLinePositions), 3),
+            );
+            interPolyGeometry.setAttribute(
+                'color',
+                new THREE.BufferAttribute(new Float32Array(interPolyLineColors), 3),
+            );
+
+            const interPolyMaterial = new THREE.LineBasicMaterial({
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.3,
+                linewidth: 1.5,
+            });
+
+            const interPolyLines = new THREE.LineSegments(interPolyGeometry, interPolyMaterial);
+            group.add(interPolyLines);
+
+            disposables.push(() => {
+                interPolyGeometry.dispose();
+                interPolyMaterial.dispose();
+            });
+        }
+
+        // Create outer poly boundary lines
+        if (outerPolyLinePositions.length > 0) {
+            const outerPolyGeometry = new THREE.BufferGeometry();
+            outerPolyGeometry.setAttribute(
+                'position',
+                new THREE.BufferAttribute(new Float32Array(outerPolyLinePositions), 3),
+            );
+            outerPolyGeometry.setAttribute(
+                'color',
+                new THREE.BufferAttribute(new Float32Array(outerPolyLineColors), 3),
+            );
+
+            const outerPolyMaterial = new THREE.LineBasicMaterial({
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.9,
+                linewidth: 2.5,
+            });
+
+            const outerPolyLines = new THREE.LineSegments(outerPolyGeometry, outerPolyMaterial);
+            group.add(outerPolyLines);
+
+            disposables.push(() => {
+                outerPolyGeometry.dispose();
+                outerPolyMaterial.dispose();
+            });
+        }
+
+        // Create vertex points
+        if (vertexPositions.length > 0) {
+            const vertexGeometry = new THREE.BufferGeometry();
+            vertexGeometry.setAttribute(
+                'position',
+                new THREE.BufferAttribute(new Float32Array(vertexPositions), 3),
+            );
+            vertexGeometry.setAttribute(
+                'color',
+                new THREE.BufferAttribute(new Float32Array(vertexColors), 3),
+            );
+
+            const vertexMaterial = new THREE.PointsMaterial({
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.8,
+                size: 3,
+                sizeAttenuation: false,
+            });
+
+            const vertexPoints = new THREE.Points(vertexGeometry, vertexMaterial);
+            group.add(vertexPoints);
+
+            disposables.push(() => {
+                vertexGeometry.dispose();
+                vertexMaterial.dispose();
+            });
+        }
     }
 
     return {

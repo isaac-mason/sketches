@@ -16,7 +16,7 @@ import type { PolyMesh } from './poly-mesh';
  * with the polygons in its associated polygon mesh object.
  */
 export type PolyMeshDetail = {
-    /** The sub-mesh data. Size: 4*nMeshes */
+    /** The sub-mesh data. Size: 4*nMeshes. Layout: [verticesBase1, trianglesBase1, verticesCount1, trianglesCount1, ...] */
     meshes: number[];
     /** The mesh vertices. Size: 3*nVertices */
     vertices: number[];
