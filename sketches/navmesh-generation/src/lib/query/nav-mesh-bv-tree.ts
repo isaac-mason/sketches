@@ -148,7 +148,7 @@ export const buildNavMeshBvTree = (navMeshTile: NavMeshTile): void => {
             ],
             i: i
         };
-        
+
         // Use detail meshes if available, otherwise use polygon vertices
         if (navMeshTile.detailMeshes.length > 0 && navMeshTile.detailVertices.length > 0) {
             // Use detail mesh vertices for more accurate bounds
@@ -222,9 +222,14 @@ export const buildNavMeshBvTree = (navMeshTile: NavMeshTile): void => {
                     if (z > item.bounds[1][2]) item.bounds[1][2] = z;
                 }   
 
-                // Remap y
-                item.bounds[0][1] = Math.floor(item.bounds[0][1] * navMeshTile.cellHeight / navMeshTile.cellSize);
-                item.bounds[1][1] = Math.ceil(item.bounds[1][1] * navMeshTile.cellHeight / navMeshTile.cellSize);
+                // BV-tree uses cellSize for all dimensions, quantize relative to tile bounds
+                item.bounds[0][0] = (item.bounds[0][0] - navMeshTile.bounds[0][0]) * quantFactor;
+                item.bounds[0][1] = (item.bounds[0][1] - navMeshTile.bounds[0][1]) * quantFactor;
+                item.bounds[0][2] = (item.bounds[0][2] - navMeshTile.bounds[0][2]) * quantFactor;
+
+                item.bounds[1][0] = (item.bounds[1][0] - navMeshTile.bounds[0][0]) * quantFactor;
+                item.bounds[1][1] = (item.bounds[1][1] - navMeshTile.bounds[0][1]) * quantFactor;
+                item.bounds[1][2] = (item.bounds[1][2] - navMeshTile.bounds[0][2]) * quantFactor;
             }
         }
         

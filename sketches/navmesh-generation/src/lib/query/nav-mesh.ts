@@ -94,6 +94,7 @@ export type NavMeshPolyDetail = {
      * The offset of the vertices in the NavMeshTile detailVertices array.
      * If the base index is between 0 and `NavMeshTile.vertices.length`, this is used to index into the NavMeshTile vertices array.
      * If the base index is greater than `NavMeshTile.vertices.length`, it is used to index into the NavMeshTile detailVertices array.
+     * This allows for detail meshes to either re-use the polygon vertices or to define their own vertices without duplicating data.
      */
     verticesBase: number;
 
@@ -117,6 +118,7 @@ export type NavMeshBvNode = {
 export type NavMeshTileBvTree = {
     /** the tile bounding volume nodes */
     nodes: NavMeshBvNode[];
+
     /** the quantisation factor for the bounding volume tree */
     quantFactor: number;
 };
@@ -128,13 +130,13 @@ export type NavMeshTile = {
     /** the bounds of the tile's AABB */
     bounds: Box3;
 
-    /** nav mesh tile vertices */
+    /** nav mesh tile vertices in world space */
     vertices: number[];
 
     /** the detail meshes */
     detailMeshes: NavMeshPolyDetail[];
 
-    /** the detail mesh's unique vertices */
+    /** the detail mesh's unique vertices, in local tile space */
     detailVertices: number[];
 
     /** the detail mesh's triangles */

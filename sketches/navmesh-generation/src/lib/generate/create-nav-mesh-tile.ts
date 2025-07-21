@@ -90,7 +90,7 @@ export const createNavMeshTile = (params: NavMeshTileParams): NavMeshTile => {
     const tile: NavMeshTile = {
         id: 0,
         bounds: structuredClone(params.bounds),
-        vertices: params.polyMesh.vertices,
+        vertices: [],
         detailMeshes: [],
         detailVertices: [],
         detailTriangles: [],
@@ -100,6 +100,19 @@ export const createNavMeshTile = (params: NavMeshTileParams): NavMeshTile => {
         cellSize: params.cellSize,
         cellHeight: params.cellHeight,
     };
+
+    const cellSize = params.cellSize;
+    const cellHeight = params.cellHeight;
+
+    // store vertices, transforming to world space
+    for (let i = 0; i < params.polyMesh.nVertices; i++) {
+        const vertexIndex = i * 3;
+        tile.vertices.push(
+            params.bounds[0][0] + params.polyMesh.vertices[vertexIndex] * cellSize,
+            params.bounds[0][1] + params.polyMesh.vertices[vertexIndex + 1] * cellHeight,
+            params.bounds[0][2] + params.polyMesh.vertices[vertexIndex + 2] * cellSize,
+        );
+    }
 
     const nvp = params.polyMesh.maxVerticesPerPoly;
 

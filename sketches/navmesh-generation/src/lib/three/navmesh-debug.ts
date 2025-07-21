@@ -2033,9 +2033,9 @@ export function createNavMeshHelper(navMesh: NavMesh): DebugObject {
                         // Vertex from main polygon - index through poly.vertices and transform to world space
                         const polyVertIndex = poly.vertices[vertIndex];
                         const vBase = polyVertIndex * 3;
-                        vx = tile.bounds[0][0] + tile.vertices[vBase] * tile.cellSize;
-                        vy = tile.bounds[0][1] + tile.vertices[vBase + 1] * tile.cellHeight;
-                        vz = tile.bounds[0][2] + tile.vertices[vBase + 2] * tile.cellSize;
+                        vx = tile.vertices[vBase];
+                        vy = tile.vertices[vBase + 1];
+                        vz = tile.vertices[vBase + 2];
                     } else {
                         // Vertex from detail mesh - transform to world space
                         const detailVertIndex = (polyDetail.verticesBase + vertIndex - poly.vertices.length) * 3;
