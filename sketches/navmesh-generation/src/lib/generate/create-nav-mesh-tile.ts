@@ -7,7 +7,7 @@ import { buildNavMeshBvTree } from "../query/nav-mesh-bv-tree";
 export type NavMeshTileParams = {
     /** the polygon mesh parameters */
     polyMesh: {
-        /** the polygon mesh vertices, [x1, y1, z1, ...] */
+        /** the polygon mesh vertices, [x1, y1, z1, ...], in local tile cell space */
         vertices: number[];
 
         /** the number of vertices in the polygon mesh */
@@ -68,22 +68,16 @@ export type NavMeshTileParams = {
     /** whether to build a bounding volume tree for the tile */
     buildBvTree: boolean;
 
-    /**
-     * The xz-plane cell size of the polygon mesh.
-     */
+    /** the xz-plane cell size of the polygon mesh */
     cellSize: number;
 
-    /**
-     * The y-axis cell height of the polygon mesh.
-     */
+    /** the y-axis cell height of the polygon mesh */
     cellHeight: number;
 
     // TODO: necessary for nav mesh querying?
     // float walkableHeight;	///< The agent height. [Unit: wu]
     // float walkableRadius;	///< The agent radius. [Unit: wu]
     // float walkableClimb;	///< The agent maximum traversable ledge. (Up/Down) [Unit: wu]
-    // float cs;				///< The xz-plane cell size of the polygon mesh. [Limit: > 0] [Unit: wu]
-    // float ch;				///< The y-axis cell height of the polygon mesh. [Limit: > 0] [Unit: wu]
 };
 
 export const createNavMeshTile = (params: NavMeshTileParams): NavMeshTile => {
