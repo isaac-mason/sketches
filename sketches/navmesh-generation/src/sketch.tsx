@@ -385,6 +385,7 @@ const RecastLike = () => {
         const nav = navMesh.create();
 
         const navMeshTileParams: NavMeshTileParams = {
+            bounds: polyMesh.bounds,
             polyMesh: {
                 vertices: polyMesh.vertices,
                 nVertices: polyMesh.nVertices,
@@ -405,7 +406,6 @@ const RecastLike = () => {
             tileX: 0, 
             tileY: 0,
             tileLayer: 0,
-            bounds: bounds,
             buildBvTree: true,
             cellSize,
             cellHeight,
