@@ -13,13 +13,13 @@ import {
 export type PolyMesh = {
     /** The mesh vertices. Form: (x, y, z) * nverts */
     vertices: number[];
-    /** Polygon and neighbor data. Length: maxpolys * 2 * nvp */
+    /** Polygon and neighbor data. Length: npolys * 2 * nvp */
     polys: number[];
-    /** The region id assigned to each polygon. Length: maxpolys */
+    /** The region id assigned to each polygon. Length: npolys */
     regions: number[];
-    /** The user defined flags for each polygon. Length: maxpolys */
+    /** The user defined flags for each polygon. Length: npolys */
     flags: number[];
-    /** The area id assigned to each polygon. Length: maxpolys */
+    /** The area id assigned to each polygon. Length: npolys */
     areas: number[];
     /** The number of vertices */
     nVertices: number;

@@ -47,6 +47,7 @@ import {
     createTriangleMeshWithAreasHelper,
     getPositionsAndIndices,
 } from './lib/three';
+import { navMesh, type NavMeshTileParams } from './lib/query';
 
 const DungeonModel = () => {
     const gltf = useGLTF('/dungeon.gltf');
@@ -362,6 +363,40 @@ const RecastLike = () => {
         console.log('intermediates', intermediates);
 
         setIntermediates(intermediates);
+
+        /* create the nav mesh */
+
+        const nav = navMesh.create();
+
+        const navMeshTileParams: NavMeshTileParams = {
+            vertices: polyMesh.vertices,
+            nVertices: polyMesh.nVertices,
+            polys: polyMesh.polys,
+            polyFlags: polyMesh.flags,
+            polyAreas: polyMesh.areas,
+            nPolys: polyMesh.nPolys,
+            maxVerticesPerPoly: polyMesh.maxVerticesPerPoly,
+            detail: {
+                detailMeshes: polyMeshDetail.meshes,
+                detailVertices: polyMeshDetail.vertices,
+                detailTriangles: polyMeshDetail.triangles,
+                nVertices: polyMeshDetail.nVertices,
+                nTriangles: polyMeshDetail.nTriangles
+            },
+            userId: 0,
+            tileX: 0, 
+            tileY: 0,
+            tileLayer: 0,
+            bounds: bounds,
+            buildBvTree: true,
+        }
+
+        const tile = navMesh.createNavMeshTile(navMeshTileParams);
+
+        navMesh.addTile(nav, tile, navMeshTileParams.tileX, navMeshTileParams.tileY, navMeshTileParams.tileLayer, );
+
+        console.log("nav", nav, tile)
+
     }, []);
 
     // debug view of walkable triangles with area ids based vertex colors
@@ -1012,7 +1047,7 @@ export function Sketch() {
         <>
             <h1>NavMesh Generation</h1>
 
-            <WebGPUCanvas>
+            <WebGPUCanvas gl={{ antialias: true }}>
                 {method === 'recast-like' && <RecastLike />}
                 {method === "heightfield-bpa" && <HeightfieldBPA />}
                 {method === 'raycast-bpa' && <RaycastBPA />}

@@ -15,6 +15,9 @@
 			"style": {
 				"noNonNullAssertion": "off",
 				"noParameterAssign": "off"
+			},
+			"suspicious": {
+				"noExplicitAny": "off"
 			}
 		}
 	},
