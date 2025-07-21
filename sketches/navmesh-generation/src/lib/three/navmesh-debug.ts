@@ -1042,7 +1042,7 @@ export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
                 const vertIndex = vertices[k] * 3;
                 const x = orig[0] + polyMesh.vertices[vertIndex] * cs;
                 const y =
-                    orig[1] + (polyMesh.vertices[vertIndex + 1] + 1) * ch + 0.1;
+                    orig[1] + (polyMesh.vertices[vertIndex + 1] + 1) * ch + 0.01;
                 const z = orig[2] + polyMesh.vertices[vertIndex + 2] * cs;
 
                 neighborLinePositions.push(x, y, z);
@@ -1087,7 +1087,7 @@ export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
                 const vertIndex = vertices[k] * 3;
                 const x = orig[0] + polyMesh.vertices[vertIndex] * cs;
                 const y =
-                    orig[1] + (polyMesh.vertices[vertIndex + 1] + 1) * ch + 0.1;
+                    orig[1] + (polyMesh.vertices[vertIndex + 1] + 1) * ch + 0.01;
                 const z = orig[2] + polyMesh.vertices[vertIndex + 2] * cs;
 
                 boundaryLinePositions.push(x, y, z);
@@ -1101,7 +1101,7 @@ export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
     for (let i = 0; i < polyMesh.nVertices; i++) {
         const vertIndex = i * 3;
         const x = orig[0] + polyMesh.vertices[vertIndex] * cs;
-        const y = orig[1] + (polyMesh.vertices[vertIndex + 1] + 1) * ch + 0.1;
+        const y = orig[1] + (polyMesh.vertices[vertIndex + 1] + 1) * ch + 0.01;
         const z = orig[2] + polyMesh.vertices[vertIndex + 2] * cs;
 
         vertexPositions.push(x, y, z);
@@ -2074,7 +2074,7 @@ export function createNavMeshHelper(navMesh: NavMesh): DebugObject {
                     if (isInner && isBoundary) continue; // Skip boundary edges for inner
                     if (!isInner && !isBoundary) continue; // Skip non-boundary edges for outer
 
-                    // Get edge vertices - transform to world space
+                    // Get edge vertices
                     const polyVertIndex1 = poly.vertices[j];
                     const polyVertIndex2 = poly.vertices[nj];
                     
@@ -2082,11 +2082,11 @@ export function createNavMeshHelper(navMesh: NavMesh): DebugObject {
                     const v2Base = polyVertIndex2 * 3;
 
                     const v1x = tile.vertices[v1Base];
-                    const v1y = tile.vertices[v1Base + 1] + 0.1; // Slightly offset up
+                    const v1y = tile.vertices[v1Base + 1] + 0.01; // Slightly offset up
                     const v1z = tile.vertices[v1Base + 2];
 
                     const v2x = tile.vertices[v2Base];
-                    const v2y = tile.vertices[v2Base + 1] + 0.1;
+                    const v2y = tile.vertices[v2Base + 1] + 0.01;
                     const v2z = tile.vertices[v2Base + 2];
 
                     // Add line segment
@@ -2104,12 +2104,12 @@ export function createNavMeshHelper(navMesh: NavMesh): DebugObject {
         // Draw outer poly boundaries (external edges)
         drawPolyBoundaries(false);
 
-        // Draw vertices - transform to world space
+        // Draw vertices
         const vertexColor = new THREE.Color().setRGB(0, 0, 0).multiplyScalar(196 / 255);
         for (let i = 0; i < tile.vertices.length; i += 3) {
-            const worldX = tile.bounds[0][0] + tile.vertices[i] * tile.cellSize;
-            const worldY = tile.bounds[0][1] + tile.vertices[i + 1] * tile.cellHeight;
-            const worldZ = tile.bounds[0][2] + tile.vertices[i + 2] * tile.cellSize;
+            const worldX = tile.vertices[i];
+            const worldY = tile.vertices[i + 1];
+            const worldZ = tile.vertices[i + 2];
             
             vertexPositions.push(worldX, worldY, worldZ);
             vertexColors.push(vertexColor.r, vertexColor.g, vertexColor.b);
@@ -2204,30 +2204,47 @@ export function createNavMeshHelper(navMesh: NavMesh): DebugObject {
 
         // Create vertex points
         if (vertexPositions.length > 0) {
-            const vertexGeometry = new THREE.BufferGeometry();
-            vertexGeometry.setAttribute(
-                'position',
-                new THREE.BufferAttribute(new Float32Array(vertexPositions), 3),
-            );
-            vertexGeometry.setAttribute(
-                'color',
-                new THREE.BufferAttribute(new Float32Array(vertexColors), 3),
+            const numVertices = vertexPositions.length / 3;
+            const sphereGeometry = new THREE.SphereGeometry(0.01, 8, 6);
+            const instancedMesh = new THREE.InstancedMesh(
+                sphereGeometry,
+                new THREE.MeshBasicMaterial({ vertexColors: true }),
+                numVertices,
             );
 
-            const vertexMaterial = new THREE.PointsMaterial({
-                vertexColors: true,
-                transparent: true,
-                opacity: 0.8,
-                size: 3,
-                sizeAttenuation: false,
-            });
+            const matrix = new THREE.Matrix4();
 
-            const vertexPoints = new THREE.Points(vertexGeometry, vertexMaterial);
-            group.add(vertexPoints);
+            for (let i = 0; i < numVertices; i++) {
+                const x = vertexPositions[i * 3];
+                const y = vertexPositions[i * 3 + 1];
+                const z = vertexPositions[i * 3 + 2];
+
+                // Set position
+                matrix.setPosition(x, y, z);
+                instancedMesh.setMatrixAt(i, matrix);
+
+                // Set color
+                const color = new THREE.Color(
+                    vertexColors[i * 3],
+                    vertexColors[i * 3 + 1],
+                    vertexColors[i * 3 + 2],
+                );
+                instancedMesh.setColorAt(i, color);
+            }
+
+            instancedMesh.instanceMatrix.needsUpdate = true;
+            if (instancedMesh.instanceColor) {
+                instancedMesh.instanceColor.needsUpdate = true;
+            }
+
+            group.add(instancedMesh);
 
             disposables.push(() => {
-                vertexGeometry.dispose();
-                vertexMaterial.dispose();
+                sphereGeometry.dispose();
+                if (instancedMesh.material instanceof THREE.Material) {
+                    instancedMesh.material.dispose();
+                }
+                instancedMesh.dispose();
             });
         }
     }
