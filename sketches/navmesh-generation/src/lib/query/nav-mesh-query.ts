@@ -2,15 +2,6 @@ import { vec3, type Vec3 } from "@/common/maaths";
 import type { NavMesh, NavMeshPoly, NavMeshTile, PolyRef } from './nav-mesh';
 import { err, ok } from '../result';
 
-type PolyQuery = {
-    process: (
-        tile: NavMeshTile,
-        polys: NavMeshPoly[],
-        refs: string[],
-        count: number,
-    ) => void;
-};
-
 type QueryFilter = {
     includeFlags: number;
     excludeFlags: number;
