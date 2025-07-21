@@ -2085,13 +2085,13 @@ export function createNavMeshHelper(navMesh: NavMesh): DebugObject {
                     const v1Base = polyVertIndex1 * 3;
                     const v2Base = polyVertIndex2 * 3;
 
-                    const v1x = tile.bounds[0][0] + tile.vertices[v1Base] * tile.cellSize;
-                    const v1y = tile.bounds[0][1] + tile.vertices[v1Base + 1] * tile.cellHeight + 0.1; // Slightly offset up
-                    const v1z = tile.bounds[0][2] + tile.vertices[v1Base + 2] * tile.cellSize;
+                    const v1x = tile.vertices[v1Base];
+                    const v1y = tile.vertices[v1Base + 1] + 0.1; // Slightly offset up
+                    const v1z = tile.vertices[v1Base + 2];
 
-                    const v2x = tile.bounds[0][0] + tile.vertices[v2Base] * tile.cellSize;
-                    const v2y = tile.bounds[0][1] + tile.vertices[v2Base + 1] * tile.cellHeight + 0.1;
-                    const v2z = tile.bounds[0][2] + tile.vertices[v2Base + 2] * tile.cellSize;
+                    const v2x = tile.vertices[v2Base];
+                    const v2y = tile.vertices[v2Base + 1] + 0.1;
+                    const v2z = tile.vertices[v2Base + 2];
 
                     // Add line segment
                     linePositions.push(v1x, v1y, v1z);
