@@ -1970,10 +1970,6 @@ export function createNavMeshHelper(navMesh: NavMesh): DebugObject {
         return color.clone().multiplyScalar(alpha / 255.0);
     };
 
-    const darkenCol = (color: THREE.Color): THREE.Color => {
-        return color.clone().multiplyScalar(0.5);
-    };
-
     // Process each tile in the navmesh
     for (const tileId in navMesh.tiles) {
         const tile = navMesh.tiles[tileId];
@@ -2030,7 +2026,7 @@ export function createNavMeshHelper(navMesh: NavMesh): DebugObject {
                     let vz: number;
 
                     if (vertIndex < poly.vertices.length) {
-                        // Vertex from main polygon - index through poly.vertices and transform to world space
+                        // Vertex from main polygon - index through poly.vertices
                         const polyVertIndex = poly.vertices[vertIndex];
                         const vBase = polyVertIndex * 3;
                         vx = tile.vertices[vBase];
