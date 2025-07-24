@@ -6,7 +6,6 @@
 export const EPSILON = 0.000001;
 
 export const RANDOM = Math.random;
-export const ANGLE_ORDER = "zyx";
 
 /**
  * Symmetric round
@@ -15,9 +14,9 @@ export const ANGLE_ORDER = "zyx";
  * @param a value to round
  */
 export function round(a: number): number {
-  if (a >= 0) return Math.round(a);
+    if (a >= 0) return Math.round(a);
 
-  return a % 0.5 === 0 ? Math.floor(a) : Math.round(a);
+    return a % 0.5 === 0 ? Math.floor(a) : Math.round(a);
 }
 
 const degree = Math.PI / 180;
@@ -30,7 +29,7 @@ const radian = 180 / Math.PI;
  * @param a Angle in Degrees
  */
 export function toRadian(a: number): number {
-  return a * degree;
+    return a * degree;
 }
 
 /**
@@ -39,7 +38,7 @@ export function toRadian(a: number): number {
  * @param a Angle in Radians
  */
 export function toDegree(a: number): number {
-  return a * radian;
+    return a * radian;
 }
 
 /**
@@ -52,7 +51,32 @@ export function toDegree(a: number): number {
  * @returns True if the numbers are approximately equal, false otherwise.
  */
 export function equals(a: number, b: number, epsilon = EPSILON): boolean {
-  return Math.abs(a - b) <= epsilon * Math.max(1.0, Math.abs(a), Math.abs(b));
+    return Math.abs(a - b) <= epsilon * Math.max(1.0, Math.abs(a), Math.abs(b));
+}
+
+/**
+ * Ease-in-out, goes to -Infinite before 0 and Infinite after 1
+ *
+ * https://www.desmos.com/calculator/vsnmlaljdu
+ *
+ * @param t
+ * @returns
+ */
+export function fade(t: number) {
+    return t * t * t * (t * (t * 6 - 15) + 10);
+}
+
+/**
+ *
+ * Returns the result of linearly interpolating between input A and input B by input T.
+ *
+ * @param v0
+ * @param v1
+ * @param t
+ * @returns
+ */
+export function lerp(v0: number, v1: number, t: number) {
+    return v0 * (1 - t) + v1 * t;
 }
 
 /**
@@ -66,27 +90,27 @@ export const clamp = (value: number, min: number, max: number): number => {
  * Remaps a number from one range to another.
  */
 export function remap(
-	number: number,
-	inLow: number,
-	inHigh: number,
-	outLow: number,
-	outHigh: number,
+    number: number,
+    inLow: number,
+    inHigh: number,
+    outLow: number,
+    outHigh: number,
 ): number {
-	const scale = (number - inLow) / (inHigh - inLow);
-	return outLow + scale * (outHigh - outLow);
+    const scale = (number - inLow) / (inHigh - inLow);
+    return outLow + scale * (outHigh - outLow);
 }
 
 /**
  * Remaps a number from one range to another, clamping the result to the output range.
  */
 export function remapClamp(
-	value: number,
-	inLow: number,
-	inHigh: number,
-	outLow: number,
-	outHigh: number,
+    value: number,
+    inLow: number,
+    inHigh: number,
+    outLow: number,
+    outHigh: number,
 ): number {
-	const scale = (value - inLow) / (inHigh - inLow);
-	const remapped = outLow + scale * (outHigh - outLow);
-	return Math.max(outLow, Math.min(outHigh, remapped));
+    const scale = (value - inLow) / (inHigh - inLow);
+    const remapped = outLow + scale * (outHigh - outLow);
+    return Math.max(outLow, Math.min(outHigh, remapped));
 }
