@@ -333,29 +333,6 @@ export function slerp(out: Quat, a: Quat, b: Quat, t: number): Quat {
 }
 
 /**
- * Generates a random unit quaternion
- *
- * @param out the receiving quaternion
- * @returns out
- */
-export function random(out: Quat): Quat {
-    // Implementation of http://planning.cs.uiuc.edu/node198.html
-    // TODO: Calling random 3 times is probably not the fastest solution
-    const u1 = common.RANDOM();
-    const u2 = common.RANDOM();
-    const u3 = common.RANDOM();
-
-    const sqrt1MinusU1 = Math.sqrt(1 - u1);
-    const sqrtU1 = Math.sqrt(u1);
-
-    out[0] = sqrt1MinusU1 * Math.sin(2.0 * Math.PI * u2);
-    out[1] = sqrt1MinusU1 * Math.cos(2.0 * Math.PI * u2);
-    out[2] = sqrtU1 * Math.sin(2.0 * Math.PI * u3);
-    out[3] = sqrtU1 * Math.cos(2.0 * Math.PI * u3);
-    return out;
-}
-
-/**
  * Calculates the inverse of a quat
  *
  * @param out the receiving quaternion

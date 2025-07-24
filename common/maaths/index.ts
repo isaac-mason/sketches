@@ -1,12 +1,15 @@
 export * as box3 from './box3';
 export * from './common';
+export * as easing from './easing';
 export * as euler from './euler';
 export * as mat2 from './mat2';
 export * as mat2d from './mat2d';
 export * as mat3 from './mat3';
 export * as mat4 from './mat4';
+export * from './noise';
 export * as quat from './quat';
 export * as quat2 from './quat2';
+export * as random from './random';
 export * from './types';
 export * as vec2 from './vec2';
 export * as vec3 from './vec3';

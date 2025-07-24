@@ -428,36 +428,6 @@ export function lerp(out: Vec4, a: Vec4, b: Vec4, t: number): Vec4 {
     return out;
 }
 
-/**
- * Generates a random vector with the given scale
- *
- * @param out the receiving vector
- * @param scale Length of the resulting vector. If omitted, a unit vector will be returned
- * @returns out
- */
-export function random(out: Vec4, scale?: number): Vec4 {
-    scale = scale === undefined ? 1.0 : scale;
-
-    // Marsaglia, George. Choosing a Point from the Surface of a
-    // Sphere. Ann. Math. Statist. 43 (1972), no. 2, 645--646.
-    // http://projecteuclid.org/euclid.aoms/1177692644;
-    let rand = common.RANDOM();
-    const v1 = rand * 2 - 1;
-    const v2 = (4 * common.RANDOM() - 2) * Math.sqrt(rand * -rand + rand);
-    const s1 = v1 * v1 + v2 * v2;
-
-    rand = common.RANDOM();
-    const v3 = rand * 2 - 1;
-    const v4 = (4 * common.RANDOM() - 2) * Math.sqrt(rand * -rand + rand);
-    const s2 = v3 * v3 + v4 * v4;
-
-    const d = Math.sqrt((1 - s1) / s2);
-    out[0] = scale * v1;
-    out[1] = scale * v2;
-    out[2] = scale * v3 * d;
-    out[3] = scale * v4 * d;
-    return out;
-}
 
 /**
  * Transforms the vec4 with a mat4.

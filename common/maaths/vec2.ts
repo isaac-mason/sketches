@@ -351,21 +351,6 @@ export function lerp(out: Vec2, a: Vec2, b: Vec2, t: number): Vec2 {
 }
 
 /**
- * Generates a random vector with the given scale
- *
- * @param out the receiving vector
- * @param scale Length of the resulting vector. If omitted, a unit vector will be returned
- * @returns out
- */
-export function random(out: Vec2, scale?: number): Vec2 {
-    scale = scale === undefined ? 1.0 : scale;
-    const r = common.RANDOM() * 2.0 * Math.PI;
-    out[0] = Math.cos(r) * scale;
-    out[1] = Math.sin(r) * scale;
-    return out;
-}
-
-/**
  * Transforms the vec2 with a mat2
  *
  * @param out the receiving vector

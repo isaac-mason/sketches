@@ -478,26 +478,6 @@ export function bezier(
 }
 
 /**
- * Generates a random vector with the given scale
- *
- * @param out the receiving vector
- * @param scale Length of the resulting vector. If omitted, a unit vector will be returned
- * @returns out
- */
-export function random(out: Vec3, scale?: number): Vec3 {
-    scale = scale === undefined ? 1.0 : scale;
-
-    const r = common.RANDOM() * 2.0 * Math.PI;
-    const z = common.RANDOM() * 2.0 - 1.0;
-    const zScale = Math.sqrt(1.0 - z * z) * scale;
-
-    out[0] = Math.cos(r) * zScale;
-    out[1] = Math.sin(r) * zScale;
-    out[2] = z * scale;
-    return out;
-}
-
-/**
  * Transforms the vec3 with a mat4.
  * 4th vector component is implicitly '1'
  *
@@ -588,8 +568,8 @@ export function transformQuat(out: Vec3, a: Vec3, q: Quat): Vec3 {
  * @returns out
  */
 export function rotateX(out: Vec3, a: Vec3, b: Vec3, rad: number): Vec3 {
-    const p = [];
-    const r = [];
+    const p: number[] = [];
+    const r: number[] = [];
     //Translate point to the origin
     p[0] = a[0] - b[0];
     p[1] = a[1] - b[1];
@@ -617,8 +597,8 @@ export function rotateX(out: Vec3, a: Vec3, b: Vec3, rad: number): Vec3 {
  * @returns out
  */
 export function rotateY(out: Vec3, a: Vec3, b: Vec3, rad: number): Vec3 {
-    const p = [];
-    const r = [];
+    const p: number[] = [];
+    const r: number[] = [];
     //Translate point to the origin
     p[0] = a[0] - b[0];
     p[1] = a[1] - b[1];
@@ -646,8 +626,8 @@ export function rotateY(out: Vec3, a: Vec3, b: Vec3, rad: number): Vec3 {
  * @returns out
  */
 export function rotateZ(out: Vec3, a: Vec3, b: Vec3, rad: number): Vec3 {
-    const p = [];
-    const r = [];
+    const p: number[] = [];
+    const r: number[] = [];
     //Translate point to the origin
     p[0] = a[0] - b[0];
     p[1] = a[1] - b[1];
