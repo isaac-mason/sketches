@@ -86,7 +86,7 @@ const _circumCircleCenter2D: Vec2 = vec2.create();
 const _circumCircleRadiusCalc: Vec2 = vec2.create();
 
 // Helper to extract 2D vector from 3D array (x, z components)
-const getVec2XZ = (out: Vec2, arr: number[], index: number): Vec2 => {
+const getVec2XZ = (out: Vec2, arr: number[], index = 0): Vec2 => {
     out[0] = arr[index]; // x component
     out[1] = arr[index + 2]; // z component (skip y)
     return out;
@@ -126,17 +126,17 @@ const circumCircle = (
     vec3.subtract(v3, p3, p1);
 
     // Calculate cross product for 2D vectors (v2 - v1) × (v3 - v1)
-    getVec2XZ(_circumCircleV1Proj, v1, 0);
-    getVec2XZ(_circumCircleV2Proj, v2, 0);
-    getVec2XZ(_circumCircleV3Proj, v3, 0);
+    getVec2XZ(_circumCircleV1Proj, v1);
+    getVec2XZ(_circumCircleV2Proj, v2);
+    getVec2XZ(_circumCircleV3Proj, v3);
     vec2.subtract(_circumCircleV2Proj, _circumCircleV2Proj, _circumCircleV1Proj); // v2 - v1
     vec2.subtract(_circumCircleV3Proj, _circumCircleV3Proj, _circumCircleV1Proj); // v3 - v1
     const cp = _circumCircleV2Proj[0] * _circumCircleV3Proj[1] - _circumCircleV2Proj[1] * _circumCircleV3Proj[0];
 
     if (Math.abs(cp) > EPS) {
-        getVec2XZ(_circumCircleV1Proj, v1, 0);
-        getVec2XZ(_circumCircleV2Proj, v2, 0);
-        getVec2XZ(_circumCircleV3Proj, v3, 0);
+        getVec2XZ(_circumCircleV1Proj, v1);
+        getVec2XZ(_circumCircleV2Proj, v2);
+        getVec2XZ(_circumCircleV3Proj, v3);
         const v1Sq = vec2.dot(_circumCircleV1Proj, _circumCircleV1Proj);
         const v2Sq = vec2.dot(_circumCircleV2Proj, _circumCircleV2Proj);
         const v3Sq = vec2.dot(_circumCircleV3Proj, _circumCircleV3Proj);
@@ -151,8 +151,8 @@ const circumCircle = (
                 v2Sq * (v1[0] - v3[0]) +
                 v3Sq * (v2[0] - v1[0])) /
             (2 * cp);
-        getVec2XZ(_circumCircleCenter2D, c, 0);
-        getVec2XZ(_circumCircleRadiusCalc, v1, 0);
+        getVec2XZ(_circumCircleCenter2D, c);
+        getVec2XZ(_circumCircleRadiusCalc, v1);
         const r = vec2.distance(_circumCircleCenter2D, _circumCircleRadiusCalc);
 
         const cVec = vec3.copy(_circumCircleCenter, c);
@@ -187,9 +187,9 @@ const distPtTri = (p: Vec3, a: Vec3, b: Vec3, c: Vec3): number => {
     vec3.subtract(v1, b, a);
     vec3.subtract(v2, p, a);
 
-    getVec2XZ(_distPtTriVec0, v0, 0);
-    getVec2XZ(_distPtTriVec1, v1, 0);
-    getVec2XZ(_distPtTriVec2, v2, 0);
+    getVec2XZ(_distPtTriVec0, v0);
+    getVec2XZ(_distPtTriVec1, v1);
+    getVec2XZ(_distPtTriVec2, v2);
 
     const dot00 = vec2.dot(_distPtTriVec0, _distPtTriVec0);
     const dot01 = vec2.dot(_distPtTriVec0, _distPtTriVec1);
@@ -299,7 +299,7 @@ const distToPoly = (nvert: number, verts: number[], p: Vec3): number => {
     let c = 0;
 
     // Extract 2D point from Vec3 (XZ plane)
-    getVec2XZ(_distToPolyP, [p[0], p[1], p[2]], 0);
+    getVec2XZ(_distToPolyP, p);
 
     for (let i = 0, j = nvert - 1; i < nvert; j = i++) {
         const vi = i * 3;
