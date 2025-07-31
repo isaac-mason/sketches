@@ -15,7 +15,7 @@ import {
     POLY_NEIS_FLAG_EXT_LINK,
     WALKABLE_AREA,
 } from '../generate';
-import type { NavMesh, NavMeshTile, NavMeshPoly, PolyRef } from '../query/nav-mesh';
+import type { NavMesh, NavMeshTile, PolyRef } from '../query/nav-mesh';
 import { desPolyRef } from '../query/nav-mesh';
 
 type DebugObject = {
