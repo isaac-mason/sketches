@@ -239,14 +239,15 @@ const createInternalLinks = (tile: NavMeshTile) => {
     }
 };
 
-export const addTile = (
-    navMesh: NavMesh,
-    navMeshTile: NavMeshTile,
-) => {
-    const tileHash = getTilePositionHash(navMeshTile.tileX, navMeshTile.tileY, navMeshTile.tileLayer);
+export const addTile = (navMesh: NavMesh, navMeshTile: NavMeshTile) => {
+    const tileHash = getTilePositionHash(
+        navMeshTile.tileX,
+        navMeshTile.tileY,
+        navMeshTile.tileLayer,
+    );
 
     // increment id for this tile position
-    navMeshTile.id = (navMesh.tileIdCounter++ % 0xffff) + 1; // wrap around at 0xffff
+    navMeshTile.id = navMesh.tileIdCounter++ + 1;
 
     // store tile in navmesh
     navMesh.tiles[navMeshTile.id] = navMeshTile;
