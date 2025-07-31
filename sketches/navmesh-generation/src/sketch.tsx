@@ -1,5 +1,5 @@
 import { WebGPUCanvas } from '@/common/components/webgpu-canvas';
-import { box3 } from '@/common/maaths';
+import { box3, vec3 } from '@/common/maaths';
 import { OrbitControls, useGLTF } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import { Leva, useControls } from 'leva';
@@ -15,6 +15,7 @@ import {
     type PolyMesh,
     type PolyMeshDetail,
     type TriangleMesh,
+    WALKABLE_AREA,
     buildCompactHeightfield,
     buildContours,
     buildDistanceField,
@@ -35,7 +36,11 @@ import {
     rasterizeTriangles,
     triangleMeshToPointSet,
 } from './lib/generate';
-import { type NavMesh, navMesh } from './lib/query';
+import { type NavMesh, type PolyRef, navMesh, navMeshQuery } from './lib/query';
+import {
+    DEFAULT_QUERY_FILTER,
+    createFindNearestPolyResult,
+} from './lib/query/nav-mesh-query';
 import {
     createCompactHeightfieldDistancesHelper,
     createCompactHeightfieldRegionsHelper,
@@ -43,6 +48,7 @@ import {
     createHeightfieldHelper,
     createNavMeshBvTreeHelper,
     createNavMeshHelper,
+    createNavMeshPolyHelper,
     createPointSetHelper,
     createPolyMeshDetailHelper,
     createPolyMeshHelper,
@@ -143,7 +149,7 @@ const RecastLike = () => {
         showNavMesh: {
             label: 'Show Nav Mesh',
             value: false,
-        }
+        },
     });
 
     const [intermediates, setIntermediates] = useState<
@@ -345,6 +351,16 @@ const RecastLike = () => {
 
         const polyMesh = buildPolyMesh(contourSet, maxVerticesPerPoly);
 
+        for (let polyIndex = 0; polyIndex < polyMesh.nPolys; polyIndex++) {
+            if (polyMesh.areas[polyIndex] === WALKABLE_AREA) {
+                polyMesh.areas[polyIndex] = 0;
+            }
+
+            if (polyMesh.areas[polyIndex] === 0) {
+                polyMesh.flags[polyIndex] = 1;
+            }
+        }
+
         console.timeEnd('build polygons mesh from contours');
 
         /* 11. create detail mesh which allows to access approximate height on each polygon */
@@ -383,6 +399,9 @@ const RecastLike = () => {
         /* create a single tile nav mesh */
 
         const nav = navMesh.create();
+        nav.tileWidth = polyMesh.bounds[1][0] - polyMesh.bounds[0][0];
+        nav.tileHeight = polyMesh.bounds[1][2] - polyMesh.bounds[0][2];
+        vec3.copy(nav.origin, polyMesh.bounds[0]);
 
         const navMeshTileParams: NavMeshTileParams = {
             bounds: polyMesh.bounds,
@@ -400,25 +419,50 @@ const RecastLike = () => {
                 detailVertices: polyMeshDetail.vertices,
                 detailTriangles: polyMeshDetail.triangles,
                 nVertices: polyMeshDetail.nVertices,
-                nTriangles: polyMeshDetail.nTriangles
+                nTriangles: polyMeshDetail.nTriangles,
             },
             userId: 0,
-            tileX: 0, 
+            tileX: 0,
             tileY: 0,
             tileLayer: 0,
             buildBvTree: true,
             cellSize,
             cellHeight,
-        }
+        };
 
         const tile = createNavMeshTile(navMeshTileParams);
 
-        navMesh.addTile(nav, tile, navMeshTileParams.tileX, navMeshTileParams.tileY, navMeshTileParams.tileLayer);
+        navMesh.addTile(
+            nav,
+            tile,
+            navMeshTileParams.tileX,
+            navMeshTileParams.tileY,
+            navMeshTileParams.tileLayer,
+        );
 
-        console.log("nav", nav, tile)
+        const nearestPolyResult = createFindNearestPolyResult();
+
+        navMeshQuery.findNearestPoly(
+            nearestPolyResult,
+            nav,
+            [0, 3.7, 2.5],
+            [1, 1, 1],
+            DEFAULT_QUERY_FILTER,
+        );
+        console.log('nearestPolyResult', nearestPolyResult);
+
+        const navMeshPolyHelper = createNavMeshPolyHelper(
+            nav,
+            nearestPolyResult.nearestPolyRef,
+            new THREE.Color('red'),
+        );
+        navMeshPolyHelper.object.position.y += 0.25;
+        scene.add(navMeshPolyHelper.object);
+
+        console.log('nav', nav, tile);
 
         setNav(nav);
-    }, []);
+    }, [scene]);
 
     // debug view of walkable triangles with area ids based vertex colors
     useEffect(() => {
@@ -554,9 +598,7 @@ const RecastLike = () => {
     useEffect(() => {
         if (!nav || !showNavMeshBvTree) return;
 
-        const debugObject = createNavMeshBvTreeHelper(
-            nav
-        )
+        const debugObject = createNavMeshBvTreeHelper(nav);
         scene.add(debugObject.object);
 
         return () => {
@@ -580,7 +622,11 @@ const RecastLike = () => {
 
     return (
         <>
-            <group ref={group} visible={showMesh}>
+            <group
+                ref={group}
+                visible={showMesh}
+                onPointerDown={(e) => console.log(e.point)}
+            >
                 {/* <DungeonModel /> */}
                 <NavTestModel />
             </group>
@@ -634,11 +680,11 @@ const HeightfieldBPA = () => {
             value: false,
         },
         showPointSet: {
-            label: "Show Point Set",
+            label: 'Show Point Set',
             value: false,
         },
         showTriangleMesh: {
-            label: "Show Triangle Mesh",
+            label: 'Show Triangle Mesh',
             value: true,
         },
     });
@@ -1098,7 +1144,7 @@ export function Sketch() {
 
             <WebGPUCanvas gl={{ antialias: true }}>
                 {method === 'recast-like' && <RecastLike />}
-                {method === "heightfield-bpa" && <HeightfieldBPA />}
+                {method === 'heightfield-bpa' && <HeightfieldBPA />}
                 {method === 'raycast-bpa' && <RaycastBPA />}
             </WebGPUCanvas>
 

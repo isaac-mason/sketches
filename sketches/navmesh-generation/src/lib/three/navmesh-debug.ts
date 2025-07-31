@@ -15,7 +15,8 @@ import {
     POLY_NEIS_FLAG_EXT_LINK,
     WALKABLE_AREA,
 } from '../generate';
-import type { NavMesh, NavMeshTile } from '../query';
+import type { NavMesh, NavMeshTile, NavMeshPoly, PolyRef } from '../query/nav-mesh';
+import { desPolyRef } from '../query/nav-mesh';
 
 type DebugObject = {
     object: THREE.Object3D;
@@ -2250,6 +2251,198 @@ export function createNavMeshHelper(navMesh: NavMesh): DebugObject {
                 instancedMesh.dispose();
             });
         }
+    }
+
+    return {
+        object: group,
+        dispose: () => {
+            for (const dispose of disposables) {
+                dispose();
+            }
+        },
+    };
+}
+
+export function createNavMeshPolyHelper(
+    navMesh: NavMesh, 
+    polyRef: PolyRef, 
+    color: THREE.Color = new THREE.Color(0, 0.75, 1)
+): DebugObject {
+    const group = new THREE.Group();
+    const disposables: (() => void)[] = [];
+
+    // Get tile and polygon from reference
+    const [tileSalt, tileIndex, polyIndex] = desPolyRef(polyRef);
+    
+    const tile = navMesh.tiles[tileIndex];
+    if (!tile || tile.id !== tileSalt || polyIndex >= tile.polys.length) {
+        // Return empty object if polygon not found
+        return {
+            object: group,
+            dispose: () => {},
+        };
+    }
+
+    const poly = tile.polys[polyIndex];
+    
+    // TODO: Handle off-mesh connections (not implemented yet)
+    // if (poly.type === NavMeshPolyType.OFFMESH_CONNECTION) {
+    //     const con = tile.offMeshConnections[polyIndex - tile.offMeshBase];
+    //     // Draw connection arc...
+    //     return { object: group, dispose: () => {} };
+    // }
+
+    // Get the detail mesh for this polygon
+    const detailMesh = tile.detailMeshes?.[polyIndex];
+    if (!detailMesh) {
+        // Fallback: draw basic polygon without detail mesh
+        const triPositions: number[] = [];
+        const triColors: number[] = [];
+        const triIndices: number[] = [];
+
+        // Create a simple triangle fan from the polygon vertices
+        if (poly.vertices.length >= 3) {
+            const baseColor = color.clone().multiplyScalar(0.25); // Transparent
+
+            for (let i = 2; i < poly.vertices.length; i++) {
+                const v0Index = poly.vertices[0] * 3;
+                const v1Index = poly.vertices[i - 1] * 3;
+                const v2Index = poly.vertices[i] * 3;
+
+                // Add triangle vertices
+                triPositions.push(
+                    tile.vertices[v0Index], 
+                    tile.vertices[v0Index + 1], 
+                    tile.vertices[v0Index + 2]
+                );
+                triPositions.push(
+                    tile.vertices[v1Index], 
+                    tile.vertices[v1Index + 1], 
+                    tile.vertices[v1Index + 2]
+                );
+                triPositions.push(
+                    tile.vertices[v2Index], 
+                    tile.vertices[v2Index + 1], 
+                    tile.vertices[v2Index + 2]
+                );
+
+                // Add colors
+                for (let j = 0; j < 3; j++) {
+                    triColors.push(baseColor.r, baseColor.g, baseColor.b);
+                }
+
+                // Add indices
+                const baseIndex = (i - 2) * 3;
+                triIndices.push(baseIndex, baseIndex + 1, baseIndex + 2);
+            }
+        }
+
+        if (triPositions.length > 0) {
+            const triGeometry = new THREE.BufferGeometry();
+            triGeometry.setAttribute(
+                'position',
+                new THREE.BufferAttribute(new Float32Array(triPositions), 3),
+            );
+            triGeometry.setAttribute(
+                'color',
+                new THREE.BufferAttribute(new Float32Array(triColors), 3),
+            );
+            triGeometry.setIndex(
+                new THREE.BufferAttribute(new Uint32Array(triIndices), 1),
+            );
+
+            const triMaterial = new THREE.MeshBasicMaterial({
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.6,
+                side: THREE.DoubleSide,
+            });
+
+            const triMesh = new THREE.Mesh(triGeometry, triMaterial);
+            group.add(triMesh);
+
+            disposables.push(() => {
+                triGeometry.dispose();
+                triMaterial.dispose();
+            });
+        }
+
+        return {
+            object: group,
+            dispose: () => {
+                for (const dispose of disposables) {
+                    dispose();
+                }
+            },
+        };
+    }
+
+    // Draw detail triangles for this polygon
+    const triPositions: number[] = [];
+    const triColors: number[] = [];
+    const triIndices: number[] = [];
+
+    const baseColor = color.clone().multiplyScalar(0.25); // Make color transparent (alpha ~64/255)
+
+    for (let i = 0; i < detailMesh.trianglesCount; ++i) {
+        const t = (detailMesh.trianglesBase + i) * 4;
+        const detailTriangles = tile.detailTriangles;
+        
+        for (let j = 0; j < 3; ++j) {
+            const vertIndex = detailTriangles[t + j];
+            
+            if (vertIndex < poly.vertices.length) {
+                const polyVertIndex = poly.vertices[vertIndex] * 3;
+                triPositions.push(
+                    tile.vertices[polyVertIndex],
+                    tile.vertices[polyVertIndex + 1],
+                    tile.vertices[polyVertIndex + 2]
+                );
+            } else {
+                const detailVertIndex = (detailMesh.verticesBase + vertIndex - poly.vertices.length) * 3;
+                triPositions.push(
+                    tile.detailVertices[detailVertIndex],
+                    tile.detailVertices[detailVertIndex + 1],
+                    tile.detailVertices[detailVertIndex + 2]
+                );
+            }
+            
+            triColors.push(baseColor.r, baseColor.g, baseColor.b);
+        }
+
+        const baseIndex = i * 3;
+        triIndices.push(baseIndex, baseIndex + 1, baseIndex + 2);
+    }
+
+    if (triPositions.length > 0) {
+        const triGeometry = new THREE.BufferGeometry();
+        triGeometry.setAttribute(
+            'position',
+            new THREE.BufferAttribute(new Float32Array(triPositions), 3),
+        );
+        triGeometry.setAttribute(
+            'color',
+            new THREE.BufferAttribute(new Float32Array(triColors), 3),
+        );
+        triGeometry.setIndex(
+            new THREE.BufferAttribute(new Uint32Array(triIndices), 1),
+        );
+
+        const triMaterial = new THREE.MeshBasicMaterial({
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.6,
+            side: THREE.DoubleSide,
+            depthWrite: false, // Equivalent to dd->depthMask(false) in C++
+        });
+
+        const triMesh = new THREE.Mesh(triGeometry, triMaterial);
+        group.add(triMesh);
+
+        disposables.push(() => {
+            triGeometry.dispose();
+            triMaterial.dispose();
+        });
     }
 
     return {

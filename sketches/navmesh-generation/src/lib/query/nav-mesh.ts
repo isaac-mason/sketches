@@ -22,7 +22,7 @@ export const serPolyRef = (
 
 /** deserialises a polygon reference into a tuple of [tile salt, tile index, index of polygon within tile] */
 export const desPolyRef = (polyRef: PolyRef): DeserialisedPolyRef => {
-    return polyRef.split('.').map(Number) as DeserialisedPolyRef;
+    return polyRef.split(',').map(Number) as DeserialisedPolyRef;
 };
 
 /** a navigation mesh based on tiles of convex polygons */
@@ -126,6 +126,15 @@ export type NavMeshTileBvTree = {
 export type NavMeshTile = {
     /** the unique id of the tile */
     id: number;
+
+    /* the tile x position in the nav mesh */
+    tileX: number;
+
+    /* the tile y position in the nav mesh */
+    tileY: number;
+
+    /** the tile layer in the nav mesh */
+    tileLayer: number;
 
     /** the bounds of the tile's AABB */
     bounds: Box3;
@@ -294,17 +303,10 @@ export const getTilesAt = (
 ): NavMeshTile[] => {
     const tiles: NavMeshTile[] = [];
 
-    // search through all tiles to find ones at the specified x,y position
-    for (const [tileHash, tileId] of Object.entries(
-        navMesh.tilePositionHashToTileId,
-    )) {
-        const [tileX, tileY, _layer] = desPolyRef(tileHash as PolyRef);
-
-        if (tileX === x && tileY === y) {
-            const tile = navMesh.tiles[tileId];
-            if (tile) {
-                tiles.push(tile);
-            }
+    for (const tileIndex in navMesh.tiles) {
+        const tile = navMesh.tiles[tileIndex];
+        if (tile.tileX === x && tile.tileY === y) {
+            tiles.push(tile);
         }
     }
 

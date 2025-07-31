@@ -83,6 +83,9 @@ export type NavMeshTileParams = {
 export const createNavMeshTile = (params: NavMeshTileParams): NavMeshTile => {
     const tile: NavMeshTile = {
         id: 0,
+        tileX: params.tileX,
+        tileY: params.tileY,
+        tileLayer: params.tileLayer,
         bounds: structuredClone(params.bounds),
         vertices: [],
         detailMeshes: [],
