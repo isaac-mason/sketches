@@ -435,9 +435,6 @@ const RecastLike = () => {
         navMesh.addTile(
             nav,
             tile,
-            navMeshTileParams.tileX,
-            navMeshTileParams.tileY,
-            navMeshTileParams.tileLayer,
         );
 
         const nearestPolyResult = createFindNearestPolyResult();

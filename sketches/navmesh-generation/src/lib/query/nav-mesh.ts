@@ -242,12 +242,8 @@ const createInternalLinks = (tile: NavMeshTile) => {
 export const addTile = (
     navMesh: NavMesh,
     navMeshTile: NavMeshTile,
-    x: number,
-    y: number,
-    layer: number,
-    // tileId: string
 ) => {
-    const tileHash = getTilePositionHash(x, y, layer);
+    const tileHash = getTilePositionHash(navMeshTile.tileX, navMeshTile.tileY, navMeshTile.tileLayer);
 
     // increment id for this tile position
     navMeshTile.id = (navMesh.tileIdCounter++ % 0xffff) + 1; // wrap around at 0xffff
