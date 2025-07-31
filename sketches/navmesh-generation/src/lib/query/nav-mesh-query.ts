@@ -16,6 +16,61 @@ import {
     worldToTilePosition,
 } from './nav-mesh';
 
+type QueryFilter = {
+    /**
+     * Flags that polygons must include to be considered.
+     */
+    includeFlags: number;
+
+    /**
+     * Flags that polygons must not include to be considered.
+     */
+    excludeFlags: number;
+
+    /**
+     * Checks if a polygon passes the filter.
+     * @param poly The polygon to check.
+     * @param ref The reference id of the polygon.
+     * @param tile The tile containing the polygon.
+     * @returns Whether the polygon passes the filter.
+     */
+    passFilter?: (poly: NavMeshPoly, ref: string, tile: NavMeshTile) => boolean;
+
+    /**
+     * Calculates the cost of moving from one point to another within a polygon.
+     * @param pa The start position on the edge of the previous and current polygon. [(x, y, z)]
+     * @param pb The end position on the edge of the current and next polygon. [(x, y, z)]
+     * @param prevRef The reference id of the previous polygon. [opt]
+     * @param prevTile The tile containing the previous polygon. [opt]
+     * @param prevPoly The previous polygon. [opt]
+     * @param curRef The reference id of the current polygon.
+     * @param curTile The tile containing the current polygon.
+     * @param curPoly The current polygon.
+     * @param nextRef The reference id of the next polygon. [opt]
+     * @param nextTile The tile containing the next polygon. [opt]
+     * @param nextPoly The next polygon. [opt]
+     * @returns The cost of moving from the start to the end position.
+     */
+    getAreaCost?: (
+        pa: number,
+        pb: number,
+        prevRef: string | undefined,
+        prevTile: NavMeshTile | undefined,
+        prevPoly: NavMeshPoly | undefined,
+        curRef: string,
+        curTile: NavMeshTile,
+        curPoly: NavMeshPoly,
+        nextRef: string | undefined,
+        nextTile: NavMeshTile | undefined,
+        nextPoly: NavMeshPoly | undefined,
+    ) => number;
+};
+
+export const DEFAULT_QUERY_FILTER: QueryFilter = {
+    includeFlags: 0xffffffff,
+    excludeFlags: 0,
+};
+
 /**
  * Gets the tile and polygon from a polygon reference
  * @param ref The polygon reference
@@ -62,8 +117,7 @@ const getPolyHeight = (
     poly: NavMeshPoly,
     polyIndex: number,
     pos: Vec3,
-    height: { value: number },
-): boolean => {
+): number => {
     // Check if we have detail mesh data
     const detailMesh = tile.detailMeshes?.[polyIndex];
 
@@ -120,8 +174,7 @@ const getPolyHeight = (
             // Check if point is inside triangle and calculate height
             const h = getHeightAtPoint(v0, v1, v2, pos);
             if (h !== null) {
-                height.value = h;
-                return true;
+                return h;
             }
         }
     }
@@ -154,12 +207,11 @@ const getPolyHeight = (
         const h = getHeightAtPoint(v0, v1, v2, pos);
 
         if (h !== null) {
-            height.value = h;
-            return true;
+            return h;
         }
     }
 
-    return false;
+    return Number.NaN;
 };
 
 const _closestOnDetailEdges: Vec3 = [0, 0, 0];
@@ -236,61 +288,6 @@ const closestPointOnDetailEdges = (
     return dmin;
 };
 
-type QueryFilter = {
-    /**
-     * Flags that polygons must include to be considered.
-     */
-    includeFlags: number;
-
-    /**
-     * Flags that polygons must not include to be considered.
-     */
-    excludeFlags: number;
-
-    /**
-     * Checks if a polygon passes the filter.
-     * @param poly The polygon to check.
-     * @param ref The reference id of the polygon.
-     * @param tile The tile containing the polygon.
-     * @returns Whether the polygon passes the filter.
-     */
-    passFilter?: (poly: NavMeshPoly, ref: string, tile: NavMeshTile) => boolean;
-
-    /**
-     * Calculates the cost of moving from one point to another within a polygon.
-     * @param pa The start position on the edge of the previous and current polygon. [(x, y, z)]
-     * @param pb The end position on the edge of the current and next polygon. [(x, y, z)]
-     * @param prevRef The reference id of the previous polygon. [opt]
-     * @param prevTile The tile containing the previous polygon. [opt]
-     * @param prevPoly The previous polygon. [opt]
-     * @param curRef The reference id of the current polygon.
-     * @param curTile The tile containing the current polygon.
-     * @param curPoly The current polygon.
-     * @param nextRef The reference id of the next polygon. [opt]
-     * @param nextTile The tile containing the next polygon. [opt]
-     * @param nextPoly The next polygon. [opt]
-     * @returns The cost of moving from the start to the end position.
-     */
-    getAreaCost?: (
-        pa: number,
-        pb: number,
-        prevRef: string | undefined,
-        prevTile: NavMeshTile | undefined,
-        prevPoly: NavMeshPoly | undefined,
-        curRef: string,
-        curTile: NavMeshTile,
-        curPoly: NavMeshPoly,
-        nextRef: string | undefined,
-        nextTile: NavMeshTile | undefined,
-        nextPoly: NavMeshPoly | undefined,
-    ) => number;
-};
-
-export const DEFAULT_QUERY_FILTER: QueryFilter = {
-    includeFlags: 0xffffffff,
-    excludeFlags: 0,
-};
-
 export type GetClosestPointOnPolyResult = {
     ok: boolean;
     isOverPoly: boolean;
@@ -352,10 +349,10 @@ export const getClosestPointOnPoly = (
         result.isOverPoly = true;
 
         // Find height at the position
-        const height = { value: 0 };
-        if (getPolyHeight(tile, poly, polyIndex, point, height)) {
+        const height = getPolyHeight(tile, poly, polyIndex, point);
+        if (!Number.isNaN(height)) {
             result.closestPoint[0] = point[0];
-            result.closestPoint[1] = height.value;
+            result.closestPoint[1] = height;
             result.closestPoint[2] = point[2];
         } else {
             // Fallback to polygon center height
