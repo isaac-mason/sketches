@@ -12,6 +12,7 @@ import type {
 import {
     MESH_NULL_IDX,
     NULL_AREA,
+    POLY_NEIS_FLAG_EXT_LINK,
     WALKABLE_AREA,
 } from '../generate';
 import type { NavMesh, NavMeshTile } from '../query';
@@ -1028,7 +1029,7 @@ export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
             if (v0 === MESH_NULL_IDX) break;
 
             const neighbor = polyMesh.polys[polyBase + nvp + j];
-            if (neighbor & 0x8000) continue; // Skip boundary edges
+            if (neighbor & POLY_NEIS_FLAG_EXT_LINK) continue; // Skip boundary edges
 
             const nj =
                 j + 1 >= nvp ||
@@ -1069,7 +1070,9 @@ export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
             if (v0 === MESH_NULL_IDX) break;
 
             const neighbor = polyMesh.polys[polyBase + nvp + j];
-            if ((neighbor & 0x8000) === 0) continue; // Skip non-boundary edges
+
+            // Skip non-boundary edges
+            if ((neighbor & POLY_NEIS_FLAG_EXT_LINK) === 0) continue;
 
             const nj =
                 j + 1 >= nvp ||
@@ -2070,7 +2073,7 @@ export function createNavMeshHelper(navMesh: NavMesh): DebugObject {
                     const nei = poly.neis[j];
                     
                     // Check if this is the type of boundary we want
-                    const isBoundary = (nei & 0x8000) !== 0;
+                    const isBoundary = (nei & POLY_NEIS_FLAG_EXT_LINK) !== 0;
                     if (isInner && isBoundary) continue; // Skip boundary edges for inner
                     if (!isInner && !isBoundary) continue; // Skip non-boundary edges for outer
 

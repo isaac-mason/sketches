@@ -1,9 +1,17 @@
-import { vec3, type Vec3 } from "@/common/maaths";
-import type { NavMesh, NavMeshPoly, NavMeshTile, PolyRef } from './nav-mesh';
+import { box3, vec2, vec3 } from "@/common/maaths";
+import type { Box3, Vec3 } from "@/common/maaths";
+import { getTilesAt, worldToTilePosition, type NavMesh, type NavMeshPoly, type NavMeshTile, type PolyRef } from './nav-mesh';
 import { err, ok } from '../result';
 
 type QueryFilter = {
+    /**
+     * Flags that polygons must include to be considered.
+     */
     includeFlags: number;
+
+    /**
+     * Flags that polygons must not include to be considered.
+     */
     excludeFlags: number;
 
     /**
@@ -45,7 +53,7 @@ type QueryFilter = {
     ) => number;
 };
 
-const DEFAULT_QUERY_FILTER: QueryFilter = {
+export const DEFAULT_QUERY_FILTER: QueryFilter = {
     includeFlags: 0xffffffff,
     excludeFlags: 0,
 };
@@ -76,17 +84,161 @@ export const findNearestPoly = (
     return result;
 };
 
+export const queryPolygonsInTile = (tile: NavMeshTile, bounds: Box3, filter: QueryFilter, out: PolyRef[]): void => {
+    if (tile.bvTree) {
+        const qmin = bounds[0];
+        const qmax = bounds[1];
+        
+        let nodeIndex = 0;
+        const endIndex = tile.bvTree.nodes.length;
+        const tbmin = tile.bounds[0];
+        const tbmax = tile.bounds[1];
+        const qfac = tile.bvTree.quantFactor;
+
+        // Calculate quantized box
+        const bmin = new Uint16Array(3);
+        const bmax = new Uint16Array(3);
+        
+        // Clamp query box to world box.
+        const minx = Math.max(Math.min(qmin[0], tbmax[0]), tbmin[0]) - tbmin[0];
+        const miny = Math.max(Math.min(qmin[1], tbmax[1]), tbmin[1]) - tbmin[1];
+        const minz = Math.max(Math.min(qmin[2], tbmax[2]), tbmin[2]) - tbmin[2];
+        const maxx = Math.max(Math.min(qmax[0], tbmax[0]), tbmin[0]) - tbmin[0];
+        const maxy = Math.max(Math.min(qmax[1], tbmax[1]), tbmin[1]) - tbmin[1];
+        const maxz = Math.max(Math.min(qmax[2], tbmax[2]), tbmin[2]) - tbmin[2];
+        
+        // Quantize
+        bmin[0] = Math.floor(qfac * minx) & 0xfffe;
+        bmin[1] = Math.floor(qfac * miny) & 0xfffe;
+        bmin[2] = Math.floor(qfac * minz) & 0xfffe;
+        bmax[0] = (Math.floor(qfac * maxx + 1)) | 1;
+        bmax[1] = (Math.floor(qfac * maxy + 1)) | 1;
+        bmax[2] = (Math.floor(qfac * maxz + 1)) | 1;
+
+        // Traverse tree
+        while (nodeIndex < endIndex) {
+            const node = tile.bvTree.nodes[nodeIndex];
+            
+            // Check overlap - assuming node.bounds is Box3 format [min, max]
+            const nodeBounds = node.bounds;
+            const overlap = (
+                bmin[0] <= nodeBounds[1][0] && bmax[0] >= nodeBounds[0][0] &&
+                bmin[1] <= nodeBounds[1][1] && bmax[1] >= nodeBounds[0][1] &&
+                bmin[2] <= nodeBounds[1][2] && bmax[2] >= nodeBounds[0][2]
+            );
+            
+            const isLeafNode = node.i >= 0;
+
+            if (isLeafNode && overlap) {
+                const polyIndex = node.i;
+                const poly = tile.polys[polyIndex];
+                const ref: PolyRef = `${tile.id},0,${polyIndex}`;
+                
+                if ((poly.flags & filter.includeFlags) !== 0 && (poly.flags & filter.excludeFlags) === 0) {
+                    if (!filter.passFilter || filter.passFilter(poly, ref, tile)) {
+                        out.push(ref);
+                    }
+                }
+            }
+
+            if (overlap || isLeafNode) {
+                nodeIndex++;
+            } else {
+                const escapeIndex = -node.i;
+                nodeIndex += escapeIndex;
+            }
+        }
+    } else {
+        const qmin = bounds[0];
+        const qmax = bounds[1];
+        const bmin = vec3.create();
+        const bmax = vec3.create();
+        
+        for (let i = 0; i < tile.polys.length; i++) {
+            const poly = tile.polys[i];
+            
+            // Do not return off-mesh connection polygons.
+            // TODO: uncomment when poly.type is available
+            // if (poly.type === 'OFFMESH_CONNECTION') {
+            //     continue;
+            // }
+            
+            // Must pass filter
+            const ref: PolyRef = `${tile.id},0,${i}`;
+            if ((poly.flags & filter.includeFlags) === 0 || (poly.flags & filter.excludeFlags) !== 0) {
+                continue;
+            }
+            
+            if (filter.passFilter && !filter.passFilter(poly, ref, tile)) {
+                continue;
+            }
+            
+            // Calc polygon bounds.
+            const firstVertexIndex = poly.vertices[0];
+            const firstVertex = [
+                tile.vertices[firstVertexIndex * 3],
+                tile.vertices[firstVertexIndex * 3 + 1],
+                tile.vertices[firstVertexIndex * 3 + 2]
+            ] as Vec3;
+            vec3.copy(bmin, firstVertex);
+            vec3.copy(bmax, firstVertex);
+            
+            for (let j = 1; j < poly.vertices.length; j++) {
+                const vertexIndex = poly.vertices[j];
+                const vertex = [
+                    tile.vertices[vertexIndex * 3],
+                    tile.vertices[vertexIndex * 3 + 1],
+                    tile.vertices[vertexIndex * 3 + 2]
+                ] as Vec3;
+                vec3.min(bmin, bmin, vertex);
+                vec3.max(bmax, bmax, vertex);
+            }
+            
+            // Check overlap with query bounds
+            if (qmin[0] <= bmax[0] && qmax[0] >= bmin[0] &&
+                qmin[1] <= bmax[1] && qmax[1] >= bmin[1] &&
+                qmin[2] <= bmax[2] && qmax[2] >= bmin[2]) {
+                
+                out.push(ref);
+            }
+        }
+    }
+}
+
+const _queryPolygonsBounds = box3.create();
+const _queryPolygonsMinTile = vec2.create();
+const _queryPolygonsMaxTile = vec2.create();
+
 export const queryPolygons = (
     navMesh: NavMesh,
     center: Vec3,
     halfExtents: Vec3,
     filter: QueryFilter,
-    maxPolys: number,
 ) => {
     const result: PolyRef[] = [];
 
-    // Perform the query and populate the result array
-    
+    // set the bounds for the query
+    const bounds = _queryPolygonsBounds;
+    vec3.sub(bounds[0], center, halfExtents);
+    vec3.add(bounds[1], center, halfExtents);
+
+    // find min and max tile positions
+    const minTile = _queryPolygonsMinTile;
+    const maxTile = _queryPolygonsMaxTile;
+    worldToTilePosition(minTile, navMesh, bounds[0][0], bounds[0][2]);
+    worldToTilePosition(maxTile, navMesh, bounds[1][0], bounds[1][2]);
+
+    // iterate through the tiles in the query bounds
+    for (let x = minTile[0]; x <= maxTile[0]; x++) {
+        for (let y = minTile[1]; y <= maxTile[1]; y++) {
+            const tiles = getTilesAt(navMesh, x, y);
+            
+            for (const tile of tiles) {
+                queryPolygonsInTile(tile, bounds, filter, result);
+            }
+        }
+    }
+
     // e.g.
     // if (error) {
     //     return err("Error querying polygons");
