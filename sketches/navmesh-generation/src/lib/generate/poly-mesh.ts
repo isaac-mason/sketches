@@ -97,6 +97,9 @@ const addVertex = (
 const prev = (i: number, n: number): number => (i - 1 >= 0 ? i - 1 : n - 1);
 const next = (i: number, n: number): number => (i + 1 < n ? i + 1 : 0);
 
+/**
+ *
+ */
 const area2 = (
     vertexA: number[],
     vertexB: number[],
@@ -110,16 +113,20 @@ const area2 = (
 
 const xorb = (x: boolean, y: boolean): boolean => !x !== !y;
 
+// Returns true iff c is strictly to the left of the directed
+// line through a to b.
 const left = (
     firstVertex: number[],
     secondVertex: number[],
     testVertex: number[],
 ): boolean => area2(firstVertex, secondVertex, testVertex) < 0;
+
 const leftOn = (
     firstVertex: number[],
     secondVertex: number[],
     testVertex: number[],
 ): boolean => area2(firstVertex, secondVertex, testVertex) <= 0;
+
 const collinear = (
     firstVertex: number[],
     secondVertex: number[],
@@ -187,9 +194,12 @@ const intersect = (
     );
 };
 
-const vequal = (vertexA: number[], vertexB: number[]): boolean =>
+// Returns whether the two vertices are equal in the XZ plane
+const vec3EqualXZ = (vertexA: number[], vertexB: number[]): boolean =>
     vertexA[0] === vertexB[0] && vertexA[2] === vertexB[2];
 
+// Returns T iff (v_i, v_j) is a proper internal *or* external
+// diagonal of P, *ignoring edges incident to v_i and v_j*.
 const diagonalie = (
     startVertexIdx: number,
     endVertexIdx: number,
@@ -230,10 +240,10 @@ const diagonalie = (
             ];
 
             if (
-                vequal(diagonalStart, edgeStart) ||
-                vequal(diagonalEnd, edgeStart) ||
-                vequal(diagonalStart, edgeEnd) ||
-                vequal(diagonalEnd, edgeEnd)
+                vec3EqualXZ(diagonalStart, edgeStart) ||
+                vec3EqualXZ(diagonalEnd, edgeStart) ||
+                vec3EqualXZ(diagonalStart, edgeEnd) ||
+                vec3EqualXZ(diagonalEnd, edgeEnd)
             ) {
                 continue;
             }
@@ -246,6 +256,11 @@ const diagonalie = (
     return true;
 };
 
+const _coneVertex = vec3.create();
+const _testVertex = vec3.create();
+const _nextVertex = vec3.create();
+const _prevVertex = vec3.create();
+
 const inCone = (
     coneVertexIdx: number,
     testVertexIdx: number,
@@ -253,17 +268,22 @@ const inCone = (
     vertices: number[],
     vertexIndices: number[],
 ): boolean => {
-    const coneVertex = [
+    const coneVertex = vec3.set(
+        _coneVertex,
         vertices[(vertexIndices[coneVertexIdx] & 0x0fffffff) * 4],
         vertices[(vertexIndices[coneVertexIdx] & 0x0fffffff) * 4 + 1],
         vertices[(vertexIndices[coneVertexIdx] & 0x0fffffff) * 4 + 2],
-    ];
-    const testVertex = [
+    );
+
+    const testVertex = vec3.set(
+        _testVertex,
         vertices[(vertexIndices[testVertexIdx] & 0x0fffffff) * 4],
         vertices[(vertexIndices[testVertexIdx] & 0x0fffffff) * 4 + 1],
         vertices[(vertexIndices[testVertexIdx] & 0x0fffffff) * 4 + 2],
-    ];
-    const nextVertex = [
+    );
+
+    const nextVertex = vec3.set(
+        _nextVertex,
         vertices[
             (vertexIndices[next(coneVertexIdx, polygonVertexCount)] &
                 0x0fffffff) *
@@ -281,8 +301,10 @@ const inCone = (
                 4 +
                 2
         ],
-    ];
-    const prevVertex = [
+    );
+
+    const prevVertex = vec3.set(
+        _prevVertex,
         vertices[
             (vertexIndices[prev(coneVertexIdx, polygonVertexCount)] &
                 0x0fffffff) *
@@ -300,7 +322,7 @@ const inCone = (
                 4 +
                 2
         ],
-    ];
+    );
 
     if (leftOn(prevVertex, coneVertex, nextVertex)) {
         return (
@@ -379,10 +401,10 @@ const diagonalieLoose = (
             ];
 
             if (
-                vequal(diagonalStart, edgeStart) ||
-                vequal(diagonalEnd, edgeStart) ||
-                vequal(diagonalStart, edgeEnd) ||
-                vequal(diagonalEnd, edgeEnd)
+                vec3EqualXZ(diagonalStart, edgeStart) ||
+                vec3EqualXZ(diagonalEnd, edgeStart) ||
+                vec3EqualXZ(diagonalStart, edgeEnd) ||
+                vec3EqualXZ(diagonalEnd, edgeEnd)
             ) {
                 continue;
             }
@@ -1518,8 +1540,7 @@ export const findPortalEdges = (
             if (mesh.polys[polyStart + j] === MESH_NULL_IDX) break;
             // Skip connected edges
             if (
-                mesh.polys[polyStart + maxVerticesPerPoly + j] !==
-                MESH_NULL_IDX
+                mesh.polys[polyStart + maxVerticesPerPoly + j] !== MESH_NULL_IDX
             ) {
                 continue;
             }
