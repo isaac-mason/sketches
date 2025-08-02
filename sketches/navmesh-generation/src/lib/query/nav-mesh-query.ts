@@ -6,6 +6,7 @@ import {
     getHeightAtPoint,
     pointInPoly,
 } from '../common/geometry';
+import { type Result, ok } from '../result';
 import {
     type NavMesh,
     type NavMeshPoly,
@@ -77,7 +78,7 @@ export const DEFAULT_QUERY_FILTER: QueryFilter = {
  * @param navMesh The navigation mesh
  * @returns Object containing tile and poly, or null if not found
  */
-const getTileAndPolyByRef = (
+export const getTileAndPolyByRef = (
     ref: PolyRef,
     navMesh: NavMesh,
 ): { tile: NavMeshTile; poly: NavMeshPoly; polyIndex: number } | null => {
@@ -112,7 +113,7 @@ const _v2: Vec3 = [0, 0, 0];
  * @param height Output parameter for the height
  * @returns True if height was found
  */
-const getPolyHeight = (
+export const getPolyHeight = (
     tile: NavMeshTile,
     poly: NavMeshPoly,
     polyIndex: number,
@@ -668,4 +669,28 @@ export const queryPolygons = (
     }
 
     return result;
+};
+
+export const findPolygonPath = (
+    startRef: PolyRef,
+    endRef: PolyRef,
+    startPos: Vec3,
+    endPos: Vec3,
+    filter: QueryFilter,
+    maxPath = 256,
+): Result<PolyRef[], string> => {
+    return ok([]);
+};
+
+export const FIND_STRAIGHT_PATH_AREA_CROSSINGS = 1;
+export const FIND_STRAIGHT_PATH_ALL_CROSSINGS = 2;
+
+export const findStraightPath = (
+    start: Vec3,
+    end: Vec3,
+    pathPolyRefs: PolyRef[],
+    maxStraightPathPoints = 256,
+    straightPathOptions = 0,
+): Result<Vec3[], string> => {
+    return ok([]);
 };
