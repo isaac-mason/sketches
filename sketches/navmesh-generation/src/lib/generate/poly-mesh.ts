@@ -1,11 +1,11 @@
-import { vec3, type Box3, type Vec3 } from '@/common/maaths';
-import type { ContourSet } from './contour-set';
+import { type Box3, type Vec3, vec3 } from '@/common/maaths';
 import {
     BORDER_VERTEX,
     MESH_NULL_IDX,
     MULTIPLE_REGS,
     POLY_NEIS_FLAG_EXT_LINK,
 } from './common';
+import type { ContourSet } from './contour-set';
 
 /**
  * Represents a polygon mesh suitable for use in building a navigation mesh.
@@ -198,6 +198,11 @@ const intersect = (
 const vec3EqualXZ = (vertexA: number[], vertexB: number[]): boolean =>
     vertexA[0] === vertexB[0] && vertexA[2] === vertexB[2];
 
+const _diagonalStart = vec3.create();
+const _diagonalEnd = vec3.create();
+const _edgeStart = vec3.create();
+const _edgeEnd = vec3.create();
+
 // Returns T iff (v_i, v_j) is a proper internal *or* external
 // diagonal of P, *ignoring edges incident to v_i and v_j*.
 const diagonalie = (
@@ -207,16 +212,18 @@ const diagonalie = (
     vertices: number[],
     vertexIndices: number[],
 ): boolean => {
-    const diagonalStart = [
+    const diagonalStart = vec3.set(
+        _diagonalStart,
         vertices[(vertexIndices[startVertexIdx] & 0x0fffffff) * 4],
         vertices[(vertexIndices[startVertexIdx] & 0x0fffffff) * 4 + 1],
         vertices[(vertexIndices[startVertexIdx] & 0x0fffffff) * 4 + 2],
-    ];
-    const diagonalEnd = [
+    );
+    const diagonalEnd = vec3.set(
+        _diagonalEnd,
         vertices[(vertexIndices[endVertexIdx] & 0x0fffffff) * 4],
         vertices[(vertexIndices[endVertexIdx] & 0x0fffffff) * 4 + 1],
         vertices[(vertexIndices[endVertexIdx] & 0x0fffffff) * 4 + 2],
-    ];
+    );
 
     for (let k = 0; k < polygonVertexCount; k++) {
         const k1 = next(k, polygonVertexCount);
@@ -228,16 +235,18 @@ const diagonalie = (
                 k1 === endVertexIdx
             )
         ) {
-            const edgeStart = [
+            const edgeStart = vec3.set(
+                _edgeStart,
                 vertices[(vertexIndices[k] & 0x0fffffff) * 4],
                 vertices[(vertexIndices[k] & 0x0fffffff) * 4 + 1],
                 vertices[(vertexIndices[k] & 0x0fffffff) * 4 + 2],
-            ];
-            const edgeEnd = [
+            );
+            const edgeEnd = vec3.set(
+                _edgeEnd,
                 vertices[(vertexIndices[k1] & 0x0fffffff) * 4],
                 vertices[(vertexIndices[k1] & 0x0fffffff) * 4 + 1],
                 vertices[(vertexIndices[k1] & 0x0fffffff) * 4 + 2],
-            ];
+            );
 
             if (
                 vec3EqualXZ(diagonalStart, edgeStart) ||
@@ -368,16 +377,18 @@ const diagonalieLoose = (
     vertices: number[],
     vertexIndices: number[],
 ): boolean => {
-    const diagonalStart = [
+    const diagonalStart = vec3.set(
+        _diagonalStart,
         vertices[(vertexIndices[startVertexIdx] & 0x0fffffff) * 4],
         vertices[(vertexIndices[startVertexIdx] & 0x0fffffff) * 4 + 1],
         vertices[(vertexIndices[startVertexIdx] & 0x0fffffff) * 4 + 2],
-    ];
-    const diagonalEnd = [
+    );
+    const diagonalEnd = vec3.set(
+        _diagonalEnd,
         vertices[(vertexIndices[endVertexIdx] & 0x0fffffff) * 4],
         vertices[(vertexIndices[endVertexIdx] & 0x0fffffff) * 4 + 1],
         vertices[(vertexIndices[endVertexIdx] & 0x0fffffff) * 4 + 2],
-    ];
+    );
 
     for (let k = 0; k < polygonVertexCount; k++) {
         const k1 = next(k, polygonVertexCount);
@@ -389,16 +400,18 @@ const diagonalieLoose = (
                 k1 === endVertexIdx
             )
         ) {
-            const edgeStart = [
+            const edgeStart = vec3.set(
+                _edgeStart,
                 vertices[(vertexIndices[k] & 0x0fffffff) * 4],
                 vertices[(vertexIndices[k] & 0x0fffffff) * 4 + 1],
                 vertices[(vertexIndices[k] & 0x0fffffff) * 4 + 2],
-            ];
-            const edgeEnd = [
+            );
+            const edgeEnd = vec3.set(
+                _edgeEnd,
                 vertices[(vertexIndices[k1] & 0x0fffffff) * 4],
                 vertices[(vertexIndices[k1] & 0x0fffffff) * 4 + 1],
                 vertices[(vertexIndices[k1] & 0x0fffffff) * 4 + 2],
-            ];
+            );
 
             if (
                 vec3EqualXZ(diagonalStart, edgeStart) ||
@@ -424,17 +437,22 @@ const inConeLoose = (
     vertices: number[],
     vertexIndices: number[],
 ): boolean => {
-    const coneVertex = [
+    const coneVertex = vec3.set(
+        _coneVertex,
         vertices[(vertexIndices[coneVertexIdx] & 0x0fffffff) * 4],
         vertices[(vertexIndices[coneVertexIdx] & 0x0fffffff) * 4 + 1],
         vertices[(vertexIndices[coneVertexIdx] & 0x0fffffff) * 4 + 2],
-    ];
-    const testVertex = [
+    );
+
+    const testVertex = vec3.set(
+        _testVertex,
         vertices[(vertexIndices[testVertexIdx] & 0x0fffffff) * 4],
         vertices[(vertexIndices[testVertexIdx] & 0x0fffffff) * 4 + 1],
         vertices[(vertexIndices[testVertexIdx] & 0x0fffffff) * 4 + 2],
-    ];
-    const nextVertex = [
+    );
+
+    const nextVertex = vec3.set(
+        _nextVertex,
         vertices[
             (vertexIndices[next(coneVertexIdx, polygonVertexCount)] &
                 0x0fffffff) *
@@ -452,8 +470,10 @@ const inConeLoose = (
                 4 +
                 2
         ],
-    ];
-    const prevVertex = [
+    );
+
+    const prevVertex = vec3.set(
+        _prevVertex,
         vertices[
             (vertexIndices[prev(coneVertexIdx, polygonVertexCount)] &
                 0x0fffffff) *
@@ -471,7 +491,7 @@ const inConeLoose = (
                 4 +
                 2
         ],
-    ];
+    );
 
     if (leftOn(prevVertex, coneVertex, nextVertex)) {
         return (
@@ -1194,6 +1214,20 @@ const canRemoveVertex = (mesh: PolyMesh, remVertexIdx: number): boolean => {
     return numOpenEdges <= 2;
 };
 
+// Helper functions for hole building
+const pushFront = (v: number, arr: number[], an: { value: number }) => {
+    an.value++;
+    for (let i = an.value - 1; i > 0; i--) {
+        arr[i] = arr[i - 1];
+    }
+    arr[0] = v;
+};
+
+const pushBack = (v: number, arr: number[], an: { value: number }) => {
+    arr[an.value] = v;
+    an.value++;
+};
+
 const removeVertex = (
     mesh: PolyMesh,
     remVertexIdx: number,
@@ -1297,20 +1331,6 @@ const removeVertex = (
     if (nedges === 0) {
         return true;
     }
-
-    // Helper functions for hole building
-    const pushFront = (v: number, arr: number[], an: { value: number }) => {
-        an.value++;
-        for (let i = an.value - 1; i > 0; i--) {
-            arr[i] = arr[i - 1];
-        }
-        arr[0] = v;
-    };
-
-    const pushBack = (v: number, arr: number[], an: { value: number }) => {
-        arr[an.value] = v;
-        an.value++;
-    };
 
     // Start with one vertex, keep appending connected segments
     const nholeRef = { value: 0 };
@@ -1425,8 +1445,6 @@ const removeVertex = (
 
     // Merge polygons
     if (nvp > 3) {
-        const tmpPoly = polys.slice(ntris * nvp);
-
         while (true) {
             // Find best polygons to merge
             let bestMergeVal = 0;
