@@ -55,7 +55,7 @@ type QueryFilter = {
      * @param nextPoly The next polygon. [opt]
      * @returns The cost of moving from the start to the end position.
      */
-    getAreaCost?: (
+    getCost?: (
         pa: number,
         pb: number,
         prevRef: string | undefined,
@@ -73,6 +73,30 @@ type QueryFilter = {
 export const DEFAULT_QUERY_FILTER: QueryFilter = {
     includeFlags: 0xffffffff,
     excludeFlags: 0,
+};
+
+const _distanceStart = vec3.create();
+const _distanceEnd = vec3.create();
+
+/**
+ * Calculates the default distance-based cost for moving between two points in a polygon.
+ */
+const getDefaultCost: QueryFilter['getCost'] = (
+    pa,
+    pb,
+    _prevRef,
+    _prevTile,
+    _prevPoly,
+    _curRef,
+    curTile,
+    _curPoly,
+    _nextRef,
+    _nextTile,
+    _nextPoly
+) => {
+    vec3.fromArray(_distanceStart, curTile.vertices, pa);
+    vec3.fromArray(_distanceEnd, curTile.vertices, pb);
+    return vec3.distance(_distanceStart, _distanceEnd);
 };
 
 /**
@@ -624,7 +648,7 @@ export const queryPolygons = (
     center: Vec3,
     halfExtents: Vec3,
     filter: QueryFilter,
-) => {
+): PolyRef[] => {
     const result: PolyRef[] = [];
 
     // set the bounds for the query
@@ -650,7 +674,7 @@ export const queryPolygons = (
     }
 
     return result;
-};
+}
 
 const _start = vec3.create();
 const _end = vec3.create();
@@ -710,7 +734,43 @@ const getPortalPoints = (
     }
 
     return true;
-};
+}
+
+const _portalLeft = vec3.create();
+const _portalRight = vec3.create();
+
+const getEdgeMidPoint = (
+    navMesh: NavMesh,
+    fromTile: NavMeshTile,
+    fromPolyRef: PolyRef,
+    fromPoly: NavMeshPoly,
+    toTile: NavMeshTile,
+    toPolyRef: PolyRef,
+    toPoly: NavMeshPoly,
+    outMidPoint: Vec3,
+): boolean => {
+    if (
+        !getPortalPoints(
+            navMesh,
+            fromTile,
+            fromPolyRef,
+            fromPoly,
+            toTile,
+            toPolyRef,
+            toPoly,
+            _portalLeft,
+            _portalRight,
+        )
+    ) {
+        return false;
+    }
+
+    outMidPoint[0] = (_portalLeft[0] + _portalRight[0]) * 0.5;
+    outMidPoint[1] = (_portalLeft[1] + _portalRight[1]) * 0.5;
+    outMidPoint[2] = (_portalLeft[2] + _portalRight[2]) * 0.5;
+
+    return true;
+}
 
 /**
  * Find a path between two polygons.
