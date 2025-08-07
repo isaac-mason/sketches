@@ -1,26 +1,24 @@
 import type { Box3, Vec2, Vec3 } from '@/common/maaths';
 import { POLY_NEIS_FLAG_EXT_LINK } from '../generate';
 
-/** a serialised polygon reference, in the format `${tile salt}.${tile index}.${index of polygon within tile}` */
-export type PolyRef = `${number},${number},${number}`;
+/** a serialised polygon reference, in the format `${tile id}.${index of polygon within tile}` */
+export type PolyRef = `${number},${number}`;
 
-/** a deserialised polygon reference, as a tuple of [tile salt, tile index, index of polygon within tile] */
+/** a deserialised polygon reference, as a tuple of [tile id, index of polygon within tile] */
 export type DeserialisedPolyRef = [
-    tileSalt: number,
-    tileIndex: number,
+    tileId: number,
     tilePolygonIndex: number,
 ];
 
-/** serialises a polygon reference from tile salt, tile index and polygon index */
+/** serialises a polygon reference */
 export const serPolyRef = (
-    tileSalt: number,
-    tileIndex: number,
+    tileId: number,
     tilePolygonIndex: number,
 ): PolyRef => {
-    return `${tileSalt},${tileIndex},${tilePolygonIndex}`;
+    return `${tileId},${tilePolygonIndex}`;
 };
 
-/** deserialises a polygon reference into a tuple of [tile salt, tile index, index of polygon within tile] */
+/** deserialises a polygon reference */
 export const desPolyRef = (polyRef: PolyRef): DeserialisedPolyRef => {
     return polyRef.split(',').map(Number) as DeserialisedPolyRef;
 };
@@ -55,6 +53,9 @@ export type NavMesh = {
 // }
 
 export type NavMeshPoly = {
+    /** indices of the links to other polygons */
+    links: number[];
+
     /** the indices of the polygon's vertices. vertices are stored in NavMeshTile.vertices */
     vertices: number[];
 
@@ -74,7 +75,7 @@ export type NavMeshPoly = {
 
 export type NavMeshLink = {
     /** neighbour reference. (The neighbor that is linked to.) */
-    ref: number;
+    ref: PolyRef;
 
     /** index of the polygon edge that owns this link */
     edge: number;
@@ -226,7 +227,7 @@ const createInternalLinks = (tile: NavMeshTile) => {
                 neighborPolyIndex < tile.polys.length
             ) {
                 const link: NavMeshLink = {
-                    ref: neighborPolyIndex, // reference to neighbor polygon
+                    ref: serPolyRef(tile.id, neighborPolyIndex),
                     edge: edgeIndex, // edge index in current polygon
                     side: 0xff, // not a boundary link
                     bmin: 0, // not used for internal links
@@ -234,6 +235,8 @@ const createInternalLinks = (tile: NavMeshTile) => {
                 };
 
                 tile.links.push(link);
+
+                poly.links.push(tile.links.length - 1);
             }
         }
     }

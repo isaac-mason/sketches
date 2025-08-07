@@ -9,13 +9,16 @@ import {
 import { type Result, ok } from '../result';
 import {
     type NavMesh,
+    type NavMeshLink,
     type NavMeshPoly,
     type NavMeshTile,
     type PolyRef,
     desPolyRef,
     getTilesAt,
+    serPolyRef,
     worldToTilePosition,
 } from './nav-mesh';
+import { navMesh } from '.';
 
 type QueryFilter = {
     /**
@@ -82,10 +85,10 @@ export const getTileAndPolyByRef = (
     ref: PolyRef,
     navMesh: NavMesh,
 ): { tile: NavMeshTile; poly: NavMeshPoly; polyIndex: number } | null => {
-    const [tileSalt, tileIndex, polyIndex] = desPolyRef(ref);
+    const [tileId, polyIndex] = desPolyRef(ref);
 
-    const tile = navMesh.tiles[tileIndex];
-    if (!tile || tile.id !== tileSalt) {
+    const tile = navMesh.tiles[tileId];
+    if (!tile) {
         return null;
     }
 
@@ -186,24 +189,9 @@ export const getPolyHeight = (
         const v1 = _v1;
         const v2 = _v2;
 
-        vec3.set(
-            v0,
-            tile.vertices[poly.vertices[0] * 3],
-            tile.vertices[poly.vertices[0] * 3 + 1],
-            tile.vertices[poly.vertices[0] * 3 + 2],
-        );
-        vec3.set(
-            v1,
-            tile.vertices[poly.vertices[1] * 3],
-            tile.vertices[poly.vertices[1] * 3 + 1],
-            tile.vertices[poly.vertices[1] * 3 + 2],
-        );
-        vec3.set(
-            v2,
-            tile.vertices[poly.vertices[2] * 3],
-            tile.vertices[poly.vertices[2] * 3 + 1],
-            tile.vertices[poly.vertices[2] * 3 + 2],
-        );
+        vec3.fromArray(v0, tile.vertices, poly.vertices[0] * 3);
+        vec3.fromArray(v1, tile.vertices, poly.vertices[1] * 3);
+        vec3.fromArray(v2, tile.vertices, poly.vertices[2] * 3);
 
         const h = getHeightAtPoint(v0, v1, v2, pos);
 
@@ -255,25 +243,18 @@ const closestPointOnDetailEdges = (
             const vk = _vk;
 
             if (viIndex < tile.vertices.length / 3) {
-                vi[0] = tile.vertices[viIndex * 3];
-                vi[1] = tile.vertices[viIndex * 3 + 1];
-                vi[2] = tile.vertices[viIndex * 3 + 2];
+                vec3.fromArray(vi, tile.vertices, viIndex * 3);
             } else {
                 const detailIndex = (viIndex - tile.vertices.length / 3) * 3;
-                vi[0] = tile.detailVertices[detailIndex];
-                vi[1] = tile.detailVertices[detailIndex + 1];
-                vi[2] = tile.detailVertices[detailIndex + 2];
+
+                vec3.fromArray(vi, tile.detailVertices, detailIndex);
             }
 
             if (vkIndex < tile.vertices.length / 3) {
-                vk[0] = tile.vertices[vkIndex * 3];
-                vk[1] = tile.vertices[vkIndex * 3 + 1];
-                vk[2] = tile.vertices[vkIndex * 3 + 2];
+                vec3.fromArray(vk, tile.vertices, vkIndex * 3);
             } else {
                 const detailIndex = (vkIndex - tile.vertices.length / 3) * 3;
-                vk[0] = tile.detailVertices[detailIndex];
-                vk[1] = tile.detailVertices[detailIndex + 1];
-                vk[2] = tile.detailVertices[detailIndex + 2];
+                vec3.fromArray(vk, tile.detailVertices, detailIndex);
             }
 
             closestPtSeg2d(_closestOnDetailEdges, pos, vi, vk);
@@ -548,7 +529,7 @@ export const queryPolygonsInTile = (
             if (isLeafNode && overlap) {
                 const polyIndex = node.i;
                 const poly = tile.polys[polyIndex];
-                const ref: PolyRef = `${tile.id},0,${polyIndex}`;
+                const ref: PolyRef = serPolyRef(tile.id, polyIndex);
 
                 if (
                     (poly.flags & filter.includeFlags) !== 0 &&
@@ -584,7 +565,7 @@ export const queryPolygonsInTile = (
             // }
 
             // Must pass filter
-            const ref: PolyRef = `${tile.id},0,${i}`;
+            const ref: PolyRef = serPolyRef(tile.id, i);
             if (
                 (poly.flags & filter.includeFlags) === 0 ||
                 (poly.flags & filter.excludeFlags) !== 0
@@ -671,7 +652,87 @@ export const queryPolygons = (
     return result;
 };
 
-export const findPolygonPath = (
+const _start = vec3.create();
+const _end = vec3.create();
+
+const getPortalPoints = (
+    navMesh: NavMesh,
+    fromTile: NavMeshTile,
+    fromPolyRef: PolyRef,
+    fromPoly: NavMeshPoly,
+    toTile: NavMeshTile,
+    toPolyRef: PolyRef,
+    toPoly: NavMeshPoly,
+    outLeft: Vec3,
+    outRight: Vec3,
+): boolean => {
+    // Find the link that points to the 'to' polygon.
+    let toLink: NavMeshLink | undefined = undefined;
+
+    for (const linkIndex of fromPoly.links) {
+        const link = fromTile.links[linkIndex];
+        if (link?.ref === toPolyRef) {
+            // Found the link to the target polygon.
+            toLink = link;
+            break;
+        }
+    }
+
+    if (!toLink) {
+        // No link found to the target polygon.
+        return false;
+    }
+
+    // TODO: off-mesh connection handling
+    // ...
+
+    // Find portal vertices
+    const v0Index = fromPoly.vertices[toLink.edge];
+    const v1Index =
+        fromPoly.vertices[(toLink.edge + 1) % fromPoly.vertices.length];
+
+    vec3.fromArray(outLeft, fromTile.vertices, v0Index * 3);
+    vec3.fromArray(outRight, fromTile.vertices, v1Index * 3);
+
+    // If the link is at tile boundary, clamp the vertices to the link width.
+    if (toLink.side !== 0xff) {
+        // Unpack portal limits.
+        if (toLink.bmin !== 0 || toLink.bmax !== 255) {
+            const s = 1.0 / 255.0;
+            const tmin = toLink.bmin * s;
+            const tmax = toLink.bmax * s;
+
+            vec3.fromArray(_start, fromTile.vertices, v0Index * 3);
+            vec3.fromArray(_end, fromTile.vertices, v1Index * 3);
+            vec3.lerp(outLeft, _start, _end, tmin);
+            vec3.lerp(outRight, _start, _end, tmax);
+        }
+    }
+
+    return true;
+};
+
+/**
+ * Find a path between two polygons.
+ *
+ * If the end polygon cannot be reached through the navigation graph,
+ * the last polygon in the path will be the nearest the end polygon.
+ *
+ * If the path array is to small to hold the full result, it will be filled as
+ * far as possible from the start polygon toward the end polygon.
+ *
+ * The start and end positions are used to calculate traversal costs.
+ * (The y-values impact the result.)
+ *
+ * @param startRef The reference ID of the starting polygon.
+ * @param endRef The reference ID of the ending polygon.
+ * @param startPos The starting position in world space.
+ * @param endPos The ending position in world space.
+ * @param filter Query filter to apply.
+ * @param maxPath Maximum number of polygons in the path.
+ * @returns The result of the pathfinding operation.
+ */
+export const findPath = (
     startRef: PolyRef,
     endRef: PolyRef,
     startPos: Vec3,

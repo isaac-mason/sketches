@@ -58,27 +58,6 @@ type CircumCircleResult = {
     radius: number;
 };
 
-// Helper functions for working with array views (to avoid allocations)
-const getVec3 = (out: Vec3, arr: number[], index: number): Vec3 => {
-    out[0] = arr[index];
-    out[1] = arr[index + 1];
-    out[2] = arr[index + 2];
-    return out;
-};
-
-const setVec3 = (
-    arr: number[],
-    index: number,
-    x: number,
-    y: number,
-    z: number,
-): void => {
-    arr[index] = x;
-    arr[index + 1] = y;
-    arr[index + 2] = z;
-};
-
-
 const _circumCircleV1Proj: Vec2 = vec2.create();
 const _circumCircleV2Proj: Vec2 = vec2.create();
 const _circumCircleV3Proj: Vec2 = vec2.create();
@@ -279,9 +258,9 @@ const distToTriMesh = (
         const vb = tris[i * 4 + 1] * 3;
         const vc = tris[i * 4 + 2] * 3;
 
-        getVec3(_distPtTriA, verts, va);
-        getVec3(_distPtTriB, verts, vb);
-        getVec3(_distPtTriC, verts, vc);
+        vec3.fromArray(_distPtTriA, verts, va);
+        vec3.fromArray(_distPtTriB, verts, vb);
+        vec3.fromArray(_distPtTriC, verts, vc);
 
         const d = distPtTri(p, _distPtTriA, _distPtTriB, _distPtTriC);
         if (d < dmin) dmin = d;
@@ -540,9 +519,9 @@ const completeFacet = (
             if (r < 0) {
                 // The circle is not updated yet, do it now.
                 pt = u;
-                getVec3(_circumCircleP1, points, s * 3);
-                getVec3(_circumCircleP2, points, t * 3);
-                getVec3(_circumCircleP3, points, u * 3);
+                vec3.fromArray(_circumCircleP1, points, s * 3);
+                vec3.fromArray(_circumCircleP2, points, t * 3);
+                vec3.fromArray(_circumCircleP3, points, u * 3);
                 circumCircle(
                     _circumCircleResult,
                     _circumCircleP1,
@@ -566,9 +545,9 @@ const completeFacet = (
             if (d < r * (1 - tol)) {
                 // Inside safe circumcircle, update circle.
                 pt = u;
-                getVec3(_circumCircleP1, points, s * 3);
-                getVec3(_circumCircleP2, points, t * 3);
-                getVec3(_circumCircleP3, points, u * 3);
+                vec3.fromArray(_circumCircleP1, points, s * 3);
+                vec3.fromArray(_circumCircleP2, points, t * 3);
+                vec3.fromArray(_circumCircleP3, points, u * 3);
                 circumCircle(
                     _circumCircleResult,
                     _circumCircleP1,
@@ -583,9 +562,9 @@ const completeFacet = (
                 if (overlapEdges(points, edges, nEdges.value, t, u)) continue;
                 // Edge is valid.
                 pt = u;
-                getVec3(_circumCircleP1, points, s * 3);
-                getVec3(_circumCircleP2, points, t * 3);
-                getVec3(_circumCircleP3, points, u * 3);
+                vec3.fromArray(_circumCircleP1, points, s * 3);
+                vec3.fromArray(_circumCircleP2, points, t * 3);
+                vec3.fromArray(_circumCircleP3, points, u * 3);
                 circumCircle(
                     _circumCircleResult,
                     _circumCircleP1,
@@ -1223,13 +1202,9 @@ const buildPolyDetail = (
 
     // Copy input vertices
     for (let i = 0; i < nin; ++i) {
-        setVec3(
-            verts,
-            i * 3,
-            inVerts[i * 3],
-            inVerts[i * 3 + 1],
-            inVerts[i * 3 + 2],
-        );
+        verts[i * 3] = inVerts[i * 3];
+        verts[i * 3 + 1] = inVerts[i * 3 + 1];
+        verts[i * 3 + 2] = inVerts[i * 3 + 2];
     }
 
     // Clear arrays
@@ -1261,11 +1236,11 @@ const buildPolyDetail = (
             }
 
             const v1 = swapped
-                ? getVec3(_buildPolyDetailV1, inVerts, vi)
-                : getVec3(_buildPolyDetailV1, inVerts, vj);
+                ? vec3.fromArray(_buildPolyDetailV1, inVerts, vi)
+                : vec3.fromArray(_buildPolyDetailV1, inVerts, vj);
             const v2 = swapped
-                ? getVec3(_buildPolyDetailV2, inVerts, vj)
-                : getVec3(_buildPolyDetailV2, inVerts, vi);
+                ? vec3.fromArray(_buildPolyDetailV2, inVerts, vj)
+                : vec3.fromArray(_buildPolyDetailV2, inVerts, vi);
 
             // Create samples along the edge.
             const dx = v2[0] - v1[0];
@@ -1312,9 +1287,9 @@ const buildPolyDetail = (
                 let maxd = 0;
                 let maxi = -1;
                 for (let m = a + 1; m < b; ++m) {
-                    getVec3(_buildPolyDetailEdgePt, edge, m * 3);
-                    getVec3(_buildPolyDetailEdgeA, edge, va);
-                    getVec3(_buildPolyDetailEdgeB, edge, vb);
+                    vec3.fromArray(_buildPolyDetailEdgePt, edge, m * 3);
+                    vec3.fromArray(_buildPolyDetailEdgeA, edge, va);
+                    vec3.fromArray(_buildPolyDetailEdgeB, edge, vb);
                     const dev = distancePtSeg(
                         _buildPolyDetailEdgePt,
                         _buildPolyDetailEdgeA,
@@ -1342,25 +1317,19 @@ const buildPolyDetail = (
             // Add new vertices.
             if (swapped) {
                 for (let k = nidx - 2; k > 0; --k) {
-                    setVec3(
-                        verts,
-                        nverts.value * 3,
-                        edge[idx[k] * 3],
-                        edge[idx[k] * 3 + 1],
-                        edge[idx[k] * 3 + 2],
-                    );
+                    verts[nverts.value * 3] = edge[idx[k] * 3];
+                    verts[nverts.value * 3 + 1] = edge[idx[k] * 3 + 1];
+                    verts[nverts.value * 3 + 2] = edge[idx[k] * 3 + 2];
+
                     hull[nhull++] = nverts.value;
                     nverts.value++;
                 }
             } else {
                 for (let k = 1; k < nidx - 1; ++k) {
-                    setVec3(
-                        verts,
-                        nverts.value * 3,
-                        edge[idx[k] * 3],
-                        edge[idx[k] * 3 + 1],
-                        edge[idx[k] * 3 + 2],
-                    );
+                    verts[nverts.value * 3] = edge[idx[k] * 3];
+                    verts[nverts.value * 3 + 1] = edge[idx[k] * 3 + 1];
+                    verts[nverts.value * 3 + 2] = edge[idx[k] * 3 + 2];
+
                     hull[nhull++] = nverts.value;
                     nverts.value++;
                 }
@@ -1473,7 +1442,6 @@ const buildPolyDetail = (
             samples[besti * 4 + 3] = 1;
             // Add the new sample point.
             verts.push(bestpt[0], bestpt[1], bestpt[2]);
-            // setVec3(verts, nverts.value * 3, bestpt[0], bestpt[1], bestpt[2]);
             nverts.value++;
 
             // Create new triangulation.

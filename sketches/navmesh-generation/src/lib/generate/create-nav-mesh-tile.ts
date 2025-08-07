@@ -116,6 +116,7 @@ export const createNavMeshTile = (params: NavMeshTileParams): NavMeshTile => {
     // create polys from input data
     for (let i = 0; i < params.polyMesh.nPolys; i++) {
         const poly: NavMeshPoly = {
+            links: [],
             vertices: [],
             neis: [],
             flags: params.polyMesh.polyFlags[i],

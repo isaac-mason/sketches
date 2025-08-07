@@ -2272,10 +2272,10 @@ export function createNavMeshPolyHelper(
     const disposables: (() => void)[] = [];
 
     // Get tile and polygon from reference
-    const [tileSalt, tileIndex, polyIndex] = desPolyRef(polyRef);
+    const [tileId, polyIndex] = desPolyRef(polyRef);
     
-    const tile = navMesh.tiles[tileIndex];
-    if (!tile || tile.id !== tileSalt || polyIndex >= tile.polys.length) {
+    const tile = navMesh.tiles[tileId];
+    if (!tile || polyIndex >= tile.polys.length) {
         // Return empty object if polygon not found
         return {
             object: group,

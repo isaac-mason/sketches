@@ -53,6 +53,13 @@ export function fromValues(x: number, y: number, z: number): Vec3 {
     return out;
 }
 
+export function fromArray(out: Vec3, array: number[], fromIndex = 0): Vec3 {
+    out[0] = array[fromIndex];
+    out[1] = array[fromIndex + 1];
+    out[2] = array[fromIndex + 2];
+    return out;
+}
+
 /**
  * Copy the values from one vec3 to another
  *
