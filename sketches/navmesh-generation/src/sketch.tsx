@@ -1,5 +1,5 @@
 import { WebGPUCanvas } from '@/common/components/webgpu-canvas';
-import { box3, Vec3, vec3 } from '@/common/maaths';
+import { type Vec3, box3, vec3 } from '@/common/maaths';
 import { OrbitControls, useGLTF } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import { Leva, useControls } from 'leva';
