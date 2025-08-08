@@ -1,11 +1,9 @@
-/**
+/*
  * Common utilities
  */
 
 // Configuration Constants
 export const EPSILON = 0.000001;
-
-export const RANDOM = Math.random;
 
 /**
  * Symmetric round
@@ -19,26 +17,26 @@ export function round(a: number): number {
     return a % 0.5 === 0 ? Math.floor(a) : Math.round(a);
 }
 
-const degree = Math.PI / 180;
+const DEGREES_TO_RADIANS = Math.PI / 180;
 
-const radian = 180 / Math.PI;
+const RADIANS_TO_DEGREES = 180 / Math.PI;
 
 /**
- * Convert Degree To Radian
+ * Converts Degrees To Radians
  *
  * @param a Angle in Degrees
  */
-export function toRadian(a: number): number {
-    return a * degree;
+export function degreesToRadians(degrees: number): number {
+    return degrees * DEGREES_TO_RADIANS;
 }
 
 /**
- * Convert Radian To Degree
+ * Converts Radians To Degrees
  *
  * @param a Angle in Radians
  */
-export function toDegree(a: number): number {
-    return a * radian;
+export function radiansToDegrees(radians: number): number {
+    return radians * RADIANS_TO_DEGREES;
 }
 
 /**

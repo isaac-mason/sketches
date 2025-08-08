@@ -9,7 +9,7 @@ export * as mat4 from './mat4';
 export * from './noise';
 export * as quat from './quat';
 export * as quat2 from './quat2';
-export * as random from './random';
+export * from './random';
 export * from './types';
 export * as vec2 from './vec2';
 export * as vec3 from './vec3';

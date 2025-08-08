@@ -8,7 +8,7 @@ import type { Quat, Vec2, Vec3, Vec4 } from './types';
  * @param seed The seed value (32-bit integer)
  * @returns A function that generates random numbers between 0 and 1
  */
-export function mulberry32(seed: number): () => number {
+export function createMulberry32Generator(seed: number): () => number {
     let a = seed;
 
     return () => {
@@ -35,7 +35,7 @@ export function generateMulberry32Seed(): number {
  * @param randomFloat01 the random float in the range [0, 1) to use for randomness. Defaults to Math.random().
  * @returns A random integer between min and max (inclusive).
  */
-export function int(
+export function randomInt(
     min: number,
     max: number,
     randomFloat01: number = Math.random(),
@@ -50,7 +50,7 @@ export function int(
  * @param randomFloat01 the random float in the range [0, 1) to use for randomness. Defaults to Math.random().
  * @returns A random float between min and max.
  */
-export function float(
+export function randomFloat(
     min: number,
     max: number,
     randomFloat01: number = Math.random(),
@@ -64,7 +64,7 @@ export function float(
  * @param randomFloat01 the random float in the range [0, 1) to use for randomness. Defaults to Math.random().
  * @returns A boolean value based on the chance.
  */
-export function bool(
+export function randomBool(
     chance = 0.5,
     randomFloat01: number = Math.random(),
 ): boolean {
@@ -77,8 +77,8 @@ export function bool(
  * @param randomFloat01 the random float in the range [0, 1) to use for randomness. Defaults to Math.random().
  * @returns A random sign, either 1 or -1.
  */
-export function sign(plusChance = 0.5, randomFloat01: number = Math.random()) {
-    const plus = bool(plusChance, randomFloat01);
+export function randomSign(plusChance = 0.5, randomFloat01: number = Math.random()) {
+    const plus = randomBool(plusChance, randomFloat01);
 
     return plus ? 1 : -1;
 }
@@ -90,7 +90,7 @@ export function sign(plusChance = 0.5, randomFloat01: number = Math.random()) {
  * @returns A randomly chosen item from the array.
  * @throws Error if the array is empty.
  */
-export function choice<T>(
+export function randomChoice<T>(
     items: T[],
     randomFloat01: number = Math.random(),
 ): T {
@@ -108,7 +108,7 @@ export function choice<T>(
  * @param randomFn Function to generate random numbers, defaults to Math.random
  * @returns out
  */
-export function vec2(out: Vec2 = [0, 0], randomFn: () => number = Math.random): Vec2 {
+export function randomVec2(out: Vec2 = [0, 0], randomFn: () => number = Math.random): Vec2 {
     const r = randomFn() * 2.0 * Math.PI;
     out[0] = Math.cos(r);
     out[1] = Math.sin(r);
@@ -122,7 +122,7 @@ export function vec2(out: Vec2 = [0, 0], randomFn: () => number = Math.random): 
  * @param randomFn Function to generate random numbers, defaults to Math.random
  * @returns out
  */
-export function vec3(out: Vec3 = [0, 0, 0], randomFn: () => number = Math.random): Vec3 {
+export function randomVec3(out: Vec3 = [0, 0, 0], randomFn: () => number = Math.random): Vec3 {
     const r = randomFn() * 2.0 * Math.PI;
     const z = randomFn() * 2.0 - 1.0;
     const zScale = Math.sqrt(1.0 - z * z);
@@ -140,7 +140,7 @@ export function vec3(out: Vec3 = [0, 0, 0], randomFn: () => number = Math.random
  * @param randomFn Function to generate random numbers, defaults to Math.random
  * @returns out
  */
-export function vec4(out: Vec4 = [0, 0, 0, 0], randomFn: () => number = Math.random): Vec4 {
+export function randomVec4(out: Vec4 = [0, 0, 0, 0], randomFn: () => number = Math.random): Vec4 {
     // Marsaglia, George. Choosing a Point from the Surface of a
     // Sphere. Ann. Math. Statist. 43 (1972), no. 2, 645--646.
     // http://projecteuclid.org/euclid.aoms/1177692644;
@@ -168,7 +168,7 @@ export function vec4(out: Vec4 = [0, 0, 0, 0], randomFn: () => number = Math.ran
  * @param out the receiving quaternion
  * @returns out
  */
-export function quat(out: Quat = [0, 0, 0, 0], randomFn: () => number = Math.random): Quat {
+export function randomQuat(out: Quat = [0, 0, 0, 0], randomFn: () => number = Math.random): Quat {
     // Implementation of http://planning.cs.uiuc.edu/node198.html
     // TODO: Calling random 3 times is probably not the fastest solution
     const u1 = randomFn();

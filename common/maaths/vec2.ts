@@ -512,6 +512,18 @@ export function equals(a: Vec2, b: Vec2): boolean {
 }
 
 /**
+ * Returns whether or not the vector is finite
+ * @param a vector to test
+ * @returns whether or not the vector is finite
+ */
+export function finite(a: Vec2): boolean {
+    return (
+        Number.isFinite(a[0]) &&
+        Number.isFinite(a[1])
+    );
+}
+
+/**
  * Alias for {@link length}
  */
 export const len = length;

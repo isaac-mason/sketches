@@ -544,6 +544,20 @@ export function equals(a: Vec4, b: Vec4): boolean {
 }
 
 /**
+ * Returns whether or not the vector is finite
+ * @param a vector to test
+ * @returns whether or not the vector is finite
+ */
+export function finite(a: Vec4): boolean {
+    return (
+        Number.isFinite(a[0]) &&
+        Number.isFinite(a[1]) &&
+        Number.isFinite(a[2]) &&
+        Number.isFinite(a[3])
+    );
+}
+
+/**
  * Alias for {@link subtract}
  */
 export const sub = subtract;

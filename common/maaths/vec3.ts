@@ -687,19 +687,6 @@ export function zero(out: Vec3): Vec3 {
 }
 
 /**
- * Returns whether or not the vector is finite
- * @param a vector to test
- * @returns 
- */
-export function finite(a: Vec3): boolean {
-    return (
-        Number.isFinite(a[0]) &&
-        Number.isFinite(a[1]) &&
-        Number.isFinite(a[2])
-    );
-}
-
-/**
  * Returns a string representation of a vector
  *
  * @param a vector to represent as a string
@@ -741,6 +728,19 @@ export function equals(a: Vec3, b: Vec3): boolean {
             common.EPSILON * Math.max(1.0, Math.abs(a1), Math.abs(b1)) &&
         Math.abs(a2 - b2) <=
             common.EPSILON * Math.max(1.0, Math.abs(a2), Math.abs(b2))
+    );
+}
+
+/**
+ * Returns whether or not the vector is finite
+ * @param a vector to test
+ * @returns whether or not the vector is finite
+ */
+export function finite(a: Vec3): boolean {
+    return (
+        Number.isFinite(a[0]) &&
+        Number.isFinite(a[1]) &&
+        Number.isFinite(a[2])
     );
 }
 
