@@ -687,6 +687,19 @@ export function zero(out: Vec3): Vec3 {
 }
 
 /**
+ * Returns whether or not the vector is finite
+ * @param a vector to test
+ * @returns 
+ */
+export function finite(a: Vec3): boolean {
+    return (
+        Number.isFinite(a[0]) &&
+        Number.isFinite(a[1]) &&
+        Number.isFinite(a[2])
+    );
+}
+
+/**
  * Returns a string representation of a vector
  *
  * @param a vector to represent as a string

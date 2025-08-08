@@ -1,5 +1,5 @@
 import { WebGPUCanvas } from '@/common/components/webgpu-canvas';
-import { box3, vec3 } from '@/common/maaths';
+import { box3, Vec3, vec3 } from '@/common/maaths';
 import { OrbitControls, useGLTF } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import { Leva, useControls } from 'leva';
@@ -40,6 +40,7 @@ import { type NavMesh, type PolyRef, navMesh, navMeshQuery } from './lib/query';
 import {
     DEFAULT_QUERY_FILTER,
     createFindNearestPolyResult,
+    findPath,
 } from './lib/query/nav-mesh-query';
 import {
     createCompactHeightfieldDistancesHelper,
@@ -432,15 +433,15 @@ const RecastLike = () => {
 
         const tile = createNavMeshTile(navMeshTileParams);
 
-        navMesh.addTile(
-            nav,
-            tile,
-        );
+        navMesh.addTile(nav, tile);
 
-        const nearestPolyResult = createFindNearestPolyResult();
+        setNav(nav);
 
-        navMeshQuery.findNearestPoly(
-            nearestPolyResult,
+        console.log('nav', nav, tile);
+
+        // testing: find nearest poly
+        const nearestPolyResult = navMeshQuery.findNearestPoly(
+            createFindNearestPolyResult(),
             nav,
             [0, 3.7, 2.5],
             [1, 1, 1],
@@ -456,9 +457,50 @@ const RecastLike = () => {
         navMeshPolyHelper.object.position.y += 0.25;
         scene.add(navMeshPolyHelper.object);
 
-        console.log('nav', nav, tile);
+        // testing: find path
+        const startPosition: Vec3 = [
+            -3.9470102457140324, 0.26650271598300623, 4.713808784000584,
+        ];
+        const endPosition: Vec3 = [
+            2.517768839689215, 2.3875615713045564, -2.2006116858522327,
+        ];
 
-        setNav(nav);
+        const startPositionNearestPoly = navMeshQuery.findNearestPoly(
+            createFindNearestPolyResult(),
+            nav,
+            startPosition,
+            [1, 1, 1],
+            DEFAULT_QUERY_FILTER,
+        );
+        const endPositionNearestPoly = navMeshQuery.findNearestPoly(
+            createFindNearestPolyResult(),
+            nav,
+            endPosition,
+            [1, 1, 1],
+            DEFAULT_QUERY_FILTER,
+        );
+
+        const findPathResult = navMeshQuery.findPath(
+            nav,
+            startPositionNearestPoly.nearestPolyRef,
+            endPositionNearestPoly.nearestPolyRef,
+            startPosition,
+            endPosition,
+            DEFAULT_QUERY_FILTER,
+            256,
+        );
+
+        console.log(findPathResult);
+
+        for (const poly of findPathResult.path) {
+            const polyHelper = createNavMeshPolyHelper(
+                nav,
+                poly,
+                new THREE.Color('blue'),
+            );
+            polyHelper.object.position.y += 0.25;
+            scene.add(polyHelper.object);
+        }
     }, [scene]);
 
     // debug view of walkable triangles with area ids based vertex colors

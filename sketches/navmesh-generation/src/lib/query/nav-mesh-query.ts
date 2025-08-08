@@ -6,7 +6,6 @@ import {
     getHeightAtPoint,
     pointInPoly,
 } from '../common/geometry';
-import { type Result, ok } from '../result';
 import {
     type NavMesh,
     type NavMeshLink,
@@ -18,7 +17,16 @@ import {
     serPolyRef,
     worldToTilePosition,
 } from './nav-mesh';
-import { navMesh } from '.';
+import {
+    modifyNodeSearchNodeQueue,
+    NODE_FLAG_CLOSED,
+    NODE_FLAG_OPEN,
+    popNodeSearchQueue,
+    pushNodeSearchQueue,
+    type SearchNode,
+    type SearchNodeQueue,
+    type SearchNodeRef,
+} from './search';
 
 type QueryFilter = {
     /**
@@ -56,12 +64,12 @@ type QueryFilter = {
      * @returns The cost of moving from the start to the end position.
      */
     getCost?: (
-        pa: number,
-        pb: number,
-        prevRef: string | undefined,
+        pa: Vec3,
+        pb: Vec3,
+        prevRef: PolyRef | undefined,
         prevTile: NavMeshTile | undefined,
         prevPoly: NavMeshPoly | undefined,
-        curRef: string,
+        curRef: PolyRef,
         curTile: NavMeshTile,
         curPoly: NavMeshPoly,
         nextRef: string | undefined,
@@ -70,34 +78,25 @@ type QueryFilter = {
     ) => number;
 };
 
-export const DEFAULT_QUERY_FILTER: QueryFilter = {
+export const DEFAULT_QUERY_FILTER = {
     includeFlags: 0xffffffff,
     excludeFlags: 0,
-};
-
-const _distanceStart = vec3.create();
-const _distanceEnd = vec3.create();
-
-/**
- * Calculates the default distance-based cost for moving between two points in a polygon.
- */
-const getDefaultCost: QueryFilter['getCost'] = (
-    pa,
-    pb,
-    _prevRef,
-    _prevTile,
-    _prevPoly,
-    _curRef,
-    curTile,
-    _curPoly,
-    _nextRef,
-    _nextTile,
-    _nextPoly
-) => {
-    vec3.fromArray(_distanceStart, curTile.vertices, pa);
-    vec3.fromArray(_distanceEnd, curTile.vertices, pb);
-    return vec3.distance(_distanceStart, _distanceEnd);
-};
+    getCost: (
+        pa,
+        pb,
+        _prevRef,
+        _prevTile,
+        _prevPoly,
+        _curRef,
+        _curTile,
+        _curPoly,
+        _nextRef,
+        _nextTile,
+        _nextPoly,
+    ) => {
+        return vec3.distance(pa, pb);
+    },
+} satisfies QueryFilter;
 
 /**
  * Gets the tile and polygon from a polygon reference
@@ -127,9 +126,9 @@ export const getTileAndPolyByRef = (
     };
 };
 
-const _v0: Vec3 = [0, 0, 0];
-const _v1: Vec3 = [0, 0, 0];
-const _v2: Vec3 = [0, 0, 0];
+const _v0 = vec3.create();
+const _v1 = vec3.create();
+const _v2 = vec3.create();
 
 /**
  * Gets the height of a polygon at a given point using detail mesh if available
@@ -166,37 +165,25 @@ export const getPolyHeight = (
 
             if (v0Index < tile.vertices.length / 3) {
                 // Use main tile vertices
-                v0[0] = tile.vertices[v0Index * 3];
-                v0[1] = tile.vertices[v0Index * 3 + 1];
-                v0[2] = tile.vertices[v0Index * 3 + 2];
+                vec3.fromArray(v0, tile.vertices, v0Index * 3);
             } else {
                 // Use detail vertices
                 const detailIndex = (v0Index - tile.vertices.length / 3) * 3;
-                v0[0] = tile.detailVertices[detailIndex];
-                v0[1] = tile.detailVertices[detailIndex + 1];
-                v0[2] = tile.detailVertices[detailIndex + 2];
+                vec3.fromArray(v0, tile.detailVertices, detailIndex);
             }
 
             if (v1Index < tile.vertices.length / 3) {
-                v1[0] = tile.vertices[v1Index * 3];
-                v1[1] = tile.vertices[v1Index * 3 + 1];
-                v1[2] = tile.vertices[v1Index * 3 + 2];
+                vec3.fromArray(v1, tile.vertices, v1Index * 3);
             } else {
                 const detailIndex = (v1Index - tile.vertices.length / 3) * 3;
-                v1[0] = tile.detailVertices[detailIndex];
-                v1[1] = tile.detailVertices[detailIndex + 1];
-                v1[2] = tile.detailVertices[detailIndex + 2];
+                vec3.fromArray(v1, tile.detailVertices, detailIndex);
             }
 
             if (v2Index < tile.vertices.length / 3) {
-                v2[0] = tile.vertices[v2Index * 3];
-                v2[1] = tile.vertices[v2Index * 3 + 1];
-                v2[2] = tile.vertices[v2Index * 3 + 2];
+                vec3.fromArray(v2, tile.vertices, v2Index * 3);
             } else {
                 const detailIndex = (v2Index - tile.vertices.length / 3) * 3;
-                v2[0] = tile.detailVertices[detailIndex];
-                v2[1] = tile.detailVertices[detailIndex + 1];
-                v2[2] = tile.detailVertices[detailIndex + 2];
+                vec3.fromArray(v2, tile.detailVertices, detailIndex);
             }
 
             // Check if point is inside triangle and calculate height
@@ -309,10 +296,10 @@ export const createGetClosestPointOnPolyResult =
         };
     };
 
-const _detailClosestPoint: Vec3 = [0, 0, 0];
+const _detailClosestPoint = vec3.create();
 
-const _lineStart: Vec3 = [0, 0, 0];
-const _lineEnd: Vec3 = [0, 0, 0];
+const _lineStart = vec3.create();
+const _lineEnd = vec3.create();
 
 export const getClosestPointOnPoly = (
     result: GetClosestPointOnPolyResult,
@@ -674,7 +661,7 @@ export const queryPolygons = (
     }
 
     return result;
-}
+};
 
 const _start = vec3.create();
 const _end = vec3.create();
@@ -734,7 +721,7 @@ const getPortalPoints = (
     }
 
     return true;
-}
+};
 
 const _portalLeft = vec3.create();
 const _portalRight = vec3.create();
@@ -770,7 +757,46 @@ const getEdgeMidPoint = (
     outMidPoint[2] = (_portalLeft[2] + _portalRight[2]) * 0.5;
 
     return true;
-}
+};
+
+const isValidPolyRef = (navMesh: NavMesh, polyRef: PolyRef): boolean => {
+    const [tileId, polyIndex] = desPolyRef(polyRef);
+
+    const tile = navMesh.tiles[tileId];
+
+    if (!tile) {
+        return false;
+    }
+
+    if (polyIndex < 0 || polyIndex >= tile.polys.length) {
+        return false;
+    }
+
+    const poly = tile.polys[polyIndex];
+    if (!poly) {
+        return false;
+    }
+
+    return true;
+};
+
+export const FIND_PATH_ERROR_INVALID_INPUT = 0 as const;
+
+export const FIND_PATH_STATUS_INVALID_INPUT = 0 as const;
+export const FIND_PATH_STATUS_PARTIAL_PATH = 1 as const;
+export const FIND_PATH_STATUS_SUCCESS = 2 as const;
+
+export type FindPathStatus =
+    | typeof FIND_PATH_STATUS_INVALID_INPUT
+    | typeof FIND_PATH_STATUS_PARTIAL_PATH
+    | typeof FIND_PATH_STATUS_SUCCESS;
+
+export type FindPathResult = {
+    path: PolyRef[];
+    status: FindPathStatus;
+};
+
+const H_SCALE = 0.999; // Search heuristic scale.
 
 /**
  * Find a path between two polygons.
@@ -793,25 +819,283 @@ const getEdgeMidPoint = (
  * @returns The result of the pathfinding operation.
  */
 export const findPath = (
+    navMesh: NavMesh,
     startRef: PolyRef,
     endRef: PolyRef,
     startPos: Vec3,
     endPos: Vec3,
     filter: QueryFilter,
     maxPath = 256,
-): Result<PolyRef[], string> => {
-    return ok([]);
+): FindPathResult => {
+    // validate input
+    if (
+        !isValidPolyRef(navMesh, startRef) ||
+        !isValidPolyRef(navMesh, endRef) ||
+        !vec3.finite(startPos) ||
+        !vec3.finite(endPos) ||
+        maxPath <= 0
+    ) {
+        return { path: [], status: FIND_PATH_ERROR_INVALID_INPUT };
+    }
+
+    // early exit if start and end are the same
+    if (startRef === endRef) {
+        return { path: [startRef], status: FIND_PATH_STATUS_SUCCESS };
+    }
+
+    // prepare search
+    const getCost = filter.getCost ?? DEFAULT_QUERY_FILTER.getCost;
+
+    const nodes: { [polyRefAndState: SearchNodeRef]: SearchNode } = {};
+    const openList: SearchNodeQueue = [];
+
+    const startNode: SearchNode = {
+        cost: 0,
+        total: vec3.distance(startPos, endPos) * H_SCALE,
+        parent: null,
+        polyRef: startRef,
+        state: 0,
+        flags: NODE_FLAG_OPEN,
+        position: structuredClone(startPos),
+    };
+    nodes[`${startRef}:0`] = startNode;
+    pushNodeSearchQueue(openList, startNode);
+
+    let lastBestNode: SearchNode = startNode;
+    let lastBestNodeCost = startNode.total;
+
+    while (openList.length > 0) {
+        // remove node from the open list and put it in the closed list
+        const currentNode = popNodeSearchQueue(openList)!;
+        currentNode.flags &= ~NODE_FLAG_OPEN;
+        currentNode.flags |= NODE_FLAG_CLOSED;
+
+        // if we have reached the goal, stop searching
+        const currentPolyRef = currentNode.polyRef;
+        if (currentPolyRef === endRef) {
+            lastBestNode = currentNode;
+            break;
+        }
+
+        // get current poly and tile
+        const [currentTileId, currentPolyIndex] = desPolyRef(currentPolyRef);
+        const currentTile = navMesh.tiles[currentTileId];
+        const currentPoly = currentTile.polys[currentPolyIndex];
+
+        // get parent poly ref
+        let parentPolyRef: PolyRef | undefined = undefined;
+        let parentTile: NavMeshTile | undefined = undefined;
+        let parentPoly: NavMeshPoly | undefined = undefined;
+        if (currentNode.parent) {
+            const [polyRef, _polyState] = currentNode.parent.split(':');
+            parentPolyRef = polyRef as PolyRef;
+
+            const [parentTileId, parentPolyIndex] = desPolyRef(parentPolyRef);
+            parentTile = navMesh.tiles[parentTileId];
+            parentPoly = parentTile.polys[parentPolyIndex];
+        }
+
+        // Expand the search with poly links
+        for (const link of currentPoly.links) {
+            const neighbourPolyRef = currentTile.links[link].ref;
+
+            // Skip invalid ids and do not expand back to where we came from
+            if (!neighbourPolyRef || neighbourPolyRef === parentPolyRef) {
+                continue;
+            }
+
+            // Get the neighbour poly and tile
+            const [neighbourTileId, neighbourPolyIndex] =
+                desPolyRef(neighbourPolyRef);
+            const neighbourTile = navMesh.tiles[neighbourTileId];
+            const neighbourPoly = neighbourTile.polys[neighbourPolyIndex];
+
+            // Check whether neighbour passes the filter
+            if (
+                filter.passFilter &&
+                filter.passFilter(
+                    neighbourPoly,
+                    neighbourPolyRef,
+                    neighbourTile,
+                ) === false
+            ) {
+                continue;
+            }
+
+            // Deal explicitly with crossing tile boundaries by partitioning the search node refs by crossing side
+            let crossSide = 0;
+            if (currentTile.links[link].side !== 0xff) {
+                crossSide = currentTile.links[link].side >> 1;
+            }
+
+            // Get the neighbour node
+            const neighbourSearchNodeRef: SearchNodeRef = `${neighbourPolyRef}:${crossSide}`;
+            let neighbourNode = nodes[neighbourSearchNodeRef];
+            if (!neighbourNode) {
+                neighbourNode = {
+                    cost: 0,
+                    total: 0,
+                    parent: null,
+                    polyRef: neighbourPolyRef,
+                    state: crossSide,
+                    flags: 0,
+                    position: structuredClone(endPos),
+                };
+                nodes[neighbourSearchNodeRef] = neighbourNode;
+            }
+
+            // If this node is being visited for the first time, calculate the node position
+            if (neighbourNode.flags === 0) {
+                getEdgeMidPoint(
+                    navMesh,
+                    currentTile,
+                    currentPolyRef,
+                    currentPoly,
+                    neighbourTile,
+                    neighbourPolyRef,
+                    neighbourPoly,
+                    neighbourNode.position,
+                );
+            }
+
+            // Calculate cost and heuristic
+            let cost = 0;
+            let heuristic = 0;
+
+            // Special case for last node
+            if (neighbourPolyRef === endRef) {
+                const curCost = getCost(
+                    currentNode.position,
+                    neighbourNode.position,
+                    neighbourPolyRef,
+                    neighbourTile,
+                    neighbourPoly,
+                    currentPolyRef,
+                    currentTile,
+                    currentPoly,
+                    undefined,
+                    undefined,
+                    undefined,
+                );
+
+                const endCost = getCost(
+                    neighbourNode.position,
+                    endPos,
+                    neighbourPolyRef,
+                    neighbourTile,
+                    neighbourPoly,
+                    currentPolyRef,
+                    currentTile,
+                    currentPoly,
+                    undefined,
+                    undefined,
+                    undefined,
+                );
+
+                cost = currentNode.cost + curCost + endCost;
+                heuristic = 0;
+            } else {
+                const curCost = getCost(
+                    currentNode.position,
+                    neighbourNode.position,
+                    parentPolyRef,
+                    parentTile,
+                    parentPoly,
+                    currentPolyRef,
+                    currentTile,
+                    currentPoly,
+                    neighbourPolyRef,
+                    neighbourTile,
+                    neighbourPoly,
+                );
+                cost = currentNode.cost + curCost;
+                heuristic =
+                    vec3.distance(neighbourNode.position, endPos) * H_SCALE;
+            }
+
+            const total = cost + heuristic;
+
+            // If the node is already in the open list, and the new result is worse, skip
+            if (
+                neighbourNode.flags & NODE_FLAG_OPEN &&
+                total >= neighbourNode.total
+            ) {
+                continue;
+            }
+
+            // If the node is already visited and in the closed list, and the new result is worse, skip
+            if (
+                neighbourNode.flags & NODE_FLAG_CLOSED &&
+                total >= neighbourNode.total
+            ) {
+                continue;
+            }
+
+            // Add or update the node
+            neighbourNode.parent = `${currentNode.polyRef}:${currentNode.state}`;
+            neighbourNode.polyRef = neighbourPolyRef;
+            neighbourNode.flags = neighbourNode.flags & ~NODE_FLAG_CLOSED;
+            neighbourNode.cost = cost;
+            neighbourNode.total = total;
+
+            if (neighbourNode.flags & NODE_FLAG_OPEN) {
+                // Already in open list, update node location
+                modifyNodeSearchNodeQueue(openList, neighbourNode);
+            } else {
+                // Put the node in the open list
+                neighbourNode.flags |= NODE_FLAG_OPEN;
+                pushNodeSearchQueue(openList, neighbourNode);
+            }
+
+            // Update nearest node to target so far
+            if (heuristic < lastBestNodeCost) {
+                lastBestNode = neighbourNode;
+                lastBestNodeCost = heuristic;
+            }
+        }
+    }
+
+    // Assemble the polygon path to the node
+    const path: PolyRef[] = [];
+    let currentNode: SearchNode | null = lastBestNode;
+
+    while (currentNode) {
+        path.push(currentNode.polyRef);
+
+        if (currentNode.parent) {
+            currentNode = nodes[currentNode.parent];
+        } else {
+            currentNode = null;
+        }
+    }
+
+    path.reverse();
+
+    // If the end polygon was not reached, return with the partial result status
+    if (lastBestNode.polyRef !== endRef) {
+        return {
+            path,
+            status: FIND_PATH_STATUS_PARTIAL_PATH,
+        };
+    }
+
+    // Return the full path result
+    return {
+        path,
+        status: FIND_PATH_STATUS_SUCCESS,
+    };
 };
 
 export const FIND_STRAIGHT_PATH_AREA_CROSSINGS = 1;
 export const FIND_STRAIGHT_PATH_ALL_CROSSINGS = 2;
 
 export const findStraightPath = (
+    navMesh: NavMesh,
     start: Vec3,
     end: Vec3,
     pathPolyRefs: PolyRef[],
     maxStraightPathPoints = 256,
     straightPathOptions = 0,
-): Result<Vec3[], string> => {
-    return ok([]);
+): Vec3[] => {
+    return [];
 };
