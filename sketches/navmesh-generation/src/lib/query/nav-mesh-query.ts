@@ -1086,6 +1086,24 @@ export const findPath = (
     };
 };
 
+export const CLOSEST_POINT_ON_POLY_BOUNDARY_ERROR_INVALID_INPUT = 0 as const;
+export const CLOSEST_POINT_ON_POLY_BOUNDARY_SUCCESS = 1 as const;
+
+export type ClosestPointOnPolyBoundaryStatus =
+    | typeof CLOSEST_POINT_ON_POLY_BOUNDARY_ERROR_INVALID_INPUT
+    | typeof CLOSEST_POINT_ON_POLY_BOUNDARY_SUCCESS;
+
+export const closestPointOnPolyBoundary = (
+    navMesh: NavMesh,
+    polyRef: PolyRef,
+    point: Vec3,
+    outClosestPoint: Vec3,
+): ClosestPointOnPolyBoundaryStatus => {
+    // TODO...
+    return CLOSEST_POINT_ON_POLY_BOUNDARY_SUCCESS;
+};
+
+
 export const FIND_STRAIGHT_PATH_AREA_CROSSINGS = 1;
 export const FIND_STRAIGHT_PATH_ALL_CROSSINGS = 2;
 

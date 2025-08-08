@@ -36,12 +36,7 @@ import {
     rasterizeTriangles,
     triangleMeshToPointSet,
 } from './lib/generate';
-import { type NavMesh, type PolyRef, navMesh, navMeshQuery } from './lib/query';
-import {
-    DEFAULT_QUERY_FILTER,
-    createFindNearestPolyResult,
-    findPath,
-} from './lib/query/nav-mesh-query';
+import { type NavMesh, navMesh, navMeshQuery } from './lib/query';
 import {
     createCompactHeightfieldDistancesHelper,
     createCompactHeightfieldRegionsHelper,
@@ -441,11 +436,11 @@ const RecastLike = () => {
 
         // testing: find nearest poly
         const nearestPolyResult = navMeshQuery.findNearestPoly(
-            createFindNearestPolyResult(),
+            navMeshQuery.createFindNearestPolyResult(),
             nav,
             [0, 3.7, 2.5],
             [1, 1, 1],
-            DEFAULT_QUERY_FILTER,
+            navMeshQuery.DEFAULT_QUERY_FILTER,
         );
         console.log('nearestPolyResult', nearestPolyResult);
 
@@ -466,18 +461,18 @@ const RecastLike = () => {
         ];
 
         const startPositionNearestPoly = navMeshQuery.findNearestPoly(
-            createFindNearestPolyResult(),
+            navMeshQuery.createFindNearestPolyResult(),
             nav,
             startPosition,
             [1, 1, 1],
-            DEFAULT_QUERY_FILTER,
+            navMeshQuery.DEFAULT_QUERY_FILTER,
         );
         const endPositionNearestPoly = navMeshQuery.findNearestPoly(
-            createFindNearestPolyResult(),
+            navMeshQuery.createFindNearestPolyResult(),
             nav,
             endPosition,
             [1, 1, 1],
-            DEFAULT_QUERY_FILTER,
+            navMeshQuery.DEFAULT_QUERY_FILTER,
         );
 
         const findPathResult = navMeshQuery.findPath(
@@ -486,7 +481,7 @@ const RecastLike = () => {
             endPositionNearestPoly.nearestPolyRef,
             startPosition,
             endPosition,
-            DEFAULT_QUERY_FILTER,
+            navMeshQuery.DEFAULT_QUERY_FILTER,
             256,
         );
 
