@@ -785,19 +785,20 @@ export const FIND_PATH_ERROR_INVALID_INPUT = 0 as const;
 
 export const FIND_PATH_STATUS_INVALID_INPUT = 0 as const;
 export const FIND_PATH_STATUS_PARTIAL_PATH = 1 as const;
-export const FIND_PATH_STATUS_SUCCESS = 2 as const;
+export const FIND_PATH_STATUS_COMPLETE_PATH = 2 as const;
 
 export type FindPathStatus =
     | typeof FIND_PATH_STATUS_INVALID_INPUT
     | typeof FIND_PATH_STATUS_PARTIAL_PATH
-    | typeof FIND_PATH_STATUS_SUCCESS;
+    | typeof FIND_PATH_STATUS_COMPLETE_PATH;
 
 export type FindPathResult = {
-    path: PolyRef[];
+    success: boolean;
     status: FindPathStatus;
+    path: PolyRef[];
 };
 
-const H_SCALE = 0.999; // Search heuristic scale.
+const HEURISTIC_SCALE = 0.999; // Search heuristic scale
 
 /**
  * Find a path between two polygons.
@@ -833,12 +834,12 @@ export const findPath = (
         !vec3.finite(startPos) ||
         !vec3.finite(endPos)
     ) {
-        return { path: [], status: FIND_PATH_ERROR_INVALID_INPUT };
+        return { status: FIND_PATH_ERROR_INVALID_INPUT, success: false, path: [] };
     }
 
     // early exit if start and end are the same
     if (startRef === endRef) {
-        return { path: [startRef], status: FIND_PATH_STATUS_SUCCESS };
+        return { status: FIND_PATH_STATUS_COMPLETE_PATH, success: true, path: [startRef] };
     }
 
     // prepare search
@@ -849,7 +850,7 @@ export const findPath = (
 
     const startNode: SearchNode = {
         cost: 0,
-        total: vec3.distance(startPos, endPos) * H_SCALE,
+        total: vec3.distance(startPos, endPos) * HEURISTIC_SCALE,
         parent: null,
         polyRef: startRef,
         state: 0,
@@ -893,22 +894,22 @@ export const findPath = (
             parentPoly = parentTile.polys[parentPolyIndex];
         }
 
-        // Expand the search with poly links
+        // expand the search with poly links
         for (const link of currentPoly.links) {
             const neighbourPolyRef = currentTile.links[link].ref;
 
-            // Skip invalid ids and do not expand back to where we came from
+            // skip invalid ids and do not expand back to where we came from
             if (!neighbourPolyRef || neighbourPolyRef === parentPolyRef) {
                 continue;
             }
 
-            // Get the neighbour poly and tile
+            // get the neighbour poly and tile
             const [neighbourTileId, neighbourPolyIndex] =
                 desPolyRef(neighbourPolyRef);
             const neighbourTile = navMesh.tiles[neighbourTileId];
             const neighbourPoly = neighbourTile.polys[neighbourPolyIndex];
 
-            // Check whether neighbour passes the filter
+            // check whether neighbour passes the filter
             if (
                 filter.passFilter &&
                 filter.passFilter(
@@ -920,13 +921,13 @@ export const findPath = (
                 continue;
             }
 
-            // Deal explicitly with crossing tile boundaries by partitioning the search node refs by crossing side
+            // deal explicitly with crossing tile boundaries by partitioning the search node refs by crossing side
             let crossSide = 0;
             if (currentTile.links[link].side !== 0xff) {
                 crossSide = currentTile.links[link].side >> 1;
             }
 
-            // Get the neighbour node
+            // get the neighbour node
             const neighbourSearchNodeRef: SearchNodeRef = `${neighbourPolyRef}:${crossSide}`;
             let neighbourNode = nodes[neighbourSearchNodeRef];
             if (!neighbourNode) {
@@ -942,7 +943,7 @@ export const findPath = (
                 nodes[neighbourSearchNodeRef] = neighbourNode;
             }
 
-            // If this node is being visited for the first time, calculate the node position
+            // if this node is being visited for the first time, calculate the node position
             if (neighbourNode.flags === 0) {
                 getEdgeMidPoint(
                     navMesh,
@@ -956,11 +957,11 @@ export const findPath = (
                 );
             }
 
-            // Calculate cost and heuristic
+            // calculate cost and heuristic
             let cost = 0;
             let heuristic = 0;
 
-            // Special case for last node
+            // special case for last node
             if (neighbourPolyRef === endRef) {
                 const curCost = getCost(
                     currentNode.position,
@@ -1008,12 +1009,12 @@ export const findPath = (
                 );
                 cost = currentNode.cost + curCost;
                 heuristic =
-                    vec3.distance(neighbourNode.position, endPos) * H_SCALE;
+                    vec3.distance(neighbourNode.position, endPos) * HEURISTIC_SCALE;
             }
 
             const total = cost + heuristic;
 
-            // If the node is already in the open list, and the new result is worse, skip
+            // if the node is already in the open list, and the new result is worse, skip
             if (
                 neighbourNode.flags & NODE_FLAG_OPEN &&
                 total >= neighbourNode.total
@@ -1021,7 +1022,7 @@ export const findPath = (
                 continue;
             }
 
-            // If the node is already visited and in the closed list, and the new result is worse, skip
+            // if the node is already visited and in the closed list, and the new result is worse, skip
             if (
                 neighbourNode.flags & NODE_FLAG_CLOSED &&
                 total >= neighbourNode.total
@@ -1029,7 +1030,7 @@ export const findPath = (
                 continue;
             }
 
-            // Add or update the node
+            // add or update the node
             neighbourNode.parent = `${currentNode.polyRef}:${currentNode.state}`;
             neighbourNode.polyRef = neighbourPolyRef;
             neighbourNode.flags = neighbourNode.flags & ~NODE_FLAG_CLOSED;
@@ -1037,15 +1038,15 @@ export const findPath = (
             neighbourNode.total = total;
 
             if (neighbourNode.flags & NODE_FLAG_OPEN) {
-                // Already in open list, update node location
+                // already in open list, update node location
                 modifyNodeSearchNodeQueue(openList, neighbourNode);
             } else {
-                // Put the node in the open list
+                // put the node in the open list
                 neighbourNode.flags |= NODE_FLAG_OPEN;
                 pushNodeSearchQueue(openList, neighbourNode);
             }
 
-            // Update nearest node to target so far
+            // update nearest node to target so far
             if (heuristic < lastBestNodeCost) {
                 lastBestNode = neighbourNode;
                 lastBestNodeCost = heuristic;
@@ -1053,7 +1054,7 @@ export const findPath = (
         }
     }
 
-    // Assemble the polygon path to the node
+    // assemble the polygon path to the node
     const path: PolyRef[] = [];
     let currentNode: SearchNode | null = lastBestNode;
 
@@ -1069,18 +1070,20 @@ export const findPath = (
 
     path.reverse();
 
-    // If the end polygon was not reached, return with the partial result status
+    // if the end polygon was not reached, return with the partial result status
     if (lastBestNode.polyRef !== endRef) {
         return {
-            path,
             status: FIND_PATH_STATUS_PARTIAL_PATH,
+            success: true,
+            path,
         };
     }
 
-    // Return the full path result
+    // the path is complete, return with the complete path status
     return {
+        status: FIND_PATH_STATUS_COMPLETE_PATH,
+        success: true,
         path,
-        status: FIND_PATH_STATUS_SUCCESS,
     };
 };
 
