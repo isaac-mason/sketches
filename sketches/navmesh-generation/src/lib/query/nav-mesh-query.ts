@@ -773,6 +773,7 @@ const isValidPolyRef = (navMesh: NavMesh, polyRef: PolyRef): boolean => {
     }
 
     const poly = tile.polys[polyIndex];
+
     if (!poly) {
         return false;
     }
@@ -815,7 +816,6 @@ const H_SCALE = 0.999; // Search heuristic scale.
  * @param startPos The starting position in world space.
  * @param endPos The ending position in world space.
  * @param filter Query filter to apply.
- * @param maxPath Maximum number of polygons in the path.
  * @returns The result of the pathfinding operation.
  */
 export const findPath = (
@@ -825,15 +825,13 @@ export const findPath = (
     startPos: Vec3,
     endPos: Vec3,
     filter: QueryFilter,
-    maxPath = 256,
 ): FindPathResult => {
     // validate input
     if (
         !isValidPolyRef(navMesh, startRef) ||
         !isValidPolyRef(navMesh, endRef) ||
         !vec3.finite(startPos) ||
-        !vec3.finite(endPos) ||
-        maxPath <= 0
+        !vec3.finite(endPos)
     ) {
         return { path: [], status: FIND_PATH_ERROR_INVALID_INPUT };
     }
