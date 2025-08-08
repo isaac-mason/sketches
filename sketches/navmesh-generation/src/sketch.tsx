@@ -482,7 +482,6 @@ const RecastLike = () => {
             startPosition,
             endPosition,
             navMeshQuery.DEFAULT_QUERY_FILTER,
-            256,
         );
 
         console.log(findPathResult);

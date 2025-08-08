@@ -18,11 +18,12 @@ import {
     worldToTilePosition,
 } from './nav-mesh';
 import {
-    modifyNodeSearchNodeQueue,
+    reindexNodeInQueue,
     NODE_FLAG_CLOSED,
     NODE_FLAG_OPEN,
-    popNodeSearchQueue,
-    pushNodeSearchQueue,
+    popNodeFromQueue,
+    pushNodeToQueue,
+    type SearchNodePool,
     type SearchNode,
     type SearchNodeQueue,
     type SearchNodeRef,
@@ -424,6 +425,24 @@ export const getClosestPointOnPoly = (
     return result;
 };
 
+export const CLOSEST_POINT_ON_POLY_BOUNDARY_ERROR_INVALID_INPUT = 0 as const;
+export const CLOSEST_POINT_ON_POLY_BOUNDARY_SUCCESS = 1 as const;
+
+export type ClosestPointOnPolyBoundaryStatus =
+    | typeof CLOSEST_POINT_ON_POLY_BOUNDARY_ERROR_INVALID_INPUT
+    | typeof CLOSEST_POINT_ON_POLY_BOUNDARY_SUCCESS;
+
+export const closestPointOnPolyBoundary = (
+    navMesh: NavMesh,
+    polyRef: PolyRef,
+    point: Vec3,
+    outClosestPoint: Vec3,
+): ClosestPointOnPolyBoundaryStatus => {
+    // TODO...
+    return CLOSEST_POINT_ON_POLY_BOUNDARY_SUCCESS;
+};
+
+
 export type FindNearestPolyResult = {
     ok: boolean;
     nearestPolyRef: PolyRef;
@@ -781,8 +800,6 @@ const isValidPolyRef = (navMesh: NavMesh, polyRef: PolyRef): boolean => {
     return true;
 };
 
-export const FIND_PATH_ERROR_INVALID_INPUT = 0 as const;
-
 export const FIND_PATH_STATUS_INVALID_INPUT = 0 as const;
 export const FIND_PATH_STATUS_PARTIAL_PATH = 1 as const;
 export const FIND_PATH_STATUS_COMPLETE_PATH = 2 as const;
@@ -793,9 +810,20 @@ export type FindPathStatus =
     | typeof FIND_PATH_STATUS_COMPLETE_PATH;
 
 export type FindPathResult = {
+    /** whether the search completed successfully, with either a partial or complete path */
     success: boolean;
+
+    /** the result status for the operation */
     status: FindPathStatus;
+
+    /** the polygon path */
     path: PolyRef[];
+
+    /** intermediate data used for the search, typically only needed for debugging */
+    intermediates?: {
+        nodes: SearchNodePool;
+        openList: SearchNodeQueue;
+    };
 };
 
 const HEURISTIC_SCALE = 0.999; // Search heuristic scale
@@ -834,7 +862,7 @@ export const findPath = (
         !vec3.finite(startPos) ||
         !vec3.finite(endPos)
     ) {
-        return { status: FIND_PATH_ERROR_INVALID_INPUT, success: false, path: [] };
+        return { status: FIND_PATH_STATUS_INVALID_INPUT, success: false, path: [] };
     }
 
     // early exit if start and end are the same
@@ -858,14 +886,14 @@ export const findPath = (
         position: structuredClone(startPos),
     };
     nodes[`${startRef}:0`] = startNode;
-    pushNodeSearchQueue(openList, startNode);
+    pushNodeToQueue(openList, startNode);
 
     let lastBestNode: SearchNode = startNode;
     let lastBestNodeCost = startNode.total;
 
     while (openList.length > 0) {
         // remove node from the open list and put it in the closed list
-        const currentNode = popNodeSearchQueue(openList)!;
+        const currentNode = popNodeFromQueue(openList)!;
         currentNode.flags &= ~NODE_FLAG_OPEN;
         currentNode.flags |= NODE_FLAG_CLOSED;
 
@@ -1039,11 +1067,11 @@ export const findPath = (
 
             if (neighbourNode.flags & NODE_FLAG_OPEN) {
                 // already in open list, update node location
-                modifyNodeSearchNodeQueue(openList, neighbourNode);
+                reindexNodeInQueue(openList, neighbourNode);
             } else {
                 // put the node in the open list
                 neighbourNode.flags |= NODE_FLAG_OPEN;
-                pushNodeSearchQueue(openList, neighbourNode);
+                pushNodeToQueue(openList, neighbourNode);
             }
 
             // update nearest node to target so far
@@ -1076,6 +1104,10 @@ export const findPath = (
             status: FIND_PATH_STATUS_PARTIAL_PATH,
             success: true,
             path,
+            intermediates: {
+                nodes,
+                openList,
+            },
         };
     }
 
@@ -1084,26 +1116,12 @@ export const findPath = (
         status: FIND_PATH_STATUS_COMPLETE_PATH,
         success: true,
         path,
+        intermediates: {
+            nodes,
+            openList,
+        },
     };
 };
-
-export const CLOSEST_POINT_ON_POLY_BOUNDARY_ERROR_INVALID_INPUT = 0 as const;
-export const CLOSEST_POINT_ON_POLY_BOUNDARY_SUCCESS = 1 as const;
-
-export type ClosestPointOnPolyBoundaryStatus =
-    | typeof CLOSEST_POINT_ON_POLY_BOUNDARY_ERROR_INVALID_INPUT
-    | typeof CLOSEST_POINT_ON_POLY_BOUNDARY_SUCCESS;
-
-export const closestPointOnPolyBoundary = (
-    navMesh: NavMesh,
-    polyRef: PolyRef,
-    point: Vec3,
-    outClosestPoint: Vec3,
-): ClosestPointOnPolyBoundaryStatus => {
-    // TODO...
-    return CLOSEST_POINT_ON_POLY_BOUNDARY_SUCCESS;
-};
-
 
 export const FIND_STRAIGHT_PATH_AREA_CROSSINGS = 1;
 export const FIND_STRAIGHT_PATH_ALL_CROSSINGS = 2;

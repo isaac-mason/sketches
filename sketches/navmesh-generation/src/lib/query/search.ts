@@ -5,7 +5,7 @@ export const NODE_FLAG_OPEN = 0x01;
 export const NODE_FLAG_CLOSED = 0x02;
 
 /** parent of the node is not adjacent. Found using raycast. */
-export const NDOE_FLAG_PARENT_DETACHED = 0x04;
+export const NODE_FLAG_PARENT_DETACHED = 0x04;
 
 /** `${poly ref}:{search node state}` */
 export type SearchNodeRef = `${PolyRef}:${number}`;
@@ -27,9 +27,11 @@ export type SearchNode = {
     polyRef: PolyRef;
 };
 
+export type SearchNodePool = { [polyRefAndState: SearchNodeRef]: SearchNode };
+
 export type SearchNodeQueue = SearchNode[];
 
-export const bubbleUpSearchNodeQueue = (
+export const bubbleUp = (
     queue: SearchNodeQueue,
     i: number,
     node: SearchNode,
@@ -46,7 +48,7 @@ export const bubbleUpSearchNodeQueue = (
     queue[i] = node;
 };
 
-export const trickleDownSearchNodeQueue = (
+export const trickleDown = (
     queue: SearchNodeQueue,
     i: number,
     node: SearchNode,
@@ -74,15 +76,15 @@ export const trickleDownSearchNodeQueue = (
     queue[i] = node;
 };
 
-export const pushNodeSearchQueue = (
+export const pushNodeToQueue = (
     queue: SearchNodeQueue,
     node: SearchNode,
 ): void => {
     queue.push(node);
-    bubbleUpSearchNodeQueue(queue, queue.length - 1, node);
+    bubbleUp(queue, queue.length - 1, node);
 }
 
-export const popNodeSearchQueue = (
+export const popNodeFromQueue = (
     queue: SearchNodeQueue,
 ): SearchNode | undefined => {
     if (queue.length === 0) {
@@ -94,20 +96,20 @@ export const popNodeSearchQueue = (
 
     if (queue.length > 0 && lastNode !== undefined) {
         queue[0] = lastNode;
-        trickleDownSearchNodeQueue(queue, 0, lastNode);
+        trickleDown(queue, 0, lastNode);
     }
 
     return node;
 };
 
-export const modifyNodeSearchNodeQueue = (
+export const reindexNodeInQueue = (
     queue: SearchNodeQueue,
     node: SearchNode,
 ): void => {
     for (let i = 0; i < queue.length; i++) {
         if (queue[i].polyRef === node.polyRef && queue[i].state === node.state) {
             queue[i] = node;
-            bubbleUpSearchNodeQueue(queue, i, node);
+            bubbleUp(queue, i, node);
             return;
         }
     }
