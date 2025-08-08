@@ -1,5 +1,5 @@
-import type { Vec2, Vec3 } from "@/common/maaths";
-import { vec2, vec3 } from "@/common/maaths";
+import type { Vec2, Vec3 } from '@/common/maaths';
+import { vec2, vec3 } from '@/common/maaths';
 
 const EPS = 1e-6;
 
@@ -10,7 +10,12 @@ const EPS = 1e-6;
  * @param p First endpoint of the segment
  * @param q Second endpoint of the segment
  */
-export const closestPtSeg2d = (closest: Vec3, pt: Vec3, p: Vec3, q: Vec3): void => {
+export const closestPtSeg2d = (
+    closest: Vec3,
+    pt: Vec3,
+    p: Vec3,
+    q: Vec3,
+): void => {
     const pqx = q[0] - p[0];
     const pqz = q[2] - p[2];
     const dx = pt[0] - p[0];
@@ -34,7 +39,11 @@ export const closestPtSeg2d = (closest: Vec3, pt: Vec3, p: Vec3, q: Vec3): void 
  * @param p The point to test
  * @returns True if the point is inside the polygon
  */
-export const pointInPoly = (nvert: number, verts: number[], p: Vec3): boolean => {
+export const pointInPoly = (
+    nvert: number,
+    verts: number[],
+    p: Vec3,
+): boolean => {
     let c = false;
     let j = nvert - 1;
 
@@ -42,8 +51,10 @@ export const pointInPoly = (nvert: number, verts: number[], p: Vec3): boolean =>
         const vi = verts.slice(i * 3, i * 3 + 3);
         const vj = verts.slice(j * 3, j * 3 + 3);
 
-        if (((vi[2] > p[2]) !== (vj[2] > p[2])) &&
-            (p[0] < (vj[0] - vi[0]) * (p[2] - vi[2]) / (vj[2] - vi[2]) + vi[0])) {
+        if (
+            vi[2] > p[2] !== vj[2] > p[2] &&
+            p[0] < ((vj[0] - vi[0]) * (p[2] - vi[2])) / (vj[2] - vi[2]) + vi[0]
+        ) {
             c = !c;
         }
     }
@@ -78,8 +89,6 @@ export const distancePtSeg2dSqr = (pt: Vec3, p: Vec3, q: Vec3): number => {
 
     return distX * distX + distZ * distZ;
 };
-
-
 
 const _distPtTriV0: Vec3 = vec3.create();
 const _distPtTriV1: Vec3 = vec3.create();
@@ -126,7 +135,6 @@ export const distPtTri = (p: Vec3, a: Vec3, b: Vec3, c: Vec3): number => {
     }
     return Number.MAX_VALUE;
 };
-
 
 const _distPtSeg2dP: Vec2 = vec2.create();
 const _distPtSeg2dQ: Vec2 = vec2.create();
@@ -181,7 +189,6 @@ export const distToTriMesh = (
     return dmin;
 };
 
-
 const _distToPolyVj: Vec2 = vec2.create();
 const _distToPolyVi: Vec2 = vec2.create();
 const _distToPolyP: Vec2 = vec2.create();
@@ -207,10 +214,10 @@ export const distToPoly = (nvert: number, verts: number[], p: Vec3): number => {
             c = c === 0 ? 1 : 0;
         }
 
-        _distToPolyVj[0] = verts[vj]
+        _distToPolyVj[0] = verts[vj];
         _distToPolyVj[1] = verts[vj + 2];
 
-        _distToPolyVi[0] = verts[vi]
+        _distToPolyVi[0] = verts[vi];
         _distToPolyVi[1] = verts[vi + 2];
 
         dmin = Math.min(
@@ -220,7 +227,6 @@ export const distToPoly = (nvert: number, verts: number[], p: Vec3): number => {
     }
     return c ? -dmin : dmin;
 };
-
 
 const _distPtSegP: Vec3 = vec3.create();
 const _distPtSegQ: Vec3 = vec3.create();
@@ -256,13 +262,25 @@ export const distancePtSeg = (pt: Vec3, p: Vec3, q: Vec3): number => {
  * @param pos Position to calculate height for
  * @returns Height at position, or null if point is not inside triangle
  */
-export const getHeightAtPoint = (v0: Vec3, v1: Vec3, v2: Vec3, pos: Vec3): number | null => {
+export const getHeightAtPoint = (
+    v0: Vec3,
+    v1: Vec3,
+    v2: Vec3,
+    pos: Vec3,
+): number | null => {
     // Calculate barycentric coordinates
-    const denom = (v1[2] - v2[2]) * (v0[0] - v2[0]) + (v2[0] - v1[0]) * (v0[2] - v2[2]);
+    const denom =
+        (v1[2] - v2[2]) * (v0[0] - v2[0]) + (v2[0] - v1[0]) * (v0[2] - v2[2]);
     if (Math.abs(denom) < 1e-8) return null;
 
-    const a = ((v1[2] - v2[2]) * (pos[0] - v2[0]) + (v2[0] - v1[0]) * (pos[2] - v2[2])) / denom;
-    const b = ((v2[2] - v0[2]) * (pos[0] - v2[0]) + (v0[0] - v2[0]) * (pos[2] - v2[2])) / denom;
+    const a =
+        ((v1[2] - v2[2]) * (pos[0] - v2[0]) +
+            (v2[0] - v1[0]) * (pos[2] - v2[2])) /
+        denom;
+    const b =
+        ((v2[2] - v0[2]) * (pos[0] - v2[0]) +
+            (v0[0] - v2[0]) * (pos[2] - v2[2])) /
+        denom;
     const c = 1 - a - b;
 
     // Check if point is inside triangle
@@ -272,7 +290,6 @@ export const getHeightAtPoint = (v0: Vec3, v1: Vec3, v2: Vec3, pos: Vec3): numbe
 
     return null;
 };
-
 
 const _circumCircleCenter: Vec3 = vec3.create();
 const _circumCircleResultVec: Vec3 = vec3.create();
@@ -319,9 +336,19 @@ export const circumCircle = (
     _circumCircleV3Proj[0] = v3[0];
     _circumCircleV3Proj[1] = v3[2];
 
-    vec2.subtract(_circumCircleV2Proj, _circumCircleV2Proj, _circumCircleV1Proj); // v2 - v1
-    vec2.subtract(_circumCircleV3Proj, _circumCircleV3Proj, _circumCircleV1Proj); // v3 - v1
-    const cp = _circumCircleV2Proj[0] * _circumCircleV3Proj[1] - _circumCircleV2Proj[1] * _circumCircleV3Proj[0];
+    vec2.subtract(
+        _circumCircleV2Proj,
+        _circumCircleV2Proj,
+        _circumCircleV1Proj,
+    ); // v2 - v1
+    vec2.subtract(
+        _circumCircleV3Proj,
+        _circumCircleV3Proj,
+        _circumCircleV1Proj,
+    ); // v3 - v1
+    const cp =
+        _circumCircleV2Proj[0] * _circumCircleV3Proj[1] -
+        _circumCircleV2Proj[1] * _circumCircleV3Proj[0];
 
     if (Math.abs(cp) > EPS) {
         _circumCircleV1Proj[0] = v1[0];
@@ -332,7 +359,7 @@ export const circumCircle = (
 
         _circumCircleV3Proj[0] = v3[0];
         _circumCircleV3Proj[1] = v3[2];
-        
+
         const v1Sq = vec2.dot(_circumCircleV1Proj, _circumCircleV1Proj);
         const v2Sq = vec2.dot(_circumCircleV2Proj, _circumCircleV2Proj);
         const v3Sq = vec2.dot(_circumCircleV3Proj, _circumCircleV3Proj);
@@ -347,12 +374,12 @@ export const circumCircle = (
                 v2Sq * (v1[0] - v3[0]) +
                 v3Sq * (v2[0] - v1[0])) /
             (2 * cp);
-        
+
         _circumCircleCenter2D[0] = c[0];
         _circumCircleCenter2D[1] = c[2];
 
         _circumCircleRadiusCalc[0] = v1[0];
-        _circumCircleRadiusCalc[1] = v1[2]
+        _circumCircleRadiusCalc[1] = v1[2];
 
         const r = vec2.distance(_circumCircleCenter2D, _circumCircleRadiusCalc);
 
@@ -371,7 +398,6 @@ export const circumCircle = (
     result.radius = 0;
 };
 
-
 const _overlapSegAB: Vec2 = vec2.create();
 const _overlapSegAD: Vec2 = vec2.create();
 const _overlapSegAC: Vec2 = vec2.create();
@@ -379,7 +405,12 @@ const _overlapSegCD: Vec2 = vec2.create();
 const _overlapSegCA: Vec2 = vec2.create();
 
 // Segment overlap checking
-export const overlapSegSeg2d = (a: Vec2, b: Vec2, c: Vec2, d: Vec2): boolean => {
+export const overlapSegSeg2d = (
+    a: Vec2,
+    b: Vec2,
+    c: Vec2,
+    d: Vec2,
+): boolean => {
     // Calculate cross products for line segment intersection test
     const ab = _overlapSegAB;
     const ad = _overlapSegAD;
@@ -403,4 +434,43 @@ export const overlapSegSeg2d = (a: Vec2, b: Vec2, c: Vec2, d: Vec2): boolean => 
         if (a3 * a4 < 0.0) return true;
     }
     return false;
+};
+
+const _polyMinExtentPt: Vec2 = vec2.create();
+const _polyMinExtentP1: Vec2 = vec2.create();
+const _polyMinExtentP2: Vec2 = vec2.create();
+
+// Calculate minimum extend of the polygon.
+export const polyMinExtent = (verts: number[], nverts: number): number => {
+    let minDist = Number.MAX_VALUE;
+
+    for (let i = 0; i < nverts; i++) {
+        const ni = (i + 1) % nverts;
+        const p1 = i * 3;
+        const p2 = ni * 3;
+        let maxEdgeDist = 0;
+        for (let j = 0; j < nverts; j++) {
+            if (j === i || j === ni) continue;
+
+            const ptIdx = j * 3;
+            _polyMinExtentPt[0] = verts[ptIdx];
+            _polyMinExtentPt[1] = verts[ptIdx + 2];
+
+            _polyMinExtentP1[0] = verts[p1];
+            _polyMinExtentP1[1] = verts[p1 + 2];
+
+            _polyMinExtentP2[0] = verts[p2];
+            _polyMinExtentP2[1] = verts[p2 + 2];
+
+            const d = distancePtSeg2d(
+                _polyMinExtentPt,
+                _polyMinExtentP1,
+                _polyMinExtentP2,
+            );
+            maxEdgeDist = Math.max(maxEdgeDist, d);
+        }
+        minDist = Math.min(minDist, maxEdgeDist);
+    }
+
+    return Math.sqrt(minDist);
 };

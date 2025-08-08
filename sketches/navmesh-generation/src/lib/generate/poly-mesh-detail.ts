@@ -5,17 +5,17 @@ import {
     distToPoly,
     distToTriMesh,
     distancePtSeg,
-    distancePtSeg2d,
     overlapSegSeg2d,
+    polyMinExtent
 } from '../common/geometry';
 import {
     MESH_NULL_IDX,
     MULTIPLE_REGS,
+    NOT_CONNECTED,
     getDirForOffset,
     getDirOffsetX,
     getDirOffsetY,
 } from './common';
-import { NOT_CONNECTED } from './common';
 import type { CompactHeightfield } from './compact-heightfield';
 import { getCon } from './compact-heightfield';
 import type { PolyMesh } from './poly-mesh';
@@ -73,7 +73,6 @@ const _circumCircleResult: CircumCircleResult = {
     radius: 0,
 };
 
-
 // Jitter functions for sampling
 const getJitterX = (i: number): number => {
     return (((i * 0x8da6b343) & 0xffff) / 65535.0) * 2.0 - 1.0;
@@ -81,35 +80,6 @@ const getJitterX = (i: number): number => {
 
 const getJitterY = (i: number): number => {
     return (((i * 0xd8163841) & 0xffff) / 65535.0) * 2.0 - 1.0;
-};
-
-const _polyMinExtentPt: Vec2 = vec2.create();
-const _polyMinExtentP1: Vec2 = vec2.create();
-const _polyMinExtentP2: Vec2 = vec2.create();
-
-// Calculate minimum extend of the polygon.
-const polyMinExtent = (verts: number[], nverts: number): number => {
-    let minDist = Number.MAX_VALUE;
-    for (let i = 0; i < nverts; i++) {
-        const ni = (i + 1) % nverts;
-        const p1 = i * 3;
-        const p2 = ni * 3;
-        let maxEdgeDist = 0;
-        for (let j = 0; j < nverts; j++) {
-            if (j === i || j === ni) continue;
-            getVec2XZ(_polyMinExtentPt, verts, j * 3);
-            getVec2XZ(_polyMinExtentP1, verts, p1);
-            getVec2XZ(_polyMinExtentP2, verts, p2);
-            const d = distancePtSeg2d(
-                _polyMinExtentPt,
-                _polyMinExtentP1,
-                _polyMinExtentP2,
-            );
-            maxEdgeDist = Math.max(maxEdgeDist, d);
-        }
-        minDist = Math.min(minDist, maxEdgeDist);
-    }
-    return Math.sqrt(minDist);
 };
 
 // Helper functions for array navigation
@@ -794,7 +764,7 @@ const seedArrayWithPolyCenter = (
                 newX,
                 newY,
                 chf.cells[newX + bs + (newY + bs) * chf.width].index +
-                    getCon(cs, dir),
+                getCon(cs, dir),
             );
         }
 
@@ -1033,7 +1003,7 @@ const buildPolyDetail = (
             idx[1] = nn;
             let nidx = 2;
 
-            for (let k = 0; k < nidx - 1; ) {
+            for (let k = 0; k < nidx - 1;) {
                 const a = idx[k];
                 const b = idx[k + 1];
                 const va = a * 3;
