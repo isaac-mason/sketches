@@ -1,6 +1,12 @@
-import { vec3, box3, clamp, type Vec3, type Box3 } from '@/common/maaths';
-import { getDirOffsetX, getDirOffsetY, type ArrayLike } from './common';
-import { NULL_AREA, AXIS_X, AXIS_Z } from "./common";
+import { type Box3, type Vec2, type Vec3, box3, clamp, vec3 } from '@/common/maaths';
+import {
+    AXIS_X,
+    AXIS_Z,
+    type ArrayLike,
+    NULL_AREA,
+    getDirOffsetX,
+    getDirOffsetY,
+} from './common';
 
 export type HeightfieldSpan = {
     /** the lower limit of the span */
@@ -34,14 +40,15 @@ const MAX_HEIGHTFIELD_HEIGHT = 0xffff;
 export const calculateGridSize = (
     bounds: Box3,
     cellSize: number,
+    outGridSize: Vec2
 ): [width: number, height: number] => {
     const minBounds = bounds[0];
     const maxBounds = bounds[1];
 
-    const width = Math.floor((maxBounds[0] - minBounds[0]) / cellSize + 0.5);
-    const height = Math.floor((maxBounds[2] - minBounds[2]) / cellSize + 0.5);
+    outGridSize[0] = Math.floor((maxBounds[0] - minBounds[0]) / cellSize + 0.5);
+    outGridSize[1] = Math.floor((maxBounds[2] - minBounds[2]) / cellSize + 0.5);
 
-    return [width, height];
+    return outGridSize;
 };
 
 export const createHeightfield = (
@@ -228,16 +235,13 @@ const dividePoly = (
 
 const _triangleBounds = box3.create();
 
-// Reusable buffers for polygon clipping to avoid allocations
 const _inVerts = new Array(7 * 3);
 const _inRow = new Array(7 * 3);
 const _p1 = new Array(7 * 3);
 const _p2 = new Array(7 * 3);
 
-// Reusable buffer for dividePoly vertex axis deltas
 const _inVertAxisDelta = new Array(12);
 
-// Reusable Vec3 buffers for triangle vertices
 const _v0 = vec3.create();
 const _v1 = vec3.create();
 const _v2 = vec3.create();
@@ -267,7 +271,7 @@ const rasterizeTriangle = (
     vec3.max(triangleBoundsMax, triangleBoundsMax, v2);
 
     // If the triangle does not touch the bounding box of the heightfield, skip the triangle
-    if (!box3.overlap(triangleBounds, heightfield.bounds)) {
+    if (!box3.intersectsBox3(triangleBounds, heightfield.bounds)) {
         return true;
     }
 

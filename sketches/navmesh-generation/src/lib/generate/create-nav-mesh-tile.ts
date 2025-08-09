@@ -80,7 +80,35 @@ export type NavMeshTileParams = {
     // float walkableClimb;	///< The agent maximum traversable ledge. (Up/Down) [Unit: wu]
 };
 
-export const createNavMeshTile = (params: NavMeshTileParams): NavMeshTile => {
+export enum CreateNavMeshTileStatus {
+    EMPTY_VERTS = 0,
+    EMPTY_POLYS = 1,
+    SUCCESS = 2,
+}
+
+export type CreateNavMeshTileResult = {
+    success: boolean;
+    status: CreateNavMeshTileStatus;
+    tile: NavMeshTile | undefined;
+}
+
+export const createNavMeshTile = (params: NavMeshTileParams): CreateNavMeshTileResult => {
+    if (params.polyMesh.nVertices <= 0) {
+        return {
+            success: false,
+            status: CreateNavMeshTileStatus.EMPTY_VERTS,
+            tile: undefined,
+        };
+    }
+
+    if (params.polyMesh.nPolys <= 0) {
+        return {
+            success: false,
+            status: CreateNavMeshTileStatus.EMPTY_POLYS,
+            tile: undefined,
+        };
+    }
+
     const tile: NavMeshTile = {
         id: 0,
         tileX: params.tileX,
@@ -218,7 +246,11 @@ export const createNavMeshTile = (params: NavMeshTileParams): NavMeshTile => {
         tile.detailTriangles = params.detailMesh.detailTriangles;
     }
 
-    return tile;
+    return {
+        success: true,
+        status: CreateNavMeshTileStatus.SUCCESS,
+        tile: tile,
+    };
 };
 
 const createDetailMeshFromPolys = (tile: NavMeshTile) => {

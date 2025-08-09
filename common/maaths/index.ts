@@ -14,3 +14,4 @@ export * from './types';
 export * as vec2 from './vec2';
 export * as vec3 from './vec3';
 export * as vec4 from './vec4';
+export * as triangle3 from './triangle3';

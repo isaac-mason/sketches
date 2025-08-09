@@ -73,6 +73,25 @@ export type NavMeshPoly = {
     // type: NavMeshPolyType;
 };
 
+export type NavMeshPolyDetail = {
+    /**
+     * The offset of the vertices in the NavMeshTile detailVertices array.
+     * If the base index is between 0 and `NavMeshTile.vertices.length`, this is used to index into the NavMeshTile vertices array.
+     * If the base index is greater than `NavMeshTile.vertices.length`, it is used to index into the NavMeshTile detailVertices array.
+     * This allows for detail meshes to either re-use the polygon vertices or to define their own vertices without duplicating data.
+     */
+    verticesBase: number;
+
+    /** the offset of the triangles in the NavMeshTile detailTriangles array */
+    trianglesBase: number;
+
+    /** the number of vertices in thde sub-mesh */
+    verticesCount: number;
+
+    /** the number of trianges in the sub-mesh */
+    trianglesCount: number;
+};
+
 export type NavMeshLink = {
     /** neighbour reference. (The neighbor that is linked to.) */
     ref: PolyRef;
@@ -90,23 +109,13 @@ export type NavMeshLink = {
     bmax: number;
 };
 
-export type NavMeshPolyDetail = {
-    /**
-     * The offset of the vertices in the NavMeshTile detailVertices array.
-     * If the base index is between 0 and `NavMeshTile.vertices.length`, this is used to index into the NavMeshTile vertices array.
-     * If the base index is greater than `NavMeshTile.vertices.length`, it is used to index into the NavMeshTile detailVertices array.
-     * This allows for detail meshes to either re-use the polygon vertices or to define their own vertices without duplicating data.
-     */
-    verticesBase: number;
-
-    /** the offset of the triangles in the NavMeshTile detailTriangles array */
-    trianglesBase: number;
-
-    /** the number of vertices in the sub-mesh */
-    verticesCount: number;
-
-    /** the number of trianges in the sub-mesh */
-    trianglesCount: number;
+export type NavMeshOffMeshConnection = {
+    /** the start position of the off mesh connection */
+    start: Vec3;
+    /** the end position of the off mesh connection */
+    end: Vec3;
+    /** the radius of the endpoints */
+    radius: number;
 };
 
 export type NavMeshBvNode = {

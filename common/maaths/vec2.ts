@@ -73,6 +73,20 @@ export function add(out: Vec2, a: Vec2, b: Vec2): Vec2 {
 }
 
 /**
+ * Adds a scalar value to all components of a vec2
+ *
+ * @param out the receiving vector
+ * @param a the source vector
+ * @param b the scalar value to add
+ * @returns out
+ */
+export function addScalar(out: Vec2, a: Vec2, b: number): Vec2 {
+    out[0] = a[0] + b;
+    out[1] = a[1] + b;
+    return out;
+}
+
+/**
  * Subtracts vector b from vector a
  *
  * @param out the receiving vector
@@ -83,6 +97,20 @@ export function add(out: Vec2, a: Vec2, b: Vec2): Vec2 {
 export function subtract(out: Vec2, a: Vec2, b: Vec2): Vec2 {
     out[0] = a[0] - b[0];
     out[1] = a[1] - b[1];
+    return out;
+}
+
+/**
+ * Subtracts a scalar value from all components of a vec2
+ *
+ * @param out the receiving vector
+ * @param a the source vector
+ * @param b the scalar value to subtract
+ * @returns out
+ */
+export function subtractScalar(out: Vec2, a: Vec2, b: number): Vec2 {
+    out[0] = a[0] - b;
+    out[1] = a[1] - b;
     return out;
 }
 

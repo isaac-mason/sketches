@@ -1,5 +1,12 @@
 import { WebGPUCanvas } from '@/common/components/webgpu-canvas';
-import { type Vec3, box3, vec3 } from '@/common/maaths';
+import {
+    type Box3,
+    type Vec3,
+    box3,
+    triangle3,
+    vec2,
+    vec3,
+} from '@/common/maaths';
 import { OrbitControls, useGLTF } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import { Leva, useControls } from 'leva';
@@ -67,7 +74,7 @@ const NavTestModel = () => {
     return <primitive object={gltf.scene} />;
 };
 
-type RecastLikeIntermediates = {
+type SoloNavMeshIntermediates = {
     input: {
         positions: Float32Array;
         indices: Uint32Array;
@@ -80,7 +87,7 @@ type RecastLikeIntermediates = {
     polyMeshDetail: PolyMeshDetail;
 };
 
-const RecastLike = () => {
+const SoloNavMesh = () => {
     const scene = useThree((state) => state.scene);
     const group = useRef<THREE.Group>(null!);
 
@@ -97,7 +104,7 @@ const RecastLike = () => {
         showPolyMeshDetail,
         showNavMeshBvTree,
         showNavMesh,
-    } = useControls('recast-like generation options', {
+    } = useControls('solo-nav-mesh generation options', {
         showMesh: {
             label: 'Show Mesh',
             value: true,
@@ -149,7 +156,7 @@ const RecastLike = () => {
     });
 
     const [intermediates, setIntermediates] = useState<
-        RecastLikeIntermediates | undefined
+        SoloNavMeshIntermediates | undefined
     >();
 
     const [nav, setNav] = useState<NavMesh | undefined>();
@@ -170,6 +177,7 @@ const RecastLike = () => {
         const walkableHeightVoxels = Math.ceil(
             walkableHeightWorld / cellHeight,
         );
+        const walkableSlopeAngleDegrees = 45;
 
         const borderSize = 4;
         const minRegionArea = 8;
@@ -206,7 +214,12 @@ const RecastLike = () => {
             0,
         );
 
-        markWalkableTriangles(positions, indices, triAreaIds, 45);
+        markWalkableTriangles(
+            positions,
+            indices,
+            triAreaIds,
+            walkableSlopeAngleDegrees,
+        );
 
         console.timeEnd('mark walkable triangles');
 
@@ -218,6 +231,7 @@ const RecastLike = () => {
         const [heightfieldWidth, heightfieldHeight] = calculateGridSize(
             bounds,
             cellSize,
+            vec2.create(),
         );
         const heightfield = createHeightfield(
             heightfieldWidth,
@@ -375,7 +389,7 @@ const RecastLike = () => {
         console.timeEnd('navmesh generation');
 
         /* store intermediates for debugging */
-        const intermediates: RecastLikeIntermediates = {
+        const intermediates: SoloNavMeshIntermediates = {
             input: {
                 positions,
                 indices,
@@ -426,13 +440,17 @@ const RecastLike = () => {
             cellHeight,
         };
 
-        const tile = createNavMeshTile(navMeshTileParams);
+        const tileResult = createNavMeshTile(navMeshTileParams);
 
-        navMesh.addTile(nav, tile);
+        if (tileResult.tile) {
+            navMesh.addTile(nav, tileResult.tile);
+        }
 
         setNav(nav);
 
-        console.log('nav', nav, tile);
+        console.log('nav', nav, tileResult.tile);
+
+        const disposables: (() => void)[] = [];
 
         // testing: find nearest poly
         const nearestPolyResult = navMeshQuery.findNearestPoly(
@@ -451,6 +469,10 @@ const RecastLike = () => {
         );
         navMeshPolyHelper.object.position.y += 0.25;
         scene.add(navMeshPolyHelper.object);
+        disposables.push(() => {
+            navMeshPolyHelper.object.removeFromParent();
+            navMeshPolyHelper.dispose();
+        });
 
         // testing: find path
         const startPosition: Vec3 = [
@@ -494,7 +516,17 @@ const RecastLike = () => {
             );
             polyHelper.object.position.y += 0.25;
             scene.add(polyHelper.object);
+            disposables.push(() => {
+                polyHelper.object.removeFromParent();
+                polyHelper.dispose();
+            });
         }
+
+        return () => {
+            for (const disposable of disposables) {
+                disposable();
+            }
+        };
     }, [scene]);
 
     // debug view of walkable triangles with area ids based vertex colors
@@ -672,6 +704,768 @@ const RecastLike = () => {
     );
 };
 
+type TiledNavMeshIntermediates = {
+    input: {
+        positions: Float32Array;
+        indices: Uint32Array;
+    };
+    inputBounds: Box3;
+    triAreaIds: Uint8Array[];
+    heightfield: Heightfield[];
+    compactHeightfield: CompactHeightfield[];
+    contourSet: ContourSet[];
+    polyMesh: PolyMesh[];
+    polyMeshDetail: PolyMeshDetail[];
+};
+
+const TiledNavMesh = () => {
+    const scene = useThree((state) => state.scene);
+    const group = useRef<THREE.Group>(null!);
+
+    const {
+        showMesh,
+        showMeshBounds,
+        showTriangleAreaIds,
+        showHeightfield,
+        showCompactHeightfieldSolid,
+        showCompactHeightFieldDistances,
+        showCompactHeightFieldRegions,
+        showRawContours,
+        showSimplifiedContours,
+        showPolyMesh,
+        showPolyMeshDetail,
+        showNavMeshBvTree,
+        showNavMesh,
+    } = useControls('tiled-nav-mesh generation options', {
+        showMesh: {
+            label: 'Show Mesh',
+            value: true,
+        },
+        showMeshBounds: {
+            label: 'Show Mesh Bounds',
+            value: false,
+        },
+        showTriangleAreaIds: {
+            label: 'Show Triangle Area IDs',
+            value: false,
+        },
+        showHeightfield: {
+            label: 'Show Heightfield',
+            value: false,
+        },
+        showCompactHeightfieldSolid: {
+            label: 'Show Compact Heightfield Solid',
+            value: false,
+        },
+        showCompactHeightFieldDistances: {
+            label: 'Show Compact Heightfield Distances',
+            value: false,
+        },
+        showCompactHeightFieldRegions: {
+            label: 'Show Compact Heightfield Regions',
+            value: false,
+        },
+        showRawContours: {
+            label: 'Show Raw Contours',
+            value: false,
+        },
+        showSimplifiedContours: {
+            label: 'Show Simplified Contours',
+            value: false,
+        },
+        showPolyMesh: {
+            label: 'Show Poly Mesh',
+            value: false,
+        },
+        showPolyMeshDetail: {
+            label: 'Show Poly Mesh Detail',
+            value: true,
+        },
+        showNavMeshBvTree: {
+            label: 'Show Nav Mesh BV Tree',
+            value: false,
+        },
+        showNavMesh: {
+            label: 'Show Nav Mesh',
+            value: false,
+        },
+    });
+
+    const [intermediates, setIntermediates] = useState<
+        TiledNavMeshIntermediates | undefined
+    >();
+
+    const [nav, setNav] = useState<NavMesh | undefined>();
+
+    useEffect(() => {
+        console.time('navmesh generation');
+
+        const buildTile = (
+            positions: ArrayLike<number>,
+            indices: ArrayLike<number>,
+            tileX: number,
+            tileY: number,
+            tileBounds: Box3,
+            cellSize: number,
+            cellHeight: number,
+            borderSize: number,
+            walkableSlopeAngleDegrees: number,
+        ) => {
+            // Expand the heightfield bounding box by border size to find the extents of geometry we need to build this tile.
+            //
+            // This is done in order to make sure that the navmesh tiles connect correctly at the borders,
+            // and the obstacles close to the border work correctly with the dilation process.
+            // No polygons (or contours) will be created on the border area.
+            //
+            // IMPORTANT!
+            //
+            //   :''''''''':
+            //   : +-----+ :
+            //   : |     | :
+            //   : |     |<--- tile to build
+            //   : |     | :
+            //   : +-----+ :<-- geometry needed
+            //   :.........:
+            //
+            // You should use this bounding box to query your input geometry.
+            //
+            // For example if you build a navmesh for terrain, and want the navmesh tiles to match the terrain tile size
+            // you will need to pass in data from neighbour terrain tiles too! In a simple case, just pass in all the 8 neighbours,
+            // or use the bounding box below to only pass in a sliver of each of the 8 neighbours.
+
+            /* 1. expand the tile bounds by the border size */
+            const expandedTileBounds = structuredClone(tileBounds);
+
+            expandedTileBounds[0][0] -= borderSize * cellSize;
+            expandedTileBounds[0][2] -= borderSize * cellSize;
+
+            expandedTileBounds[1][0] += borderSize * cellSize;
+            expandedTileBounds[1][2] += borderSize * cellSize;
+
+            /* 2. get triangles overlapping the tile bounds */
+            const trianglesInBox: number[] = [];
+
+            const triangle = triangle3.create();
+
+            for (let i = 0; i < indices.length; i += 3) {
+                const a = indices[i];
+                const b = indices[i + 1];
+                const c = indices[i + 2];
+
+                vec3.fromArray(triangle[0], positions, a * 3);
+                vec3.fromArray(triangle[1], positions, b * 3);
+                vec3.fromArray(triangle[2], positions, c * 3);
+
+                if (box3.intersectsTriangle3(expandedTileBounds, triangle)) {
+                    trianglesInBox.push(a, b, c);
+                }
+            }
+
+            /* 3. mark walkable triangles */
+            const triAreaIds: Uint8Array = new Uint8Array(
+                trianglesInBox.length / 3,
+            ).fill(0);
+
+            markWalkableTriangles(
+                positions,
+                trianglesInBox,
+                triAreaIds,
+                walkableSlopeAngleDegrees,
+            );
+
+            /* 4. rasterize the triangles to a voxel heightfield */
+            const heightfieldWidth = tileSize + borderSize * 2;
+            const heightfieldHeight = tileSize + borderSize * 2;
+
+            const heightfield = createHeightfield(
+                heightfieldWidth,
+                heightfieldHeight,
+                expandedTileBounds,
+                cellSize,
+                cellHeight,
+            );
+
+            rasterizeTriangles(
+                heightfield,
+                positions,
+                trianglesInBox,
+                triAreaIds,
+                walkableClimbVoxels,
+            );
+
+            /* 5. filter walkable surfaces */
+            filterLowHangingWalkableObstacles(heightfield, walkableClimbVoxels);
+            filterLedgeSpans(
+                heightfield,
+                walkableHeightVoxels,
+                walkableClimbVoxels,
+            );
+            filterWalkableLowHeightSpans(heightfield, walkableHeightVoxels);
+
+            /* 6. partition walkable surface to simple regions. */
+
+            const compactHeightfield = buildCompactHeightfield(
+                walkableHeightVoxels,
+                walkableClimbVoxels,
+                heightfield,
+            );
+
+            /* 7. erode the walkable area by the agent radius / walkable radius */
+
+            erodeWalkableArea(walkableRadiusVoxels, compactHeightfield);
+
+            /* 8. prepare for region partitioning by calculating a distance field along the walkable surface */
+
+            buildDistanceField(compactHeightfield);
+
+            /* 9. partition the walkable surface into simple regions without holes */
+
+            buildRegions(
+                compactHeightfield,
+                borderSize,
+                minRegionArea,
+                mergeRegionArea,
+            );
+
+            /* 10. trace and simplify region contours */
+
+            const contourSet = buildContours(
+                compactHeightfield,
+                maxSimplificationError,
+                maxEdgeLength,
+                ContourBuildFlags.CONTOUR_TESS_WALL_EDGES,
+            );
+
+            /* 11. build polygons mesh from contours */
+
+            const polyMesh = buildPolyMesh(contourSet, maxVerticesPerPoly);
+
+            for (let polyIndex = 0; polyIndex < polyMesh.nPolys; polyIndex++) {
+                if (polyMesh.areas[polyIndex] === WALKABLE_AREA) {
+                    polyMesh.areas[polyIndex] = 0;
+                }
+
+                if (polyMesh.areas[polyIndex] === 0) {
+                    polyMesh.flags[polyIndex] = 1;
+                }
+            }
+
+            /* 12. create detail mesh which allows to access approximate height on each polygon */
+
+            const polyMeshDetail = buildPolyMeshDetail(
+                polyMesh,
+                compactHeightfield,
+                detailSampleDistance,
+                detailSampleMaxError,
+            );
+
+            return {
+                expandedTileBounds,
+                heightfield,
+                compactHeightfield,
+                contourSet,
+                polyMesh,
+                polyMeshDetail,
+            };
+        };
+
+        /* 0. define generation parameters */
+        const tileSize = 64;
+
+        const cellSize = 0.1;
+        const cellHeight = 0.1;
+
+        const walkableRadiusWorld = 0.2;
+        const walkableRadiusVoxels = Math.ceil(walkableRadiusWorld / cellSize);
+
+        const walkableClimbWorld = 0.5;
+        const walkableClimbVoxels = Math.ceil(walkableClimbWorld / cellHeight);
+        const walkableHeightWorld = 0.25;
+        const walkableHeightVoxels = Math.ceil(
+            walkableHeightWorld / cellHeight,
+        );
+        const walkableSlopeAngleDegrees = 45;
+
+        const borderSize = 4;
+        const minRegionArea = 8;
+        const mergeRegionArea = 20;
+
+        const maxSimplificationError = 1.3;
+        const maxEdgeLength = 12;
+
+        const maxVerticesPerPoly = 5;
+        const detailSampleDistance = 6;
+        const detailSampleMaxError = 1;
+
+        /* 1. get positions and indices from THREE.Mesh instances in the group */
+
+        console.time('get positions and indices');
+
+        const meshes: THREE.Mesh[] = [];
+
+        group.current.traverse((child) => {
+            if (child instanceof THREE.Mesh) {
+                meshes.push(child);
+            }
+        });
+
+        const [positions, indices] = getPositionsAndIndices(meshes);
+
+        console.timeEnd('get positions and indices');
+
+        /* 2. create a tiled nav mesh */
+
+        const meshBounds = calculateMeshBounds(
+            positions,
+            indices,
+            box3.create(),
+        );
+        const gridSize = calculateGridSize(meshBounds, cellSize, vec2.create());
+
+        const nav = navMesh.create();
+        nav.tileWidth = tileSize;
+        nav.tileHeight = tileSize;
+        nav.origin = meshBounds[0];
+        // [0, 0, 0]
+        // vec3.copy(nav.origin, polyMesh.bounds[0]);
+
+        /* 3. generate tiles */
+
+        const intermediates: TiledNavMeshIntermediates = {
+            input: {
+                positions,
+                indices,
+            },
+            inputBounds: meshBounds,
+            triAreaIds: [],
+            heightfield: [],
+            compactHeightfield: [],
+            contourSet: [],
+            polyMesh: [],
+            polyMeshDetail: [],
+        };
+
+        const nTilesX = Math.floor((gridSize[0] + tileSize - 1) / tileSize);
+        const nTilesY = Math.floor((gridSize[1] + tileSize - 1) / tileSize);
+
+        for (let tileX = 0; tileX < nTilesX; tileX++) {
+            for (let tileY = 0; tileY < nTilesY; tileY++) {
+                const tileBounds: Box3 = [
+                    [
+                        meshBounds[0][0] + tileX * tileSize * cellSize,
+                        meshBounds[0][1],
+                        meshBounds[0][2] + tileY * tileSize * cellSize,
+                    ],
+                    [
+                        meshBounds[0][0] + (tileX + 1) * tileSize * cellSize,
+                        meshBounds[0][1] + tileSize * cellHeight,
+                        meshBounds[0][2] + (tileY + 1) * tileSize * cellSize,
+                    ],
+                ];
+
+                const {
+                    polyMesh,
+                    polyMeshDetail,
+                    heightfield,
+                    compactHeightfield,
+                    contourSet,
+                } = buildTile(
+                    positions,
+                    indices,
+                    tileX,
+                    tileY,
+                    tileBounds,
+                    cellSize,
+                    cellHeight,
+                    borderSize,
+                    walkableSlopeAngleDegrees,
+                );
+
+                intermediates.heightfield.push(heightfield);
+                intermediates.compactHeightfield.push(compactHeightfield);
+                intermediates.contourSet.push(contourSet);
+                intermediates.polyMesh.push(polyMesh);
+                intermediates.polyMeshDetail.push(polyMeshDetail);
+
+                const navMeshTileParams: NavMeshTileParams = {
+                    bounds: polyMesh.bounds,
+                    polyMesh: {
+                        vertices: polyMesh.vertices,
+                        nVertices: polyMesh.nVertices,
+                        polys: polyMesh.polys,
+                        polyFlags: polyMesh.flags,
+                        polyAreas: polyMesh.areas,
+                        nPolys: polyMesh.nPolys,
+                        maxVerticesPerPoly: polyMesh.maxVerticesPerPoly,
+                    },
+                    detailMesh: {
+                        detailMeshes: polyMeshDetail.meshes,
+                        detailVertices: polyMeshDetail.vertices,
+                        detailTriangles: polyMeshDetail.triangles,
+                        nVertices: polyMeshDetail.nVertices,
+                        nTriangles: polyMeshDetail.nTriangles,
+                    },
+                    userId: 0,
+                    tileX,
+                    tileY,
+                    tileLayer: 0,
+                    buildBvTree: true,
+                    cellSize,
+                    cellHeight,
+                };
+
+                const tileResult = createNavMeshTile(navMeshTileParams);
+
+                if (tileResult.tile) {
+                    navMesh.addTile(nav, tileResult.tile);
+                }
+            }
+        }
+
+        setNav(nav);
+        setIntermediates(intermediates);
+
+        console.log('nav', nav);
+
+        // // testing: find nearest poly
+        // const nearestPolyResult = navMeshQuery.findNearestPoly(
+        //     navMeshQuery.createFindNearestPolyResult(),
+        //     nav,
+        //     [0, 3.7, 2.5],
+        //     [1, 1, 1],
+        //     navMeshQuery.DEFAULT_QUERY_FILTER,
+        // );
+        // console.log('nearestPolyResult', nearestPolyResult);
+
+        // const navMeshPolyHelper = createNavMeshPolyHelper(
+        //     nav,
+        //     nearestPolyResult.nearestPolyRef,
+        //     new THREE.Color('red'),
+        // );
+        // navMeshPolyHelper.object.position.y += 0.25;
+        // scene.add(navMeshPolyHelper.object);
+
+        // testing: find path
+        const startPosition: Vec3 = [
+            -3.9470102457140324, 0.26650271598300623, 4.713808784000584,
+        ];
+        const endPosition: Vec3 = [
+            2.517768839689215, 2.3875615713045564, -2.2006116858522327,
+        ];
+
+        const startPositionNearestPoly = navMeshQuery.findNearestPoly(
+            navMeshQuery.createFindNearestPolyResult(),
+            nav,
+            startPosition,
+            [1, 1, 1],
+            navMeshQuery.DEFAULT_QUERY_FILTER,
+        );
+        const endPositionNearestPoly = navMeshQuery.findNearestPoly(
+            navMeshQuery.createFindNearestPolyResult(),
+            nav,
+            endPosition,
+            [1, 1, 1],
+            navMeshQuery.DEFAULT_QUERY_FILTER,
+        );
+
+        const findPathResult = navMeshQuery.findPath(
+            nav,
+            startPositionNearestPoly.nearestPolyRef,
+            endPositionNearestPoly.nearestPolyRef,
+            startPosition,
+            endPosition,
+            navMeshQuery.DEFAULT_QUERY_FILTER,
+        );
+
+        console.log(findPathResult);
+
+        for (const poly of findPathResult.path) {
+            const polyHelper = createNavMeshPolyHelper(
+                nav,
+                poly,
+                new THREE.Color('blue'),
+            );
+            polyHelper.object.position.y += 0.25;
+            scene.add(polyHelper.object);
+        }
+    }, [scene]);
+
+    // debug view of the mesh bounds
+    useEffect(() => {
+        if (!intermediates || !showMeshBounds) return;
+        
+        // intermediates.inputBounds
+        const min = intermediates.inputBounds[0];
+        const max = intermediates.inputBounds[1];
+
+        const box3Helper = new THREE.Box3Helper(new THREE.Box3(new THREE.Vector3(...min), new THREE.Vector3(...max)), new THREE.Color("white"));
+        scene.add(box3Helper);
+
+        return () => {
+            scene.remove(box3Helper);
+            box3Helper.dispose();
+        };
+    }, [showMeshBounds, intermediates, scene]);
+
+    // debug view of walkable triangles with area ids based vertex colors
+    useEffect(() => {
+        if (!intermediates || !showTriangleAreaIds) return;
+
+        const disposables: (() => void)[] = [];
+
+        for (const triAreaIds of intermediates.triAreaIds) {
+            const debugObject = createTriangleAreaIdsHelper(
+                intermediates.input,
+                triAreaIds,
+            );
+            scene.add(debugObject.object);
+
+            disposables.push(() => {
+                scene.remove(debugObject.object);
+                debugObject.dispose();
+            });
+        }
+
+        return () => {
+            for (const dispose of disposables) {
+                dispose();
+            }
+        };
+    }, [showTriangleAreaIds, intermediates, scene]);
+
+    // debug view of the heightfield
+    useEffect(() => {
+        if (!intermediates || !showHeightfield) return;
+
+        const disposables: (() => void)[] = [];
+
+        for (const heightfield of intermediates.heightfield) {
+            const debugObject = createHeightfieldHelper(heightfield);
+            scene.add(debugObject.object);
+
+            disposables.push(() => {
+                scene.remove(debugObject.object);
+                debugObject.dispose();
+            });
+        }
+
+        return () => {
+            for (const dispose of disposables) {
+                dispose();
+            }
+        };
+    }, [showHeightfield, intermediates, scene]);
+
+    // debug view of the compact heightfield - solid view
+    useEffect(() => {
+        if (!intermediates || !showCompactHeightfieldSolid) return;
+
+        const disposables: (() => void)[] = [];
+
+        for (const compactHeightfield of intermediates.compactHeightfield) {
+            const debugObject =
+                createCompactHeightfieldSolidHelper(compactHeightfield);
+            scene.add(debugObject.object);
+
+            disposables.push(() => {
+                scene.remove(debugObject.object);
+                debugObject.dispose();
+            });
+        }
+
+        return () => {
+            for (const dispose of disposables) {
+                dispose();
+            }
+        };
+    }, [showCompactHeightfieldSolid, intermediates, scene]);
+
+    // debug view of the compact heightfield - distance field
+    useEffect(() => {
+        if (!intermediates || !showCompactHeightFieldDistances) return;
+
+        const disposables: (() => void)[] = [];
+
+        for (const compactHeightfield of intermediates.compactHeightfield) {
+            const debugObject = createCompactHeightfieldDistancesHelper(
+                compactHeightfield,
+            );
+            scene.add(debugObject.object);
+
+            disposables.push(() => {
+                scene.remove(debugObject.object);
+                debugObject.dispose();
+            });
+        }
+
+        return () => {
+            for (const dispose of disposables) {
+                dispose();
+            }
+        };
+    }, [showCompactHeightFieldDistances, intermediates, scene]);
+
+    // debug view of the compact heightfield - regions
+    useEffect(() => {
+        if (!intermediates || !showCompactHeightFieldRegions) return;
+
+        const disposables: (() => void)[] = [];
+
+        for (const compactHeightfield of intermediates.compactHeightfield) {
+            const debugObject = createCompactHeightfieldRegionsHelper(
+                compactHeightfield,
+            );
+            scene.add(debugObject.object);
+
+            disposables.push(() => {
+                scene.remove(debugObject.object);
+                debugObject.dispose();
+            });
+        }
+
+        return () => {
+            for (const dispose of disposables) {
+                dispose();
+            }
+        };
+    }, [showCompactHeightFieldRegions, intermediates, scene]);
+
+    // debug view of the raw contours
+    useEffect(() => {
+        if (!intermediates || !showRawContours) return;
+
+        const disposables: (() => void)[] = [];
+
+        for (const contourSet of intermediates.contourSet) {
+            const debugObject = createRawContoursHelper(contourSet);
+            scene.add(debugObject.object);
+
+            disposables.push(() => {
+                scene.remove(debugObject.object);
+                debugObject.dispose();
+            });
+        }
+        return () => {
+            for (const dispose of disposables) {
+                dispose();
+            }
+        };
+    }, [showRawContours, intermediates, scene]);
+
+    // debug view of the simplified contours
+    useEffect(() => {
+        if (!intermediates || !showSimplifiedContours) return;
+
+        const disposables: (() => void)[] = [];
+
+        for (const contourSet of intermediates.contourSet) {
+            const debugObject = createSimplifiedContoursHelper(contourSet);
+            scene.add(debugObject.object);
+
+            disposables.push(() => {
+                scene.remove(debugObject.object);
+                debugObject.dispose();
+            });
+        }
+
+        return () => {
+            for (const dispose of disposables) {
+                dispose();
+            }
+        };
+    }, [showSimplifiedContours, intermediates, scene]);
+
+    // debug view of the poly mesh
+    useEffect(() => {
+        if (!intermediates || !showPolyMesh) return;
+
+        const disposables: (() => void)[] = [];
+
+        for (const polyMesh of intermediates.polyMesh) {
+            const debugObject = createPolyMeshHelper(polyMesh);
+            scene.add(debugObject.object);
+
+            disposables.push(() => {
+                scene.remove(debugObject.object);
+                debugObject.dispose();
+            });
+        }
+
+        return () => {
+            for (const dispose of disposables) {
+                dispose();
+            }
+        };
+    }, [showPolyMesh, intermediates, scene]);
+
+    // debug view of the poly mesh detail
+    useEffect(() => {
+        if (!intermediates || !showPolyMeshDetail) return;
+
+        const disposables: (() => void)[] = [];
+
+        for (const polyMeshDetail of intermediates.polyMeshDetail) {
+            const debugObject = createPolyMeshDetailHelper(polyMeshDetail);
+            scene.add(debugObject.object);
+
+            disposables.push(() => {
+                scene.remove(debugObject.object);
+                debugObject.dispose();
+            });
+        }
+
+        return () => {
+            for (const dispose of disposables) {
+                dispose();
+            }
+        };
+    }, [showPolyMeshDetail, intermediates, scene]);
+
+    // debug view of the nav mesh BV tree
+    useEffect(() => {
+        if (!nav || !showNavMeshBvTree) return;
+        
+        const debugObject = createNavMeshBvTreeHelper(nav);
+        scene.add(debugObject.object);
+
+        return () => {
+            scene.remove(debugObject.object);
+            debugObject.dispose();
+        };
+    }, [showNavMeshBvTree, nav, scene]);
+
+    // debug view of the nav mesh
+    useEffect(() => {
+        if (!nav || !showNavMesh) return;
+
+        const debugObject = createNavMeshHelper(nav);
+        scene.add(debugObject.object);
+
+        return () => {
+            scene.remove(debugObject.object);
+            debugObject.dispose();
+        };
+    }, [showNavMesh, nav, scene]);
+
+    return (
+        <>
+            <group
+                ref={group}
+                visible={showMesh}
+                onPointerDown={(e) => console.log(e.point)}
+            >
+                {/* <DungeonModel /> */}
+                <NavTestModel />
+            </group>
+
+            <ambientLight intensity={0.5} />
+            <directionalLight position={[5, 5, 5]} intensity={1} />
+
+            <OrbitControls />
+        </>
+    );
+};
+
 type HeightfieldBPAIntermediates = {
     input: {
         positions: Float32Array;
@@ -788,6 +1582,7 @@ const HeightfieldBPA = () => {
         const [heightfieldWidth, heightfieldHeight] = calculateGridSize(
             bounds,
             cellSize,
+            vec2.create(),
         );
         const heightfield = createHeightfield(
             heightfieldWidth,
@@ -1160,9 +1955,10 @@ const RaycastBPA = () => {
 export function Sketch() {
     const { method } = useControls('generation method', {
         method: {
-            value: 'recast-like',
+            value: 'solo-nav-mesh',
             options: {
-                'Recast-like': 'recast-like',
+                'Solo NavMesh': 'solo-nav-mesh',
+                'Tiled NavMesh': 'tiled-nav-mesh',
                 'Heightfield BPA': 'heightfield-bpa',
                 'Raycast BPA': 'raycast-bpa',
             },
@@ -1176,7 +1972,8 @@ export function Sketch() {
             <h1>NavMesh Generation</h1>
 
             <WebGPUCanvas gl={{ antialias: true }}>
-                {method === 'recast-like' && <RecastLike />}
+                {method === 'solo-nav-mesh' && <SoloNavMesh />}
+                {method === 'tiled-nav-mesh' && <TiledNavMesh />}
                 {method === 'heightfield-bpa' && <HeightfieldBPA />}
                 {method === 'raycast-bpa' && <RaycastBPA />}
             </WebGPUCanvas>

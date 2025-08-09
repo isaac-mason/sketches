@@ -53,7 +53,7 @@ export function fromValues(x: number, y: number, z: number): Vec3 {
     return out;
 }
 
-export function fromArray(out: Vec3, array: number[], fromIndex = 0): Vec3 {
+export function fromArray(out: Vec3, array: ArrayLike<number>, fromIndex = 0): Vec3 {
     out[0] = array[fromIndex];
     out[1] = array[fromIndex + 1];
     out[2] = array[fromIndex + 2];
@@ -105,6 +105,22 @@ export function add(out: Vec3, a: Vec3, b: Vec3): Vec3 {
     return out;
 }
 
+
+/**
+ * Adds a scalar value to all components of a vec3
+ *
+ * @param out the receiving vector
+ * @param a the source vector
+ * @param b the scalar value to add
+ * @returns out
+ */
+export function addScalar(out: Vec3, a: Vec3, b: number): Vec3 {
+    out[0] = a[0] + b;
+    out[1] = a[1] + b;
+    out[2] = a[2] + b;
+    return out;
+}
+
 /**
  * Subtracts vector b from vector a
  *
@@ -120,6 +136,20 @@ export function subtract(out: Vec3, a: Vec3, b: Vec3): Vec3 {
     return out;
 }
 
+/**
+ * Subtracts a scalar value from all components of a vec3
+ *
+ * @param out the receiving vector
+ * @param a the source vector
+ * @param b the scalar value to subtract
+ * @returns out
+ */
+export function subtractScalar(out: Vec3, a: Vec3, b: number): Vec3 {
+    out[0] = a[0] - b;
+    out[1] = a[1] - b;
+    out[2] = a[2] - b;
+    return out;
+}
 /**
  * Multiplies two vec3's
  *
