@@ -19,6 +19,7 @@ import {
 import type { CompactHeightfield } from './compact-heightfield';
 import { getCon } from './compact-heightfield';
 import type { PolyMesh } from './poly-mesh';
+import { type BuildContext, buildContext } from './build-context';
 
 /**
  * Contains triangle meshes that represent detailed height data associated
@@ -180,6 +181,7 @@ const findEdge = (
 };
 
 const addEdge = (
+    ctx: BuildContext,
     edges: number[],
     nedges: { value: number },
     maxEdges: number,
@@ -189,7 +191,7 @@ const addEdge = (
     r: number,
 ): number => {
     if (nedges.value >= maxEdges) {
-        console.error(`addEdge: Too many edges (${nedges.value}/${maxEdges}).`);
+        buildContext.error(ctx, `addEdge: Too many edges (${nedges.value}/${maxEdges}).`);
         return EV_UNDEF;
     }
 
@@ -219,6 +221,7 @@ const _circumCircleP3: Vec3 = vec3.create();
 
 // Triangle completion function for Delaunay triangulation
 const completeFacet = (
+    ctx: BuildContext,
     points: number[],
     nPoints: number,
     edges: number[],
@@ -343,7 +346,7 @@ const completeFacet = (
         // Add new edge or update face info of old edge.
         let newE = findEdge(edges, nEdges.value, pt, s);
         if (newE === EV_UNDEF) {
-            addEdge(edges, nEdges, maxEdges, pt, s, nFaces.value, EV_UNDEF);
+            addEdge(ctx, edges, nEdges, maxEdges, pt, s, nFaces.value, EV_UNDEF);
         } else {
             updateLeftFace(edges, newE, pt, s, nFaces.value);
         }
@@ -351,7 +354,7 @@ const completeFacet = (
         // Add new edge or update face info of old edge.
         newE = findEdge(edges, nEdges.value, t, pt);
         if (newE === EV_UNDEF) {
-            addEdge(edges, nEdges, maxEdges, t, pt, nFaces.value, EV_UNDEF);
+            addEdge(ctx, edges, nEdges, maxEdges, t, pt, nFaces.value, EV_UNDEF);
         } else {
             updateLeftFace(edges, newE, t, pt, nFaces.value);
         }
@@ -419,6 +422,7 @@ const overlapEdges = (
 
 // Delaunay triangulation hull function
 const delaunayHull = (
+    ctx: BuildContext,
     npts: number,
     pts: number[],
     nhull: number,
@@ -434,13 +438,14 @@ const delaunayHull = (
     edges.length = maxEdges * 4;
 
     for (let i = 0, j = nhull - 1; i < nhull; j = i++) {
-        addEdge(edges, nedges, maxEdges, hull[j], hull[i], EV_HULL, EV_UNDEF);
+        addEdge(ctx, edges, nedges, maxEdges, hull[j], hull[i], EV_HULL, EV_UNDEF);
     }
 
     let currentEdge = 0;
     while (currentEdge < nedges.value) {
         if (edges[currentEdge * 4 + 2] === EV_UNDEF) {
             completeFacet(
+                ctx,
                 pts,
                 npts,
                 edges,
@@ -452,6 +457,7 @@ const delaunayHull = (
         }
         if (edges[currentEdge * 4 + 3] === EV_UNDEF) {
             completeFacet(
+                ctx,
                 pts,
                 npts,
                 edges,
@@ -502,9 +508,7 @@ const delaunayHull = (
     for (let i = 0; i < tris.length / 4; ++i) {
         const t = i * 4;
         if (tris[t] === -1 || tris[t + 1] === -1 || tris[t + 2] === -1) {
-            console.warn(
-                `delaunayHull: Removing dangling face ${i} [${tris[t]},${tris[t + 1]},${tris[t + 2]}].`,
-            );
+            buildContext.warn(ctx, `delaunayHull: Removing dangling face ${i} [${tris[t]},${tris[t + 1]},${tris[t + 2]}].`);
             tris[t] = tris[tris.length - 4];
             tris[t + 1] = tris[tris.length - 3];
             tris[t + 2] = tris[tris.length - 2];
@@ -647,6 +651,7 @@ const SEED_ARRAY_WITH_POLY_CENTER_OFFSET = [
 
 // Seed array with polygon center for height data collection
 const seedArrayWithPolyCenter = (
+    ctx: BuildContext,
     chf: CompactHeightfield,
     poly: number[],
     polyStart: number,
@@ -724,8 +729,7 @@ const seedArrayWithPolyCenter = (
     let ci = -1;
     while (true) {
         if (array.length < 3) {
-            // TODO: build context?
-            // console.warn('Walk towards polygon center failed to reach center');
+            buildContext.warn(ctx, 'Walk towards polygon center failed to reach center');
             break;
         }
 
@@ -790,6 +794,7 @@ const seedArrayWithPolyCenter = (
 
 // Get height data for a polygon
 const getHeightData = (
+    ctx: BuildContext,
     chf: CompactHeightfield,
     poly: number[],
     polyStart: number,
@@ -851,6 +856,7 @@ const getHeightData = (
     // if the polygon does not contain any points from the current region or if it could potentially be overlapping polygons
     if (empty) {
         seedArrayWithPolyCenter(
+            ctx,
             chf,
             poly,
             polyStart,
@@ -913,6 +919,7 @@ const _bmin = vec3.create();
 const _bmax = vec3.create();
 
 const buildPolyDetail = (
+    ctx: BuildContext,
     inVerts: number[],
     nin: number,
     sampleDist: number,
@@ -1080,9 +1087,7 @@ const buildPolyDetail = (
     triangulateHull(verts, nhull, hull, nin, tris);
 
     if (tris.length === 0) {
-        console.warn(
-            `buildPolyDetail: Could not triangulate polygon (${nverts.value} verts).`,
-        );
+        buildContext.warn(ctx, `buildPolyDetail: Could not triangulate polygon (${nverts.value} verts).`);
         return true;
     }
 
@@ -1179,16 +1184,14 @@ const buildPolyDetail = (
             // Create new triangulation.
             edges.length = 0;
             tris.length = 0;
-            delaunayHull(nverts.value, verts, nhull, hull, tris, edges);
+            delaunayHull(ctx, nverts.value, verts, nhull, hull, tris, edges);
         }
     }
 
     const ntris = tris.length / 4;
     if (ntris > MAX_TRIS) {
         tris.length = MAX_TRIS * 4;
-        console.error(
-            `rcBuildPolyMeshDetail: Shrinking triangle count from ${ntris} to max ${MAX_TRIS}.`,
-        );
+        buildContext.warn(ctx, `rcBuildPolyMeshDetail: Shrinking triangle count from ${ntris} to max ${MAX_TRIS}.`);
     }
 
     setTriFlags(tris, nhull, hull);
@@ -1202,6 +1205,7 @@ const _triangulateHullNext: Vec2 = vec2.create();
 const _triangulateHullRight: Vec2 = vec2.create();
 
 export const buildPolyMeshDetail = (
+    ctx: BuildContext,
     polyMesh: PolyMesh,
     compactHeightfield: CompactHeightfield,
     sampleDist: number,
@@ -1311,6 +1315,7 @@ export const buildPolyMeshDetail = (
         hp.width = bounds[i * 4 + 1] - bounds[i * 4];
         hp.height = bounds[i * 4 + 3] - bounds[i * 4 + 2];
         getHeightData(
+            ctx,
             compactHeightfield,
             polyMesh.polys,
             p,
@@ -1327,6 +1332,7 @@ export const buildPolyMeshDetail = (
 
         if (
             !buildPolyDetail(
+                ctx,
                 poly,
                 npoly,
                 sampleDist,
@@ -1341,7 +1347,7 @@ export const buildPolyMeshDetail = (
                 samples,
             )
         ) {
-            console.error('buildPolyMeshDetail: Failed to build detail mesh');
+            buildContext.error(ctx, `buildPolyMeshDetail: Failed to build detail mesh for poly ${i}.`);
             continue;
         }
 

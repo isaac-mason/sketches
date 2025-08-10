@@ -191,6 +191,8 @@ const SoloNavMesh = () => {
         const detailSampleDistance = 6;
         const detailSampleMaxError = 1;
 
+        const ctx = buildContext.create();
+
         /* 1. get positions and indices from THREE.Mesh instances in the group */
 
         console.time('get positions and indices');
@@ -379,6 +381,7 @@ const SoloNavMesh = () => {
         console.time('build detail mesh from contours');
 
         const polyMeshDetail = buildPolyMeshDetail(
+            ctx,
             polyMesh,
             compactHeightfield,
             detailSampleDistance,
@@ -954,6 +957,7 @@ const TiledNavMesh = () => {
             /* 12. create detail mesh which allows to access approximate height on each polygon */
 
             const polyMeshDetail = buildPolyMeshDetail(
+                ctx,
                 polyMesh,
                 compactHeightfield,
                 detailSampleDistance,
@@ -998,6 +1002,8 @@ const TiledNavMesh = () => {
         const detailSampleDistance = 6;
         const detailSampleMaxError = 1;
 
+        const ctx = buildContext.create();
+
         /* 1. get positions and indices from THREE.Mesh instances in the group */
 
         console.time('get positions and indices');
@@ -1015,8 +1021,6 @@ const TiledNavMesh = () => {
         console.timeEnd('get positions and indices');
 
         /* 2. create a tiled nav mesh */
-
-        const ctx = buildContext.create();
 
         const meshBounds = calculateMeshBounds(
             positions,
@@ -1124,6 +1128,8 @@ const TiledNavMesh = () => {
                 }
             }
         }
+
+        console.timeEnd('navmesh generation');
 
         setNav(nav);
         setIntermediates(intermediates);

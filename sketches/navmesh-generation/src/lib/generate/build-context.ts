@@ -20,7 +20,7 @@ export type BuildContext = {
     _startTimes: Record<string, number>;
 }
 
-export const create = (): BuildContext => {
+const create = (): BuildContext => {
     return {
         logs: [],
         times: [],
@@ -28,14 +28,44 @@ export const create = (): BuildContext => {
     };
 };
 
-export const startTimer = (context: BuildContext, name: string): void => {
+const start = (context: BuildContext, name: string): void => {
     context._startTimes[name] = performance.now();
 };
 
-export const endTimer = (context: BuildContext, name: string): void => {
+const end = (context: BuildContext, name: string): void => {
     const now = performance.now();
     const start = context._startTimes[name];
     const duration = now - start;
     delete context._startTimes[name];
     context.times.push({ name, duration });
+};
+
+const info = (context: BuildContext, message: string): void => {
+    context.logs.push({
+        type: BuildContextLogType.INFO,
+        message,
+    });
+};
+
+const warn = (context: BuildContext, message: string): void => {
+    context.logs.push({
+        type: BuildContextLogType.WARNING,
+        message,
+    });
+};
+
+const error = (context: BuildContext, message: string): void => {
+    context.logs.push({
+        type: BuildContextLogType.ERROR,
+        message,
+    });
+};
+
+export const buildContext = {
+    create,
+    startTimer: start,
+    endTimer: end,
+    info,
+    warn,
+    error,
 };

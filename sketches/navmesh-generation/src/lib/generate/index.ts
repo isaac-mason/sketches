@@ -1,5 +1,5 @@
 export * from "./bpa";
-export * as buildContext from './build-context';
+export * from './build-context';
 export * from './common';
 export * from './compact-heightfield';
 export * from './compact-heightfield-regions';
