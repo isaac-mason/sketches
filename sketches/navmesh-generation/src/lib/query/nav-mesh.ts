@@ -216,6 +216,54 @@ export const create = (): NavMesh => {
     };
 };
 
+/**
+ * Returns the tile x and y position in the nav mesh from a world space position.
+ * @param outTilePosition the output tile position
+ * @param worldX the world tile x coordinate
+ * @param worldY the world tile y coordinate (along the z axis)
+ */
+export const worldToTilePosition = (
+    outTilePosition: Vec2,
+    navMesh: NavMesh,
+    worldX: number,
+    worldY: number,
+) => {
+    outTilePosition[0] = Math.floor(
+        (worldX - navMesh.origin[0]) / navMesh.tileWidth,
+    );
+    outTilePosition[1] = Math.floor(
+        (worldY - navMesh.origin[2]) / navMesh.tileHeight,
+    );
+    return outTilePosition;
+};
+
+export const getTileAt = (
+    navMesh: NavMesh,
+    x: number,
+    y: number,
+    layer: number,
+): NavMeshTile | undefined => {
+    const tileHash = getTilePositionHash(x, y, layer);
+    return navMesh.tiles[tileHash];
+};
+
+export const getTilesAt = (
+    navMesh: NavMesh,
+    x: number,
+    y: number,
+): NavMeshTile[] => {
+    const tiles: NavMeshTile[] = [];
+
+    for (const tileIndex in navMesh.tiles) {
+        const tile = navMesh.tiles[tileIndex];
+        if (tile.tileX === x && tile.tileY === y) {
+            tiles.push(tile);
+        }
+    }
+
+    return tiles;
+};
+
 const getTilePositionHash = (x: number, y: number, layer: number): string => {
     return `${x},${y},${layer}`;
 };
@@ -336,15 +384,20 @@ const overlapSlabs = (
     return false;
 };
 
-// Scratch arrays for portal finding
 const _amin = vec3.create();
 const _amax = vec3.create();
 const _bmin = vec3.create();
 const _bmax = vec3.create();
-// const _neia = new Float32Array(4 * 2); // up to 4 connections, storing min/max u for each
 
-// Find connecting external polys between edge va->vb in target tile on opposite side.
-// Returns array of { ref, tmin, tmax } describing overlapping intervals along the edge.
+/**
+ * Find connecting external polys between edge va->vb in target tile on opposite side.
+ * Returns array of { ref, tmin, tmax } describing overlapping intervals along the edge.
+ * @param va vertex A
+ * @param vb vertex B
+ * @param target target tile
+ * @param side portal side
+ * @returns array of connecting polygons
+ */
 const findConnectingPolys = (
     va: Vec3,
     vb: Vec3,
@@ -356,15 +409,20 @@ const findConnectingPolys = (
     const apos = getSlabCoord(va, side);
 
     const results: { ref: PolyRef; umin: number; umax: number }[] = [];
-    // Iterate target polys & their boundary edges (those marked ext link in that direction)
+    // iterate target polys & their boundary edges (those marked ext link in that direction)
     for (let i = 0; i < target.polys.length; i++) {
         const poly = target.polys[i];
         const nv = poly.vertices.length;
         for (let j = 0; j < nv; j++) {
             const nei = poly.neis[j];
-            if ((nei & POLY_NEIS_FLAG_EXT_LINK) === 0) continue; // not an external edge
+
+            // not an external edge
+            if ((nei & POLY_NEIS_FLAG_EXT_LINK) === 0) continue;
+
             const dir = nei & POLY_NEIS_FLAG_EXT_LINK_DIR_MASK;
-            if (dir !== side) continue; // only edges that face the specified side from target perspective
+
+            // only edges that face the specified side from target perspective
+            if (dir !== side) continue;
 
             const vcIndex = poly.vertices[j];
             const vdIndex = poly.vertices[(j + 1) % nv];
@@ -380,7 +438,9 @@ const findConnectingPolys = (
             ];
 
             const bpos = getSlabCoord(vc, side);
-            if (Math.abs(apos - bpos) > 0.01) continue; // not co-planar enough
+
+            // not co-planar enough
+            if (Math.abs(apos - bpos) > 0.01) continue;
 
             calcSlabEndPoints(vc, vd, _bmin, _bmax, side);
             if (
@@ -395,13 +455,15 @@ const findConnectingPolys = (
             )
                 continue;
 
-            // Record overlap interval
+            // record overlap interval
             results.push({
                 ref: serPolyRef(target.id, i),
                 umin: Math.max(_amin[0], _bmin[0]),
                 umax: Math.min(_amax[0], _bmax[0]),
             });
-            break; // proceed next polygon (edge matched)
+
+            // proceed to next polygon (edge matched)
+            break;
         }
     }
     return results;
@@ -505,6 +567,7 @@ export const disconnectExternalLinks = (
                 filteredLinks.push(linkIndex);
             }
         }
+
         poly.links = filteredLinks;
     }
 };
@@ -593,7 +656,11 @@ export const addTile = (navMesh: NavMesh, tile: NavMeshTile) => {
         );
 
         for (const neighbourTile of neighbourTiles) {
-            console.log(tile.id, "connecting with neighbour tile", neighbourTile.id);
+            console.log(
+                tile.id,
+                'connecting with neighbour tile',
+                neighbourTile.id,
+            );
             connectExternalLinks(tile, neighbourTile, side);
             connectExternalLinks(neighbourTile, tile, oppositeTile(side));
             // connectExtOffMeshLinks(navMeshTile, neighbourTile, side);
@@ -616,7 +683,7 @@ export const removeTile = (
     }
 
     // disconnect external links from neighboring tiles
-    
+
     // disconnect external links with tiles in the same layer
     const tilesAtCurrentPosition = getTilesAt(navMesh, x, y);
 
@@ -645,54 +712,5 @@ export const removeTile = (
     delete navMesh.tiles[tileId];
     delete navMesh.tilePositionHashToTileId[tileHash];
 
-
     return true;
-};
-
-export const getTileAt = (
-    navMesh: NavMesh,
-    x: number,
-    y: number,
-    layer: number,
-): NavMeshTile | undefined => {
-    const tileHash = getTilePositionHash(x, y, layer);
-    return navMesh.tiles[tileHash];
-};
-
-export const getTilesAt = (
-    navMesh: NavMesh,
-    x: number,
-    y: number,
-): NavMeshTile[] => {
-    const tiles: NavMeshTile[] = [];
-
-    for (const tileIndex in navMesh.tiles) {
-        const tile = navMesh.tiles[tileIndex];
-        if (tile.tileX === x && tile.tileY === y) {
-            tiles.push(tile);
-        }
-    }
-
-    return tiles;
-};
-
-/**
- * Returns the tile x and y position in the nav mesh from a world space position.
- * @param outTilePosition the output tile position
- * @param worldX the world tile x coordinate
- * @param worldY the world tile y coordinate (along the z axis)
- */
-export const worldToTilePosition = (
-    outTilePosition: Vec2,
-    navMesh: NavMesh,
-    worldX: number,
-    worldY: number,
-) => {
-    outTilePosition[0] = Math.floor(
-        (worldX - navMesh.origin[0]) / navMesh.tileWidth,
-    );
-    outTilePosition[1] = Math.floor(
-        (worldY - navMesh.origin[2]) / navMesh.tileHeight,
-    );
-    return outTilePosition;
 };
