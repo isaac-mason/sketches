@@ -1,14 +1,14 @@
 import { vec3, type Box3, type Vec2, type Vec3 } from '@/common/maaths';
-import { POLY_NEIS_FLAG_EXT_LINK, POLY_NEIS_FLAG_EXT_LINK_DIR_MASK } from '../generate';
+import {
+    POLY_NEIS_FLAG_EXT_LINK,
+    POLY_NEIS_FLAG_EXT_LINK_DIR_MASK,
+} from '../generate';
 
 /** a serialised polygon reference, in the format `${tile id}.${index of polygon within tile}` */
 export type PolyRef = `${number},${number}`;
 
 /** a deserialised polygon reference, as a tuple of [tile id, index of polygon within tile] */
-export type DeserialisedPolyRef = [
-    tileId: number,
-    tilePolygonIndex: number,
-];
+export type DeserialisedPolyRef = [tileId: number, tilePolygonIndex: number];
 
 /** serialises a polygon reference */
 export const serPolyRef = (
@@ -272,28 +272,49 @@ const getSlabCoord = (v: Vec3, side: number): number => {
 
 // Calculate 2D endpoints (u,y) for edge segment projected onto the portal axis plane.
 // For x-portals (side 0/4) we use u = z, for z-portals (2/6) u = x.
-const calcSlabEndPoints = (va: Vec3, vb: Vec3, bmin: Vec3, bmax: Vec3, side: number) => {
+const calcSlabEndPoints = (
+    va: Vec3,
+    vb: Vec3,
+    bmin: Vec3,
+    bmax: Vec3,
+    side: number,
+) => {
     if (side === 0 || side === 4) {
         if (va[2] < vb[2]) {
-            bmin[0] = va[2]; bmin[1] = va[1];
-            bmax[0] = vb[2]; bmax[1] = vb[1];
+            bmin[0] = va[2];
+            bmin[1] = va[1];
+            bmax[0] = vb[2];
+            bmax[1] = vb[1];
         } else {
-            bmin[0] = vb[2]; bmin[1] = vb[1];
-            bmax[0] = va[2]; bmax[1] = va[1];
+            bmin[0] = vb[2];
+            bmin[1] = vb[1];
+            bmax[0] = va[2];
+            bmax[1] = va[1];
         }
     } else if (side === 2 || side === 6) {
         if (va[0] < vb[0]) {
-            bmin[0] = va[0]; bmin[1] = va[1];
-            bmax[0] = vb[0]; bmax[1] = vb[1];
+            bmin[0] = va[0];
+            bmin[1] = va[1];
+            bmax[0] = vb[0];
+            bmax[1] = vb[1];
         } else {
-            bmin[0] = vb[0]; bmin[1] = vb[1];
-            bmax[0] = va[0]; bmax[1] = va[1];
+            bmin[0] = vb[0];
+            bmin[1] = vb[1];
+            bmax[0] = va[0];
+            bmax[1] = va[1];
         }
     }
 };
 
 // Overlap test of two edge slabs in (u,y) space, with tolerances px (horizontal pad) and py (vertical threshold)
-const overlapSlabs = (amin: Vec3, amax: Vec3, bmin: Vec3, bmax: Vec3, px: number, py: number): boolean => {
+const overlapSlabs = (
+    amin: Vec3,
+    amax: Vec3,
+    bmin: Vec3,
+    bmax: Vec3,
+    px: number,
+    py: number,
+): boolean => {
     const minx = Math.max(amin[0] + px, bmin[0] + px);
     const maxx = Math.min(amax[0] - px, bmax[0] - px);
     if (minx > maxx) return false; // no horizontal overlap
@@ -310,7 +331,7 @@ const overlapSlabs = (amin: Vec3, amax: Vec3, bmin: Vec3, bmax: Vec3, px: number
     const dmin = bminy - aminy;
     const dmax = bmaxy - amaxy;
     if (dmin * dmax < 0) return true; // crossing
-    const thr = (py * 2) * (py * 2);
+    const thr = py * 2 * (py * 2);
     if (dmin * dmin <= thr || dmax * dmax <= thr) return true; // near endpoints
     return false;
 };
@@ -362,7 +383,17 @@ const findConnectingPolys = (
             if (Math.abs(apos - bpos) > 0.01) continue; // not co-planar enough
 
             calcSlabEndPoints(vc, vd, _bmin, _bmax, side);
-            if (!overlapSlabs(_amin, _amax, _bmin, _bmax, 0.01, target.walkableClimb)) continue;
+            if (
+                !overlapSlabs(
+                    _amin,
+                    _amax,
+                    _bmin,
+                    _bmax,
+                    0.01,
+                    target.walkableClimb,
+                )
+            )
+                continue;
 
             // Record overlap interval
             results.push({
@@ -376,14 +407,14 @@ const findConnectingPolys = (
     return results;
 };
 
-
-// int dtNavMesh::findConnectingPolys(const float* va, const float* vb,
-// 								   const dtMeshTile* tile, int side,
-								//    dtPolyRef* con, float* conarea, int maxcon) const
 const _va = vec3.create();
 const _vb = vec3.create();
 
-const connectExtLinks = (tile: NavMeshTile, target: NavMeshTile, side: number) => {
+const connectExternalLinks = (
+    tile: NavMeshTile,
+    target: NavMeshTile,
+    side: number,
+) => {
     // connect border links
     for (let i = 0; i < tile.polys.length; i++) {
         const poly = tile.polys[i];
@@ -400,24 +431,39 @@ const connectExtLinks = (tile: NavMeshTile, target: NavMeshTile, side: number) =
                 continue;
             }
 
-            // Create new links
+            // create new links
             const va = vec3.fromArray(_va, tile.vertices, poly.vertices[j] * 3);
-            const vb = vec3.fromArray(_vb, tile.vertices, poly.vertices[(j + 1) % nv] * 3);
+            const vb = vec3.fromArray(
+                _vb,
+                tile.vertices,
+                poly.vertices[(j + 1) % nv] * 3,
+            );
 
-            // Find overlaps against target tile along the opposite side direction
-            const overlaps = findConnectingPolys(va, vb, target, oppositeTile(dir));
+            // find overlaps against target tile along the opposite side direction
+            const overlaps = findConnectingPolys(
+                va,
+                vb,
+                target,
+                oppositeTile(dir),
+            );
             for (const o of overlaps) {
                 // Parameterize overlap interval along this edge to [0,1]
                 let tmin: number;
                 let tmax: number;
-                if (dir === 0 || dir === 4) { // x portals param by z
+                if (dir === 0 || dir === 4) {
+                    // x portals param by z
                     tmin = (o.umin - va[2]) / (vb[2] - va[2]);
                     tmax = (o.umax - va[2]) / (vb[2] - va[2]);
-                } else { // z portals param by x
+                } else {
+                    // z portals param by x
                     tmin = (o.umin - va[0]) / (vb[0] - va[0]);
                     tmax = (o.umax - va[0]) / (vb[0] - va[0]);
                 }
-                if (tmin > tmax) { const tmp = tmin; tmin = tmax; tmax = tmp; }
+                if (tmin > tmax) {
+                    const tmp = tmin;
+                    tmin = tmax;
+                    tmax = tmp;
+                }
                 tmin = Math.max(0, Math.min(1, tmin));
                 tmax = Math.max(0, Math.min(1, tmax));
 
@@ -433,11 +479,35 @@ const connectExtLinks = (tile: NavMeshTile, target: NavMeshTile, side: number) =
             }
         }
     }
-}
+};
 
-const disconnectExtLinks = (tile: NavMeshTile, target: NavMeshTile) => {
-    
-}
+/**
+ * Disconnect external links from tile to target tile
+ */
+export const disconnectExternalLinks = (
+    tile: NavMeshTile | undefined,
+    target: NavMeshTile | undefined,
+) => {
+    if (!tile || !target) return;
+    const targetId = target.id;
+    for (let i = 0; i < tile.polys.length; i++) {
+        const poly = tile.polys[i];
+
+        const filteredLinks: number[] = [];
+
+        for (let k = 0; k < poly.links.length; k++) {
+            const linkIndex = poly.links[k];
+            const link = tile.links[linkIndex];
+
+            const [linkTileId] = desPolyRef(link.ref);
+
+            if (linkTileId !== targetId) {
+                filteredLinks.push(linkIndex);
+            }
+        }
+        poly.links = filteredLinks;
+    }
+};
 
 const getNeighbourTilesAt = (
     navMesh: NavMesh,
@@ -449,57 +519,83 @@ const getNeighbourTilesAt = (
     let ny = y;
 
     switch (side) {
-        case 0: nx++; break;
-        case 1: nx++; ny++; break;
-        case 2: ny++; break;
-        case 3: nx--; ny++; break;
-        case 4: nx--; break;
-        case 5: nx--; ny--; break;
-        case 6: ny--; break;
-        case 7: nx++; ny--; break;
+        case 0:
+            nx++;
+            break;
+        case 1:
+            nx++;
+            ny++;
+            break;
+        case 2:
+            ny++;
+            break;
+        case 3:
+            nx--;
+            ny++;
+            break;
+        case 4:
+            nx--;
+            break;
+        case 5:
+            nx--;
+            ny--;
+            break;
+        case 6:
+            ny--;
+            break;
+        case 7:
+            nx++;
+            ny--;
+            break;
     }
 
     return getTilesAt(navMesh, nx, ny);
 };
 
-export const addTile = (navMesh: NavMesh, navMeshTile: NavMeshTile) => {
+export const addTile = (navMesh: NavMesh, tile: NavMeshTile) => {
     const tileHash = getTilePositionHash(
-        navMeshTile.tileX,
-        navMeshTile.tileY,
-        navMeshTile.tileLayer,
+        tile.tileX,
+        tile.tileY,
+        tile.tileLayer,
     );
 
     // increment id for this tile position
-    navMeshTile.id = navMesh.tileIdCounter++ + 1;
+    tile.id = navMesh.tileIdCounter++ + 1;
 
     // store tile in navmesh
-    navMesh.tiles[navMeshTile.id] = navMeshTile;
-    navMesh.tilePositionHashToTileId[tileHash] = navMeshTile.id;
+    navMesh.tiles[tile.id] = tile;
+    navMesh.tilePositionHashToTileId[tileHash] = tile.id;
 
     // create internal links within the tile
-    createInternalLinks(navMeshTile);
+    createInternalLinks(tile);
 
     // create connections with neighbour tiles
 
     // connect with layers in current tile.
-    const tiles = getTilesAt(navMesh, navMeshTile.tileX, navMeshTile.tileY);
+    const tilesAtCurrentPosition = getTilesAt(navMesh, tile.tileX, tile.tileY);
 
-    for (const tile of tiles) {
-        if (tile.id === navMeshTile.id) continue;
+    for (const tileAtCurrentPosition of tilesAtCurrentPosition) {
+        if (tileAtCurrentPosition.id === tile.id) continue;
 
-        connectExtLinks(tile, navMeshTile, -1);
-        connectExtLinks(navMeshTile, tile, -1);
+        connectExternalLinks(tileAtCurrentPosition, tile, -1);
+        connectExternalLinks(tile, tileAtCurrentPosition, -1);
         // connectExtOffMeshLinks(tile, navMeshTile, -1);
         // connectExtOffMeshLinks(navMeshTile, tile, -1);
     }
 
     // connect with neighbouring tiles
     for (let side = 0; side < 8; side++) {
-        const neighbourTiles = getNeighbourTilesAt(navMesh, navMeshTile.tileX, navMeshTile.tileY, side);
+        const neighbourTiles = getNeighbourTilesAt(
+            navMesh,
+            tile.tileX,
+            tile.tileY,
+            side,
+        );
 
         for (const neighbourTile of neighbourTiles) {
-            connectExtLinks(navMeshTile, neighbourTile, side);
-            connectExtLinks(neighbourTile, navMeshTile, oppositeTile(side));
+            console.log(tile.id, "connecting with neighbour tile", neighbourTile.id);
+            connectExternalLinks(tile, neighbourTile, side);
+            connectExternalLinks(neighbourTile, tile, oppositeTile(side));
             // connectExtOffMeshLinks(navMeshTile, neighbourTile, side);
             // connectExtOffMeshLinks(neighbourTile, navMeshTile, oppositeTile(side));
         }
@@ -519,12 +615,36 @@ export const removeTile = (
         return false;
     }
 
+    // disconnect external links from neighboring tiles
+    
+    // disconnect external links with tiles in the same layer
+    const tilesAtCurrentPosition = getTilesAt(navMesh, x, y);
+
+    for (const tileAtCurrentPosition of tilesAtCurrentPosition) {
+        if (tileAtCurrentPosition.id === tileId) continue;
+
+        disconnectExternalLinks(tileAtCurrentPosition, navMesh.tiles[tileId]);
+        disconnectExternalLinks(navMesh.tiles[tileId], tileAtCurrentPosition);
+        // disconnectExtOffMeshLinks(tile, navMesh.tiles[tileId]);
+        // disconnectExtOffMeshLinks(navMesh.tiles[tileId], tile);
+    }
+
+    // disconnect external links with neighbouring tiles
+    for (let side = 0; side < 8; side++) {
+        const neighbourTiles = getNeighbourTilesAt(navMesh, x, y, side);
+
+        for (const neighbourTile of neighbourTiles) {
+            disconnectExternalLinks(neighbourTile, navMesh.tiles[tileId]);
+            disconnectExternalLinks(navMesh.tiles[tileId], neighbourTile);
+            // disconnectExtOffMeshLinks(neighbourTile, navMesh.tiles[tileId]);
+            // disconnectExtOffMeshLinks(navMesh.tiles[tileId], neighbourTile);
+        }
+    }
+
     // remove tile from navmesh
     delete navMesh.tiles[tileId];
     delete navMesh.tilePositionHashToTileId[tileHash];
 
-    // TODO: remove external links from neighboring tiles that reference this tile
-    // ...
 
     return true;
 };

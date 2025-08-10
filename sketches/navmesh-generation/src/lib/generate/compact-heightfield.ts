@@ -264,17 +264,19 @@ export const buildCompactHeightfield = (
 };
 
 
+const MAX_DISTANCE = 255;
+
 export const erodeWalkableArea = (
     walkableRadiusVoxels: number,
     compactHeightfield: CompactHeightfield,
 ) => {
     const xSize = compactHeightfield.width;
     const zSize = compactHeightfield.height;
-    const zStride = xSize; // For readability
+    const zStride = xSize; // for readability
 
-    // Initialize distance array - 0xff means maximum distance (255)
+    // Initialize distance array
     const distanceToBoundary = new Uint8Array(compactHeightfield.spanCount);
-    distanceToBoundary.fill(0xff);
+    distanceToBoundary.fill(MAX_DISTANCE);
 
     // Mark boundary cells
     for (let z = 0; z < zSize; ++z) {
