@@ -715,13 +715,17 @@ const seedArrayWithPolyCenter = (
     const dirs = [0, 1, 2, 3];
     hp.data.fill(0);
 
-    // DFS to move to the center
+    // DFS to move to the center. Note that we need a DFS here and can not just move
+	// directly towards the center without recording intermediate nodes, even though the polygons
+	// are convex. In very rare we can get stuck due to contour simplification if we do not
+	// record nodes.
     let cx = -1;
     let cy = -1;
     let ci = -1;
     while (true) {
         if (array.length < 3) {
-            console.warn('Walk towards polygon center failed to reach center');
+            // TODO: build context?
+            // console.warn('Walk towards polygon center failed to reach center');
             break;
         }
 
@@ -731,7 +735,9 @@ const seedArrayWithPolyCenter = (
 
         if (cx === pcx && cy === pcy) break;
 
-        // If we are already at the correct X-position, prefer direction directly towards the center in Y-axis
+		// If we are already at the correct X-position, prefer direction
+		// directly towards the center in the Y-axis; otherwise prefer
+		// direction in the X-axis
         let directDir: number;
         if (cx === pcx) {
             directDir = getDirForOffset(0, pcy > cy ? 1 : -1);
@@ -739,7 +745,7 @@ const seedArrayWithPolyCenter = (
             directDir = getDirForOffset(pcx > cx ? 1 : -1, 0);
         }
 
-        // Push the direct dir last so we start with this on next iteration
+		// Push the direct dir last so we start with this on next iteration
         const temp = dirs[directDir];
         dirs[directDir] = dirs[3];
         dirs[3] = temp;

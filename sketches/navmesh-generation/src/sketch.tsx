@@ -24,6 +24,7 @@ import {
     type TriangleMesh,
     WALKABLE_AREA,
     buildCompactHeightfield,
+    buildContext,
     buildContours,
     buildDistanceField,
     buildPolyMesh,
@@ -1014,6 +1015,8 @@ const TiledNavMesh = () => {
         console.timeEnd('get positions and indices');
 
         /* 2. create a tiled nav mesh */
+
+        const ctx = buildContext.create();
 
         const meshBounds = calculateMeshBounds(
             positions,

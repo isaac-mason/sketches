@@ -1,5 +1,5 @@
 import { type Box3, type Vec3, vec3 } from '@/common/maaths';
-import { WALKABLE_AREA } from "./common";
+import { NULL_AREA, WALKABLE_AREA } from "./common";
 import type { ArrayLike } from './common';
 
 const _edge0 = vec3.create();
@@ -82,6 +82,40 @@ export const markWalkableTriangles = (
 
         if (_triangleNormal[1] > walkableThr) {
             outTriAreaIds[i] = WALKABLE_AREA;
+        }
+    }
+};
+
+/**
+ * Clears (sets to NULL_AREA) triangles whose slope exceeds the walkable limit.
+ * Mirrors markWalkableTriangles but does the inverse operation.
+ * @param inVertices Array of vertex coordinates [x0, y0, z0, ...]
+ * @param inIndices Array of triangle indices [i0, i1, i2, ...]
+ * @param inOutTriAreaIds In/out array of triangle area IDs (modified in place)
+ * @param walkableSlopeAngle Maximum walkable slope angle in degrees (default: 45)
+ */
+export const clearUnwalkableTriangles = (
+    inVertices: ArrayLike<number>,
+    inIndices: ArrayLike<number>,
+    inOutTriAreaIds: ArrayLike<number>,
+    walkableSlopeAngle = 45.0,
+) => {
+    const walkableThr = Math.cos((walkableSlopeAngle / 180.0) * Math.PI);
+    const numTris = inIndices.length / 3;
+    for (let i = 0; i < numTris; ++i) {
+        const triStartIndex = i * 3;
+        const i0 = inIndices[triStartIndex];
+        const i1 = inIndices[triStartIndex + 1];
+        const i2 = inIndices[triStartIndex + 2];
+
+        const v0 = vec3.set(_v0, inVertices[i0 * 3], inVertices[i0 * 3 + 1], inVertices[i0 * 3 + 2]);
+        const v1 = vec3.set(_v1, inVertices[i1 * 3], inVertices[i1 * 3 + 1], inVertices[i1 * 3 + 2]);
+        const v2 = vec3.set(_v2, inVertices[i2 * 3], inVertices[i2 * 3 + 1], inVertices[i2 * 3 + 2]);
+
+        calcTriNormal(v0, v1, v2, _triangleNormal);
+
+        if (_triangleNormal[1] <= walkableThr) {
+            inOutTriAreaIds[i] = NULL_AREA;
         }
     }
 };
