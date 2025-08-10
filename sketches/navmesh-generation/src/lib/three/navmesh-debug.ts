@@ -2011,13 +2011,13 @@ export function createNavMeshHelper(navMesh: NavMesh): DebugObject {
         let triVertexIndex = 0;
 
         // Draw triangles for each polygon
-        for (let i = 0; i < tile.polys.length; i++) {
-            const poly = tile.polys[i];
+        for (const polyId in tile.polys) {
+            const poly = tile.polys[polyId]
 
             // Skip off-mesh connections (not implemented yet)
             // if (poly.type === NavMeshPolyType.OFFMESH_CONNECTION) continue;
 
-            const polyDetail = tile.detailMeshes[i];
+            const polyDetail = tile.detailMeshes[polyId];
             if (!polyDetail) continue;
 
             // Determine polygon color
@@ -2093,8 +2093,8 @@ export function createNavMeshHelper(navMesh: NavMesh): DebugObject {
                       .setRGB(0, 48 / 255, 64 / 255)
                       .multiplyScalar(220 / 255);
 
-            for (let i = 0; i < tile.polys.length; i++) {
-                const poly = tile.polys[i];
+            for (const polyId in tile.polys) {
+                const poly = tile.polys[polyId];
 
                 for (let j = 0; j < poly.vertices.length; j++) {
                     const nj = (j + 1) % poly.vertices.length;
@@ -2319,10 +2319,10 @@ export function createNavMeshPolyHelper(
     const disposables: (() => void)[] = [];
 
     // Get tile and polygon from reference
-    const [tileId, polyIndex] = desPolyRef(polyRef);
+    const [tileId, polyId] = desPolyRef(polyRef);
 
     const tile = navMesh.tiles[tileId];
-    if (!tile || polyIndex >= tile.polys.length) {
+    if (!tile || !tile.polys[polyId]) {
         // Return empty object if polygon not found
         return {
             object: group,
@@ -2330,7 +2330,7 @@ export function createNavMeshPolyHelper(
         };
     }
 
-    const poly = tile.polys[polyIndex];
+    const poly = tile.polys[polyId];
 
     // TODO: Handle off-mesh connections (not implemented yet)
     // if (poly.type === NavMeshPolyType.OFFMESH_CONNECTION) {
@@ -2340,7 +2340,7 @@ export function createNavMeshPolyHelper(
     // }
 
     // Get the detail mesh for this polygon
-    const detailMesh = tile.detailMeshes?.[polyIndex];
+    const detailMesh = tile.detailMeshes?.[polyId];
     if (!detailMesh) {
         // Fallback: draw basic polygon without detail mesh
         const triPositions: number[] = [];
@@ -2516,10 +2516,6 @@ export function createNavMeshTilePortalsHelper(
     const group = new THREE.Group();
     const disposables: (() => void)[] = [];
 
-    if (!navMeshTile || navMeshTile.polys.length === 0) {
-        return { object: group, dispose: () => {} };
-    }
-
     const padx = 0.04; // horizontal pad like Detour (purely visual)
     const pady = navMeshTile.walkableClimb; // vertical extent
 
@@ -2541,8 +2537,8 @@ export function createNavMeshTilePortalsHelper(
         const color = sideColors[side];
         if (!color) continue;
 
-        for (let i = 0; i < navMeshTile.polys.length; i++) {
-            const poly = navMeshTile.polys[i];
+        for (const polyId in navMeshTile.polys) {
+            const poly = navMeshTile.polys[polyId];
             const nv = poly.vertices.length;
             for (let j = 0; j < nv; j++) {
                 if (poly.neis[j] !== matchMask) continue; // must be exact match

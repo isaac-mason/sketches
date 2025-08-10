@@ -8,7 +8,7 @@ import {
     vec3,
 } from '@/common/maaths';
 import { OrbitControls, useGLTF } from '@react-three/drei';
-import { ThreeEvent, useThree } from '@react-three/fiber';
+import { type ThreeEvent, useThree } from '@react-three/fiber';
 import { Leva, useControls } from 'leva';
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';

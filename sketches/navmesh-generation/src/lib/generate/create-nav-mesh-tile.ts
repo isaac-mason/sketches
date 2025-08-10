@@ -1,7 +1,8 @@
-import type { Box3 } from "@/common/maaths";
-import type { NavMeshTile, NavMesh, NavMeshPolyDetail, NavMeshPoly } from "../query";
-import { MESH_NULL_IDX, POLY_NEIS_FLAG_EXT_LINK } from "./common";
-import { buildNavMeshBvTree } from "../query/nav-mesh-bv-tree";
+import type { Box3 } from '@/common/maaths';
+import type { NavMeshTile, NavMesh, NavMeshPolyDetail, NavMeshPoly } from '../query';
+import { MESH_NULL_IDX, POLY_NEIS_FLAG_EXT_LINK } from './common';
+import { buildNavMeshBvTree } from '../query/nav-mesh-bv-tree';
+import { NavMeshPolyType } from '../query/nav-mesh';
 
 /** the source data used to create a navigation mesh tile */
 export type NavMeshTileParams = {
@@ -94,7 +95,7 @@ export type CreateNavMeshTileResult = {
     success: boolean;
     status: CreateNavMeshTileStatus;
     tile: NavMeshTile | undefined;
-}
+};
 
 export const createNavMeshTile = (params: NavMeshTileParams): CreateNavMeshTileResult => {
     if (params.polyMesh.nVertices <= 0) {
@@ -151,6 +152,7 @@ export const createNavMeshTile = (params: NavMeshTileParams): CreateNavMeshTileR
     // create polys from input data
     for (let i = 0; i < params.polyMesh.nPolys; i++) {
         const poly: NavMeshPoly = {
+            type: NavMeshPolyType.GROUND,
             links: [],
             vertices: [],
             neis: [],
@@ -160,14 +162,8 @@ export const createNavMeshTile = (params: NavMeshTileParams): CreateNavMeshTileR
 
         // extract polygon data for this polygon
         const polyStart = i * nvp * 2;
-        const vertIndices = params.polyMesh.polys.slice(
-            polyStart,
-            polyStart + nvp,
-        );
-        const neiData = params.polyMesh.polys.slice(
-            polyStart + nvp,
-            polyStart + nvp * 2,
-        );
+        const vertIndices = params.polyMesh.polys.slice(polyStart, polyStart + nvp);
+        const neiData = params.polyMesh.polys.slice(polyStart + nvp, polyStart + nvp * 2);
 
         // build vertex indices and neighbor data
         for (let j = 0; j < nvp; j++) {
@@ -233,7 +229,7 @@ export const createNavMeshTile = (params: NavMeshTileParams): CreateNavMeshTileR
                 trianglesCount: trianglesCount,
             };
 
-            tile.detailMeshes.push(detailMesh);
+            tile.detailMeshes[i] = detailMesh;
 
             if (nDetailVertices - nPolyVertices > 0) {
                 for (let j = nPolyVertices; j < nDetailVertices; j++) {
@@ -266,8 +262,8 @@ const createDetailMeshFromPolys = (tile: NavMeshTile) => {
 
     let tbase = 0;
 
-    for (let i = 0; i < tile.polys.length; i++) {
-        const poly = tile.polys[i];
+    for (const polyId in tile.polys) {
+        const poly = tile.polys[polyId];
         const nv = poly.vertices.length;
 
         // Create detail mesh descriptor for this polygon
@@ -278,7 +274,7 @@ const createDetailMeshFromPolys = (tile: NavMeshTile) => {
             trianglesCount: nv - 2, // Number of triangles in fan triangulation
         };
 
-        detailMeshes.push(detailMesh);
+        detailMeshes[polyId] = detailMesh;
 
         // Triangulate polygon using fan triangulation (local indices within the polygon)
         for (let j = 2; j < nv; j++) {

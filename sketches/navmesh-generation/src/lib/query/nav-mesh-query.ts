@@ -92,21 +92,21 @@ export const getTileAndPolyByRef = (
     ref: PolyRef,
     navMesh: NavMesh,
 ): { tile: NavMeshTile; poly: NavMeshPoly; polyIndex: number } | null => {
-    const [tileId, polyIndex] = desPolyRef(ref);
+    const [tileId, polyId] = desPolyRef(ref);
 
     const tile = navMesh.tiles[tileId];
     if (!tile) {
         return null;
     }
 
-    if (polyIndex >= tile.polys.length) {
-        return null;
-    }
+    // if (polyIndex >= tile.polys.length) {
+    //     return null;
+    // }
 
     return {
         tile,
-        poly: tile.polys[polyIndex],
-        polyIndex,
+        poly: tile.polys[polyId],
+        polyIndex: polyId,
     };
 };
 
@@ -517,9 +517,9 @@ export const queryPolygonsInTile = (tile: NavMeshTile, bounds: Box3, filter: Que
             const isLeafNode = node.i >= 0;
 
             if (isLeafNode && overlap) {
-                const polyIndex = node.i;
-                const poly = tile.polys[polyIndex];
-                const ref: PolyRef = serPolyRef(tile.id, polyIndex);
+                const polyId = node.i;
+                const poly = tile.polys[polyId];
+                const ref: PolyRef = serPolyRef(tile.id, polyId);
 
                 if ((poly.flags & filter.includeFlags) !== 0 && (poly.flags & filter.excludeFlags) === 0) {
                     if (!filter.passFilter || filter.passFilter(poly, ref, tile)) {
@@ -539,8 +539,8 @@ export const queryPolygonsInTile = (tile: NavMeshTile, bounds: Box3, filter: Que
         const qmin = bounds[0];
         const qmax = bounds[1];
 
-        for (let i = 0; i < tile.polys.length; i++) {
-            const poly = tile.polys[i];
+        for (const polyId in tile.polys) {
+            const poly = tile.polys[polyId];
 
             // Do not return off-mesh connection polygons.
             // TODO: uncomment when poly.type is available
@@ -549,7 +549,7 @@ export const queryPolygonsInTile = (tile: NavMeshTile, bounds: Box3, filter: Que
             // }
 
             // Must pass filter
-            const ref: PolyRef = serPolyRef(tile.id, i);
+            const ref: PolyRef = serPolyRef(tile.id, polyId);
             if ((poly.flags & filter.includeFlags) === 0 || (poly.flags & filter.excludeFlags) !== 0) {
                 continue;
             }
@@ -645,7 +645,7 @@ const getPortalPoints = (
 
     for (const linkIndex of fromPoly.links) {
         const link = fromTile.links[linkIndex];
-        if (link?.ref === toPolyRef) {
+        if (link?.neighbourRef === toPolyRef) {
             // Found the link to the target polygon.
             toLink = link;
             break;
@@ -718,9 +718,9 @@ const isValidPolyRef = (navMesh: NavMesh, polyRef: PolyRef): boolean => {
         return false;
     }
 
-    if (polyIndex < 0 || polyIndex >= tile.polys.length) {
-        return false;
-    }
+    // if (polyIndex < 0 || polyIndex >= tile.polys.length) {
+    //     return false;
+    // }
 
     const poly = tile.polys[polyIndex];
 
@@ -863,7 +863,7 @@ export const findPath = (
 
         // expand the search with poly links
         for (const link of currentPoly.links) {
-            const neighbourPolyRef = currentTile.links[link].ref;
+            const neighbourPolyRef = currentTile.links[link].neighbourRef;
 
             // skip invalid ids and do not expand back to where we came from
             if (!neighbourPolyRef || neighbourPolyRef === parentPolyRef) {
