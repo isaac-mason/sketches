@@ -225,14 +225,13 @@ export const create = (): NavMesh => {
 export const worldToTilePosition = (
     outTilePosition: Vec2,
     navMesh: NavMesh,
-    worldX: number,
-    worldY: number,
+    worldPosition: Vec3,
 ) => {
     outTilePosition[0] = Math.floor(
-        (worldX - navMesh.origin[0]) / navMesh.tileWidth,
+        (worldPosition[0] - navMesh.origin[0]) / navMesh.tileWidth,
     );
     outTilePosition[1] = Math.floor(
-        (worldY - navMesh.origin[2]) / navMesh.tileHeight,
+        (worldPosition[2] - navMesh.origin[2]) / navMesh.tileHeight,
     );
     return outTilePosition;
 };
@@ -656,11 +655,6 @@ export const addTile = (navMesh: NavMesh, tile: NavMeshTile) => {
         );
 
         for (const neighbourTile of neighbourTiles) {
-            console.log(
-                tile.id,
-                'connecting with neighbour tile',
-                neighbourTile.id,
-            );
             connectExternalLinks(tile, neighbourTile, side);
             connectExternalLinks(neighbourTile, tile, oppositeTile(side));
             // connectExtOffMeshLinks(navMeshTile, neighbourTile, side);

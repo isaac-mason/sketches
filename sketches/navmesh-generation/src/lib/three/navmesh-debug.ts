@@ -17,6 +17,7 @@ import {
 } from '../generate';
 import type { NavMesh, NavMeshTile, PolyRef } from '../query/nav-mesh';
 import { desPolyRef } from '../query/nav-mesh';
+import type { SearchNodePool, SearchNodeRef } from '../query/search';
 
 type DebugObject = {
     object: THREE.Object3D;
@@ -2644,3 +2645,109 @@ export function createNavMeshPortalsHelper(navMesh: NavMesh): DebugObject {
         },
     };
 }
+
+/**
+ * Debug helper equivalent to duDebugDrawNavMeshNodes.
+ * Renders search nodes (A* / pathfinding) as points with lines to their parent nodes.
+ */
+export function createSearchNodesHelper(nodePool: SearchNodePool): DebugObject {
+    const group = new THREE.Group();
+    const disposables: (() => void)[] = [];
+
+    if (!nodePool || Object.keys(nodePool).length === 0) {
+        return { object: group, dispose: () => {} };
+    }
+
+    const yOffset = 0.5; // matches Detour off = 0.5f
+    const pointPositions: number[] = [];
+    const pointColors: number[] = [];
+    const linePositions: number[] = [];
+    const lineColors: number[] = [];
+
+    // Color (255,192,0) -> (1, 0.7529, 0)
+    const pointColor = new THREE.Color(1.0, 192 / 255, 0.0);
+    const lineColor = new THREE.Color(1.0, 192 / 255, 0.0);
+
+    for (const key in nodePool) {
+        const node = nodePool[key as SearchNodeRef];
+        const [x, y, z] = node.position;
+        pointPositions.push(x, y + yOffset, z);
+        pointColors.push(pointColor.r, pointColor.g, pointColor.b);
+    }
+
+    // Lines to parents
+    for (const key in nodePool) {
+        const node = nodePool[key as SearchNodeRef];
+        if (!node.parent) continue;
+        const parent = nodePool[node.parent];
+        if (!parent) continue;
+        const [cx, cy, cz] = node.position;
+        const [px, py, pz] = parent.position;
+        linePositions.push(cx, cy + yOffset, cz, px, py + yOffset, pz);
+        lineColors.push(
+            lineColor.r,
+            lineColor.g,
+            lineColor.b,
+            lineColor.r,
+            lineColor.g,
+            lineColor.b,
+        );
+    }
+
+    if (pointPositions.length > 0) {
+        const geom = new THREE.BufferGeometry();
+        geom.setAttribute(
+            'position',
+            new THREE.BufferAttribute(new Float32Array(pointPositions), 3),
+        );
+        geom.setAttribute(
+            'color',
+            new THREE.BufferAttribute(new Float32Array(pointColors), 3),
+        );
+        const mat = new THREE.PointsMaterial({
+            size: 6,
+            sizeAttenuation: false,
+            vertexColors: true,
+            transparent: true,
+            opacity: 1.0,
+        });
+        const points = new THREE.Points(geom, mat);
+        group.add(points);
+        disposables.push(() => {
+            geom.dispose();
+            mat.dispose();
+        });
+    }
+
+    if (linePositions.length > 0) {
+        const geom = new THREE.BufferGeometry();
+        geom.setAttribute(
+            'position',
+            new THREE.BufferAttribute(new Float32Array(linePositions), 3),
+        );
+        geom.setAttribute(
+            'color',
+            new THREE.BufferAttribute(new Float32Array(lineColors), 3),
+        );
+        const mat = new THREE.LineBasicMaterial({
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.5,
+            linewidth: 2.0,
+        });
+        const lines = new THREE.LineSegments(geom, mat);
+        group.add(lines);
+        disposables.push(() => {
+            geom.dispose();
+            mat.dispose();
+        });
+    }
+
+    return {
+        object: group,
+        dispose: () => {
+            for (const d of disposables) d();
+        },
+    };
+}
+

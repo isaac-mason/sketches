@@ -8,7 +8,7 @@ import {
     vec3,
 } from '@/common/maaths';
 import { OrbitControls, useGLTF } from '@react-three/drei';
-import { useThree } from '@react-three/fiber';
+import { ThreeEvent, useThree } from '@react-three/fiber';
 import { Leva, useControls } from 'leva';
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
@@ -62,7 +62,9 @@ import {
     createTriangleAreaIdsHelper,
     createTriangleMeshWithAreasHelper,
     getPositionsAndIndices,
+    createSearchNodesHelper,
 } from './lib/three';
+import { worldToTilePosition } from './lib/query/nav-mesh';
 
 const DungeonModel = () => {
     const gltf = useGLTF('/dungeon.gltf');
@@ -905,8 +907,8 @@ const TiledNavMesh = () => {
             );
 
             /* 4. rasterize the triangles to a voxel heightfield */
-            const heightfieldWidth = tileSize + borderSize * 2;
-            const heightfieldHeight = tileSize + borderSize * 2;
+            const heightfieldWidth = tileSizeVoxels + borderSize * 2;
+            const heightfieldHeight = tileSizeVoxels + borderSize * 2;
 
             const heightfield = createHeightfield(
                 heightfieldWidth,
@@ -1002,10 +1004,12 @@ const TiledNavMesh = () => {
         };
 
         /* 0. define generation parameters */
-        const tileSize = 64;
-
+        
         const cellSize = 0.1;
         const cellHeight = 0.1;
+        
+        const tileSizeVoxels = 64;
+        const tileSizeWorld = tileSizeVoxels * cellSize;
 
         const walkableRadiusWorld = 0.2;
         const walkableRadiusVoxels = Math.ceil(walkableRadiusWorld / cellSize);
@@ -1057,11 +1061,9 @@ const TiledNavMesh = () => {
         const gridSize = calculateGridSize(meshBounds, cellSize, vec2.create());
 
         const nav = navMesh.create();
-        nav.tileWidth = tileSize;
-        nav.tileHeight = tileSize;
+        nav.tileWidth = tileSizeWorld;
+        nav.tileHeight = tileSizeWorld;
         nav.origin = meshBounds[0];
-        // [0, 0, 0]
-        // vec3.copy(nav.origin, polyMesh.bounds[0]);
 
         /* 3. generate tiles */
 
@@ -1079,21 +1081,21 @@ const TiledNavMesh = () => {
             polyMeshDetail: [],
         };
 
-        const nTilesX = Math.floor((gridSize[0] + tileSize - 1) / tileSize);
-        const nTilesY = Math.floor((gridSize[1] + tileSize - 1) / tileSize);
+        const nTilesX = Math.floor((gridSize[0] + tileSizeVoxels - 1) / tileSizeVoxels);
+        const nTilesY = Math.floor((gridSize[1] + tileSizeVoxels - 1) / tileSizeVoxels);
 
         for (let tileX = 0; tileX < nTilesX; tileX++) {
             for (let tileY = 0; tileY < nTilesY; tileY++) {
                 const tileBounds: Box3 = [
                     [
-                        meshBounds[0][0] + tileX * tileSize * cellSize,
+                        meshBounds[0][0] + tileX * tileSizeWorld,
                         meshBounds[0][1],
-                        meshBounds[0][2] + tileY * tileSize * cellSize,
+                        meshBounds[0][2] + tileY * tileSizeWorld,
                     ],
                     [
-                        meshBounds[0][0] + (tileX + 1) * tileSize * cellSize,
-                        meshBounds[0][1] + tileSize * cellHeight,
-                        meshBounds[0][2] + (tileY + 1) * tileSize * cellSize,
+                        meshBounds[0][0] + (tileX + 1) * tileSizeWorld,
+                        meshBounds[1][1],
+                        meshBounds[0][2] + (tileY + 1) * tileSizeWorld,
                     ],
                 ];
 
@@ -1166,30 +1168,39 @@ const TiledNavMesh = () => {
 
         console.log('nav', nav);
 
-        // // testing: find nearest poly
-        // const nearestPolyResult = navMeshQuery.findNearestPoly(
-        //     navMeshQuery.createFindNearestPolyResult(),
-        //     nav,
-        //     [0, 3.7, 2.5],
-        //     [1, 1, 1],
-        //     navMeshQuery.DEFAULT_QUERY_FILTER,
-        // );
-        // console.log('nearestPolyResult', nearestPolyResult);
+        const disposables: (() => void)[] = [];
 
-        // const navMeshPolyHelper = createNavMeshPolyHelper(
-        //     nav,
-        //     nearestPolyResult.nearestPolyRef,
-        //     new THREE.Color('red'),
-        // );
-        // navMeshPolyHelper.object.position.y += 0.25;
-        // scene.add(navMeshPolyHelper.object);
+        // testing: find nearest poly
+        const nearestPolyResult = navMeshQuery.findNearestPoly(
+            navMeshQuery.createFindNearestPolyResult(),
+            nav,
+            [-0.22592914810594739, 3.7884295483375467, 2.1988403851931517],
+            [1, 1, 1],
+            navMeshQuery.DEFAULT_QUERY_FILTER,
+        );
+        console.log('nearestPolyResult', nearestPolyResult);
+
+        if (nearestPolyResult.success) {
+            const navMeshPolyHelper = createNavMeshPolyHelper(
+                nav,
+                nearestPolyResult.nearestPolyRef,
+                new THREE.Color('red'),
+            );
+            navMeshPolyHelper.object.position.y += 0.25;
+            scene.add(navMeshPolyHelper.object);
+
+            disposables.push(() => {
+                scene.remove(navMeshPolyHelper.object);
+                navMeshPolyHelper.dispose();
+            });
+        }
 
         // testing: find path
         const startPosition: Vec3 = [
             -3.9470102457140324, 0.26650271598300623, 4.713808784000584,
         ];
         const endPosition: Vec3 = [
-            2.517768839689215, 2.3875615713045564, -2.2006116858522327,
+            2.5106054275953076, 2.3875614958052864, -2.0952471700431685
         ];
 
         const startPositionNearestPoly = navMeshQuery.findNearestPoly(
@@ -1206,6 +1217,16 @@ const TiledNavMesh = () => {
             [1, 1, 1],
             navMeshQuery.DEFAULT_QUERY_FILTER,
         );
+
+        console.log("findPath params",
+            {
+                nav,
+                startPositionNearestPoly,
+                endPositionNearestPoly,
+                startPosition,
+                endPosition
+            }
+        )
 
         const findPathResult = navMeshQuery.findPath(
             nav,
@@ -1227,6 +1248,21 @@ const TiledNavMesh = () => {
             polyHelper.object.position.y += 0.25;
             scene.add(polyHelper.object);
         }
+
+        if (findPathResult.intermediates?.nodes) {
+            const searchNodesHelper = createSearchNodesHelper(findPathResult.intermediates.nodes);
+            scene.add(searchNodesHelper.object);
+            disposables.push(() => {
+                scene.remove(searchNodesHelper.object);
+                searchNodesHelper.dispose();
+            });
+        }
+
+        return () => {
+            for (const dispose of disposables) {
+                dispose();
+            }
+        };
     }, [scene]);
 
     // debug view of the mesh bounds
@@ -1499,12 +1535,20 @@ const TiledNavMesh = () => {
         };
     }, [showNavMeshPortals, nav, scene]);
 
+    const onPointerDown = (e: ThreeEvent<PointerEvent>) => {
+        console.log("point", e.point);
+
+        if (nav) {
+            console.log("tile xy", worldToTilePosition(vec2.create(), nav, e.point.toArray()));
+        }
+    }
+
     return (
         <>
             <group
                 ref={group}
                 visible={showMesh}
-                onPointerDown={(e) => console.log(e.point)}
+                onPointerDown={onPointerDown}
             >
                 {/* <DungeonModel /> */}
                 <NavTestModel />
@@ -2007,7 +2051,7 @@ const RaycastBPA = () => {
 export function Sketch() {
     const { method } = useControls('generation method', {
         method: {
-            value: 'solo-nav-mesh',
+            value: 'tiled-nav-mesh',
             options: {
                 'Solo NavMesh': 'solo-nav-mesh',
                 'Tiled NavMesh': 'tiled-nav-mesh',
