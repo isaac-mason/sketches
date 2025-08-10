@@ -1,5 +1,5 @@
-import type { Box3, Vec2, Vec3 } from '@/common/maaths';
-import { POLY_NEIS_FLAG_EXT_LINK } from '../generate';
+import { vec3, type Box3, type Vec2, type Vec3 } from '@/common/maaths';
+import { POLY_NEIS_FLAG_EXT_LINK, POLY_NEIS_FLAG_EXT_LINK_DIR_MASK } from '../generate';
 
 /** a serialised polygon reference, in the format `${tile id}.${index of polygon within tile}` */
 export type PolyRef = `${number},${number}`;
@@ -189,10 +189,20 @@ export type NavMeshTile = {
      */
     cellHeight: number;
 
-    // TODO: evaluate if necessary for nav mesh querying
-    // float walkableHeight;	///< The agent height. [Unit: wu]
-    // float walkableRadius;	///< The agent radius. [Unit: wu]
-    // float walkableClimb;	///< The agent maximum traversable ledge. (Up/Down) [Unit: wu]
+    /**
+     * The agent height. [Unit: wu]
+     */
+    walkableHeight: number;
+
+    /**
+     * The agent radius. [Unit: wu]
+     */
+    walkableRadius: number;
+
+    /**
+     * The agent maximum traversable ledge. (Up/Down) [Unit: wu]
+     */
+    walkableClimb: number;
 };
 
 export const create = (): NavMesh => {
@@ -251,6 +261,207 @@ const createInternalLinks = (tile: NavMeshTile) => {
     }
 };
 
+const oppositeTile = (side: number): number => (side + 4) & 0x7;
+
+// Compute a scalar coordinate along the primary axis for the slab
+const getSlabCoord = (v: Vec3, side: number): number => {
+    if (side === 0 || side === 4) return v[0]; // x portals measure by x
+    if (side === 2 || side === 6) return v[2]; // z portals measure by z
+    return 0;
+};
+
+// Calculate 2D endpoints (u,y) for edge segment projected onto the portal axis plane.
+// For x-portals (side 0/4) we use u = z, for z-portals (2/6) u = x.
+const calcSlabEndPoints = (va: Vec3, vb: Vec3, bmin: Vec3, bmax: Vec3, side: number) => {
+    if (side === 0 || side === 4) {
+        if (va[2] < vb[2]) {
+            bmin[0] = va[2]; bmin[1] = va[1];
+            bmax[0] = vb[2]; bmax[1] = vb[1];
+        } else {
+            bmin[0] = vb[2]; bmin[1] = vb[1];
+            bmax[0] = va[2]; bmax[1] = va[1];
+        }
+    } else if (side === 2 || side === 6) {
+        if (va[0] < vb[0]) {
+            bmin[0] = va[0]; bmin[1] = va[1];
+            bmax[0] = vb[0]; bmax[1] = vb[1];
+        } else {
+            bmin[0] = vb[0]; bmin[1] = vb[1];
+            bmax[0] = va[0]; bmax[1] = va[1];
+        }
+    }
+};
+
+// Overlap test of two edge slabs in (u,y) space, with tolerances px (horizontal pad) and py (vertical threshold)
+const overlapSlabs = (amin: Vec3, amax: Vec3, bmin: Vec3, bmax: Vec3, px: number, py: number): boolean => {
+    const minx = Math.max(amin[0] + px, bmin[0] + px);
+    const maxx = Math.min(amax[0] - px, bmax[0] - px);
+    if (minx > maxx) return false; // no horizontal overlap
+
+    // Vertical overlap test via line interpolation along u
+    const ad = (amax[1] - amin[1]) / (amax[0] - amin[0]);
+    const ak = amin[1] - ad * amin[0];
+    const bd = (bmax[1] - bmin[1]) / (bmax[0] - bmin[0]);
+    const bk = bmin[1] - bd * bmin[0];
+    const aminy = ad * minx + ak;
+    const amaxy = ad * maxx + ak;
+    const bminy = bd * minx + bk;
+    const bmaxy = bd * maxx + bk;
+    const dmin = bminy - aminy;
+    const dmax = bmaxy - amaxy;
+    if (dmin * dmax < 0) return true; // crossing
+    const thr = (py * 2) * (py * 2);
+    if (dmin * dmin <= thr || dmax * dmax <= thr) return true; // near endpoints
+    return false;
+};
+
+// Scratch arrays for portal finding
+const _amin = vec3.create();
+const _amax = vec3.create();
+const _bmin = vec3.create();
+const _bmax = vec3.create();
+// const _neia = new Float32Array(4 * 2); // up to 4 connections, storing min/max u for each
+
+// Find connecting external polys between edge va->vb in target tile on opposite side.
+// Returns array of { ref, tmin, tmax } describing overlapping intervals along the edge.
+const findConnectingPolys = (
+    va: Vec3,
+    vb: Vec3,
+    target: NavMeshTile | undefined,
+    side: number,
+): { ref: PolyRef; umin: number; umax: number }[] => {
+    if (!target) return [];
+    calcSlabEndPoints(va, vb, _amin, _amax, side); // store u,y
+    const apos = getSlabCoord(va, side);
+
+    const results: { ref: PolyRef; umin: number; umax: number }[] = [];
+    // Iterate target polys & their boundary edges (those marked ext link in that direction)
+    for (let i = 0; i < target.polys.length; i++) {
+        const poly = target.polys[i];
+        const nv = poly.vertices.length;
+        for (let j = 0; j < nv; j++) {
+            const nei = poly.neis[j];
+            if ((nei & POLY_NEIS_FLAG_EXT_LINK) === 0) continue; // not an external edge
+            const dir = nei & POLY_NEIS_FLAG_EXT_LINK_DIR_MASK;
+            if (dir !== side) continue; // only edges that face the specified side from target perspective
+
+            const vcIndex = poly.vertices[j];
+            const vdIndex = poly.vertices[(j + 1) % nv];
+            const vc: Vec3 = [
+                target.vertices[vcIndex * 3],
+                target.vertices[vcIndex * 3 + 1],
+                target.vertices[vcIndex * 3 + 2],
+            ];
+            const vd: Vec3 = [
+                target.vertices[vdIndex * 3],
+                target.vertices[vdIndex * 3 + 1],
+                target.vertices[vdIndex * 3 + 2],
+            ];
+
+            const bpos = getSlabCoord(vc, side);
+            if (Math.abs(apos - bpos) > 0.01) continue; // not co-planar enough
+
+            calcSlabEndPoints(vc, vd, _bmin, _bmax, side);
+            if (!overlapSlabs(_amin, _amax, _bmin, _bmax, 0.01, target.walkableClimb)) continue;
+
+            // Record overlap interval
+            results.push({
+                ref: serPolyRef(target.id, i),
+                umin: Math.max(_amin[0], _bmin[0]),
+                umax: Math.min(_amax[0], _bmax[0]),
+            });
+            break; // proceed next polygon (edge matched)
+        }
+    }
+    return results;
+};
+
+
+// int dtNavMesh::findConnectingPolys(const float* va, const float* vb,
+// 								   const dtMeshTile* tile, int side,
+								//    dtPolyRef* con, float* conarea, int maxcon) const
+const _va = vec3.create();
+const _vb = vec3.create();
+
+const connectExtLinks = (tile: NavMeshTile, target: NavMeshTile, side: number) => {
+    // connect border links
+    for (let i = 0; i < tile.polys.length; i++) {
+        const poly = tile.polys[i];
+
+        const nv = poly.vertices.length;
+        for (let j = 0; j < nv; j++) {
+            // skip non-portal edges
+            if ((poly.neis[j] & POLY_NEIS_FLAG_EXT_LINK) === 0) {
+                continue;
+            }
+
+            const dir = poly.neis[j] & POLY_NEIS_FLAG_EXT_LINK_DIR_MASK;
+            if (side !== -1 && dir !== side) {
+                continue;
+            }
+
+            // Create new links
+            const va = vec3.fromArray(_va, tile.vertices, poly.vertices[j] * 3);
+            const vb = vec3.fromArray(_vb, tile.vertices, poly.vertices[(j + 1) % nv] * 3);
+
+            // Find overlaps against target tile along the opposite side direction
+            const overlaps = findConnectingPolys(va, vb, target, oppositeTile(dir));
+            for (const o of overlaps) {
+                // Parameterize overlap interval along this edge to [0,1]
+                let tmin: number;
+                let tmax: number;
+                if (dir === 0 || dir === 4) { // x portals param by z
+                    tmin = (o.umin - va[2]) / (vb[2] - va[2]);
+                    tmax = (o.umax - va[2]) / (vb[2] - va[2]);
+                } else { // z portals param by x
+                    tmin = (o.umin - va[0]) / (vb[0] - va[0]);
+                    tmax = (o.umax - va[0]) / (vb[0] - va[0]);
+                }
+                if (tmin > tmax) { const tmp = tmin; tmin = tmax; tmax = tmp; }
+                tmin = Math.max(0, Math.min(1, tmin));
+                tmax = Math.max(0, Math.min(1, tmax));
+
+                const link: NavMeshLink = {
+                    ref: o.ref,
+                    edge: j,
+                    side: dir,
+                    bmin: Math.round(tmin * 255),
+                    bmax: Math.round(tmax * 255),
+                };
+                tile.links.push(link);
+                poly.links.push(tile.links.length - 1);
+            }
+        }
+    }
+}
+
+const disconnectExtLinks = (tile: NavMeshTile, target: NavMeshTile) => {
+    
+}
+
+const getNeighbourTilesAt = (
+    navMesh: NavMesh,
+    x: number,
+    y: number,
+    side: number,
+): NavMeshTile[] => {
+    let nx = x;
+    let ny = y;
+
+    switch (side) {
+        case 0: nx++; break;
+        case 1: nx++; ny++; break;
+        case 2: ny++; break;
+        case 3: nx--; ny++; break;
+        case 4: nx--; break;
+        case 5: nx--; ny--; break;
+        case 6: ny--; break;
+        case 7: nx++; ny--; break;
+    }
+
+    return getTilesAt(navMesh, nx, ny);
+};
+
 export const addTile = (navMesh: NavMesh, navMeshTile: NavMeshTile) => {
     const tileHash = getTilePositionHash(
         navMeshTile.tileX,
@@ -268,8 +479,31 @@ export const addTile = (navMesh: NavMesh, navMeshTile: NavMeshTile) => {
     // create internal links within the tile
     createInternalLinks(navMeshTile);
 
-    // TODO: create external links to neighboring tiles
-    // ...
+    // create connections with neighbour tiles
+
+    // connect with layers in current tile.
+    const tiles = getTilesAt(navMesh, navMeshTile.tileX, navMeshTile.tileY);
+
+    for (const tile of tiles) {
+        if (tile.id === navMeshTile.id) continue;
+
+        connectExtLinks(tile, navMeshTile, -1);
+        connectExtLinks(navMeshTile, tile, -1);
+        // connectExtOffMeshLinks(tile, navMeshTile, -1);
+        // connectExtOffMeshLinks(navMeshTile, tile, -1);
+    }
+
+    // connect with neighbouring tiles
+    for (let side = 0; side < 8; side++) {
+        const neighbourTiles = getNeighbourTilesAt(navMesh, navMeshTile.tileX, navMeshTile.tileY, side);
+
+        for (const neighbourTile of neighbourTiles) {
+            connectExtLinks(navMeshTile, neighbourTile, side);
+            connectExtLinks(neighbourTile, navMeshTile, oppositeTile(side));
+            // connectExtOffMeshLinks(navMeshTile, neighbourTile, side);
+            // connectExtOffMeshLinks(neighbourTile, navMeshTile, oppositeTile(side));
+        }
+    }
 };
 
 export const removeTile = (

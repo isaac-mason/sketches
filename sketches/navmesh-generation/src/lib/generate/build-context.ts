@@ -7,20 +7,20 @@ export enum BuildContextLogType {
 export type BuildContextLog = {
     type: BuildContextLogType;
     message: string;
-}
+};
 
 export type BuildContextTime = {
     name: string;
     duration: number;
-}
+};
 
-export type BuildContext = {
+export type BuildContextState = {
     logs: BuildContextLog[];
     times: BuildContextTime[];
     _startTimes: Record<string, number>;
-}
+};
 
-const create = (): BuildContext => {
+const create = (): BuildContextState => {
     return {
         logs: [],
         times: [],
@@ -28,11 +28,11 @@ const create = (): BuildContext => {
     };
 };
 
-const start = (context: BuildContext, name: string): void => {
+const start = (context: BuildContextState, name: string): void => {
     context._startTimes[name] = performance.now();
 };
 
-const end = (context: BuildContext, name: string): void => {
+const end = (context: BuildContextState, name: string): void => {
     const now = performance.now();
     const start = context._startTimes[name];
     const duration = now - start;
@@ -40,31 +40,31 @@ const end = (context: BuildContext, name: string): void => {
     context.times.push({ name, duration });
 };
 
-const info = (context: BuildContext, message: string): void => {
+const info = (context: BuildContextState, message: string): void => {
     context.logs.push({
         type: BuildContextLogType.INFO,
         message,
     });
 };
 
-const warn = (context: BuildContext, message: string): void => {
+const warn = (context: BuildContextState, message: string): void => {
     context.logs.push({
         type: BuildContextLogType.WARNING,
         message,
     });
 };
 
-const error = (context: BuildContext, message: string): void => {
+const error = (context: BuildContextState, message: string): void => {
     context.logs.push({
         type: BuildContextLogType.ERROR,
         message,
     });
 };
 
-export const buildContext = {
+export const BuildContext = {
     create,
-    startTimer: start,
-    endTimer: end,
+    start,
+    end,
     info,
     warn,
     error,

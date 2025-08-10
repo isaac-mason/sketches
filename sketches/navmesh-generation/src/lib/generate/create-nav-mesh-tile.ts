@@ -74,10 +74,14 @@ export type NavMeshTileParams = {
     /** the y-axis cell height of the polygon mesh */
     cellHeight: number;
 
-    // TODO: necessary for nav mesh querying?
-    // float walkableHeight;	///< The agent height. [Unit: wu]
-    // float walkableRadius;	///< The agent radius. [Unit: wu]
-    // float walkableClimb;	///< The agent maximum traversable ledge. (Up/Down) [Unit: wu]
+    /** the agent height in world units */
+    walkableHeight: number;
+
+    /** the agent radius in world units */
+    walkableRadius: number;
+
+    /** the agent maximum traversable ledge. Up/Down in world units */
+    walkableClimb: number;
 };
 
 export enum CreateNavMeshTileStatus {
@@ -124,6 +128,9 @@ export const createNavMeshTile = (params: NavMeshTileParams): CreateNavMeshTileR
         bvTree: null,
         cellSize: params.cellSize,
         cellHeight: params.cellHeight,
+        walkableClimb: params.walkableClimb,
+        walkableHeight: params.walkableHeight,
+        walkableRadius: params.walkableRadius,
     };
 
     const cellSize = params.cellSize;

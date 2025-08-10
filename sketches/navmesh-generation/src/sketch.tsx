@@ -24,7 +24,7 @@ import {
     type TriangleMesh,
     WALKABLE_AREA,
     buildCompactHeightfield,
-    buildContext,
+    BuildContext,
     buildContours,
     buildDistanceField,
     buildPolyMesh,
@@ -191,7 +191,7 @@ const SoloNavMesh = () => {
         const detailSampleDistance = 6;
         const detailSampleMaxError = 1;
 
-        const ctx = buildContext.create();
+        const ctx = BuildContext.create();
 
         /* 1. get positions and indices from THREE.Mesh instances in the group */
 
@@ -442,6 +442,9 @@ const SoloNavMesh = () => {
             buildBvTree: true,
             cellSize,
             cellHeight,
+            walkableHeight: walkableHeightWorld,
+            walkableRadius: walkableRadiusWorld,
+            walkableClimb: walkableClimbWorld,
         };
 
         const tileResult = createNavMeshTile(navMeshTileParams);
@@ -1002,7 +1005,7 @@ const TiledNavMesh = () => {
         const detailSampleDistance = 6;
         const detailSampleMaxError = 1;
 
-        const ctx = buildContext.create();
+        const ctx = BuildContext.create();
 
         /* 1. get positions and indices from THREE.Mesh instances in the group */
 
@@ -1119,6 +1122,9 @@ const TiledNavMesh = () => {
                     buildBvTree: true,
                     cellSize,
                     cellHeight,
+                    walkableHeight: walkableHeightWorld,
+                    walkableRadius: walkableRadiusWorld,
+                    walkableClimb: walkableClimbWorld,
                 };
 
                 const tileResult = createNavMeshTile(navMeshTileParams);

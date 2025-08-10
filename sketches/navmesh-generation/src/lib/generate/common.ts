@@ -54,6 +54,7 @@ export const MAX_LAYERS = NOT_CONNECTED - 1;
 // A flag that indicates that an entity links to an external entity.
 // (E.g. A polygon edge is a portal that links to another polygon.)
 export const POLY_NEIS_FLAG_EXT_LINK = 0x8000;
+export const POLY_NEIS_FLAG_EXT_LINK_DIR_MASK = 0xff;
 
 // A value that indicates the entity does not link to anything.
 export const POLY_NEIS_FLAG_NULL_LINK = 0xffffffff;
