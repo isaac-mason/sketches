@@ -52,6 +52,7 @@ import {
     createHeightfieldHelper,
     createNavMeshBvTreeHelper,
     createNavMeshHelper,
+    createNavMeshPortalsHelper,
     createNavMeshPolyHelper,
     createPointSetHelper,
     createPolyMeshDetailHelper,
@@ -105,6 +106,7 @@ const SoloNavMesh = () => {
         showPolyMeshDetail,
         showNavMeshBvTree,
         showNavMesh,
+    showNavMeshPortals,
     } = useControls('solo-nav-mesh generation options', {
         showMesh: {
             label: 'Show Mesh',
@@ -152,6 +154,10 @@ const SoloNavMesh = () => {
         },
         showNavMesh: {
             label: 'Show Nav Mesh',
+            value: false,
+        },
+        showNavMeshPortals: {
+            label: 'Show Nav Mesh Portals',
             value: false,
         },
     });
@@ -692,6 +698,19 @@ const SoloNavMesh = () => {
         };
     }, [showNavMesh, nav, scene]);
 
+    // debug view of the nav mesh portals (after nav mesh)
+    useEffect(() => {
+        if (!nav || !showNavMeshPortals) return;
+
+        const debugObject = createNavMeshPortalsHelper(nav);
+        scene.add(debugObject.object);
+
+        return () => {
+            scene.remove(debugObject.object);
+            debugObject.dispose();
+        };
+    }, [showNavMeshPortals, nav, scene]);
+
     return (
         <>
             <group
@@ -743,6 +762,7 @@ const TiledNavMesh = () => {
         showPolyMeshDetail,
         showNavMeshBvTree,
         showNavMesh,
+        showNavMeshPortals,
     } = useControls('tiled-nav-mesh generation options', {
         showMesh: {
             label: 'Show Mesh',
@@ -794,6 +814,10 @@ const TiledNavMesh = () => {
         },
         showNavMesh: {
             label: 'Show Nav Mesh',
+            value: false,
+        },
+        showNavMeshPortals: {
+            label: 'Show Nav Mesh Portals',
             value: false,
         },
     });
@@ -1192,7 +1216,7 @@ const TiledNavMesh = () => {
             navMeshQuery.DEFAULT_QUERY_FILTER,
         );
 
-        console.log(findPathResult);
+        console.log("findPathResult", findPathResult);
 
         for (const poly of findPathResult.path) {
             const polyHelper = createNavMeshPolyHelper(
@@ -1461,6 +1485,19 @@ const TiledNavMesh = () => {
             debugObject.dispose();
         };
     }, [showNavMesh, nav, scene]);
+
+    // debug view of the nav mesh portals
+    useEffect(() => {
+        if (!nav || !showNavMeshPortals) return;
+
+        const debugObject = createNavMeshPortalsHelper(nav);
+        scene.add(debugObject.object);
+
+        return () => {
+            scene.remove(debugObject.object);
+            debugObject.dispose();
+        };
+    }, [showNavMeshPortals, nav, scene]);
 
     return (
         <>

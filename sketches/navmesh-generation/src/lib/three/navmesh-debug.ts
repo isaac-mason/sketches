@@ -1044,7 +1044,9 @@ export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
                 const vertIndex = vertices[k] * 3;
                 const x = orig[0] + polyMesh.vertices[vertIndex] * cs;
                 const y =
-                    orig[1] + (polyMesh.vertices[vertIndex + 1] + 1) * ch + 0.01;
+                    orig[1] +
+                    (polyMesh.vertices[vertIndex + 1] + 1) * ch +
+                    0.01;
                 const z = orig[2] + polyMesh.vertices[vertIndex + 2] * cs;
 
                 neighborLinePositions.push(x, y, z);
@@ -1091,7 +1093,9 @@ export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
                 const vertIndex = vertices[k] * 3;
                 const x = orig[0] + polyMesh.vertices[vertIndex] * cs;
                 const y =
-                    orig[1] + (polyMesh.vertices[vertIndex + 1] + 1) * ch + 0.01;
+                    orig[1] +
+                    (polyMesh.vertices[vertIndex + 1] + 1) * ch +
+                    0.01;
                 const z = orig[2] + polyMesh.vertices[vertIndex + 2] * cs;
 
                 boundaryLinePositions.push(x, y, z);
@@ -1818,7 +1822,9 @@ export function createPointSetHelper(pointSet: PointSet): DebugObject {
     };
 }
 
-export function createNavMeshTileBvTreeHelper(navMeshTile: NavMeshTile): DebugObject {
+export function createNavMeshTileBvTreeHelper(
+    navMeshTile: NavMeshTile,
+): DebugObject {
     const group = new THREE.Group();
     const disposables: (() => void)[] = [];
 
@@ -1846,7 +1852,7 @@ export function createNavMeshTileBvTreeHelper(navMeshTile: NavMeshTile): DebugOb
     // Draw BV nodes - only internal nodes (leaf indices are positive, internal are negative)
     for (let i = 0; i < navMeshTile.bvTree.nodes.length; i++) {
         const node = navMeshTile.bvTree.nodes[i];
-        
+
         // Leaf indices are positive.
         if (node.i < 0) continue;
 
@@ -1954,7 +1960,9 @@ export function createNavMeshHelper(navMesh: NavMesh): DebugObject {
         // Hash the value to generate a consistent color
         const hash = val * 137.5; // Use golden ratio approximation
         const hue = hash % 360;
-        return new THREE.Color(`hsl(${hue}, 70%, 60%)`).multiplyScalar(alpha / 255.0);
+        return new THREE.Color(`hsl(${hue}, 70%, 60%)`).multiplyScalar(
+            alpha / 255.0,
+        );
     };
 
     const areaToCol = (area: number): THREE.Color => {
@@ -2004,7 +2012,7 @@ export function createNavMeshHelper(navMesh: NavMesh): DebugObject {
         // Draw triangles for each polygon
         for (let i = 0; i < tile.polys.length; i++) {
             const poly = tile.polys[i];
-            
+
             // Skip off-mesh connections (not implemented yet)
             // if (poly.type === NavMeshPolyType.OFFMESH_CONNECTION) continue;
 
@@ -2038,10 +2046,20 @@ export function createNavMeshHelper(navMesh: NavMesh): DebugObject {
                         vz = tile.vertices[vBase + 2];
                     } else {
                         // Vertex from detail mesh - transform to world space
-                        const detailVertIndex = (polyDetail.verticesBase + vertIndex - poly.vertices.length) * 3;
-                        vx = tile.bounds[0][0] + tile.detailVertices[detailVertIndex];
-                        vy = tile.bounds[0][1] + tile.detailVertices[detailVertIndex + 1];
-                        vz = tile.bounds[0][2] + tile.detailVertices[detailVertIndex + 2];
+                        const detailVertIndex =
+                            (polyDetail.verticesBase +
+                                vertIndex -
+                                poly.vertices.length) *
+                            3;
+                        vx =
+                            tile.bounds[0][0] +
+                            tile.detailVertices[detailVertIndex];
+                        vy =
+                            tile.bounds[0][1] +
+                            tile.detailVertices[detailVertIndex + 1];
+                        vz =
+                            tile.bounds[0][2] +
+                            tile.detailVertices[detailVertIndex + 2];
                     }
 
                     triPositions.push(vx, vy, vz);
@@ -2060,19 +2078,27 @@ export function createNavMeshHelper(navMesh: NavMesh): DebugObject {
 
         // Draw polygon boundaries
         const drawPolyBoundaries = (isInner: boolean) => {
-            const linePositions = isInner ? interPolyLinePositions : outerPolyLinePositions;
-            const lineColors = isInner ? interPolyLineColors : outerPolyLineColors;
-            const color = isInner 
-                ? new THREE.Color().setRGB(0, 48 / 255, 64 / 255).multiplyScalar(32 / 255)
-                : new THREE.Color().setRGB(0, 48 / 255, 64 / 255).multiplyScalar(220 / 255);
+            const linePositions = isInner
+                ? interPolyLinePositions
+                : outerPolyLinePositions;
+            const lineColors = isInner
+                ? interPolyLineColors
+                : outerPolyLineColors;
+            const color = isInner
+                ? new THREE.Color()
+                      .setRGB(0, 48 / 255, 64 / 255)
+                      .multiplyScalar(32 / 255)
+                : new THREE.Color()
+                      .setRGB(0, 48 / 255, 64 / 255)
+                      .multiplyScalar(220 / 255);
 
             for (let i = 0; i < tile.polys.length; i++) {
                 const poly = tile.polys[i];
-                
+
                 for (let j = 0; j < poly.vertices.length; j++) {
                     const nj = (j + 1) % poly.vertices.length;
                     const nei = poly.neis[j];
-                    
+
                     // Check if this is the type of boundary we want
                     const isBoundary = (nei & POLY_NEIS_FLAG_EXT_LINK) !== 0;
                     if (isInner && isBoundary) continue; // Skip boundary edges for inner
@@ -2081,7 +2107,7 @@ export function createNavMeshHelper(navMesh: NavMesh): DebugObject {
                     // Get edge vertices
                     const polyVertIndex1 = poly.vertices[j];
                     const polyVertIndex2 = poly.vertices[nj];
-                    
+
                     const v1Base = polyVertIndex1 * 3;
                     const v2Base = polyVertIndex2 * 3;
 
@@ -2104,17 +2130,19 @@ export function createNavMeshHelper(navMesh: NavMesh): DebugObject {
 
         // Draw inter-poly boundaries (internal edges)
         drawPolyBoundaries(true);
-        
+
         // Draw outer poly boundaries (external edges)
         drawPolyBoundaries(false);
 
         // Draw vertices
-        const vertexColor = new THREE.Color().setRGB(0, 0, 0).multiplyScalar(196 / 255);
+        const vertexColor = new THREE.Color()
+            .setRGB(0, 0, 0)
+            .multiplyScalar(196 / 255);
         for (let i = 0; i < tile.vertices.length; i += 3) {
             const worldX = tile.vertices[i];
             const worldY = tile.vertices[i + 1];
             const worldZ = tile.vertices[i + 2];
-            
+
             vertexPositions.push(worldX, worldY, worldZ);
             vertexColors.push(vertexColor.r, vertexColor.g, vertexColor.b);
         }
@@ -2155,11 +2183,17 @@ export function createNavMeshHelper(navMesh: NavMesh): DebugObject {
             const interPolyGeometry = new THREE.BufferGeometry();
             interPolyGeometry.setAttribute(
                 'position',
-                new THREE.BufferAttribute(new Float32Array(interPolyLinePositions), 3),
+                new THREE.BufferAttribute(
+                    new Float32Array(interPolyLinePositions),
+                    3,
+                ),
             );
             interPolyGeometry.setAttribute(
                 'color',
-                new THREE.BufferAttribute(new Float32Array(interPolyLineColors), 3),
+                new THREE.BufferAttribute(
+                    new Float32Array(interPolyLineColors),
+                    3,
+                ),
             );
 
             const interPolyMaterial = new THREE.LineBasicMaterial({
@@ -2169,7 +2203,10 @@ export function createNavMeshHelper(navMesh: NavMesh): DebugObject {
                 linewidth: 1.5,
             });
 
-            const interPolyLines = new THREE.LineSegments(interPolyGeometry, interPolyMaterial);
+            const interPolyLines = new THREE.LineSegments(
+                interPolyGeometry,
+                interPolyMaterial,
+            );
             group.add(interPolyLines);
 
             disposables.push(() => {
@@ -2183,11 +2220,17 @@ export function createNavMeshHelper(navMesh: NavMesh): DebugObject {
             const outerPolyGeometry = new THREE.BufferGeometry();
             outerPolyGeometry.setAttribute(
                 'position',
-                new THREE.BufferAttribute(new Float32Array(outerPolyLinePositions), 3),
+                new THREE.BufferAttribute(
+                    new Float32Array(outerPolyLinePositions),
+                    3,
+                ),
             );
             outerPolyGeometry.setAttribute(
                 'color',
-                new THREE.BufferAttribute(new Float32Array(outerPolyLineColors), 3),
+                new THREE.BufferAttribute(
+                    new Float32Array(outerPolyLineColors),
+                    3,
+                ),
             );
 
             const outerPolyMaterial = new THREE.LineBasicMaterial({
@@ -2197,7 +2240,10 @@ export function createNavMeshHelper(navMesh: NavMesh): DebugObject {
                 linewidth: 2.5,
             });
 
-            const outerPolyLines = new THREE.LineSegments(outerPolyGeometry, outerPolyMaterial);
+            const outerPolyLines = new THREE.LineSegments(
+                outerPolyGeometry,
+                outerPolyMaterial,
+            );
             group.add(outerPolyLines);
 
             disposables.push(() => {
@@ -2264,16 +2310,16 @@ export function createNavMeshHelper(navMesh: NavMesh): DebugObject {
 }
 
 export function createNavMeshPolyHelper(
-    navMesh: NavMesh, 
-    polyRef: PolyRef, 
-    color: THREE.Color = new THREE.Color(0, 0.75, 1)
+    navMesh: NavMesh,
+    polyRef: PolyRef,
+    color: THREE.Color = new THREE.Color(0, 0.75, 1),
 ): DebugObject {
     const group = new THREE.Group();
     const disposables: (() => void)[] = [];
 
     // Get tile and polygon from reference
     const [tileId, polyIndex] = desPolyRef(polyRef);
-    
+
     const tile = navMesh.tiles[tileId];
     if (!tile || polyIndex >= tile.polys.length) {
         // Return empty object if polygon not found
@@ -2284,7 +2330,7 @@ export function createNavMeshPolyHelper(
     }
 
     const poly = tile.polys[polyIndex];
-    
+
     // TODO: Handle off-mesh connections (not implemented yet)
     // if (poly.type === NavMeshPolyType.OFFMESH_CONNECTION) {
     //     const con = tile.offMeshConnections[polyIndex - tile.offMeshBase];
@@ -2311,19 +2357,19 @@ export function createNavMeshPolyHelper(
 
                 // Add triangle vertices
                 triPositions.push(
-                    tile.vertices[v0Index], 
-                    tile.vertices[v0Index + 1], 
-                    tile.vertices[v0Index + 2]
+                    tile.vertices[v0Index],
+                    tile.vertices[v0Index + 1],
+                    tile.vertices[v0Index + 2],
                 );
                 triPositions.push(
-                    tile.vertices[v1Index], 
-                    tile.vertices[v1Index + 1], 
-                    tile.vertices[v1Index + 2]
+                    tile.vertices[v1Index],
+                    tile.vertices[v1Index + 1],
+                    tile.vertices[v1Index + 2],
                 );
                 triPositions.push(
-                    tile.vertices[v2Index], 
-                    tile.vertices[v2Index + 1], 
-                    tile.vertices[v2Index + 2]
+                    tile.vertices[v2Index],
+                    tile.vertices[v2Index + 1],
+                    tile.vertices[v2Index + 2],
                 );
 
                 // Add colors
@@ -2387,26 +2433,30 @@ export function createNavMeshPolyHelper(
     for (let i = 0; i < detailMesh.trianglesCount; ++i) {
         const t = (detailMesh.trianglesBase + i) * 4;
         const detailTriangles = tile.detailTriangles;
-        
+
         for (let j = 0; j < 3; ++j) {
             const vertIndex = detailTriangles[t + j];
-            
+
             if (vertIndex < poly.vertices.length) {
                 const polyVertIndex = poly.vertices[vertIndex] * 3;
                 triPositions.push(
                     tile.vertices[polyVertIndex],
                     tile.vertices[polyVertIndex + 1],
-                    tile.vertices[polyVertIndex + 2]
+                    tile.vertices[polyVertIndex + 2],
                 );
             } else {
-                const detailVertIndex = (detailMesh.verticesBase + vertIndex - poly.vertices.length) * 3;
+                const detailVertIndex =
+                    (detailMesh.verticesBase +
+                        vertIndex -
+                        poly.vertices.length) *
+                    3;
                 triPositions.push(
                     tile.detailVertices[detailVertIndex],
                     tile.detailVertices[detailVertIndex + 1],
-                    tile.detailVertices[detailVertIndex + 2]
+                    tile.detailVertices[detailVertIndex + 2],
                 );
             }
-            
+
             triColors.push(baseColor.r, baseColor.g, baseColor.b);
         }
 
@@ -2451,6 +2501,146 @@ export function createNavMeshPolyHelper(
             for (const dispose of disposables) {
                 dispose();
             }
+        },
+    };
+}
+
+/**
+ * Debug helper equivalent to drawMeshTilePortal for a single tile.
+ * Draws portal rectangles on boundary edges for sides 0,2,4,6 using the Detour coloring scheme.
+ */
+export function createNavMeshTilePortalsHelper(
+    navMeshTile: NavMeshTile,
+): DebugObject {
+    const group = new THREE.Group();
+    const disposables: (() => void)[] = [];
+
+    if (!navMeshTile || navMeshTile.polys.length === 0) {
+        return { object: group, dispose: () => {} };
+    }
+
+    const padx = 0.04; // horizontal pad like Detour (purely visual)
+    const pady = navMeshTile.walkableClimb; // vertical extent
+
+    // Colors approximating duRGBA values (alpha handled via material opacity)
+    const sideColors: Record<number, THREE.Color> = {
+        0: new THREE.Color(128 / 255, 0, 0), // red
+        2: new THREE.Color(0, 128 / 255, 0), // green
+        4: new THREE.Color(128 / 255, 0, 128 / 255), // magenta
+        6: new THREE.Color(0, 128 / 255, 128 / 255), // cyan
+    };
+
+    const positions: number[] = [];
+    const colors: number[] = [];
+
+    // Iterate sides 0..7 but only draw for 0,2,4,6 per original implementation
+    const drawSides = [0, 2, 4, 6];
+    for (const side of drawSides) {
+        const matchMask = POLY_NEIS_FLAG_EXT_LINK | side;
+        const color = sideColors[side];
+        if (!color) continue;
+
+        for (let i = 0; i < navMeshTile.polys.length; i++) {
+            const poly = navMeshTile.polys[i];
+            const nv = poly.vertices.length;
+            for (let j = 0; j < nv; j++) {
+                if (poly.neis[j] !== matchMask) continue; // must be exact match
+
+                const v0Index = poly.vertices[j];
+                const v1Index = poly.vertices[(j + 1) % nv];
+
+                const aBase = v0Index * 3;
+                const bBase = v1Index * 3;
+
+                const ax = navMeshTile.vertices[aBase];
+                const ay = navMeshTile.vertices[aBase + 1];
+                const az = navMeshTile.vertices[aBase + 2];
+                const bx = navMeshTile.vertices[bBase];
+                const by = navMeshTile.vertices[bBase + 1];
+                const bz = navMeshTile.vertices[bBase + 2];
+
+                if (side === 0 || side === 4) {
+                    const x = ax + (side === 0 ? -padx : padx);
+                    // Four edges of rectangle (8 vertices for 4 line segments)
+                    // (x, a.y-pady, a.z) -> (x, a.y+pady, a.z)
+                    positions.push(x, ay - pady, az, x, ay + pady, az);
+                    // (x, a.y+pady, a.z) -> (x, b.y+pady, b.z)
+                    positions.push(x, ay + pady, az, x, by + pady, bz);
+                    // (x, b.y+pady, b.z) -> (x, b.y-pady, b.z)
+                    positions.push(x, by + pady, bz, x, by - pady, bz);
+                    // (x, b.y-pady, b.z) -> (x, a.y-pady, a.z)
+                    positions.push(x, by - pady, bz, x, ay - pady, az);
+                } else if (side === 2 || side === 6) {
+                    const z = az + (side === 2 ? -padx : padx);
+                    // (a.x, a.y-pady, z) -> (a.x, a.y+pady, z)
+                    positions.push(ax, ay - pady, z, ax, ay + pady, z);
+                    // (a.x, a.y+pady, z) -> (b.x, b.y+pady, z)
+                    positions.push(ax, ay + pady, z, bx, by + pady, z);
+                    // (b.x, b.y+pady, z) -> (b.x, b.y-pady, z)
+                    positions.push(bx, by + pady, z, bx, by - pady, z);
+                    // (b.x, b.y-pady, z) -> (a.x, a.y-pady, z)
+                    positions.push(bx, by - pady, z, ax, ay - pady, z);
+                }
+
+                // Add color entries (2 per line segment vertex, 8 segments *2 vertices = 8*2? Actually 4 segments*2 vertices = 8 vertices per rectangle)
+                for (let k = 0; k < 8; k++) {
+                    colors.push(color.r, color.g, color.b);
+                }
+            }
+        }
+    }
+
+    if (positions.length > 0) {
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute(
+            'position',
+            new THREE.BufferAttribute(new Float32Array(positions), 3),
+        );
+        geometry.setAttribute(
+            'color',
+            new THREE.BufferAttribute(new Float32Array(colors), 3),
+        );
+        const material = new THREE.LineBasicMaterial({
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.5,
+            linewidth: 2.0,
+        });
+        const lines = new THREE.LineSegments(geometry, material);
+        group.add(lines);
+        disposables.push(() => {
+            geometry.dispose();
+            material.dispose();
+        });
+    }
+
+    return {
+        object: group,
+        dispose: () => {
+            for (const d of disposables) d();
+        },
+    };
+}
+
+/**
+ * Debug helper equivalent to duDebugDrawNavMeshPortals. Draws portal rectangles for all tiles.
+ */
+export function createNavMeshPortalsHelper(navMesh: NavMesh): DebugObject {
+    const group = new THREE.Group();
+    const disposables: (() => void)[] = [];
+
+    for (const tileId in navMesh.tiles) {
+        const tile = navMesh.tiles[tileId];
+        if (!tile) continue;
+        const tileHelper = createNavMeshTilePortalsHelper(tile);
+        group.add(tileHelper.object);
+        disposables.push(tileHelper.dispose);
+    }
+
+    return {
+        object: group,
+        dispose: () => {
+            for (const d of disposables) d();
         },
     };
 }
