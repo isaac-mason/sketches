@@ -1043,6 +1043,8 @@ const TiledNavMesh = () => {
                 direction: OffMeshConnectionDirection.START_TO_END,
                 radius: 0.5,
                 cost: 0,
+                area: 0,
+                flags: 0xffffff,
             },
         ];
 

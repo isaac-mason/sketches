@@ -27,7 +27,7 @@ import {
     type SearchNodeRef,
 } from './search';
 
-type QueryFilter = {
+export type QueryFilter = {
     /**
      * Flags that nodes must include to be considered.
      */
@@ -41,9 +41,11 @@ type QueryFilter = {
     /**
      * Checks if a NavMesh node passes the filter.
      * @param ref The node reference.
+     * @param navMesh The navmesh
+     * @param filter The query filter.
      * @returns Whether the node reference passes the filter.
      */
-    passFilter?: (nodeRef: NodeRef) => boolean;
+    passFilter?: (nodeRef: NodeRef, navMesh: NavMesh, filter: QueryFilter) => boolean;
 
     /**
      * Calculates the cost of moving from one point to another.
@@ -78,6 +80,23 @@ export const DEFAULT_QUERY_FILTER = {
         }
 
         return vec3.distance(pa, pb);
+    },
+    passFilter(nodeRef, navMesh, filter) {
+        const nodeType = getNodeRefType(nodeRef);
+
+        let flags = 0;
+
+        if (nodeType === NodeType.GROUND_POLY) {
+            const [, tileId, polyIndex] = desNodeRef(nodeRef);
+            const poly = navMesh.tiles[tileId].polys[polyIndex];
+            flags = poly.flags;
+        } else if (nodeType === NodeType.OFFMESH_CONNECTION) {
+            const [, offMeshConnectionId] = desNodeRef(nodeRef);
+            const offMeshConnection = navMesh.offMeshConnections[offMeshConnectionId];
+            flags = offMeshConnection.flags;
+        }
+
+        return (flags & filter.includeFlags) !== 0 && (flags & filter.excludeFlags) === 0;
     },
 } satisfies QueryFilter;
 
@@ -281,7 +300,6 @@ const _detailClosestPoint = vec3.create();
 const _lineStart = vec3.create();
 const _lineEnd = vec3.create();
 
-
 // TODO: should this be renamed to closestPointOnNode and handle off-mesh connections? TBD
 export const getClosestPointOnPoly = (
     result: GetClosestPointOnPolyResult,
@@ -470,7 +488,7 @@ const _bmax = vec3.create();
 const _bmin = vec3.create();
 const _vertex = vec3.create();
 
-export const queryPolygonsInTile = (tile: NavMeshTile, bounds: Box3, filter: QueryFilter, out: NodeRef[]): void => {
+export const queryPolygonsInTile = (navMesh: NavMesh, tile: NavMeshTile, bounds: Box3, filter: QueryFilter, out: NodeRef[]): void => {
     if (tile.bvTree) {
         const qmin = bounds[0];
         const qmax = bounds[1];
@@ -518,7 +536,7 @@ export const queryPolygonsInTile = (tile: NavMeshTile, bounds: Box3, filter: Que
                 const ref: NodeRef = serPolyNodeRef(tile.id, polyId);
 
                 if ((poly.flags & filter.includeFlags) !== 0 && (poly.flags & filter.excludeFlags) === 0) {
-                    if (!filter.passFilter || filter.passFilter(ref)) {
+                    if (!filter.passFilter || filter.passFilter(ref, navMesh, filter)) {
                         out.push(ref);
                     }
                 }
@@ -544,7 +562,7 @@ export const queryPolygonsInTile = (tile: NavMeshTile, bounds: Box3, filter: Que
                 continue;
             }
 
-            if (filter.passFilter && !filter.passFilter(polyRef)) {
+            if (filter.passFilter && !filter.passFilter(polyRef, navMesh, filter)) {
                 continue;
             }
 
@@ -608,7 +626,7 @@ export const queryPolygons = (navMesh: NavMesh, center: Vec3, halfExtents: Vec3,
             const tiles = getTilesAt(navMesh, x, y);
 
             for (const tile of tiles) {
-                queryPolygonsInTile(tile, bounds, filter, result);
+                queryPolygonsInTile(navMesh,tile, bounds, filter, result);
             }
         }
     }
@@ -619,13 +637,7 @@ export const queryPolygons = (navMesh: NavMesh, center: Vec3, halfExtents: Vec3,
 const _start = vec3.create();
 const _end = vec3.create();
 
-const getPortalPoints = (
-    navMesh: NavMesh,
-    fromNodeRef: NodeRef,
-    toNodeRef: NodeRef,
-    outLeft: Vec3,
-    outRight: Vec3,
-): boolean => {
+const getPortalPoints = (navMesh: NavMesh, fromNodeRef: NodeRef, toNodeRef: NodeRef, outLeft: Vec3, outRight: Vec3): boolean => {
     // find the link that points to the 'to' polygon.
     let toLink: NavMeshLink | undefined = undefined;
 
@@ -659,10 +671,8 @@ const getPortalPoints = (
         const [, offMeshConnectionId, offMeshConnectionSide] = desNodeRef(fromNodeRef);
         const offMeshConnection = navMesh.offMeshConnections[offMeshConnectionId];
         if (!offMeshConnection) return false;
-        
-        const position = offMeshConnectionSide === OffMeshConnectionSide.START
-            ? offMeshConnection.start
-            : offMeshConnection.end;
+
+        const position = offMeshConnectionSide === OffMeshConnectionSide.START ? offMeshConnection.start : offMeshConnection.end;
 
         vec3.copy(outLeft, position);
         vec3.copy(outRight, position);
@@ -675,9 +685,7 @@ const getPortalPoints = (
         const offMeshConnection = navMesh.offMeshConnections[offMeshConnectionId];
         if (!offMeshConnection) return false;
 
-        const position = offMeshConnectionSide === OffMeshConnectionSide.START
-            ? offMeshConnection.start
-            : offMeshConnection.end;
+        const position = offMeshConnectionSide === OffMeshConnectionSide.START ? offMeshConnection.start : offMeshConnection.end;
 
         vec3.copy(outLeft, position);
         vec3.copy(outRight, position);
@@ -719,12 +727,7 @@ const getPortalPoints = (
 const _portalLeft = vec3.create();
 const _portalRight = vec3.create();
 
-const getEdgeMidPoint = (
-    navMesh: NavMesh,
-    fromNodeRef: NodeRef,
-    toNodeRef: NodeRef,
-    outMidPoint: Vec3,
-): boolean => {
+const getEdgeMidPoint = (navMesh: NavMesh, fromNodeRef: NodeRef, toNodeRef: NodeRef, outMidPoint: Vec3): boolean => {
     if (!getPortalPoints(navMesh, fromNodeRef, toNodeRef, _portalLeft, _portalRight)) {
         return false;
     }
@@ -737,30 +740,30 @@ const getEdgeMidPoint = (
 };
 
 const isValidNodeRef = (navMesh: NavMesh, nodeRef: NodeRef): boolean => {
-    const nodeType = getNodeRefType(nodeRef)
-    
+    const nodeType = getNodeRefType(nodeRef);
+
     if (nodeType === NodeType.GROUND_POLY) {
         const [, tileId, polyIndex] = desNodeRef(nodeRef);
-        
+
         const tile = navMesh.tiles[tileId];
-    
+
         if (!tile) {
             return false;
         }
-    
+
         if (polyIndex < 0 || polyIndex >= tile.polys.length) {
             return false;
         }
-    
+
         const poly = tile.polys[polyIndex];
-    
+
         if (!poly) {
             return false;
         }
-    
+
         return true;
     }
-    
+
     if (nodeType === NodeType.OFFMESH_CONNECTION) {
         const [, offMeshConnectionId] = desNodeRef(nodeRef);
         const offMeshConnection = navMesh.offMeshConnections[offMeshConnectionId];
@@ -904,7 +907,7 @@ export const findPath = (
             }
 
             // check whether neighbour passes the filter
-            if (filter.passFilter && filter.passFilter(neighbourNodeRef) === false) {
+            if (filter.passFilter && filter.passFilter(neighbourNodeRef, navMesh, filter) === false) {
                 continue;
             }
 
@@ -932,12 +935,7 @@ export const findPath = (
 
             // if this node is being visited for the first time, calculate the node position
             if (neighbourNode.flags === 0) {
-                getEdgeMidPoint(
-                    navMesh,
-                    currentNodeRef,
-                    neighbourNodeRef,
-                    neighbourNode.position,
-                );
+                getEdgeMidPoint(navMesh, currentNodeRef, neighbourNodeRef, neighbourNode.position);
             }
 
             // calculate cost and heuristic
@@ -955,14 +953,7 @@ export const findPath = (
                     undefined,
                 );
 
-                const endCost = getCost(
-                    neighbourNode.position,
-                    endPos,
-                    navMesh,
-                    neighbourNodeRef,
-                    currentNodeRef,
-                    undefined,
-                );
+                const endCost = getCost(neighbourNode.position, endPos, navMesh, neighbourNodeRef, currentNodeRef, undefined);
 
                 cost = currentNode.cost + curCost + endCost;
                 heuristic = 0;

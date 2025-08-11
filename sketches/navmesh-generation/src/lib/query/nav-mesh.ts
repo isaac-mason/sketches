@@ -153,6 +153,10 @@ export type NavMeshOffMeshConnection = {
     radius: number;
     /** the direction of the off mesh connection */
     direction: OffMeshConnectionDirection;
+    /** the flags for the off mesh connection */
+    flags: number;
+    /** the area id for the off mesh connection */
+    area: number;
     /**
      * optional override cost for this connection.
      * if this is provided, the default query filter getCost() will return this value instead of using the distance of the start to end.
