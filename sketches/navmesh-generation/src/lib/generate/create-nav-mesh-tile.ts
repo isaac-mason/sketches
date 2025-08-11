@@ -2,7 +2,7 @@ import type { Box3 } from '@/common/maaths';
 import type { NavMeshTile, NavMesh, NavMeshPolyDetail, NavMeshPoly } from '../query';
 import { MESH_NULL_IDX, POLY_NEIS_FLAG_EXT_LINK } from './common';
 import { buildNavMeshBvTree } from '../query/nav-mesh-bv-tree';
-import { NavMeshPolyType } from '../query/nav-mesh';
+import { NodeType, serPolyNodeRef } from '../query/nav-mesh';
 
 /** the source data used to create a navigation mesh tile */
 export type NavMeshTileParams = {
@@ -47,9 +47,6 @@ export type NavMeshTileParams = {
         /** the number of triangles in the detail mesh */
         nTriangles: number;
     };
-
-    // TODO: off mesh connections
-    // ...
 
     /** the user defined id of the tile */
     userId: number;
@@ -125,7 +122,6 @@ export const createNavMeshTile = (params: NavMeshTileParams): CreateNavMeshTileR
         detailVertices: [],
         detailTriangles: [],
         polys: [],
-        links: [],
         bvTree: null,
         cellSize: params.cellSize,
         cellHeight: params.cellHeight,
@@ -152,8 +148,7 @@ export const createNavMeshTile = (params: NavMeshTileParams): CreateNavMeshTileR
     // create polys from input data
     for (let i = 0; i < params.polyMesh.nPolys; i++) {
         const poly: NavMeshPoly = {
-            type: NavMeshPolyType.GROUND,
-            links: [],
+            type: NodeType.GROUND_POLY,
             vertices: [],
             neis: [],
             flags: params.polyMesh.polyFlags[i],

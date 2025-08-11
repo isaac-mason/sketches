@@ -1,5 +1,5 @@
 import type { Vec3 } from '@/common/maaths';
-import type { PolyRef } from './nav-mesh';
+import type { NodeRef } from './nav-mesh';
 
 export const NODE_FLAG_OPEN = 0x01;
 export const NODE_FLAG_CLOSED = 0x02;
@@ -8,7 +8,7 @@ export const NODE_FLAG_CLOSED = 0x02;
 export const NODE_FLAG_PARENT_DETACHED = 0x04;
 
 /** `${poly ref}:{search node state}` */
-export type SearchNodeRef = `${PolyRef}:${number}`;
+export type SearchNodeRef = `${NodeRef}:${number}`;
 
 export type SearchNode = {
     /** the position of the node */
@@ -23,11 +23,11 @@ export type SearchNode = {
     state: number;
     /** node flags */
     flags: number;
-    /** the polygon ref for this node */
-    polyRef: PolyRef;
+    /** the node ref for this search node */
+    nodeRef: NodeRef;
 };
 
-export type SearchNodePool = { [polyRefAndState: SearchNodeRef]: SearchNode };
+export type SearchNodePool = { [nodeRefAndState: SearchNodeRef]: SearchNode };
 
 export type SearchNodeQueue = SearchNode[];
 
@@ -107,7 +107,7 @@ export const reindexNodeInQueue = (
     node: SearchNode,
 ): void => {
     for (let i = 0; i < queue.length; i++) {
-        if (queue[i].polyRef === node.polyRef && queue[i].state === node.state) {
+        if (queue[i].nodeRef === node.nodeRef && queue[i].state === node.state) {
             queue[i] = node;
             bubbleUp(queue, i, node);
             return;

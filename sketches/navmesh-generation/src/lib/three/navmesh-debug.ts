@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import type { Vec3 } from '@/common/maaths';
 import type {
     ArrayLike,
     CompactHeightfield,
@@ -15,8 +16,8 @@ import {
     POLY_NEIS_FLAG_EXT_LINK,
     WALKABLE_AREA,
 } from '../generate';
-import type { NavMesh, NavMeshTile, PolyRef } from '../query/nav-mesh';
-import { desPolyRef } from '../query/nav-mesh';
+import type { NavMesh, NavMeshTile, NodeRef } from '../query/nav-mesh';
+import { desNodeRef, OffMeshConnectionDirection } from '../query/nav-mesh';
 import type { SearchNodePool, SearchNodeRef } from '../query/search';
 
 type DebugObject = {
@@ -2312,14 +2313,14 @@ export function createNavMeshHelper(navMesh: NavMesh): DebugObject {
 
 export function createNavMeshPolyHelper(
     navMesh: NavMesh,
-    polyRef: PolyRef,
+    polyRef: NodeRef,
     color: THREE.Color = new THREE.Color(0, 0.75, 1),
 ): DebugObject {
     const group = new THREE.Group();
     const disposables: (() => void)[] = [];
 
     // Get tile and polygon from reference
-    const [tileId, polyId] = desPolyRef(polyRef);
+    const [, tileId, polyId] = desNodeRef(polyRef);
 
     const tile = navMesh.tiles[tileId];
     if (!tile || !tile.polys[polyId]) {
@@ -2331,13 +2332,6 @@ export function createNavMeshPolyHelper(
     }
 
     const poly = tile.polys[polyId];
-
-    // TODO: Handle off-mesh connections (not implemented yet)
-    // if (poly.type === NavMeshPolyType.OFFMESH_CONNECTION) {
-    //     const con = tile.offMeshConnections[polyIndex - tile.offMeshBase];
-    //     // Draw connection arc...
-    //     return { object: group, dispose: () => {} };
-    // }
 
     // Get the detail mesh for this polygon
     const detailMesh = tile.detailMeshes?.[polyId];
@@ -2745,5 +2739,122 @@ export function createSearchNodesHelper(nodePool: SearchNodePool): DebugObject {
             for (const d of disposables) d();
         },
     };
+}
+
+/**
+ * Draws off-mesh connections (start->end) as an arced line with endpoint circles and vertical pillars.
+ * Simplified adaptation of the Detour debug draw logic.
+ */
+export function createNavMeshOffMeshConnectionsHelper(navMesh: NavMesh): DebugObject {
+    const group = new THREE.Group();
+    const disposables: (() => void)[] = [];
+
+    const arcSegments = 16;
+    const circleSegments = 20;
+
+    // Aggregated arrays for arcs & circles
+    const arcPositions: number[] = [];
+    const arcColors: number[] = [];
+    const circlePositions: number[] = [];
+    const circleColors: number[] = [];
+
+    const arcColor = new THREE.Color(255 / 255, 196 / 255, 0 / 255); // main arc color
+    const pillarColor = new THREE.Color(0 / 255, 48 / 255, 64 / 255); // pillar color
+    const oneWayEndColor = new THREE.Color(220 / 255, 32 / 255, 16 / 255); // end marker if one-way
+
+    for (const id in navMesh.offMeshConnections) {
+        const con = navMesh.offMeshConnections[id];
+        if (!con) continue;
+        const start = con.start;
+        const end = con.end;
+        const radius = con.radius;
+
+        // Arc polyline (adds a vertical sinusoidal lift up to 0.25 at mid)
+        for (let i = 0; i < arcSegments; i++) {
+            const t0 = i / arcSegments;
+            const t1 = (i + 1) / arcSegments;
+            const x0 = THREE.MathUtils.lerp(start[0], end[0], t0);
+            const y0 = THREE.MathUtils.lerp(start[1], end[1], t0) + Math.sin(t0 * Math.PI) * 0.25;
+            const z0 = THREE.MathUtils.lerp(start[2], end[2], t0);
+            const x1 = THREE.MathUtils.lerp(start[0], end[0], t1);
+            const y1 = THREE.MathUtils.lerp(start[1], end[1], t1) + Math.sin(t1 * Math.PI) * 0.25;
+            const z1 = THREE.MathUtils.lerp(start[2], end[2], t1);
+            arcPositions.push(x0, y0, z0, x1, y1, z1);
+            for (let k = 0; k < 2; k++) arcColors.push(arcColor.r, arcColor.g, arcColor.b);
+        }
+
+        // One-way direction arrow in the middle of arc
+        if (con.direction === OffMeshConnectionDirection.START_TO_END) {
+            const tMid = 0.5;
+            const xMid = THREE.MathUtils.lerp(start[0], end[0], tMid);
+            const yMid = THREE.MathUtils.lerp(start[1], end[1], tMid) + 0.25;
+            const zMid = THREE.MathUtils.lerp(start[2], end[2], tMid);
+            const dirX = end[0] - start[0];
+            const dirZ = end[2] - start[2];
+            const len = Math.hypot(dirX, dirZ) || 1;
+            const nx = dirX / len;
+            const nz = dirZ / len;
+            const back = 0.3;
+            arcPositions.push(
+                xMid, yMid, zMid,
+                xMid - nx * back + nz * back * 0.5, yMid - 0.05, zMid - nz * back - nx * back * 0.5,
+                xMid, yMid, zMid,
+                xMid - nx * back - nz * back * 0.5, yMid - 0.05, zMid - nz * back + nx * back * 0.5,
+            );
+            for (let k = 0; k < 4; k++) arcColors.push(arcColor.r, arcColor.g, arcColor.b);
+        }
+
+        const addCircle = (center: Vec3, color: THREE.Color) => {
+            for (let i = 0; i < circleSegments; i++) {
+                const a0 = (i / circleSegments) * Math.PI * 2;
+                const a1 = ((i + 1) / circleSegments) * Math.PI * 2;
+                const x0 = center[0] + Math.cos(a0) * radius;
+                const z0 = center[2] + Math.sin(a0) * radius;
+                const x1 = center[0] + Math.cos(a1) * radius;
+                const z1 = center[2] + Math.sin(a1) * radius;
+                circlePositions.push(
+                    x0, center[1] + 0.1, z0,
+                    x1, center[1] + 0.1, z1,
+                );
+                for (let k = 0; k < 2; k++) circleColors.push(color.r, color.g, color.b);
+            }
+            // Pillar
+            circlePositions.push(
+                center[0], center[1], center[2],
+                center[0], center[1] + 0.2, center[2],
+            );
+            for (let k = 0; k < 2; k++) circleColors.push(pillarColor.r, pillarColor.g, pillarColor.b);
+        };
+
+        addCircle(start, arcColor);
+        addCircle(
+            end,
+            con.direction === OffMeshConnectionDirection.BIDIRECTIONAL
+                ? arcColor
+                : oneWayEndColor,
+        );
+    }
+
+    if (arcPositions.length > 0) {
+        const geom = new THREE.BufferGeometry();
+        geom.setAttribute('position', new THREE.BufferAttribute(new Float32Array(arcPositions), 3));
+        geom.setAttribute('color', new THREE.BufferAttribute(new Float32Array(arcColors), 3));
+        const mat = new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.9, linewidth: 2.0 });
+        const lines = new THREE.LineSegments(geom, mat);
+        group.add(lines);
+        disposables.push(() => { geom.dispose(); mat.dispose(); });
+    }
+
+    if (circlePositions.length > 0) {
+        const geom = new THREE.BufferGeometry();
+        geom.setAttribute('position', new THREE.BufferAttribute(new Float32Array(circlePositions), 3));
+        geom.setAttribute('color', new THREE.BufferAttribute(new Float32Array(circleColors), 3));
+        const mat = new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.8, linewidth: 1.5 });
+        const circles = new THREE.LineSegments(geom, mat);
+        group.add(circles);
+        disposables.push(() => { geom.dispose(); mat.dispose(); });
+    }
+
+    return { object: group, dispose: () => { for (const d of disposables) d(); } };
 }
 

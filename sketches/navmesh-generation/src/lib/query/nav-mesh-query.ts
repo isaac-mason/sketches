@@ -5,12 +5,15 @@ import {
     type NavMesh,
     type NavMeshLink,
     type NavMeshPoly,
+    NodeType,
     type NavMeshTile,
-    type PolyRef,
-    desPolyRef,
+    type NodeRef,
+    desNodeRef,
     getTilesAt,
-    serPolyRef,
+    serPolyNodeRef,
     worldToTilePosition,
+    getNodeRefType,
+    OffMeshConnectionSide,
 } from './nav-mesh';
 import {
     reindexNodeInQueue,
@@ -26,58 +29,54 @@ import {
 
 type QueryFilter = {
     /**
-     * Flags that polygons must include to be considered.
+     * Flags that nodes must include to be considered.
      */
     includeFlags: number;
 
     /**
-     * Flags that polygons must not include to be considered.
+     * Flags that nodes must not include to be considered.
      */
     excludeFlags: number;
 
     /**
-     * Checks if a polygon passes the filter.
-     * @param poly The polygon to check.
-     * @param ref The reference id of the polygon.
-     * @param tile The tile containing the polygon.
-     * @returns Whether the polygon passes the filter.
+     * Checks if a NavMesh node passes the filter.
+     * @param ref The node reference.
+     * @returns Whether the node reference passes the filter.
      */
-    passFilter?: (poly: NavMeshPoly, ref: string, tile: NavMeshTile) => boolean;
+    passFilter?: (nodeRef: NodeRef) => boolean;
 
     /**
-     * Calculates the cost of moving from one point to another within a polygon.
-     * @param pa The start position on the edge of the previous and current polygon. [(x, y, z)]
-     * @param pb The end position on the edge of the current and next polygon. [(x, y, z)]
-     * @param prevRef The reference id of the previous polygon. [opt]
-     * @param prevTile The tile containing the previous polygon. [opt]
-     * @param prevPoly The previous polygon. [opt]
-     * @param curRef The reference id of the current polygon.
-     * @param curTile The tile containing the current polygon.
-     * @param curPoly The current polygon.
-     * @param nextRef The reference id of the next polygon. [opt]
-     * @param nextTile The tile containing the next polygon. [opt]
-     * @param nextPoly The next polygon. [opt]
+     * Calculates the cost of moving from one point to another.
+     * @param pa The start position on the edge of the previous and current node. [(x, y, z)]
+     * @param pb The end position on the edge of the current and next node. [(x, y, z)]
+     * @param navMesh The navigation mesh
+     * @param prevRef The reference id of the previous node. [opt]
+     * @param curRef The reference id of the current node.
+     * @param nextRef The reference id of the next node. [opt]
      * @returns The cost of moving from the start to the end position.
      */
     getCost?: (
         pa: Vec3,
         pb: Vec3,
-        prevRef: PolyRef | undefined,
-        prevTile: NavMeshTile | undefined,
-        prevPoly: NavMeshPoly | undefined,
-        curRef: PolyRef,
-        curTile: NavMeshTile,
-        curPoly: NavMeshPoly,
-        nextRef: string | undefined,
-        nextTile: NavMeshTile | undefined,
-        nextPoly: NavMeshPoly | undefined,
+        navMesh: NavMesh,
+        prevRef: NodeRef | undefined,
+        curRef: NodeRef,
+        nextRef: NodeRef | undefined,
     ) => number;
 };
 
 export const DEFAULT_QUERY_FILTER = {
     includeFlags: 0xffffffff,
     excludeFlags: 0,
-    getCost: (pa, pb, _prevRef, _prevTile, _prevPoly, _curRef, _curTile, _curPoly, _nextRef, _nextTile, _nextPoly) => {
+    getCost: (pa, pb, navMesh, _prevRef, _curRef, nextRef) => {
+        if (nextRef && getNodeRefType(nextRef) === NodeType.OFFMESH_CONNECTION) {
+            const [, offMeshConnectionId] = desNodeRef(nextRef);
+            const offMeshConnection = navMesh.offMeshConnections[offMeshConnectionId];
+            if (offMeshConnection.cost !== undefined) {
+                return offMeshConnection.cost;
+            }
+        }
+
         return vec3.distance(pa, pb);
     },
 } satisfies QueryFilter;
@@ -89,24 +88,27 @@ export const DEFAULT_QUERY_FILTER = {
  * @returns Object containing tile and poly, or null if not found
  */
 export const getTileAndPolyByRef = (
-    ref: PolyRef,
+    ref: NodeRef,
     navMesh: NavMesh,
 ): { tile: NavMeshTile; poly: NavMeshPoly; polyIndex: number } | null => {
-    const [tileId, polyId] = desPolyRef(ref);
+    const [nodeType, tileId, nodeIndex] = desNodeRef(ref);
+
+    if (nodeType !== NodeType.GROUND_POLY) return null;
 
     const tile = navMesh.tiles[tileId];
+
     if (!tile) {
         return null;
     }
 
-    // if (polyIndex >= tile.polys.length) {
-    //     return null;
-    // }
+    if (nodeIndex >= tile.polys.length) {
+        return null;
+    }
 
     return {
         tile,
-        poly: tile.polys[polyId],
-        polyIndex: polyId,
+        poly: tile.polys[nodeIndex],
+        polyIndex: nodeIndex,
     };
 };
 
@@ -124,11 +126,11 @@ const _v2 = vec3.create();
  * @returns True if height was found
  */
 export const getPolyHeight = (tile: NavMeshTile, poly: NavMeshPoly, polyIndex: number, pos: Vec3): number => {
-    // Check if we have detail mesh data
+    // check if we have detail mesh data
     const detailMesh = tile.detailMeshes?.[polyIndex];
 
     if (detailMesh) {
-        // Use detail mesh for accurate height calculation
+        // use detail mesh for accurate height calculation
         for (let j = 0; j < detailMesh.trianglesCount; ++j) {
             const t = (detailMesh.trianglesBase + j) * 4;
             const detailTriangles = tile.detailTriangles;
@@ -137,16 +139,16 @@ export const getPolyHeight = (tile: NavMeshTile, poly: NavMeshPoly, polyIndex: n
             const v1Index = detailTriangles[t + 1];
             const v2Index = detailTriangles[t + 2];
 
-            // Get triangle vertices
+            // get triangle vertices
             const v0 = _v0;
             const v1 = _v1;
             const v2 = _v2;
 
             if (v0Index < tile.vertices.length / 3) {
-                // Use main tile vertices
+                // use main tile vertices
                 vec3.fromArray(v0, tile.vertices, v0Index * 3);
             } else {
-                // Use detail vertices
+                // use detail vertices
                 const detailIndex = (v0Index - tile.vertices.length / 3) * 3;
                 vec3.fromArray(v0, tile.detailVertices, detailIndex);
             }
@@ -165,7 +167,7 @@ export const getPolyHeight = (tile: NavMeshTile, poly: NavMeshPoly, polyIndex: n
                 vec3.fromArray(v2, tile.detailVertices, detailIndex);
             }
 
-            // Check if point is inside triangle and calculate height
+            // check if point is inside triangle and calculate height
             const h = getHeightAtPoint(v0, v1, v2, pos);
             if (h !== null) {
                 return h;
@@ -173,7 +175,7 @@ export const getPolyHeight = (tile: NavMeshTile, poly: NavMeshPoly, polyIndex: n
         }
     }
 
-    // Fallback: use polygon vertices for height calculation
+    // fallback: use polygon vertices for height calculation
     if (poly.vertices.length >= 3) {
         const v0 = _v0;
         const v1 = _v1;
@@ -228,7 +230,7 @@ const closestPointOnDetailEdges = (
             const viIndex = detailTriangles[t + j];
             const vkIndex = detailTriangles[t + k];
 
-            // Get vertices
+            // get vertices
             const vi = _vi;
             const vk = _vk;
 
@@ -279,10 +281,12 @@ const _detailClosestPoint = vec3.create();
 const _lineStart = vec3.create();
 const _lineEnd = vec3.create();
 
+
+// TODO: should this be renamed to closestPointOnNode and handle off-mesh connections? TBD
 export const getClosestPointOnPoly = (
     result: GetClosestPointOnPolyResult,
     navMesh: NavMesh,
-    ref: PolyRef,
+    ref: NodeRef,
     point: Vec3,
 ): GetClosestPointOnPolyResult => {
     result.success = false;
@@ -296,15 +300,7 @@ export const getClosestPointOnPoly = (
 
     const { tile, poly, polyIndex } = tileAndPoly;
 
-    // TODO: Handle off-mesh connections
-    // if (poly.getType() === DT_POLYTYPE_OFFMESH_CONNECTION) {
-    //     const v0 = poly.verts[0] * 3;
-    //     const v1 = poly.verts[1] * 3;
-    //     // ... off-mesh connection logic
-    //     return result;
-    // }
-
-    // Get polygon vertices
+    // get polygon vertices
     const nv = poly.vertices.length;
     const verts = new Array(nv * 3);
 
@@ -315,18 +311,18 @@ export const getClosestPointOnPoly = (
         verts[i * 3 + 2] = tile.vertices[vertIndex + 2];
     }
 
-    // Check if point is over polygon
+    // check if point is over polygon
     if (pointInPoly(nv, verts, point)) {
         result.isOverPoly = true;
 
-        // Find height at the position
+        // find height at the position
         const height = getPolyHeight(tile, poly, polyIndex, point);
         if (!Number.isNaN(height)) {
             result.closestPoint[0] = point[0];
             result.closestPoint[1] = height;
             result.closestPoint[2] = point[2];
         } else {
-            // Fallback to polygon center height
+            // fallback to polygon center height
             let avgY = 0;
             for (let i = 0; i < nv; ++i) {
                 avgY += verts[i * 3 + 1];
@@ -340,7 +336,7 @@ export const getClosestPointOnPoly = (
         return result;
     }
 
-    // Point is outside polygon, find closest point on polygon boundary
+    // point is outside polygon, find closest point on polygon boundary
     let dmin = Number.MAX_VALUE;
     let imin = -1;
 
@@ -374,7 +370,7 @@ export const getClosestPointOnPoly = (
 
         closestPtSeg2d(result.closestPoint, point, _lineStart, _lineEnd);
 
-        // Try to get more accurate height from detail mesh if available
+        // try to get more accurate height from detail mesh if available
         const detailMesh = tile.detailMeshes?.[polyIndex];
 
         if (detailMesh) {
@@ -403,7 +399,7 @@ export type ClosestPointOnPolyBoundaryStatus =
 
 export const closestPointOnPolyBoundary = (
     navMesh: NavMesh,
-    polyRef: PolyRef,
+    polyRef: NodeRef,
     point: Vec3,
     outClosestPoint: Vec3,
 ): ClosestPointOnPolyBoundaryStatus => {
@@ -413,14 +409,14 @@ export const closestPointOnPolyBoundary = (
 
 export type FindNearestPolyResult = {
     success: boolean;
-    nearestPolyRef: PolyRef;
+    nearestPolyRef: NodeRef;
     nearestPoint: Vec3;
 };
 
 export const createFindNearestPolyResult = (): FindNearestPolyResult => {
     return {
         success: false,
-        nearestPolyRef: '' as PolyRef,
+        nearestPolyRef: '' as NodeRef,
         nearestPoint: [0, 0, 0],
     };
 };
@@ -437,14 +433,14 @@ export const findNearestPoly = (
     queryFilter: QueryFilter,
 ): FindNearestPolyResult => {
     result.success = false;
-    result.nearestPolyRef = '' as PolyRef;
+    result.nearestPolyRef = '' as NodeRef;
     vec3.copy(result.nearestPoint, center);
 
     // query polygons in the area
     const polys = queryPolygons(navMesh, center, halfExtents, queryFilter);
 
     let nearestDistSqr = Number.MAX_VALUE;
-    let nearestPoly: PolyRef | null = null;
+    let nearestPoly: NodeRef | null = null;
 
     // find the closest polygon
     for (const polyRef of polys) {
@@ -474,7 +470,7 @@ const _bmax = vec3.create();
 const _bmin = vec3.create();
 const _vertex = vec3.create();
 
-export const queryPolygonsInTile = (tile: NavMeshTile, bounds: Box3, filter: QueryFilter, out: PolyRef[]): void => {
+export const queryPolygonsInTile = (tile: NavMeshTile, bounds: Box3, filter: QueryFilter, out: NodeRef[]): void => {
     if (tile.bvTree) {
         const qmin = bounds[0];
         const qmax = bounds[1];
@@ -485,7 +481,7 @@ export const queryPolygonsInTile = (tile: NavMeshTile, bounds: Box3, filter: Que
         const tbmax = tile.bounds[1];
         const qfac = tile.bvTree.quantFactor;
 
-        // Clamp query box to world box.
+        // clamp query box to world box.
         const minx = Math.max(Math.min(qmin[0], tbmax[0]), tbmin[0]) - tbmin[0];
         const miny = Math.max(Math.min(qmin[1], tbmax[1]), tbmin[1]) - tbmin[1];
         const minz = Math.max(Math.min(qmin[2], tbmax[2]), tbmin[2]) - tbmin[2];
@@ -493,7 +489,7 @@ export const queryPolygonsInTile = (tile: NavMeshTile, bounds: Box3, filter: Que
         const maxy = Math.max(Math.min(qmax[1], tbmax[1]), tbmin[1]) - tbmin[1];
         const maxz = Math.max(Math.min(qmax[2], tbmax[2]), tbmin[2]) - tbmin[2];
 
-        // Quantize
+        // quantize
         _bmin[0] = Math.floor(qfac * minx) & 0xfffe;
         _bmin[1] = Math.floor(qfac * miny) & 0xfffe;
         _bmin[2] = Math.floor(qfac * minz) & 0xfffe;
@@ -501,7 +497,7 @@ export const queryPolygonsInTile = (tile: NavMeshTile, bounds: Box3, filter: Que
         _bmax[1] = Math.floor(qfac * maxy + 1) | 1;
         _bmax[2] = Math.floor(qfac * maxz + 1) | 1;
 
-        // Traverse tree
+        // traverse tree
         while (nodeIndex < endIndex) {
             const node = tile.bvTree.nodes[nodeIndex];
 
@@ -519,10 +515,10 @@ export const queryPolygonsInTile = (tile: NavMeshTile, bounds: Box3, filter: Que
             if (isLeafNode && overlap) {
                 const polyId = node.i;
                 const poly = tile.polys[polyId];
-                const ref: PolyRef = serPolyRef(tile.id, polyId);
+                const ref: NodeRef = serPolyNodeRef(tile.id, polyId);
 
                 if ((poly.flags & filter.includeFlags) !== 0 && (poly.flags & filter.excludeFlags) === 0) {
-                    if (!filter.passFilter || filter.passFilter(poly, ref, tile)) {
+                    if (!filter.passFilter || filter.passFilter(ref)) {
                         out.push(ref);
                     }
                 }
@@ -539,22 +535,16 @@ export const queryPolygonsInTile = (tile: NavMeshTile, bounds: Box3, filter: Que
         const qmin = bounds[0];
         const qmax = bounds[1];
 
-        for (const polyId in tile.polys) {
-            const poly = tile.polys[polyId];
+        for (let polyIndex = 0; polyIndex < tile.polys.length; polyIndex++) {
+            const poly = tile.polys[polyIndex];
+            const polyRef = serPolyNodeRef(tile.id, polyIndex);
 
-            // Do not return off-mesh connection polygons.
-            // TODO: uncomment when poly.type is available
-            // if (poly.type === 'OFFMESH_CONNECTION') {
-            //     continue;
-            // }
-
-            // Must pass filter
-            const ref: PolyRef = serPolyRef(tile.id, polyId);
+            // must pass filter
             if ((poly.flags & filter.includeFlags) === 0 || (poly.flags & filter.excludeFlags) !== 0) {
                 continue;
             }
 
-            if (filter.passFilter && !filter.passFilter(poly, ref, tile)) {
+            if (filter.passFilter && !filter.passFilter(polyRef)) {
                 continue;
             }
 
@@ -581,7 +571,7 @@ export const queryPolygonsInTile = (tile: NavMeshTile, bounds: Box3, filter: Que
                 vec3.max(_bmin, _bmin, _vertex);
             }
 
-            // Check overlap with query bounds
+            // check overlap with query bounds
             if (
                 qmin[0] <= _bmin[0] &&
                 qmax[0] >= _bmax[0] &&
@@ -590,7 +580,7 @@ export const queryPolygonsInTile = (tile: NavMeshTile, bounds: Box3, filter: Que
                 qmin[2] <= _bmin[2] &&
                 qmax[2] >= _bmax[2]
             ) {
-                out.push(ref);
+                out.push(polyRef);
             }
         }
     }
@@ -600,8 +590,8 @@ const _queryPolygonsBounds = box3.create();
 const _queryPolygonsMinTile = vec2.create();
 const _queryPolygonsMaxTile = vec2.create();
 
-export const queryPolygons = (navMesh: NavMesh, center: Vec3, halfExtents: Vec3, filter: QueryFilter): PolyRef[] => {
-    const result: PolyRef[] = [];
+export const queryPolygons = (navMesh: NavMesh, center: Vec3, halfExtents: Vec3, filter: QueryFilter): NodeRef[] => {
+    const result: NodeRef[] = [];
 
     // set the bounds for the query
     const bounds = _queryPolygonsBounds;
@@ -631,45 +621,86 @@ const _end = vec3.create();
 
 const getPortalPoints = (
     navMesh: NavMesh,
-    fromTile: NavMeshTile,
-    fromPolyRef: PolyRef,
-    fromPoly: NavMeshPoly,
-    toTile: NavMeshTile,
-    toPolyRef: PolyRef,
-    toPoly: NavMeshPoly,
+    fromNodeRef: NodeRef,
+    toNodeRef: NodeRef,
     outLeft: Vec3,
     outRight: Vec3,
 ): boolean => {
-    // Find the link that points to the 'to' polygon.
+    // find the link that points to the 'to' polygon.
     let toLink: NavMeshLink | undefined = undefined;
 
-    for (const linkIndex of fromPoly.links) {
-        const link = fromTile.links[linkIndex];
-        if (link?.neighbourRef === toPolyRef) {
-            // Found the link to the target polygon.
+    const fromPolyLinks = navMesh.nodes[fromNodeRef];
+
+    for (const linkIndex of fromPolyLinks) {
+        const link = navMesh.links[linkIndex];
+        if (link?.neighbourRef === toNodeRef) {
+            // found the link to the target polygon.
             toLink = link;
             break;
         }
     }
 
     if (!toLink) {
-        // No link found to the target polygon.
+        // no link found to the target polygon.
         return false;
     }
 
-    // TODO: off-mesh connection handling
-    // ...
+    const fromNodeType = getNodeRefType(fromNodeRef);
+    const toNodeType = getNodeRefType(toNodeRef);
 
-    // Find portal vertices
+    // assume either:
+    // - poly to poly
+    // - offmesh to poly
+    // - poly to offmesh
+    // offmesh to offmesh is not supported
+
+    // handle from offmesh connection to poly
+    if (fromNodeType === NodeType.OFFMESH_CONNECTION) {
+        const [, offMeshConnectionId, offMeshConnectionSide] = desNodeRef(fromNodeRef);
+        const offMeshConnection = navMesh.offMeshConnections[offMeshConnectionId];
+        if (!offMeshConnection) return false;
+        
+        const position = offMeshConnectionSide === OffMeshConnectionSide.START
+            ? offMeshConnection.start
+            : offMeshConnection.end;
+
+        vec3.copy(outLeft, position);
+        vec3.copy(outRight, position);
+        return true;
+    }
+
+    // handle from poly to offmesh connection
+    if (toNodeType === NodeType.OFFMESH_CONNECTION) {
+        const [, offMeshConnectionId, offMeshConnectionSide] = desNodeRef(toNodeRef);
+        const offMeshConnection = navMesh.offMeshConnections[offMeshConnectionId];
+        if (!offMeshConnection) return false;
+
+        const position = offMeshConnectionSide === OffMeshConnectionSide.START
+            ? offMeshConnection.start
+            : offMeshConnection.end;
+
+        vec3.copy(outLeft, position);
+        vec3.copy(outRight, position);
+        return true;
+    }
+
+    // handle from poly to poly
+
+    // get the 'from' and 'to' tiles
+    const [, fromTileId, fromPolyIndex] = desNodeRef(fromNodeRef);
+    const fromTile = navMesh.tiles[fromTileId];
+    const fromPoly = fromTile.polys[fromPolyIndex];
+
+    // find portal vertices
     const v0Index = fromPoly.vertices[toLink.edge];
     const v1Index = fromPoly.vertices[(toLink.edge + 1) % fromPoly.vertices.length];
 
     vec3.fromArray(outLeft, fromTile.vertices, v0Index * 3);
     vec3.fromArray(outRight, fromTile.vertices, v1Index * 3);
 
-    // If the link is at tile boundary, clamp the vertices to the link width.
+    // if the link is at tile boundary, clamp the vertices to the link width.
     if (toLink.side !== 0xff) {
-        // Unpack portal limits.
+        // unpack portal limits.
         if (toLink.bmin !== 0 || toLink.bmax !== 255) {
             const s = 1.0 / 255.0;
             const tmin = toLink.bmin * s;
@@ -690,15 +721,11 @@ const _portalRight = vec3.create();
 
 const getEdgeMidPoint = (
     navMesh: NavMesh,
-    fromTile: NavMeshTile,
-    fromPolyRef: PolyRef,
-    fromPoly: NavMeshPoly,
-    toTile: NavMeshTile,
-    toPolyRef: PolyRef,
-    toPoly: NavMeshPoly,
+    fromNodeRef: NodeRef,
+    toNodeRef: NodeRef,
     outMidPoint: Vec3,
 ): boolean => {
-    if (!getPortalPoints(navMesh, fromTile, fromPolyRef, fromPoly, toTile, toPolyRef, toPoly, _portalLeft, _portalRight)) {
+    if (!getPortalPoints(navMesh, fromNodeRef, toNodeRef, _portalLeft, _portalRight)) {
         return false;
     }
 
@@ -709,26 +736,39 @@ const getEdgeMidPoint = (
     return true;
 };
 
-const isValidPolyRef = (navMesh: NavMesh, polyRef: PolyRef): boolean => {
-    const [tileId, polyIndex] = desPolyRef(polyRef);
-
-    const tile = navMesh.tiles[tileId];
-
-    if (!tile) {
-        return false;
+const isValidNodeRef = (navMesh: NavMesh, nodeRef: NodeRef): boolean => {
+    const nodeType = getNodeRefType(nodeRef)
+    
+    if (nodeType === NodeType.GROUND_POLY) {
+        const [, tileId, polyIndex] = desNodeRef(nodeRef);
+        
+        const tile = navMesh.tiles[tileId];
+    
+        if (!tile) {
+            return false;
+        }
+    
+        if (polyIndex < 0 || polyIndex >= tile.polys.length) {
+            return false;
+        }
+    
+        const poly = tile.polys[polyIndex];
+    
+        if (!poly) {
+            return false;
+        }
+    
+        return true;
+    }
+    
+    if (nodeType === NodeType.OFFMESH_CONNECTION) {
+        const [, offMeshConnectionId] = desNodeRef(nodeRef);
+        const offMeshConnection = navMesh.offMeshConnections[offMeshConnectionId];
+        // TODO: check if off mesh connection is connected?
+        return !!offMeshConnection;
     }
 
-    // if (polyIndex < 0 || polyIndex >= tile.polys.length) {
-    //     return false;
-    // }
-
-    const poly = tile.polys[polyIndex];
-
-    if (!poly) {
-        return false;
-    }
-
-    return true;
+    return false;
 };
 
 export const FIND_PATH_STATUS_INVALID_INPUT = 0 as const;
@@ -747,8 +787,8 @@ export type FindPathResult = {
     /** the result status for the operation */
     status: FindPathStatus;
 
-    /** the polygon path */
-    path: PolyRef[];
+    /** the path, consisting of polygon node and offmesh link node references */
+    path: NodeRef[];
 
     /** intermediate data used for the search, typically only needed for debugging */
     intermediates?: {
@@ -760,19 +800,19 @@ export type FindPathResult = {
 const HEURISTIC_SCALE = 0.999; // Search heuristic scale
 
 /**
- * Find a path between two polygons.
+ * Find a path between two nodes.
  *
- * If the end polygon cannot be reached through the navigation graph,
- * the last polygon in the path will be the nearest the end polygon.
+ * If the end node cannot be reached through the navigation graph,
+ * the last node in the path will be the nearest the end node.
  *
  * If the path array is to small to hold the full result, it will be filled as
- * far as possible from the start polygon toward the end polygon.
+ * far as possible from the start node toward the end node.
  *
  * The start and end positions are used to calculate traversal costs.
  * (The y-values impact the result.)
  *
- * @param startRef The reference ID of the starting polygon.
- * @param endRef The reference ID of the ending polygon.
+ * @param startRef The reference ID of the starting node.
+ * @param endRef The reference ID of the ending node.
  * @param startPos The starting position in world space.
  * @param endPos The ending position in world space.
  * @param filter Query filter to apply.
@@ -780,16 +820,16 @@ const HEURISTIC_SCALE = 0.999; // Search heuristic scale
  */
 export const findPath = (
     navMesh: NavMesh,
-    startRef: PolyRef,
-    endRef: PolyRef,
+    startRef: NodeRef,
+    endRef: NodeRef,
     startPos: Vec3,
     endPos: Vec3,
     filter: QueryFilter,
 ): FindPathResult => {
     // validate input
     if (
-        !isValidPolyRef(navMesh, startRef) ||
-        !isValidPolyRef(navMesh, endRef) ||
+        !isValidNodeRef(navMesh, startRef) ||
+        !isValidNodeRef(navMesh, endRef) ||
         !vec3.finite(startPos) ||
         !vec3.finite(endPos)
     ) {
@@ -812,14 +852,14 @@ export const findPath = (
     // prepare search
     const getCost = filter.getCost ?? DEFAULT_QUERY_FILTER.getCost;
 
-    const nodes: { [polyRefAndState: SearchNodeRef]: SearchNode } = {};
+    const nodes: SearchNodePool = {};
     const openList: SearchNodeQueue = [];
 
     const startNode: SearchNode = {
         cost: 0,
         total: vec3.distance(startPos, endPos) * HEURISTIC_SCALE,
         parent: null,
-        polyRef: startRef,
+        nodeRef: startRef,
         state: 0,
         flags: NODE_FLAG_OPEN,
         position: structuredClone(startPos),
@@ -837,64 +877,52 @@ export const findPath = (
         currentNode.flags |= NODE_FLAG_CLOSED;
 
         // if we have reached the goal, stop searching
-        const currentPolyRef = currentNode.polyRef;
-        if (currentPolyRef === endRef) {
+        const currentNodeRef = currentNode.nodeRef;
+        if (currentNodeRef === endRef) {
             lastBestNode = currentNode;
             break;
         }
 
-        // get current poly and tile
-        const [currentTileId, currentPolyIndex] = desPolyRef(currentPolyRef);
-        const currentTile = navMesh.tiles[currentTileId];
-        const currentPoly = currentTile.polys[currentPolyIndex];
+        // get current node
+        const currentNodeLinks = navMesh.nodes[currentNodeRef];
 
-        // get parent poly ref
-        let parentPolyRef: PolyRef | undefined = undefined;
-        let parentTile: NavMeshTile | undefined = undefined;
-        let parentPoly: NavMeshPoly | undefined = undefined;
+        // get parent node ref
+        let parentNodeRef: NodeRef | undefined = undefined;
         if (currentNode.parent) {
-            const [polyRef, _polyState] = currentNode.parent.split(':');
-            parentPolyRef = polyRef as PolyRef;
-
-            const [parentTileId, parentPolyIndex] = desPolyRef(parentPolyRef);
-            parentTile = navMesh.tiles[parentTileId];
-            parentPoly = parentTile.polys[parentPolyIndex];
+            const [nodeRef, _state] = currentNode.parent.split(':');
+            parentNodeRef = nodeRef as NodeRef;
         }
 
-        // expand the search with poly links
-        for (const link of currentPoly.links) {
-            const neighbourPolyRef = currentTile.links[link].neighbourRef;
+        // expand the search with node links
+        for (const linkIndex of currentNodeLinks) {
+            const link = navMesh.links[linkIndex];
+            const neighbourNodeRef = link.neighbourRef;
 
             // skip invalid ids and do not expand back to where we came from
-            if (!neighbourPolyRef || neighbourPolyRef === parentPolyRef) {
+            if (!neighbourNodeRef || neighbourNodeRef === parentNodeRef) {
                 continue;
             }
 
-            // get the neighbour poly and tile
-            const [neighbourTileId, neighbourPolyIndex] = desPolyRef(neighbourPolyRef);
-            const neighbourTile = navMesh.tiles[neighbourTileId];
-            const neighbourPoly = neighbourTile.polys[neighbourPolyIndex];
-
             // check whether neighbour passes the filter
-            if (filter.passFilter && filter.passFilter(neighbourPoly, neighbourPolyRef, neighbourTile) === false) {
+            if (filter.passFilter && filter.passFilter(neighbourNodeRef) === false) {
                 continue;
             }
 
             // deal explicitly with crossing tile boundaries by partitioning the search node refs by crossing side
             let crossSide = 0;
-            if (currentTile.links[link].side !== 0xff) {
-                crossSide = currentTile.links[link].side >> 1;
+            if (link.side !== 0xff) {
+                crossSide = link.side >> 1;
             }
 
             // get the neighbour node
-            const neighbourSearchNodeRef: SearchNodeRef = `${neighbourPolyRef}:${crossSide}`;
+            const neighbourSearchNodeRef: SearchNodeRef = `${neighbourNodeRef}:${crossSide}`;
             let neighbourNode = nodes[neighbourSearchNodeRef];
             if (!neighbourNode) {
                 neighbourNode = {
                     cost: 0,
                     total: 0,
                     parent: null,
-                    polyRef: neighbourPolyRef,
+                    nodeRef: neighbourNodeRef,
                     state: crossSide,
                     flags: 0,
                     position: structuredClone(endPos),
@@ -906,12 +934,8 @@ export const findPath = (
             if (neighbourNode.flags === 0) {
                 getEdgeMidPoint(
                     navMesh,
-                    currentTile,
-                    currentPolyRef,
-                    currentPoly,
-                    neighbourTile,
-                    neighbourPolyRef,
-                    neighbourPoly,
+                    currentNodeRef,
+                    neighbourNodeRef,
                     neighbourNode.position,
                 );
             }
@@ -921,32 +945,22 @@ export const findPath = (
             let heuristic = 0;
 
             // special case for last node
-            if (neighbourPolyRef === endRef) {
+            if (neighbourNodeRef === endRef) {
                 const curCost = getCost(
                     currentNode.position,
                     neighbourNode.position,
-                    neighbourPolyRef,
-                    neighbourTile,
-                    neighbourPoly,
-                    currentPolyRef,
-                    currentTile,
-                    currentPoly,
-                    undefined,
-                    undefined,
+                    navMesh,
+                    neighbourNodeRef,
+                    currentNodeRef,
                     undefined,
                 );
 
                 const endCost = getCost(
                     neighbourNode.position,
                     endPos,
-                    neighbourPolyRef,
-                    neighbourTile,
-                    neighbourPoly,
-                    currentPolyRef,
-                    currentTile,
-                    currentPoly,
-                    undefined,
-                    undefined,
+                    navMesh,
+                    neighbourNodeRef,
+                    currentNodeRef,
                     undefined,
                 );
 
@@ -956,15 +970,10 @@ export const findPath = (
                 const curCost = getCost(
                     currentNode.position,
                     neighbourNode.position,
-                    parentPolyRef,
-                    parentTile,
-                    parentPoly,
-                    currentPolyRef,
-                    currentTile,
-                    currentPoly,
-                    neighbourPolyRef,
-                    neighbourTile,
-                    neighbourPoly,
+                    navMesh,
+                    parentNodeRef,
+                    currentNodeRef,
+                    neighbourNodeRef,
                 );
                 cost = currentNode.cost + curCost;
                 heuristic = vec3.distance(neighbourNode.position, endPos) * HEURISTIC_SCALE;
@@ -983,8 +992,8 @@ export const findPath = (
             }
 
             // add or update the node
-            neighbourNode.parent = `${currentNode.polyRef}:${currentNode.state}`;
-            neighbourNode.polyRef = neighbourPolyRef;
+            neighbourNode.parent = `${currentNode.nodeRef}:${currentNode.state}`;
+            neighbourNode.nodeRef = neighbourNodeRef;
             neighbourNode.flags = neighbourNode.flags & ~NODE_FLAG_CLOSED;
             neighbourNode.cost = cost;
             neighbourNode.total = total;
@@ -1006,12 +1015,12 @@ export const findPath = (
         }
     }
 
-    // assemble the polygon path to the node
-    const path: PolyRef[] = [];
+    // assemble the path to the node
+    const path: NodeRef[] = [];
     let currentNode: SearchNode | null = lastBestNode;
 
     while (currentNode) {
-        path.push(currentNode.polyRef);
+        path.push(currentNode.nodeRef);
 
         if (currentNode.parent) {
             currentNode = nodes[currentNode.parent];
@@ -1022,8 +1031,8 @@ export const findPath = (
 
     path.reverse();
 
-    // if the end polygon was not reached, return with the partial result status
-    if (lastBestNode.polyRef !== endRef) {
+    // if the end node was not reached, return with the partial result status
+    if (lastBestNode.nodeRef !== endRef) {
         return {
             status: FIND_PATH_STATUS_PARTIAL_PATH,
             success: true,
@@ -1054,7 +1063,7 @@ export const findStraightPath = (
     navMesh: NavMesh,
     start: Vec3,
     end: Vec3,
-    pathPolyRefs: PolyRef[],
+    pathPolyRefs: NodeRef[],
     maxStraightPathPoints = 256,
     straightPathOptions = 0,
 ): Vec3[] => {
