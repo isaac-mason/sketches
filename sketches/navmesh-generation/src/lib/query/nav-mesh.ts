@@ -48,14 +48,12 @@ export enum NodeType {
     OFFMESH_CONNECTION = 1,
 }
 
-/**
- * A serialized node reference.
- */
+/** A serialized node reference */
 export type NodeRef = GroundPolyNodeRef | OffMeshConnectionNodeRef;
 export type GroundPolyNodeRef = `${NodeType.GROUND_POLY},${number},${number}`;
 export type OffMeshConnectionNodeRef = `${NodeType.OFFMESH_CONNECTION},${number},${number}`;
 
-/** a deserialised node reference */
+/** A deserialised node reference */
 export type DeserialisedNodeRef = DeserialisedGroundNodeRef | DeserialisedOffMeshConnectionNodeRef;
 export type DeserialisedGroundNodeRef = [nodeType: NodeType.GROUND_POLY, tileId: number, nodeIndex: number];
 export type DeserialisedOffMeshConnectionNodeRef = [
@@ -237,19 +235,13 @@ export type NavMeshTile = {
      */
     cellHeight: number;
 
-    /**
-     * The agent height. [Unit: wu]
-     */
+    /** the agent height in world units */
     walkableHeight: number;
 
-    /**
-     * The agent radius. [Unit: wu]
-     */
+    /** the agent radius in world units */
     walkableRadius: number;
 
-    /**
-     * The agent maximum traversable ledge. (Up/Down) [Unit: wu]
-     */
+    /** the agent maximum traversable ledge (up/down) in world units */
     walkableClimb: number;
 };
 
