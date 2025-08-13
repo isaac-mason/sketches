@@ -44,7 +44,7 @@ export type NavMesh = {
 export enum NodeType {
     /** the node is a standard ground convex polygon that is part of the surface of the mesh */
     GROUND_POLY = 0,
-    /** the node is an off-mesh connection consisting of two vertices */
+    /** the node is an off-mesh connection */
     OFFMESH_CONNECTION = 1,
 }
 

@@ -1,43 +1,42 @@
 import type { Box3, Vec3 } from '@/common/maaths';
 import { box3, vec2, vec3 } from '@/common/maaths';
 import {
+    type IntersectSegSeg2DResult,
     closestPtSeg2d,
+    createIntersectSegSeg2DResult,
+    createIntersectSegmentPoly2DResult,
     distancePtSeg2dSqr,
     getHeightAtPoint,
-    pointInPoly,
-    triArea2D,
     intersectSegSeg2D,
-    type IntersectSegSeg2DResult,
-    createIntersectSegSeg2DResult,
     intersectSegmentPoly2D,
-    type IntersectSegmentPoly2DResult,
-    createIntersectSegmentPoly2DResult,
+    pointInPoly,
     randomPointInConvexPoly,
+    triArea2D,
 } from '../common/geometry';
 import {
     type NavMesh,
     type NavMeshLink,
     type NavMeshPoly,
-    NodeType,
     type NavMeshTile,
     type NodeRef,
+    NodeType,
+    OffMeshConnectionSide,
     desNodeRef,
+    getNodeRefType,
     getTilesAt,
     serPolyNodeRef,
     worldToTilePosition,
-    getNodeRefType,
-    OffMeshConnectionSide,
 } from './nav-mesh';
 import {
-    reindexNodeInQueue,
     NODE_FLAG_CLOSED,
     NODE_FLAG_OPEN,
-    popNodeFromQueue,
-    pushNodeToQueue,
-    type SearchNodePool,
     type SearchNode,
+    type SearchNodePool,
     type SearchNodeQueue,
     type SearchNodeRef,
+    popNodeFromQueue,
+    pushNodeToQueue,
+    reindexNodeInQueue,
 } from './search';
 
 export type QueryFilter = {
@@ -165,16 +164,13 @@ export type GetTileAndPolyByRefResult =
  * @param navMesh The navigation mesh
  * @returns Object containing tile and poly, or null if not found
  */
-export const getTileAndPolyByRef = (
-    ref: NodeRef,
-    navMesh: NavMesh,
-): GetTileAndPolyByRefResult => {
-    const result: GetTileAndPolyByRefResult = {
+export const getTileAndPolyByRef = (ref: NodeRef, navMesh: NavMesh): GetTileAndPolyByRefResult => {
+    const result = {
         success: false,
         tile: null,
         poly: null,
         polyIndex: -1,
-    };
+    } as GetTileAndPolyByRefResult;
 
     const [nodeType, tileId, nodeIndex] = desNodeRef(ref);
 
@@ -198,9 +194,9 @@ export const getTileAndPolyByRef = (
     return result;
 };
 
-const _v0 = vec3.create();
-const _v1 = vec3.create();
-const _v2 = vec3.create();
+const _getPolyHeightV0 = vec3.create();
+const _getPolyHeightV1 = vec3.create();
+const _getPolyHeightV2 = vec3.create();
 
 /**
  * Gets the height of a polygon at a given point using detail mesh if available
@@ -226,9 +222,9 @@ export const getPolyHeight = (tile: NavMeshTile, poly: NavMeshPoly, polyIndex: n
             const v2Index = detailTriangles[t + 2];
 
             // get triangle vertices
-            const v0 = _v0;
-            const v1 = _v1;
-            const v2 = _v2;
+            const v0 = _getPolyHeightV0;
+            const v1 = _getPolyHeightV1;
+            const v2 = _getPolyHeightV2;
 
             if (v0Index < tile.vertices.length / 3) {
                 // use main tile vertices
@@ -263,9 +259,9 @@ export const getPolyHeight = (tile: NavMeshTile, poly: NavMeshPoly, polyIndex: n
 
     // fallback: use polygon vertices for height calculation
     if (poly.vertices.length >= 3) {
-        const v0 = _v0;
-        const v1 = _v1;
-        const v2 = _v2;
+        const v0 = _getPolyHeightV0;
+        const v1 = _getPolyHeightV1;
+        const v2 = _getPolyHeightV2;
 
         vec3.fromBuffer(v0, tile.vertices, poly.vertices[0] * 3);
         vec3.fromBuffer(v1, tile.vertices, poly.vertices[1] * 3);
@@ -282,8 +278,8 @@ export const getPolyHeight = (tile: NavMeshTile, poly: NavMeshPoly, polyIndex: n
 };
 
 const _closestOnDetailEdges: Vec3 = [0, 0, 0];
-const _vi: Vec3 = [0, 0, 0];
-const _vk: Vec3 = [0, 0, 0];
+const _closestPointOnDetailEdgesVi: Vec3 = [0, 0, 0];
+const _closestPointOnDetailEdgesVk: Vec3 = [0, 0, 0];
 
 /**
  * Finds the closest point on detail mesh edges to a given point
@@ -317,8 +313,8 @@ const closestPointOnDetailEdges = (
             const vkIndex = detailTriangles[t + k];
 
             // get vertices
-            const vi = _vi;
-            const vk = _vk;
+            const vi = _closestPointOnDetailEdgesVi;
+            const vk = _closestPointOnDetailEdgesVk;
 
             if (viIndex < tile.vertices.length / 3) {
                 vec3.fromBuffer(vi, tile.vertices, viIndex * 3);
@@ -364,8 +360,8 @@ export const createGetClosestPointOnPolyResult = (): GetClosestPointOnPolyResult
 
 const _detailClosestPoint = vec3.create();
 
-const _lineStart = vec3.create();
-const _lineEnd = vec3.create();
+const _getClosestPointOnPolyLineStart = vec3.create();
+const _getClosestPointOnPolyLineEnd = vec3.create();
 
 // TODO: should this be renamed to closestPointOnNode and handle off-mesh connections? TBD
 export const getClosestPointOnPoly = (
@@ -384,6 +380,9 @@ export const getClosestPointOnPoly = (
     }
 
     const { tile, poly, polyIndex } = tileAndPoly;
+
+    const lineStart = _getClosestPointOnPolyLineStart;
+    const lineEnd = _getClosestPointOnPolyLineEnd;
 
     // get polygon vertices
     const nv = poly.vertices.length;
@@ -427,15 +426,15 @@ export const getClosestPointOnPoly = (
 
     for (let i = 0; i < nv; ++i) {
         const j = (i + 1) % nv;
-        _lineStart[0] = verts[i * 3];
-        _lineStart[1] = verts[i * 3 + 1];
-        _lineStart[2] = verts[i * 3 + 2];
+        lineStart[0] = verts[i * 3];
+        lineStart[1] = verts[i * 3 + 1];
+        lineStart[2] = verts[i * 3 + 2];
 
-        _lineEnd[0] = verts[j * 3];
-        _lineEnd[1] = verts[j * 3 + 1];
-        _lineEnd[2] = verts[j * 3 + 2];
+        lineEnd[0] = verts[j * 3];
+        lineEnd[1] = verts[j * 3 + 1];
+        lineEnd[2] = verts[j * 3 + 2];
 
-        const d = distancePtSeg2dSqr(point, _lineStart, _lineEnd);
+        const d = distancePtSeg2dSqr(point, lineStart, lineEnd);
         if (d < dmin) {
             dmin = d;
             imin = i;
@@ -445,15 +444,15 @@ export const getClosestPointOnPoly = (
     if (imin >= 0) {
         const j = (imin + 1) % nv;
 
-        _lineStart[0] = verts[imin * 3];
-        _lineStart[1] = verts[imin * 3 + 1];
-        _lineStart[2] = verts[imin * 3 + 2];
+        lineStart[0] = verts[imin * 3];
+        lineStart[1] = verts[imin * 3 + 1];
+        lineStart[2] = verts[imin * 3 + 2];
 
-        _lineEnd[0] = verts[j * 3];
-        _lineEnd[1] = verts[j * 3 + 1];
-        _lineEnd[2] = verts[j * 3 + 2];
+        lineEnd[0] = verts[j * 3];
+        lineEnd[1] = verts[j * 3 + 1];
+        lineEnd[2] = verts[j * 3 + 2];
 
-        closestPtSeg2d(result.closestPoint, point, _lineStart, _lineEnd);
+        closestPtSeg2d(result.closestPoint, point, lineStart, lineEnd);
 
         // try to get more accurate height from detail mesh if available
         const detailMesh = tile.detailMeshes?.[polyIndex];
@@ -475,7 +474,10 @@ export const getClosestPointOnPoly = (
     return result;
 };
 
-export const closestPointOnPolyBoundary = (
+const _closestPointOnPolyBoundaryLineStart = vec3.create();
+const _closestPointOnPolyBoundaryLineEnd = vec3.create();
+
+export const getClosestPointOnPolyBoundary = (
     navMesh: NavMesh,
     polyRef: NodeRef,
     point: Vec3,
@@ -489,7 +491,10 @@ export const closestPointOnPolyBoundary = (
 
     const { tile, poly } = tileAndPoly;
 
-    // Collect vertices
+    const lineStart = _closestPointOnPolyBoundaryLineStart;
+    const lineEnd = _closestPointOnPolyBoundaryLineEnd;
+
+    // collect vertices
     const nv = poly.vertices.length;
     const verts = new Array<number>(nv * 3);
     for (let i = 0; i < nv; ++i) {
@@ -499,26 +504,26 @@ export const closestPointOnPolyBoundary = (
         verts[i * 3 + 2] = tile.vertices[vIndex + 2];
     }
 
-    // If inside polygon, return the point as-is
+    // if inside polygon, return the point as-is
     if (pointInPoly(nv, verts, point)) {
         vec3.copy(outClosestPoint, point);
         return true;
     }
 
-    // Otherwise clamp to nearest edge
+    // otherwise clamp to nearest edge
     let dmin = Number.MAX_VALUE;
     let imin = 0;
     for (let i = 0; i < nv; ++i) {
         const j = (i + 1) % nv;
         const vaIndex = i * 3;
         const vbIndex = j * 3;
-        _lineStart[0] = verts[vaIndex + 0];
-        _lineStart[1] = verts[vaIndex + 1];
-        _lineStart[2] = verts[vaIndex + 2];
-        _lineEnd[0] = verts[vbIndex + 0];
-        _lineEnd[1] = verts[vbIndex + 1];
-        _lineEnd[2] = verts[vbIndex + 2];
-        const d = distancePtSeg2dSqr(point, _lineStart, _lineEnd);
+        lineStart[0] = verts[vaIndex + 0];
+        lineStart[1] = verts[vaIndex + 1];
+        lineStart[2] = verts[vaIndex + 2];
+        lineEnd[0] = verts[vbIndex + 0];
+        lineEnd[1] = verts[vbIndex + 1];
+        lineEnd[2] = verts[vbIndex + 2];
+        const d = distancePtSeg2dSqr(point, lineStart, lineEnd);
         if (d < dmin) {
             dmin = d;
             imin = i;
@@ -535,7 +540,7 @@ export const closestPointOnPolyBoundary = (
     const vb1 = verts[vbIndex + 1];
     const vb2 = verts[vbIndex + 2];
 
-    // Compute t on segment (xz plane)
+    // compute t on segment (xz plane)
     const pqx = vb0 - va0;
     const pqz = vb2 - va2;
     const dx = point[0] - va0;
@@ -566,9 +571,7 @@ export const createFindNearestPolyResult = (): FindNearestPolyResult => {
     };
 };
 
-const _closestPointResult = createGetClosestPointOnPolyResult();
-
-const _nearestPoint: Vec3 = [0, 0, 0];
+const _findNearestPolyClosestPointResult = createGetClosestPointOnPolyResult();
 
 export const findNearestPoly = (
     result: FindNearestPolyResult,
@@ -585,42 +588,36 @@ export const findNearestPoly = (
     const polys = queryPolygons(navMesh, center, halfExtents, queryFilter);
 
     let nearestDistSqr = Number.MAX_VALUE;
-    let nearestPoly: NodeRef | null = null;
 
     // find the closest polygon
     for (const polyRef of polys) {
-        getClosestPointOnPoly(_closestPointResult, navMesh, polyRef, center);
+        const closestPoint = getClosestPointOnPoly(_findNearestPolyClosestPointResult, navMesh, polyRef, center);
 
-        if (_closestPointResult.success) {
-            const distSqr = vec3.squaredDistance(center, _closestPointResult.closestPoint);
+        if (closestPoint.success) {
+            const distSqr = vec3.squaredDistance(center, closestPoint.closestPoint);
 
             if (distSqr < nearestDistSqr) {
                 nearestDistSqr = distSqr;
-                nearestPoly = polyRef;
-                vec3.copy(_nearestPoint, _closestPointResult.closestPoint);
+                result.nearestPolyRef = polyRef;
+                vec3.copy(result.nearestPoint, closestPoint.closestPoint);
+                result.success = true;
             }
         }
-    }
-
-    if (nearestPoly) {
-        result.success = true;
-        result.nearestPolyRef = nearestPoly;
-        vec3.copy(result.nearestPoint, _nearestPoint);
     }
 
     return result;
 };
 
-const _bmax = vec3.create();
-const _bmin = vec3.create();
-const _vertex = vec3.create();
+const _queryPolygonsInTileBmax = vec3.create();
+const _queryPolygonsInTileBmin = vec3.create();
+const _queryPolygonsInTileVertex = vec3.create();
 
 export const queryPolygonsInTile = (
+    out: NodeRef[],
     navMesh: NavMesh,
     tile: NavMeshTile,
     bounds: Box3,
     filter: QueryFilter,
-    out: NodeRef[],
 ): void => {
     if (tile.bvTree) {
         const qmin = bounds[0];
@@ -641,12 +638,12 @@ export const queryPolygonsInTile = (
         const maxz = Math.max(Math.min(qmax[2], tbmax[2]), tbmin[2]) - tbmin[2];
 
         // quantize
-        _bmin[0] = Math.floor(qfac * minx) & 0xfffe;
-        _bmin[1] = Math.floor(qfac * miny) & 0xfffe;
-        _bmin[2] = Math.floor(qfac * minz) & 0xfffe;
-        _bmax[0] = Math.floor(qfac * maxx + 1) | 1;
-        _bmax[1] = Math.floor(qfac * maxy + 1) | 1;
-        _bmax[2] = Math.floor(qfac * maxz + 1) | 1;
+        _queryPolygonsInTileBmin[0] = Math.floor(qfac * minx) & 0xfffe;
+        _queryPolygonsInTileBmin[1] = Math.floor(qfac * miny) & 0xfffe;
+        _queryPolygonsInTileBmin[2] = Math.floor(qfac * minz) & 0xfffe;
+        _queryPolygonsInTileBmax[0] = Math.floor(qfac * maxx + 1) | 1;
+        _queryPolygonsInTileBmax[1] = Math.floor(qfac * maxy + 1) | 1;
+        _queryPolygonsInTileBmax[2] = Math.floor(qfac * maxz + 1) | 1;
 
         // traverse tree
         while (nodeIndex < endIndex) {
@@ -654,12 +651,12 @@ export const queryPolygonsInTile = (
 
             const nodeBounds = node.bounds;
             const overlap =
-                _bmin[0] <= nodeBounds[1][0] &&
-                _bmax[0] >= nodeBounds[0][0] &&
-                _bmin[1] <= nodeBounds[1][1] &&
-                _bmax[1] >= nodeBounds[0][1] &&
-                _bmin[2] <= nodeBounds[1][2] &&
-                _bmax[2] >= nodeBounds[0][2];
+                _queryPolygonsInTileBmin[0] <= nodeBounds[1][0] &&
+                _queryPolygonsInTileBmax[0] >= nodeBounds[0][0] &&
+                _queryPolygonsInTileBmin[1] <= nodeBounds[1][1] &&
+                _queryPolygonsInTileBmax[1] >= nodeBounds[0][1] &&
+                _queryPolygonsInTileBmin[2] <= nodeBounds[1][2] &&
+                _queryPolygonsInTileBmax[2] >= nodeBounds[0][2];
 
             const isLeafNode = node.i >= 0;
 
@@ -702,34 +699,34 @@ export const queryPolygonsInTile = (
             // calc polygon bounds
             const firstVertexIndex = poly.vertices[0];
             vec3.set(
-                _vertex,
+                _queryPolygonsInTileVertex,
                 tile.vertices[firstVertexIndex * 3],
                 tile.vertices[firstVertexIndex * 3 + 1],
                 tile.vertices[firstVertexIndex * 3 + 2],
             );
-            vec3.copy(_bmax, _vertex);
-            vec3.copy(_bmin, _vertex);
+            vec3.copy(_queryPolygonsInTileBmax, _queryPolygonsInTileVertex);
+            vec3.copy(_queryPolygonsInTileBmin, _queryPolygonsInTileVertex);
 
             for (let j = 1; j < poly.vertices.length; j++) {
                 const vertexIndex = poly.vertices[j];
                 vec3.set(
-                    _vertex,
+                    _queryPolygonsInTileVertex,
                     tile.vertices[vertexIndex * 3],
                     tile.vertices[vertexIndex * 3 + 1],
                     tile.vertices[vertexIndex * 3 + 2],
                 );
-                vec3.min(_bmax, _bmax, _vertex);
-                vec3.max(_bmin, _bmin, _vertex);
+                vec3.min(_queryPolygonsInTileBmax, _queryPolygonsInTileBmax, _queryPolygonsInTileVertex);
+                vec3.max(_queryPolygonsInTileBmin, _queryPolygonsInTileBmin, _queryPolygonsInTileVertex);
             }
 
             // check overlap with query bounds
             if (
-                qmin[0] <= _bmin[0] &&
-                qmax[0] >= _bmax[0] &&
-                qmin[1] <= _bmin[1] &&
-                qmax[1] >= _bmax[1] &&
-                qmin[2] <= _bmin[2] &&
-                qmax[2] >= _bmax[2]
+                qmin[0] <= _queryPolygonsInTileBmin[0] &&
+                qmax[0] >= _queryPolygonsInTileBmax[0] &&
+                qmin[1] <= _queryPolygonsInTileBmin[1] &&
+                qmax[1] >= _queryPolygonsInTileBmax[1] &&
+                qmin[2] <= _queryPolygonsInTileBmin[2] &&
+                qmax[2] >= _queryPolygonsInTileBmax[2]
             ) {
                 out.push(polyRef);
             }
@@ -759,7 +756,7 @@ export const queryPolygons = (navMesh: NavMesh, center: Vec3, halfExtents: Vec3,
             const tiles = getTilesAt(navMesh, x, y);
 
             for (const tile of tiles) {
-                queryPolygonsInTile(navMesh, tile, bounds, filter, result);
+                queryPolygonsInTile(result, navMesh, tile, bounds, filter);
             }
         }
     }
@@ -907,14 +904,11 @@ const isValidNodeRef = (navMesh: NavMesh, nodeRef: NodeRef): boolean => {
     return false;
 };
 
-export const FIND_NODE_PATH_STATUS_INVALID_INPUT = 0 as const;
-export const FIND_NODE_PATH_STATUS_PARTIAL_PATH = 1 as const;
-export const FIND_NODE_PATH_STATUS_COMPLETE_PATH = 2 as const;
-
-export type FindNodePathStatus =
-    | typeof FIND_NODE_PATH_STATUS_INVALID_INPUT
-    | typeof FIND_NODE_PATH_STATUS_PARTIAL_PATH
-    | typeof FIND_NODE_PATH_STATUS_COMPLETE_PATH;
+export enum FindNodePathStatus {
+    INVALID_INPUT = 0,
+    PARTIAL_PATH = 1,
+    COMPLETE_PATH = 2,
+}
 
 export type FindNodePathResult = {
     /** whether the search completed successfully, with either a partial or complete path */
@@ -970,7 +964,7 @@ export const findNodePath = (
         !vec3.finite(endPos)
     ) {
         return {
-            status: FIND_NODE_PATH_STATUS_INVALID_INPUT,
+            status: FindNodePathStatus.INVALID_INPUT,
             success: false,
             path: [],
         };
@@ -979,7 +973,7 @@ export const findNodePath = (
     // early exit if start and end are the same
     if (startRef === endRef) {
         return {
-            status: FIND_NODE_PATH_STATUS_COMPLETE_PATH,
+            status: FindNodePathStatus.COMPLETE_PATH,
             success: true,
             path: [startRef],
         };
@@ -1158,7 +1152,7 @@ export const findNodePath = (
     // if the end node was not reached, return with the partial result status
     if (lastBestNode.nodeRef !== endRef) {
         return {
-            status: FIND_NODE_PATH_STATUS_PARTIAL_PATH,
+            status: FindNodePathStatus.PARTIAL_PATH,
             success: true,
             path,
             intermediates: {
@@ -1170,7 +1164,7 @@ export const findNodePath = (
 
     // the path is complete, return with the complete path status
     return {
-        status: FIND_NODE_PATH_STATUS_COMPLETE_PATH,
+        status: FindNodePathStatus.COMPLETE_PATH,
         success: true,
         path,
         intermediates: {
@@ -1276,10 +1270,11 @@ export const findStraightPath = (
 
     // clamp start & end to poly boundaries
     const closestStartPos = vec3.create();
-    if (!closestPointOnPolyBoundary(navMesh, pathNodeRefs[0], start, closestStartPos)) return { success: false, path };
+    if (!getClosestPointOnPolyBoundary(navMesh, pathNodeRefs[0], start, closestStartPos)) return { success: false, path };
 
     const closestEndPos = vec3.create();
-    if (!closestPointOnPolyBoundary(navMesh, pathNodeRefs[pathNodeRefs.length - 1], end, closestEndPos)) return { success: false, path };
+    if (!getClosestPointOnPolyBoundary(navMesh, pathNodeRefs[pathNodeRefs.length - 1], end, closestEndPos))
+        return { success: false, path };
 
     // add start point
     appendVertex(closestStartPos, pathNodeRefs[0], path, getNodeRefType(pathNodeRefs[0]));
@@ -1320,7 +1315,7 @@ export const findStraightPath = (
                     const endClamp = vec3.create();
 
                     // this should only happen when the first polygon is invalid.
-                    if (!closestPointOnPolyBoundary(navMesh, pathNodeRefs[i], end, endClamp)) return { success: false, path };
+                    if (!getClosestPointOnPolyBoundary(navMesh, pathNodeRefs[i], end, endClamp)) return { success: false, path };
 
                     // append portals along the current straight path segment.
                     if (straightPathOptions & (FIND_STRAIGHT_PATH_AREA_CROSSINGS | FIND_STRAIGHT_PATH_ALL_CROSSINGS)) {
@@ -1655,7 +1650,7 @@ export type RaycastResult = {
  *
  * This method is meant to be used for quick, short distance checks.
  * The raycast ignores the y-value of the end position (2D check).
- * 
+ *
  * @param navMesh The navigation mesh to use for the raycast.
  * @param startRef The NodeRef for the start polygon
  * @param startPosition The starting position in world space.
@@ -1734,10 +1729,10 @@ export const raycast = (
 
             // find link which contains this edge
             if (link.edge !== intersectSegmentPoly2DResult.segMax) continue;
-            
+
             // skip off-mesh connections
             if (getNodeRefType(link.neighbourRef) === NodeType.OFFMESH_CONNECTION) continue;
-            
+
             // get pointer to the next polygon
             const nextTileAndPolyResult = getTileAndPolyByRef(link.neighbourRef, navMesh);
             if (!nextTileAndPolyResult.success) continue;
@@ -1799,7 +1794,8 @@ export const raycast = (
             // calculate hit normal
             if (intersectSegmentPoly2DResult.segMax >= 0) {
                 const a = intersectSegmentPoly2DResult.segMax;
-                const b = intersectSegmentPoly2DResult.segMax + 1 < poly.vertices.length ? intersectSegmentPoly2DResult.segMax + 1 : 0;
+                const b =
+                    intersectSegmentPoly2DResult.segMax + 1 < poly.vertices.length ? intersectSegmentPoly2DResult.segMax + 1 : 0;
                 const va = vec3.fromBuffer(vec3.create(), polyVerts, a * 3);
                 const vb = vec3.fromBuffer(vec3.create(), polyVerts, b * 3);
                 const dx = vb[0] - va[0];
@@ -1828,17 +1824,13 @@ export type FindRandomPointResult = {
 
 /**
  * Finds a random point on the navigation mesh.
- * 
+ *
  * @param navMesh - The navigation mesh
  * @param filter - Query filter to apply to polygons
  * @param rand - Function that returns random values [0,1]
  * @returns The result object with success flag, random point, and polygon reference
  */
-export const findRandomPoint = (
-    navMesh: NavMesh,
-    filter: QueryFilter,
-    rand: () => number,
-): FindRandomPointResult => {
+export const findRandomPoint = (navMesh: NavMesh, filter: QueryFilter, rand: () => number): FindRandomPointResult => {
     const result: FindRandomPointResult = {
         success: false,
         ref: '' as NodeRef,
@@ -1848,11 +1840,11 @@ export const findRandomPoint = (
     // randomly pick one tile using reservoir sampling
     let selectedTile: NavMeshTile | null = null;
     let tileSum = 0;
-    
+
     const tiles = Object.values(navMesh.tiles);
     for (const tile of tiles) {
         if (!tile || !tile.polys) continue;
-        
+
         // choose random tile using reservoir sampling
         const area = 1.0; // could be tile area, but we use uniform weighting
         tileSum += area;
@@ -1861,7 +1853,7 @@ export const findRandomPoint = (
             selectedTile = tile;
         }
     }
-    
+
     if (!selectedTile) {
         return result;
     }
@@ -1873,7 +1865,7 @@ export const findRandomPoint = (
 
     for (let i = 0; i < selectedTile.polys.length; i++) {
         const poly = selectedTile.polys[i];
-        
+
         // do not return off-mesh connection polygons
         if (poly.type !== NodeType.GROUND_POLY) {
             continue;
@@ -1894,7 +1886,7 @@ export const findRandomPoint = (
         const vc = vec3.create();
         for (let j = 2; j < poly.vertices.length; j++) {
             vec3.fromBuffer(va, selectedTile.vertices, poly.vertices[0] * 3);
-            vec3.fromBuffer(vb, selectedTile.vertices, poly.vertices[j-1] * 3);
+            vec3.fromBuffer(vb, selectedTile.vertices, poly.vertices[j - 1] * 3);
             vec3.fromBuffer(vc, selectedTile.vertices, poly.vertices[j] * 3);
             polyArea += triArea2D(va, vb, vc);
         }
@@ -1931,7 +1923,7 @@ export const findRandomPoint = (
     // project point onto polygon surface to ensure it's exactly on the mesh
     const closestPointResult = createGetClosestPointOnPolyResult();
     getClosestPointOnPoly(closestPointResult, navMesh, selectedPolyRef, pt);
-    
+
     if (closestPointResult.success) {
         vec3.copy(result.position, closestPointResult.closestPoint);
     } else {
@@ -1953,11 +1945,11 @@ export type FindRandomPointAroundCircleResult = {
 /**
  * Finds a random point within a circle around a center position on the navigation mesh.
  * This is a port of dtNavMeshQuery::findRandomPointAroundCircle from Detour.
- * 
+ *
  * Uses Dijkstra-like search to explore reachable polygons within the circle,
  * then selects a random polygon weighted by area, and finally generates
  * a random point within that polygon.
- * 
+ *
  * @param result - Result object to store the random point and polygon reference
  * @param navMesh - The navigation mesh
  * @param startRef - Reference to the polygon to start the search from
@@ -1973,7 +1965,7 @@ export const findRandomPointAroundCircle = (
     centerPosition: Vec3,
     maxRadius: number,
     filter: QueryFilter,
-    rand: () => number
+    rand: () => number,
 ): FindRandomPointAroundCircleResult => {
     const result: FindRandomPointAroundCircleResult = {
         success: false,
@@ -1982,10 +1974,7 @@ export const findRandomPointAroundCircle = (
     };
 
     // validate input
-    if (!isValidNodeRef(navMesh, startRef) || 
-        !vec3.finite(centerPosition) || 
-        maxRadius < 0 || 
-        !Number.isFinite(maxRadius)) {
+    if (!isValidNodeRef(navMesh, startRef) || !vec3.finite(centerPosition) || maxRadius < 0 || !Number.isFinite(maxRadius)) {
         return result;
     }
 
@@ -2047,7 +2036,7 @@ export const findRandomPointAroundCircle = (
             const v2 = vec3.create();
             for (let j = 2; j < bestPoly.vertices.length; j++) {
                 vec3.fromBuffer(v0, bestTile.vertices, bestPoly.vertices[0] * 3);
-                vec3.fromBuffer(v1, bestTile.vertices, bestPoly.vertices[j-1] * 3);
+                vec3.fromBuffer(v1, bestTile.vertices, bestPoly.vertices[j - 1] * 3);
                 vec3.fromBuffer(v2, bestTile.vertices, bestPoly.vertices[j] * 3);
                 polyArea += triArea2D(v0, v1, v2);
             }
@@ -2076,7 +2065,7 @@ export const findRandomPointAroundCircle = (
             if (!link) continue;
 
             const neighbourRef = link.neighbourRef;
-            
+
             // skip invalid neighbours and do not follow back to parent
             if (!neighbourRef || neighbourRef === parentRef) {
                 continue;
@@ -2105,7 +2094,7 @@ export const findRandomPointAroundCircle = (
             // get or create neighbour node
             const neighbourNodeKey: SearchNodeRef = `${neighbourRef}:0`;
             let neighbourNode = nodes[neighbourNodeKey];
-            
+
             if (!neighbourNode) {
                 neighbourNode = {
                     cost: 0,
@@ -2131,12 +2120,12 @@ export const findRandomPointAroundCircle = (
             const total = bestNode.total + vec3.distance(bestNode.position, neighbourNode.position);
 
             // the node is already in open list and the new result is worse, skip
-            if ((neighbourNode.flags & NODE_FLAG_OPEN) && total >= neighbourNode.total) {
+            if (neighbourNode.flags & NODE_FLAG_OPEN && total >= neighbourNode.total) {
                 continue;
             }
 
             neighbourNode.parent = `${bestRef}:0` as SearchNodeRef;
-            neighbourNode.flags = (neighbourNode.flags & ~NODE_FLAG_CLOSED);
+            neighbourNode.flags = neighbourNode.flags & ~NODE_FLAG_CLOSED;
             neighbourNode.total = total;
 
             if (neighbourNode.flags & NODE_FLAG_OPEN) {
@@ -2171,7 +2160,7 @@ export const findRandomPointAroundCircle = (
     // project point onto polygon surface to ensure it's exactly on the mesh
     const closestPointResult = createGetClosestPointOnPolyResult();
     getClosestPointOnPoly(closestPointResult, navMesh, randomPolyRef, pt);
-    
+
     if (closestPointResult.success) {
         vec3.copy(result.position, closestPointResult.closestPoint);
     } else {
