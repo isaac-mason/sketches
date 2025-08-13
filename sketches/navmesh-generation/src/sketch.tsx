@@ -305,7 +305,7 @@ const SoloNavMesh = () => {
         //     if you have large open areas with small obstacles (not a problem if you use tiles)
         //   * good choice to use for tiled navmesh with medium and small sized tiles
 
-        buildRegions(compactHeightfield, borderSize, minRegionArea, mergeRegionArea);
+        buildRegions(ctx, compactHeightfield, borderSize, minRegionArea, mergeRegionArea);
         // buildRegionsMonotone(compactHeightfield, borderSize, minRegionArea, mergeRegionArea);
         // buildLayerRegions(compactHeightfield, borderSize, minRegionArea);
 
@@ -852,7 +852,7 @@ const TiledNavMesh = () => {
 
             /* 9. partition the walkable surface into simple regions without holes */
 
-            buildRegions(compactHeightfield, borderSize, minRegionArea, mergeRegionArea);
+            buildRegions(ctx, compactHeightfield, borderSize, minRegionArea, mergeRegionArea);
             // buildRegionsMonotone(compactHeightfield, borderSize, minRegionArea, mergeRegionArea);
             // buildLayerRegions(compactHeightfield, borderSize, minRegionArea);
 

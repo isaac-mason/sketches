@@ -1,8 +1,9 @@
-import type { CompactHeightfield } from './compact-heightfield';
-import { getCon } from './compact-heightfield';
+import { BuildContext, type BuildContextState } from './build-context';
 import { NOT_CONNECTED } from './common';
 import { BORDER_REG, DIR_OFFSETS } from './common';
 import { NULL_AREA } from "./common";
+import type { CompactHeightfield } from './compact-heightfield';
+import { getCon } from './compact-heightfield';
 
 const LOG_NB_STACKS = 3;
 const NB_STACKS = 1 << LOG_NB_STACKS;
@@ -18,10 +19,10 @@ const calculateDistanceField = (
     const w = compactHeightfield.width;
     const h = compactHeightfield.height;
 
-    // Initialize distance values to maximum
+    // initialize distance values to maximum
     distances.fill(0xffff);
 
-    // Mark boundary cells
+    // mark boundary cells
     for (let y = 0; y < h; ++y) {
         for (let x = 0; x < w; ++x) {
             const cell = compactHeightfield.cells[x + y * w];
@@ -49,7 +50,7 @@ const calculateDistanceField = (
         }
     }
 
-    // Pass 1: Forward pass
+    // pass 1: Forward pass
     for (let y = 0; y < h; ++y) {
         for (let x = 0; x < w; ++x) {
             const cell = compactHeightfield.cells[x + y * w];
@@ -109,7 +110,7 @@ const calculateDistanceField = (
         }
     }
 
-    // Pass 2: Backward pass
+    // pass 2: Backward pass
     for (let y = h - 1; y >= 0; --y) {
         for (let x = w - 1; x >= 0; --x) {
             const cell = compactHeightfield.cells[x + y * w];
@@ -169,7 +170,7 @@ const calculateDistanceField = (
         }
     }
 
-    // Find maximum distance
+    // find maximum distance
     let maxDist = 0;
     for (let i = 0; i < compactHeightfield.spanCount; ++i) {
         maxDist = Math.max(distances[i], maxDist);
@@ -184,8 +185,8 @@ const calculateDistanceField = (
 const boxBlur = (
     compactHeightfield: CompactHeightfield,
     threshold: number,
-    src: number[],
-    dst: number[],
+    srcDistances: number[],
+    dstDistances: number[],
 ): void => {
     const w = compactHeightfield.width;
     const h = compactHeightfield.height;
@@ -197,10 +198,10 @@ const boxBlur = (
             const cell = compactHeightfield.cells[x + y * w];
             for (let i = cell.index; i < cell.index + cell.count; ++i) {
                 const span = compactHeightfield.spans[i];
-                const cd = src[i];
+                const cd = srcDistances[i];
 
                 if (cd <= scaledThreshold) {
-                    dst[i] = cd;
+                    dstDistances[i] = cd;
                     continue;
                 }
 
@@ -212,7 +213,7 @@ const boxBlur = (
                         const ai =
                             compactHeightfield.cells[ax + ay * w].index +
                             getCon(span, dir);
-                        d += src[ai];
+                        d += srcDistances[ai];
 
                         const aSpan = compactHeightfield.spans[ai];
                         const dir2 = (dir + 1) & 0x3;
@@ -222,7 +223,7 @@ const boxBlur = (
                             const ai2 =
                                 compactHeightfield.cells[ax2 + ay2 * w].index +
                                 getCon(aSpan, dir2);
-                            d += src[ai2];
+                            d += srcDistances[ai2];
                         } else {
                             d += cd;
                         }
@@ -230,29 +231,29 @@ const boxBlur = (
                         d += cd * 2;
                     }
                 }
-                dst[i] = Math.floor((d + 5) / 9);
+                dstDistances[i] = Math.floor((d + 5) / 9);
             }
         }
     }
 };
 
-export const buildDistanceField = (compactHeightfield: CompactHeightfield) => {
-    // Create temporary array for blurring
-    const dst = new Array(compactHeightfield.spanCount).fill(0);
+export const buildDistanceField = (compactHeightfield: CompactHeightfield): void => {
+    // create temporary array for blurring
+    const tempDistances = new Array(compactHeightfield.spanCount).fill(0);
 
-    // Calculate distance field directly into the heightfield's distances array
+    // calculate distance field directly into the heightfield's distances array
     const maxDist = calculateDistanceField(
         compactHeightfield,
         compactHeightfield.distances,
     );
     compactHeightfield.maxDistance = maxDist;
 
-    // Apply box blur
-    boxBlur(compactHeightfield, 1, compactHeightfield.distances, dst);
+    // apply box blur
+    boxBlur(compactHeightfield, 1, compactHeightfield.distances, tempDistances);
 
-    // Copy the box blur result back to the heightfield
+    // copy the box blur result back to the heightfield
     for (let i = 0; i < compactHeightfield.spanCount; i++) {
-        compactHeightfield.distances[i] = dst[i];
+        compactHeightfield.distances[i] = tempDistances[i];
     }
 };
 
@@ -263,35 +264,36 @@ type LevelStackEntry = {
 };
 
 export const buildRegions = (
+    ctx: BuildContextState,
     compactHeightfield: CompactHeightfield,
     borderSize: number,
     minRegionArea: number,
     mergeRegionArea: number,
-) => {
-    // Region building constants
+): boolean => {
+    // region building constants
     const w = compactHeightfield.width;
     const h = compactHeightfield.height;
 
-    // Initialize region and distance buffers
+    // initialize region and distance buffers
     const srcReg = new Array(compactHeightfield.spanCount).fill(0);
     const srcDist = new Array(compactHeightfield.spanCount).fill(0);
 
     let regionId = 1;
     let level = (compactHeightfield.maxDistance + 1) & ~1;
 
-    // Initialize level stacks
+    // initialize level stacks
     const lvlStacks: LevelStackEntry[][] = [];
     for (let i = 0; i < NB_STACKS; i++) {
         lvlStacks[i] = [];
     }
     const stack: LevelStackEntry[] = [];
 
-    // Paint border regions if border size is specified
+    // paint border regions if border size is specified
     if (borderSize > 0) {
         const bw = Math.min(w, borderSize);
         const bh = Math.min(h, borderSize);
 
-        // Paint border rectangles
+        // paint border rectangles
         paintRectRegion(
             0,
             bw,
@@ -354,7 +356,7 @@ export const buildRegions = (
             appendStacks(lvlStacks[sId - 1], lvlStacks[sId], srcReg);
         }
 
-        // Expand current regions until no empty connected cells found
+        // expand current regions until no empty connected cells found
         expandRegions(
             EXPAND_ITERS,
             level,
@@ -365,7 +367,7 @@ export const buildRegions = (
             false,
         );
 
-        // Mark new regions with IDs
+        // mark new regions with IDs
         for (let j = 0; j < lvlStacks[sId].length; j++) {
             const current = lvlStacks[sId][j];
             const x = current.x;
@@ -387,7 +389,8 @@ export const buildRegions = (
                     )
                 ) {
                     if (regionId === 0xffff) {
-                        throw new Error('Region ID overflow');
+                        BuildContext.error(ctx, "Region ID overflow");
+                        return false;
                     }
                     regionId++;
                 }
@@ -395,7 +398,7 @@ export const buildRegions = (
         }
     }
 
-    // Expand current regions until no empty connected cells found
+    // expand current regions until no empty connected cells found
     expandRegions(
         EXPAND_ITERS * 8,
         0,
@@ -406,7 +409,7 @@ export const buildRegions = (
         true,
     );
 
-    // Merge regions and filter out small regions
+    // merge regions and filter out small regions
     const overlaps: number[] = [];
     compactHeightfield.maxRegions = regionId;
 
@@ -419,10 +422,11 @@ export const buildRegions = (
             overlaps,
         )
     ) {
-        throw new Error('Failed to merge and filter regions');
+        BuildContext.error(ctx, "Failed to merge and filter regions")
+        return false;
     }
 
-    // Write the result to compact heightfield spans
+    // write the result to compact heightfield spans
     for (let i = 0; i < compactHeightfield.spanCount; i++) {
         compactHeightfield.spans[i].region = srcReg[i];
     }
