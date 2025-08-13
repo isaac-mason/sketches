@@ -115,10 +115,10 @@ export type NavMeshPolyDetail = {
 };
 
 export type NavMeshLink = {
-    /** polygon reference that owns this link */
+    /** node reference that owns this link */
     ref: NodeRef;
 
-    /** neighbour reference. (The neighbor that is linked to.) */
+    /** the neighbour node reference that ref links to */
     neighbourRef: NodeRef;
 
     /** index of the polygon edge that owns this link */

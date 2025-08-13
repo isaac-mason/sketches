@@ -58,7 +58,10 @@ import {
     createSearchNodesHelper,
     createNavMeshOffMeshConnectionsHelper,
 } from './lib/three';
-import { createFindNearestPolyResult, DEFAULT_QUERY_FILTER } from './lib/query/nav-mesh-query';
+import { createFindNearestPolyResult, DEFAULT_QUERY_FILTER, findNodePath } from './lib/query/nav-mesh-query';
+import { Line2 } from 'three/examples/jsm/lines/webgpu/Line2.js';
+import { LineGeometry } from 'three/examples/jsm/Addons.js';
+import { Line2NodeMaterial } from 'three/webgpu';
 
 const DungeonModel = () => {
     const gltf = useGLTF('/dungeon.gltf');
@@ -166,10 +169,10 @@ const SoloNavMesh = () => {
         console.time('navmesh generation');
 
         /* 0. define generation parameters */
-        const cellSize = 0.1;
-        const cellHeight = 0.1;
+        const cellSize = 0.15;
+        const cellHeight = 0.15;
 
-        const walkableRadiusWorld = 0.2;
+        const walkableRadiusWorld = 0.1;
         const walkableRadiusVoxels = Math.ceil(walkableRadiusWorld / cellSize);
 
         const walkableClimbWorld = 0.5;
@@ -452,7 +455,7 @@ const SoloNavMesh = () => {
             navMeshQuery.DEFAULT_QUERY_FILTER,
         );
 
-        const findPathResult = navMeshQuery.findPath(
+        const findPathResult = navMeshQuery.findNodePath(
             nav,
             startPositionNearestPoly.nearestPolyRef,
             endPositionNearestPoly.nearestPolyRef,
@@ -463,8 +466,10 @@ const SoloNavMesh = () => {
 
         console.log(findPathResult);
 
-        for (const poly of findPathResult.path) {
-            const polyHelper = createNavMeshPolyHelper(nav, poly, new THREE.Color('blue'));
+        for (let i = 0; i < findPathResult.path.length; i++) {
+            const poly = findPathResult.path[i];
+            const hslColor = new THREE.Color().setHSL(i / findPathResult.path.length, 1, 0.5);
+            const polyHelper = createNavMeshPolyHelper(nav, poly, hslColor);
             polyHelper.object.position.y += 0.25;
             scene.add(polyHelper.object);
             disposables.push(() => {
@@ -758,8 +763,6 @@ const TiledNavMesh = () => {
         const buildTile = (
             positions: ArrayLike<number>,
             indices: ArrayLike<number>,
-            tileX: number,
-            tileY: number,
             tileBounds: Box3,
             cellSize: number,
             cellHeight: number,
@@ -849,6 +852,8 @@ const TiledNavMesh = () => {
             /* 9. partition the walkable surface into simple regions without holes */
 
             buildRegions(compactHeightfield, borderSize, minRegionArea, mergeRegionArea);
+            // buildRegionsMonotone(compactHeightfield, borderSize, minRegionArea, mergeRegionArea);
+            // buildLayerRegions(compactHeightfield, borderSize, minRegionArea);
 
             /* 10. trace and simplify region contours */
 
@@ -895,13 +900,13 @@ const TiledNavMesh = () => {
 
         /* 0. define generation parameters */
 
-        const cellSize = 0.1;
-        const cellHeight = 0.1;
+        const cellSize = 0.15;
+        const cellHeight = 0.15;
 
         const tileSizeVoxels = 64;
         const tileSizeWorld = tileSizeVoxels * cellSize;
 
-        const walkableRadiusWorld = 0.2;
+        const walkableRadiusWorld = 0.1;
         const walkableRadiusVoxels = Math.ceil(walkableRadiusWorld / cellSize);
 
         const walkableClimbWorld = 0.5;
@@ -982,8 +987,6 @@ const TiledNavMesh = () => {
                 const { polyMesh, polyMeshDetail, heightfield, compactHeightfield, contourSet } = buildTile(
                     positions,
                     indices,
-                    tileX,
-                    tileY,
                     tileBounds,
                     cellSize,
                     cellHeight,
@@ -1109,7 +1112,7 @@ const TiledNavMesh = () => {
             endPosition,
         });
 
-        const findPathResult = navMeshQuery.findPath(
+        const findPathResult = navMeshQuery.findNodePath(
             nav,
             startPositionNearestPoly.nearestPolyRef,
             endPositionNearestPoly.nearestPolyRef,
@@ -1120,10 +1123,17 @@ const TiledNavMesh = () => {
 
         console.log('findPathResult', findPathResult);
 
-        for (const poly of findPathResult.path) {
-            const polyHelper = createNavMeshPolyHelper(nav, poly, new THREE.Color('blue'));
+        for (let i = 0; i < findPathResult.path.length; i++) {
+            const poly = findPathResult.path[i];
+            const hslColor = new THREE.Color().setHSL(i / findPathResult.path.length, 1, 0.5);
+            const polyHelper = createNavMeshPolyHelper(nav, poly, hslColor);
             polyHelper.object.position.y += 0.25;
             scene.add(polyHelper.object);
+
+            disposables.push(() => {
+                scene.remove(polyHelper.object);
+                polyHelper.dispose();
+            });
         }
 
         if (findPathResult.intermediates?.nodes) {
@@ -1133,6 +1143,53 @@ const TiledNavMesh = () => {
                 scene.remove(searchNodesHelper.object);
                 searchNodesHelper.dispose();
             });
+        }
+
+        // testing: find straight path
+        const findStraightPathResult = navMeshQuery.findStraightPath(nav, startPosition, endPosition, findPathResult.path);
+
+        console.log('findStraightPathResult', findStraightPathResult);
+
+        for (let i = 0; i < findStraightPathResult.path.length; i++) {
+            const point = findStraightPathResult.path[i];
+
+            // point
+            const mesh = new THREE.Mesh(
+                new THREE.SphereGeometry(0.1, 16, 16),
+                new THREE.MeshBasicMaterial({ color: new THREE.Color('yellow') }),
+            );
+            mesh.position.set(...point.position);
+            scene.add(mesh);
+
+            disposables.push(() => {
+                scene.remove(mesh);
+                mesh.geometry.dispose();
+                mesh.material.dispose();
+            });
+
+            // line from prev to current
+            if (i > 0) {
+                const prevPoint = findStraightPathResult.path[i - 1];
+
+                const lineGeometry = new LineGeometry();
+                lineGeometry.setFromPoints([new THREE.Vector3(...prevPoint.position), new THREE.Vector3(...point.position)]);
+
+                const lineMaterial = new Line2NodeMaterial({
+                    color: 'yellow',
+                    linewidth: 0.1,
+                    worldUnits: true,
+                });
+
+                const line = new Line2(lineGeometry, lineMaterial);
+
+                scene.add(line);
+
+                disposables.push(() => {
+                    scene.remove(line);
+                    lineGeometry.dispose();
+                    lineMaterial.dispose();
+                });
+            }
         }
 
         return () => {

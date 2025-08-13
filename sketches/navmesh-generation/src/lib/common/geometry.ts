@@ -411,7 +411,7 @@ export const overlapSegSeg2d = (
     c: Vec2,
     d: Vec2,
 ): boolean => {
-    // Calculate cross products for line segment intersection test
+    // calculate cross products for line segment intersection test
     const ab = _overlapSegAB;
     const ad = _overlapSegAD;
     const ac = _overlapSegAC;
@@ -436,11 +436,54 @@ export const overlapSegSeg2d = (
     return false;
 };
 
+/**
+ * 2D signed area in XZ plane (positive if c is to the left of ab)
+ */
+export const triArea2D = (a: Vec3, b: Vec3, c: Vec3): number => {
+    const abx = b[0] - a[0];
+    const abz = b[2] - a[2];
+    const acx = c[0] - a[0];
+    const acz = c[2] - a[2];
+    return abx * acz - abz * acx;
+};
+
+export type IntersectSegSeg2DResult = { hit: boolean; s: number; t: number };
+export const createIntersectSegSeg2DResult = (): IntersectSegSeg2DResult => ({ hit: false, s: 0, t: 0 });
+
+/**
+ * Segment-segment intersection in XZ plane.
+ * Returns tuple [hit, s, t] where
+ *  P = a + s*(b-a) and Q = c + t*(d-c). Hit only if both s and t are within [0,1].
+ */
+export const intersectSegSeg2D = (
+    out: IntersectSegSeg2DResult,
+    a: Vec3,
+    b: Vec3,
+    c: Vec3,
+    d: Vec3,
+): boolean => {
+    const bax = b[0] - a[0];
+    const baz = b[2] - a[2];
+    const dcx = d[0] - c[0];
+    const dcz = d[2] - c[2];
+    const acx = a[0] - c[0];
+    const acz = a[2] - c[2];
+    const denom = dcz * bax - dcx * baz;
+    if (Math.abs(denom) < 1e-12) {
+        out.hit = false; out.s = 0; out.t = 0; return false;
+    }
+    const s = (dcx * acz - dcz * acx) / denom;
+    const t = (bax * acz - baz * acx) / denom;
+    const hit = !(s < 0 || s > 1 || t < 0 || t > 1);
+    out.hit = hit; out.s = s; out.t = t;
+    return hit;
+};
+
 const _polyMinExtentPt: Vec2 = vec2.create();
 const _polyMinExtentP1: Vec2 = vec2.create();
 const _polyMinExtentP2: Vec2 = vec2.create();
 
-// Calculate minimum extend of the polygon.
+// calculate minimum extend of the polygon.
 export const polyMinExtent = (verts: number[], nverts: number): number => {
     let minDist = Number.MAX_VALUE;
 
