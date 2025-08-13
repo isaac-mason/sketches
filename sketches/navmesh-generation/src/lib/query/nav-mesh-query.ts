@@ -9,6 +9,9 @@ import {
     intersectSegSeg2D,
     type IntersectSegSeg2DResult,
     createIntersectSegSeg2DResult,
+    intersectSegmentPoly2D,
+    type IntersectSegmentPoly2DResult,
+    createIntersectSegmentPoly2DResult,
 } from '../common/geometry';
 import {
     type NavMesh,
@@ -113,7 +116,7 @@ export type GetNodeAreaAndFlagsResult = {
     success: boolean;
     area: number;
     flags: number;
-}
+};
 
 export const createGetNodeAreaAndFlagsResult = (): GetNodeAreaAndFlagsResult => {
     return {
@@ -123,11 +126,7 @@ export const createGetNodeAreaAndFlagsResult = (): GetNodeAreaAndFlagsResult => 
     };
 };
 
-export const getNodeAreaAndFlags = (
-    out: GetNodeAreaAndFlagsResult,
-    nodeRef: NodeRef,
-    navMesh: NavMesh,
-) => {
+export const getNodeAreaAndFlags = (out: GetNodeAreaAndFlagsResult, nodeRef: NodeRef, navMesh: NavMesh) => {
     out.success = false;
     out.flags = 0;
     out.area = 0;
@@ -149,19 +148,21 @@ export const getNodeAreaAndFlags = (
     }
 
     return out;
-}
+};
 
-export type GetTileAndPolyByRefResult = {
-    success: false;
-    tile: NavMeshTile | null;
-    poly: NavMeshPoly | null;
-    polyIndex: number;
-} | {
-    success: true;
-    tile: NavMeshTile;
-    poly: NavMeshPoly;
-    polyIndex: number;
-}
+export type GetTileAndPolyByRefResult =
+    | {
+          success: false;
+          tile: NavMeshTile | null;
+          poly: NavMeshPoly | null;
+          polyIndex: number;
+      }
+    | {
+          success: true;
+          tile: NavMeshTile;
+          poly: NavMeshPoly;
+          polyIndex: number;
+      };
 
 export const createGetTileAndPolyByRefResult = (): GetTileAndPolyByRefResult => {
     return {
@@ -244,25 +245,25 @@ export const getPolyHeight = (tile: NavMeshTile, poly: NavMeshPoly, polyIndex: n
 
             if (v0Index < tile.vertices.length / 3) {
                 // use main tile vertices
-                vec3.fromArray(v0, tile.vertices, v0Index * 3);
+                vec3.fromBuffer(v0, tile.vertices, v0Index * 3);
             } else {
                 // use detail vertices
                 const detailIndex = (v0Index - tile.vertices.length / 3) * 3;
-                vec3.fromArray(v0, tile.detailVertices, detailIndex);
+                vec3.fromBuffer(v0, tile.detailVertices, detailIndex);
             }
 
             if (v1Index < tile.vertices.length / 3) {
-                vec3.fromArray(v1, tile.vertices, v1Index * 3);
+                vec3.fromBuffer(v1, tile.vertices, v1Index * 3);
             } else {
                 const detailIndex = (v1Index - tile.vertices.length / 3) * 3;
-                vec3.fromArray(v1, tile.detailVertices, detailIndex);
+                vec3.fromBuffer(v1, tile.detailVertices, detailIndex);
             }
 
             if (v2Index < tile.vertices.length / 3) {
-                vec3.fromArray(v2, tile.vertices, v2Index * 3);
+                vec3.fromBuffer(v2, tile.vertices, v2Index * 3);
             } else {
                 const detailIndex = (v2Index - tile.vertices.length / 3) * 3;
-                vec3.fromArray(v2, tile.detailVertices, detailIndex);
+                vec3.fromBuffer(v2, tile.detailVertices, detailIndex);
             }
 
             // check if point is inside triangle and calculate height
@@ -279,9 +280,9 @@ export const getPolyHeight = (tile: NavMeshTile, poly: NavMeshPoly, polyIndex: n
         const v1 = _v1;
         const v2 = _v2;
 
-        vec3.fromArray(v0, tile.vertices, poly.vertices[0] * 3);
-        vec3.fromArray(v1, tile.vertices, poly.vertices[1] * 3);
-        vec3.fromArray(v2, tile.vertices, poly.vertices[2] * 3);
+        vec3.fromBuffer(v0, tile.vertices, poly.vertices[0] * 3);
+        vec3.fromBuffer(v1, tile.vertices, poly.vertices[1] * 3);
+        vec3.fromBuffer(v2, tile.vertices, poly.vertices[2] * 3);
 
         const h = getHeightAtPoint(v0, v1, v2, pos);
 
@@ -333,18 +334,18 @@ const closestPointOnDetailEdges = (
             const vk = _vk;
 
             if (viIndex < tile.vertices.length / 3) {
-                vec3.fromArray(vi, tile.vertices, viIndex * 3);
+                vec3.fromBuffer(vi, tile.vertices, viIndex * 3);
             } else {
                 const detailIndex = (viIndex - tile.vertices.length / 3) * 3;
 
-                vec3.fromArray(vi, tile.detailVertices, detailIndex);
+                vec3.fromBuffer(vi, tile.detailVertices, detailIndex);
             }
 
             if (vkIndex < tile.vertices.length / 3) {
-                vec3.fromArray(vk, tile.vertices, vkIndex * 3);
+                vec3.fromBuffer(vk, tile.vertices, vkIndex * 3);
             } else {
                 const detailIndex = (vkIndex - tile.vertices.length / 3) * 3;
-                vec3.fromArray(vk, tile.detailVertices, detailIndex);
+                vec3.fromBuffer(vk, tile.detailVertices, detailIndex);
             }
 
             closestPtSeg2d(_closestOnDetailEdges, pos, vi, vk);
@@ -855,8 +856,8 @@ const getPortalPoints = (navMesh: NavMesh, fromNodeRef: NodeRef, toNodeRef: Node
     const v0Index = fromPoly.vertices[toLink.edge];
     const v1Index = fromPoly.vertices[(toLink.edge + 1) % fromPoly.vertices.length];
 
-    vec3.fromArray(outLeft, fromTile.vertices, v0Index * 3);
-    vec3.fromArray(outRight, fromTile.vertices, v1Index * 3);
+    vec3.fromBuffer(outLeft, fromTile.vertices, v0Index * 3);
+    vec3.fromBuffer(outRight, fromTile.vertices, v1Index * 3);
 
     // if the link is at tile boundary, clamp the vertices to the link width.
     if (toLink.side !== 0xff) {
@@ -866,8 +867,8 @@ const getPortalPoints = (navMesh: NavMesh, fromNodeRef: NodeRef, toNodeRef: Node
             const tmin = toLink.bmin * s;
             const tmax = toLink.bmax * s;
 
-            vec3.fromArray(_getPortalPointsStart, fromTile.vertices, v0Index * 3);
-            vec3.fromArray(_getPortalPointsEnd, fromTile.vertices, v1Index * 3);
+            vec3.fromBuffer(_getPortalPointsStart, fromTile.vertices, v0Index * 3);
+            vec3.fromBuffer(_getPortalPointsEnd, fromTile.vertices, v1Index * 3);
             vec3.lerp(outLeft, _getPortalPointsStart, _getPortalPointsEnd, tmin);
             vec3.lerp(outRight, _getPortalPointsStart, _getPortalPointsEnd, tmax);
         }
@@ -1276,7 +1277,7 @@ const _findStraightPathRightPortalPoint = vec3.create();
  * The start position is clamped to the first polygon node in the path, and the
  * end position is clamped to the last. So the start and end positions should
  * normally be within or very near the first and last polygons respectively.
- * 
+ *
  * @param navMesh The navigation mesh to use for the search.
  * @param start The start position in world space.
  * @param end The end position in world space.
@@ -1333,7 +1334,7 @@ export const findStraightPath = (
 
             const left = _findStraightPathLeftPortalPoint;
             const right = _findStraightPathRightPortalPoint;
-            
+
             if (i + 1 < pathSize) {
                 const toRef = pathNodeRefs[i + 1];
                 toType = getNodeRefType(toRef);
@@ -1402,7 +1403,10 @@ export const findStraightPath = (
 
             // left vertex
             if (triArea2D(portalApex, portalLeft, _findStraightPathLeftPortalPoint) >= 0.0) {
-                if (vec3.equals(portalApex, portalLeft) || triArea2D(portalApex, portalRight, _findStraightPathLeftPortalPoint) < 0.0) {
+                if (
+                    vec3.equals(portalApex, portalLeft) ||
+                    triArea2D(portalApex, portalRight, _findStraightPathLeftPortalPoint) < 0.0
+                ) {
                     vec3.copy(portalLeft, _findStraightPathLeftPortalPoint);
                     leftPolyRef = i + 1 < pathSize ? pathNodeRefs[i + 1] : null;
                     leftPolyType = toType;
@@ -1447,70 +1451,54 @@ export const findStraightPath = (
     return { success: true, path };
 };
 
-export const MOVE_ALONG_SURFACE_STATUS_SUCCESS = 1 as const;
-export const MOVE_ALONG_SURFACE_STATUS_PARTIAL = 2 as const;
-export const MOVE_ALONG_SURFACE_STATUS_FAILURE = 0 as const;
-export const MOVE_ALONG_SURFACE_STATUS_INVALID_PARAM = 3 as const;
-
-export type MoveAlongSurfaceStatus =
-    | typeof MOVE_ALONG_SURFACE_STATUS_SUCCESS
-    | typeof MOVE_ALONG_SURFACE_STATUS_PARTIAL
-    | typeof MOVE_ALONG_SURFACE_STATUS_FAILURE
-    | typeof MOVE_ALONG_SURFACE_STATUS_INVALID_PARAM;
-
 export type MoveAlongSurfaceResult = {
-    status: MoveAlongSurfaceStatus;
-    resultPos: Vec3;
+    success: boolean;
+    resultPosition: Vec3;
     visited: NodeRef[];
-    visitedCount: number;
 };
 
 /**
  * Moves from start position towards end position along the navigation mesh surface.
- * 
- * This method is optimized for small delta movement and a small number of 
- * polygons. If used for too great a distance, the result set will form an 
+ *
+ * This method is optimized for small delta movement and a small number of
+ * polygons. If used for too great a distance, the result set will form an
  * incomplete path.
- * 
- * The resultPos will equal the endPos if the end is reached. 
+ *
+ * The resultPosition will equal the endPosition if the end is reached.
  * Otherwise the closest reachable position will be returned.
- * 
- * The resultPos is not projected onto the surface of the navigation 
+ *
+ * The resultPosition is not projected onto the surface of the navigation
  * mesh. Use getPolyHeight if this is needed.
- * 
- * This method treats the end position in the same manner as 
+ *
+ * This method treats the end position in the same manner as
  * the raycast method. (As a 2D point.)
- * 
+ *
+ * @param result The result object to populate
  * @param navMesh The navigation mesh
  * @param startRef The reference ID of the starting polygon
- * @param startPos The starting position [(x, y, z)]
- * @param endPos The ending position [(x, y, z)]
+ * @param startPosition The starting position [(x, y, z)]
+ * @param endPosition The ending position [(x, y, z)]
  * @param filter The query filter.
  * @returns Result containing status, final position, and visited polygons
  */
 export const moveAlongSurface = (
     navMesh: NavMesh,
     startRef: NodeRef,
-    startPos: Vec3,
-    endPos: Vec3,
+    startPosition: Vec3,
+    endPosition: Vec3,
     filter: QueryFilter,
 ): MoveAlongSurfaceResult => {
     const result: MoveAlongSurfaceResult = {
-        status: MOVE_ALONG_SURFACE_STATUS_FAILURE,
-        resultPos: [0, 0, 0],
+        success: false,
+        resultPosition: vec3.create(),
         visited: [],
-        visitedCount: 0,
     };
 
-    if (!isValidNodeRef(navMesh, startRef) ||
-        !vec3.finite(startPos) ||
-        !vec3.finite(endPos) ||
-        !filter) {
-        result.status = MOVE_ALONG_SURFACE_STATUS_INVALID_PARAM;
+    if (!isValidNodeRef(navMesh, startRef) || !vec3.finite(startPosition) || !vec3.finite(endPosition) || !filter) {
         return result;
     }
 
-    result.status = MOVE_ALONG_SURFACE_STATUS_SUCCESS;
+    result.success = true;
 
     const nodes: SearchNodePool = {};
     const visited: NodeRef[] = [];
@@ -1522,18 +1510,18 @@ export const moveAlongSurface = (
         nodeRef: startRef,
         state: 0,
         flags: NODE_FLAG_CLOSED,
-        position: structuredClone(startPos),
+        position: structuredClone(startPosition),
     };
     nodes[`${startRef}:0`] = startNode;
 
-    const bestPos = vec3.clone(startPos);
+    const bestPos = vec3.clone(startPosition);
     let bestDist = Number.MAX_VALUE;
     let bestNode: SearchNode | null = startNode;
 
     // search constraints
     const searchPos = vec3.create();
-    vec3.lerp(searchPos, startPos, endPos, 0.5);
-    const searchRadSqr = (vec3.distance(startPos, endPos) / 2.0 + 0.001) ** 2;
+    vec3.lerp(searchPos, startPosition, endPosition, 0.5);
+    const searchRadSqr = (vec3.distance(startPosition, endPosition) / 2.0 + 0.001) ** 2;
 
     // breadth-first search queue (no priority needed for this algorithm)
     const queue: SearchNodeQueue = [startNode];
@@ -1545,7 +1533,7 @@ export const moveAlongSurface = (
         // get poly and tile
         const curRef = curNode.nodeRef;
         const tileAndPoly = getTileAndPolyByRef(createGetTileAndPolyByRefResult(), curRef, navMesh);
-        
+
         if (!tileAndPoly.success) continue;
 
         const { tile, poly } = tileAndPoly;
@@ -1561,9 +1549,9 @@ export const moveAlongSurface = (
         }
 
         // if target is inside the poly, stop search
-        if (pointInPoly(nverts, verts, endPos)) {
+        if (pointInPoly(nverts, verts, endPosition)) {
             bestNode = curNode;
-            vec3.copy(bestPos, endPos);
+            vec3.copy(bestPos, endPosition);
             break;
         }
 
@@ -1597,10 +1585,10 @@ export const moveAlongSurface = (
                 // wall edge, calc distance
                 const vj = [verts[j * 3], verts[j * 3 + 1], verts[j * 3 + 2]] as Vec3;
                 const vi = [verts[i * 3], verts[i * 3 + 1], verts[i * 3 + 2]] as Vec3;
-                const distSqr = distancePtSeg2dSqr(endPos, vj, vi);
+                const distSqr = distancePtSeg2dSqr(endPosition, vj, vi);
                 if (distSqr < bestDist) {
                     // update nearest distance
-                    closestPtSeg2d(bestPos, endPos, vj, vi);
+                    closestPtSeg2d(bestPos, endPosition, vj, vi);
                     bestDist = distSqr;
                     bestNode = curNode;
                 }
@@ -1608,7 +1596,7 @@ export const moveAlongSurface = (
                 for (const neighbourRef of neis) {
                     // handle tile boundary crossings like findNodePath
                     let crossSide = 0;
-                    const linkIndex = linkIndices.find(idx => navMesh.links[idx]?.neighbourRef === neighbourRef);
+                    const linkIndex = linkIndices.find((idx) => navMesh.links[idx]?.neighbourRef === neighbourRef);
                     if (linkIndex !== undefined) {
                         const link = navMesh.links[linkIndex];
                         if (link.side !== 0xff) {
@@ -1618,7 +1606,7 @@ export const moveAlongSurface = (
 
                     const neighbourSearchNodeRef: SearchNodeRef = `${neighbourRef}:${crossSide}`;
                     let neighbourNode = nodes[neighbourSearchNodeRef];
-                    
+
                     if (!neighbourNode) {
                         neighbourNode = {
                             cost: 0,
@@ -1627,7 +1615,7 @@ export const moveAlongSurface = (
                             nodeRef: neighbourRef,
                             state: crossSide,
                             flags: 0,
-                            position: structuredClone(endPos),
+                            position: structuredClone(endPosition),
                         };
                         nodes[neighbourSearchNodeRef] = neighbourNode;
                     }
@@ -1670,9 +1658,192 @@ export const moveAlongSurface = (
         visited.reverse();
     }
 
-    vec3.copy(result.resultPos, bestPos);
+    vec3.copy(result.resultPosition, bestPos);
     result.visited = visited;
-    result.visitedCount = visited.length;
+
+    return result;
+};
+
+export type RaycastResult = {
+    /** The hit parameter along the segment. A value of Number.MAX_VALUE indicates no wall hit. */
+    t: number;
+    /** Normal vector of the hit wall. */
+    hitNormal: Vec3;
+    /** Index of the edge hit. */
+    hitEdgeIndex: number;
+    /** Visited polygon references. */
+    path: NodeRef[];
+};
+
+/**
+ * Casts a 'walkability' ray along the surface of the navigation mesh from
+ * the start position toward the end position.
+ *
+ * This method is meant to be used for quick, short distance checks.
+ * The raycast ignores the y-value of the end position (2D check).
+ * 
+ * @param navMesh The navigation mesh to use for the raycast.
+ * @param startRef The NodeRef for the start polygon
+ * @param startPosition The starting position in world space.
+ * @param endPosition The ending position in world space.
+ * @param filter The query filter to apply.
+ */
+export const raycast = (
+    navMesh: NavMesh,
+    startRef: NodeRef,
+    startPosition: Vec3,
+    endPosition: Vec3,
+    filter: QueryFilter,
+): RaycastResult => {
+    const result: RaycastResult = {
+        t: 0,
+        hitNormal: vec3.create(),
+        hitEdgeIndex: -1,
+        path: [],
+    };
+
+    // validate input
+    if (!isValidNodeRef(navMesh, startRef) || !vec3.finite(startPosition) || !vec3.finite(endPosition) || !filter) {
+        return result;
+    }
+
+    let curRef: NodeRef | null = startRef;
+
+    const tileAndPolyResult = createGetTileAndPolyByRefResult();
+    const nextTileAndPolyResult = createGetTileAndPolyByRefResult();
+    const intersectSegmentPoly2DResult = createIntersectSegmentPoly2DResult();
+
+    while (curRef) {
+        // get current tile and poly
+        getTileAndPolyByRef(tileAndPolyResult, curRef, navMesh);
+        if (!tileAndPolyResult.success) break;
+        const { tile, poly } = tileAndPolyResult;
+
+        // collect current poly vertices
+        const polyVerts: number[] = [];
+        for (let i = 0; i < poly.vertices.length; i++) {
+            const vertIndex = poly.vertices[i] * 3;
+            polyVerts.push(tile.vertices[vertIndex]);
+            polyVerts.push(tile.vertices[vertIndex + 1]);
+            polyVerts.push(tile.vertices[vertIndex + 2]);
+        }
+
+        // cast ray against current polygon
+        intersectSegmentPoly2D(intersectSegmentPoly2DResult, startPosition, endPosition, polyVerts);
+        if (!intersectSegmentPoly2DResult.intersects) {
+            // could not hit the polygon, keep the old t and report hit
+            return result;
+        }
+
+        result.hitEdgeIndex = intersectSegmentPoly2DResult.segMax;
+
+        // keep track of furthest t so far
+        if (intersectSegmentPoly2DResult.tmax > result.t) {
+            result.t = intersectSegmentPoly2DResult.tmax;
+        }
+
+        // add polygon to visited
+        result.path.push(curRef);
+
+        // ray end is completely inside the polygon
+        if (intersectSegmentPoly2DResult.segMax === -1) {
+            result.t = Number.MAX_VALUE;
+
+            return result;
+        }
+
+        // follow neighbors
+        let nextRef: NodeRef | null = null;
+
+        const polyLinks: number[] = navMesh.nodes[curRef];
+
+        for (const linkIndex of polyLinks) {
+            const link = navMesh.links[linkIndex];
+
+            // find link which contains this edge
+            if (link.edge !== intersectSegmentPoly2DResult.segMax) continue;
+            
+            // skip off-mesh connections
+            if (getNodeRefType(link.neighbourRef) === NodeType.OFFMESH_CONNECTION) continue;
+            
+            // get pointer to the next polygon
+            getTileAndPolyByRef(nextTileAndPolyResult, link.neighbourRef, navMesh);
+            if (!nextTileAndPolyResult.success) continue;
+
+            // skip links based on filter
+            if (filter.passFilter && !filter.passFilter(link.neighbourRef, navMesh, filter)) continue;
+
+            // if the link is internal, just return the ref
+            if (link.side === 0xff) {
+                nextRef = link.neighbourRef;
+                break;
+            }
+
+            // if the link is at tile boundary, check if the link spans the whole edge
+            if (link.bmin === 0 && link.bmax === 255) {
+                nextRef = link.neighbourRef;
+                break;
+            }
+
+            // check for partial edge links
+            const v0 = poly.vertices[link.edge];
+            const v1 = poly.vertices[(link.edge + 1) % poly.vertices.length];
+            const left = [tile.vertices[v0 * 3], tile.vertices[v0 * 3 + 1], tile.vertices[v0 * 3 + 2]] as Vec3;
+            const right = [tile.vertices[v1 * 3], tile.vertices[v1 * 3 + 1], tile.vertices[v1 * 3 + 2]] as Vec3;
+
+            // check that the intersection lies inside the link portal
+            if (link.side === 0 || link.side === 4) {
+                // calculate link size
+                const s = 1.0 / 255.0;
+                let lmin = left[2] + (right[2] - left[2]) * (link.bmin * s);
+                let lmax = left[2] + (right[2] - left[2]) * (link.bmax * s);
+                if (lmin > lmax) [lmin, lmax] = [lmax, lmin];
+
+                // find Z intersection
+                const z = startPosition[2] + (endPosition[2] - startPosition[2]) * intersectSegmentPoly2DResult.tmax;
+                if (z >= lmin && z <= lmax) {
+                    nextRef = link.neighbourRef;
+                    break;
+                }
+            } else if (link.side === 2 || link.side === 6) {
+                // calculate link size
+                const s = 1.0 / 255.0;
+                let lmin = left[0] + (right[0] - left[0]) * (link.bmin * s);
+                let lmax = left[0] + (right[0] - left[0]) * (link.bmax * s);
+                if (lmin > lmax) [lmin, lmax] = [lmax, lmin];
+
+                // find X intersection
+                const x = startPosition[0] + (endPosition[0] - startPosition[0]) * intersectSegmentPoly2DResult.tmax;
+                if (x >= lmin && x <= lmax) {
+                    nextRef = link.neighbourRef;
+                    break;
+                }
+            }
+        }
+
+        if (!nextRef) {
+            // no neighbor, we hit a wall
+
+            // calculate hit normal
+            if (intersectSegmentPoly2DResult.segMax >= 0) {
+                const a = intersectSegmentPoly2DResult.segMax;
+                const b = intersectSegmentPoly2DResult.segMax + 1 < poly.vertices.length ? intersectSegmentPoly2DResult.segMax + 1 : 0;
+                const va = vec3.fromBuffer(vec3.create(), polyVerts, a * 3);
+                const vb = vec3.fromBuffer(vec3.create(), polyVerts, b * 3);
+                const dx = vb[0] - va[0];
+                const dz = vb[2] - va[2];
+                result.hitNormal[0] = dz;
+                result.hitNormal[1] = 0;
+                result.hitNormal[2] = -dx;
+                vec3.normalize(result.hitNormal, result.hitNormal);
+            }
+
+            return result;
+        }
+
+        // no hit, advance to neighbor polygon
+        curRef = nextRef;
+    }
 
     return result;
 };

@@ -277,9 +277,9 @@ const completeFacet = (
             if (r < 0) {
                 // The circle is not updated yet, do it now.
                 pt = u;
-                vec3.fromArray(_circumCircleP1, points, s * 3);
-                vec3.fromArray(_circumCircleP2, points, t * 3);
-                vec3.fromArray(_circumCircleP3, points, u * 3);
+                vec3.fromBuffer(_circumCircleP1, points, s * 3);
+                vec3.fromBuffer(_circumCircleP2, points, t * 3);
+                vec3.fromBuffer(_circumCircleP3, points, u * 3);
                 circumCircle(
                     _circumCircleResult,
                     _circumCircleP1,
@@ -306,9 +306,9 @@ const completeFacet = (
             if (d < r * (1 - tol)) {
                 // Inside safe circumcircle, update circle.
                 pt = u;
-                vec3.fromArray(_circumCircleP1, points, s * 3);
-                vec3.fromArray(_circumCircleP2, points, t * 3);
-                vec3.fromArray(_circumCircleP3, points, u * 3);
+                vec3.fromBuffer(_circumCircleP1, points, s * 3);
+                vec3.fromBuffer(_circumCircleP2, points, t * 3);
+                vec3.fromBuffer(_circumCircleP3, points, u * 3);
                 circumCircle(
                     _circumCircleResult,
                     _circumCircleP1,
@@ -323,9 +323,9 @@ const completeFacet = (
                 if (overlapEdges(points, edges, nEdges.value, t, u)) continue;
                 // Edge is valid.
                 pt = u;
-                vec3.fromArray(_circumCircleP1, points, s * 3);
-                vec3.fromArray(_circumCircleP2, points, t * 3);
-                vec3.fromArray(_circumCircleP3, points, u * 3);
+                vec3.fromBuffer(_circumCircleP1, points, s * 3);
+                vec3.fromBuffer(_circumCircleP2, points, t * 3);
+                vec3.fromBuffer(_circumCircleP3, points, u * 3);
                 circumCircle(
                     _circumCircleResult,
                     _circumCircleP1,
@@ -975,11 +975,11 @@ const buildPolyDetail = (
             }
 
             const v1 = swapped
-                ? vec3.fromArray(_buildPolyDetailV1, inVerts, vi)
-                : vec3.fromArray(_buildPolyDetailV1, inVerts, vj);
+                ? vec3.fromBuffer(_buildPolyDetailV1, inVerts, vi)
+                : vec3.fromBuffer(_buildPolyDetailV1, inVerts, vj);
             const v2 = swapped
-                ? vec3.fromArray(_buildPolyDetailV2, inVerts, vj)
-                : vec3.fromArray(_buildPolyDetailV2, inVerts, vi);
+                ? vec3.fromBuffer(_buildPolyDetailV2, inVerts, vj)
+                : vec3.fromBuffer(_buildPolyDetailV2, inVerts, vi);
 
             // Create samples along the edge.
             const dx = v2[0] - v1[0];
@@ -1026,9 +1026,9 @@ const buildPolyDetail = (
                 let maxd = 0;
                 let maxi = -1;
                 for (let m = a + 1; m < b; ++m) {
-                    vec3.fromArray(_buildPolyDetailEdgePt, edge, m * 3);
-                    vec3.fromArray(_buildPolyDetailEdgeA, edge, va);
-                    vec3.fromArray(_buildPolyDetailEdgeB, edge, vb);
+                    vec3.fromBuffer(_buildPolyDetailEdgePt, edge, m * 3);
+                    vec3.fromBuffer(_buildPolyDetailEdgeA, edge, va);
+                    vec3.fromBuffer(_buildPolyDetailEdgeB, edge, vb);
                     const dev = distancePtSeg(
                         _buildPolyDetailEdgePt,
                         _buildPolyDetailEdgeA,

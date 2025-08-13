@@ -53,10 +53,17 @@ export function fromValues(x: number, y: number, z: number): Vec3 {
     return out;
 }
 
-export function fromArray(out: Vec3, array: ArrayLike<number>, fromIndex = 0): Vec3 {
-    out[0] = array[fromIndex];
-    out[1] = array[fromIndex + 1];
-    out[2] = array[fromIndex + 2];
+/**
+ * Sets the components of a vec3 from a buffer
+ * @param out the receiving vector
+ * @param buffer the source buffer
+ * @param startIndex the starting index in the buffer
+ * @returns out
+ */
+export function fromBuffer(out: Vec3, buffer: ArrayLike<number>, startIndex = 0): Vec3 {
+    out[0] = buffer[startIndex];
+    out[1] = buffer[startIndex + 1];
+    out[2] = buffer[startIndex + 2];
     return out;
 }
 

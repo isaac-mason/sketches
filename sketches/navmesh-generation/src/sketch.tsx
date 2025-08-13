@@ -58,10 +58,10 @@ import {
     createSearchNodesHelper,
     createNavMeshOffMeshConnectionsHelper,
 } from './lib/three';
-import { createFindNearestPolyResult, DEFAULT_QUERY_FILTER, findNodePath, MOVE_ALONG_SURFACE_STATUS_SUCCESS } from './lib/query/nav-mesh-query';
 import { Line2 } from 'three/examples/jsm/lines/webgpu/Line2.js';
 import { LineGeometry } from 'three/examples/jsm/Addons.js';
 import { Line2NodeMaterial } from 'three/webgpu';
+import { int } from 'three/tsl';
 
 const DungeonModel = () => {
     const gltf = useGLTF('/dungeon.gltf');
@@ -810,9 +810,9 @@ const TiledNavMesh = () => {
                 const b = indices[i + 1];
                 const c = indices[i + 2];
 
-                vec3.fromArray(triangle[0], positions, a * 3);
-                vec3.fromArray(triangle[1], positions, b * 3);
-                vec3.fromArray(triangle[2], positions, c * 3);
+                vec3.fromBuffer(triangle[0], positions, a * 3);
+                vec3.fromBuffer(triangle[1], positions, b * 3);
+                vec3.fromBuffer(triangle[2], positions, c * 3);
 
                 if (box3.intersectsTriangle3(expandedTileBounds, triangle)) {
                     trianglesInBox.push(a, b, c);
@@ -1213,7 +1213,7 @@ const TiledNavMesh = () => {
 
             console.log('moveAlongSurfaceResult', moveAlongSurfaceResult);
 
-            if (moveAlongSurfaceResult.status === MOVE_ALONG_SURFACE_STATUS_SUCCESS) {
+            if (moveAlongSurfaceResult.success) {
                 // Visualize the start position
                 const startMesh = new THREE.Mesh(
                     new THREE.SphereGeometry(0.1, 16, 16),
@@ -1247,7 +1247,7 @@ const TiledNavMesh = () => {
                     new THREE.SphereGeometry(0.15, 16, 16),
                     new THREE.MeshBasicMaterial({ color: new THREE.Color('cyan') }),
                 );
-                resultMesh.position.fromArray(moveAlongSurfaceResult.resultPos);
+                resultMesh.position.fromArray(moveAlongSurfaceResult.resultPosition);
                 scene.add(resultMesh);
 
                 disposables.push(() => {
@@ -1259,8 +1259,8 @@ const TiledNavMesh = () => {
                 // Visualize the path from start to result
                 const lineGeometry = new LineGeometry();
                 lineGeometry.setFromPoints([
-                    new THREE.Vector3(...moveStart), 
-                    new THREE.Vector3(...moveAlongSurfaceResult.resultPos)
+                    new THREE.Vector3(...moveStart),
+                    new THREE.Vector3(...moveAlongSurfaceResult.resultPosition),
                 ]);
                 const lineMaterial = new Line2NodeMaterial({
                     color: 'cyan',
@@ -1278,10 +1278,7 @@ const TiledNavMesh = () => {
 
                 // Visualize the intended direction line (start to target)
                 const directionLineGeometry = new LineGeometry();
-                directionLineGeometry.setFromPoints([
-                    new THREE.Vector3(...moveStart), 
-                    new THREE.Vector3(...moveEnd)
-                ]);
+                directionLineGeometry.setFromPoints([new THREE.Vector3(...moveStart), new THREE.Vector3(...moveEnd)]);
                 const directionLineMaterial = new Line2NodeMaterial({
                     color: 'red',
                     linewidth: 0.1,
@@ -1310,6 +1307,165 @@ const TiledNavMesh = () => {
                     });
                 }
             }
+        }
+
+        // testing: raycast
+        const raycastStart = vec3.fromValues(-0.6369757983243722, 0.2670287934145126, 4.9034711243234055);
+        const raycastEnd = vec3.fromValues(0.5382623335427014, 0.26749792728632293, 3.5854695302398483);
+
+        const raycastStartNearestPoly = navMeshQuery.findNearestPoly(
+            navMeshQuery.createFindNearestPolyResult(),
+            nav,
+            raycastStart,
+            [1, 1, 1],
+            navMeshQuery.DEFAULT_QUERY_FILTER,
+        );
+
+        if (raycastStartNearestPoly.success) {
+            const raycastResult = navMeshQuery.raycast(
+                nav,
+                raycastStartNearestPoly.nearestPolyRef,
+                raycastStart,
+                raycastEnd,
+                navMeshQuery.DEFAULT_QUERY_FILTER,
+            );
+
+            console.log('raycastHit', raycastResult);
+
+            // Visualize the raycast start position
+            const rayStartMesh = new THREE.Mesh(
+                new THREE.SphereGeometry(0.08, 16, 16),
+                new THREE.MeshBasicMaterial({ color: new THREE.Color('orange') }),
+            );
+            rayStartMesh.position.fromArray(raycastStart);
+            rayStartMesh.position.y += 0.5;
+            scene.add(rayStartMesh);
+
+            disposables.push(() => {
+                scene.remove(rayStartMesh);
+                rayStartMesh.geometry.dispose();
+                rayStartMesh.material.dispose();
+            });
+
+            // Visualize the raycast target end position
+            const rayTargetMesh = new THREE.Mesh(
+                new THREE.SphereGeometry(0.08, 16, 16),
+                new THREE.MeshBasicMaterial({ color: new THREE.Color('purple') }),
+            );
+            rayTargetMesh.position.fromArray(raycastEnd);
+            rayTargetMesh.position.y += 0.5;
+            scene.add(rayTargetMesh);
+
+            disposables.push(() => {
+                scene.remove(rayTargetMesh);
+                rayTargetMesh.geometry.dispose();
+                rayTargetMesh.material.dispose();
+            });
+
+            // Calculate hit position
+            let hitPos: Vec3;
+            if (raycastResult.t === Number.MAX_VALUE) {
+                // Ray reached the end without hitting a wall
+                hitPos = raycastEnd;
+            } else {
+                // Ray hit a wall at parameter t
+                hitPos = vec3.create();
+                vec3.lerp(hitPos, raycastStart, raycastEnd, raycastResult.t);
+            }
+
+            // Visualize the hit position
+            const hitMesh = new THREE.Mesh(
+                new THREE.SphereGeometry(0.12, 16, 16),
+                new THREE.MeshBasicMaterial({ color: new THREE.Color('blue') }),
+            );
+            hitMesh.position.fromArray(hitPos);
+            hitMesh.position.y += 0.5;
+            scene.add(hitMesh);
+
+            disposables.push(() => {
+                scene.remove(hitMesh);
+                hitMesh.geometry.dispose();
+                hitMesh.material.dispose();
+            });
+
+            // Visualize the raycast path
+            const rayLineGeometry = new LineGeometry();
+            rayLineGeometry.setFromPoints([new THREE.Vector3(...raycastStart), new THREE.Vector3(...hitPos)]);
+            const rayLineMaterial = new Line2NodeMaterial({
+                color: 'magenta',
+                linewidth: 0.12,
+                worldUnits: true,
+            });
+            const rayLine = new Line2(rayLineGeometry, rayLineMaterial);
+            rayLine.position.y += 0.5;
+            scene.add(rayLine);
+
+            disposables.push(() => {
+                scene.remove(rayLine);
+                rayLineGeometry.dispose();
+                rayLineMaterial.dispose();
+            });
+
+            // Visualize the intended ray direction (dashed line if hit a wall)
+            if (raycastResult.t < Number.MAX_VALUE) {
+                const intendedRayLineGeometry = new LineGeometry();
+                intendedRayLineGeometry.setFromPoints([new THREE.Vector3(...raycastStart), new THREE.Vector3(...raycastEnd)]);
+                const intendedRayLineMaterial = new Line2NodeMaterial({
+                    color: 'purple',
+                    linewidth: 0.08,
+                    worldUnits: true,
+                    dashed: true,
+                    dashSize: 0.1,
+                    gapSize: 0.05,
+                });
+                const intendedRayLine = new Line2(intendedRayLineGeometry, intendedRayLineMaterial);
+                intendedRayLine.position.y += 0.5;
+                scene.add(intendedRayLine);
+
+                disposables.push(() => {
+                    scene.remove(intendedRayLine);
+                    intendedRayLineGeometry.dispose();
+                    intendedRayLineMaterial.dispose();
+                });
+            }
+
+            // Visualize hit normal if we hit a wall
+            if (raycastResult.t < Number.MAX_VALUE && vec3.length(raycastResult.hitNormal) > 0) {
+                const normalEnd = vec3.create();
+                vec3.scaleAndAdd(normalEnd, hitPos, raycastResult.hitNormal, 0.5);
+
+                const normalLineGeometry = new LineGeometry();
+                normalLineGeometry.setFromPoints([new THREE.Vector3(...hitPos), new THREE.Vector3(...normalEnd)]);
+                const normalLineMaterial = new Line2NodeMaterial({
+                    color: 'yellow',
+                    linewidth: 0.08,
+                    worldUnits: true,
+                });
+                const normalLine = new Line2(normalLineGeometry, normalLineMaterial);
+                normalLine.position.y += 0.5;
+                scene.add(normalLine);
+
+                disposables.push(() => {
+                    scene.remove(normalLine);
+                    normalLineGeometry.dispose();
+                    normalLineMaterial.dispose();
+                });
+            }
+
+            // Visualize the visited polygons from raycast
+            for (let i = 0; i < raycastResult.path.length; i++) {
+                const poly = raycastResult.path[i];
+                const hslColor = new THREE.Color().setHSL(0.8, 0.9, 0.4 + (i / raycastResult.path.length) * 0.3);
+                const polyHelper = createNavMeshPolyHelper(nav, poly, hslColor);
+                polyHelper.object.position.y += 0.35;
+                scene.add(polyHelper.object);
+
+                disposables.push(() => {
+                    scene.remove(polyHelper.object);
+                    polyHelper.dispose();
+                });
+            }
+            
         }
 
         return () => {
@@ -1606,11 +1762,11 @@ const TiledNavMesh = () => {
             console.log(
                 'nearest poly',
                 navMeshQuery.findNearestPoly(
-                    createFindNearestPolyResult(),
+                    navMeshQuery.createFindNearestPolyResult(),
                     nav,
                     e.point.toArray(),
                     [1, 1, 1],
-                    DEFAULT_QUERY_FILTER,
+                    navMeshQuery.DEFAULT_QUERY_FILTER,
                 ).nearestPolyRef,
             );
         }

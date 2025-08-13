@@ -161,9 +161,9 @@ export const distToTriMesh = (p: Vec3, verts: number[], tris: number[], ntris: n
         const vb = tris[i * 4 + 1] * 3;
         const vc = tris[i * 4 + 2] * 3;
 
-        vec3.fromArray(_distPtTriA, verts, va);
-        vec3.fromArray(_distPtTriB, verts, vb);
-        vec3.fromArray(_distPtTriC, verts, vc);
+        vec3.fromBuffer(_distPtTriA, verts, va);
+        vec3.fromBuffer(_distPtTriB, verts, vb);
+        vec3.fromBuffer(_distPtTriC, verts, vc);
 
         const d = distPtTri(p, _distPtTriA, _distPtTriB, _distPtTriC);
         if (d < dmin) dmin = d;
@@ -448,4 +448,116 @@ export const polyMinExtent = (verts: number[], nverts: number): number => {
     }
 
     return Math.sqrt(minDist);
+};
+
+/**
+ * Derives the xz-plane 2D perp product of the two vectors. (uz*vx - ux*vz)
+ * The vectors are projected onto the xz-plane, so the y-values are ignored.
+ * @param u The LHV vector [(x, y, z)]
+ * @param v The RHV vector [(x, y, z)]
+ * @returns The perp dot product on the xz-plane.
+ */
+const vperp2D = (u: Vec3, v: Vec3): number => {
+	return u[2]*v[0] - u[0]*v[2];
+}
+
+export type IntersectSegmentPoly2DResult = {
+    intersects: boolean;
+    tmin: number;
+    tmax: number;
+    segMin: number;
+    segMax: number;
+};
+
+export const createIntersectSegmentPoly2DResult = (): IntersectSegmentPoly2DResult => ({
+    intersects: false,
+    tmin: 0,
+    tmax: 0,
+    segMin: -1,
+    segMax: -1,
+});
+
+const _intersectSegmentPoly2DVi = vec3.create();
+const _intersectSegmentPoly2DVj = vec3.create();
+const _intersectSegmentPoly2DDir = vec3.create();
+const _intersectSegmentPoly2DToStart = vec3.create();
+const _intersectSegmentPoly2DEdge = vec3.create();
+
+/**
+ * Intersects a segment with a polygon in 2D (ignoring Y).
+ * Uses the Sutherland-Hodgman clipping algorithm approach.
+ * 
+ * @param result - The result object to store intersection data
+ * @param startPos - Start position of the segment
+ * @param endPos - End position of the segment  
+ * @param verts - Polygon vertices as flat array [x,y,z,x,y,z,...]
+ * @param nv - Number of vertices in the polygon
+ */
+export const intersectSegmentPoly2D = (
+    result: IntersectSegmentPoly2DResult,
+    startPos: Vec3,
+    endPos: Vec3,
+    verts: number[],
+): IntersectSegmentPoly2DResult => {
+    result.intersects = false;
+    result.tmin = 0;
+    result.tmax = 1;
+    result.segMin = -1;
+    result.segMax = -1;
+
+    const dir = vec3.subtract(_intersectSegmentPoly2DDir, endPos, startPos);
+    
+    const vi = _intersectSegmentPoly2DVi;
+    const vj = _intersectSegmentPoly2DVj;
+    const edge = _intersectSegmentPoly2DEdge;
+    const diff = _intersectSegmentPoly2DToStart;
+
+    const nv = verts.length / 3;
+    for (let i = 0, j = nv - 1; i < nv; j = i, i++) {
+        vec3.fromBuffer(vi, verts, i * 3);
+        vec3.fromBuffer(vj, verts, j * 3);
+
+        vec3.subtract(edge, vi, vj);
+        vec3.subtract(diff, startPos, vj);
+
+        const n = vperp2D(edge, diff);
+        const d = vperp2D(dir, edge);
+
+        if (Math.abs(d) < EPS) {
+            // S is nearly parallel to this edge
+            if (n < 0) {
+                return result;
+            }
+            
+            continue;
+        }
+        
+        const t = n / d;
+        
+        if (d < 0) {
+            // segment S is entering across this edge
+            if (t > result.tmin) {
+                result.tmin = t;
+                result.segMin = j;
+                // S enters after leaving polygon
+                if (result.tmin > result.tmax) {
+                    return result;
+                }
+            }
+        } else {
+            // segment S is leaving across this edge
+            if (t < result.tmax) {
+                result.tmax = t;
+                result.segMax = j;
+                // S leaves before entering polygon
+                if (result.tmax < result.tmin) {
+                    return result;
+                }
+            }
+        }
+    }
+    
+    result.intersects = true;
+
+    return result;
 };

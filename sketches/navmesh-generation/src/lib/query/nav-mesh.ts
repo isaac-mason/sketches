@@ -561,8 +561,8 @@ const connectExternalLinks = (navMesh: NavMesh, tile: NavMeshTile, target: NavMe
             }
 
             // create new links
-            const va = vec3.fromArray(_va, tile.vertices, poly.vertices[j] * 3);
-            const vb = vec3.fromArray(_vb, tile.vertices, poly.vertices[(j + 1) % nv] * 3);
+            const va = vec3.fromBuffer(_va, tile.vertices, poly.vertices[j] * 3);
+            const vb = vec3.fromBuffer(_vb, tile.vertices, poly.vertices[(j + 1) % nv] * 3);
 
             // find overlaps against target tile along the opposite side direction
             const overlaps = findConnectingPolys(va, vb, target, oppositeTile(dir));
