@@ -826,8 +826,8 @@ const TiledNavMesh = () => {
             markWalkableTriangles(positions, trianglesInBox, triAreaIds, walkableSlopeAngleDegrees);
 
             /* 4. rasterize the triangles to a voxel heightfield */
-            const heightfieldWidth = tileSizeVoxels + borderSize * 2;
-            const heightfieldHeight = tileSizeVoxels + borderSize * 2;
+            const heightfieldWidth = Math.floor(tileSizeVoxels + borderSize * 2);
+            const heightfieldHeight = Math.floor(tileSizeVoxels + borderSize * 2);
 
             const heightfield = createHeightfield(heightfieldWidth, heightfieldHeight, expandedTileBounds, cellSize, cellHeight);
 
@@ -839,25 +839,20 @@ const TiledNavMesh = () => {
             filterWalkableLowHeightSpans(heightfield, walkableHeightVoxels);
 
             /* 6. partition walkable surface to simple regions. */
-
             const compactHeightfield = buildCompactHeightfield(walkableHeightVoxels, walkableClimbVoxels, heightfield);
 
             /* 7. erode the walkable area by the agent radius / walkable radius */
-
             erodeWalkableArea(walkableRadiusVoxels, compactHeightfield);
 
             /* 8. prepare for region partitioning by calculating a distance field along the walkable surface */
-
             buildDistanceField(compactHeightfield);
 
             /* 9. partition the walkable surface into simple regions without holes */
-
             buildRegions(ctx, compactHeightfield, borderSize, minRegionArea, mergeRegionArea);
             // buildRegionsMonotone(compactHeightfield, borderSize, minRegionArea, mergeRegionArea);
             // buildLayerRegions(compactHeightfield, borderSize, minRegionArea);
 
             /* 10. trace and simplify region contours */
-
             const contourSet = buildContours(
                 compactHeightfield,
                 maxSimplificationError,
@@ -866,7 +861,6 @@ const TiledNavMesh = () => {
             );
 
             /* 11. build polygons mesh from contours */
-
             const polyMesh = buildPolyMesh(contourSet, maxVerticesPerPoly);
 
             for (let polyIndex = 0; polyIndex < polyMesh.nPolys; polyIndex++) {
@@ -880,7 +874,6 @@ const TiledNavMesh = () => {
             }
 
             /* 12. create detail mesh which allows to access approximate height on each polygon */
-
             const polyMeshDetail = buildPolyMeshDetail(
                 ctx,
                 polyMesh,
