@@ -1358,23 +1358,6 @@ export const findStraightPath = (
                     return { success: true, path };
                 }
 
-                // TODO: testing - shouldn't be necessary if winding us correct upstream
-                // ensure portal endpoints are oriented relative to the current apex.
-                // detour's data guarantees this via consistent polygon winding and link construction,
-                // but our pipeline may not. normalize here so the funnel sees true left/right.
-                if (triArea2D(portalApex, portalLeft, portalRight) < 0.0) {
-                    // swap to keep portalLeft on the left of portalRight as seen from apex
-                    _findStraightPathTmpPoint[0] = portalLeft[0];
-                    _findStraightPathTmpPoint[1] = portalLeft[1];
-                    _findStraightPathTmpPoint[2] = portalLeft[2];
-                    portalLeft[0] = portalRight[0];
-                    portalLeft[1] = portalRight[1];
-                    portalLeft[2] = portalRight[2];
-                    portalRight[0] = _findStraightPathTmpPoint[0];
-                    portalRight[1] = _findStraightPathTmpPoint[1];
-                    portalRight[2] = _findStraightPathTmpPoint[2];
-                }
-
                 if (i === 0) {
                     // if starting really close to the portal, advance
                     const d2 = distancePtSeg2dSqr(portalApex, left, right);

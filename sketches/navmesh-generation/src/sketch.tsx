@@ -1104,7 +1104,7 @@ const TiledNavMesh = () => {
             navMeshQuery.DEFAULT_QUERY_FILTER,
         );
 
-        console.log('findPath params', {
+        console.log('findNodePath params', {
             nav,
             startPositionNearestPoly,
             endPositionNearestPoly,
@@ -1112,7 +1112,7 @@ const TiledNavMesh = () => {
             endPosition,
         });
 
-        const findPathResult = navMeshQuery.findNodePath(
+        const findNodePathResult = navMeshQuery.findNodePath(
             nav,
             startPositionNearestPoly.nearestPolyRef,
             endPositionNearestPoly.nearestPolyRef,
@@ -1121,11 +1121,11 @@ const TiledNavMesh = () => {
             navMeshQuery.DEFAULT_QUERY_FILTER,
         );
 
-        console.log('findPathResult', findPathResult);
+        console.log('findNodePathResult', findNodePathResult);
 
-        for (let i = 0; i < findPathResult.path.length; i++) {
-            const poly = findPathResult.path[i];
-            const hslColor = new THREE.Color().setHSL(i / findPathResult.path.length, 1, 0.5);
+        for (let i = 0; i < findNodePathResult.path.length; i++) {
+            const poly = findNodePathResult.path[i];
+            const hslColor = new THREE.Color().setHSL(i / findNodePathResult.path.length, 1, 0.5);
             const polyHelper = createNavMeshPolyHelper(nav, poly, hslColor);
             polyHelper.object.position.y += 0.25;
             scene.add(polyHelper.object);
@@ -1136,9 +1136,10 @@ const TiledNavMesh = () => {
             });
         }
 
-        if (findPathResult.intermediates?.nodes) {
-            const searchNodesHelper = createSearchNodesHelper(findPathResult.intermediates.nodes);
+        if (findNodePathResult.intermediates?.nodes) {
+            const searchNodesHelper = createSearchNodesHelper(findNodePathResult.intermediates.nodes);
             scene.add(searchNodesHelper.object);
+
             disposables.push(() => {
                 scene.remove(searchNodesHelper.object);
                 searchNodesHelper.dispose();
@@ -1146,7 +1147,7 @@ const TiledNavMesh = () => {
         }
 
         // testing: find straight path
-        const findStraightPathResult = navMeshQuery.findStraightPath(nav, startPosition, endPosition, findPathResult.path);
+        const findStraightPathResult = navMeshQuery.findStraightPath(nav, startPosition, endPosition, findNodePathResult.path);
 
         console.log('findStraightPathResult', findStraightPathResult);
 
@@ -1173,15 +1174,12 @@ const TiledNavMesh = () => {
 
                 const lineGeometry = new LineGeometry();
                 lineGeometry.setFromPoints([new THREE.Vector3(...prevPoint.position), new THREE.Vector3(...point.position)]);
-
                 const lineMaterial = new Line2NodeMaterial({
                     color: 'yellow',
                     linewidth: 0.1,
                     worldUnits: true,
                 });
-
                 const line = new Line2(lineGeometry, lineMaterial);
-
                 scene.add(line);
 
                 disposables.push(() => {

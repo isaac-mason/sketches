@@ -10,12 +10,7 @@ const EPS = 1e-6;
  * @param p First endpoint of the segment
  * @param q Second endpoint of the segment
  */
-export const closestPtSeg2d = (
-    closest: Vec3,
-    pt: Vec3,
-    p: Vec3,
-    q: Vec3,
-): void => {
+export const closestPtSeg2d = (closest: Vec3, pt: Vec3, p: Vec3, q: Vec3): void => {
     const pqx = q[0] - p[0];
     const pqz = q[2] - p[2];
     const dx = pt[0] - p[0];
@@ -39,11 +34,7 @@ export const closestPtSeg2d = (
  * @param p The point to test
  * @returns True if the point is inside the polygon
  */
-export const pointInPoly = (
-    nvert: number,
-    verts: number[],
-    p: Vec3,
-): boolean => {
+export const pointInPoly = (nvert: number, verts: number[], p: Vec3): boolean => {
     let c = false;
     let j = nvert - 1;
 
@@ -51,10 +42,7 @@ export const pointInPoly = (
         const vi = verts.slice(i * 3, i * 3 + 3);
         const vj = verts.slice(j * 3, j * 3 + 3);
 
-        if (
-            vi[2] > p[2] !== vj[2] > p[2] &&
-            p[0] < ((vj[0] - vi[0]) * (p[2] - vi[2])) / (vj[2] - vi[2]) + vi[0]
-        ) {
+        if (vi[2] > p[2] !== vj[2] > p[2] && p[0] < ((vj[0] - vi[0]) * (p[2] - vi[2])) / (vj[2] - vi[2]) + vi[0]) {
             c = !c;
         }
     }
@@ -166,12 +154,7 @@ const _distPtTriA: Vec3 = vec3.create();
 const _distPtTriB: Vec3 = vec3.create();
 const _distPtTriC: Vec3 = vec3.create();
 
-export const distToTriMesh = (
-    p: Vec3,
-    verts: number[],
-    tris: number[],
-    ntris: number,
-): number => {
+export const distToTriMesh = (p: Vec3, verts: number[], tris: number[], ntris: number): number => {
     let dmin = Number.MAX_VALUE;
     for (let i = 0; i < ntris; ++i) {
         const va = tris[i * 4 + 0] * 3;
@@ -206,10 +189,7 @@ export const distToPoly = (nvert: number, verts: number[], p: Vec3): number => {
         const vj = j * 3;
         if (
             verts[vi + 2] > p[2] !== verts[vj + 2] > p[2] &&
-            p[0] <
-                ((verts[vj] - verts[vi]) * (p[2] - verts[vi + 2])) /
-                    (verts[vj + 2] - verts[vi + 2]) +
-                    verts[vi]
+            p[0] < ((verts[vj] - verts[vi]) * (p[2] - verts[vi + 2])) / (verts[vj + 2] - verts[vi + 2]) + verts[vi]
         ) {
             c = c === 0 ? 1 : 0;
         }
@@ -220,10 +200,7 @@ export const distToPoly = (nvert: number, verts: number[], p: Vec3): number => {
         _distToPolyVi[0] = verts[vi];
         _distToPolyVi[1] = verts[vi + 2];
 
-        dmin = Math.min(
-            dmin,
-            distancePtSeg2d(_distToPolyP, _distToPolyVj, _distToPolyVi),
-        );
+        dmin = Math.min(dmin, distancePtSeg2d(_distToPolyP, _distToPolyVj, _distToPolyVi));
     }
     return c ? -dmin : dmin;
 };
@@ -262,25 +239,13 @@ export const distancePtSeg = (pt: Vec3, p: Vec3, q: Vec3): number => {
  * @param pos Position to calculate height for
  * @returns Height at position, or null if point is not inside triangle
  */
-export const getHeightAtPoint = (
-    v0: Vec3,
-    v1: Vec3,
-    v2: Vec3,
-    pos: Vec3,
-): number | null => {
+export const getHeightAtPoint = (v0: Vec3, v1: Vec3, v2: Vec3, pos: Vec3): number | null => {
     // Calculate barycentric coordinates
-    const denom =
-        (v1[2] - v2[2]) * (v0[0] - v2[0]) + (v2[0] - v1[0]) * (v0[2] - v2[2]);
+    const denom = (v1[2] - v2[2]) * (v0[0] - v2[0]) + (v2[0] - v1[0]) * (v0[2] - v2[2]);
     if (Math.abs(denom) < 1e-8) return null;
 
-    const a =
-        ((v1[2] - v2[2]) * (pos[0] - v2[0]) +
-            (v2[0] - v1[0]) * (pos[2] - v2[2])) /
-        denom;
-    const b =
-        ((v2[2] - v0[2]) * (pos[0] - v2[0]) +
-            (v0[0] - v2[0]) * (pos[2] - v2[2])) /
-        denom;
+    const a = ((v1[2] - v2[2]) * (pos[0] - v2[0]) + (v2[0] - v1[0]) * (pos[2] - v2[2])) / denom;
+    const b = ((v2[2] - v0[2]) * (pos[0] - v2[0]) + (v0[0] - v2[0]) * (pos[2] - v2[2])) / denom;
     const c = 1 - a - b;
 
     // Check if point is inside triangle
@@ -309,13 +274,7 @@ export type CircumCircleResult = {
     radius: number;
 };
 
-export const circumCircle = (
-    result: CircumCircleResult,
-    p1: Vec3,
-    p2: Vec3,
-    p3: Vec3,
-    c: Vec3,
-): void => {
+export const circumCircle = (result: CircumCircleResult, p1: Vec3, p2: Vec3, p3: Vec3, c: Vec3): void => {
     // Calculate the circle relative to p1, to avoid some precision issues.
     const v1 = _circumCircleV1;
     const v2 = _circumCircleV2;
@@ -336,19 +295,9 @@ export const circumCircle = (
     _circumCircleV3Proj[0] = v3[0];
     _circumCircleV3Proj[1] = v3[2];
 
-    vec2.subtract(
-        _circumCircleV2Proj,
-        _circumCircleV2Proj,
-        _circumCircleV1Proj,
-    ); // v2 - v1
-    vec2.subtract(
-        _circumCircleV3Proj,
-        _circumCircleV3Proj,
-        _circumCircleV1Proj,
-    ); // v3 - v1
-    const cp =
-        _circumCircleV2Proj[0] * _circumCircleV3Proj[1] -
-        _circumCircleV2Proj[1] * _circumCircleV3Proj[0];
+    vec2.subtract(_circumCircleV2Proj, _circumCircleV2Proj, _circumCircleV1Proj); // v2 - v1
+    vec2.subtract(_circumCircleV3Proj, _circumCircleV3Proj, _circumCircleV1Proj); // v3 - v1
+    const cp = _circumCircleV2Proj[0] * _circumCircleV3Proj[1] - _circumCircleV2Proj[1] * _circumCircleV3Proj[0];
 
     if (Math.abs(cp) > EPS) {
         _circumCircleV1Proj[0] = v1[0];
@@ -363,17 +312,9 @@ export const circumCircle = (
         const v1Sq = vec2.dot(_circumCircleV1Proj, _circumCircleV1Proj);
         const v2Sq = vec2.dot(_circumCircleV2Proj, _circumCircleV2Proj);
         const v3Sq = vec2.dot(_circumCircleV3Proj, _circumCircleV3Proj);
-        c[0] =
-            (v1Sq * (v2[2] - v3[2]) +
-                v2Sq * (v3[2] - v1[2]) +
-                v3Sq * (v1[2] - v2[2])) /
-            (2 * cp);
+        c[0] = (v1Sq * (v2[2] - v3[2]) + v2Sq * (v3[2] - v1[2]) + v3Sq * (v1[2] - v2[2])) / (2 * cp);
         c[1] = 0;
-        c[2] =
-            (v1Sq * (v3[0] - v2[0]) +
-                v2Sq * (v1[0] - v3[0]) +
-                v3Sq * (v2[0] - v1[0])) /
-            (2 * cp);
+        c[2] = (v1Sq * (v3[0] - v2[0]) + v2Sq * (v1[0] - v3[0]) + v3Sq * (v2[0] - v1[0])) / (2 * cp);
 
         _circumCircleCenter2D[0] = c[0];
         _circumCircleCenter2D[1] = c[2];
@@ -405,12 +346,7 @@ const _overlapSegCD: Vec2 = vec2.create();
 const _overlapSegCA: Vec2 = vec2.create();
 
 // Segment overlap checking
-export const overlapSegSeg2d = (
-    a: Vec2,
-    b: Vec2,
-    c: Vec2,
-    d: Vec2,
-): boolean => {
+export const overlapSegSeg2d = (a: Vec2, b: Vec2, c: Vec2, d: Vec2): boolean => {
     // calculate cross products for line segment intersection test
     const ab = _overlapSegAB;
     const ad = _overlapSegAD;
@@ -438,13 +374,14 @@ export const overlapSegSeg2d = (
 
 /**
  * 2D signed area in XZ plane (positive if c is to the left of ab)
+ * Matches C++ dtTriArea2D: return acx*abz - abx*acz;
  */
 export const triArea2D = (a: Vec3, b: Vec3, c: Vec3): number => {
     const abx = b[0] - a[0];
     const abz = b[2] - a[2];
     const acx = c[0] - a[0];
     const acz = c[2] - a[2];
-    return abx * acz - abz * acx;
+    return acx * abz - abx * acz;
 };
 
 export type IntersectSegSeg2DResult = { hit: boolean; s: number; t: number };
@@ -455,13 +392,7 @@ export const createIntersectSegSeg2DResult = (): IntersectSegSeg2DResult => ({ h
  * Returns tuple [hit, s, t] where
  *  P = a + s*(b-a) and Q = c + t*(d-c). Hit only if both s and t are within [0,1].
  */
-export const intersectSegSeg2D = (
-    out: IntersectSegSeg2DResult,
-    a: Vec3,
-    b: Vec3,
-    c: Vec3,
-    d: Vec3,
-): boolean => {
+export const intersectSegSeg2D = (out: IntersectSegSeg2DResult, a: Vec3, b: Vec3, c: Vec3, d: Vec3): boolean => {
     const bax = b[0] - a[0];
     const baz = b[2] - a[2];
     const dcx = d[0] - c[0];
@@ -470,12 +401,17 @@ export const intersectSegSeg2D = (
     const acz = a[2] - c[2];
     const denom = dcz * bax - dcx * baz;
     if (Math.abs(denom) < 1e-12) {
-        out.hit = false; out.s = 0; out.t = 0; return false;
+        out.hit = false;
+        out.s = 0;
+        out.t = 0;
+        return false;
     }
     const s = (dcx * acz - dcz * acx) / denom;
     const t = (bax * acz - baz * acx) / denom;
     const hit = !(s < 0 || s > 1 || t < 0 || t > 1);
-    out.hit = hit; out.s = s; out.t = t;
+    out.hit = hit;
+    out.s = s;
+    out.t = t;
     return hit;
 };
 
@@ -505,11 +441,7 @@ export const polyMinExtent = (verts: number[], nverts: number): number => {
             _polyMinExtentP2[0] = verts[p2];
             _polyMinExtentP2[1] = verts[p2 + 2];
 
-            const d = distancePtSeg2d(
-                _polyMinExtentPt,
-                _polyMinExtentP1,
-                _polyMinExtentP2,
-            );
+            const d = distancePtSeg2d(_polyMinExtentPt, _polyMinExtentP1, _polyMinExtentP2);
             maxEdgeDist = Math.max(maxEdgeDist, d);
         }
         minDist = Math.min(minDist, maxEdgeDist);

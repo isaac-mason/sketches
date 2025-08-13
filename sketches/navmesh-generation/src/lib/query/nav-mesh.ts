@@ -566,6 +566,7 @@ const connectExternalLinks = (navMesh: NavMesh, tile: NavMeshTile, target: NavMe
 
             // find overlaps against target tile along the opposite side direction
             const overlaps = findConnectingPolys(va, vb, target, oppositeTile(dir));
+
             for (const o of overlaps) {
                 // parameterize overlap interval along this edge to [0,1]
                 let tmin: number;
