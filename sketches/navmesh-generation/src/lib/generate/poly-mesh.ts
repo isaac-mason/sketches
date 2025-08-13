@@ -25,8 +25,6 @@ export type PolyMesh = {
     nVertices: number;
     /** The number of polygons */
     nPolys: number;
-    /** The number of allocated polygons */
-    maxPolys: number;
     /** The maximum number of vertices per polygon */
     maxVerticesPerPoly: number;
     /** the bounds in world space */
@@ -933,7 +931,6 @@ export const buildPolyMesh = (
         areas: new Array(maxTris).fill(0),
         nVertices: 0,
         nPolys: 0,
-        maxPolys: maxTris,
         maxVerticesPerPoly,
         bounds: structuredClone(contourSet.bounds) as Box3,
         cellSize: contourSet.cellSize,

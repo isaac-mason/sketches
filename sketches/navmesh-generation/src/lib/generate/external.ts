@@ -27,7 +27,6 @@ export const createPolyMeshesFromTriangleMesh = (
             areas: [],
             nVertices: 0,
             nPolys: 0,
-            maxPolys: 0,
             maxVerticesPerPoly: 3,
             bounds: bounds || [
                 [0, 0, 0],
@@ -86,7 +85,6 @@ export const createPolyMeshesFromTriangleMesh = (
         areas: new Array(numTriangles),
         nVertices: numVertices,
         nPolys: numTriangles,
-        maxPolys: numTriangles,
         maxVerticesPerPoly,
         bounds: meshBounds,
         cellSize: -1,
