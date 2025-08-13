@@ -12,6 +12,7 @@ import {
     intersectSegmentPoly2D,
     type IntersectSegmentPoly2DResult,
     createIntersectSegmentPoly2DResult,
+    randomPointInConvexPoly,
 } from '../common/geometry';
 import {
     type NavMesh,
@@ -488,23 +489,16 @@ export const getClosestPointOnPoly = (
     return result;
 };
 
-export const CLOSEST_POINT_ON_POLY_BOUNDARY_ERROR_INVALID_INPUT = 0 as const;
-export const CLOSEST_POINT_ON_POLY_BOUNDARY_SUCCESS = 1 as const;
-
-export type ClosestPointOnPolyBoundaryStatus =
-    | typeof CLOSEST_POINT_ON_POLY_BOUNDARY_ERROR_INVALID_INPUT
-    | typeof CLOSEST_POINT_ON_POLY_BOUNDARY_SUCCESS;
-
 export const closestPointOnPolyBoundary = (
     navMesh: NavMesh,
     polyRef: NodeRef,
     point: Vec3,
     outClosestPoint: Vec3,
-): ClosestPointOnPolyBoundaryStatus => {
+): boolean => {
     const tileAndPoly = getTileAndPolyByRef(createGetTileAndPolyByRefResult(), polyRef, navMesh);
 
     if (!tileAndPoly.success || !vec3.finite(point) || !outClosestPoint) {
-        return CLOSEST_POINT_ON_POLY_BOUNDARY_ERROR_INVALID_INPUT;
+        return false;
     }
 
     const { tile, poly } = tileAndPoly;
@@ -522,7 +516,7 @@ export const closestPointOnPolyBoundary = (
     // If inside polygon, return the point as-is
     if (pointInPoly(nv, verts, point)) {
         vec3.copy(outClosestPoint, point);
-        return CLOSEST_POINT_ON_POLY_BOUNDARY_SUCCESS;
+        return true;
     }
 
     // Otherwise clamp to nearest edge
@@ -569,7 +563,7 @@ export const closestPointOnPolyBoundary = (
     outClosestPoint[1] = va1 + (vb1 - va1) * t;
     outClosestPoint[2] = va2 + (vb2 - va2) * t;
 
-    return CLOSEST_POINT_ON_POLY_BOUNDARY_SUCCESS;
+    return true;
 };
 
 export type FindNearestPolyResult = {
@@ -1299,12 +1293,10 @@ export const findStraightPath = (
 
     // clamp start & end to poly boundaries
     const closestStartPos = vec3.create();
-    const c0 = closestPointOnPolyBoundary(navMesh, pathNodeRefs[0], start, closestStartPos);
-    if (c0 === CLOSEST_POINT_ON_POLY_BOUNDARY_ERROR_INVALID_INPUT) return { success: false, path };
+    if (!closestPointOnPolyBoundary(navMesh, pathNodeRefs[0], start, closestStartPos)) return { success: false, path };
 
     const closestEndPos = vec3.create();
-    const c1 = closestPointOnPolyBoundary(navMesh, pathNodeRefs[pathNodeRefs.length - 1], end, closestEndPos);
-    if (c1 === CLOSEST_POINT_ON_POLY_BOUNDARY_ERROR_INVALID_INPUT) return { success: false, path };
+    if (!closestPointOnPolyBoundary(navMesh, pathNodeRefs[pathNodeRefs.length - 1], end, closestEndPos)) return { success: false, path };
 
     // add start point
     appendVertex(closestStartPos, pathNodeRefs[0], path, getNodeRefType(pathNodeRefs[0]));
@@ -1343,10 +1335,9 @@ export const findStraightPath = (
                 if (!getPortalPoints(navMesh, pathNodeRefs[i], toRef, left, right)) {
                     // failed to get portal points, clamp end to current poly and return partial
                     const endClamp = vec3.create();
-                    const s2 = closestPointOnPolyBoundary(navMesh, pathNodeRefs[i], end, endClamp);
 
                     // this should only happen when the first polygon is invalid.
-                    if (s2 === CLOSEST_POINT_ON_POLY_BOUNDARY_ERROR_INVALID_INPUT) return { success: false, path };
+                    if (!closestPointOnPolyBoundary(navMesh, pathNodeRefs[i], end, endClamp)) return { success: false, path };
 
                     // append portals along the current straight path segment.
                     if (straightPathOptions & (FIND_STRAIGHT_PATH_AREA_CROSSINGS | FIND_STRAIGHT_PATH_ALL_CROSSINGS)) {
@@ -1844,6 +1835,130 @@ export const raycast = (
         // no hit, advance to neighbor polygon
         curRef = nextRef;
     }
+
+    return result;
+};
+
+export type FindRandomPointResult = {
+    success: boolean;
+    ref: NodeRef;
+    position: Vec3;
+};
+
+/**
+ * Finds a random point on the navigation mesh.
+ * 
+ * @param navMesh - The navigation mesh
+ * @param filter - Query filter to apply to polygons
+ * @param rand - Function that returns random values [0,1]
+ * @returns The result object with success flag, random point, and polygon reference
+ */
+export const findRandomPoint = (
+    navMesh: NavMesh,
+    filter: QueryFilter,
+    rand: () => number,
+): FindRandomPointResult => {
+    const result: FindRandomPointResult = {
+        success: false,
+        ref: '' as NodeRef,
+        position: [0, 0, 0],
+    };
+
+    // randomly pick one tile using reservoir sampling
+    let selectedTile: NavMeshTile | null = null;
+    let tileSum = 0;
+    
+    const tiles = Object.values(navMesh.tiles);
+    for (const tile of tiles) {
+        if (!tile || !tile.polys) continue;
+        
+        // choose random tile using reservoir sampling
+        const area = 1.0; // could be tile area, but we use uniform weighting
+        tileSum += area;
+        const u = rand();
+        if (u * tileSum <= area) {
+            selectedTile = tile;
+        }
+    }
+    
+    if (!selectedTile) {
+        return result;
+    }
+
+    // randomly pick one polygon weighted by polygon area
+    let selectedPoly: NavMeshPoly | null = null;
+    let selectedPolyRef: NodeRef | null = null;
+    let areaSum = 0;
+
+    for (let i = 0; i < selectedTile.polys.length; i++) {
+        const poly = selectedTile.polys[i];
+        
+        // do not return off-mesh connection polygons
+        if (poly.type !== NodeType.GROUND_POLY) {
+            continue;
+        }
+
+        // construct the polygon reference
+        const polyRef = serPolyNodeRef(selectedTile.id, i);
+
+        // must pass filter
+        if (filter.passFilter && !filter.passFilter(polyRef, navMesh, filter)) {
+            continue;
+        }
+
+        // calculate area of the polygon using triangulation
+        let polyArea = 0;
+        const va = vec3.create();
+        const vb = vec3.create();
+        const vc = vec3.create();
+        for (let j = 2; j < poly.vertices.length; j++) {
+            vec3.fromBuffer(va, selectedTile.vertices, poly.vertices[0] * 3);
+            vec3.fromBuffer(vb, selectedTile.vertices, poly.vertices[j-1] * 3);
+            vec3.fromBuffer(vc, selectedTile.vertices, poly.vertices[j] * 3);
+            polyArea += triArea2D(va, vb, vc);
+        }
+
+        // choose random polygon weighted by area, using reservoir sampling
+        areaSum += polyArea;
+        const u = rand();
+        if (u * areaSum <= polyArea) {
+            selectedPoly = poly;
+            selectedPolyRef = polyRef;
+        }
+    }
+
+    if (!selectedPoly || !selectedPolyRef) {
+        return result;
+    }
+
+    // randomly pick point on polygon
+    const verts: number[] = [];
+    for (let j = 0; j < selectedPoly.vertices.length; j++) {
+        const vertexIndex = selectedPoly.vertices[j] * 3;
+        verts.push(selectedTile.vertices[vertexIndex]);
+        verts.push(selectedTile.vertices[vertexIndex + 1]);
+        verts.push(selectedTile.vertices[vertexIndex + 2]);
+    }
+
+    const s = rand();
+    const t = rand();
+    const areas = new Array(selectedPoly.vertices.length);
+    const pt: Vec3 = [0, 0, 0];
+
+    randomPointInConvexPoly(pt, verts, areas, s, t);
+
+    // project point onto polygon surface to ensure it's exactly on the mesh
+    const closestPointResult = createGetClosestPointOnPolyResult();
+    getClosestPointOnPoly(closestPointResult, navMesh, selectedPolyRef, pt);
+    
+    if (closestPointResult.success) {
+        vec3.copy(result.position, closestPointResult.closestPoint);
+    } else {
+        vec3.copy(result.position, pt);
+    }
+
+    result.ref = selectedPolyRef;
+    result.success = true;
 
     return result;
 };

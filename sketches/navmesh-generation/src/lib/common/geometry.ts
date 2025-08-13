@@ -458,8 +458,8 @@ export const polyMinExtent = (verts: number[], nverts: number): number => {
  * @returns The perp dot product on the xz-plane.
  */
 const vperp2D = (u: Vec3, v: Vec3): number => {
-	return u[2]*v[0] - u[0]*v[2];
-}
+    return u[2] * v[0] - u[0] * v[2];
+};
 
 export type IntersectSegmentPoly2DResult = {
     intersects: boolean;
@@ -486,10 +486,10 @@ const _intersectSegmentPoly2DEdge = vec3.create();
 /**
  * Intersects a segment with a polygon in 2D (ignoring Y).
  * Uses the Sutherland-Hodgman clipping algorithm approach.
- * 
+ *
  * @param result - The result object to store intersection data
  * @param startPos - Start position of the segment
- * @param endPos - End position of the segment  
+ * @param endPos - End position of the segment
  * @param verts - Polygon vertices as flat array [x,y,z,x,y,z,...]
  * @param nv - Number of vertices in the polygon
  */
@@ -506,7 +506,7 @@ export const intersectSegmentPoly2D = (
     result.segMax = -1;
 
     const dir = vec3.subtract(_intersectSegmentPoly2DDir, endPos, startPos);
-    
+
     const vi = _intersectSegmentPoly2DVi;
     const vj = _intersectSegmentPoly2DVj;
     const edge = _intersectSegmentPoly2DEdge;
@@ -528,12 +528,12 @@ export const intersectSegmentPoly2D = (
             if (n < 0) {
                 return result;
             }
-            
+
             continue;
         }
-        
+
         const t = n / d;
-        
+
         if (d < 0) {
             // segment S is entering across this edge
             if (t > result.tmin) {
@@ -556,8 +556,70 @@ export const intersectSegmentPoly2D = (
             }
         }
     }
-    
+
     result.intersects = true;
 
     return result;
+};
+
+const _randomPointInConvexPolyVa = vec3.create();
+const _randomPointInConvexPolyVb = vec3.create();
+const _randomPointInConvexPolyVc = vec3.create();
+
+/**
+ * Generates a random point inside a convex polygon using barycentric coordinates.
+ *
+ * @param verts - Polygon vertices as flat array [x,y,z,x,y,z,...]
+ * @param areas - Temporary array for triangle areas (will be modified)
+ * @param s - Random value [0,1] for triangle selection
+ * @param t - Random value [0,1] for point within triangle
+ * @param out - Output point [x,y,z]
+ */
+export const randomPointInConvexPoly = (out: Vec3, verts: number[], areas: number[], s: number, t: number): Vec3 => {
+    const nv = verts.length / 3;
+
+    // calculate cumulative triangle areas for weighted selection
+    let areaSum = 0;
+    for (let i = 2; i < nv; i++) {
+        const va = [verts[0], verts[1], verts[2]] as Vec3;
+        const vb = [verts[(i - 1) * 3], verts[(i - 1) * 3 + 1], verts[(i - 1) * 3 + 2]] as Vec3;
+        const vc = [verts[i * 3], verts[i * 3 + 1], verts[i * 3 + 2]] as Vec3;
+        areas[i] = triArea2D(va, vb, vc);
+        areaSum += Math.max(0.001, areas[i]);
+    }
+
+    // choose triangle based on area-weighted random selection
+    const thr = s * areaSum;
+    let acc = 0;
+    let tri = nv - 1;
+    for (let i = 2; i < nv; i++) {
+        acc += Math.max(0.001, areas[i]);
+        if (thr <= acc) {
+            tri = i;
+            break;
+        }
+    }
+
+    // generate random point in triangle using barycentric coordinates
+    // standard method: use square root for uniform distribution
+    let u = Math.sqrt(t);
+    let v = 1 - t;
+
+    // ensure the point is inside the triangle
+    if (u + v > 1) {
+        u = 1 - u;
+        v = 1 - v;
+    }
+
+    const w = 1 - u - v;
+
+    const va = vec3.set(_randomPointInConvexPolyVa, verts[0], verts[1], verts[2]);
+    const vb = vec3.set(_randomPointInConvexPolyVb, verts[(tri - 1) * 3], verts[(tri - 1) * 3 + 1], verts[(tri - 1) * 3 + 2]);
+    const vc = vec3.set(_randomPointInConvexPolyVc, verts[tri * 3], verts[tri * 3 + 1], verts[tri * 3 + 2]);
+
+    out[0] = u * va[0] + v * vb[0] + w * vc[0];
+    out[1] = u * va[1] + v * vb[1] + w * vc[1];
+    out[2] = u * va[2] + v * vb[2] + w * vc[2];
+
+    return out;
 };

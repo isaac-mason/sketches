@@ -1465,6 +1465,25 @@ const TiledNavMesh = () => {
                     polyHelper.dispose();
                 });
             }
+
+            // testing: find random point
+            const randomPoint = navMeshQuery.findRandomPoint(nav, navMeshQuery.DEFAULT_QUERY_FILTER, Math.random);
+
+            if (randomPoint.success) {
+                const point = randomPoint.position;
+                const pointMesh = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.1, 16, 16),
+                    new THREE.MeshBasicMaterial({ color: 'red' })
+                );
+                pointMesh.position.set(...point);
+                scene.add(pointMesh);
+
+                disposables.push(() => {
+                    scene.remove(pointMesh);
+                    pointMesh.geometry.dispose();
+                    pointMesh.material.dispose();
+                });
+            }
             
         }
 
