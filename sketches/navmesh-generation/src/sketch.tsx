@@ -58,7 +58,7 @@ import {
     createSearchNodesHelper,
     createNavMeshOffMeshConnectionsHelper,
 } from './lib/three';
-import { createFindNearestPolyResult, DEFAULT_QUERY_FILTER, findNodePath } from './lib/query/nav-mesh-query';
+import { createFindNearestPolyResult, DEFAULT_QUERY_FILTER, findNodePath, MOVE_ALONG_SURFACE_STATUS_SUCCESS } from './lib/query/nav-mesh-query';
 import { Line2 } from 'three/examples/jsm/lines/webgpu/Line2.js';
 import { LineGeometry } from 'three/examples/jsm/Addons.js';
 import { Line2NodeMaterial } from 'three/webgpu';
@@ -1040,15 +1040,15 @@ const TiledNavMesh = () => {
 
         /* 4. add offmesh connections */
         const offMeshConnections: NavMeshOffMeshConnection[] = [
-            {
-                start: [-2.4799404316645157, 0.26716880587122915, 4.039628947351325],
-                end: [-2.735661224133032, 2.3264200687408447, 0.9084349415865054],
-                direction: OffMeshConnectionDirection.START_TO_END,
-                radius: 0.5,
-                cost: 0,
-                area: 0,
-                flags: 0xffffff,
-            },
+            // {
+            //     start: [-2.4799404316645157, 0.26716880587122915, 4.039628947351325],
+            //     end: [-2.735661224133032, 2.3264200687408447, 0.9084349415865054],
+            //     direction: OffMeshConnectionDirection.START_TO_END,
+            //     radius: 0.5,
+            //     cost: 0,
+            //     area: 0,
+            //     flags: 0xffffff,
+            // },
         ];
 
         for (const offMeshConnection of offMeshConnections) {
@@ -1187,6 +1187,128 @@ const TiledNavMesh = () => {
                     lineGeometry.dispose();
                     lineMaterial.dispose();
                 });
+            }
+        }
+
+        // testing: move along surface
+        const moveStart = vec3.fromValues(7.998617874675065, 1.9101248566771005, 2.0063896115329314);
+        const moveEnd = vec3.fromValues(9.21025357579929, 2.2998759746551514, 2.6880702982290465);
+
+        const moveStartNearestPoly = navMeshQuery.findNearestPoly(
+            navMeshQuery.createFindNearestPolyResult(),
+            nav,
+            moveStart,
+            [1, 1, 1],
+            navMeshQuery.DEFAULT_QUERY_FILTER,
+        );
+
+        if (moveStartNearestPoly.success) {
+            const moveAlongSurfaceResult = navMeshQuery.moveAlongSurface(
+                nav,
+                moveStartNearestPoly.nearestPolyRef,
+                moveStart,
+                moveEnd,
+                navMeshQuery.DEFAULT_QUERY_FILTER,
+            );
+
+            console.log('moveAlongSurfaceResult', moveAlongSurfaceResult);
+
+            if (moveAlongSurfaceResult.status === MOVE_ALONG_SURFACE_STATUS_SUCCESS) {
+                // Visualize the start position
+                const startMesh = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.1, 16, 16),
+                    new THREE.MeshBasicMaterial({ color: new THREE.Color('green') }),
+                );
+                startMesh.position.fromArray(moveStart);
+                scene.add(startMesh);
+
+                disposables.push(() => {
+                    scene.remove(startMesh);
+                    startMesh.geometry.dispose();
+                    startMesh.material.dispose();
+                });
+
+                // Visualize the target end position
+                const targetMesh = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.1, 16, 16),
+                    new THREE.MeshBasicMaterial({ color: new THREE.Color('red') }),
+                );
+                targetMesh.position.fromArray(moveEnd);
+                scene.add(targetMesh);
+
+                disposables.push(() => {
+                    scene.remove(targetMesh);
+                    targetMesh.geometry.dispose();
+                    targetMesh.material.dispose();
+                });
+
+                // Visualize the result position
+                const resultMesh = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.15, 16, 16),
+                    new THREE.MeshBasicMaterial({ color: new THREE.Color('cyan') }),
+                );
+                resultMesh.position.fromArray(moveAlongSurfaceResult.resultPos);
+                scene.add(resultMesh);
+
+                disposables.push(() => {
+                    scene.remove(resultMesh);
+                    resultMesh.geometry.dispose();
+                    resultMesh.material.dispose();
+                });
+
+                // Visualize the path from start to result
+                const lineGeometry = new LineGeometry();
+                lineGeometry.setFromPoints([
+                    new THREE.Vector3(...moveStart), 
+                    new THREE.Vector3(...moveAlongSurfaceResult.resultPos)
+                ]);
+                const lineMaterial = new Line2NodeMaterial({
+                    color: 'cyan',
+                    linewidth: 0.15,
+                    worldUnits: true,
+                });
+                const line = new Line2(lineGeometry, lineMaterial);
+                scene.add(line);
+
+                disposables.push(() => {
+                    scene.remove(line);
+                    lineGeometry.dispose();
+                    lineMaterial.dispose();
+                });
+
+                // Visualize the intended direction line (start to target)
+                const directionLineGeometry = new LineGeometry();
+                directionLineGeometry.setFromPoints([
+                    new THREE.Vector3(...moveStart), 
+                    new THREE.Vector3(...moveEnd)
+                ]);
+                const directionLineMaterial = new Line2NodeMaterial({
+                    color: 'red',
+                    linewidth: 0.1,
+                    worldUnits: true,
+                });
+                const directionLine = new Line2(directionLineGeometry, directionLineMaterial);
+                scene.add(directionLine);
+
+                disposables.push(() => {
+                    scene.remove(directionLine);
+                    directionLineGeometry.dispose();
+                    directionLineMaterial.dispose();
+                });
+
+                // Visualize the visited polygons
+                for (let i = 0; i < moveAlongSurfaceResult.visited.length; i++) {
+                    const poly = moveAlongSurfaceResult.visited[i];
+                    const hslColor = new THREE.Color().setHSL(0.5, 0.8, 0.3 + (i / moveAlongSurfaceResult.visited.length) * 0.4);
+                    const polyHelper = createNavMeshPolyHelper(nav, poly, hslColor);
+                    polyHelper.object.position.y += 0.3;
+                    scene.add(polyHelper.object);
+
+                    disposables.push(() => {
+                        scene.remove(polyHelper.object);
+                        polyHelper.dispose();
+                    });
+                }
             }
         }
 

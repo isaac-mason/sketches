@@ -970,7 +970,7 @@ const HEURISTIC_SCALE = 0.999; // Search heuristic scale
  * @param endRef The reference ID of the ending node.
  * @param startPos The starting position in world space.
  * @param endPos The ending position in world space.
- * @param filter Query filter to apply.
+ * @param filter The query filter.
  * @returns The result of the pathfinding operation.
  */
 export const findNodePath = (
@@ -1269,7 +1269,6 @@ export type FindStraightPathResult = {
 
 const _findStraightPathLeftPortalPoint = vec3.create();
 const _findStraightPathRightPortalPoint = vec3.create();
-const _findStraightPathTmpPoint = vec3.create();
 
 /**
  * This method peforms what is often called 'string pulling'.
@@ -1428,7 +1427,7 @@ export const findStraightPath = (
                     // restart
                     i = apexIndex;
 
-                    // biome-ignore lint/correctness/noUnnecessaryContinue: <explanation>
+                    // biome-ignore lint/correctness/noUnnecessaryContinue: defensive against later code changes
                     continue;
                 }
             }
@@ -1446,4 +1445,234 @@ export const findStraightPath = (
     appendVertex(closestEndPos, endRef, path, NodeType.GROUND_POLY);
 
     return { success: true, path };
+};
+
+export const MOVE_ALONG_SURFACE_STATUS_SUCCESS = 1 as const;
+export const MOVE_ALONG_SURFACE_STATUS_PARTIAL = 2 as const;
+export const MOVE_ALONG_SURFACE_STATUS_FAILURE = 0 as const;
+export const MOVE_ALONG_SURFACE_STATUS_INVALID_PARAM = 3 as const;
+
+export type MoveAlongSurfaceStatus =
+    | typeof MOVE_ALONG_SURFACE_STATUS_SUCCESS
+    | typeof MOVE_ALONG_SURFACE_STATUS_PARTIAL
+    | typeof MOVE_ALONG_SURFACE_STATUS_FAILURE
+    | typeof MOVE_ALONG_SURFACE_STATUS_INVALID_PARAM;
+
+export type MoveAlongSurfaceResult = {
+    status: MoveAlongSurfaceStatus;
+    resultPos: Vec3;
+    visited: NodeRef[];
+    visitedCount: number;
+};
+
+/**
+ * Moves from start position towards end position along the navigation mesh surface.
+ * 
+ * This method is optimized for small delta movement and a small number of 
+ * polygons. If used for too great a distance, the result set will form an 
+ * incomplete path.
+ * 
+ * The resultPos will equal the endPos if the end is reached. 
+ * Otherwise the closest reachable position will be returned.
+ * 
+ * The resultPos is not projected onto the surface of the navigation 
+ * mesh. Use getPolyHeight if this is needed.
+ * 
+ * This method treats the end position in the same manner as 
+ * the raycast method. (As a 2D point.)
+ * 
+ * @param navMesh The navigation mesh
+ * @param startRef The reference ID of the starting polygon
+ * @param startPos The starting position [(x, y, z)]
+ * @param endPos The ending position [(x, y, z)]
+ * @param filter The query filter.
+ * @returns Result containing status, final position, and visited polygons
+ */
+export const moveAlongSurface = (
+    navMesh: NavMesh,
+    startRef: NodeRef,
+    startPos: Vec3,
+    endPos: Vec3,
+    filter: QueryFilter,
+): MoveAlongSurfaceResult => {
+    const result: MoveAlongSurfaceResult = {
+        status: MOVE_ALONG_SURFACE_STATUS_FAILURE,
+        resultPos: [0, 0, 0],
+        visited: [],
+        visitedCount: 0,
+    };
+
+    if (!isValidNodeRef(navMesh, startRef) ||
+        !vec3.finite(startPos) ||
+        !vec3.finite(endPos) ||
+        !filter) {
+        result.status = MOVE_ALONG_SURFACE_STATUS_INVALID_PARAM;
+        return result;
+    }
+
+    result.status = MOVE_ALONG_SURFACE_STATUS_SUCCESS;
+
+    const nodes: SearchNodePool = {};
+    const visited: NodeRef[] = [];
+
+    const startNode: SearchNode = {
+        cost: 0,
+        total: 0,
+        parent: null,
+        nodeRef: startRef,
+        state: 0,
+        flags: NODE_FLAG_CLOSED,
+        position: structuredClone(startPos),
+    };
+    nodes[`${startRef}:0`] = startNode;
+
+    const bestPos = vec3.clone(startPos);
+    let bestDist = Number.MAX_VALUE;
+    let bestNode: SearchNode | null = startNode;
+
+    // search constraints
+    const searchPos = vec3.create();
+    vec3.lerp(searchPos, startPos, endPos, 0.5);
+    const searchRadSqr = (vec3.distance(startPos, endPos) / 2.0 + 0.001) ** 2;
+
+    // breadth-first search queue (no priority needed for this algorithm)
+    const queue: SearchNodeQueue = [startNode];
+
+    while (queue.length > 0) {
+        // pop front (breadth-first)
+        const curNode = queue.shift()!;
+
+        // get poly and tile
+        const curRef = curNode.nodeRef;
+        const tileAndPoly = getTileAndPolyByRef(createGetTileAndPolyByRefResult(), curRef, navMesh);
+        
+        if (!tileAndPoly.success) continue;
+
+        const { tile, poly } = tileAndPoly;
+
+        // collect vertices
+        const nverts = poly.vertices.length;
+        const verts: number[] = [];
+        for (let i = 0; i < nverts; ++i) {
+            const vertIndex = poly.vertices[i] * 3;
+            verts.push(tile.vertices[vertIndex]);
+            verts.push(tile.vertices[vertIndex + 1]);
+            verts.push(tile.vertices[vertIndex + 2]);
+        }
+
+        // if target is inside the poly, stop search
+        if (pointInPoly(nverts, verts, endPos)) {
+            bestNode = curNode;
+            vec3.copy(bestPos, endPos);
+            break;
+        }
+
+        // find wall edges and find nearest point inside the walls
+        for (let i = 0, j = nverts - 1; i < nverts; j = i++) {
+            // find links to neighbours
+            const neis: NodeRef[] = [];
+
+            // expand search with neighbours
+            const linkIndices = navMesh.nodes[curRef] || [];
+
+            for (const linkIndex of linkIndices) {
+                const link = navMesh.links[linkIndex];
+                if (!link) continue;
+
+                const neighbourRef = link.neighbourRef;
+                if (!neighbourRef) continue;
+
+                // check if this link corresponds to edge j
+                if (link.edge === j) {
+                    // check filter
+                    if (filter.passFilter && !filter.passFilter(neighbourRef, navMesh, filter)) {
+                        continue;
+                    }
+
+                    neis.push(neighbourRef);
+                }
+            }
+
+            if (neis.length === 0) {
+                // wall edge, calc distance
+                const vj = [verts[j * 3], verts[j * 3 + 1], verts[j * 3 + 2]] as Vec3;
+                const vi = [verts[i * 3], verts[i * 3 + 1], verts[i * 3 + 2]] as Vec3;
+                const distSqr = distancePtSeg2dSqr(endPos, vj, vi);
+                if (distSqr < bestDist) {
+                    // update nearest distance
+                    closestPtSeg2d(bestPos, endPos, vj, vi);
+                    bestDist = distSqr;
+                    bestNode = curNode;
+                }
+            } else {
+                for (const neighbourRef of neis) {
+                    // handle tile boundary crossings like findNodePath
+                    let crossSide = 0;
+                    const linkIndex = linkIndices.find(idx => navMesh.links[idx]?.neighbourRef === neighbourRef);
+                    if (linkIndex !== undefined) {
+                        const link = navMesh.links[linkIndex];
+                        if (link.side !== 0xff) {
+                            crossSide = link.side >> 1;
+                        }
+                    }
+
+                    const neighbourSearchNodeRef: SearchNodeRef = `${neighbourRef}:${crossSide}`;
+                    let neighbourNode = nodes[neighbourSearchNodeRef];
+                    
+                    if (!neighbourNode) {
+                        neighbourNode = {
+                            cost: 0,
+                            total: 0,
+                            parent: null,
+                            nodeRef: neighbourRef,
+                            state: crossSide,
+                            flags: 0,
+                            position: structuredClone(endPos),
+                        };
+                        nodes[neighbourSearchNodeRef] = neighbourNode;
+                    }
+
+                    // skip if already visited
+                    if (neighbourNode.flags & NODE_FLAG_CLOSED) continue;
+
+                    // skip the link if it is too far from search constraint
+                    const vj = [verts[j * 3], verts[j * 3 + 1], verts[j * 3 + 2]] as Vec3;
+                    const vi = [verts[i * 3], verts[i * 3 + 1], verts[i * 3 + 2]] as Vec3;
+                    const distSqr = distancePtSeg2dSqr(searchPos, vj, vi);
+                    if (distSqr > searchRadSqr) continue;
+
+                    // calculate node position if first visit
+                    if (neighbourNode.flags === 0) {
+                        getEdgeMidPoint(navMesh, curRef, neighbourRef, neighbourNode.position);
+                    }
+
+                    // mark as visited and add to queue
+                    neighbourNode.parent = `${curNode.nodeRef}:${curNode.state}`;
+                    neighbourNode.flags = NODE_FLAG_CLOSED;
+                    queue.push(neighbourNode);
+                }
+            }
+        }
+    }
+
+    if (bestNode) {
+        let currentNode: SearchNode | null = bestNode;
+        while (currentNode) {
+            visited.push(currentNode.nodeRef);
+
+            if (currentNode.parent) {
+                currentNode = nodes[currentNode.parent];
+            } else {
+                currentNode = null;
+            }
+        }
+
+        visited.reverse();
+    }
+
+    vec3.copy(result.resultPos, bestPos);
+    result.visited = visited;
+    result.visitedCount = visited.length;
+
+    return result;
 };
