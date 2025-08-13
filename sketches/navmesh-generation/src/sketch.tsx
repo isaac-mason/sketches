@@ -225,8 +225,8 @@ const SoloNavMesh = () => {
 
         console.time('rasterize triangles');
 
-        const bounds = calculateMeshBounds(positions, indices, box3.create());
-        const [heightfieldWidth, heightfieldHeight] = calculateGridSize(bounds, cellSize, vec2.create());
+        const bounds = calculateMeshBounds(box3.create(), positions, indices);
+        const [heightfieldWidth, heightfieldHeight] = calculateGridSize(vec2.create(), bounds, cellSize);
         const heightfield = createHeightfield(heightfieldWidth, heightfieldHeight, bounds, cellSize, cellHeight);
 
         rasterizeTriangles(heightfield, positions, indices, triAreaIds, walkableClimbVoxels);
@@ -947,8 +947,8 @@ const TiledNavMesh = () => {
 
         /* 2. create a tiled nav mesh */
 
-        const meshBounds = calculateMeshBounds(positions, indices, box3.create());
-        const gridSize = calculateGridSize(meshBounds, cellSize, vec2.create());
+        const meshBounds = calculateMeshBounds(box3.create(), positions, indices);
+        const gridSize = calculateGridSize(vec2.create(), meshBounds, cellSize);
 
         const nav = navMesh.create();
         nav.tileWidth = tileSizeWorld;
@@ -1041,15 +1041,15 @@ const TiledNavMesh = () => {
 
         /* 4. add offmesh connections */
         const offMeshConnections: NavMeshOffMeshConnection[] = [
-            // {
-            //     start: [-2.4799404316645157, 0.26716880587122915, 4.039628947351325],
-            //     end: [-2.735661224133032, 2.3264200687408447, 0.9084349415865054],
-            //     direction: OffMeshConnectionDirection.START_TO_END,
-            //     radius: 0.5,
-            //     cost: 0,
-            //     area: 0,
-            //     flags: 0xffffff,
-            // },
+            {
+                start: [-2.4799404316645157, 0.26716880587122915, 4.039628947351325],
+                end: [-2.735661224133032, 2.3264200687408447, 0.9084349415865054],
+                direction: OffMeshConnectionDirection.START_TO_END,
+                radius: 0.5,
+                cost: 0,
+                area: 0,
+                flags: 0xffffff,
+            },
         ];
 
         for (const offMeshConnection of offMeshConnections) {
@@ -1925,8 +1925,8 @@ const HeightfieldBPA = () => {
 
         console.time('rasterize triangles');
 
-        const bounds = calculateMeshBounds(positions, indices, box3.create());
-        const [heightfieldWidth, heightfieldHeight] = calculateGridSize(bounds, cellSize, vec2.create());
+        const bounds = calculateMeshBounds(box3.create(), positions, indices);
+        const [heightfieldWidth, heightfieldHeight] = calculateGridSize(vec2.create(), bounds, cellSize);
         const heightfield = createHeightfield(heightfieldWidth, heightfieldHeight, bounds, cellSize, cellHeight);
 
         rasterizeTriangles(heightfield, positions, indices, triAreaIds, walkableClimbVoxels);
@@ -2148,7 +2148,7 @@ const RaycastBPA = () => {
 
         console.time('generate walkable points via raycasting');
 
-        const bounds = calculateMeshBounds(positions, indices, box3.create());
+        const bounds = calculateMeshBounds(box3.create(), positions, indices);
 
         const pointSet = triangleMeshToPointSet(positions, indices, bounds, {
             gridSize: cellSize,

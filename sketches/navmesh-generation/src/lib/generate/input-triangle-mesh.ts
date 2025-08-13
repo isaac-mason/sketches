@@ -121,9 +121,9 @@ export const clearUnwalkableTriangles = (
 };
 
 export const calculateMeshBounds = (
+    outBounds: Box3,
     inVertices: ArrayLike<number>,
     inIndices: ArrayLike<number>,
-    outBounds: Box3,
 ): Box3 => {
     outBounds[0][0] = Number.POSITIVE_INFINITY;
     outBounds[0][1] = Number.POSITIVE_INFINITY;

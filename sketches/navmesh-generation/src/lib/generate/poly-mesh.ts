@@ -834,7 +834,7 @@ export const buildMeshAdjacency = (
         firstEdge[i] = MESH_NULL_IDX;
     }
 
-    // Build edges
+    // build edges
     for (let i = 0; i < polygonCount; i++) {
         const polyStartIdx = i * verticesPerPoly * 2;
         for (let j = 0; j < verticesPerPoly; j++) {
@@ -859,7 +859,7 @@ export const buildMeshAdjacency = (
         }
     }
 
-    // Match edges
+    // match edges
     for (let i = 0; i < polygonCount; i++) {
         const polyStartIdx = i * verticesPerPoly * 2;
         for (let j = 0; j < verticesPerPoly; j++) {
@@ -887,7 +887,7 @@ export const buildMeshAdjacency = (
         }
     }
 
-    // Store adjacency
+    // store adjacency
     for (let i = 0; i < edgeCount; i++) {
         const e = edges[i];
         if (e.poly[0] !== e.poly[1]) {
@@ -905,24 +905,24 @@ export const buildPolyMesh = (
     contourSet: ContourSet,
     maxVerticesPerPoly: number,
 ): PolyMesh => {
-    // Calculate sizes
+    // calculate sizes
     let maxVertices = 0;
     let maxTris = 0;
     let maxVertsPerCont = 0;
 
     for (let i = 0; i < contourSet.contours.length; i++) {
-        const cont = contourSet.contours[i];
-        if (cont.nVertices < 3) continue;
-        maxVertices += cont.nVertices;
-        maxTris += cont.nVertices - 2;
-        maxVertsPerCont = Math.max(maxVertsPerCont, cont.nVertices);
+        const contour = contourSet.contours[i];
+        if (contour.nVertices < 3) continue;
+        maxVertices += contour.nVertices;
+        maxTris += contour.nVertices - 2;
+        maxVertsPerCont = Math.max(maxVertsPerCont, contour.nVertices);
     }
 
     if (maxVertices >= 0xfffe) {
         throw new Error(`Too many vertices: ${maxVertices}`);
     }
 
-    // Initialize mesh
+    // initialize mesh
     const mesh: PolyMesh = {
         vertices: new Array(maxVertices * 3).fill(0),
         polys: new Array(maxTris * maxVerticesPerPoly * 2).fill(MESH_NULL_IDX),
@@ -951,25 +951,25 @@ export const buildPolyMesh = (
 
     const vertexCount = { value: 0 };
 
-    // Process each contour
+    // process each contour
     for (let i = 0; i < contourSet.contours.length; i++) {
         const cont = contourSet.contours[i];
 
         if (cont.nVertices < 3) continue;
 
-        // Create indices
+        // create indices
         for (let j = 0; j < cont.nVertices; j++) {
             indices[j] = j;
         }
 
-        // Triangulate contour
+        // triangulate contour
         let ntris = triangulate(cont.nVertices, cont.vertices, indices, tris);
         if (ntris <= 0) {
             console.warn(`Bad triangulation for contour ${i}`);
             ntris = Math.abs(ntris);
         }
 
-        // Add vertices
+        // add vertices
         for (let j = 0; j < cont.nVertices; j++) {
             const v = [
                 cont.vertices[j * 4],
@@ -991,7 +991,7 @@ export const buildPolyMesh = (
             }
         }
 
-        // Build initial polygons
+        // build initial polygons
         let npolys = 0;
         polys.fill(MESH_NULL_IDX, 0, maxVertsPerCont * maxVerticesPerPoly);
 
@@ -1007,7 +1007,7 @@ export const buildPolyMesh = (
 
         if (npolys === 0) continue;
 
-        // Merge polygons
+        // merge polygons
         if (maxVerticesPerPoly > 3) {
             while (true) {
                 let bestMergeVal = 0;
@@ -1050,7 +1050,7 @@ export const buildPolyMesh = (
                         maxVerticesPerPoly,
                     );
 
-                    // Move last poly to fill gap
+                    // move last poly to fill gap
                     for (let m = 0; m < maxVerticesPerPoly; m++) {
                         polys[pbStart + m] =
                             polys[(npolys - 1) * maxVerticesPerPoly + m];
@@ -1062,7 +1062,7 @@ export const buildPolyMesh = (
             }
         }
 
-        // Store polygons
+        // store polygons
         for (let j = 0; j < npolys; j++) {
             const pStart = mesh.nPolys * maxVerticesPerPoly * 2;
             const qStart = j * maxVerticesPerPoly;
@@ -1083,7 +1083,7 @@ export const buildPolyMesh = (
 
     mesh.nVertices = vertexCount.value;
 
-    // Remove edge vertices
+    // remove edge vertices
     for (let i = 0; i < mesh.nVertices; i++) {
         if (vflags[i]) {
             if (!canRemoveVertex(mesh, i)) {
@@ -1093,8 +1093,8 @@ export const buildPolyMesh = (
                 console.error(`Failed to remove edge vertex ${i}`);
                 throw new Error(`Failed to remove edge vertex ${i}`);
             }
-            // Remove vertex - Note: mesh.nVertices is already decremented inside removeVertex()!
-            // Fixup vertex flags
+            // remove vertex - note: mesh.nVertices is already decremented inside removeVertex()!
+            // fixup vertex flags
             for (let j = i; j < mesh.nVertices; j++) {
                 vflags[j] = vflags[j + 1];
             }
@@ -1102,7 +1102,7 @@ export const buildPolyMesh = (
         }
     }
 
-    // Build mesh adjacency
+    // build mesh adjacency
     if (
         !buildMeshAdjacency(
             mesh.polys,
@@ -1114,10 +1114,15 @@ export const buildPolyMesh = (
         throw new Error('Failed to build mesh adjacency');
     }
 
-    // Find portal edges
+    // find portal edges
     findPortalEdges(mesh, contourSet.width, contourSet.height);
 
-    // Allocate and initialize mesh flags array
+    // trim arrays to size
+    mesh.polys.length = mesh.nPolys * maxVerticesPerPoly * 2;
+    mesh.regions.length = mesh.nPolys;
+    mesh.flags.length = mesh.nPolys;
+
+    // allocate and initialize mesh flags array
     mesh.flags = new Array(mesh.nPolys).fill(0);
 
     return mesh;

@@ -38,9 +38,9 @@ const SPAN_MAX_HEIGHT = 0x1fff; // 8191
 const MAX_HEIGHTFIELD_HEIGHT = 0xffff;
 
 export const calculateGridSize = (
+    outGridSize: Vec2,
     bounds: Box3,
     cellSize: number,
-    outGridSize: Vec2
 ): [width: number, height: number] => {
     const minBounds = bounds[0];
     const maxBounds = bounds[1];
