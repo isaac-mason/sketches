@@ -229,7 +229,7 @@ const SoloNavMesh = () => {
         const [heightfieldWidth, heightfieldHeight] = calculateGridSize(vec2.create(), bounds, cellSize);
         const heightfield = createHeightfield(heightfieldWidth, heightfieldHeight, bounds, cellSize, cellHeight);
 
-        rasterizeTriangles(heightfield, positions, indices, triAreaIds, walkableClimbVoxels);
+        rasterizeTriangles(ctx, heightfield, positions, indices, triAreaIds, walkableClimbVoxels);
 
         console.timeEnd('rasterize triangles');
 
@@ -831,7 +831,7 @@ const TiledNavMesh = () => {
 
             const heightfield = createHeightfield(heightfieldWidth, heightfieldHeight, expandedTileBounds, cellSize, cellHeight);
 
-            rasterizeTriangles(heightfield, positions, trianglesInBox, triAreaIds, walkableClimbVoxels);
+            rasterizeTriangles(ctx, heightfield, positions, trianglesInBox, triAreaIds, walkableClimbVoxels);
 
             /* 5. filter walkable surfaces */
             filterLowHangingWalkableObstacles(heightfield, walkableClimbVoxels);
@@ -1895,6 +1895,8 @@ const HeightfieldBPA = () => {
 
         const bpaRadius = cellSize * 1.5;
 
+        const ctx = BuildContext.create();
+
         /* 1. get positions and indices from THREE.Mesh instances in the group */
 
         console.time('get positions and indices');
@@ -1929,7 +1931,7 @@ const HeightfieldBPA = () => {
         const [heightfieldWidth, heightfieldHeight] = calculateGridSize(vec2.create(), bounds, cellSize);
         const heightfield = createHeightfield(heightfieldWidth, heightfieldHeight, bounds, cellSize, cellHeight);
 
-        rasterizeTriangles(heightfield, positions, indices, triAreaIds, walkableClimbVoxels);
+        rasterizeTriangles(ctx, heightfield, positions, indices, triAreaIds, walkableClimbVoxels);
 
         console.timeEnd('rasterize triangles');
 

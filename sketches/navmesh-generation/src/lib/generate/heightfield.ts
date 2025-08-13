@@ -7,6 +7,7 @@ import {
     getDirOffsetX,
     getDirOffsetY,
 } from './common';
+import { BuildContext, type BuildContextState } from './build-context';
 
 export type HeightfieldSpan = {
     /** the lower limit of the span */
@@ -443,6 +444,7 @@ const rasterizeTriangle = (
 };
 
 export const rasterizeTriangles = (
+    ctx: BuildContextState,
     heightfield: Heightfield,
     vertices: ArrayLike<number>,
     indices: ArrayLike<number>,
@@ -460,19 +462,19 @@ export const rasterizeTriangles = (
         const v1 = vec3.fromBuffer(_v1, vertices, i1 * 3);
         const v2 = vec3.fromBuffer(_v2, vertices, i2 * 3);
 
-        const areaID = triAreaIds[triIndex];
+        const areaId = triAreaIds[triIndex];
 
         if (
             !rasterizeTriangle(
                 v0,
                 v1,
                 v2,
-                areaID,
+                areaId,
                 heightfield,
                 flagMergeThreshold,
             )
         ) {
-            console.error('Failed to rasterize triangle');
+            BuildContext.error(ctx, "Failed to rasterize triangle");
             return false;
         }
     }
