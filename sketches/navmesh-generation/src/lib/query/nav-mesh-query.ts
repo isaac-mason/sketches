@@ -698,23 +698,13 @@ export const queryPolygonsInTile = (
 
             // calc polygon bounds
             const firstVertexIndex = poly.vertices[0];
-            vec3.set(
-                _queryPolygonsInTileVertex,
-                tile.vertices[firstVertexIndex * 3],
-                tile.vertices[firstVertexIndex * 3 + 1],
-                tile.vertices[firstVertexIndex * 3 + 2],
-            );
+            vec3.fromBuffer(_queryPolygonsInTileVertex, tile.vertices, firstVertexIndex * 3);
             vec3.copy(_queryPolygonsInTileBmax, _queryPolygonsInTileVertex);
             vec3.copy(_queryPolygonsInTileBmin, _queryPolygonsInTileVertex);
 
             for (let j = 1; j < poly.vertices.length; j++) {
                 const vertexIndex = poly.vertices[j];
-                vec3.set(
-                    _queryPolygonsInTileVertex,
-                    tile.vertices[vertexIndex * 3],
-                    tile.vertices[vertexIndex * 3 + 1],
-                    tile.vertices[vertexIndex * 3 + 2],
-                );
+                vec3.fromBuffer(_queryPolygonsInTileVertex, tile.vertices, vertexIndex * 3);
                 vec3.min(_queryPolygonsInTileBmax, _queryPolygonsInTileBmax, _queryPolygonsInTileVertex);
                 vec3.max(_queryPolygonsInTileBmin, _queryPolygonsInTileBmin, _queryPolygonsInTileVertex);
             }

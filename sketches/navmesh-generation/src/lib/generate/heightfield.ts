@@ -456,24 +456,9 @@ export const rasterizeTriangles = (
         const i1 = indices[triIndex * 3 + 1];
         const i2 = indices[triIndex * 3 + 2];
 
-        const v0 = vec3.set(
-            _v0,
-            vertices[i0 * 3],
-            vertices[i0 * 3 + 1],
-            vertices[i0 * 3 + 2],
-        );
-        const v1 = vec3.set(
-            _v1,
-            vertices[i1 * 3],
-            vertices[i1 * 3 + 1],
-            vertices[i1 * 3 + 2],
-        );
-        const v2 = vec3.set(
-            _v2,
-            vertices[i2 * 3],
-            vertices[i2 * 3 + 1],
-            vertices[i2 * 3 + 2],
-        );
+        const v0 = vec3.fromBuffer(_v0, vertices, i0 * 3);
+        const v1 = vec3.fromBuffer(_v1, vertices, i1 * 3);
+        const v2 = vec3.fromBuffer(_v2, vertices, i2 * 3);
 
         const areaID = triAreaIds[triIndex];
 

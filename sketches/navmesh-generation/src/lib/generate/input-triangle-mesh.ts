@@ -1,5 +1,5 @@
 import { type Box3, type Vec3, vec3 } from '@/common/maaths';
-import { NULL_AREA, WALKABLE_AREA } from "./common";
+import { NULL_AREA, WALKABLE_AREA } from './common';
 import type { ArrayLike } from './common';
 
 const _edge0 = vec3.create();
@@ -12,12 +12,7 @@ const _edge1 = vec3.create();
  * @param inV2 Third vertex [x, y, z]
  * @param outFaceNormal Output normal vector [x, y, z]
  */
-const calcTriNormal = (
-    inV0: Vec3,
-    inV1: Vec3,
-    inV2: Vec3,
-    outFaceNormal: Vec3,
-) => {
+const calcTriNormal = (inV0: Vec3, inV1: Vec3, inV2: Vec3, outFaceNormal: Vec3) => {
     // Calculate edge vectors: e0 = v1 - v0, e1 = v2 - v0
     vec3.subtract(_edge0, inV1, inV0);
     vec3.subtract(_edge1, inV2, inV0);
@@ -59,24 +54,9 @@ export const markWalkableTriangles = (
         const i1 = inIndices[triStartIndex + 1];
         const i2 = inIndices[triStartIndex + 2];
 
-        const v0 = vec3.set(
-            _v0,
-            inVertices[i0 * 3],
-            inVertices[i0 * 3 + 1],
-            inVertices[i0 * 3 + 2],
-        );
-        const v1 = vec3.set(
-            _v1,
-            inVertices[i1 * 3],
-            inVertices[i1 * 3 + 1],
-            inVertices[i1 * 3 + 2],
-        );
-        const v2 = vec3.set(
-            _v2,
-            inVertices[i2 * 3],
-            inVertices[i2 * 3 + 1],
-            inVertices[i2 * 3 + 2],
-        );
+        const v0 = vec3.fromBuffer(_v0, inVertices, i0 * 3);
+        const v1 = vec3.fromBuffer(_v1, inVertices, i1 * 3);
+        const v2 = vec3.fromBuffer(_v2, inVertices, i2 * 3);
 
         calcTriNormal(v0, v1, v2, _triangleNormal);
 
@@ -108,9 +88,9 @@ export const clearUnwalkableTriangles = (
         const i1 = inIndices[triStartIndex + 1];
         const i2 = inIndices[triStartIndex + 2];
 
-        const v0 = vec3.set(_v0, inVertices[i0 * 3], inVertices[i0 * 3 + 1], inVertices[i0 * 3 + 2]);
-        const v1 = vec3.set(_v1, inVertices[i1 * 3], inVertices[i1 * 3 + 1], inVertices[i1 * 3 + 2]);
-        const v2 = vec3.set(_v2, inVertices[i2 * 3], inVertices[i2 * 3 + 1], inVertices[i2 * 3 + 2]);
+        const v0 = vec3.fromBuffer(_v0, inVertices, i0 * 3);
+        const v1 = vec3.fromBuffer(_v1, inVertices, i1 * 3);
+        const v2 = vec3.fromBuffer(_v2, inVertices, i2 * 3);
 
         calcTriNormal(v0, v1, v2, _triangleNormal);
 
@@ -120,11 +100,7 @@ export const clearUnwalkableTriangles = (
     }
 };
 
-export const calculateMeshBounds = (
-    outBounds: Box3,
-    inVertices: ArrayLike<number>,
-    inIndices: ArrayLike<number>,
-): Box3 => {
+export const calculateMeshBounds = (outBounds: Box3, inVertices: ArrayLike<number>, inIndices: ArrayLike<number>): Box3 => {
     outBounds[0][0] = Number.POSITIVE_INFINITY;
     outBounds[0][1] = Number.POSITIVE_INFINITY;
     outBounds[0][2] = Number.POSITIVE_INFINITY;

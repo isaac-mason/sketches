@@ -484,9 +484,9 @@ const createTriangleMeshBvh = (
         const i1 = indices[i + 1] * 3;
         const i2 = indices[i + 2] * 3;
 
-        vec3.set(_v0, positions[i0], positions[i0 + 1], positions[i0 + 2]);
-        vec3.set(_v1, positions[i1], positions[i1 + 1], positions[i1 + 2]);
-        vec3.set(_v2, positions[i2], positions[i2 + 1], positions[i2 + 2]);
+        vec3.fromBuffer(_v0, positions, i0);
+        vec3.fromBuffer(_v1, positions, i1);
+        vec3.fromBuffer(_v2, positions, i2);
 
         triangles.push(createTriangle(_v0, _v1, _v2, Math.floor(i / 3)));
     }

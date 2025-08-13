@@ -327,14 +327,14 @@ export const circumCircle = (result: CircumCircleResult, p1: Vec3, p2: Vec3, p3:
         const cVec = vec3.copy(_circumCircleCenter, c);
         const resultVec = _circumCircleResultVec;
         vec3.add(resultVec, cVec, p1);
-        vec3.set(c, resultVec[0], resultVec[1], resultVec[2]);
+        vec3.copy(c, resultVec);
 
         result.success = true;
         result.radius = r;
         return;
     }
 
-    vec3.set(c, p1[0], p1[1], p1[2]);
+    vec3.copy(c, p1);
     result.success = false;
     result.radius = 0;
 };
@@ -613,9 +613,9 @@ export const randomPointInConvexPoly = (out: Vec3, verts: number[], areas: numbe
 
     const w = 1 - u - v;
 
-    const va = vec3.set(_randomPointInConvexPolyVa, verts[0], verts[1], verts[2]);
-    const vb = vec3.set(_randomPointInConvexPolyVb, verts[(tri - 1) * 3], verts[(tri - 1) * 3 + 1], verts[(tri - 1) * 3 + 2]);
-    const vc = vec3.set(_randomPointInConvexPolyVc, verts[tri * 3], verts[tri * 3 + 1], verts[tri * 3 + 2]);
+    const va = vec3.fromBuffer(_randomPointInConvexPolyVa, verts, 0);
+    const vb = vec3.fromBuffer(_randomPointInConvexPolyVb, verts, (tri - 1) * 3);
+    const vc = vec3.fromBuffer(_randomPointInConvexPolyVc, verts, tri * 3);
 
     out[0] = u * va[0] + v * vb[0] + w * vc[0];
     out[1] = u * va[1] + v * vb[1] + w * vc[1];
