@@ -1,10 +1,5 @@
 import { type Box3, type Vec3, vec3 } from '@/common/maaths';
-import {
-    BORDER_VERTEX,
-    MESH_NULL_IDX,
-    MULTIPLE_REGS,
-    POLY_NEIS_FLAG_EXT_LINK,
-} from './common';
+import { BORDER_VERTEX, MESH_NULL_IDX, MULTIPLE_REGS, POLY_NEIS_FLAG_EXT_LINK } from './common';
 import type { ContourSet } from './contour-set';
 
 /**
@@ -98,38 +93,22 @@ const next = (i: number, n: number): number => (i + 1 < n ? i + 1 : 0);
 /**
  *
  */
-const area2 = (
-    vertexA: number[],
-    vertexB: number[],
-    vertexC: number[],
-): number => {
-    return (
-        (vertexB[0] - vertexA[0]) * (vertexC[2] - vertexA[2]) -
-        (vertexC[0] - vertexA[0]) * (vertexB[2] - vertexA[2])
-    );
+const area2 = (vertexA: number[], vertexB: number[], vertexC: number[]): number => {
+    return (vertexB[0] - vertexA[0]) * (vertexC[2] - vertexA[2]) - (vertexC[0] - vertexA[0]) * (vertexB[2] - vertexA[2]);
 };
 
 const xorb = (x: boolean, y: boolean): boolean => !x !== !y;
 
 // Returns true iff c is strictly to the left of the directed
 // line through a to b.
-const left = (
-    firstVertex: number[],
-    secondVertex: number[],
-    testVertex: number[],
-): boolean => area2(firstVertex, secondVertex, testVertex) < 0;
+const left = (firstVertex: number[], secondVertex: number[], testVertex: number[]): boolean =>
+    area2(firstVertex, secondVertex, testVertex) < 0;
 
-const leftOn = (
-    firstVertex: number[],
-    secondVertex: number[],
-    testVertex: number[],
-): boolean => area2(firstVertex, secondVertex, testVertex) <= 0;
+const leftOn = (firstVertex: number[], secondVertex: number[], testVertex: number[]): boolean =>
+    area2(firstVertex, secondVertex, testVertex) <= 0;
 
-const collinear = (
-    firstVertex: number[],
-    secondVertex: number[],
-    testVertex: number[],
-): boolean => area2(firstVertex, secondVertex, testVertex) === 0;
+const collinear = (firstVertex: number[], secondVertex: number[], testVertex: number[]): boolean =>
+    area2(firstVertex, secondVertex, testVertex) === 0;
 
 const intersectProp = (
     segmentAStart: number[],
@@ -146,27 +125,16 @@ const intersectProp = (
         return false;
     }
     return (
-        xorb(
-            left(segmentAStart, segmentAEnd, segmentBStart),
-            left(segmentAStart, segmentAEnd, segmentBEnd),
-        ) &&
-        xorb(
-            left(segmentBStart, segmentBEnd, segmentAStart),
-            left(segmentBStart, segmentBEnd, segmentAEnd),
-        )
+        xorb(left(segmentAStart, segmentAEnd, segmentBStart), left(segmentAStart, segmentAEnd, segmentBEnd)) &&
+        xorb(left(segmentBStart, segmentBEnd, segmentAStart), left(segmentBStart, segmentBEnd, segmentAEnd))
     );
 };
 
-const between = (
-    startVertex: number[],
-    endVertex: number[],
-    testVertex: number[],
-): boolean => {
+const between = (startVertex: number[], endVertex: number[], testVertex: number[]): boolean => {
     if (!collinear(startVertex, endVertex, testVertex)) return false;
     if (startVertex[0] !== endVertex[0]) {
         return (
-            (startVertex[0] <= testVertex[0] &&
-                testVertex[0] <= endVertex[0]) ||
+            (startVertex[0] <= testVertex[0] && testVertex[0] <= endVertex[0]) ||
             (startVertex[0] >= testVertex[0] && testVertex[0] >= endVertex[0])
         );
     }
@@ -176,14 +144,8 @@ const between = (
     );
 };
 
-const intersect = (
-    segmentAStart: number[],
-    segmentAEnd: number[],
-    segmentBStart: number[],
-    segmentBEnd: number[],
-): boolean => {
-    if (intersectProp(segmentAStart, segmentAEnd, segmentBStart, segmentBEnd))
-        return true;
+const intersect = (segmentAStart: number[], segmentAEnd: number[], segmentBStart: number[], segmentBEnd: number[]): boolean => {
+    if (intersectProp(segmentAStart, segmentAEnd, segmentBStart, segmentBEnd)) return true;
     return (
         between(segmentAStart, segmentAEnd, segmentBStart) ||
         between(segmentAStart, segmentAEnd, segmentBEnd) ||
@@ -193,8 +155,7 @@ const intersect = (
 };
 
 // Returns whether the two vertices are equal in the XZ plane
-const vec3EqualXZ = (vertexA: number[], vertexB: number[]): boolean =>
-    vertexA[0] === vertexB[0] && vertexA[2] === vertexB[2];
+const vec3EqualXZ = (vertexA: number[], vertexB: number[]): boolean => vertexA[0] === vertexB[0] && vertexA[2] === vertexB[2];
 
 const _diagonalStart = vec3.create();
 const _diagonalEnd = vec3.create();
@@ -210,41 +171,14 @@ const diagonalie = (
     vertices: number[],
     vertexIndices: number[],
 ): boolean => {
-    const diagonalStart = vec3.set(
-        _diagonalStart,
-        vertices[(vertexIndices[startVertexIdx] & 0x0fffffff) * 4],
-        vertices[(vertexIndices[startVertexIdx] & 0x0fffffff) * 4 + 1],
-        vertices[(vertexIndices[startVertexIdx] & 0x0fffffff) * 4 + 2],
-    );
-    const diagonalEnd = vec3.set(
-        _diagonalEnd,
-        vertices[(vertexIndices[endVertexIdx] & 0x0fffffff) * 4],
-        vertices[(vertexIndices[endVertexIdx] & 0x0fffffff) * 4 + 1],
-        vertices[(vertexIndices[endVertexIdx] & 0x0fffffff) * 4 + 2],
-    );
+    const diagonalStart = vec3.fromBuffer(_diagonalStart, vertices, (vertexIndices[startVertexIdx] & 0x0fffffff) * 4);
+    const diagonalEnd = vec3.fromBuffer(_diagonalEnd, vertices, (vertexIndices[endVertexIdx] & 0x0fffffff) * 4);
 
     for (let k = 0; k < polygonVertexCount; k++) {
         const k1 = next(k, polygonVertexCount);
-        if (
-            !(
-                k === startVertexIdx ||
-                k1 === startVertexIdx ||
-                k === endVertexIdx ||
-                k1 === endVertexIdx
-            )
-        ) {
-            const edgeStart = vec3.set(
-                _edgeStart,
-                vertices[(vertexIndices[k] & 0x0fffffff) * 4],
-                vertices[(vertexIndices[k] & 0x0fffffff) * 4 + 1],
-                vertices[(vertexIndices[k] & 0x0fffffff) * 4 + 2],
-            );
-            const edgeEnd = vec3.set(
-                _edgeEnd,
-                vertices[(vertexIndices[k1] & 0x0fffffff) * 4],
-                vertices[(vertexIndices[k1] & 0x0fffffff) * 4 + 1],
-                vertices[(vertexIndices[k1] & 0x0fffffff) * 4 + 2],
-            );
+        if (!(k === startVertexIdx || k1 === startVertexIdx || k === endVertexIdx || k1 === endVertexIdx)) {
+            const edgeStart = vec3.fromBuffer(_edgeStart, vertices, (vertexIndices[k] & 0x0fffffff) * 4);
+            const edgeEnd = vec3.fromBuffer(_edgeEnd, vertices, (vertexIndices[k1] & 0x0fffffff) * 4);
 
             if (
                 vec3EqualXZ(diagonalStart, edgeStart) ||
@@ -275,72 +209,24 @@ const inCone = (
     vertices: number[],
     vertexIndices: number[],
 ): boolean => {
-    const coneVertex = vec3.set(
-        _coneVertex,
-        vertices[(vertexIndices[coneVertexIdx] & 0x0fffffff) * 4],
-        vertices[(vertexIndices[coneVertexIdx] & 0x0fffffff) * 4 + 1],
-        vertices[(vertexIndices[coneVertexIdx] & 0x0fffffff) * 4 + 2],
-    );
+    const coneVertex = vec3.fromBuffer(_coneVertex, vertices, (vertexIndices[coneVertexIdx] & 0x0fffffff) * 4);
+    const testVertex = vec3.fromBuffer(_testVertex, vertices, (vertexIndices[testVertexIdx] & 0x0fffffff) * 4);
 
-    const testVertex = vec3.set(
-        _testVertex,
-        vertices[(vertexIndices[testVertexIdx] & 0x0fffffff) * 4],
-        vertices[(vertexIndices[testVertexIdx] & 0x0fffffff) * 4 + 1],
-        vertices[(vertexIndices[testVertexIdx] & 0x0fffffff) * 4 + 2],
-    );
-
-    const nextVertex = vec3.set(
+    const nextVertex = vec3.fromBuffer(
         _nextVertex,
-        vertices[
-            (vertexIndices[next(coneVertexIdx, polygonVertexCount)] &
-                0x0fffffff) *
-                4
-        ],
-        vertices[
-            (vertexIndices[next(coneVertexIdx, polygonVertexCount)] &
-                0x0fffffff) *
-                4 +
-                1
-        ],
-        vertices[
-            (vertexIndices[next(coneVertexIdx, polygonVertexCount)] &
-                0x0fffffff) *
-                4 +
-                2
-        ],
+        vertices,
+        (vertexIndices[next(coneVertexIdx, polygonVertexCount)] & 0x0fffffff) * 4,
     );
-
-    const prevVertex = vec3.set(
+    const prevVertex = vec3.fromBuffer(
         _prevVertex,
-        vertices[
-            (vertexIndices[prev(coneVertexIdx, polygonVertexCount)] &
-                0x0fffffff) *
-                4
-        ],
-        vertices[
-            (vertexIndices[prev(coneVertexIdx, polygonVertexCount)] &
-                0x0fffffff) *
-                4 +
-                1
-        ],
-        vertices[
-            (vertexIndices[prev(coneVertexIdx, polygonVertexCount)] &
-                0x0fffffff) *
-                4 +
-                2
-        ],
+        vertices,
+        (vertexIndices[prev(coneVertexIdx, polygonVertexCount)] & 0x0fffffff) * 4,
     );
 
     if (leftOn(prevVertex, coneVertex, nextVertex)) {
-        return (
-            left(coneVertex, testVertex, prevVertex) &&
-            left(testVertex, coneVertex, nextVertex)
-        );
+        return left(coneVertex, testVertex, prevVertex) && left(testVertex, coneVertex, nextVertex);
     }
-    return !(
-        leftOn(coneVertex, testVertex, nextVertex) &&
-        leftOn(testVertex, coneVertex, prevVertex)
-    );
+    return !(leftOn(coneVertex, testVertex, nextVertex) && leftOn(testVertex, coneVertex, prevVertex));
 };
 
 const diagonal = (
@@ -351,20 +237,8 @@ const diagonal = (
     vertexIndices: number[],
 ): boolean => {
     return (
-        inCone(
-            startVertexIdx,
-            endVertexIdx,
-            polygonVertexCount,
-            vertices,
-            vertexIndices,
-        ) &&
-        diagonalie(
-            startVertexIdx,
-            endVertexIdx,
-            polygonVertexCount,
-            vertices,
-            vertexIndices,
-        )
+        inCone(startVertexIdx, endVertexIdx, polygonVertexCount, vertices, vertexIndices) &&
+        diagonalie(startVertexIdx, endVertexIdx, polygonVertexCount, vertices, vertexIndices)
     );
 };
 
@@ -375,41 +249,14 @@ const diagonalieLoose = (
     vertices: number[],
     vertexIndices: number[],
 ): boolean => {
-    const diagonalStart = vec3.set(
-        _diagonalStart,
-        vertices[(vertexIndices[startVertexIdx] & 0x0fffffff) * 4],
-        vertices[(vertexIndices[startVertexIdx] & 0x0fffffff) * 4 + 1],
-        vertices[(vertexIndices[startVertexIdx] & 0x0fffffff) * 4 + 2],
-    );
-    const diagonalEnd = vec3.set(
-        _diagonalEnd,
-        vertices[(vertexIndices[endVertexIdx] & 0x0fffffff) * 4],
-        vertices[(vertexIndices[endVertexIdx] & 0x0fffffff) * 4 + 1],
-        vertices[(vertexIndices[endVertexIdx] & 0x0fffffff) * 4 + 2],
-    );
+    const diagonalStart = vec3.fromBuffer(_diagonalStart, vertices, (vertexIndices[startVertexIdx] & 0x0fffffff) * 4);
+    const diagonalEnd = vec3.fromBuffer(_diagonalEnd, vertices, (vertexIndices[endVertexIdx] & 0x0fffffff) * 4);
 
     for (let k = 0; k < polygonVertexCount; k++) {
         const k1 = next(k, polygonVertexCount);
-        if (
-            !(
-                k === startVertexIdx ||
-                k1 === startVertexIdx ||
-                k === endVertexIdx ||
-                k1 === endVertexIdx
-            )
-        ) {
-            const edgeStart = vec3.set(
-                _edgeStart,
-                vertices[(vertexIndices[k] & 0x0fffffff) * 4],
-                vertices[(vertexIndices[k] & 0x0fffffff) * 4 + 1],
-                vertices[(vertexIndices[k] & 0x0fffffff) * 4 + 2],
-            );
-            const edgeEnd = vec3.set(
-                _edgeEnd,
-                vertices[(vertexIndices[k1] & 0x0fffffff) * 4],
-                vertices[(vertexIndices[k1] & 0x0fffffff) * 4 + 1],
-                vertices[(vertexIndices[k1] & 0x0fffffff) * 4 + 2],
-            );
+        if (!(k === startVertexIdx || k1 === startVertexIdx || k === endVertexIdx || k1 === endVertexIdx)) {
+            const edgeStart = vec3.fromBuffer(_edgeStart, vertices, (vertexIndices[k] & 0x0fffffff) * 4);
+            const edgeEnd = vec3.fromBuffer(_edgeEnd, vertices, (vertexIndices[k1] & 0x0fffffff) * 4);
 
             if (
                 vec3EqualXZ(diagonalStart, edgeStart) ||
@@ -435,72 +282,24 @@ const inConeLoose = (
     vertices: number[],
     vertexIndices: number[],
 ): boolean => {
-    const coneVertex = vec3.set(
-        _coneVertex,
-        vertices[(vertexIndices[coneVertexIdx] & 0x0fffffff) * 4],
-        vertices[(vertexIndices[coneVertexIdx] & 0x0fffffff) * 4 + 1],
-        vertices[(vertexIndices[coneVertexIdx] & 0x0fffffff) * 4 + 2],
-    );
+    const coneVertex = vec3.fromBuffer(_coneVertex, vertices, (vertexIndices[coneVertexIdx] & 0x0fffffff) * 4);
+    const testVertex = vec3.fromBuffer(_testVertex, vertices, (vertexIndices[testVertexIdx] & 0x0fffffff) * 4);
 
-    const testVertex = vec3.set(
-        _testVertex,
-        vertices[(vertexIndices[testVertexIdx] & 0x0fffffff) * 4],
-        vertices[(vertexIndices[testVertexIdx] & 0x0fffffff) * 4 + 1],
-        vertices[(vertexIndices[testVertexIdx] & 0x0fffffff) * 4 + 2],
-    );
-
-    const nextVertex = vec3.set(
+    const nextVertex = vec3.fromBuffer(
         _nextVertex,
-        vertices[
-            (vertexIndices[next(coneVertexIdx, polygonVertexCount)] &
-                0x0fffffff) *
-                4
-        ],
-        vertices[
-            (vertexIndices[next(coneVertexIdx, polygonVertexCount)] &
-                0x0fffffff) *
-                4 +
-                1
-        ],
-        vertices[
-            (vertexIndices[next(coneVertexIdx, polygonVertexCount)] &
-                0x0fffffff) *
-                4 +
-                2
-        ],
+        vertices,
+        (vertexIndices[next(coneVertexIdx, polygonVertexCount)] & 0x0fffffff) * 4,
     );
-
-    const prevVertex = vec3.set(
+    const prevVertex = vec3.fromBuffer(
         _prevVertex,
-        vertices[
-            (vertexIndices[prev(coneVertexIdx, polygonVertexCount)] &
-                0x0fffffff) *
-                4
-        ],
-        vertices[
-            (vertexIndices[prev(coneVertexIdx, polygonVertexCount)] &
-                0x0fffffff) *
-                4 +
-                1
-        ],
-        vertices[
-            (vertexIndices[prev(coneVertexIdx, polygonVertexCount)] &
-                0x0fffffff) *
-                4 +
-                2
-        ],
+        vertices,
+        (vertexIndices[prev(coneVertexIdx, polygonVertexCount)] & 0x0fffffff) * 4,
     );
 
     if (leftOn(prevVertex, coneVertex, nextVertex)) {
-        return (
-            leftOn(coneVertex, testVertex, prevVertex) &&
-            leftOn(testVertex, coneVertex, nextVertex)
-        );
+        return leftOn(coneVertex, testVertex, prevVertex) && leftOn(testVertex, coneVertex, nextVertex);
     }
-    return !(
-        leftOn(coneVertex, testVertex, nextVertex) &&
-        leftOn(testVertex, coneVertex, prevVertex)
-    );
+    return !(leftOn(coneVertex, testVertex, nextVertex) && leftOn(testVertex, coneVertex, prevVertex));
 };
 
 const diagonalLoose = (
@@ -511,20 +310,8 @@ const diagonalLoose = (
     vertexIndices: number[],
 ): boolean => {
     return (
-        inConeLoose(
-            startVertexIdx,
-            endVertexIdx,
-            polygonVertexCount,
-            vertices,
-            vertexIndices,
-        ) &&
-        diagonalieLoose(
-            startVertexIdx,
-            endVertexIdx,
-            polygonVertexCount,
-            vertices,
-            vertexIndices,
-        )
+        inConeLoose(startVertexIdx, endVertexIdx, polygonVertexCount, vertices, vertexIndices) &&
+        diagonalieLoose(startVertexIdx, endVertexIdx, polygonVertexCount, vertices, vertexIndices)
     );
 };
 
@@ -540,7 +327,7 @@ const triangulate = (
     let ntris = 0;
     let dst = 0;
 
-    // Mark removable vertices
+    // mark removable vertices
     for (let i = 0; i < polygonVertexCount; i++) {
         const i1 = next(i, polygonVertexCount);
         const i2 = next(i1, polygonVertexCount);
@@ -557,22 +344,8 @@ const triangulate = (
         for (let i = 0; i < nv; i++) {
             const i1 = next(i, nv);
             if (vertexIndices[i1] & 0x80000000) {
-                const p0 = vec3.set(
-                    _triangulateP0,
-                    vertices[(vertexIndices[i] & 0x0fffffff) * 4],
-                    vertices[(vertexIndices[i] & 0x0fffffff) * 4 + 1],
-                    vertices[(vertexIndices[i] & 0x0fffffff) * 4 + 2],
-                );
-                const p2 = vec3.set(
-                    _triangulateP2,
-                    vertices[(vertexIndices[next(i1, nv)] & 0x0fffffff) * 4],
-                    vertices[
-                        (vertexIndices[next(i1, nv)] & 0x0fffffff) * 4 + 1
-                    ],
-                    vertices[
-                        (vertexIndices[next(i1, nv)] & 0x0fffffff) * 4 + 2
-                    ],
-                );
+                const p0 = vec3.fromBuffer(_triangulateP0, vertices, (vertexIndices[i] & 0x0fffffff) * 4);
+                const p2 = vec3.fromBuffer(_triangulateP2, vertices, (vertexIndices[next(i1, nv)] & 0x0fffffff) * 4);
 
                 const dx = p2[0] - p0[0];
                 const dy = p2[2] - p0[2];
@@ -586,30 +359,15 @@ const triangulate = (
         }
 
         if (mini === -1) {
-            // Try loose diagonal test
+            // try loose diagonal test
             for (let i = 0; i < nv; i++) {
                 const i1 = next(i, nv);
                 const i2 = next(i1, nv);
                 if (diagonalLoose(i, i2, nv, vertices, vertexIndices)) {
-                    // Using loose version would be better but simplified
-                    const p0 = vec3.set(
-                        _triangulateP0,
-                        vertices[(vertexIndices[i] & 0x0fffffff) * 4],
-                        vertices[(vertexIndices[i] & 0x0fffffff) * 4 + 1],
-                        vertices[(vertexIndices[i] & 0x0fffffff) * 4 + 2],
-                    );
-                    const p2 = vec3.set(
-                        _triangulateP2,
-                        vertices[
-                            (vertexIndices[next(i2, nv)] & 0x0fffffff) * 4
-                        ],
-                        vertices[
-                            (vertexIndices[next(i2, nv)] & 0x0fffffff) * 4 + 1
-                        ],
-                        vertices[
-                            (vertexIndices[next(i2, nv)] & 0x0fffffff) * 4 + 2
-                        ],
-                    );
+                    // using loose version would be better but simplified
+                    const p0 = vec3.fromBuffer(_triangulateP0, vertices, (vertexIndices[i] & 0x0fffffff) * 4);
+                    const p2 = vec3.fromBuffer(_triangulateP2, vertices, (vertexIndices[next(i2, nv)] & 0x0fffffff) * 4);
+
                     const dx = p2[0] - p0[0];
                     const dy = p2[2] - p0[2];
                     const len = dx * dx + dy * dy;
@@ -634,7 +392,7 @@ const triangulate = (
         triangleIndices[dst++] = vertexIndices[i2] & 0x0fffffff;
         ntris++;
 
-        // Remove vertex
+        // remove vertex
         nv--;
         for (let k = i1; k < nv; k++) {
             vertexIndices[k] = vertexIndices[k + 1];
@@ -643,7 +401,7 @@ const triangulate = (
         if (i1 >= nv) i1 = 0;
         const iPrev = prev(i1, nv);
 
-        // Update diagonal flags
+        // update diagonal flags
         if (diagonal(prev(iPrev, nv), i1, nv, vertices, vertexIndices)) {
             vertexIndices[iPrev] |= 0x80000000;
         } else {
@@ -657,7 +415,7 @@ const triangulate = (
         }
     }
 
-    // Final triangle
+    // final triangle
     triangleIndices[dst++] = vertexIndices[0] & 0x0fffffff;
     triangleIndices[dst++] = vertexIndices[1] & 0x0fffffff;
     triangleIndices[dst++] = vertexIndices[2] & 0x0fffffff;
@@ -666,26 +424,17 @@ const triangulate = (
     return ntris;
 };
 
-const countPolyVerts = (
-    polygons: number[],
-    polyStartIdx: number,
-    maxVerticesPerPoly: number,
-): number => {
+const countPolyVerts = (polygons: number[], polyStartIdx: number, maxVerticesPerPoly: number): number => {
     for (let i = 0; i < maxVerticesPerPoly; i++) {
         if (polygons[polyStartIdx + i] === MESH_NULL_IDX) return i;
     }
     return maxVerticesPerPoly;
 };
 
-const uleft = (
-    firstVertex: number[],
-    secondVertex: number[],
-    testVertex: number[],
-): boolean => {
+const uleft = (firstVertex: number[], secondVertex: number[], testVertex: number[]): boolean => {
     return (
         (secondVertex[0] - firstVertex[0]) * (testVertex[2] - firstVertex[2]) -
-            (testVertex[0] - firstVertex[0]) *
-                (secondVertex[2] - firstVertex[2]) <
+            (testVertex[0] - firstVertex[0]) * (secondVertex[2] - firstVertex[2]) <
         0
     );
 };
@@ -697,16 +446,8 @@ const getPolyMergeValue = (
     vertices: number[],
     maxVerticesPerPoly: number,
 ): { value: number; ea: number; eb: number } => {
-    const numVertsA = countPolyVerts(
-        polygons,
-        polyAStartIdx,
-        maxVerticesPerPoly,
-    );
-    const numVertsB = countPolyVerts(
-        polygons,
-        polyBStartIdx,
-        maxVerticesPerPoly,
-    );
+    const numVertsA = countPolyVerts(polygons, polyAStartIdx, maxVerticesPerPoly);
+    const numVertsB = countPolyVerts(polygons, polyBStartIdx, maxVerticesPerPoly);
 
     if (numVertsA + numVertsB - 2 > maxVerticesPerPoly) {
         return { value: -1, ea: -1, eb: -1 };
@@ -782,36 +523,26 @@ const mergePolyVerts = (
     tempStartIdx: number,
     maxVerticesPerPoly: number,
 ): void => {
-    const numVertsA = countPolyVerts(
-        polygons,
-        polyAStartIdx,
-        maxVerticesPerPoly,
-    );
-    const numVertsB = countPolyVerts(
-        polygons,
-        polyBStartIdx,
-        maxVerticesPerPoly,
-    );
+    const numVertsA = countPolyVerts(polygons, polyAStartIdx, maxVerticesPerPoly);
+    const numVertsB = countPolyVerts(polygons, polyBStartIdx, maxVerticesPerPoly);
 
-    // Clear tmp area
+    // clear tmp area
     for (let i = 0; i < maxVerticesPerPoly; i++) {
         polygons[tempStartIdx + i] = MESH_NULL_IDX;
     }
 
     let n = 0;
 
-    // Add pa
+    // pdd pa
     for (let i = 0; i < numVertsA - 1; i++) {
-        polygons[tempStartIdx + n++] =
-            polygons[polyAStartIdx + ((edgeIdxA + 1 + i) % numVertsA)];
+        polygons[tempStartIdx + n++] = polygons[polyAStartIdx + ((edgeIdxA + 1 + i) % numVertsA)];
     }
-    // Add pb
+    // add pb
     for (let i = 0; i < numVertsB - 1; i++) {
-        polygons[tempStartIdx + n++] =
-            polygons[polyBStartIdx + ((edgeIdxB + 1 + i) % numVertsB)];
+        polygons[tempStartIdx + n++] = polygons[polyBStartIdx + ((edgeIdxB + 1 + i) % numVertsB)];
     }
 
-    // Copy back to pa
+    // copy back to pa
     for (let i = 0; i < maxVerticesPerPoly; i++) {
         polygons[polyAStartIdx + i] = polygons[tempStartIdx + i];
     }
@@ -841,8 +572,7 @@ export const buildMeshAdjacency = (
             if (polygons[polyStartIdx + j] === MESH_NULL_IDX) break;
             const v0 = polygons[polyStartIdx + j];
             const v1 =
-                j + 1 >= verticesPerPoly ||
-                polygons[polyStartIdx + j + 1] === MESH_NULL_IDX
+                j + 1 >= verticesPerPoly || polygons[polyStartIdx + j + 1] === MESH_NULL_IDX
                     ? polygons[polyStartIdx]
                     : polygons[polyStartIdx + j + 1];
             if (v0 < v1) {
@@ -866,16 +596,11 @@ export const buildMeshAdjacency = (
             if (polygons[polyStartIdx + j] === MESH_NULL_IDX) break;
             const v0 = polygons[polyStartIdx + j];
             const v1 =
-                j + 1 >= verticesPerPoly ||
-                polygons[polyStartIdx + j + 1] === MESH_NULL_IDX
+                j + 1 >= verticesPerPoly || polygons[polyStartIdx + j + 1] === MESH_NULL_IDX
                     ? polygons[polyStartIdx]
                     : polygons[polyStartIdx + j + 1];
             if (v0 > v1) {
-                for (
-                    let e = firstEdge[v1];
-                    e !== MESH_NULL_IDX;
-                    e = nextEdge[e]
-                ) {
+                for (let e = firstEdge[v1]; e !== MESH_NULL_IDX; e = nextEdge[e]) {
                     const edge = edges[e];
                     if (edge.vert[1] === v0 && edge.poly[0] === edge.poly[1]) {
                         edge.poly[1] = i;
@@ -901,10 +626,7 @@ export const buildMeshAdjacency = (
     return true;
 };
 
-export const buildPolyMesh = (
-    contourSet: ContourSet,
-    maxVerticesPerPoly: number,
-): PolyMesh => {
+export const buildPolyMesh = (contourSet: ContourSet, maxVerticesPerPoly: number): PolyMesh => {
     // calculate sizes
     let maxVertices = 0;
     let maxTris = 0;
@@ -944,9 +666,7 @@ export const buildPolyMesh = (
     const firstVert = new Array(VERTEX_BUCKET_COUNT).fill(-1);
     const indices = new Array(maxVertsPerCont);
     const tris = new Array(maxVertsPerCont * 3);
-    const polys = new Array((maxVertsPerCont + 1) * maxVerticesPerPoly).fill(
-        MESH_NULL_IDX,
-    );
+    const polys = new Array((maxVertsPerCont + 1) * maxVerticesPerPoly).fill(MESH_NULL_IDX);
     const tmpPolyStart = maxVertsPerCont * maxVerticesPerPoly;
 
     const vertexCount = { value: 0 };
@@ -971,21 +691,8 @@ export const buildPolyMesh = (
 
         // add vertices
         for (let j = 0; j < cont.nVertices; j++) {
-            const v = [
-                cont.vertices[j * 4],
-                cont.vertices[j * 4 + 1],
-                cont.vertices[j * 4 + 2],
-                cont.vertices[j * 4 + 3],
-            ];
-            indices[j] = addVertex(
-                v[0],
-                v[1],
-                v[2],
-                mesh.vertices,
-                firstVert,
-                nextVert,
-                vertexCount,
-            );
+            const v = [cont.vertices[j * 4], cont.vertices[j * 4 + 1], cont.vertices[j * 4 + 2], cont.vertices[j * 4 + 3]];
+            indices[j] = addVertex(v[0], v[1], v[2], mesh.vertices, firstVert, nextVert, vertexCount);
             if (v[3] & BORDER_VERTEX) {
                 vflags[indices[j]] = 1;
             }
@@ -1020,13 +727,7 @@ export const buildPolyMesh = (
                     for (let k = j + 1; k < npolys; k++) {
                         const paStart = j * maxVerticesPerPoly;
                         const pbStart = k * maxVerticesPerPoly;
-                        const result = getPolyMergeValue(
-                            polys,
-                            paStart,
-                            pbStart,
-                            mesh.vertices,
-                            maxVerticesPerPoly,
-                        );
+                        const result = getPolyMergeValue(polys, paStart, pbStart, mesh.vertices, maxVerticesPerPoly);
                         if (result.value > bestMergeVal) {
                             bestMergeVal = result.value;
                             bestPa = j;
@@ -1040,20 +741,11 @@ export const buildPolyMesh = (
                 if (bestMergeVal > 0) {
                     const paStart = bestPa * maxVerticesPerPoly;
                     const pbStart = bestPb * maxVerticesPerPoly;
-                    mergePolyVerts(
-                        polys,
-                        paStart,
-                        pbStart,
-                        bestEa,
-                        bestEb,
-                        tmpPolyStart,
-                        maxVerticesPerPoly,
-                    );
+                    mergePolyVerts(polys, paStart, pbStart, bestEa, bestEb, tmpPolyStart, maxVerticesPerPoly);
 
                     // move last poly to fill gap
                     for (let m = 0; m < maxVerticesPerPoly; m++) {
-                        polys[pbStart + m] =
-                            polys[(npolys - 1) * maxVerticesPerPoly + m];
+                        polys[pbStart + m] = polys[(npolys - 1) * maxVerticesPerPoly + m];
                     }
                     npolys--;
                 } else {
@@ -1074,9 +766,7 @@ export const buildPolyMesh = (
             mesh.nPolys++;
 
             if (mesh.nPolys > maxTris) {
-                throw new Error(
-                    `Too many polygons: ${mesh.nPolys} (max: ${maxTris})`,
-                );
+                throw new Error(`Too many polygons: ${mesh.nPolys} (max: ${maxTris})`);
             }
         }
     }
@@ -1103,14 +793,7 @@ export const buildPolyMesh = (
     }
 
     // build mesh adjacency
-    if (
-        !buildMeshAdjacency(
-            mesh.polys,
-            mesh.nPolys,
-            mesh.nVertices,
-            maxVerticesPerPoly,
-        )
-    ) {
+    if (!buildMeshAdjacency(mesh.polys, mesh.nPolys, mesh.nVertices, maxVerticesPerPoly)) {
         throw new Error('Failed to build mesh adjacency');
     }
 
@@ -1170,10 +853,7 @@ const canRemoveVertex = (mesh: PolyMesh, remVertexIdx: number): boolean => {
 
         // Collect edges which touch the removed vertex
         for (let j = 0, k = nv - 1; j < nv; k = j++) {
-            if (
-                mesh.polys[polyStart + j] === remVertexIdx ||
-                mesh.polys[polyStart + k] === remVertexIdx
-            ) {
+            if (mesh.polys[polyStart + j] === remVertexIdx || mesh.polys[polyStart + k] === remVertexIdx) {
                 // Arrange edge so that a=rem
                 let a = mesh.polys[polyStart + j];
                 let b = mesh.polys[polyStart + k];
@@ -1230,11 +910,7 @@ const pushBack = (v: number, arr: number[], an: { value: number }) => {
     an.value++;
 };
 
-const removeVertex = (
-    mesh: PolyMesh,
-    remVertexIdx: number,
-    maxTris: number,
-): boolean => {
+const removeVertex = (mesh: PolyMesh, remVertexIdx: number, maxTris: number): boolean => {
     const nvp = mesh.maxVerticesPerPoly;
 
     // Count number of polygons to remove
@@ -1273,10 +949,7 @@ const removeVertex = (
         if (hasRem) {
             // Collect edges which do not touch the removed vertex
             for (let j = 0, k = nv - 1; j < nv; k = j++) {
-                if (
-                    mesh.polys[polyStart + j] !== remVertexIdx &&
-                    mesh.polys[polyStart + k] !== remVertexIdx
-                ) {
+                if (mesh.polys[polyStart + j] !== remVertexIdx && mesh.polys[polyStart + k] !== remVertexIdx) {
                     const e = nedges * 4;
                     edges[e] = mesh.polys[polyStart + k];
                     edges[e + 1] = mesh.polys[polyStart + j];
@@ -1459,13 +1132,7 @@ const removeVertex = (
                 const pjStart = j * nvp;
                 for (let k = j + 1; k < npolys; k++) {
                     const pkStart = k * nvp;
-                    const result = getPolyMergeValue(
-                        polys,
-                        pjStart,
-                        pkStart,
-                        mesh.vertices,
-                        nvp,
-                    );
+                    const result = getPolyMergeValue(polys, pjStart, pkStart, mesh.vertices, nvp);
                     if (result.value > bestMergeVal) {
                         bestMergeVal = result.value;
                         bestPa = j;
@@ -1480,15 +1147,7 @@ const removeVertex = (
                 // Found best, merge
                 const paStart = bestPa * nvp;
                 const pbStart = bestPb * nvp;
-                mergePolyVerts(
-                    polys,
-                    paStart,
-                    pbStart,
-                    bestEa,
-                    bestEb,
-                    ntris * nvp,
-                    nvp,
-                );
+                mergePolyVerts(polys, paStart, pbStart, bestEa, bestEb, ntris * nvp, nvp);
 
                 if (pregs[bestPa] !== pregs[bestPb]) {
                     pregs[bestPa] = MULTIPLE_REGS;
@@ -1531,9 +1190,7 @@ const removeVertex = (
         mesh.nPolys++;
 
         if (mesh.nPolys > maxTris) {
-            console.error(
-                `removeVertex: Too many polygons ${mesh.nPolys} (max:${maxTris})`,
-            );
+            console.error(`removeVertex: Too many polygons ${mesh.nPolys} (max:${maxTris})`);
             return false;
         }
     }
@@ -1541,11 +1198,7 @@ const removeVertex = (
     return true;
 };
 
-export const findPortalEdges = (
-    mesh: PolyMesh,
-    width: number,
-    height: number,
-): void => {
+export const findPortalEdges = (mesh: PolyMesh, width: number, height: number): void => {
     if (mesh.borderSize <= 0) {
         return;
     }
@@ -1559,17 +1212,12 @@ export const findPortalEdges = (
         for (let j = 0; j < maxVerticesPerPoly; j++) {
             if (mesh.polys[polyStart + j] === MESH_NULL_IDX) break;
             // Skip connected edges
-            if (
-                mesh.polys[polyStart + maxVerticesPerPoly + j] !== MESH_NULL_IDX
-            ) {
+            if (mesh.polys[polyStart + maxVerticesPerPoly + j] !== MESH_NULL_IDX) {
                 continue;
             }
 
             let nj = j + 1;
-            if (
-                nj >= maxVerticesPerPoly ||
-                mesh.polys[polyStart + nj] === MESH_NULL_IDX
-            ) {
+            if (nj >= maxVerticesPerPoly || mesh.polys[polyStart + nj] === MESH_NULL_IDX) {
                 nj = 0;
             }
 
@@ -1582,17 +1230,13 @@ export const findPortalEdges = (
             _vb[2] = mesh.vertices[mesh.polys[polyStart + nj] * 3 + 2];
 
             if (_va[0] === 0 && _vb[0] === 0) {
-                mesh.polys[polyStart + maxVerticesPerPoly + j] =
-                    POLY_NEIS_FLAG_EXT_LINK | 0;
+                mesh.polys[polyStart + maxVerticesPerPoly + j] = POLY_NEIS_FLAG_EXT_LINK | 0;
             } else if (_va[2] === height && _vb[2] === height) {
-                mesh.polys[polyStart + maxVerticesPerPoly + j] =
-                    POLY_NEIS_FLAG_EXT_LINK | 1;
+                mesh.polys[polyStart + maxVerticesPerPoly + j] = POLY_NEIS_FLAG_EXT_LINK | 1;
             } else if (_va[0] === width && _vb[0] === width) {
-                mesh.polys[polyStart + maxVerticesPerPoly + j] =
-                    POLY_NEIS_FLAG_EXT_LINK | 2;
+                mesh.polys[polyStart + maxVerticesPerPoly + j] = POLY_NEIS_FLAG_EXT_LINK | 2;
             } else if (_va[2] === 0 && _vb[2] === 0) {
-                mesh.polys[polyStart + maxVerticesPerPoly + j] =
-                    POLY_NEIS_FLAG_EXT_LINK | 3;
+                mesh.polys[polyStart + maxVerticesPerPoly + j] = POLY_NEIS_FLAG_EXT_LINK | 3;
             }
         }
     }
