@@ -5,7 +5,11 @@ import { type ThreeEvent, useThree } from '@react-three/fiber';
 import { Leva, useControls } from 'leva';
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { LineGeometry } from 'three/examples/jsm/Addons.js';
+import { Line2 } from 'three/examples/jsm/lines/webgpu/Line2.js';
+import { Line2NodeMaterial } from 'three/webgpu';
 import {
+    BuildContext,
     type CompactHeightfield,
     ContourBuildFlags,
     type ContourSet,
@@ -17,7 +21,6 @@ import {
     type TriangleMesh,
     WALKABLE_AREA,
     buildCompactHeightfield,
-    BuildContext,
     buildContours,
     buildDistanceField,
     buildPolyMesh,
@@ -37,7 +40,8 @@ import {
     rasterizeTriangles,
     triangleMeshToPointSet,
 } from './lib/generate';
-import { type NavMesh, navMesh, navMeshQuery, type NavMeshOffMeshConnection, OffMeshConnectionDirection } from './lib/query';
+import { type NavMesh, type NavMeshOffMeshConnection, OffMeshConnectionDirection, navMesh, navMeshQuery } from './lib/query';
+import { createFindNearestPolyResult } from './lib/query/nav-mesh-query';
 import {
     createCompactHeightfieldDistancesHelper,
     createCompactHeightfieldRegionsHelper,
@@ -45,24 +49,19 @@ import {
     createHeightfieldHelper,
     createNavMeshBvTreeHelper,
     createNavMeshHelper,
-    createNavMeshPortalsHelper,
+    createNavMeshOffMeshConnectionsHelper,
     createNavMeshPolyHelper,
+    createNavMeshPortalsHelper,
     createPointSetHelper,
     createPolyMeshDetailHelper,
     createPolyMeshHelper,
     createRawContoursHelper,
+    createSearchNodesHelper,
     createSimplifiedContoursHelper,
     createTriangleAreaIdsHelper,
     createTriangleMeshWithAreasHelper,
     getPositionsAndIndices,
-    createSearchNodesHelper,
-    createNavMeshOffMeshConnectionsHelper,
 } from './lib/three';
-import { Line2 } from 'three/examples/jsm/lines/webgpu/Line2.js';
-import { LineGeometry } from 'three/examples/jsm/Addons.js';
-import { Line2NodeMaterial } from 'three/webgpu';
-import { int } from 'three/tsl';
-import { createFindNearestPolyResult } from './lib/query/nav-mesh-query';
 
 const DungeonModel = () => {
     const gltf = useGLTF('/dungeon.gltf');
