@@ -62,6 +62,7 @@ import { Line2 } from 'three/examples/jsm/lines/webgpu/Line2.js';
 import { LineGeometry } from 'three/examples/jsm/Addons.js';
 import { Line2NodeMaterial } from 'three/webgpu';
 import { int } from 'three/tsl';
+import { createFindNearestPolyResult } from './lib/query/nav-mesh-query';
 
 const DungeonModel = () => {
     const gltf = useGLTF('/dungeon.gltf');
@@ -1484,7 +1485,30 @@ const TiledNavMesh = () => {
                     pointMesh.material.dispose();
                 });
             }
+
+            // testing: find random point around circle
+            const randomPointAroundCircleStart = navMeshQuery.findNearestPoly(createFindNearestPolyResult(), nav, [2.60197368685782, 2.7357429300436893, 3.8039709751268105], [1, 1, 1], navMeshQuery.DEFAULT_QUERY_FILTER);
             
+            if (randomPointAroundCircleStart.success) {
+                const randomPointAroundCircle = navMeshQuery.findRandomPointAroundCircle(nav, randomPointAroundCircleStart.nearestPolyRef, randomPointAroundCircleStart.nearestPoint, 0.2, navMeshQuery.DEFAULT_QUERY_FILTER, Math.random);
+    
+                if (randomPointAroundCircle.success) {
+                    const point = randomPointAroundCircle.position;
+                    const pointMesh = new THREE.Mesh(
+                        new THREE.SphereGeometry(0.1, 16, 16),
+                        new THREE.MeshBasicMaterial({ color: 'blue' })
+                    );
+                    pointMesh.position.set(...point);
+                    scene.add(pointMesh);
+    
+                    disposables.push(() => {
+                        scene.remove(pointMesh);
+                        pointMesh.geometry.dispose();
+                        pointMesh.material.dispose();
+                    });
+                }
+            }
+
         }
 
         return () => {

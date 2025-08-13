@@ -119,36 +119,30 @@ export type GetNodeAreaAndFlagsResult = {
     flags: number;
 };
 
-export const createGetNodeAreaAndFlagsResult = (): GetNodeAreaAndFlagsResult => {
-    return {
+export const getNodeAreaAndFlags = (nodeRef: NodeRef, navMesh: NavMesh): GetNodeAreaAndFlagsResult => {
+    const result: GetNodeAreaAndFlagsResult = {
         success: false,
-        area: 0,
         flags: 0,
+        area: 0,
     };
-};
-
-export const getNodeAreaAndFlags = (out: GetNodeAreaAndFlagsResult, nodeRef: NodeRef, navMesh: NavMesh) => {
-    out.success = false;
-    out.flags = 0;
-    out.area = 0;
 
     const nodeType = getNodeRefType(nodeRef);
 
     if (nodeType === NodeType.GROUND_POLY) {
         const [, tileId, polyIndex] = desNodeRef(nodeRef);
         const poly = navMesh.tiles[tileId].polys[polyIndex];
-        out.flags = poly.flags;
-        out.area = poly.area;
-        out.success = true;
+        result.flags = poly.flags;
+        result.area = poly.area;
+        result.success = true;
     } else if (nodeType === NodeType.OFFMESH_CONNECTION) {
         const [, offMeshConnectionId] = desNodeRef(nodeRef);
         const offMeshConnection = navMesh.offMeshConnections[offMeshConnectionId];
-        out.flags = offMeshConnection.flags;
-        out.area = offMeshConnection.area;
-        out.success = true;
+        result.flags = offMeshConnection.flags;
+        result.area = offMeshConnection.area;
+        result.success = true;
     }
 
-    return out;
+    return result;
 };
 
 export type GetTileAndPolyByRefResult =
@@ -165,15 +159,6 @@ export type GetTileAndPolyByRefResult =
           polyIndex: number;
       };
 
-export const createGetTileAndPolyByRefResult = (): GetTileAndPolyByRefResult => {
-    return {
-        success: false,
-        tile: null,
-        poly: null,
-        polyIndex: -1,
-    };
-};
-
 /**
  * Gets the tile and polygon from a polygon reference
  * @param ref The polygon reference
@@ -181,14 +166,15 @@ export const createGetTileAndPolyByRefResult = (): GetTileAndPolyByRefResult => 
  * @returns Object containing tile and poly, or null if not found
  */
 export const getTileAndPolyByRef = (
-    result: GetTileAndPolyByRefResult,
     ref: NodeRef,
     navMesh: NavMesh,
 ): GetTileAndPolyByRefResult => {
-    result.success = false;
-    result.tile = null;
-    result.poly = null;
-    result.polyIndex = -1;
+    const result: GetTileAndPolyByRefResult = {
+        success: false,
+        tile: null,
+        poly: null,
+        polyIndex: -1,
+    };
 
     const [nodeType, tileId, nodeIndex] = desNodeRef(ref);
 
@@ -392,7 +378,7 @@ export const getClosestPointOnPoly = (
     result.isOverPoly = false;
     vec3.copy(result.closestPoint, point);
 
-    const tileAndPoly = getTileAndPolyByRef(createGetTileAndPolyByRefResult(), ref, navMesh);
+    const tileAndPoly = getTileAndPolyByRef(ref, navMesh);
     if (!tileAndPoly.success) {
         return result;
     }
@@ -495,7 +481,7 @@ export const closestPointOnPolyBoundary = (
     point: Vec3,
     outClosestPoint: Vec3,
 ): boolean => {
-    const tileAndPoly = getTileAndPolyByRef(createGetTileAndPolyByRefResult(), polyRef, navMesh);
+    const tileAndPoly = getTileAndPolyByRef(polyRef, navMesh);
 
     if (!tileAndPoly.success || !vec3.finite(point) || !outClosestPoint) {
         return false;
@@ -1217,9 +1203,6 @@ const _appendPortalsPoint = vec3.create();
 const _appendPortalsLeft = vec3.create();
 const _appendPortalsRight = vec3.create();
 
-const _aNodeAndAreaResult = createGetNodeAreaAndFlagsResult();
-const _bNodeAndAreaResult = createGetNodeAreaAndFlagsResult();
-
 const appendPortals = (
     navMesh: NavMesh,
     startIdx: number,
@@ -1237,8 +1220,8 @@ const appendPortals = (
 
         // skip intersection if only area crossings requested and areas equal.
         if (options & FIND_STRAIGHT_PATH_AREA_CROSSINGS) {
-            const a = getNodeAreaAndFlags(_aNodeAndAreaResult, from, navMesh);
-            const b = getNodeAreaAndFlags(_bNodeAndAreaResult, to, navMesh);
+            const a = getNodeAreaAndFlags(from, navMesh);
+            const b = getNodeAreaAndFlags(to, navMesh);
 
             if (a.success && b.success) {
                 if (a.area === b.area) continue;
@@ -1523,7 +1506,7 @@ export const moveAlongSurface = (
 
         // get poly and tile
         const curRef = curNode.nodeRef;
-        const tileAndPoly = getTileAndPolyByRef(createGetTileAndPolyByRefResult(), curRef, navMesh);
+        const tileAndPoly = getTileAndPolyByRef(curRef, navMesh);
 
         if (!tileAndPoly.success) continue;
 
@@ -1700,13 +1683,11 @@ export const raycast = (
 
     let curRef: NodeRef | null = startRef;
 
-    const tileAndPolyResult = createGetTileAndPolyByRefResult();
-    const nextTileAndPolyResult = createGetTileAndPolyByRefResult();
     const intersectSegmentPoly2DResult = createIntersectSegmentPoly2DResult();
 
     while (curRef) {
         // get current tile and poly
-        getTileAndPolyByRef(tileAndPolyResult, curRef, navMesh);
+        const tileAndPolyResult = getTileAndPolyByRef(curRef, navMesh);
         if (!tileAndPolyResult.success) break;
         const { tile, poly } = tileAndPolyResult;
 
@@ -1758,7 +1739,7 @@ export const raycast = (
             if (getNodeRefType(link.neighbourRef) === NodeType.OFFMESH_CONNECTION) continue;
             
             // get pointer to the next polygon
-            getTileAndPolyByRef(nextTileAndPolyResult, link.neighbourRef, navMesh);
+            const nextTileAndPolyResult = getTileAndPolyByRef(link.neighbourRef, navMesh);
             if (!nextTileAndPolyResult.success) continue;
 
             // skip links based on filter
@@ -1958,6 +1939,246 @@ export const findRandomPoint = (
     }
 
     result.ref = selectedPolyRef;
+    result.success = true;
+
+    return result;
+};
+
+export type FindRandomPointAroundCircleResult = {
+    success: boolean;
+    randomRef: NodeRef;
+    position: Vec3;
+};
+
+/**
+ * Finds a random point within a circle around a center position on the navigation mesh.
+ * This is a port of dtNavMeshQuery::findRandomPointAroundCircle from Detour.
+ * 
+ * Uses Dijkstra-like search to explore reachable polygons within the circle,
+ * then selects a random polygon weighted by area, and finally generates
+ * a random point within that polygon.
+ * 
+ * @param result - Result object to store the random point and polygon reference
+ * @param navMesh - The navigation mesh
+ * @param startRef - Reference to the polygon to start the search from
+ * @param centerPosition - Center position of the search circle
+ * @param maxRadius - Maximum radius of the search circle
+ * @param filter - Query filter to apply to polygons
+ * @param rand - Function that returns random values [0,1]
+ * @returns The result object with success flag, random point, and polygon reference
+ */
+export const findRandomPointAroundCircle = (
+    navMesh: NavMesh,
+    startRef: NodeRef,
+    centerPosition: Vec3,
+    maxRadius: number,
+    filter: QueryFilter,
+    rand: () => number
+): FindRandomPointAroundCircleResult => {
+    const result: FindRandomPointAroundCircleResult = {
+        success: false,
+        randomRef: '' as NodeRef,
+        position: [0, 0, 0],
+    };
+
+    // validate input
+    if (!isValidNodeRef(navMesh, startRef) || 
+        !vec3.finite(centerPosition) || 
+        maxRadius < 0 || 
+        !Number.isFinite(maxRadius)) {
+        return result;
+    }
+
+    const startTileAndPoly = getTileAndPolyByRef(startRef, navMesh);
+    if (!startTileAndPoly.success) {
+        return result;
+    }
+
+    // check if start polygon passes filter
+    if (filter.passFilter && !filter.passFilter(startRef, navMesh, filter)) {
+        return result;
+    }
+
+    // prepare search
+    const nodes: SearchNodePool = {};
+    const openList: SearchNodeQueue = [];
+
+    const startNode: SearchNode = {
+        cost: 0,
+        total: 0,
+        parent: null,
+        nodeRef: startRef,
+        state: 0,
+        flags: NODE_FLAG_OPEN,
+        position: structuredClone(centerPosition),
+    };
+    nodes[`${startRef}:0`] = startNode;
+    pushNodeToQueue(openList, startNode);
+
+    const radiusSqr = maxRadius * maxRadius;
+    let areaSum = 0;
+
+    let randomTile: NavMeshTile | null = null;
+    let randomPoly: NavMeshPoly | null = null;
+    let randomPolyRef: NodeRef | null = null;
+
+    const va = vec3.create();
+    const vb = vec3.create();
+
+    while (openList.length > 0) {
+        // remove node from the open list and put it in the closed list
+        const bestNode = popNodeFromQueue(openList)!;
+        bestNode.flags &= ~NODE_FLAG_OPEN;
+        bestNode.flags |= NODE_FLAG_CLOSED;
+
+        // get poly and tile
+        const bestRef = bestNode.nodeRef;
+        const bestTileAndPoly = getTileAndPolyByRef(bestRef, navMesh);
+        if (!bestTileAndPoly.success) continue;
+
+        const { tile: bestTile, poly: bestPoly } = bestTileAndPoly;
+
+        // place random locations on ground polygons
+        if (bestPoly.type === NodeType.GROUND_POLY) {
+            // calculate area of the polygon
+            let polyArea = 0;
+            const v0 = vec3.create();
+            const v1 = vec3.create();
+            const v2 = vec3.create();
+            for (let j = 2; j < bestPoly.vertices.length; j++) {
+                vec3.fromBuffer(v0, bestTile.vertices, bestPoly.vertices[0] * 3);
+                vec3.fromBuffer(v1, bestTile.vertices, bestPoly.vertices[j-1] * 3);
+                vec3.fromBuffer(v2, bestTile.vertices, bestPoly.vertices[j] * 3);
+                polyArea += triArea2D(v0, v1, v2);
+            }
+
+            // choose random polygon weighted by area, using reservoir sampling
+            areaSum += polyArea;
+            const u = rand();
+            if (u * areaSum <= polyArea) {
+                randomTile = bestTile;
+                randomPoly = bestPoly;
+                randomPolyRef = bestRef;
+            }
+        }
+
+        // get parent reference for preventing backtracking
+        let parentRef: NodeRef | null = null;
+        if (bestNode.parent) {
+            const [nodeRef, _state] = bestNode.parent.split(':');
+            parentRef = nodeRef as NodeRef;
+        }
+
+        // iterate through all links from the current polygon
+        const polyLinks: number[] = navMesh.nodes[bestRef] ?? [];
+        for (const linkIndex of polyLinks) {
+            const link = navMesh.links[linkIndex];
+            if (!link) continue;
+
+            const neighbourRef = link.neighbourRef;
+            
+            // skip invalid neighbours and do not follow back to parent
+            if (!neighbourRef || neighbourRef === parentRef) {
+                continue;
+            }
+
+            // expand to neighbour
+            const neighbourTileAndPoly = getTileAndPolyByRef(neighbourRef, navMesh);
+            if (!neighbourTileAndPoly.success) continue;
+
+            // do not advance if the polygon is excluded by the filter
+            if (filter.passFilter && !filter.passFilter(neighbourRef, navMesh, filter)) {
+                continue;
+            }
+
+            // find edge and calc distance to the edge
+            if (!getPortalPoints(navMesh, bestRef, neighbourRef, va, vb)) {
+                continue;
+            }
+
+            // if the circle is not touching the next polygon, skip it
+            const distSqr = distancePtSeg2dSqr(centerPosition, va, vb);
+            if (distSqr > radiusSqr) {
+                continue;
+            }
+
+            // get or create neighbour node
+            const neighbourNodeKey: SearchNodeRef = `${neighbourRef}:0`;
+            let neighbourNode = nodes[neighbourNodeKey];
+            
+            if (!neighbourNode) {
+                neighbourNode = {
+                    cost: 0,
+                    total: 0,
+                    parent: null,
+                    nodeRef: neighbourRef,
+                    state: 0,
+                    flags: 0,
+                    position: [0, 0, 0],
+                };
+                nodes[neighbourNodeKey] = neighbourNode;
+            }
+
+            if (neighbourNode.flags & NODE_FLAG_CLOSED) {
+                continue;
+            }
+
+            // set position if this is the first time we visit this node
+            if (neighbourNode.flags === 0) {
+                vec3.lerp(neighbourNode.position, va, vb, 0.5);
+            }
+
+            const total = bestNode.total + vec3.distance(bestNode.position, neighbourNode.position);
+
+            // the node is already in open list and the new result is worse, skip
+            if ((neighbourNode.flags & NODE_FLAG_OPEN) && total >= neighbourNode.total) {
+                continue;
+            }
+
+            neighbourNode.parent = `${bestRef}:0` as SearchNodeRef;
+            neighbourNode.flags = (neighbourNode.flags & ~NODE_FLAG_CLOSED);
+            neighbourNode.total = total;
+
+            if (neighbourNode.flags & NODE_FLAG_OPEN) {
+                reindexNodeInQueue(openList, neighbourNode);
+            } else {
+                neighbourNode.flags = NODE_FLAG_OPEN;
+                pushNodeToQueue(openList, neighbourNode);
+            }
+        }
+    }
+
+    if (!randomPoly || !randomTile || !randomPolyRef) {
+        return result;
+    }
+
+    // randomly pick point on polygon
+    const verts: number[] = [];
+    for (let j = 0; j < randomPoly.vertices.length; j++) {
+        const vertexIndex = randomPoly.vertices[j] * 3;
+        verts.push(randomTile.vertices[vertexIndex]);
+        verts.push(randomTile.vertices[vertexIndex + 1]);
+        verts.push(randomTile.vertices[vertexIndex + 2]);
+    }
+
+    const s = rand();
+    const t = rand();
+    const areas = new Array(randomPoly.vertices.length);
+    const pt: Vec3 = [0, 0, 0];
+
+    randomPointInConvexPoly(pt, verts, areas, s, t);
+
+    // project point onto polygon surface to ensure it's exactly on the mesh
+    const closestPointResult = createGetClosestPointOnPolyResult();
+    getClosestPointOnPoly(closestPointResult, navMesh, randomPolyRef, pt);
+    
+    if (closestPointResult.success) {
+        vec3.copy(result.position, closestPointResult.closestPoint);
+    } else {
+        vec3.copy(result.position, pt);
+    }
+
+    result.randomRef = randomPolyRef;
     result.success = true;
 
     return result;
