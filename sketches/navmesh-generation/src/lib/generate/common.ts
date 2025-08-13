@@ -58,6 +58,3 @@ export const POLY_NEIS_FLAG_EXT_LINK_DIR_MASK = 0xff;
 
 // A value that indicates the entity does not link to anything.
 export const POLY_NEIS_FLAG_NULL_LINK = 0xffffffff;
-
-// A flag that indicates that an off-mesh connection can be traversed in both directions. (Is bidirectional.)
-// export const POLY_NEIS_FLAG_OFFMESH_CON_BIDIR = 1;
