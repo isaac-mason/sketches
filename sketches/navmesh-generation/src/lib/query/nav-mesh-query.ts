@@ -1856,11 +1856,6 @@ export const findRandomPoint = (navMesh: NavMesh, filter: QueryFilter, rand: () 
     for (let i = 0; i < selectedTile.polys.length; i++) {
         const poly = selectedTile.polys[i];
 
-        // do not return off-mesh connection polygons
-        if (poly.type !== NodeType.GROUND_POLY) {
-            continue;
-        }
-
         // construct the polygon reference
         const polyRef = serPolyNodeRef(selectedTile.id, i);
 
@@ -2018,27 +2013,26 @@ export const findRandomPointAroundCircle = (
         const { tile: bestTile, poly: bestPoly } = bestTileAndPoly;
 
         // place random locations on ground polygons
-        if (bestPoly.type === NodeType.GROUND_POLY) {
-            // calculate area of the polygon
-            let polyArea = 0;
-            const v0 = vec3.create();
-            const v1 = vec3.create();
-            const v2 = vec3.create();
-            for (let j = 2; j < bestPoly.vertices.length; j++) {
-                vec3.fromBuffer(v0, bestTile.vertices, bestPoly.vertices[0] * 3);
-                vec3.fromBuffer(v1, bestTile.vertices, bestPoly.vertices[j - 1] * 3);
-                vec3.fromBuffer(v2, bestTile.vertices, bestPoly.vertices[j] * 3);
-                polyArea += triArea2D(v0, v1, v2);
-            }
 
-            // choose random polygon weighted by area, using reservoir sampling
-            areaSum += polyArea;
-            const u = rand();
-            if (u * areaSum <= polyArea) {
-                randomTile = bestTile;
-                randomPoly = bestPoly;
-                randomPolyRef = bestRef;
-            }
+        // calculate area of the polygon
+        let polyArea = 0;
+        const v0 = vec3.create();
+        const v1 = vec3.create();
+        const v2 = vec3.create();
+        for (let j = 2; j < bestPoly.vertices.length; j++) {
+            vec3.fromBuffer(v0, bestTile.vertices, bestPoly.vertices[0] * 3);
+            vec3.fromBuffer(v1, bestTile.vertices, bestPoly.vertices[j - 1] * 3);
+            vec3.fromBuffer(v2, bestTile.vertices, bestPoly.vertices[j] * 3);
+            polyArea += triArea2D(v0, v1, v2);
+        }
+
+        // choose random polygon weighted by area, using reservoir sampling
+        areaSum += polyArea;
+        const u = rand();
+        if (u * areaSum <= polyArea) {
+            randomTile = bestTile;
+            randomPoly = bestPoly;
+            randomPolyRef = bestRef;
         }
 
         // get parent reference for preventing backtracking

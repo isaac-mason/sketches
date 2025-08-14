@@ -79,9 +79,6 @@ export const desNodeRef = (nodeRef: NodeRef): DeserialisedNodeRef => {
 };
 
 export type NavMeshPoly = {
-    /** the type of the poly */
-    type: NodeType;
-
     /** the indices of the polygon's vertices. vertices are stored in NavMeshTile.vertices */
     vertices: number[];
 

@@ -2,7 +2,6 @@ import type { Box3 } from '@/common/maaths';
 import type { NavMeshTile, NavMeshPolyDetail, NavMeshPoly } from '../query';
 import { MESH_NULL_IDX, POLY_NEIS_FLAG_EXT_LINK } from './common';
 import { buildNavMeshBvTree } from '../query/nav-mesh-bv-tree';
-import { NodeType } from '../query/nav-mesh';
 
 /** the source data used to create a navigation mesh tile */
 export type NavMeshTileParams = {
@@ -143,7 +142,6 @@ export const createNavMeshTile = (params: NavMeshTileParams): CreateNavMeshTileR
     // create polys from input data
     for (let i = 0; i < nPolys; i++) {
         const poly: NavMeshPoly = {
-            type: NodeType.GROUND_POLY,
             vertices: [],
             neis: [],
             flags: params.polys.polyFlags[i],
