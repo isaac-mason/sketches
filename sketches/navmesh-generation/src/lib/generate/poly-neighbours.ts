@@ -10,7 +10,7 @@ type Edge = {
 };
 
 /**
- * Finds polygon edge neighbours and populates the neis array for each polygon.
+ * Finds polygon edge neighbours, populates the neis array for each polygon.
  */
 export const buildMeshAdjacency = (
     polys: NavMeshPoly[],

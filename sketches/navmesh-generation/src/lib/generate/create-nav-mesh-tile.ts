@@ -1,9 +1,9 @@
 import type { Box3 } from '@/common/maaths';
 import type { NavMeshTile, NavMeshPolyDetail, NavMeshPoly } from '../query';
-import { MESH_NULL_IDX, POLY_NEIS_FLAG_EXT_LINK } from './common';
+import { MESH_NULL_IDX } from './common';
 import { buildNavMeshBvTree } from '../query/nav-mesh-bv-tree';
 import type { PolyMesh } from './poly-mesh';
-import { buildMeshAdjacency, buildPolyNeighbours, finalizePolyNeighbours, findPortalEdges } from './poly-neighbours';
+import { buildPolyNeighbours } from './poly-neighbours';
 
 export type NavMeshTilePolys = {
     /** the nav mesh polygon vertices in world space, [x1, y1, z1, ...] */
@@ -47,7 +47,6 @@ export const polyMeshToNavMeshTilePolys = (polyMesh: PolyMesh): NavMeshTilePolys
         // extract polygon data for this polygon
         const polyStart = i * nvp;
         const vertIndices = polyMesh.polys.slice(polyStart, polyStart + nvp);
-        // const neiData = polyMesh.neis.slice(polyStart, polyStart + nvp);
 
         // build vertex indices and neighbor data
         for (let j = 0; j < nvp; j++) {
@@ -55,8 +54,6 @@ export const polyMeshToNavMeshTilePolys = (polyMesh: PolyMesh): NavMeshTilePolys
             if (vertIndex === MESH_NULL_IDX) break;
 
             poly.vertices.push(vertIndex);
-
-            // poly.neis.push(neiData[j]);
         }
 
         polys.push(poly);
@@ -78,6 +75,45 @@ export const polyMeshToNavMeshTilePolys = (polyMesh: PolyMesh): NavMeshTilePolys
         polys,
         maxVerticesPerPoly: nvp,
     };   
+}
+
+/**
+ * Builds NavMeshTile polys from given polygons. Use this method when you are creating a nav mesh tile from external polygon data.
+ * 
+ * Use @see polyMeshToNavMeshTilePolys if you need to convert a PolyMesh to NavMeshTile NavMeshPoly's.
+ * 
+ * Computes poly neighbours used for internal polygon edge neighbour linking, and finds portal edges used for nav mesh tile stitching. 
+ * @param polygons polygons
+ * @param vertices polygon vertices in world space
+ * @param maxVerticesPerPoly the maximum number of vertices per poly
+ * @param borderSize the border size. if above 0, portal edges will be marked
+ * @param bounds the bounds of the polygon vertices
+ * @returns NavMeshTile polygons
+ */
+export const polygonsToNavMeshTilePolys = (polygons: Array<Omit<NavMeshPoly, "neis">>, vertices: number[], maxVerticesPerPoly: number, borderSize: number, bounds: Box3): NavMeshTilePolys => {
+    const polys: NavMeshPoly[] = [];
+
+    for (const poly of polygons) {
+        polys.push({
+            vertices: poly.vertices,
+            neis: [],
+            flags: poly.flags,
+            area: poly.area,
+        });
+    }
+
+    const minX = bounds[0][0];
+    const minZ = bounds[0][2];
+    const maxX = bounds[1][0];
+    const maxZ = bounds[1][2];
+
+    buildPolyNeighbours(polys, vertices, borderSize, minX, maxX, minZ, maxZ);
+
+    return {
+        vertices,
+        polys,
+        maxVerticesPerPoly
+    };
 }
 
 /** the source data used to create a navigation mesh tile */
@@ -174,9 +210,6 @@ export const createNavMeshTile = (params: NavMeshTileParams): CreateNavMeshTileR
         };
     }
 
-    // const nvp = params.polys.maxVerticesPerPoly;
-    // const nPolys = params.polys.polys.length / nvp;
-
     const tile: NavMeshTile = {
         id: -1,
         tileX: params.tileX,
@@ -211,9 +244,9 @@ export const createNavMeshTile = (params: NavMeshTileParams): CreateNavMeshTileR
         // create detail triangles if not provided
         createDetailMeshFromPolys(tile);
     } else {
-        // Store detail meshes and vertices.
-        // The nav polygon vertices are stored as the first vertices on each mesh.
-        // We compress the mesh data by skipping them and using the navmesh coordinates.
+        // store detail meshes and vertices.
+        // the nav polygon vertices are stored as the first vertices on each mesh.
+        // we compress the mesh data by skipping them and using the navmesh coordinates.
         let vbase = 0;
 
         for (let i = 0; i < tile.polys.length; i++) {
@@ -268,24 +301,24 @@ const createDetailMeshFromPolys = (tile: NavMeshTile) => {
         const poly = tile.polys[polyId];
         const nv = poly.vertices.length;
 
-        // Create detail mesh descriptor for this polygon
+        // create detail mesh descriptor for this polygon
         const detailMesh: NavMeshPolyDetail = {
-            verticesBase: 0, // No additional detail vertices when triangulating from polys
-            verticesCount: 0, // No additional detail vertices when triangulating from polys
-            trianglesBase: tbase, // Starting triangle index
-            trianglesCount: nv - 2, // Number of triangles in fan triangulation
+            verticesBase: 0, // no additional detail vertices when triangulating from polys
+            verticesCount: 0, // no additional detail vertices when triangulating from polys
+            trianglesBase: tbase, // starting triangle index
+            trianglesCount: nv - 2, // number of triangles in fan triangulation
         };
 
         detailMeshes[polyId] = detailMesh;
 
-        // Triangulate polygon using fan triangulation (local indices within the polygon)
+        // triangulate polygon using fan triangulation (local indices within the polygon)
         for (let j = 2; j < nv; j++) {
-            // Create triangle using vertex 0 and two consecutive vertices
+            // create triangle using vertex 0 and two consecutive vertices
             detailTriangles.push(0); // first vertex (local index)
             detailTriangles.push(j - 1); // previous vertex (local index)
             detailTriangles.push(j); // current vertex (local index)
 
-            // Edge flags - bit for each edge that belongs to poly boundary
+            // edge flags - bit for each edge that belongs to poly boundary
             let edgeFlags = 1 << 2; // edge 2 is always a polygon boundary
             if (j === 2) edgeFlags |= 1 << 0; // first triangle, edge 0 is boundary
             if (j === nv - 1) edgeFlags |= 1 << 4; // last triangle, edge 1 is boundary
@@ -297,6 +330,7 @@ const createDetailMeshFromPolys = (tile: NavMeshTile) => {
 
     tile.detailMeshes = detailMeshes;
     tile.detailTriangles = detailTriangles;
-    // No additional detail vertices needed when triangulating from polygon vertices
+    
+    // no additional detail vertices needed when triangulating from polygon vertices
     tile.detailVertices = [];
 };
