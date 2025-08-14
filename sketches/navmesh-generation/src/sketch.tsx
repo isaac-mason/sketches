@@ -14,7 +14,6 @@ import {
     ContourBuildFlags,
     type ContourSet,
     type Heightfield,
-    type NavMeshTileParams,
     type PointSet,
     type PolyMesh,
     type PolyMeshDetail,
@@ -30,18 +29,26 @@ import {
     calculateMeshBounds,
     compactHeightfieldToPointSet,
     createHeightfield,
-    createNavMeshTile,
     erodeWalkableArea,
     filterLedgeSpans,
     filterLowHangingWalkableObstacles,
     filterWalkableLowHeightSpans,
     markWalkableTriangles,
     pointSetToWalkableTriangleMeshBPA,
-    polyMeshToNavMeshTilePolys,
+    polyMeshDetailToTileDetailMesh,
+    polyMeshToTilePolys,
     rasterizeTriangles,
     triangleMeshToPointSet,
 } from './lib/generate';
-import { type NavMesh, type NavMeshOffMeshConnection, OffMeshConnectionDirection, navMesh, navMeshQuery } from './lib/query';
+import {
+    type NavMesh,
+    type NavMeshOffMeshConnection,
+    type NavMeshTile,
+    OffMeshConnectionDirection,
+    navMesh,
+    navMeshQuery,
+} from './lib/query';
+import { buildNavMeshBvTree } from './lib/query/nav-mesh-bv-tree';
 import { createFindNearestPolyResult } from './lib/query/nav-mesh-query';
 import {
     createCompactHeightfieldDistancesHelper,
@@ -377,23 +384,22 @@ const SoloNavMesh = () => {
         nav.tileHeight = polyMesh.bounds[1][2] - polyMesh.bounds[0][2];
         vec3.copy(nav.origin, polyMesh.bounds[0]);
 
-        const navMeshTilePolys = polyMeshToNavMeshTilePolys(polyMesh);
+        const tilePolys = polyMeshToTilePolys(polyMesh);
 
-        const navMeshTileParams: NavMeshTileParams = {
+        const tileDetailMesh = polyMeshDetailToTileDetailMesh(tilePolys.polys, maxVerticesPerPoly, polyMeshDetail);
+
+        const tile: NavMeshTile = {
+            id: -1,
             bounds: polyMesh.bounds,
-            vertices: navMeshTilePolys.vertices,
-            polys: navMeshTilePolys.polys,
-            maxVerticesPerPoly: navMeshTilePolys.maxVerticesPerPoly,
-            detailMesh: {
-                detailMeshes: polyMeshDetail.meshes,
-                detailVertices: polyMeshDetail.vertices,
-                detailTriangles: polyMeshDetail.triangles,
-            },
-            userId: 0,
+            vertices: tilePolys.vertices,
+            polys: tilePolys.polys,
+            detailMeshes: tileDetailMesh.detailMeshes,
+            detailVertices: tileDetailMesh.detailVertices,
+            detailTriangles: tileDetailMesh.detailTriangles,
             tileX: 0,
             tileY: 0,
             tileLayer: 0,
-            buildBvTree: true,
+            bvTree: null,
             cellSize,
             cellHeight,
             walkableHeight: walkableHeightWorld,
@@ -401,15 +407,13 @@ const SoloNavMesh = () => {
             walkableClimb: walkableClimbWorld,
         };
 
-        const tileResult = createNavMeshTile(navMeshTileParams);
+        buildNavMeshBvTree(tile);
 
-        if (tileResult.tile) {
-            navMesh.addTile(nav, tileResult.tile);
-        }
+        navMesh.addTile(nav, tile);
 
         setNav(nav);
 
-        console.log('nav', nav, tileResult.tile);
+        console.log('nav', nav, tile);
 
         const disposables: (() => void)[] = [];
 
@@ -988,23 +992,22 @@ const TiledNavMesh = () => {
                 intermediates.polyMesh.push(polyMesh);
                 intermediates.polyMeshDetail.push(polyMeshDetail);
 
-                const navMeshTilePolys = polyMeshToNavMeshTilePolys(polyMesh);
+                const tilePolys = polyMeshToTilePolys(polyMesh);
 
-                const navMeshTileParams: NavMeshTileParams = {
+                const tileDetailMesh = polyMeshDetailToTileDetailMesh(tilePolys.polys, maxVerticesPerPoly, polyMeshDetail);
+
+                const tile: NavMeshTile = {
+                    id: -1,
                     bounds: polyMesh.bounds,
-                    vertices: navMeshTilePolys.vertices,
-                    polys: navMeshTilePolys.polys,
-                    maxVerticesPerPoly: navMeshTilePolys.maxVerticesPerPoly,
-                    detailMesh: {
-                        detailMeshes: polyMeshDetail.meshes,
-                        detailVertices: polyMeshDetail.vertices,
-                        detailTriangles: polyMeshDetail.triangles,
-                    },
-                    userId: 0,
+                    vertices: tilePolys.vertices,
+                    polys: tilePolys.polys,
+                    detailMeshes: tileDetailMesh.detailMeshes,
+                    detailVertices: tileDetailMesh.detailVertices,
+                    detailTriangles: tileDetailMesh.detailTriangles,
                     tileX,
                     tileY,
                     tileLayer: 0,
-                    buildBvTree: true,
+                    bvTree: null,
                     cellSize,
                     cellHeight,
                     walkableHeight: walkableHeightWorld,
@@ -1012,11 +1015,9 @@ const TiledNavMesh = () => {
                     walkableClimb: walkableClimbWorld,
                 };
 
-                const tileResult = createNavMeshTile(navMeshTileParams);
+                buildNavMeshBvTree(tile);
 
-                if (tileResult.tile) {
-                    navMesh.addTile(nav, tileResult.tile);
-                }
+                navMesh.addTile(nav, tile);
             }
         }
 
@@ -1455,7 +1456,7 @@ const TiledNavMesh = () => {
                 const point = randomPoint.position;
                 const pointMesh = new THREE.Mesh(
                     new THREE.SphereGeometry(0.1, 16, 16),
-                    new THREE.MeshBasicMaterial({ color: 'red' })
+                    new THREE.MeshBasicMaterial({ color: 'red' }),
                 );
                 pointMesh.position.set(...point);
                 scene.add(pointMesh);
@@ -1468,20 +1469,33 @@ const TiledNavMesh = () => {
             }
 
             // testing: find random point around circle
-            const randomPointAroundCircleStart = navMeshQuery.findNearestPoly(createFindNearestPolyResult(), nav, [2.60197368685782, 2.7357429300436893, 3.8039709751268105], [1, 1, 1], navMeshQuery.DEFAULT_QUERY_FILTER);
-            
+            const randomPointAroundCircleStart = navMeshQuery.findNearestPoly(
+                createFindNearestPolyResult(),
+                nav,
+                [2.60197368685782, 2.7357429300436893, 3.8039709751268105],
+                [1, 1, 1],
+                navMeshQuery.DEFAULT_QUERY_FILTER,
+            );
+
             if (randomPointAroundCircleStart.success) {
-                const randomPointAroundCircle = navMeshQuery.findRandomPointAroundCircle(nav, randomPointAroundCircleStart.nearestPolyRef, randomPointAroundCircleStart.nearestPoint, 0.2, navMeshQuery.DEFAULT_QUERY_FILTER, Math.random);
-    
+                const randomPointAroundCircle = navMeshQuery.findRandomPointAroundCircle(
+                    nav,
+                    randomPointAroundCircleStart.nearestPolyRef,
+                    randomPointAroundCircleStart.nearestPoint,
+                    0.2,
+                    navMeshQuery.DEFAULT_QUERY_FILTER,
+                    Math.random,
+                );
+
                 if (randomPointAroundCircle.success) {
                     const point = randomPointAroundCircle.position;
                     const pointMesh = new THREE.Mesh(
                         new THREE.SphereGeometry(0.1, 16, 16),
-                        new THREE.MeshBasicMaterial({ color: 'blue' })
+                        new THREE.MeshBasicMaterial({ color: 'blue' }),
                     );
                     pointMesh.position.set(...point);
                     scene.add(pointMesh);
-    
+
                     disposables.push(() => {
                         scene.remove(pointMesh);
                         pointMesh.geometry.dispose();
@@ -1489,7 +1503,6 @@ const TiledNavMesh = () => {
                     });
                 }
             }
-
         }
 
         return () => {
