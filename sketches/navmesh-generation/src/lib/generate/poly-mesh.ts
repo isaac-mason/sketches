@@ -552,7 +552,7 @@ const mergePolyVerts = (
 
 export const buildMeshAdjacency = (
     polygons: number[],
-    polyEdgeNeighbours: number[],
+    neis: number[],
     polygonCount: number,
     vertexCount: number,
     verticesPerPoly: number,
@@ -621,8 +621,8 @@ export const buildMeshAdjacency = (
         if (e.poly[0] !== e.poly[1]) {
             const p0Start = e.poly[0] * verticesPerPoly;
             const p1Start = e.poly[1] * verticesPerPoly;
-            polyEdgeNeighbours[p0Start + e.polyEdge[0]] = e.poly[1];
-            polyEdgeNeighbours[p1Start + e.polyEdge[1]] = e.poly[0];
+            neis[p0Start + e.polyEdge[0]] = e.poly[1];
+            neis[p1Start + e.polyEdge[1]] = e.poly[0];
         }
     }
 

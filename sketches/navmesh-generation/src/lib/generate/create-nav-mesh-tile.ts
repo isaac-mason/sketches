@@ -1,8 +1,8 @@
 import type { Box3 } from '@/common/maaths';
-import type { NavMeshTile, NavMesh, NavMeshPolyDetail, NavMeshPoly } from '../query';
+import type { NavMeshTile, NavMeshPolyDetail, NavMeshPoly } from '../query';
 import { MESH_NULL_IDX, POLY_NEIS_FLAG_EXT_LINK } from './common';
 import { buildNavMeshBvTree } from '../query/nav-mesh-bv-tree';
-import { NodeType, serPolyNodeRef } from '../query/nav-mesh';
+import { NodeType } from '../query/nav-mesh';
 
 /** the source data used to create a navigation mesh tile */
 export type NavMeshTileParams = {
@@ -10,9 +10,6 @@ export type NavMeshTileParams = {
     polyMesh: {
         /** the polygon mesh vertices, [x1, y1, z1, ...], in local tile cell space */
         vertices: number[];
-
-        /** the number of vertices in the polygon mesh */
-        nVertices: number;
 
         /** the polygon vertex indices */
         polys: number[];
@@ -25,9 +22,6 @@ export type NavMeshTileParams = {
 
         /** the polygon area ids */
         polyAreas: number[];
-
-        /** the number of polygons in the mesh */
-        nPolys: number;
 
         /** the maximum number of vertices per polygon [Limit: >= 3] */
         maxVerticesPerPoly: number;
@@ -98,7 +92,7 @@ export type CreateNavMeshTileResult = {
 };
 
 export const createNavMeshTile = (params: NavMeshTileParams): CreateNavMeshTileResult => {
-    if (params.polyMesh.nVertices <= 0) {
+    if (params.polyMesh.vertices.length <= 0) {
         return {
             success: false,
             status: CreateNavMeshTileStatus.EMPTY_VERTS,
@@ -106,13 +100,18 @@ export const createNavMeshTile = (params: NavMeshTileParams): CreateNavMeshTileR
         };
     }
 
-    if (params.polyMesh.nPolys <= 0) {
+    if (params.polyMesh.polys.length <= 0) {
         return {
             success: false,
             status: CreateNavMeshTileStatus.EMPTY_POLYS,
             tile: undefined,
         };
     }
+
+    const nvp = params.polyMesh.maxVerticesPerPoly;
+
+    const nVertices = params.polyMesh.vertices.length / 3;
+    const nPolys = params.polyMesh.polys.length / nvp;
 
     const tile: NavMeshTile = {
         id: 0,
@@ -137,7 +136,7 @@ export const createNavMeshTile = (params: NavMeshTileParams): CreateNavMeshTileR
     const cellHeight = params.cellHeight;
 
     // store vertices, transforming to world space
-    for (let i = 0; i < params.polyMesh.nVertices; i++) {
+    for (let i = 0; i < nVertices; i++) {
         const vertexIndex = i * 3;
         tile.vertices.push(
             params.bounds[0][0] + params.polyMesh.vertices[vertexIndex] * cellSize,
@@ -146,10 +145,9 @@ export const createNavMeshTile = (params: NavMeshTileParams): CreateNavMeshTileR
         );
     }
 
-    const nvp = params.polyMesh.maxVerticesPerPoly;
 
     // create polys from input data
-    for (let i = 0; i < params.polyMesh.nPolys; i++) {
+    for (let i = 0; i < nPolys; i++) {
         const poly: NavMeshPoly = {
             type: NodeType.GROUND_POLY,
             vertices: [],
@@ -212,7 +210,7 @@ export const createNavMeshTile = (params: NavMeshTileParams): CreateNavMeshTileR
         // We compress the mesh data by skipping them and using the navmesh coordinates.
         let vbase = 0;
 
-        for (let i = 0; i < params.polyMesh.nPolys; i++) {
+        for (let i = 0; i < nPolys; i++) {
             const poly = tile.polys[i];
             const nPolyVertices = poly.vertices.length;
             const nDetailVertices = params.detailMesh.detailMeshes[i * 4 + 1];
