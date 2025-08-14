@@ -8,21 +8,15 @@ import { buildPolyNeighbours } from './poly-neighbours';
 export type NavMeshTilePolys = Pick<NavMeshTile, 'vertices' | 'polys'>;
 
 export const polyMeshToTilePolys = (polyMesh: PolyMesh): NavMeshTilePolys => {
-    const nVertices = polyMesh.vertices.length / 3;
-    const vertices: number[] = [];
+    // copy polyMesh local space vertices
+    const vertices: number[] = structuredClone(polyMesh.vertices);
 
-    // get vertices
-    for (let i = 0; i < nVertices; i++) {
-        const vertexIndex = i * 3;
-        vertices.push(polyMesh.vertices[vertexIndex], polyMesh.vertices[vertexIndex + 1], polyMesh.vertices[vertexIndex + 2]);
-    }
-
+    // create polys from input PolyMesh
     const nvp = polyMesh.maxVerticesPerPoly;
     const nPolys = polyMesh.vertices.length / nvp;
 
     const polys: NavMeshPoly[] = [];
 
-    // create polys from input data
     for (let i = 0; i < nPolys; i++) {
         const poly: NavMeshPoly = {
             vertices: [],
@@ -108,6 +102,12 @@ export const polygonsToNavMeshTilePolys = (
 
 export type NavMeshTileDetailMesh = Pick<NavMeshTile, 'detailMeshes' | 'detailVertices' | 'detailTriangles'>;
 
+/**
+ * Creates a detail mesh from the given polygon data using fan triangulation.
+ * This is less precise than providing a detail mesh, but is acceptable for some use cases where accurate height data is not important.
+ * @param polys 
+ * @returns 
+ */
 export const polysToTileDetailMesh = (polys: NavMeshPoly[]): NavMeshTileDetailMesh => {
     const detailTriangles: number[] = [];
     const detailMeshes: NavMeshPolyDetail[] = [];
@@ -152,6 +152,13 @@ export const polysToTileDetailMesh = (polys: NavMeshPoly[]): NavMeshTileDetailMe
     };
 };
 
+/**
+ * Converts a given PolyMeshDetail to the tile detail mesh format.
+ * @param polys 
+ * @param maxVerticesPerPoly 
+ * @param polyMeshDetail 
+ * @returns 
+ */
 export const polyMeshDetailToTileDetailMesh = (
     polys: NavMeshPoly[],
     maxVerticesPerPoly: number,
