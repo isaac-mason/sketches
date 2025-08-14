@@ -146,10 +146,7 @@ export const buildNavMeshBvTree = (navMeshTile: NavMeshTile): void => {
     const items: NavMeshBvNode[] = new Array(Object.keys(navMeshTile.polys).length);
 
     // Calculate bounds for each polygon
-    let i = -1;
-    for (const polyId in navMeshTile.polys) {
-        i++;
-
+    for (let i = 0; i < navMeshTile.polys.length; i++) {
         const item: NavMeshBvNode = {
             bounds: [
                 [0, 0, 0],
