@@ -2,34 +2,94 @@ import type { Box3 } from '@/common/maaths';
 import type { NavMeshTile, NavMeshPolyDetail, NavMeshPoly } from '../query';
 import { MESH_NULL_IDX, POLY_NEIS_FLAG_EXT_LINK } from './common';
 import { buildNavMeshBvTree } from '../query/nav-mesh-bv-tree';
+import type { PolyMesh } from './poly-mesh';
+import { buildMeshAdjacency, buildPolyNeighbours, finalizePolyNeighbours, findPortalEdges } from './poly-neighbours';
+
+export type NavMeshTilePolys = {
+    /** the nav mesh polygon vertices in world space, [x1, y1, z1, ...] */
+    vertices: number[];
+
+    /** the nav mesh polygons */
+    polys: NavMeshPoly[];
+
+    /** max vertices per poly */
+    maxVerticesPerPoly: number;
+}
+
+export const polyMeshToNavMeshTilePolys = (polyMesh: PolyMesh): NavMeshTilePolys => {
+    const nVertices = polyMesh.vertices.length / 3;
+    const vertices: number[] = [];
+
+    // get vertices
+    for (let i = 0; i < nVertices; i++) {
+        const vertexIndex = i * 3;
+        vertices.push(
+            polyMesh.vertices[vertexIndex],
+            polyMesh.vertices[vertexIndex + 1],
+            polyMesh.vertices[vertexIndex + 2],
+        );
+    }
+
+    const nvp = polyMesh.maxVerticesPerPoly;
+    const nPolys = polyMesh.vertices.length / nvp;
+
+    const polys: NavMeshPoly[] = [];
+
+    // create polys from input data
+    for (let i = 0; i < nPolys; i++) {
+        const poly: NavMeshPoly = {
+            vertices: [],
+            neis: [],
+            flags: polyMesh.flags[i],
+            area: polyMesh.areas[i],
+        };
+
+        // extract polygon data for this polygon
+        const polyStart = i * nvp;
+        const vertIndices = polyMesh.polys.slice(polyStart, polyStart + nvp);
+        // const neiData = polyMesh.neis.slice(polyStart, polyStart + nvp);
+
+        // build vertex indices and neighbor data
+        for (let j = 0; j < nvp; j++) {
+            const vertIndex = vertIndices[j];
+            if (vertIndex === MESH_NULL_IDX) break;
+
+            poly.vertices.push(vertIndex);
+
+            // poly.neis.push(neiData[j]);
+        }
+
+        polys.push(poly);
+    }
+
+    // build poly neighbours information
+    buildPolyNeighbours(polys, vertices, polyMesh.borderSize, 0, 0, polyMesh.localWidth, polyMesh.localHeight);
+
+    // convert vertices to world space
+    // we do this after buildPolyNeighbours so that neighbour calculation can be done with quantized values
+    for (let i = 0; i < vertices.length; i += 3) {
+        vertices[i] = polyMesh.bounds[0][0] + vertices[i] * polyMesh.cellSize;
+        vertices[i + 1] = polyMesh.bounds[0][1] + vertices[i + 1] * polyMesh.cellHeight;
+        vertices[i + 2] = polyMesh.bounds[0][2] + vertices[i + 2] * polyMesh.cellSize;
+    }
+
+    return {
+        vertices,
+        polys,
+        maxVerticesPerPoly: nvp,
+    };   
+}
 
 /** the source data used to create a navigation mesh tile */
 export type NavMeshTileParams = {
-    /** the nav mesh polygons in world space */
-    polys: {
-        /** the polygon mesh vertices, [x1, y1, z1, ...], in world space */
-        vertices: number[];
+    /** the nav mesh polygon vertices in world space, [x1, y1, z1, ...] */
+    vertices: number[];
 
-        /** the polygon vertex indices */
-        polys: number[];
+    /** the nav mesh polygons */
+    polys: NavMeshPoly[];
 
-        /**
-         * Polygon edge neighbors.
-         * If you used the voxelisation pipeline / buildPolyMesh to generate nav mesh polys, use
-         * the generated polygon edge neighbour data in polyMesh.neis.
-         * If you are providing an external polygon mesh, neis must be built with buildMeshAdjacency and findPortalEdges. 
-         */
-        neis: number[];
-
-        /** the polygon flags */
-        polyFlags: number[];
-
-        /** the polygon area ids */
-        polyAreas: number[];
-
-        /** the maximum number of vertices per polygon [Limit: >= 3] */
-        maxVerticesPerPoly: number;
-    };
+    /** the maximum number of vertices per poly */
+    maxVerticesPerPoly: number;
 
     /** (optional) height detail attributes */
     detailMesh?: {
@@ -98,7 +158,7 @@ export type CreateNavMeshTileResult = {
 };
 
 export const createNavMeshTile = (params: NavMeshTileParams): CreateNavMeshTileResult => {
-    if (params.polys.vertices.length <= 0) {
+    if (params.vertices.length <= 0) {
         return {
             success: false,
             status: CreateNavMeshTileStatus.EMPTY_VERTS,
@@ -106,7 +166,7 @@ export const createNavMeshTile = (params: NavMeshTileParams): CreateNavMeshTileR
         };
     }
 
-    if (params.polys.polys.length <= 0) {
+    if (params.polys.length <= 0) {
         return {
             success: false,
             status: CreateNavMeshTileStatus.EMPTY_POLYS,
@@ -114,8 +174,8 @@ export const createNavMeshTile = (params: NavMeshTileParams): CreateNavMeshTileR
         };
     }
 
-    const nvp = params.polys.maxVerticesPerPoly;
-    const nPolys = params.polys.polys.length / nvp;
+    // const nvp = params.polys.maxVerticesPerPoly;
+    // const nPolys = params.polys.polys.length / nvp;
 
     const tile: NavMeshTile = {
         id: -1,
@@ -137,56 +197,10 @@ export const createNavMeshTile = (params: NavMeshTileParams): CreateNavMeshTileR
     };
 
     // store vertices
-    tile.vertices = structuredClone(params.polys.vertices);
+    tile.vertices = structuredClone(params.vertices);
 
-    // create polys from input data
-    for (let i = 0; i < nPolys; i++) {
-        const poly: NavMeshPoly = {
-            vertices: [],
-            neis: [],
-            flags: params.polys.polyFlags[i],
-            area: params.polys.polyAreas[i],
-        };
-
-        // extract polygon data for this polygon
-        const polyStart = i * nvp;
-        const vertIndices = params.polys.polys.slice(polyStart, polyStart + nvp);
-        const neiData = params.polys.neis.slice(polyStart, polyStart + nvp);
-
-        // build vertex indices and neighbor data
-        for (let j = 0; j < nvp; j++) {
-            const vertIndex = vertIndices[j];
-            if (vertIndex === MESH_NULL_IDX) break;
-
-            poly.vertices.push(vertIndex);
-
-            const neiValue = neiData[j];
-
-            if (neiValue & POLY_NEIS_FLAG_EXT_LINK) {
-                // border or portal edge
-                const dir = neiValue & 0xf;
-                if (dir === 0xf) {
-                    poly.neis.push(0);
-                } else if (dir === 0) {
-                    poly.neis.push(POLY_NEIS_FLAG_EXT_LINK | 4); // Portal x-
-                } else if (dir === 1) {
-                    poly.neis.push(POLY_NEIS_FLAG_EXT_LINK | 2); // Portal z+
-                } else if (dir === 2) {
-                    poly.neis.push(POLY_NEIS_FLAG_EXT_LINK | 0); // Portal x+
-                } else if (dir === 3) {
-                    poly.neis.push(POLY_NEIS_FLAG_EXT_LINK | 6); // Portal z-
-                } else {
-                    // TODO: how to handle this case?
-                    poly.neis.push(0);
-                }
-            } else {
-                // normal internal connection (add 1 to convert from 0-based to 1-based indexing)
-                poly.neis.push(neiValue + 1);
-            }
-        }
-
-        tile.polys.push(poly);
-    }
+    // store polys
+    tile.polys = structuredClone(params.polys);
 
     // build bv tree if requested
     if (params.buildBvTree) {
@@ -202,7 +216,7 @@ export const createNavMeshTile = (params: NavMeshTileParams): CreateNavMeshTileR
         // We compress the mesh data by skipping them and using the navmesh coordinates.
         let vbase = 0;
 
-        for (let i = 0; i < nPolys; i++) {
+        for (let i = 0; i < tile.polys.length; i++) {
             const poly = tile.polys[i];
             const nPolyVertices = poly.vertices.length;
             const nDetailVertices = params.detailMesh.detailMeshes[i * 4 + 1];
@@ -229,7 +243,7 @@ export const createNavMeshTile = (params: NavMeshTileParams): CreateNavMeshTileR
                     );
                 }
 
-                vbase += params.polys.maxVerticesPerPoly - nPolyVertices;
+                vbase += params.maxVerticesPerPoly - nPolyVertices;
             }
         }
 

@@ -35,9 +35,9 @@ import {
     filterLedgeSpans,
     filterLowHangingWalkableObstacles,
     filterWalkableLowHeightSpans,
-    getWorldSpacePolyMeshVertices,
     markWalkableTriangles,
     pointSetToWalkableTriangleMeshBPA,
+    polyMeshToNavMeshTilePolys,
     rasterizeTriangles,
     triangleMeshToPointSet,
 } from './lib/generate';
@@ -377,18 +377,13 @@ const SoloNavMesh = () => {
         nav.tileHeight = polyMesh.bounds[1][2] - polyMesh.bounds[0][2];
         vec3.copy(nav.origin, polyMesh.bounds[0]);
 
-        const polyVerticesWorld = getWorldSpacePolyMeshVertices(polyMesh);
+        const navMeshTilePolys = polyMeshToNavMeshTilePolys(polyMesh);
 
         const navMeshTileParams: NavMeshTileParams = {
             bounds: polyMesh.bounds,
-            polys: {
-                vertices: polyVerticesWorld,
-                polys: polyMesh.polys,
-                neis: polyMesh.neis,
-                polyFlags: polyMesh.flags,
-                polyAreas: polyMesh.areas,
-                maxVerticesPerPoly: polyMesh.maxVerticesPerPoly,
-            },
+            vertices: navMeshTilePolys.vertices,
+            polys: navMeshTilePolys.polys,
+            maxVerticesPerPoly: navMeshTilePolys.maxVerticesPerPoly,
             detailMesh: {
                 detailMeshes: polyMeshDetail.meshes,
                 detailVertices: polyMeshDetail.vertices,
@@ -993,18 +988,13 @@ const TiledNavMesh = () => {
                 intermediates.polyMesh.push(polyMesh);
                 intermediates.polyMeshDetail.push(polyMeshDetail);
 
-                const polyVerticesWorld = getWorldSpacePolyMeshVertices(polyMesh);
+                const navMeshTilePolys = polyMeshToNavMeshTilePolys(polyMesh);
 
                 const navMeshTileParams: NavMeshTileParams = {
                     bounds: polyMesh.bounds,
-                    polys: {
-                        vertices: polyVerticesWorld,
-                        polys: polyMesh.polys,
-                        neis: polyMesh.neis,
-                        polyFlags: polyMesh.flags,
-                        polyAreas: polyMesh.areas,
-                        maxVerticesPerPoly: polyMesh.maxVerticesPerPoly,
-                    },
+                    vertices: navMeshTilePolys.vertices,
+                    polys: navMeshTilePolys.polys,
+                    maxVerticesPerPoly: navMeshTilePolys.maxVerticesPerPoly,
                     detailMesh: {
                         detailMeshes: polyMeshDetail.meshes,
                         detailVertices: polyMeshDetail.vertices,

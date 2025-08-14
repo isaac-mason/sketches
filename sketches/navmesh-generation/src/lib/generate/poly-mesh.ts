@@ -1,7 +1,6 @@
-import { type Box3, type Vec3, vec3 } from '@/common/maaths';
-import { BORDER_VERTEX, MESH_NULL_IDX, MULTIPLE_REGS, POLY_NEIS_FLAG_EXT_LINK } from './common';
+import { type Box3, vec3 } from '@/common/maaths';
+import { BORDER_VERTEX, MESH_NULL_IDX, MULTIPLE_REGS } from './common';
 import type { ContourSet } from './contour-set';
-import { buildMeshAdjacency, findPortalEdges } from './poly-neighbours';
 
 /**
  * Represents a polygon mesh suitable for use in building a navigation mesh.
@@ -11,8 +10,6 @@ export type PolyMesh = {
     vertices: number[];
     /** Polygon vertex indices. Length: npolys * nvp */
     polys: number[];
-    /** Polygon edge neighbors. Length: npolys * nvp */
-    neis: number[];
     /** The region id assigned to each polygon. Length: npolys */
     regions: number[];
     /** The user defined flags for each polygon. Length: npolys */
@@ -27,6 +24,10 @@ export type PolyMesh = {
     maxVerticesPerPoly: number;
     /** the bounds in world space */
     bounds: Box3;
+    /** the width in local space */
+    localWidth: number;
+    /** the height in local space */
+    localHeight: number;
     /** The size of each cell. (On the xz-plane.) */
     cellSize: number;
     /** The height of each cell. (The minimum increment along the y-axis.) */
@@ -566,7 +567,6 @@ export const buildPolyMesh = (contourSet: ContourSet, maxVerticesPerPoly: number
     const mesh: PolyMesh = {
         vertices: new Array(maxVertices * 3).fill(0),
         polys: new Array(maxTris * maxVerticesPerPoly).fill(MESH_NULL_IDX),
-        neis: [], // computed after poly generation
         regions: new Array(maxTris).fill(0),
         flags: new Array(maxTris).fill(0),
         areas: new Array(maxTris).fill(0),
@@ -574,6 +574,8 @@ export const buildPolyMesh = (contourSet: ContourSet, maxVerticesPerPoly: number
         nPolys: 0,
         maxVerticesPerPoly,
         bounds: structuredClone(contourSet.bounds) as Box3,
+        localWidth: contourSet.width,
+        localHeight: contourSet.height,
         cellSize: contourSet.cellSize,
         cellHeight: contourSet.cellHeight,
         borderSize: contourSet.borderSize,
@@ -715,18 +717,6 @@ export const buildPolyMesh = (contourSet: ContourSet, maxVerticesPerPoly: number
     mesh.polys.length = mesh.nPolys * maxVerticesPerPoly;
     mesh.regions.length = mesh.nPolys;
     mesh.flags.length = mesh.nPolys;
-
-    // build mesh adjacency
-    const meshAdjacency = buildMeshAdjacency(mesh.polys, mesh.nVertices, maxVerticesPerPoly);
-    if (!meshAdjacency.success) {
-        throw new Error('Failed to build mesh adjacency');
-    }
-    mesh.neis = meshAdjacency.neis;
-
-    // find portal edges
-    if (mesh.borderSize > 0) {
-        findPortalEdges(mesh.polys, mesh.maxVerticesPerPoly, mesh.vertices, mesh.neis, 0, 0, contourSet.width, contourSet.height);
-    }
 
     // allocate and initialize mesh flags array
     mesh.flags = new Array(mesh.nPolys).fill(0);
@@ -887,14 +877,12 @@ const removeVertex = (mesh: PolyMesh, remVertexIdx: number, maxTris: number): bo
             if (polyStart !== lastPolyStart) {
                 for (let j = 0; j < nvp; j++) {
                     mesh.polys[polyStart + j] = mesh.polys[lastPolyStart + j];
-                    mesh.neis[polyStart + j] = mesh.neis[lastPolyStart + j];
                 }
             }
 
             // Clear the last polygon
             for (let j = 0; j < nvp; j++) {
                 mesh.polys[lastPolyStart + j] = MESH_NULL_IDX;
-                mesh.neis[lastPolyStart + j] = MESH_NULL_IDX;
             }
 
             mesh.regions[i] = mesh.regions[mesh.nPolys - 1];
@@ -1104,7 +1092,6 @@ const removeVertex = (mesh: PolyMesh, remVertexIdx: number, maxTris: number): bo
         // Clear the polygon
         for (let j = 0; j < nvp; j++) {
             mesh.polys[meshPolyStart + j] = MESH_NULL_IDX;
-            mesh.neis[meshPolyStart + j] = MESH_NULL_IDX;
         }
 
         for (let j = 0; j < nvp; j++) {
@@ -1122,21 +1109,4 @@ const removeVertex = (mesh: PolyMesh, remVertexIdx: number, maxTris: number): bo
     }
 
     return true;
-};
-
-export const getWorldSpacePolyMeshVertices = (polyMesh: PolyMesh): number[] => {
-    const nVertices = polyMesh.vertices.length / 3;
-    const vertices: number[] = [];
-
-    // store vertices, transforming to world space
-    for (let i = 0; i < nVertices; i++) {
-        const vertexIndex = i * 3;
-        vertices.push(
-            polyMesh.bounds[0][0] + polyMesh.vertices[vertexIndex] * polyMesh.cellSize,
-            polyMesh.bounds[0][1] + polyMesh.vertices[vertexIndex + 1] * polyMesh.cellHeight,
-            polyMesh.bounds[0][2] + polyMesh.vertices[vertexIndex + 2] * polyMesh.cellSize,
-        );
-    }
-
-    return vertices;
 };

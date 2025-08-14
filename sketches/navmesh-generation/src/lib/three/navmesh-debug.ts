@@ -954,13 +954,9 @@ export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
     const triColors: number[] = [];
     const triIndices: number[] = [];
 
-    // Arrays for neighbor edges (internal edges)
-    const neighborLinePositions: number[] = [];
-    const neighborLineColors: number[] = [];
-
-    // Arrays for boundary edges (external edges)
-    const boundaryLinePositions: number[] = [];
-    const boundaryLineColors: number[] = [];
+    // Arrays for edges
+    const edgeLinePositions: number[] = [];
+    const edgeLineColors: number[] = [];
 
     // Arrays for vertices (points)
     const vertexPositions: number[] = [];
@@ -1020,19 +1016,17 @@ export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
         }
     }
 
-    // Draw neighbor edges (internal edges)
-    const neighborColor = new THREE.Color()
+    // Draw edges
+    const edgeColor = new THREE.Color()
         .setRGB(0, 48 / 255, 64 / 255)
         .multiplyScalar(0.125); // RGB(0,48,64) with alpha 32/255
-    for (let i = 0; i < polyMesh.nPolys; i++) {
+    
+        for (let i = 0; i < polyMesh.nPolys; i++) {
         const polyBase = i * nvp;
 
         for (let j = 0; j < nvp; j++) {
             const v0 = polyMesh.polys[polyBase + j];
             if (v0 === MESH_NULL_IDX) break;
-
-            const neighbor = polyMesh.neis[polyBase + j];
-            if (neighbor & POLY_NEIS_FLAG_EXT_LINK) continue; // Skip boundary edges
 
             const nj =
                 j + 1 >= nvp ||
@@ -1051,57 +1045,12 @@ export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
                     0.01;
                 const z = orig[2] + polyMesh.vertices[vertIndex + 2] * cs;
 
-                neighborLinePositions.push(x, y, z);
-                neighborLineColors.push(
-                    neighborColor.r,
-                    neighborColor.g,
-                    neighborColor.b,
+                edgeLinePositions.push(x, y, z);
+                edgeLineColors.push(
+                    edgeColor.r,
+                    edgeColor.g,
+                    edgeColor.b,
                 );
-            }
-        }
-    }
-
-    // Draw boundary edges (external edges)
-    const boundaryColor = new THREE.Color()
-        .setRGB(0, 48 / 255, 64 / 255)
-        .multiplyScalar(0.863); // RGB(0,48,64) with alpha 220/255
-    const portalColor = new THREE.Color().setRGB(1, 1, 1).multiplyScalar(0.5); // RGB(255,255,255) with alpha 128/255
-
-    for (let i = 0; i < polyMesh.nPolys; i++) {
-        const polyBase = i * nvp;
-
-        for (let j = 0; j < nvp; j++) {
-            const v0 = polyMesh.polys[polyBase + j];
-            if (v0 === MESH_NULL_IDX) break;
-
-            const neighbor = polyMesh.neis[polyBase + j];
-
-            // Skip non-boundary edges
-            if ((neighbor & POLY_NEIS_FLAG_EXT_LINK) === 0) continue;
-
-            const nj =
-                j + 1 >= nvp ||
-                polyMesh.polys[polyBase + j + 1] === MESH_NULL_IDX
-                    ? 0
-                    : j + 1;
-            const v1 = polyMesh.polys[polyBase + nj];
-
-            // Check if this is a portal edge
-            const isPortal = (neighbor & 0xf) !== 0xf;
-            const edgeColor = isPortal ? portalColor : boundaryColor;
-
-            const vertices = [v0, v1];
-            for (let k = 0; k < 2; k++) {
-                const vertIndex = vertices[k] * 3;
-                const x = orig[0] + polyMesh.vertices[vertIndex] * cs;
-                const y =
-                    orig[1] +
-                    (polyMesh.vertices[vertIndex + 1] + 1) * ch +
-                    0.01;
-                const z = orig[2] + polyMesh.vertices[vertIndex + 2] * cs;
-
-                boundaryLinePositions.push(x, y, z);
-                boundaryLineColors.push(edgeColor.r, edgeColor.g, edgeColor.b);
             }
         }
     }
@@ -1152,71 +1101,37 @@ export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
         triMaterial.dispose();
     });
 
-    // Create neighbor edges geometry
-    if (neighborLinePositions.length > 0) {
-        const neighborLineGeometry = new THREE.BufferGeometry();
-        neighborLineGeometry.setAttribute(
+    // Create edges geometry
+    if (edgeLinePositions.length > 0) {
+        const edgeLineGeometry = new THREE.BufferGeometry();
+        edgeLineGeometry.setAttribute(
             'position',
             new THREE.BufferAttribute(
-                new Float32Array(neighborLinePositions),
+                new Float32Array(edgeLinePositions),
                 3,
             ),
         );
-        neighborLineGeometry.setAttribute(
+        edgeLineGeometry.setAttribute(
             'color',
-            new THREE.BufferAttribute(new Float32Array(neighborLineColors), 3),
+            new THREE.BufferAttribute(new Float32Array(edgeLineColors), 3),
         );
 
-        const neighborLineMaterial = new THREE.LineBasicMaterial({
+        const edgesLineMaterial = new THREE.LineBasicMaterial({
             vertexColors: true,
             transparent: true,
             opacity: 0.5,
             linewidth: 1.5,
         });
 
-        const neighborLines = new THREE.LineSegments(
-            neighborLineGeometry,
-            neighborLineMaterial,
+        const edgesLines = new THREE.LineSegments(
+            edgeLineGeometry,
+            edgesLineMaterial,
         );
-        group.add(neighborLines);
+        group.add(edgesLines);
 
         disposables.push(() => {
-            neighborLineGeometry.dispose();
-            neighborLineMaterial.dispose();
-        });
-    }
-
-    // Create boundary edges geometry
-    if (boundaryLinePositions.length > 0) {
-        const boundaryLineGeometry = new THREE.BufferGeometry();
-        boundaryLineGeometry.setAttribute(
-            'position',
-            new THREE.BufferAttribute(
-                new Float32Array(boundaryLinePositions),
-                3,
-            ),
-        );
-        boundaryLineGeometry.setAttribute(
-            'color',
-            new THREE.BufferAttribute(new Float32Array(boundaryLineColors), 3),
-        );
-
-        const boundaryLineMaterial = new THREE.LineBasicMaterial({
-            vertexColors: true,
-            transparent: true,
-            opacity: 0.9,
-            linewidth: 2.5,
-        });
-
-        const boundaryLines = new THREE.LineSegments(
-            boundaryLineGeometry,
-            boundaryLineMaterial,
-        );
-        group.add(boundaryLines);
-
-        disposables.push(() => {
-            boundaryLineGeometry.dispose();
-            boundaryLineMaterial.dispose();
+            edgeLineGeometry.dispose();
+            edgesLineMaterial.dispose();
         });
     }
 
