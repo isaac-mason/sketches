@@ -1031,7 +1031,7 @@ export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
             const v0 = polyMesh.polys[polyBase + j];
             if (v0 === MESH_NULL_IDX) break;
 
-            const neighbor = polyMesh.polyEdgeNeighbours[polyBase + j];
+            const neighbor = polyMesh.neis[polyBase + j];
             if (neighbor & POLY_NEIS_FLAG_EXT_LINK) continue; // Skip boundary edges
 
             const nj =
@@ -1074,7 +1074,7 @@ export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
             const v0 = polyMesh.polys[polyBase + j];
             if (v0 === MESH_NULL_IDX) break;
 
-            const neighbor = polyMesh.polyEdgeNeighbours[polyBase + j];
+            const neighbor = polyMesh.neis[polyBase + j];
 
             // Skip non-boundary edges
             if ((neighbor & POLY_NEIS_FLAG_EXT_LINK) === 0) continue;
