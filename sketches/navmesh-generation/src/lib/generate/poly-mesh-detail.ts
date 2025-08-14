@@ -1257,7 +1257,7 @@ export const buildPolyMeshDetail = (
 
     // Find max size for a polygon area.
     for (let i = 0; i < polyMesh.nPolys; ++i) {
-        const p = i * nvp * 2;
+        const p = i * nvp;
         let xmin = compactHeightfield.width;
         let xmax = 0;
         let ymin = compactHeightfield.height;
@@ -1296,7 +1296,7 @@ export const buildPolyMeshDetail = (
     };
 
     for (let i = 0; i < polyMesh.nPolys; ++i) {
-        const p = i * nvp * 2;
+        const p = i * nvp;
 
         // Store polygon vertices for processing.
         let npoly = 0;

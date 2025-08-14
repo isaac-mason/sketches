@@ -8,8 +8,10 @@ import type { ContourSet } from './contour-set';
 export type PolyMesh = {
     /** The mesh vertices. Form: (x, y, z) * nverts */
     vertices: number[];
-    /** Polygon and neighbor data. Length: npolys * 2 * nvp */
+    /** Polygon vertex indices. Length: npolys * nvp */
     polys: number[];
+    /** Polygon edge neighbors. Length: npolys * nvp */
+    polyEdgeNeighbours: number[];
     /** The region id assigned to each polygon. Length: npolys */
     regions: number[];
     /** The user defined flags for each polygon. Length: npolys */
@@ -550,6 +552,7 @@ const mergePolyVerts = (
 
 export const buildMeshAdjacency = (
     polygons: number[],
+    polyEdgeNeighbours: number[],
     polygonCount: number,
     vertexCount: number,
     verticesPerPoly: number,
@@ -567,7 +570,7 @@ export const buildMeshAdjacency = (
 
     // build edges
     for (let i = 0; i < polygonCount; i++) {
-        const polyStartIdx = i * verticesPerPoly * 2;
+        const polyStartIdx = i * verticesPerPoly;
         for (let j = 0; j < verticesPerPoly; j++) {
             if (polygons[polyStartIdx + j] === MESH_NULL_IDX) break;
             const v0 = polygons[polyStartIdx + j];
@@ -591,7 +594,7 @@ export const buildMeshAdjacency = (
 
     // match edges
     for (let i = 0; i < polygonCount; i++) {
-        const polyStartIdx = i * verticesPerPoly * 2;
+        const polyStartIdx = i * verticesPerPoly;
         for (let j = 0; j < verticesPerPoly; j++) {
             if (polygons[polyStartIdx + j] === MESH_NULL_IDX) break;
             const v0 = polygons[polyStartIdx + j];
@@ -616,10 +619,10 @@ export const buildMeshAdjacency = (
     for (let i = 0; i < edgeCount; i++) {
         const e = edges[i];
         if (e.poly[0] !== e.poly[1]) {
-            const p0Start = e.poly[0] * verticesPerPoly * 2;
-            const p1Start = e.poly[1] * verticesPerPoly * 2;
-            polygons[p0Start + verticesPerPoly + e.polyEdge[0]] = e.poly[1];
-            polygons[p1Start + verticesPerPoly + e.polyEdge[1]] = e.poly[0];
+            const p0Start = e.poly[0] * verticesPerPoly;
+            const p1Start = e.poly[1] * verticesPerPoly;
+            polyEdgeNeighbours[p0Start + e.polyEdge[0]] = e.poly[1];
+            polyEdgeNeighbours[p1Start + e.polyEdge[1]] = e.poly[0];
         }
     }
 
@@ -647,7 +650,8 @@ export const buildPolyMesh = (contourSet: ContourSet, maxVerticesPerPoly: number
     // initialize mesh
     const mesh: PolyMesh = {
         vertices: new Array(maxVertices * 3).fill(0),
-        polys: new Array(maxTris * maxVerticesPerPoly * 2).fill(MESH_NULL_IDX),
+        polys: new Array(maxTris * maxVerticesPerPoly).fill(MESH_NULL_IDX),
+        polyEdgeNeighbours: new Array(maxTris * maxVerticesPerPoly).fill(MESH_NULL_IDX),
         regions: new Array(maxTris).fill(0),
         flags: new Array(maxTris).fill(0),
         areas: new Array(maxTris).fill(0),
@@ -756,7 +760,7 @@ export const buildPolyMesh = (contourSet: ContourSet, maxVerticesPerPoly: number
 
         // store polygons
         for (let j = 0; j < npolys; j++) {
-            const pStart = mesh.nPolys * maxVerticesPerPoly * 2;
+            const pStart = mesh.nPolys * maxVerticesPerPoly;
             const qStart = j * maxVerticesPerPoly;
             for (let k = 0; k < maxVerticesPerPoly; k++) {
                 mesh.polys[pStart + k] = polys[qStart + k];
@@ -793,7 +797,7 @@ export const buildPolyMesh = (contourSet: ContourSet, maxVerticesPerPoly: number
     }
 
     // build mesh adjacency
-    if (!buildMeshAdjacency(mesh.polys, mesh.nPolys, mesh.nVertices, maxVerticesPerPoly)) {
+    if (!buildMeshAdjacency(mesh.polys, mesh.polyEdgeNeighbours, mesh.nPolys, mesh.nVertices, maxVerticesPerPoly)) {
         throw new Error('Failed to build mesh adjacency');
     }
 
@@ -801,7 +805,8 @@ export const buildPolyMesh = (contourSet: ContourSet, maxVerticesPerPoly: number
     findPortalEdges(mesh, contourSet.width, contourSet.height);
 
     // trim arrays to size
-    mesh.polys.length = mesh.nPolys * maxVerticesPerPoly * 2;
+    mesh.polys.length = mesh.nPolys * maxVerticesPerPoly;
+    mesh.polyEdgeNeighbours.length = mesh.nPolys * maxVerticesPerPoly;
     mesh.regions.length = mesh.nPolys;
     mesh.flags.length = mesh.nPolys;
 
@@ -819,7 +824,7 @@ const canRemoveVertex = (mesh: PolyMesh, remVertexIdx: number): boolean => {
     let numRemainingEdges = 0;
 
     for (let i = 0; i < mesh.nPolys; i++) {
-        const polyStart = i * nvp * 2;
+        const polyStart = i * nvp;
         const nv = countPolyVerts(mesh.polys, polyStart, nvp);
         let numRemoved = 0;
         let numVerts = 0;
@@ -848,7 +853,7 @@ const canRemoveVertex = (mesh: PolyMesh, remVertexIdx: number): boolean => {
     let nedges = 0;
 
     for (let i = 0; i < mesh.nPolys; i++) {
-        const polyStart = i * nvp * 2;
+        const polyStart = i * nvp;
         const nv = countPolyVerts(mesh.polys, polyStart, nvp);
 
         // Collect edges which touch the removed vertex
@@ -916,7 +921,7 @@ const removeVertex = (mesh: PolyMesh, remVertexIdx: number, maxTris: number): bo
     // Count number of polygons to remove
     let numRemovedVerts = 0;
     for (let i = 0; i < mesh.nPolys; i++) {
-        const polyStart = i * nvp * 2;
+        const polyStart = i * nvp;
         const nv = countPolyVerts(mesh.polys, polyStart, nvp);
         for (let j = 0; j < nv; j++) {
             if (mesh.polys[polyStart + j] === remVertexIdx) {
@@ -935,7 +940,7 @@ const removeVertex = (mesh: PolyMesh, remVertexIdx: number, maxTris: number): bo
     let nharea = 0;
 
     for (let i = 0; i < mesh.nPolys; i++) {
-        const polyStart = i * nvp * 2;
+        const polyStart = i * nvp;
         const nv = countPolyVerts(mesh.polys, polyStart, nvp);
         let hasRem = false;
 
@@ -960,16 +965,18 @@ const removeVertex = (mesh: PolyMesh, remVertexIdx: number, maxTris: number): bo
             }
 
             // Remove the polygon
-            const lastPolyStart = (mesh.nPolys - 1) * nvp * 2;
+            const lastPolyStart = (mesh.nPolys - 1) * nvp;
             if (polyStart !== lastPolyStart) {
-                for (let j = 0; j < nvp * 2; j++) {
+                for (let j = 0; j < nvp; j++) {
                     mesh.polys[polyStart + j] = mesh.polys[lastPolyStart + j];
+                    mesh.polyEdgeNeighbours[polyStart + j] = mesh.polyEdgeNeighbours[lastPolyStart + j];
                 }
             }
 
             // Clear the last polygon
             for (let j = 0; j < nvp; j++) {
-                mesh.polys[lastPolyStart + nvp + j] = MESH_NULL_IDX;
+                mesh.polys[lastPolyStart + j] = MESH_NULL_IDX;
+                mesh.polyEdgeNeighbours[lastPolyStart + j] = MESH_NULL_IDX;
             }
 
             mesh.regions[i] = mesh.regions[mesh.nPolys - 1];
@@ -989,7 +996,7 @@ const removeVertex = (mesh: PolyMesh, remVertexIdx: number, maxTris: number): bo
 
     // Adjust indices to match the removed vertex layout
     for (let i = 0; i < mesh.nPolys; i++) {
-        const polyStart = i * nvp * 2;
+        const polyStart = i * nvp;
         const nv = countPolyVerts(mesh.polys, polyStart, nvp);
         for (let j = 0; j < nv; j++) {
             if (mesh.polys[polyStart + j] > remVertexIdx) {
@@ -1173,12 +1180,13 @@ const removeVertex = (mesh: PolyMesh, remVertexIdx: number, maxTris: number): bo
     for (let i = 0; i < npolys; i++) {
         if (mesh.nPolys >= maxTris) break;
 
-        const meshPolyStart = mesh.nPolys * nvp * 2;
+        const meshPolyStart = mesh.nPolys * nvp;
         const polyStart = i * nvp;
 
         // Clear the polygon
-        for (let j = 0; j < nvp * 2; j++) {
+        for (let j = 0; j < nvp; j++) {
             mesh.polys[meshPolyStart + j] = MESH_NULL_IDX;
+            mesh.polyEdgeNeighbours[meshPolyStart + j] = MESH_NULL_IDX;
         }
 
         for (let j = 0; j < nvp; j++) {
@@ -1208,11 +1216,11 @@ export const findPortalEdges = (mesh: PolyMesh, width: number, height: number): 
     const _vb: Vec3 = [0, 0, 0];
 
     for (let i = 0; i < mesh.nPolys; i++) {
-        const polyStart = i * 2 * maxVerticesPerPoly;
+        const polyStart = i * maxVerticesPerPoly;
         for (let j = 0; j < maxVerticesPerPoly; j++) {
             if (mesh.polys[polyStart + j] === MESH_NULL_IDX) break;
             // Skip connected edges
-            if (mesh.polys[polyStart + maxVerticesPerPoly + j] !== MESH_NULL_IDX) {
+            if (mesh.polyEdgeNeighbours[polyStart + j] !== MESH_NULL_IDX) {
                 continue;
             }
 
@@ -1230,13 +1238,13 @@ export const findPortalEdges = (mesh: PolyMesh, width: number, height: number): 
             _vb[2] = mesh.vertices[mesh.polys[polyStart + nj] * 3 + 2];
 
             if (_va[0] === 0 && _vb[0] === 0) {
-                mesh.polys[polyStart + maxVerticesPerPoly + j] = POLY_NEIS_FLAG_EXT_LINK | 0;
+                mesh.polyEdgeNeighbours[polyStart + j] = POLY_NEIS_FLAG_EXT_LINK | 0;
             } else if (_va[2] === height && _vb[2] === height) {
-                mesh.polys[polyStart + maxVerticesPerPoly + j] = POLY_NEIS_FLAG_EXT_LINK | 1;
+                mesh.polyEdgeNeighbours[polyStart + j] = POLY_NEIS_FLAG_EXT_LINK | 1;
             } else if (_va[0] === width && _vb[0] === width) {
-                mesh.polys[polyStart + maxVerticesPerPoly + j] = POLY_NEIS_FLAG_EXT_LINK | 2;
+                mesh.polyEdgeNeighbours[polyStart + j] = POLY_NEIS_FLAG_EXT_LINK | 2;
             } else if (_va[2] === 0 && _vb[2] === 0) {
-                mesh.polys[polyStart + maxVerticesPerPoly + j] = POLY_NEIS_FLAG_EXT_LINK | 3;
+                mesh.polyEdgeNeighbours[polyStart + j] = POLY_NEIS_FLAG_EXT_LINK | 3;
             }
         }
     }

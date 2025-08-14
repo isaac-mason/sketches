@@ -5,7 +5,6 @@ export * from './compact-heightfield';
 export * from './compact-heightfield-regions';
 export * from './contour-set';
 export * from "./create-nav-mesh-tile";
-export * from './external';
 export * from './heightfield';
 export * from './input-triangle-mesh';
 export * from './point-set';

@@ -986,7 +986,7 @@ export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
 
     // Draw polygon triangles
     for (let i = 0; i < polyMesh.nPolys; i++) {
-        const polyBase = i * nvp * 2;
+        const polyBase = i * nvp;
         const area = polyMesh.areas[i];
         const color = areaToColor(area);
 
@@ -1025,13 +1025,13 @@ export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
         .setRGB(0, 48 / 255, 64 / 255)
         .multiplyScalar(0.125); // RGB(0,48,64) with alpha 32/255
     for (let i = 0; i < polyMesh.nPolys; i++) {
-        const polyBase = i * nvp * 2;
+        const polyBase = i * nvp;
 
         for (let j = 0; j < nvp; j++) {
             const v0 = polyMesh.polys[polyBase + j];
             if (v0 === MESH_NULL_IDX) break;
 
-            const neighbor = polyMesh.polys[polyBase + nvp + j];
+            const neighbor = polyMesh.polyEdgeNeighbours[polyBase + j];
             if (neighbor & POLY_NEIS_FLAG_EXT_LINK) continue; // Skip boundary edges
 
             const nj =
@@ -1068,13 +1068,13 @@ export function createPolyMeshHelper(polyMesh: PolyMesh): DebugObject {
     const portalColor = new THREE.Color().setRGB(1, 1, 1).multiplyScalar(0.5); // RGB(255,255,255) with alpha 128/255
 
     for (let i = 0; i < polyMesh.nPolys; i++) {
-        const polyBase = i * nvp * 2;
+        const polyBase = i * nvp;
 
         for (let j = 0; j < nvp; j++) {
             const v0 = polyMesh.polys[polyBase + j];
             if (v0 === MESH_NULL_IDX) break;
 
-            const neighbor = polyMesh.polys[polyBase + nvp + j];
+            const neighbor = polyMesh.polyEdgeNeighbours[polyBase + j];
 
             // Skip non-boundary edges
             if ((neighbor & POLY_NEIS_FLAG_EXT_LINK) === 0) continue;
