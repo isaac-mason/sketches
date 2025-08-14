@@ -6,15 +6,20 @@ import { NodeType } from '../query/nav-mesh';
 
 /** the source data used to create a navigation mesh tile */
 export type NavMeshTileParams = {
-    /** the polygon mesh parameters */
-    polyMesh: {
-        /** the polygon mesh vertices, [x1, y1, z1, ...], in local tile cell space */
+    /** the nav mesh polygons in world space */
+    polys: {
+        /** the polygon mesh vertices, [x1, y1, z1, ...], in world space */
         vertices: number[];
 
         /** the polygon vertex indices */
         polys: number[];
 
-        /** the polygon edge neighbors */
+        /**
+         * Polygon edge neighbors.
+         * If you used the voxelisation pipeline / buildPolyMesh to generate nav mesh polys, use
+         * the generated polygon edge neighbour data in polyMesh.neis.
+         * If you are providing an external polygon mesh, neis must be built with buildMeshAdjacency and findPortalEdges. 
+         */
         neis: number[];
 
         /** the polygon flags */
@@ -35,14 +40,8 @@ export type NavMeshTileParams = {
         /** the detail mesh vertices, [x1, y1, z1, ...] */
         detailVertices: number[];
 
-        /** the number of vertices in the detail mesh */
-        nVertices: number;
-
         /** the detail mesh triangles, [a1, b1, c1, a2, b2, c2, ...] */
         detailTriangles: number[];
-
-        /** the number of triangles in the detail mesh */
-        nTriangles: number;
     };
 
     /** the user defined id of the tile */
@@ -63,10 +62,18 @@ export type NavMeshTileParams = {
     /** whether to build a bounding volume tree for the tile */
     buildBvTree: boolean;
 
-    /** the xz-plane cell size of the polygon mesh */
+    /** 
+     * The xz-plane cell size.
+     * If the tile was generated with voxelization, it should be the voxel cell size.
+     * If the tile was created with a different method, use a value that approximates the level of precision required for the tile.
+     */
     cellSize: number;
 
-    /** the y-axis cell height of the polygon mesh */
+    /** 
+     * The y-axis cell size.
+     * If the tile was generated with voxelization, it should be the voxel cell size.
+     * If the tile was created with a different method, use a value that approximates the level of precision required for the tile.
+     */
     cellHeight: number;
 
     /** the agent height in world units */
@@ -92,7 +99,7 @@ export type CreateNavMeshTileResult = {
 };
 
 export const createNavMeshTile = (params: NavMeshTileParams): CreateNavMeshTileResult => {
-    if (params.polyMesh.vertices.length <= 0) {
+    if (params.polys.vertices.length <= 0) {
         return {
             success: false,
             status: CreateNavMeshTileStatus.EMPTY_VERTS,
@@ -100,7 +107,7 @@ export const createNavMeshTile = (params: NavMeshTileParams): CreateNavMeshTileR
         };
     }
 
-    if (params.polyMesh.polys.length <= 0) {
+    if (params.polys.polys.length <= 0) {
         return {
             success: false,
             status: CreateNavMeshTileStatus.EMPTY_POLYS,
@@ -108,13 +115,11 @@ export const createNavMeshTile = (params: NavMeshTileParams): CreateNavMeshTileR
         };
     }
 
-    const nvp = params.polyMesh.maxVerticesPerPoly;
-
-    const nVertices = params.polyMesh.vertices.length / 3;
-    const nPolys = params.polyMesh.polys.length / nvp;
+    const nvp = params.polys.maxVerticesPerPoly;
+    const nPolys = params.polys.polys.length / nvp;
 
     const tile: NavMeshTile = {
-        id: 0,
+        id: -1,
         tileX: params.tileX,
         tileY: params.tileY,
         tileLayer: params.tileLayer,
@@ -132,19 +137,8 @@ export const createNavMeshTile = (params: NavMeshTileParams): CreateNavMeshTileR
         walkableRadius: params.walkableRadius,
     };
 
-    const cellSize = params.cellSize;
-    const cellHeight = params.cellHeight;
-
-    // store vertices, transforming to world space
-    for (let i = 0; i < nVertices; i++) {
-        const vertexIndex = i * 3;
-        tile.vertices.push(
-            params.bounds[0][0] + params.polyMesh.vertices[vertexIndex] * cellSize,
-            params.bounds[0][1] + params.polyMesh.vertices[vertexIndex + 1] * cellHeight,
-            params.bounds[0][2] + params.polyMesh.vertices[vertexIndex + 2] * cellSize,
-        );
-    }
-
+    // store vertices
+    tile.vertices = structuredClone(params.polys.vertices);
 
     // create polys from input data
     for (let i = 0; i < nPolys; i++) {
@@ -152,14 +146,14 @@ export const createNavMeshTile = (params: NavMeshTileParams): CreateNavMeshTileR
             type: NodeType.GROUND_POLY,
             vertices: [],
             neis: [],
-            flags: params.polyMesh.polyFlags[i],
-            area: params.polyMesh.polyAreas[i],
+            flags: params.polys.polyFlags[i],
+            area: params.polys.polyAreas[i],
         };
 
         // extract polygon data for this polygon
         const polyStart = i * nvp;
-        const vertIndices = params.polyMesh.polys.slice(polyStart, polyStart + nvp);
-        const neiData = params.polyMesh.neis.slice(polyStart, polyStart + nvp);
+        const vertIndices = params.polys.polys.slice(polyStart, polyStart + nvp);
+        const neiData = params.polys.neis.slice(polyStart, polyStart + nvp);
 
         // build vertex indices and neighbor data
         for (let j = 0; j < nvp; j++) {
@@ -237,7 +231,7 @@ export const createNavMeshTile = (params: NavMeshTileParams): CreateNavMeshTileR
                     );
                 }
 
-                vbase += params.polyMesh.maxVerticesPerPoly - nPolyVertices;
+                vbase += params.polys.maxVerticesPerPoly - nPolyVertices;
             }
         }
 

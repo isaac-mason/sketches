@@ -35,6 +35,7 @@ import {
     filterLedgeSpans,
     filterLowHangingWalkableObstacles,
     filterWalkableLowHeightSpans,
+    getWorldSpacePolyMeshVertices,
     markWalkableTriangles,
     pointSetToWalkableTriangleMeshBPA,
     rasterizeTriangles,
@@ -376,24 +377,22 @@ const SoloNavMesh = () => {
         nav.tileHeight = polyMesh.bounds[1][2] - polyMesh.bounds[0][2];
         vec3.copy(nav.origin, polyMesh.bounds[0]);
 
+        const polyVerticesWorld = getWorldSpacePolyMeshVertices(polyMesh);
+
         const navMeshTileParams: NavMeshTileParams = {
             bounds: polyMesh.bounds,
-            polyMesh: {
-                vertices: polyMesh.vertices,
-                nVertices: polyMesh.nVertices,
+            polys: {
+                vertices: polyVerticesWorld,
                 polys: polyMesh.polys,
                 neis: polyMesh.neis,
                 polyFlags: polyMesh.flags,
                 polyAreas: polyMesh.areas,
-                nPolys: polyMesh.nPolys,
                 maxVerticesPerPoly: polyMesh.maxVerticesPerPoly,
             },
             detailMesh: {
                 detailMeshes: polyMeshDetail.meshes,
                 detailVertices: polyMeshDetail.vertices,
                 detailTriangles: polyMeshDetail.triangles,
-                nVertices: polyMeshDetail.nVertices,
-                nTriangles: polyMeshDetail.nTriangles,
             },
             userId: 0,
             tileX: 0,
@@ -994,24 +993,22 @@ const TiledNavMesh = () => {
                 intermediates.polyMesh.push(polyMesh);
                 intermediates.polyMeshDetail.push(polyMeshDetail);
 
+                const polyVerticesWorld = getWorldSpacePolyMeshVertices(polyMesh);
+
                 const navMeshTileParams: NavMeshTileParams = {
                     bounds: polyMesh.bounds,
-                    polyMesh: {
-                        vertices: polyMesh.vertices,
-                        nVertices: polyMesh.nVertices,
+                    polys: {
+                        vertices: polyVerticesWorld,
                         polys: polyMesh.polys,
                         neis: polyMesh.neis,
                         polyFlags: polyMesh.flags,
                         polyAreas: polyMesh.areas,
-                        nPolys: polyMesh.nPolys,
                         maxVerticesPerPoly: polyMesh.maxVerticesPerPoly,
                     },
                     detailMesh: {
                         detailMeshes: polyMeshDetail.meshes,
                         detailVertices: polyMeshDetail.vertices,
                         detailTriangles: polyMeshDetail.triangles,
-                        nVertices: polyMeshDetail.nVertices,
-                        nTriangles: polyMeshDetail.nTriangles,
                     },
                     userId: 0,
                     tileX,
