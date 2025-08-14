@@ -18,7 +18,7 @@ export type NavMeshTileParams = {
         polys: number[];
 
         /** the polygon edge neighbors */
-        polyEdgeNeighbours: number[];
+        neis: number[];
 
         /** the polygon flags */
         polyFlags: number[];
@@ -161,7 +161,7 @@ export const createNavMeshTile = (params: NavMeshTileParams): CreateNavMeshTileR
         // extract polygon data for this polygon
         const polyStart = i * nvp;
         const vertIndices = params.polyMesh.polys.slice(polyStart, polyStart + nvp);
-        const neiData = params.polyMesh.polyEdgeNeighbours.slice(polyStart, polyStart + nvp);
+        const neiData = params.polyMesh.neis.slice(polyStart, polyStart + nvp);
 
         // build vertex indices and neighbor data
         for (let j = 0; j < nvp; j++) {
