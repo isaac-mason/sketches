@@ -54,6 +54,7 @@ export const sketchesOrder = [
     'z-fighting-mitigations',
     'transparency/face-sorting',
     'tris-in-box',
+    'ball-pivoting-algorithm',
     'glsl-shaders-from-scratch/intro/varyings',
     'glsl-shaders-from-scratch/intro/uniforms',
     'glsl-shaders-from-scratch/intro/attributes',
