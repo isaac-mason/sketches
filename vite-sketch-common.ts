@@ -1,8 +1,8 @@
 import basicSsl from '@vitejs/plugin-basic-ssl'
 import react from '@vitejs/plugin-react-swc'
-import * as fs from 'fs'
-import * as path from 'path'
-import { UserConfig } from 'vite'
+import * as fs from 'node:fs'
+import * as path from 'node:path'
+import type { UserConfig } from 'vite'
 
 function findRootPackageDirectory(currentDirectory: string) {
     while (currentDirectory !== path.parse(currentDirectory).root) {

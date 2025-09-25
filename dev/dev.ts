@@ -1,7 +1,7 @@
 import express from 'express'
 import * as vite from 'vite'
-import { resolve } from 'path'
-import containerViteConfig from '../container/vite.config.mts'
+import { resolve } from 'node:path'
+import containerViteConfig from '../container/vite.config.mjs'
 import * as SketchDevServers from './sketch-dev-servers'
 import { containerAppDirectory, copySketchCoverImages, createSketchesMeta, getFreePorts, writeSketchesMeta } from './utils'
 

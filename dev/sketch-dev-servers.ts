@@ -113,7 +113,7 @@ export const get = async (
     const cwd = path.resolve(rootDirectory, 'sketches', sketchPath);
 
     const process = Bun.spawn({
-        cmd: ['yarn', 'dev', '--port', String(port)],
+        cmd: ['pnpm', 'run', 'dev', '--port', String(port)],
         cwd,
         stdout: 'pipe',
         stderr: 'pipe',

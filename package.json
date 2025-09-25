@@ -7,8 +7,8 @@
         "dev": "NODE_TLS_REJECT_UNAUTHORIZED=0 bun dev/dev.ts",
         "build": "bun dev/build.ts",
         "preview": "vite preview",
-        "format": "yarn biome format --write sketches/. common/.",
-        "lint": "yarn biome lint --write sketches/. common/."
+        "format": "pnpm biome format --write sketches/. common/.",
+        "lint": "pnpm biome lint --write sketches/. common/."
     },
     "devDependencies": {
         "@biomejs/biome": "^1.9.4",
@@ -25,8 +25,8 @@
         "container",
         "sketches/**/*"
     ],
-    "packageManager": "yarn@4.1.1",
     "resolutions": {
         "@dimforge/rapier3d-compat": "^0.15.0"
-    }
+    },
+    "packageManager": "pnpm@8.15.2+sha1.798034f615aa211c6c2ae00010cc20be5fc102ee"
 }

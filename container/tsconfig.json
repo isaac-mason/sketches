@@ -21,6 +21,5 @@
             "@/common": ["../common/index.ts"]
         }
     },
-    "include": ["src", "generated", "../common"],
-    "references": [{ "path": "./tsconfig.node.json" }]
+    "include": ["src", "generated", "../common"]
 }

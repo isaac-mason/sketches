@@ -43,7 +43,7 @@ export const sketchesOrder = [
     'nature/grass',
     'nature/grass-2',
     'd3/force-directed-graph',
-    'fractals/mandelbrot-set',
+    'mandelbrot-set',
     'character-animation/basic',
     'character-animation/mixamo-animations',
     'postprocessing/pixelation',

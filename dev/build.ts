@@ -18,7 +18,7 @@ try {
     console.log('⏳ building sketches')
     for (const { path } of sketchesMeta) {
         console.log(`\n⏳ building sketch: ${path}\n`)
-        await $`(cd sketches/${path} && yarn build)`.cwd(rootDirectory)
+        await $`(cd sketches/${path} && pnpm run build)`.cwd(rootDirectory)
     }
 
     console.log('⏳ copying sketch builds to sketches-static')
