@@ -106,7 +106,7 @@ console.log(`
 console.log(`sketches dev server running at http://127.0.0.1:${port}`)
 
 // handle exit signals
-;['exit', 'SIGINT', 'SIGTERM', 'SIGQUIT'].forEach((signal) => {
+for (const signal of ['exit', 'SIGINT', 'SIGTERM', 'SIGQUIT']) {
     process.on(signal, async () => {
         console.log(`Received ${signal}, stopping all sketches...`)
 
@@ -114,6 +114,4 @@ console.log(`sketches dev server running at http://127.0.0.1:${port}`)
 
         process.exit()
     })
-})
-
-// open 
+}
