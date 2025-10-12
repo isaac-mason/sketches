@@ -232,12 +232,12 @@ importers:
       arancini:
         specifier: ^8.1.0
         version: 8.1.0(react-dom@19.2.0)(react@19.2.0)
-      gl-matrix:
-        specifier: ^3.4.3
-        version: 3.4.4
       leva:
         specifier: ^0.10.0
         version: 0.10.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)
+      maaths:
+        specifier: ^0.0.4
+        version: 0.0.4
       react:
         specifier: ^19.2.0
         version: 19.2.0
@@ -248,9 +248,6 @@ importers:
         specifier: ^0.180.0
         version: 0.180.0
     devDependencies:
-      '@types/gl-matrix':
-        specifier: ^3.2.0
-        version: 3.2.0
       '@types/react':
         specifier: ^19.2.2
         version: 19.2.2
@@ -2081,12 +2078,12 @@ importers:
       arancini:
         specifier: ^8.1.0
         version: 8.1.0(react-dom@19.2.0)(react@19.2.0)
-      gl-matrix:
-        specifier: ^3.4.3
-        version: 3.4.4
       leva:
         specifier: ^0.10.0
         version: 0.10.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)
+      maaths:
+        specifier: ^0.0.4
+        version: 0.0.4
       react:
         specifier: ^19.2.0
         version: 19.2.0
@@ -2100,9 +2097,6 @@ importers:
         specifier: ^5.0.3
         version: 5.0.8(@types/react@19.2.2)(react@19.2.0)(use-sync-external-store@1.5.0)
     devDependencies:
-      '@types/gl-matrix':
-        specifier: ^3.2.0
-        version: 3.2.0
       '@types/react':
         specifier: ^19.2.2
         version: 19.2.2
@@ -5501,13 +5495,6 @@ packages:
     resolution: {integrity: sha512-6C8nqWur3j98U6+lXDfTUWIfgvZU+EumvpHKcYjujKH7woYyLj2sUmff0tRhrqM7BohUw7Pz3ZB1jj2gW9Fvmg==}
     dev: true
 
-  /@types/gl-matrix@3.2.0:
-    resolution: {integrity: sha512-CY4JAtSOGQX7rVgqVuOk7ZfaLv8VeadDMPj3smMOy8Hp/YiHONa3Mr0mEUgbo0eEwV7+Owpf6BwspcA7hv4NXg==}
-    deprecated: This is a stub types definition. gl-matrix provides its own type definitions, so you do not need this installed.
-    dependencies:
-      gl-matrix: 3.4.4
-    dev: true
-
   /@types/http-errors@2.0.5:
     resolution: {integrity: sha512-r8Tayk8HJnX0FztbZN7oVqGccWgw98T/0neJphO91KkmOzug1KkofZURD4UaD5uH8AqcFLfdPErnBod0u71/qg==}
     dev: true
@@ -6822,6 +6809,7 @@ packages:
 
   /gl-matrix@3.4.4:
     resolution: {integrity: sha512-latSnyDNt/8zYUB6VIJ6PCh2jBjJX6gnDsoCZ7LyW7GkqrD51EWwa9qCoGixj8YqBtETQK/xY7OmpTF8xz1DdQ==}
+    dev: false
 
   /glob-parent@5.1.2:
     resolution: {integrity: sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow==}

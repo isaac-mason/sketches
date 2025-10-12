@@ -1,4 +1,4 @@
-import { vec3, mat3, quat } from 'gl-matrix';
+import { vec3, mat3, quat } from 'maaths';
 
 export type Vec3 = [number, number, number];
 

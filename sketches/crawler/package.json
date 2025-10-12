@@ -16,14 +16,13 @@
         "@react-three/rapier": "^2.1.0",
         "@dimforge/rapier3d-compat": "0.15.0",
         "arancini": "^8.1.0",
-        "gl-matrix": "^3.4.3",
+        "maaths": "^0.0.4",
         "leva": "^0.10.0",
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
         "three": "^0.180.0"
     },
     "devDependencies": {
-        "@types/gl-matrix": "^3.2.0",
         "@types/react": "^19.2.2",
         "@types/react-dom": "^19.2.1",
         "@types/three": "^0.180.0"

@@ -1,4 +1,4 @@
-import { vec2, mat2 } from 'gl-matrix';
+import { vec2, mat2 } from 'maaths';
 
 export type Vec2 = [number, number];
 

@@ -14,7 +14,7 @@
         "@react-three/drei": "^10.7.6",
         "@react-three/fiber": "^9.3.0",
         "arancini": "^8.1.0",
-        "gl-matrix": "^3.4.3",
+        "maaths": "^0.0.4",
         "leva": "^0.10.0",
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
@@ -22,7 +22,6 @@
         "zustand": "^5.0.3"
     },
     "devDependencies": {
-        "@types/gl-matrix": "^3.2.0",
         "@types/react": "^19.2.2",
         "@types/react-dom": "^19.2.1",
         "@types/three": "^0.180.0"
