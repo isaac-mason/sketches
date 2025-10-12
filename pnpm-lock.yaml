@@ -110,8 +110,8 @@ importers:
         specifier: ^19.1.6
         version: 19.1.9(@types/react@19.1.13)
       vite-imagetools:
-        specifier: ^7.0.5
-        version: 7.1.1
+        specifier: ^9.0.0
+        version: 9.0.0
       vite-plugin-html:
         specifier: ^3.2.2
         version: 3.2.2(vite@7.1.9)
@@ -6955,9 +6955,9 @@ packages:
     resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
     dev: false
 
-  /imagetools-core@7.1.0:
-    resolution: {integrity: sha512-8Aa4NecBBGmTkaAUjcuRYgTPKHCsBEWYmCnvKCL6/bxedehtVVFyZPdXe8DD0Nevd6UWBq85ifUaJ8498lgqNQ==}
-    engines: {node: '>=18.0.0'}
+  /imagetools-core@9.0.0:
+    resolution: {integrity: sha512-LAU2iVl6MuLbARLrZFEOrgqUFGmHij0FqqOR1/mMndUzJoPz2BU4gCXUhjikgwwmfhBPa/1szwiliUy//ZWafw==}
+    engines: {node: '>=20.0.0'}
     dev: true
 
   /immediate@3.0.6:
@@ -8840,12 +8840,12 @@ packages:
     engines: {node: '>= 0.8'}
     dev: true
 
-  /vite-imagetools@7.1.1:
-    resolution: {integrity: sha512-6Dz0ZD2u1u59dw0ryid4beaDcCNNiTfLXUg6XLxx9n7Qm4BgAAm8TozYUnIH0aT4FDAADZqHsh9ZtISzAs4eKA==}
-    engines: {node: '>=18.0.0'}
+  /vite-imagetools@9.0.0:
+    resolution: {integrity: sha512-nxTMh7+PkZlOinV1DwgcDAill4+khOF29yQVqYEzleyKEb6qunRDYBYaT9TmGfx4l1fk2xSvDNgbiTYyiekHAw==}
+    engines: {node: '>=20.0.0'}
     dependencies:
       '@rollup/pluginutils': 5.3.0
-      imagetools-core: 7.1.0
+      imagetools-core: 9.0.0
       sharp: 0.34.4
     transitivePeerDependencies:
       - rollup
