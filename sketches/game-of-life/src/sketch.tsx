@@ -61,13 +61,13 @@ const GameOfLife = ({
     const drawing = useRef(false);
     const dirty = useRef(false);
 
-    const state = useMemo(() => new Uint8Array(gameWidth * gameHeight), []);
-    const nextState = useMemo(() => new Uint8Array(gameWidth * gameHeight), []);
+    const state = useMemo(() => new Uint8Array(gameWidth * gameHeight), [gameWidth, gameHeight]);
+    const nextState = useMemo(() => new Uint8Array(gameWidth * gameHeight), [gameWidth, gameHeight]);
     const dataTexture = useMemo(() => {
         const data = new Uint8Array(gameWidth * gameHeight * 4);
         const texture = new THREE.DataTexture(data, gameWidth, gameHeight, THREE.RGBAFormat);
         return { data, texture };
-    }, []);
+    }, [gameWidth, gameHeight]);
 
     const pageVisibile = usePageVisible();
 
@@ -99,11 +99,11 @@ const GameOfLife = ({
         }
 
         step.current();
-    }, []);
+    }, [step, gameWidth, gameHeight, state, nextState]);
 
     const fixedTimeStep = useMemo(() => {
         return new FixedTimeStep({ timeStep: 1 / 5, maxSubSteps: 5, step: () => step.current() });
-    }, []);
+    }, [step]);
 
     useFrame((_, delta) => {
         if (!pageVisibile) return;
@@ -170,7 +170,7 @@ const GameOfLife = ({
     useEffect(() => {
         uGameWidth.value = gameWidth;
         uGameHeight.value = gameHeight;
-    }, [gameWidth, gameHeight]);
+    }, [gameWidth, gameHeight, uGameWidth, uGameHeight]);
 
     const material = useMemo(() => {
         const meshPhongMaterial = new THREE.MeshBasicNodeMaterial();
@@ -184,7 +184,7 @@ const GameOfLife = ({
         meshPhongMaterial.colorNode = vec4(select(isAlive, vec4(1.0, 1.0, 1.0, 1.0), vec4(color('#333'), 0.5)));
 
         return meshPhongMaterial;
-    }, []);
+    }, [dataTexture.texture, uGameWidth, uGameHeight]);
 
     return (
         <mesh {...meshProps} ref={meshRef} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp}>
@@ -326,7 +326,7 @@ export function Sketch() {
         <WebGPUCanvas shadows dpr={[1, 1.5]}>
             <Bunnies>
                 {bunnies.map((bunny, i) => (
-                    <Bunny key={i} position={bunny.position} color={bunny.color} rotation-y={bunny.rotation} />
+                    <Bunny key={String(i)} position={bunny.position} color={bunny.color} rotation-y={bunny.rotation} />
                 ))}
             </Bunnies>
 
