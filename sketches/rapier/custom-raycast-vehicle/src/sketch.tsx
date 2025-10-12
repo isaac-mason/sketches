@@ -1,4 +1,4 @@
-import { Instructions, useLoadingAssets, usePageVisible } from '@/common'
+import { Instructions, useLoadingAssets, usePageVisible } from '@sketches/common'
 import { Environment, OrbitControls, Stars } from '@react-three/drei'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { CuboidCollider, CylinderCollider, Physics, RigidBody, useBeforePhysicsStep } from '@react-three/rapier'

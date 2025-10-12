@@ -1,4 +1,4 @@
-import { useResolution } from '@/common'
+import { useResolution } from '@sketches/common'
 import { OrthographicCamera } from '@react-three/drei'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { useRef } from 'react'

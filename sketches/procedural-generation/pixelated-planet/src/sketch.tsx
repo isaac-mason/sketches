@@ -1,4 +1,4 @@
-import { WebGPUCanvas } from '@/common'
+import { WebGPUCanvas } from '@sketches/common'
 import { Html, OrbitControls } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
 import { button, useControls } from 'leva'

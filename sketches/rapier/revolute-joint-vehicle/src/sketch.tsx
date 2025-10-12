@@ -5,7 +5,7 @@ import { CylinderCollider, Physics, RapierRigidBody, RigidBody, useFixedJoint, u
 import { useControls } from 'leva'
 import React, { RefObject, createRef, useEffect, useMemo, useRef } from 'react'
 import { Quaternion, Vector3, Vector3Tuple, Vector4Tuple } from 'three'
-import { Instructions, usePageVisible } from '@/common'
+import { Instructions, usePageVisible } from '@sketches/common'
 import { Canvas } from '@react-three/fiber'
 
 const CONTROLS = {

@@ -1,12 +1,9 @@
 {
     "name": "@sketches/caves",
-    "packageManager": "yarn@4.1.1",
     "private": true,
     "sketch": {
         "title": "Procedural Generation - Caves",
-        "tags": [
-            "procedural-generation"
-        ],
+        "tags": ["procedural-generation"],
         "dev": {
             "secure": false
         }

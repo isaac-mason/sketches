@@ -3,10 +3,7 @@
     "private": true,
     "sketch": {
         "title": "Recast Navigation - AR NavMesh",
-        "tags": [
-            "recast-navigation",
-            "ar"
-        ],
+        "tags": ["recast-navigation", "ar"],
         "hidden": true
     },
     "scripts": {
@@ -14,6 +11,7 @@
         "build": "vite build"
     },
     "dependencies": {
+        "@sketches/common": "workspace:*",
         "@react-three/drei": "^10.4.4",
         "@react-three/fiber": "^9.2.0",
         "@react-three/uikit": "^0.8.14",
@@ -29,8 +27,6 @@
     "devDependencies": {
         "@types/react": "^19.1.8",
         "@types/react-dom": "^19.1.6",
-        "@types/three": "^0.179.0",
-        "typescript": "^5.8.3",
-        "vite": "^7.0.2"
+        "@types/three": "^0.179.0"
     }
 }

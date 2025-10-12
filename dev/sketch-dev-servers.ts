@@ -107,7 +107,7 @@ export const get = async (
         throw new Error('no free ports');
     }
 
-    const secure = sketchMeta.dev?.secure ?? true;
+    const secure = sketchMeta.dev?.secure ?? false;
     const url = `http${secure ? 's' : ''}://localhost:${port}/`;
 
     const cwd = path.resolve(rootDirectory, 'sketches', sketchPath);

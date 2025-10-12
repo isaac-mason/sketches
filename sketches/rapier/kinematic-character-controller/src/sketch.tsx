@@ -1,4 +1,4 @@
-import { Instructions, useLoadingAssets, usePageVisible } from '@/common'
+import { Instructions, useLoadingAssets, usePageVisible } from '@sketches/common'
 import Rapier from '@dimforge/rapier3d-compat'
 import { Environment, KeyboardControls, PointerLockControls, useKeyboardControls } from '@react-three/drei'
 import { Canvas, ThreeElements, useFrame, useThree } from '@react-three/fiber'

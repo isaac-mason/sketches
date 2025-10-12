@@ -5,7 +5,7 @@
     "type": "module",
     "scripts": {
         "dev": "vite build",
-        "build": "tsc && vite build",
+        "build": "vite build",
         "preview": "vite preview",
         "format": "prettier src/. --write",
         "lint": "eslint src"
@@ -22,12 +22,7 @@
         "@types/node": "^22.13.10",
         "@types/react": "^19.1.8",
         "@types/react-dom": "^19.1.6",
-        "@vitejs/plugin-basic-ssl": "^1.2.0",
-        "@vitejs/plugin-react-swc": "^3.8.0",
-        "typescript": "^5.8.3",
-        "vite": "^7.0.2",
-        "vite-imagetools": "^7.0.5",
+        "vite-imagetools": "^9.0.0",
         "vite-plugin-html": "^3.2.2"
-    },
-    "packageManager": "yarn@4.1.1"
+    }
 }

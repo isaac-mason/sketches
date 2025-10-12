@@ -1,4 +1,4 @@
 {
     "extends": "../../../tsconfig.sketch.json",
-    "include": ["src", "src/lib", "../../../common", "../simple-voxels-lib/src/block-registry.ts", "../simple-voxels-lib/src/chunk-geometry.ts", "../simple-voxels-lib/src/chunk-material.ts", "../simple-voxels-lib/src/culled-mesher.ts", "src/load-image.ts", "../simple-voxels-lib/src/raycast.ts", "../simple-voxels-lib/src/texture-atlas.ts", "../simple-voxels-lib/src/voxels.ts", "../simple-voxels-lib/src/world.ts"]
+    "include": ["src"]
 }

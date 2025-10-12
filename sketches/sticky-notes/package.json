@@ -3,17 +3,14 @@
     "private": true,
     "sketch": {
         "title": "Sticky Notes",
-        "tags": [
-            "sticky-notes",
-            "ui",
-            "html"
-        ]
+        "tags": ["sticky-notes", "ui", "html"]
     },
     "scripts": {
         "dev": "vite dev",
         "build": "vite build"
     },
     "dependencies": {
+        "@sketches/common": "workspace:*",
         "@react-three/drei": "^10.4.4",
         "@react-three/fiber": "^9.2.0",
         "@use-gesture/react": "^10.3.1",
@@ -24,8 +21,6 @@
     "devDependencies": {
         "@types/react": "^19.1.8",
         "@types/react-dom": "^19.1.6",
-        "@types/three": "^0.179.0",
-        "typescript": "^5.8.3",
-        "vite": "^7.0.2"
+        "@types/three": "^0.179.0"
     }
 }

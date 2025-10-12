@@ -1,5 +1,5 @@
-import { useInterval } from '@/common/hooks/use-interval'
-import { usePageVisible } from '@/common/hooks/use-page-visible'
+import { useInterval } from '@sketches/common/hooks/use-interval'
+import { usePageVisible } from '@sketches/common/hooks/use-page-visible'
 import { useFrame, useThree } from '@react-three/fiber'
 import { useControls } from 'leva'
 import { useEffect, useState } from 'react'

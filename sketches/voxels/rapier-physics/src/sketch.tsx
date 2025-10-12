@@ -1,4 +1,4 @@
-import { WebGPUCanvas } from '@/common/components/webgpu-canvas';
+import { WebGPUCanvas } from '@sketches/common/components/webgpu-canvas';
 import Rapier from '@dimforge/rapier3d-compat';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
@@ -10,7 +10,7 @@ import {
 } from '@react-three/rapier';
 import { MIN_BLOCK_TEXTURE_SIZE, Voxels } from '@sketches/simple-voxels-lib';
 import { useControls } from 'leva';
-import { Generator, noise } from 'maath/random';
+import { createMulberry32Generator, createSimplex2D } from 'maaths';
 import {
 	createRef,
 	type ReactElement,
@@ -80,13 +80,13 @@ const GameWorld = () => {
 		const dirtLevel = -20;
 		const levelBottom = -30;
 
-		noise.seed(2);
-		const generator = new Generator(42);
+		const noise = createSimplex2D(2);
+		const generator = createMulberry32Generator(42);
 
 		for (let x = -levelHalfSize; x < levelHalfSize; x++) {
 			for (let z = -levelHalfSize; z < levelHalfSize; z++) {
-				let y = Math.floor(noise.simplex2(x / 200, z / 200) * 10);
-				y += Math.floor(noise.simplex2(x / 150, z / 150) * 5);
+				let y = Math.floor(noise(x / 200, z / 200) * 10);
+				y += Math.floor(noise(x / 150, z / 150) * 5);
 
 				// ground
 				for (let currentY = y; currentY >= levelBottom; currentY--) {
@@ -100,8 +100,8 @@ const GameWorld = () => {
 				}
 
 				// random trees
-				if (generator.value() < 0.002) {
-					const treeHeight = Math.floor(generator.value() * 5) + 5;
+				if (generator() < 0.002) {
+					const treeHeight = Math.floor(generator() * 5) + 5;
 					for (let y2 = y; y2 < y + treeHeight; y2++) {
 						voxels.setBlock(x, y2, z, wood.index);
 					}

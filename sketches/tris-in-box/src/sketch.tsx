@@ -1,5 +1,5 @@
 import { Canvas } from '@react-three/fiber'
-import cityEnvironment from '@pmndrs/assets/hdri/city.exr'
+import cityEnvironment from './city.hdr?url'
 import { Environment, MapControls, PerspectiveCamera, PivotControls, useGLTF } from '@react-three/drei'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'

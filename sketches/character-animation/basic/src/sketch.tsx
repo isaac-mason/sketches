@@ -1,5 +1,5 @@
 import { Canvas } from '@react-three/fiber'
-import cityEnvironment from '@pmndrs/assets/hdri/city.exr'
+import cityEnvironment from './city.hdr?url'
 import { Environment, OrbitControls, useAnimations, useGLTF } from '@react-three/drei'
 import { useEffect, useState } from 'react'
 import { LoopRepeat } from 'three'

@@ -1,4 +1,4 @@
-import { WebGPUCanvas } from '@/common/components/webgpu-canvas';
+import { WebGPUCanvas } from '@sketches/common/components/webgpu-canvas';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { type ThreeEvent, useFrame, useThree } from '@react-three/fiber';
 import {
@@ -6,7 +6,7 @@ import {
 	raycast,
 	Voxels,
 } from '@sketches/simple-voxels-lib';
-import { Generator, noise } from 'maath/random';
+import { createMulberry32Generator, createSimplex2D } from 'maaths';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js';
 import { Line2 } from 'three/examples/jsm/lines/webgpu/Line2.js';
@@ -54,13 +54,13 @@ const GameWorld = () => {
 
 		const levelHalfSize = 100;
 
-		noise.seed(2);
-		const generator = new Generator(42);
+		const noise = createSimplex2D(2);
+		const generator = createMulberry32Generator(42);
 
 		for (let x = -levelHalfSize; x < levelHalfSize; x++) {
 			for (let z = -levelHalfSize; z < levelHalfSize; z++) {
-				let y = Math.floor(noise.simplex2(x / 200, z / 200) * 30);
-				y += Math.floor(noise.simplex2(x / 50, z / 50) * 5);
+				let y = Math.floor(noise(x / 200, z / 200) * 30);
+				y += Math.floor(noise(x / 50, z / 50) * 5);
 
 				// ground
 				for (let y2 = y; y2 < y + 2; y2++) {
@@ -71,8 +71,8 @@ const GameWorld = () => {
 				}
 
 				// random stone formations
-				if (generator.value() < 0.01) {
-					const size = Math.floor(generator.value() * 10) + 1;
+				if (generator() < 0.01) {
+					const size = Math.floor(generator() * 10) + 1;
 					for (let x2 = x; x2 < x + size; x2++) {
 						for (let y2 = y; y2 < y + size; y2++) {
 							for (let z2 = z; z2 < z + size; z2++) {
@@ -115,12 +115,15 @@ const GameWorld = () => {
 
 			if (!hit) return;
 
+			
 			if (e.button === 0) {
 				const block = _raycastHitPosition.floor();
+				console.log('break', block.x, block.y, block.z);
 
 				voxels.setBlock(block.x, block.y, block.z, 0);
 			} else {
 				const block = _raycastHitPosition.add(_raycastHitNormal).floor();
+				console.log('place', block.x, block.y, block.z);
 
 				voxels.setBlock(block.x, block.y, block.z, 1);
 			}
@@ -145,7 +148,7 @@ const GameWorld = () => {
 		if (!voxels) return;
 
 		const findGroundY = (x: number, z: number) => {
-			let y = 100;
+			let y = 200;
 			const endY = -100;
 
 			while (y > endY) {
@@ -161,7 +164,7 @@ const GameWorld = () => {
 			return y;
 		};
 
-		const start = new THREE.Vector3(-50, 0, -50);
+		const start = new THREE.Vector3(-14, 0, -20);
 		start.y = findGroundY(start.x, start.z) + 1;
 		const end = new THREE.Vector3(50, 0, 50);
 		end.y = findGroundY(end.x, end.z) + 1;
@@ -177,6 +180,8 @@ const GameWorld = () => {
 			true,
 		);
 		console.timeEnd('pathfinding');
+
+		console.log("result", result);
 
 		if (!result.success) {
 			return;

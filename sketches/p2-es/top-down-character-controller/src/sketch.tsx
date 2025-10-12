@@ -1,4 +1,4 @@
-import { Instructions } from '@/common'
+import { Instructions } from '@sketches/common'
 import { CameraControls, KeyboardControls, PerspectiveCamera, useKeyboardControls } from '@react-three/drei'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { World } from 'arancini'

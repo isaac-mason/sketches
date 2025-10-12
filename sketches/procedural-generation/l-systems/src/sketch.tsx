@@ -1,6 +1,6 @@
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei'
-import { Generator } from 'maath/random'
+import { createMulberry32Generator } from 'maaths'
 import { useMemo, useState } from 'react'
 import * as THREE from 'three'
 import { LineGeometry } from 'three/addons/lines/LineGeometry.js'
@@ -89,7 +89,7 @@ const defaultSyntax = {
 }
 
 const generateSequence = (rules: Config['rules'], axiom: string, iterations: number) => {
-    const generator = new Generator(42)
+    const generator = createMulberry32Generator(42)
 
     const rulesMap: Record<string, Config['rules'][0]> = {}
     for (const rule of rules) {
@@ -108,7 +108,7 @@ const generateSequence = (rules: Config['rules'], axiom: string, iterations: num
                 continue
             }
 
-            if (rule.chance && generator.value() > rule.chance) {
+            if (rule.chance && generator() > rule.chance) {
                 newResult += char
                 continue
             }
@@ -135,7 +135,7 @@ const interpret = (sequence: string, angle: number, syntax: Config['syntax']) =>
     const characters = sequence.split('')
 
     for (const char of characters) {
-        const fn = syntax[char as never] as (context: InterpreterContext) => void | undefined
+        const fn = syntax[char as never] as (context: InterpreterContext) => undefined
 
         if (!fn) continue
 
@@ -312,6 +312,7 @@ export function Sketch() {
                 {configKeys.map((key) => (
                     <button
                         key={key}
+                        type="button"
                         onClick={() => setConfigKey(key)}
                         style={{
                             padding: '0.5rem',

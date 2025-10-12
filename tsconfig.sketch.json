@@ -16,10 +16,6 @@
         "noEmit": true,
         "jsx": "react-jsx",
         "experimentalDecorators": true,
-        "baseUrl": ".",
-        "paths": {
-            "@/common": ["./common/index.ts"],
-            "@/common/*": ["./common/*"]
-        }
+        "baseUrl": "."
     }
 }

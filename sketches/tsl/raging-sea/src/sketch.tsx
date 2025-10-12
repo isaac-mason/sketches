@@ -1,4 +1,4 @@
-import { WebGPUCanvas } from '@/common/components/webgpu-canvas'
+import { WebGPUCanvas } from '@sketches/common/components/webgpu-canvas'
 import { abs, color, mix, modelWorldMatrix, positionLocal, sin, time, vec3, vec4 } from 'three/tsl'
 import { MeshBasicNodeMaterial } from 'three/webgpu'
 import { perlinNoise3d } from './tsl/perlin-noise-3d'

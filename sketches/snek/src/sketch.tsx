@@ -27,8 +27,7 @@ import {
 	type Vector3Tuple,
 } from 'three';
 import { create } from 'zustand';
-import { Controls } from '../../../common/components/controls';
-import { WebGPUCanvas } from '../../../common/components/webgpu-canvas';
+import { Controls, WebGPUCanvas } from '@sketches/common';
 import {
 	type Chain,
 	JointConstraintType,

@@ -1,4 +1,4 @@
-import { getQueryParamOrDefault, usePageVisible } from '@/common'
+import { getQueryParamOrDefault, usePageVisible } from '@sketches/common'
 import Rapier from '@dimforge/rapier3d-compat'
 import { OrbitControls, Wireframe } from '@react-three/drei'
 import { Canvas, Vector3 as Vector3Tuple, useThree } from '@react-three/fiber'

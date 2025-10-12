@@ -1,4 +1,4 @@
-import { WebGPUCanvas } from '@/common'
+import { WebGPUCanvas } from '@sketches/common'
 import { OrbitControls } from '@react-three/drei'
 import { useControls } from 'leva'
 import { useMemo } from 'react'

@@ -1,5 +1,5 @@
 import tailwindcss from '@tailwindcss/vite'
-import react from '@vitejs/plugin-react-swc'
+import react from '@vitejs/plugin-react'
 import * as path from 'node:path'
 import { defineConfig } from 'vite'
 import { imagetools } from 'vite-imagetools'
@@ -47,11 +47,6 @@ export default defineConfig(() => {
                 ],
             }),
         ],
-        optimizeDeps: {
-            esbuildOptions: {
-                target: 'esnext',
-            },
-        },
         build: {
             target: 'esnext',
         },

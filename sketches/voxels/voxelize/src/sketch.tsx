@@ -1,4 +1,4 @@
-import { WebGPUCanvas } from '@/common/components/webgpu-canvas'
+import { WebGPUCanvas } from '@sketches/common/components/webgpu-canvas'
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei'
 import { MIN_BLOCK_TEXTURE_SIZE, Voxels } from '@sketches/simple-voxels-lib'
 import { useEffect, useRef } from 'react'

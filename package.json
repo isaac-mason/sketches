@@ -16,18 +16,18 @@
         "@types/express": "^4",
         "@types/http-proxy": "^1",
         "@types/node": "^22.13.10",
-        "@vitejs/plugin-basic-ssl": "^1.2.0",
         "bun": "^1.2.4",
         "express": "^4.21.2",
-        "typescript": "^5.8.3"
+        "typescript": "^5.8.3",
+        "@vitejs/plugin-react": "^5.0.4",
+        "vite": "npm:rolldown-vite@^7.1.16"
     },
-    "workspaces": [
-        "common",
-        "container",
-        "sketches/**/*"
-    ],
+    "workspaces": ["common", "container", "sketches/**/*"],
     "resolutions": {
         "@dimforge/rapier3d-compat": "^0.15.0"
+    },
+    "overrides": {
+        "vite": "npm:rolldown-vite@^7.1.16"
     },
     "packageManager": "pnpm@8.15.2+sha1.798034f615aa211c6c2ae00010cc20be5fc102ee"
 }

@@ -27,7 +27,7 @@ try {
     await copySketchCoverImages(sketchesMeta)
 
     console.log('⏳ building container app\n')
-    await $`yarn build`.cwd(containerAppDirectory)
+    await $`pnpm run build`.cwd(containerAppDirectory)
 
     console.log('\n\n✅ build succeded')
 } catch (e) {

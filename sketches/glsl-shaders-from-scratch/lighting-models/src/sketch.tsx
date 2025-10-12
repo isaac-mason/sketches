@@ -1,4 +1,4 @@
-import suziGlbUrl from '@pmndrs/assets/models/suzi.glb'
+import suziGlbUrl from './suzi.glb?url'
 import { OrbitControls, PerspectiveCamera, useCubeTexture, useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import { Canvas } from '@react-three/fiber'

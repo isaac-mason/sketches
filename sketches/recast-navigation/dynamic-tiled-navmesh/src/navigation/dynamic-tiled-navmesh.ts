@@ -1,4 +1,4 @@
-import { Topic } from '@/common/utils/topic'
+import { Topic } from '@sketches/common/utils/topic'
 import {
     Detour,
     NavMesh,

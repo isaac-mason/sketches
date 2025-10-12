@@ -3,14 +3,14 @@ import * as THREE from 'three'
 
 const N_MIPMAPS = 4
 
-export const MIN_BLOCK_TEXTURE_SIZE = Math.pow(2, N_MIPMAPS)
+export const MIN_BLOCK_TEXTURE_SIZE = 2 ** N_MIPMAPS
 
 const hashFace = (face: BlockRegistry.BlockCubeFace) => {
     if (face.texture) {
         return `tex-${face.texture.id}`
-    } else {
-        return `col-${face.color}`
     }
+
+    return `col-${face.color}`
 }
 
 type LayoutData = {
@@ -69,7 +69,7 @@ export const createLayout = (blockRegistry: BlockRegistry.State, textureSize: nu
         totalPixels += tile.size ** 2
     }
 
-    const canvasSize = Math.pow(2, Math.ceil(Math.log2(Math.sqrt(totalPixels))))
+    const canvasSize = 2 ** Math.ceil(Math.log2(Math.sqrt(totalPixels)))
     const canvasWidth = canvasSize
     const canvasHeight = canvasSize
 

@@ -1,0 +1,26 @@
+{
+    "name": "@sketches/lines",
+    "private": true,
+    "sketch": {
+        "title": "Lines - Image",
+        "tags": ["lines", "image"]
+    },
+    "scripts": {
+        "dev": "vite dev",
+        "build": "vite build"
+    },
+    "dependencies": {
+        "@sketches/common": "workspace:*",
+        "@react-three/drei": "^10.4.4",
+        "@react-three/fiber": "^9.2.0",
+        "react": "^19.1.0",
+        "react-dom": "^19.1.0",
+        "three": "^0.179.1",
+        "leva": "^0.10.0"
+    },
+    "devDependencies": {
+        "@types/react": "^19.1.8",
+        "@types/react-dom": "^19.1.6",
+        "@types/three": "^0.179.0"
+    }
+}

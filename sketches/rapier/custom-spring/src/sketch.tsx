@@ -1,4 +1,4 @@
-import { usePageVisible } from '@/common';
+import { usePageVisible } from '@sketches/common';
 import { Html, OrbitControls, Text } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import {

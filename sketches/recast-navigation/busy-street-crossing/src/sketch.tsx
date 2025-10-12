@@ -1,14 +1,14 @@
-import { Canvas } from '@react-three/fiber'
-import cityEnvironment from '@pmndrs/assets/hdri/city.exr'
-import { Environment, OrbitControls } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
-import { World } from 'arancini'
-import { createReactAPI } from 'arancini/react'
-import { useControls } from 'leva'
-import { CrowdAgent, Vector3, init as initRecast, vec3 } from 'recast-navigation'
-import { suspend } from 'suspend-react'
-import { Object3D } from 'three'
-import { Agent, Navigation, Traversable } from './recast-react-api'
+import { Canvas } from '@react-three/fiber';
+import cityEnvironment from './city.hdr?url';
+import { Environment, OrbitControls } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
+import { World } from 'arancini';
+import { createReactAPI } from 'arancini/react';
+import { useControls } from 'leva';
+import { type CrowdAgent, type Vector3, init as initRecast, vec3 } from 'recast-navigation';
+import { suspend } from 'suspend-react';
+import type { Object3D } from 'three';
+import { Agent, Navigation, Traversable } from './recast-react-api';
 
 const targets = [
     // top left
@@ -27,63 +27,63 @@ const targets = [
     { x: 45, y: 0, z: 15 },
     // right bottom
     { x: 45, y: 0, z: -15 },
-]
+];
 
 type EntityType = {
-    agent?: CrowdAgent
-    object3D?: Object3D
-    target?: Vector3
-}
+    agent?: CrowdAgent;
+    object3D?: Object3D;
+    target?: Vector3;
+};
 
-const world = new World<EntityType>()
+const world = new World<EntityType>();
 
 const queries = {
     agents: world.query((e) => e.is('agent')),
     agentsWithObject3D: world.query((e) => e.is('agent', 'object3D')),
-}
+};
 
-const { useQuery, Entity, Entities, Component } = createReactAPI(world)
+const { useQuery, Entity, Entities, Component } = createReactAPI(world);
 
 const App = () => {
     const { debugNavMesh } = useControls('ai-busy-crossing', {
         debugNavMesh: false,
-    })
+    });
 
-    const agents = useQuery(queries.agentsWithObject3D)
+    const agents = useQuery(queries.agentsWithObject3D);
 
     /* update agent positions */
     useFrame(() => {
         for (const entity of agents) {
-            const { agent, object3D } = entity
-            const { x, y, z } = agent.position()
-            const { x: vx, y: vy, z: vz } = agent.velocity()
-            object3D.position.set(x, y, z)
-            object3D.lookAt(x + vx, y + vy, z + vz)
+            const { agent, object3D } = entity;
+            const { x, y, z } = agent.position();
+            const { x: vx, y: vy, z: vz } = agent.velocity();
+            object3D.position.set(x, y, z);
+            object3D.lookAt(x + vx, y + vy, z + vz);
 
             if (!entity.target) {
-                const target = targets[Math.floor(Math.random() * targets.length)]
+                const target = targets[Math.floor(Math.random() * targets.length)];
 
-                agent.requestMoveTarget(target)
-                entity.target = { ...target }
+                agent.requestMoveTarget(target);
+                entity.target = { ...target };
             }
 
-            const { target } = entity
+            const { target } = entity;
 
-            const tolerance = 5
+            const tolerance = 5;
 
             if (Math.abs(x - target.x) < tolerance && Math.abs(y - target.y) < tolerance && Math.abs(z - target.z) < tolerance) {
-                agent.resetMoveTarget()
-                world.remove(entity, 'target')
+                agent.resetMoveTarget();
+                world.remove(entity, 'target');
             }
         }
-    })
+    });
 
     return (
         <>
             <Navigation debug={debugNavMesh} generatorConfig={{ walkableRadius: 2 }}>
                 {/* create some agents */}
                 {Array.from({ length: 200 }).map((_, idx) => (
-                    <Entity key={idx}>
+                    <Entity key={String(idx)}>
                         <Component name="agent">
                             <Agent
                                 initialPosition={vec3.toArray(targets[Math.floor(Math.random() * targets.length)])}
@@ -152,7 +152,7 @@ const App = () => {
             {/* zebra crossings */}
             {Array.from({ length: 10 }).map((_, idx) => (
                 <mesh
-                    key={idx}
+                    key={String(idx)}
                     position={[-9 + idx * 2, 0.05, -15]}
                     rotation-x={-Math.PI / 2}
                     rotation-y={Math.PI / 2}
@@ -164,7 +164,7 @@ const App = () => {
             ))}
             {Array.from({ length: 10 }).map((_, idx) => (
                 <mesh
-                    key={idx}
+                    key={String(idx)}
                     position={[-9 + idx * 2, 0.05, 15]}
                     rotation-x={-Math.PI / 2}
                     rotation-y={Math.PI / 2}
@@ -175,13 +175,13 @@ const App = () => {
                 </mesh>
             ))}
             {Array.from({ length: 10 }).map((_, idx) => (
-                <mesh key={idx} position={[15, 0.05, -9 + idx * 2]} rotation-x={-Math.PI / 2}>
+                <mesh key={String(idx)} position={[15, 0.05, -9 + idx * 2]} rotation-x={-Math.PI / 2}>
                     <meshBasicMaterial color="#fff" />
                     <planeGeometry args={[10, 1]} />
                 </mesh>
             ))}
             {Array.from({ length: 10 }).map((_, idx) => (
-                <mesh key={idx} position={[-15, 0.05, -9 + idx * 2]} rotation-x={-Math.PI / 2}>
+                <mesh key={String(idx)} position={[-15, 0.05, -9 + idx * 2]} rotation-x={-Math.PI / 2}>
                     <meshBasicMaterial color="#fff" />
                     <planeGeometry args={[10, 1]} />
                 </mesh>
@@ -189,18 +189,18 @@ const App = () => {
 
             <Environment files={cityEnvironment} />
         </>
-    )
-}
+    );
+};
 
 export function Sketch() {
     suspend(async () => {
-        await initRecast()
-    }, [])
+        await initRecast();
+    }, []);
 
     return (
         <Canvas camera={{ position: [5, 30, 10] }}>
             <App />
             <OrbitControls />
         </Canvas>
-    )
+    );
 }

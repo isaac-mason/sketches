@@ -17,9 +17,6 @@
         "jsx": "react-jsx",
         "experimentalDecorators": true,
         "baseUrl": ".",
-        "paths": {
-            "@/common": ["../common/index.ts"]
-        }
     },
-    "include": ["src", "generated", "../common"]
+    "include": ["src", "generated"]
 }

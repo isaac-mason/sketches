@@ -1,4 +1,4 @@
-import { WebGPUCanvas } from '@/common/components/webgpu-canvas'
+import { WebGPUCanvas } from '@sketches/common/components/webgpu-canvas'
 import { mix, positionLocal, sin, time, vec3 } from 'three/tsl'
 import { MeshBasicNodeMaterial } from 'three/webgpu'
 

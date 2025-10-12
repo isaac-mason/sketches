@@ -1,16 +1,10 @@
-import forestEnvironment from '@pmndrs/assets/hdri/forest.exr';
-import {
-    Environment,
-    OrbitControls,
-    PerspectiveCamera,
-} from '@react-three/drei';
+import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
+import { Controls, WebGPUCanvas, usePageVisible } from '@sketches/common';
 import { useControls } from 'leva';
 import { useEffect, useState } from 'react';
 import * as THREE from 'three';
-import { WebGPUCanvas, usePageVisible } from '../../../common';
 import Engine from '../lib/engine';
-import { Controls } from '../../../common/components/controls';
 
 const _position = new THREE.Vector3();
 const _quaternion = new THREE.Quaternion();
@@ -30,24 +24,10 @@ const CELL_SIZE = 5;
 
 const input = new engine.Input();
 
-const world = new engine.World(
-    N,
-    WORLD_SIZE,
-    CELL_SIZE,
-    FIXED_TIME_STEP,
-    BOUNDS_RADIUS,
-    BOUNDS_CENTER,
-);
+const world = new engine.World(N, WORLD_SIZE, CELL_SIZE, FIXED_TIME_STEP, BOUNDS_RADIUS, BOUNDS_CENTER);
 
 const Boids = () => {
-    const {
-        separationWeight,
-        alignmentWeight,
-        cohesionWeight,
-        maxSpeed,
-        minSpeed,
-        neighborRadius,
-    } = useControls({
+    const { separationWeight, alignmentWeight, cohesionWeight, maxSpeed, minSpeed, neighborRadius } = useControls({
         separationWeight: { value: 1.5, min: 0, max: 10, step: 0.1 },
         alignmentWeight: { value: 1.0, min: 0, max: 10, step: 0.1 },
         cohesionWeight: { value: 1.0, min: 0, max: 10, step: 0.1 },
@@ -56,8 +36,7 @@ const Boids = () => {
         neighborRadius: { value: 5, min: 1, max: 20, step: 0.1 },
     });
     const [batchedMesh, setBatchedMesh] = useState<THREE.BatchedMesh>();
-    const [boidIndexToInstanceId, setBoidIndexToInstanceId] =
-        useState<Map<number, number>>();
+    const [boidIndexToInstanceId, setBoidIndexToInstanceId] = useState<Map<number, number>>();
 
     const pageVisible = usePageVisible();
 
@@ -91,8 +70,7 @@ const Boids = () => {
     }, []);
 
     useFrame((_, dt) => {
-        if (!pageVisible || !world || !batchedMesh || !boidIndexToInstanceId)
-            return;
+        if (!pageVisible || !world || !batchedMesh || !boidIndexToInstanceId) return;
 
         input.separationWeight = separationWeight;
         input.alignmentWeight = alignmentWeight;
@@ -115,25 +93,18 @@ const Boids = () => {
             const boidBase = boidsPtr + (engine.BOID_SIZE / 4) * i; // Base pointer for this boid
 
             const x = heap[boidBase + engine.BOID_INTERPOLATED_POSITION_OFFSET / 4];
-            const y =
-                heap[boidBase + engine.BOID_INTERPOLATED_POSITION_OFFSET / 4 + 1];
-            const z =
-                heap[boidBase + engine.BOID_INTERPOLATED_POSITION_OFFSET / 4 + 2];
+            const y = heap[boidBase + engine.BOID_INTERPOLATED_POSITION_OFFSET / 4 + 1];
+            const z = heap[boidBase + engine.BOID_INTERPOLATED_POSITION_OFFSET / 4 + 2];
 
             const vx = heap[boidBase + engine.BOID_INTERPOLATED_VELOCITY_OFFSET / 4];
-            const vy =
-                heap[boidBase + engine.BOID_INTERPOLATED_VELOCITY_OFFSET / 4 + 1];
-            const vz =
-                heap[boidBase + engine.BOID_INTERPOLATED_VELOCITY_OFFSET / 4 + 2];
+            const vy = heap[boidBase + engine.BOID_INTERPOLATED_VELOCITY_OFFSET / 4 + 1];
+            const vz = heap[boidBase + engine.BOID_INTERPOLATED_VELOCITY_OFFSET / 4 + 2];
 
             const instanceId = boidIndexToInstanceId?.get(i);
             if (instanceId !== undefined && batchedMesh) {
                 _matrix.compose(
                     _position.set(x, y, z),
-                    _quaternion.setFromUnitVectors(
-                        _axis.set(1, 0, 0),
-                        _velocity.set(vx, vy, vz).normalize(),
-                    ),
+                    _quaternion.setFromUnitVectors(_axis.set(1, 0, 0), _velocity.set(vx, vy, vz).normalize()),
                     _scale.set(1, 1, 1),
                 );
                 batchedMesh.setMatrixAt(instanceId, _matrix);
@@ -165,11 +136,9 @@ export function Sketch() {
                 </mesh>
 
                 <ambientLight intensity={1.5} />
-                <Environment files={forestEnvironment} environmentIntensity={0.5} />
 
                 <PerspectiveCamera makeDefault position={[30, 10, 100]} />
                 <OrbitControls makeDefault />
-
             </WebGPUCanvas>
             <Controls />
         </>

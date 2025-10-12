@@ -3,15 +3,14 @@
     "private": true,
     "sketch": {
         "title": "Snek",
-        "tags": [
-            "procedural-animation"
-        ]
+        "tags": ["procedural-animation"]
     },
     "scripts": {
         "dev": "vite dev",
         "build": "vite build"
     },
     "dependencies": {
+        "@sketches/common": "workspace:*",
         "@react-three/drei": "^10.4.4",
         "@react-three/fiber": "^9.2.0",
         "arancini": "^8.1.0",
@@ -26,8 +25,6 @@
         "@types/gl-matrix": "^3.2.0",
         "@types/react": "^19.1.8",
         "@types/react-dom": "^19.1.6",
-        "@types/three": "^0.179.0",
-        "typescript": "^5.8.3",
-        "vite": "^7.0.2"
+        "@types/three": "^0.179.0"
     }
 }

@@ -1,5 +1,5 @@
 import { Canvas } from '@react-three/fiber'
-import suziGlbUrl from '@pmndrs/assets/models/suzi.glb'
+import suziGlbUrl from './suzi.glb?url'
 import { OrbitControls, useGLTF } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { useRef } from 'react'

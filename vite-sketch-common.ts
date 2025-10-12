@@ -1,5 +1,4 @@
-import basicSsl from '@vitejs/plugin-basic-ssl'
-import react from '@vitejs/plugin-react-swc'
+import react from '@vitejs/plugin-react'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import type { UserConfig } from 'vite'
@@ -43,33 +42,12 @@ export const createCommonConfig = (currentDirectory: string) => {
                     })
                 },
             },
-            // for easy local development using features that require a secure context
-            basicSsl({
-                certDir: path.resolve(rootPackageDirectoryDirectory, 'dev', 'certs'),
-            }),
         ],
-        optimizeDeps: {
-            esbuildOptions: {
-                target: 'esnext',
-            },
-            exclude: [
-                // these packages do not play nicely with vite pre-bundling
-                'recast-navigation',
-                '@recast-navigation/core',
-                '@recast-navigation/generators',
-                '@recast-navigation/three',
-            ],
-        },
         build: {
             target: 'esnext',
         },
         worker: {
             format: 'es',
-        },
-        resolve: {
-            alias: {
-                '@/common': path.resolve(`${rootPackageDirectoryDirectory}/common`),
-            },
         },
         // relative
         base: './',

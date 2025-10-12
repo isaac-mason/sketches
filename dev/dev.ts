@@ -30,7 +30,7 @@ const containerViteDevServer = await vite.createServer({
 // append headers required for SharedArrayBuffer
 app.use((_req, res, next) => {
     res.appendHeader('Cross-Origin-Opener-Policy', 'same-origin')
-    res.appendHeader('Cross-Origin-Embedder-Policy', 'credentialless') // 'require-corp')
+    res.appendHeader('Cross-Origin-Embedder-Policy', 'credentialless')
     res.appendHeader('X-Frame-Options', 'SAMEORIGIN')
     next()
 })

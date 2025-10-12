@@ -1,4 +1,4 @@
-import { useButtonGroupControls } from '@/common'
+import { useButtonGroupControls } from '@sketches/common'
 import { Canvas } from '@react-three/fiber'
 import { CameraShake, OrbitControls, PerspectiveCamera } from '@react-three/drei'
 import { ThreeElements, useFrame } from '@react-three/fiber'
