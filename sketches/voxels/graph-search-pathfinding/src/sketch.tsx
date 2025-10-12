@@ -1,4 +1,4 @@
-import { WebGPUCanvas } from '@sketches/common/components/webgpu-canvas';
+import { WebGPUCanvas } from '@sketches/common';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { type ThreeEvent, useFrame, useThree } from '@react-three/fiber';
 import {

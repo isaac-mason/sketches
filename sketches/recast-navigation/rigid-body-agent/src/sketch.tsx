@@ -1,18 +1,18 @@
-import { Canvas } from '@react-three/fiber'
-import { Crosshair } from '@sketches/common/components/crosshair'
-import { Instructions } from '@sketches/common/components/instructions'
-import { useLoadingAssets } from '@sketches/common/hooks/use-loading-assets'
-import cityEnvironment from './city.hdr?url'
-import { Environment, MeshReflectorMaterial, PerspectiveCamera } from '@react-three/drei'
-import { CuboidCollider, Physics, RigidBody } from '@react-three/rapier'
-import { useControls } from 'leva'
-import { Agent } from './agent/agent'
-import { BoxTool } from './box-tool'
-import { Component, Entity } from './ecs'
-import { NavMeshDebug, NavMeshGenerator } from './navmesh/navmesh'
-import { Player, PlayerControls } from './player'
-import { init as initRecast } from 'recast-navigation'
-import { suspend } from 'suspend-react'
+import { Environment, MeshReflectorMaterial, PerspectiveCamera } from '@react-three/drei';
+import { Canvas } from '@react-three/fiber';
+import { CuboidCollider, Physics, RigidBody } from '@react-three/rapier';
+import { Crosshair } from '@sketches/common';
+import { Instructions } from '@sketches/common';
+import { useLoadingAssets } from '@sketches/common';
+import { useControls } from 'leva';
+import { init as initRecast } from 'recast-navigation';
+import { suspend } from 'suspend-react';
+import { Agent } from './agent/agent';
+import { BoxTool } from './box-tool';
+import cityEnvironment from './city.hdr?url';
+import { Component, Entity } from './ecs';
+import { NavMeshDebug, NavMeshGenerator } from './navmesh/navmesh';
+import { Player, PlayerControls } from './player';
 
 const Scene = () => {
     return (
@@ -42,20 +42,20 @@ const Scene = () => {
                 </RigidBody>
             </Entity>
         </>
-    )
-}
+    );
+};
 
 export function Sketch() {
     suspend(async () => {
-        await initRecast()
-    }, [])
+        await initRecast();
+    }, []);
 
-    const loading = useLoadingAssets()
+    const loading = useLoadingAssets();
 
     const { physicsDebug, navMeshDebug } = useControls('physics', {
         physicsDebug: false,
         navMeshDebug: true,
-    })
+    });
 
     return (
         <>
@@ -89,5 +89,5 @@ export function Sketch() {
                 click to place boxes
             </Instructions>
         </>
-    )
+    );
 }

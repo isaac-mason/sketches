@@ -155,7 +155,7 @@ export const createCanvas = (layout: Layout, assets: Record<string, HTMLImageEle
     }
 
     // create mipmaps
-    const mipmaps: HTMLCanvasElement[] = []
+    const mipmaps: HTMLCanvasElement[] = [canvas]
 
     let currentCanvas = canvas
     for (let i = 0; i < N_MIPMAPS; i++) {

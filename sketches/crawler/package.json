@@ -11,8 +11,8 @@
     },
     "dependencies": {
         "@sketches/common": "workspace:*",
-        "@react-three/drei": "^10.4.4",
-        "@react-three/fiber": "^9.2.0",
+        "@react-three/drei": "^10.7.6",
+        "@react-three/fiber": "^9.3.0",
         "@react-three/rapier": "^2.1.0",
         "@dimforge/rapier3d-compat": "0.15.0",
         "arancini": "^8.1.0",
@@ -20,12 +20,12 @@
         "leva": "^0.10.0",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",
-        "three": "^0.179.1"
+        "three": "^0.180.0"
     },
     "devDependencies": {
         "@types/gl-matrix": "^3.2.0",
         "@types/react": "^19.1.8",
         "@types/react-dom": "^19.1.6",
-        "@types/three": "^0.179.0"
+        "@types/three": "^0.180.0"
     }
 }

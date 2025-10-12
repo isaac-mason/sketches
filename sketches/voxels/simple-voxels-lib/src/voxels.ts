@@ -84,6 +84,8 @@ export class Voxels {
      * Call as this.assets updates, e.g. as images load to facilitate lazy loading.
      */
     updateAtlasTexture() {
+        const prevTexture = this.textureAtlasTexture;
+
         const canvas = TextureAtlas.createCanvas(
             this.textureAtlasLayout!,
             this.assets,
@@ -94,6 +96,8 @@ export class Voxels {
         this.textureAtlasTexture = texture;
 
         this.chunkMaterial.updateTexture(texture);
+
+        prevTexture?.dispose();
     }
 
     /**

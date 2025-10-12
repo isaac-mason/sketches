@@ -1,4 +1,4 @@
-import { WebGPUCanvas } from '@sketches/common/components/webgpu-canvas';
+import { WebGPUCanvas } from '@sketches/common';
 import Rapier from '@dimforge/rapier3d-compat';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';

@@ -1,4 +1,4 @@
-import { WebGPUCanvas } from '@sketches/common/components/webgpu-canvas';
+import { WebGPUCanvas } from '@sketches/common';
 import sunsetEnvironment from './sunset.hdr?url';
 import { Environment, PerspectiveCamera } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';

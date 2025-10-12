@@ -1,6 +1,6 @@
 import { mix, uv, vec3 } from 'three/tsl'
 import { MeshBasicNodeMaterial } from 'three/webgpu'
-import { WebGPUCanvas } from '@sketches/common/components/webgpu-canvas'
+import { WebGPUCanvas } from '@sketches/common'
 
 const material = new MeshBasicNodeMaterial()
 

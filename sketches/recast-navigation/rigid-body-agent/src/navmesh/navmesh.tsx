@@ -1,5 +1,5 @@
-import { useConst } from '@sketches/common/hooks/use-const';
-import { useInterval } from '@sketches/common/hooks/use-interval';
+import { useConst } from '@sketches/common';
+import { useInterval } from '@sketches/common';
 import { useFrame } from '@react-three/fiber';
 import { useRapier } from '@react-three/rapier';
 import { useEffect, useRef, useState } from 'react';

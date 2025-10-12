@@ -256,7 +256,7 @@ const CameraRig = () => {
 
 const ReflectingFloor = () => {
     const { floorMaterial, reflection } = useMemo(() => {
-        const reflection = reflector({ resolution: 0.5 });
+        const reflection = reflector({ resolutionScale: 0.5 });
         reflection.target.rotateX(-Math.PI / 2);
 
         const floorMaterial = new THREE.MeshStandardNodeMaterial();

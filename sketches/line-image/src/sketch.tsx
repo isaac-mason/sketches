@@ -1,4 +1,4 @@
-import { WebGPUCanvas } from '@sketches/common/components/webgpu-canvas'
+import { WebGPUCanvas } from '@sketches/common'
 import { OrbitControls, useTexture } from '@react-three/drei'
 import { useControls } from 'leva'
 import { useMemo, useRef } from 'react'
