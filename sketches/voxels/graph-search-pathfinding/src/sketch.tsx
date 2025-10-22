@@ -6,7 +6,7 @@ import {
 	raycast,
 	Voxels,
 } from '@sketches/simple-voxels-lib';
-import { createMulberry32Generator, createSimplex2D } from 'maaths';
+import { createMulberry32Generator, createSimplex2D } from 'mathcat';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js';
 import { Line2 } from 'three/examples/jsm/lines/webgpu/Line2.js';

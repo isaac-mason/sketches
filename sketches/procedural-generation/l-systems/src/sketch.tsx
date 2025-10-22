@@ -1,6 +1,6 @@
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei'
-import { createMulberry32Generator } from 'maaths'
+import { createMulberry32Generator } from 'mathcat'
 import { useMemo, useState } from 'react'
 import * as THREE from 'three'
 import { LineGeometry } from 'three/addons/lines/LineGeometry.js'

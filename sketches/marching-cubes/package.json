@@ -13,7 +13,7 @@
         "voxelizer-cli": "./voxelizer-cli.ts"
     },
     "dependencies": {
-        "maaths": "^0.0.4",
+        "mathcat": "^0.0.6",
         "three": "^0.180.0"
     },
     "devDependencies": {

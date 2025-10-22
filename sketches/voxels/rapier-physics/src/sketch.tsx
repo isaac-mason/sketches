@@ -10,7 +10,7 @@ import {
 } from '@react-three/rapier';
 import { MIN_BLOCK_TEXTURE_SIZE, Voxels } from '@sketches/simple-voxels-lib';
 import { useControls } from 'leva';
-import { createMulberry32Generator, createSimplex2D } from 'maaths';
+import { createMulberry32Generator, createSimplex2D } from 'mathcat';
 import {
 	createRef,
 	type ReactElement,

@@ -3,7 +3,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { Crosshair } from '@sketches/common';
 import { WebGPUCanvas } from '@sketches/common';
 import { MIN_BLOCK_TEXTURE_SIZE, Voxels, raycast } from '@sketches/simple-voxels-lib';
-import { createMulberry32Generator, createSimplex2D } from 'maaths';
+import { createMulberry32Generator, createSimplex2D } from 'mathcat';
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three/webgpu';
 

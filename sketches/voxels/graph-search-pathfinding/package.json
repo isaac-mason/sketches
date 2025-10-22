@@ -16,7 +16,7 @@
         "@react-three/drei": "^10.7.6",
         "@react-three/fiber": "^9.3.0",
         "@sketches/simple-voxels-lib": "workspace:*",
-        "maaths": "0.0.4",
+        "mathcat": "0.0.6",
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
         "three": "^0.180.0"

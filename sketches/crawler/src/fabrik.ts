@@ -1,4 +1,4 @@
-import { vec3, mat3, quat } from 'maaths';
+import { vec3, mat3, quat } from 'mathcat';
 
 export type Vec3 = [number, number, number];
 

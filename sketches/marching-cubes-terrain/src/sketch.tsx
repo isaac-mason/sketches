@@ -1,7 +1,7 @@
 import { Canvas } from '@react-three/fiber'
 import cityEnvironment from './city.hdr?url'
 import { Environment, OrbitControls, PerspectiveCamera } from '@react-three/drei'
-import { createMulberry32Generator, createSimplex2D } from 'maaths'
+import { createMulberry32Generator, createSimplex2D } from 'mathcat'
 import { useMemo } from 'react'
 import * as THREE from 'three'
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js'
