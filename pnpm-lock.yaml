@@ -241,9 +241,9 @@ importers:
       leva:
         specifier: ^0.10.0
         version: 0.10.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)
-      maaths:
-        specifier: ^0.0.4
-        version: 0.0.4
+      mathcat:
+        specifier: ^0.0.6
+        version: 0.0.6
       react:
         specifier: ^19.2.0
         version: 19.2.0
@@ -979,9 +979,9 @@ importers:
 
   sketches/marching-cubes:
     dependencies:
-      maaths:
-        specifier: ^0.0.4
-        version: 0.0.4
+      mathcat:
+        specifier: ^0.0.6
+        version: 0.0.6
       three:
         specifier: ^0.180.0
         version: 0.180.0
@@ -1001,9 +1001,9 @@ importers:
       '@sketches/common':
         specifier: workspace:*
         version: link:../../common
-      maaths:
-        specifier: 0.0.4
-        version: 0.0.4
+      mathcat:
+        specifier: 0.0.6
+        version: 0.0.6
       react:
         specifier: ^19.2.0
         version: 19.2.0
@@ -1452,9 +1452,9 @@ importers:
       leva:
         specifier: ^0.10.0
         version: 0.10.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)
-      maaths:
-        specifier: 0.0.4
-        version: 0.0.4
+      mathcat:
+        specifier: 0.0.6
+        version: 0.0.6
       react:
         specifier: ^19.2.0
         version: 19.2.0
@@ -2100,9 +2100,9 @@ importers:
       leva:
         specifier: ^0.10.0
         version: 0.10.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)
-      maaths:
-        specifier: ^0.0.4
-        version: 0.0.4
+      mathcat:
+        specifier: ^0.0.6
+        version: 0.0.6
       react:
         specifier: ^19.2.0
         version: 19.2.0
@@ -2849,9 +2849,9 @@ importers:
       '@sketches/simple-voxels-lib':
         specifier: workspace:*
         version: link:../simple-voxels-lib
-      maaths:
-        specifier: 0.0.4
-        version: 0.0.4
+      mathcat:
+        specifier: 0.0.6
+        version: 0.0.6
       react:
         specifier: ^19.2.0
         version: 19.2.0
@@ -2886,9 +2886,9 @@ importers:
       '@sketches/simple-voxels-lib':
         specifier: workspace:*
         version: link:../simple-voxels-lib
-      maaths:
-        specifier: 0.0.4
-        version: 0.0.4
+      mathcat:
+        specifier: 0.0.6
+        version: 0.0.6
       react:
         specifier: ^19.2.0
         version: 19.2.0
@@ -2969,9 +2969,9 @@ importers:
       leva:
         specifier: ^0.10.0
         version: 0.10.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)
-      maaths:
-        specifier: 0.0.4
-        version: 0.0.4
+      mathcat:
+        specifier: 0.0.6
+        version: 0.0.6
       react:
         specifier: ^19.2.0
         version: 19.2.0
@@ -7423,10 +7423,6 @@ packages:
       three: 0.180.0
     dev: false
 
-  /maaths@0.0.4:
-    resolution: {integrity: sha512-47ph1qULtwUyk0B81zMiS2eMabBv+blKBmCZeXGJNqxgxAD581lENFi7QMa2gxNssoTcAz5tcI1nCN64JDFblQ==}
-    dev: false
-
   /magic-string@0.30.19:
     resolution: {integrity: sha512-2N21sPY9Ws53PZvsEpVtNuSW+ScYbQdp4b9qUaL+9QkHUrGFKo56Lg9Emg5s9V/qrtNBmiR01sYhUOwu3H+VOw==}
     dependencies:
@@ -7437,6 +7433,10 @@ packages:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
     engines: {node: '>= 0.4'}
     dev: true
+
+  /mathcat@0.0.6:
+    resolution: {integrity: sha512-yI06neyDl7vuBBumXYHBm48nx6GDFX5RMUb+iWyj8xVQ9FVCxYlIxIdRQqINH25ttXArrFgMTFhCJvtzOx+P+g==}
+    dev: false
 
   /media-typer@1.1.0:
     resolution: {integrity: sha512-aisnrDP4GNe06UcKFnV5bfMNPBUw4jsLGaWwWfnH3v02GnBuXX2MCVn5RbrWo0j3pczUilYblq7fQ7Nw2t5XKw==}
