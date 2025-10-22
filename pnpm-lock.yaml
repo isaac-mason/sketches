@@ -977,6 +977,19 @@ importers:
         specifier: ^0.180.0
         version: 0.180.0
 
+  sketches/marching-cubes:
+    dependencies:
+      maaths:
+        specifier: ^0.0.4
+        version: 0.0.4
+      three:
+        specifier: ^0.180.0
+        version: 0.180.0
+    devDependencies:
+      '@types/three':
+        specifier: ^0.180.0
+        version: 0.180.0
+
   sketches/marching-cubes-terrain:
     dependencies:
       '@react-three/drei':

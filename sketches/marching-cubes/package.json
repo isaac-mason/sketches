@@ -1,0 +1,22 @@
+{
+    "name": "@sketches/marching-cubes",
+    "private": true,
+    "sketch": {
+        "title": "Marching Cubes",
+        "tags": ["marching-cubes"]
+    },
+    "scripts": {
+        "dev": "vite dev",
+        "build": "vite build"
+    },
+    "bin": {
+        "voxelizer-cli": "./voxelizer-cli.ts"
+    },
+    "dependencies": {
+        "maaths": "^0.0.4",
+        "three": "^0.180.0"
+    },
+    "devDependencies": {
+        "@types/three": "^0.180.0"
+    }
+}
