@@ -7,24 +7,24 @@
 
 set -e
 
-emcc -s EXPORT_NAME="'Voxels'" \
+emcc -s EXPORT_NAME="'Engine'" \
   -O3 \
   -ffast-math \
   -s ALLOW_MEMORY_GROWTH \
   -s ASSERTIONS=0 \
   -s MALLOC=emmalloc \
   -lembind \
-  -o src/voxels.mjs \
-  src/voxels.cpp
+  -o src/engine.mjs \
+  src/engine.cpp
 
-emcc -s EXPORT_NAME="'Voxels'" -lembind --emit-tsd src/voxels.d.ts src/voxels.cpp
+emcc -s EXPORT_NAME="'Engine'" -lembind --emit-tsd src/engine.d.ts src/engine.cpp
 rm a.out.js
 rm a.out.wasm
 
-cat >> ./src/voxels.d.ts << EOF
+cat >> ./src/engine.d.ts << EOF
 
 declare const Module: () => Promise<MainModule>;
 export default Module;
-export type Voxels = MainModule;
+export type Engine = MainModule;
 export * from "./types";
 EOF
