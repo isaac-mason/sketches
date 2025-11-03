@@ -309,7 +309,7 @@ export class RapierRaycastVehicle {
             )
 
             // if hit
-            if (rayColliderIntersection && rayColliderIntersection.collider) {
+            if (rayColliderIntersection?.collider) {
                 // store ground rigid body
                 wheel.state.groundRigidBody = rayColliderIntersection.collider.parent()
 
@@ -736,7 +736,7 @@ const _computeImpulseDenominator_r0 = new Vector3()
 const _computeImpulseDenominator_c0 = new Vector3()
 const _computeImpulseDenominator_vec = new Vector3()
 const _computeImpulseDenominator_m = new Vector3()
-const _computeImpulseDenominator_effectiveWorldInvInertiaSqrt = new Matrix3()
+const _computeImpulseDenominator_effectiveWorldInvInertia = new Matrix3()
 
 function computeImpulseDenominator(body: Rapier.RigidBody, pos: Vector3, normal: Vector3): number {
     const r0 = _computeImpulseDenominator_r0
@@ -744,20 +744,20 @@ function computeImpulseDenominator(body: Rapier.RigidBody, pos: Vector3, normal:
     const vec = _computeImpulseDenominator_vec
     const m = _computeImpulseDenominator_m
 
-    const effectiveWorldInvInertiaSqrtSpdMatrix3 = body.effectiveWorldInvInertiaSqrt()
+    const effectiveWorldInvInertiaSpdMatrix3 = body.effectiveWorldInvInertia()
 
     // prettier-ignore
-    const effectiveWorldInvInertiaSqrt = _computeImpulseDenominator_effectiveWorldInvInertiaSqrt.set(
-        effectiveWorldInvInertiaSqrtSpdMatrix3.m11, effectiveWorldInvInertiaSqrtSpdMatrix3.m12, effectiveWorldInvInertiaSqrtSpdMatrix3.m13,
-        effectiveWorldInvInertiaSqrtSpdMatrix3.m23, effectiveWorldInvInertiaSqrtSpdMatrix3.m22, effectiveWorldInvInertiaSqrtSpdMatrix3.m23,
-        effectiveWorldInvInertiaSqrtSpdMatrix3.m33, effectiveWorldInvInertiaSqrtSpdMatrix3.m12, effectiveWorldInvInertiaSqrtSpdMatrix3.m33,
+    const effectiveWorldInvInertia = _computeImpulseDenominator_effectiveWorldInvInertia.set(
+        effectiveWorldInvInertiaSpdMatrix3.m11, effectiveWorldInvInertiaSpdMatrix3.m12, effectiveWorldInvInertiaSpdMatrix3.m13,
+        effectiveWorldInvInertiaSpdMatrix3.m21, effectiveWorldInvInertiaSpdMatrix3.m22, effectiveWorldInvInertiaSpdMatrix3.m23,
+        effectiveWorldInvInertiaSpdMatrix3.m31, effectiveWorldInvInertiaSpdMatrix3.m32, effectiveWorldInvInertiaSpdMatrix3.m33,
     )
 
     r0.subVectors(pos, body.translation() as Vector3)
 
     c0.crossVectors(r0, normal)
 
-    m.copy(c0).applyMatrix3(effectiveWorldInvInertiaSqrt)
+    m.copy(c0).applyMatrix3(effectiveWorldInvInertia)
 
     vec.crossVectors(m, r0)
 

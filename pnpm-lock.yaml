@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@dimforge/rapier3d-compat': ^0.15.0
+  '@dimforge/rapier3d-compat': ^0.19.2
 
 importers:
 
@@ -221,8 +221,8 @@ importers:
   sketches/crawler:
     dependencies:
       '@dimforge/rapier3d-compat':
-        specifier: ^0.15.0
-        version: 0.15.1
+        specifier: ^0.19.2
+        version: 0.19.2
       '@react-three/drei':
         specifier: ^10.7.6
         version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.180.0)(react-dom@19.2.0)(react@19.2.0)(three@0.180.0)
@@ -230,8 +230,8 @@ importers:
         specifier: ^9.3.0
         version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.180.0)
       '@react-three/rapier':
-        specifier: ^2.1.0
-        version: 2.1.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.180.0)
+        specifier: ^2.2.0
+        version: 2.2.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.180.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../common
@@ -1027,8 +1027,8 @@ importers:
   sketches/melodic-marble-run:
     dependencies:
       '@dimforge/rapier3d-compat':
-        specifier: ^0.15.0
-        version: 0.15.1
+        specifier: ^0.19.2
+        version: 0.19.2
       '@react-three/drei':
         specifier: ^10.7.6
         version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.180.0)(react-dom@19.2.0)(react@19.2.0)(three@0.180.0)
@@ -1036,8 +1036,8 @@ importers:
         specifier: ^9.3.0
         version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.180.0)
       '@react-three/rapier':
-        specifier: ^2.1.0
-        version: 2.1.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.180.0)
+        specifier: ^2.2.0
+        version: 2.2.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.180.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../common
@@ -1515,8 +1515,8 @@ importers:
   sketches/rapier/arcade-vehicle-controller:
     dependencies:
       '@dimforge/rapier3d-compat':
-        specifier: ^0.15.0
-        version: 0.15.1
+        specifier: ^0.19.2
+        version: 0.19.2
       '@react-three/drei':
         specifier: ^10.7.6
         version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.180.0)(react-dom@19.2.0)(react@19.2.0)(three@0.180.0)
@@ -1524,8 +1524,8 @@ importers:
         specifier: ^9.3.0
         version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.180.0)
       '@react-three/rapier':
-        specifier: ^2.1.0
-        version: 2.1.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.180.0)
+        specifier: ^2.2.0
+        version: 2.2.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.180.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -1555,8 +1555,8 @@ importers:
   sketches/rapier/cluster:
     dependencies:
       '@dimforge/rapier3d-compat':
-        specifier: ^0.15.0
-        version: 0.15.1
+        specifier: ^0.19.2
+        version: 0.19.2
       '@react-three/drei':
         specifier: ^10.7.6
         version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.180.0)(react-dom@19.2.0)(react@19.2.0)(three@0.180.0)
@@ -1564,8 +1564,8 @@ importers:
         specifier: ^9.3.0
         version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.180.0)
       '@react-three/rapier':
-        specifier: ^2.1.0
-        version: 2.1.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.180.0)
+        specifier: ^2.2.0
+        version: 2.2.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.180.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -1595,8 +1595,8 @@ importers:
   sketches/rapier/custom-raycast-vehicle:
     dependencies:
       '@dimforge/rapier3d-compat':
-        specifier: ^0.15.0
-        version: 0.15.1
+        specifier: ^0.19.2
+        version: 0.19.2
       '@react-three/drei':
         specifier: ^10.7.6
         version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.180.0)(react-dom@19.2.0)(react@19.2.0)(three@0.180.0)
@@ -1604,8 +1604,8 @@ importers:
         specifier: ^9.3.0
         version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.180.0)
       '@react-three/rapier':
-        specifier: ^2.1.0
-        version: 2.1.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.180.0)
+        specifier: ^2.2.0
+        version: 2.2.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.180.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -1635,8 +1635,8 @@ importers:
   sketches/rapier/custom-spring:
     dependencies:
       '@dimforge/rapier3d-compat':
-        specifier: ^0.15.0
-        version: 0.15.1
+        specifier: ^0.19.2
+        version: 0.19.2
       '@react-three/drei':
         specifier: ^10.7.6
         version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.180.0)(react-dom@19.2.0)(react@19.2.0)(three@0.180.0)
@@ -1644,8 +1644,8 @@ importers:
         specifier: ^9.3.0
         version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.180.0)
       '@react-three/rapier':
-        specifier: ^2.1.0
-        version: 2.1.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.180.0)
+        specifier: ^2.2.0
+        version: 2.2.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.180.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -1678,8 +1678,8 @@ importers:
   sketches/rapier/dynamic-raycast-vehicle-controller:
     dependencies:
       '@dimforge/rapier3d-compat':
-        specifier: ^0.15.0
-        version: 0.15.1
+        specifier: ^0.19.2
+        version: 0.19.2
       '@react-three/drei':
         specifier: ^10.7.6
         version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.180.0)(react-dom@19.2.0)(react@19.2.0)(three@0.180.0)
@@ -1687,8 +1687,8 @@ importers:
         specifier: ^9.3.0
         version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.180.0)
       '@react-three/rapier':
-        specifier: ^2.1.0
-        version: 2.1.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.180.0)
+        specifier: ^2.2.0
+        version: 2.2.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.180.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -1718,8 +1718,8 @@ importers:
   sketches/rapier/kinematic-character-controller:
     dependencies:
       '@dimforge/rapier3d-compat':
-        specifier: ^0.15.0
-        version: 0.15.1
+        specifier: ^0.19.2
+        version: 0.19.2
       '@react-three/drei':
         specifier: ^10.7.6
         version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.180.0)(react-dom@19.2.0)(react@19.2.0)(three@0.180.0)
@@ -1727,8 +1727,8 @@ importers:
         specifier: ^9.3.0
         version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.180.0)
       '@react-three/rapier':
-        specifier: ^2.1.0
-        version: 2.1.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.180.0)
+        specifier: ^2.2.0
+        version: 2.2.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.180.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -1758,8 +1758,8 @@ importers:
   sketches/rapier/pointer-controls:
     dependencies:
       '@dimforge/rapier3d-compat':
-        specifier: ^0.15.0
-        version: 0.15.1
+        specifier: ^0.19.2
+        version: 0.19.2
       '@react-three/drei':
         specifier: ^10.7.6
         version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.180.0)(react-dom@19.2.0)(react@19.2.0)(three@0.180.0)
@@ -1767,8 +1767,8 @@ importers:
         specifier: ^9.3.0
         version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.180.0)
       '@react-three/rapier':
-        specifier: ^2.1.0
-        version: 2.1.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.180.0)
+        specifier: ^2.2.0
+        version: 2.2.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.180.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -1798,8 +1798,8 @@ importers:
   sketches/rapier/revolute-joint-vehicle:
     dependencies:
       '@dimforge/rapier3d-compat':
-        specifier: ^0.15.0
-        version: 0.15.1
+        specifier: ^0.19.2
+        version: 0.19.2
       '@react-three/drei':
         specifier: ^10.7.6
         version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.180.0)(react-dom@19.2.0)(react@19.2.0)(three@0.180.0)
@@ -1807,8 +1807,8 @@ importers:
         specifier: ^9.3.0
         version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.180.0)
       '@react-three/rapier':
-        specifier: ^2.1.0
-        version: 2.1.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.180.0)
+        specifier: ^2.2.0
+        version: 2.2.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.180.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -1933,8 +1933,8 @@ importers:
   sketches/recast-navigation/dynamic-tiled-navmesh:
     dependencies:
       '@dimforge/rapier3d-compat':
-        specifier: ^0.15.0
-        version: 0.15.1
+        specifier: ^0.19.2
+        version: 0.19.2
       '@react-three/drei':
         specifier: ^10.7.6
         version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.180.0)(react-dom@19.2.0)(react@19.2.0)(three@0.180.0)
@@ -1942,8 +1942,8 @@ importers:
         specifier: ^9.3.0
         version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.180.0)
       '@react-three/rapier':
-        specifier: ^2.1.0
-        version: 2.1.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.180.0)
+        specifier: ^2.2.0
+        version: 2.2.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.180.0)
       '@recast-navigation/core':
         specifier: ^0.43.0
         version: 0.43.0
@@ -1991,8 +1991,8 @@ importers:
   sketches/recast-navigation/rigid-body-agent:
     dependencies:
       '@dimforge/rapier3d-compat':
-        specifier: ^0.15.0
-        version: 0.15.1
+        specifier: ^0.19.2
+        version: 0.19.2
       '@react-three/drei':
         specifier: ^10.7.6
         version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.180.0)(react-dom@19.2.0)(react@19.2.0)(three@0.180.0)
@@ -2000,8 +2000,8 @@ importers:
         specifier: ^9.3.0
         version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.180.0)
       '@react-three/rapier':
-        specifier: ^2.1.0
-        version: 2.1.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.180.0)
+        specifier: ^2.2.0
+        version: 2.2.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.180.0)
       '@recast-navigation/three':
         specifier: ^0.43.0
         version: 0.43.0(@types/three@0.180.0)(three@0.180.0)
@@ -2949,8 +2949,8 @@ importers:
   sketches/voxels/rapier-physics:
     dependencies:
       '@dimforge/rapier3d-compat':
-        specifier: ^0.15.0
-        version: 0.15.1
+        specifier: ^0.19.2
+        version: 0.19.2
       '@react-three/drei':
         specifier: ^10.7.6
         version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.180.0)(react-dom@19.2.0)(react@19.2.0)(three@0.180.0)
@@ -2958,8 +2958,8 @@ importers:
         specifier: ^9.3.0
         version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.180.0)
       '@react-three/rapier':
-        specifier: ^2.1.0
-        version: 2.1.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.180.0)
+        specifier: ^2.2.0
+        version: 2.2.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.180.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -3429,8 +3429,8 @@ packages:
     resolution: {integrity: sha512-rnJenoStJ8nvmt9Gzye8nkYd6V22xUAnu4086ER7h1zJ508vStko4pMvDeQ446ilDTFpV5wnoc5YS7XvMwwMqA==}
     dev: false
 
-  /@dimforge/rapier3d-compat@0.15.1:
-    resolution: {integrity: sha512-4XVdIGLTK7IeLX5K5AtlUSq39GeGMjVBtn86NH6AmzDzFkM6YbnMYVnxKGL2/nFEwLGs6Zv/ihYOYWd1D1cn5Q==}
+  /@dimforge/rapier3d-compat@0.19.2:
+    resolution: {integrity: sha512-AZHL1jqUF55QJkJyU1yKeh4ImX2J93bVLIezT1+o0FZqTix6O06MOaqpKoJ4MmbDCsoZmwO+qc471/SDMDm2AA==}
 
   /@emnapi/core@1.5.0:
     resolution: {integrity: sha512-sbP8GzB1WDzacS8fgNPpHlp6C9VZe+SJP3F90W9rLemaQj2PzIuTEl1qDOYQf58YIpyjViI24y9aPWCjEzY2cg==}
@@ -4676,14 +4676,14 @@ packages:
       three: 0.180.0
     dev: false
 
-  /@react-three/rapier@2.1.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.180.0):
-    resolution: {integrity: sha512-o1VzgCEILnc4noF4t5WNPYCy6dh0bTcd0Fa/xZa5/LBDnjYMb2mlWX6f+wMck5ucdz2BsVV+tpYWTGvb72QRIA==}
+  /@react-three/rapier@2.2.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.180.0):
+    resolution: {integrity: sha512-mVsqbKXlGZoN+XrqdhzFZUQmy8pibEOVzl4k7LC+LHe84bQnYBSagy1Hvbda6bL1PJDdTFyiDiBk5buKFinNIQ==}
     peerDependencies:
       '@react-three/fiber': ^9.0.4
       react: ^19
       three: '>=0.159.0'
     dependencies:
-      '@dimforge/rapier3d-compat': 0.15.1
+      '@dimforge/rapier3d-compat': 0.19.2
       '@react-three/fiber': 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.180.0)
       react: 19.2.0
       suspend-react: 0.1.3(react@19.2.0)
@@ -5599,7 +5599,7 @@ packages:
   /@types/three@0.180.0:
     resolution: {integrity: sha512-ykFtgCqNnY0IPvDro7h+9ZeLY+qjgUWv+qEvUt84grhenO60Hqd4hScHE7VTB9nOQ/3QM8lkbNE+4vKjEpUxKg==}
     dependencies:
-      '@dimforge/rapier3d-compat': 0.15.1
+      '@dimforge/rapier3d-compat': 0.19.2
       '@tweenjs/tween.js': 23.1.3
       '@types/stats.js': 0.17.4
       '@types/webxr': 0.5.23

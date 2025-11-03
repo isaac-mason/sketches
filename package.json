@@ -23,7 +23,7 @@
         "vite": "npm:rolldown-vite@^7.1.16"
     },
     "resolutions": {
-        "@dimforge/rapier3d-compat": "^0.15.0"
+        "@dimforge/rapier3d-compat": "^0.19.2"
     },
     "overrides": {
         "vite": "npm:rolldown-vite@^7.1.16"

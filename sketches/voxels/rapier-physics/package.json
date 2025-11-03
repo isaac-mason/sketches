@@ -13,10 +13,10 @@
     },
     "dependencies": {
         "@sketches/common": "workspace:*",
-        "@dimforge/rapier3d-compat": "0.15.0",
+        "@dimforge/rapier3d-compat": "0.19.2",
         "@react-three/drei": "^10.7.6",
         "@react-three/fiber": "^9.3.0",
-        "@react-three/rapier": "^2.1.0",
+        "@react-three/rapier": "^2.2.0",
         "@sketches/simple-voxels-lib": "workspace:*",
         "leva": "^0.10.0",
         "mathcat": "0.0.6",
