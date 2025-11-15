@@ -1,71 +1,78 @@
-import { Helper, useGLTF } from '@react-three/drei'
-import { CuboidCollider, RapierRigidBody, RigidBody, RigidBodyProps, useRapier } from '@react-three/rapier'
-import { useControls as useLeva } from 'leva'
-import { Fragment, RefObject, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
-import { Color, Group, Mesh, MeshStandardMaterial, Object3D, SpotLightHelper, Vector3, Vector3Tuple } from 'three'
-import { GLTF } from 'three-stdlib'
-import { RapierRaycastVehicle, WheelOptions } from '../lib/rapier-raycast-vehicle'
+import { Helper, useGLTF } from '@react-three/drei';
+import { CuboidCollider, type RapierRigidBody, RigidBody, type RigidBodyProps, useRapier } from '@react-three/rapier';
+import { useControls as useLeva } from 'leva';
+import { Fragment, type RefObject, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import {
+    Color,
+    type Group,
+    type Mesh,
+    type MeshStandardMaterial,
+    Object3D,
+    SpotLightHelper,
+    Vector3,
+    type Vector3Tuple,
+} from 'three';
+import { RapierRaycastVehicle, type WheelOptions } from '../lib/rapier-raycast-vehicle';
+import type { ThreeElements } from '@react-three/fiber';
+import chassisDracoUrl from '../assets/chassis-draco.glb?url';
+import wheelGlbUrl from '../assets/wheel-draco.glb?url';
 
-import chassisDracoUrl from '../assets/chassis-draco.glb?url'
-import wheelGlbUrl from '../assets/wheel-draco.glb?url'
-import { ThreeElements } from '@react-three/fiber'
-
-type WheelGLTF = GLTF & {
+type WheelGLTF = {
     nodes: {
-        Mesh_14: Mesh
-        Mesh_14_1: Mesh
-    }
+        Mesh_14: Mesh;
+        Mesh_14_1: Mesh;
+    };
     materials: {
-        'Material.002': MeshStandardMaterial
-        'Material.009': MeshStandardMaterial
-    }
-}
+        'Material.002': MeshStandardMaterial;
+        'Material.009': MeshStandardMaterial;
+    };
+};
 
-interface ChassisGLTF extends GLTF {
+interface ChassisGLTF {
     nodes: {
-        Chassis_1: Mesh
-        Chassis_2: Mesh
-        Glass: Mesh
-        BrakeLights: Mesh
-        HeadLights: Mesh
-        Cabin_Grilles: Mesh
-        Undercarriage: Mesh
-        TurnSignals: Mesh
-        Chrome: Mesh
-        Wheel_1: Mesh
-        Wheel_2: Mesh
-        License_1: Mesh
-        License_2: Mesh
-        Cube013: Mesh
-        Cube013_1: Mesh
-        Cube013_2: Mesh
-        'pointer-left': Mesh
-        'pointer-right': Mesh
-    }
+        Chassis_1: Mesh;
+        Chassis_2: Mesh;
+        Glass: Mesh;
+        BrakeLights: Mesh;
+        HeadLights: Mesh;
+        Cabin_Grilles: Mesh;
+        Undercarriage: Mesh;
+        TurnSignals: Mesh;
+        Chrome: Mesh;
+        Wheel_1: Mesh;
+        Wheel_2: Mesh;
+        License_1: Mesh;
+        License_2: Mesh;
+        Cube013: Mesh;
+        Cube013_1: Mesh;
+        Cube013_2: Mesh;
+        'pointer-left': Mesh;
+        'pointer-right': Mesh;
+    };
     materials: {
-        BodyPaint: MeshStandardMaterial
-        License: MeshStandardMaterial
-        Chassis_2: MeshStandardMaterial
-        Glass: MeshStandardMaterial
-        BrakeLight: MeshStandardMaterial
-        defaultMatClone: MeshStandardMaterial
-        HeadLight: MeshStandardMaterial
-        Black: MeshStandardMaterial
-        Undercarriage: MeshStandardMaterial
-        TurnSignal: MeshStandardMaterial
-    }
+        BodyPaint: MeshStandardMaterial;
+        License: MeshStandardMaterial;
+        Chassis_2: MeshStandardMaterial;
+        Glass: MeshStandardMaterial;
+        BrakeLight: MeshStandardMaterial;
+        defaultMatClone: MeshStandardMaterial;
+        HeadLight: MeshStandardMaterial;
+        Black: MeshStandardMaterial;
+        Undercarriage: MeshStandardMaterial;
+        TurnSignal: MeshStandardMaterial;
+    };
 }
 
 type WheelProps = ThreeElements['group'] & {
-    side: 'left' | 'right'
-    radius: number
-}
+    side: 'left' | 'right';
+    radius: number;
+};
 
 const Wheel = ({ side, radius, ...props }: WheelProps) => {
-    const groupRef = useRef<Group>(null!)
+    const groupRef = useRef<Group>(null!);
 
-    const { nodes, materials } = useGLTF(wheelGlbUrl) as WheelGLTF
-    const scale = radius / 0.34
+    const { nodes, materials } = useGLTF(wheelGlbUrl) as any as WheelGLTF;
+    const scale = radius / 0.34;
 
     return (
         <group {...props} ref={groupRef}>
@@ -76,43 +83,43 @@ const Wheel = ({ side, radius, ...props }: WheelProps) => {
                 </group>
             </group>
         </group>
-    )
-}
+    );
+};
 
-const BRAKE_LIGHTS_ON_COLOR = new Color(1, 0.2, 0.2).multiplyScalar(1.5)
-const BRAKE_LIGHTS_OFF_COLOR = new Color(0x333333)
+const BRAKE_LIGHTS_ON_COLOR = new Color(1, 0.2, 0.2).multiplyScalar(1.5);
+const BRAKE_LIGHTS_OFF_COLOR = new Color(0x333333);
 
 type RaycastVehicleWheel = {
-    options: WheelOptions
-    object: RefObject<Object3D>
-}
+    options: WheelOptions;
+    object: RefObject<Object3D>;
+};
 
-export type VehicleProps = RigidBodyProps
+export type VehicleProps = RigidBodyProps;
 
 export type VehicleRef = {
-    chassisRigidBody: RefObject<RapierRigidBody>
-    rapierRaycastVehicle: RefObject<RapierRaycastVehicle>
-    wheels: RaycastVehicleWheel[]
-    setBraking: (braking: boolean) => void
-}
+    chassisRigidBody: RefObject<RapierRigidBody>;
+    rapierRaycastVehicle: RefObject<RapierRaycastVehicle>;
+    wheels: RaycastVehicleWheel[];
+    setBraking: (braking: boolean) => void;
+};
 
 export const Vehicle = forwardRef<VehicleRef, VehicleProps>(({ children, ...groupProps }, ref) => {
-    const rapier = useRapier()
+    const rapier = useRapier();
 
-    const { nodes: n, materials: m } = useGLTF(chassisDracoUrl) as ChassisGLTF
+    const { nodes: n, materials: m } = useGLTF(chassisDracoUrl) as any as ChassisGLTF;
 
-    const vehicleRef = useRef<RapierRaycastVehicle>(null!)
-    const chassisRigidBodyRef = useRef<RapierRigidBody>(null!)
-    const brakeLightsRef = useRef<Mesh>(null!)
+    const vehicleRef = useRef<RapierRaycastVehicle>(null!);
+    const chassisRigidBodyRef = useRef<RapierRigidBody>(null!);
+    const brakeLightsRef = useRef<Mesh>(null!);
 
-    const topLeftWheelObject = useRef<Group>(null!)
-    const topRightWheelObject = useRef<Group>(null!)
-    const bottomLeftWheelObject = useRef<Group>(null!)
-    const bottomRightWheelObject = useRef<Group>(null!)
+    const topLeftWheelObject = useRef<Group>(null!);
+    const topRightWheelObject = useRef<Group>(null!);
+    const bottomLeftWheelObject = useRef<Group>(null!);
+    const bottomRightWheelObject = useRef<Group>(null!);
 
     const { headlightsSpotLightHelper } = useLeva('headlights', {
         headlightsSpotLightHelper: false,
-    })
+    });
 
     const {
         indexRightAxis,
@@ -157,16 +164,16 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(({ children, ...grou
         vehicleHeight: -0.3,
         vehicleFront: -1.35,
         vehicleBack: 1.3,
-    })
+    });
 
-    const directionLocal = useMemo(() => new Vector3(...directionLocalArray), [directionLocalArray])
-    const axleLocal = useMemo(() => new Vector3(...axleLocalArray), [axleLocalArray])
+    const directionLocal = useMemo(() => new Vector3(...directionLocalArray), [directionLocalArray]);
+    const axleLocal = useMemo(() => new Vector3(...axleLocalArray), [axleLocalArray]);
 
     const commonWheelOptions = {
         ...levaWheelOptions,
         directionLocal,
         axleLocal,
-    }
+    };
 
     const wheels: RaycastVehicleWheel[] = [
         {
@@ -197,17 +204,17 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(({ children, ...grou
                 chassisConnectionPointLocal: new Vector3(vehicleFront, vehicleHeight, vehicleWidth * -0.5),
             },
         },
-    ]
+    ];
 
     useImperativeHandle(ref, () => ({
         chassisRigidBody: chassisRigidBodyRef,
         rapierRaycastVehicle: vehicleRef,
         setBraking: (braking: boolean) => {
-            const material = brakeLightsRef.current.material as MeshStandardMaterial
-            material.color = braking ? BRAKE_LIGHTS_ON_COLOR : BRAKE_LIGHTS_OFF_COLOR
+            const material = brakeLightsRef.current.material as MeshStandardMaterial;
+            material.color = braking ? BRAKE_LIGHTS_ON_COLOR : BRAKE_LIGHTS_OFF_COLOR;
         },
         wheels,
-    }))
+    }));
 
     useEffect(() => {
         vehicleRef.current = new RapierRaycastVehicle({
@@ -216,14 +223,12 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(({ children, ...grou
             indexRightAxis,
             indexForwardAxis,
             indexUpAxis,
-        })
+        });
 
         for (let i = 0; i < wheels.length; i++) {
-            const options = wheels[i].options
-            vehicleRef.current.addWheel(options)
+            const options = wheels[i].options;
+            vehicleRef.current.addWheel(options);
         }
-
-        vehicleRef.current = vehicleRef.current
     }, [
         chassisRigidBodyRef,
         vehicleRef,
@@ -233,19 +238,21 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(({ children, ...grou
         directionLocal,
         axleLocal,
         levaWheelOptions,
-    ])
+        rapier.world,
+        wheels.length,
+    ]);
 
     const [leftHeadlightTarget] = useState(() => {
-        const object = new Object3D()
-        object.position.set(10, -0.5, -0.7)
-        return object
-    })
+        const object = new Object3D();
+        object.position.set(10, -0.5, -0.7);
+        return object;
+    });
 
     const [rightHeadlightTarget] = useState(() => {
-        const object = new Object3D()
-        object.position.set(10, -0.5, 0.7)
-        return object
-    })
+        const object = new Object3D();
+        object.position.set(10, -0.5, 0.7);
+        return object;
+    });
 
     return (
         <>
@@ -265,7 +272,7 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(({ children, ...grou
                         target: rightHeadlightTarget,
                     },
                 ].map(({ position, target }, idx) => (
-                    <Fragment key={idx}>
+                    <Fragment key={String(idx)}>
                         <primitive object={target} />
                         <spotLight
                             position={position}
@@ -357,5 +364,5 @@ export const Vehicle = forwardRef<VehicleRef, VehicleProps>(({ children, ...grou
                 <Wheel rotation={[0, Math.PI / 2, 0]} side="right" radius={commonWheelOptions.radius} />
             </group>
         </>
-    )
-})
+    );
+});

@@ -1,132 +1,132 @@
-import { Instructions, useLoadingAssets, usePageVisible } from '@sketches/common'
-import { Environment, OrbitControls, Stars } from '@react-three/drei'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { CuboidCollider, CylinderCollider, Physics, RigidBody, useBeforePhysicsStep } from '@react-three/rapier'
-import { useControls as useLeva } from 'leva'
-import { useRef } from 'react'
-import { Quaternion, Vector3 } from 'three'
-import { LampPost } from './components/lamp-post'
-import { TrafficCone } from './components/traffic-cone'
-import { Vehicle, VehicleRef } from './components/vehicle'
-import { AFTER_RAPIER_UPDATE, RAPIER_UPDATE_PRIORITY } from './constants'
-import { useControls } from './hooks/use-controls'
+import { Instructions, useLoadingAssets, usePageVisible } from '@sketches/common';
+import { Environment, OrbitControls, Stars } from '@react-three/drei';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { CuboidCollider, CylinderCollider, Physics, RigidBody, useBeforePhysicsStep } from '@react-three/rapier';
+import { useControls as useLeva } from 'leva';
+import { useRef } from 'react';
+import { Quaternion, Vector3 } from 'three';
+import { LampPost } from './components/lamp-post';
+import { TrafficCone } from './components/traffic-cone';
+import { Vehicle, type VehicleRef } from './components/vehicle';
+import { AFTER_RAPIER_UPDATE, RAPIER_UPDATE_PRIORITY } from './constants';
+import { useControls } from './hooks/use-controls';
 
-const cameraIdealOffset = new Vector3()
-const cameraIdealLookAt = new Vector3()
-const chassisTranslation = new Vector3()
-const chassisRotation = new Quaternion()
+const cameraIdealOffset = new Vector3();
+const cameraIdealLookAt = new Vector3();
+const chassisTranslation = new Vector3();
+const chassisRotation = new Quaternion();
 
 const Game = () => {
-    const raycastVehicle = useRef<VehicleRef>(null)
+    const raycastVehicle = useRef<VehicleRef>(null);
 
-    const camera = useThree((state) => state.camera)
-    const currentCameraPosition = useRef(new Vector3(15, 15, 0))
-    const currentCameraLookAt = useRef(new Vector3())
+    const camera = useThree((state) => state.camera);
+    const currentCameraPosition = useRef(new Vector3(15, 15, 0));
+    const currentCameraLookAt = useRef(new Vector3());
 
-    const controls = useControls()
+    const controls = useControls();
 
     const { cameraMode } = useLeva('camera', {
         cameraMode: {
             value: 'drive',
             options: ['drive', 'orbit'],
         },
-    })
+    });
 
     const { maxForce, maxSteer, maxBrake } = useLeva('controls', {
         maxForce: 30,
         maxSteer: 10,
         maxBrake: 2,
-    })
+    });
 
     useBeforePhysicsStep((world) => {
         if (!raycastVehicle.current || !raycastVehicle.current.rapierRaycastVehicle.current) {
-            return
+            return;
         }
 
         const {
             wheels,
             rapierRaycastVehicle: { current: vehicle },
             setBraking,
-        } = raycastVehicle.current
+        } = raycastVehicle.current;
 
         // update wheels from controls
-        let engineForce = 0
-        let steering = 0
+        let engineForce = 0;
+        let steering = 0;
 
         if (controls.current.forward) {
-            engineForce += maxForce
+            engineForce += maxForce;
         }
         if (controls.current.backward) {
-            engineForce -= maxForce
+            engineForce -= maxForce;
         }
 
         if (controls.current.left) {
-            steering += maxSteer
+            steering += maxSteer;
         }
         if (controls.current.right) {
-            steering -= maxSteer
+            steering -= maxSteer;
         }
 
-        const brakeForce = controls.current.brake ? maxBrake : 0
+        const brakeForce = controls.current.brake ? maxBrake : 0;
 
         for (let i = 0; i < vehicle.wheels.length; i++) {
-            vehicle.setBrakeValue(brakeForce, i)
+            vehicle.setBrakeValue(brakeForce, i);
         }
 
         // steer front wheels
-        vehicle.setSteeringValue(steering, 0)
-        vehicle.setSteeringValue(steering, 1)
+        vehicle.setSteeringValue(steering, 0);
+        vehicle.setSteeringValue(steering, 1);
 
         // apply engine force to back wheels
-        vehicle.applyEngineForce(engineForce, 2)
-        vehicle.applyEngineForce(engineForce, 3)
+        vehicle.applyEngineForce(engineForce, 2);
+        vehicle.applyEngineForce(engineForce, 3);
 
         // update the vehicle
-        vehicle.update(world.timestep)
+        vehicle.update(world.timestep);
 
         // update the wheels
         for (let i = 0; i < vehicle.wheels.length; i++) {
-            const wheelObject = wheels[i].object.current
-            if (!wheelObject) continue
+            const wheelObject = wheels[i].object.current;
+            if (!wheelObject) continue;
 
-            const wheelState = vehicle.wheels[i].state
-            wheelObject.position.copy(wheelState.worldTransform.position)
-            wheelObject.quaternion.copy(wheelState.worldTransform.quaternion)
+            const wheelState = vehicle.wheels[i].state;
+            wheelObject.position.copy(wheelState.worldTransform.position);
+            wheelObject.quaternion.copy(wheelState.worldTransform.quaternion);
         }
 
         // update brake lights
-        setBraking(brakeForce > 0)
-    })
+        setBraking(brakeForce > 0);
+    });
 
     useFrame((_, delta) => {
-        if (cameraMode !== 'drive') return
+        if (cameraMode !== 'drive') return;
 
-        const chassis = raycastVehicle.current?.chassisRigidBody
-        if (!chassis?.current) return
+        const chassis = raycastVehicle.current?.chassisRigidBody;
+        if (!chassis?.current) return;
 
-        chassisRotation.copy(chassis.current.rotation() as Quaternion)
-        chassisTranslation.copy(chassis.current.translation() as Vector3)
+        chassisRotation.copy(chassis.current.rotation() as Quaternion);
+        chassisTranslation.copy(chassis.current.translation() as Vector3);
 
-        const t = 1.0 - Math.pow(0.01, delta)
+        const t = 1.0 - Math.pow(0.01, delta);
 
-        cameraIdealOffset.set(-10, 3, 0)
-        cameraIdealOffset.applyQuaternion(chassisRotation)
-        cameraIdealOffset.add(chassisTranslation)
+        cameraIdealOffset.set(-10, 3, 0);
+        cameraIdealOffset.applyQuaternion(chassisRotation);
+        cameraIdealOffset.add(chassisTranslation);
 
         if (cameraIdealOffset.y < 0) {
-            cameraIdealOffset.y = 0.5
+            cameraIdealOffset.y = 0.5;
         }
 
-        cameraIdealLookAt.set(0, 1, 0)
-        cameraIdealLookAt.applyQuaternion(chassisRotation)
-        cameraIdealLookAt.add(chassisTranslation)
+        cameraIdealLookAt.set(0, 1, 0);
+        cameraIdealLookAt.applyQuaternion(chassisRotation);
+        cameraIdealLookAt.add(chassisTranslation);
 
-        currentCameraPosition.current.lerp(cameraIdealOffset, t)
-        currentCameraLookAt.current.lerp(cameraIdealLookAt, t)
+        currentCameraPosition.current.lerp(cameraIdealOffset, t);
+        currentCameraLookAt.current.lerp(cameraIdealLookAt, t);
 
-        camera.position.copy(currentCameraPosition.current)
-        camera.lookAt(currentCameraLookAt.current)
-    }, AFTER_RAPIER_UPDATE)
+        camera.position.copy(currentCameraPosition.current);
+        camera.lookAt(currentCameraLookAt.current);
+    }, AFTER_RAPIER_UPDATE);
 
     return (
         <>
@@ -161,7 +161,7 @@ const Game = () => {
             <group position={[0, 0, 50]}>
                 {Array.from({ length: 6 }).map((_, idx) => (
                     <RigidBody
-                        key={idx}
+                        key={String(idx)}
                         colliders={false}
                         type="fixed"
                         mass={10}
@@ -179,7 +179,7 @@ const Game = () => {
 
             {/* boxes */}
             {Array.from({ length: 6 }).map((_, idx) => (
-                <RigidBody key={idx} colliders="cuboid" mass={0.2}>
+                <RigidBody key={String(idx)} colliders="cuboid" mass={0.2}>
                     <mesh position={[0, 2 + idx * 2.5, 70]}>
                         <boxGeometry args={[2, 1, 2]} />
                         <meshStandardMaterial color="orange" />
@@ -209,16 +209,16 @@ const Game = () => {
 
             {cameraMode === 'orbit' && <OrbitControls />}
         </>
-    )
-}
+    );
+};
 
 export function Sketch() {
-    const loading = useLoadingAssets()
-    const visible = usePageVisible()
+    const loading = useLoadingAssets();
+    const visible = usePageVisible();
 
     const { debug } = useLeva('physics', {
         debug: false,
-    })
+    });
 
     return (
         <>
@@ -238,5 +238,5 @@ export function Sketch() {
 
             <Instructions>* use wasd to drive, space to break</Instructions>
         </>
-    )
+    );
 }

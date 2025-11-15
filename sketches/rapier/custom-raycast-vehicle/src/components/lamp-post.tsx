@@ -1,13 +1,13 @@
-import { RigidBody, RigidBodyProps } from '@react-three/rapier'
-import { useState } from 'react'
-import { Object3D } from 'three'
+import { RigidBody, type RigidBodyProps } from '@react-three/rapier';
+import { useState } from 'react';
+import { Object3D } from 'three';
 
 export const LampPost = (props: RigidBodyProps) => {
     const [target] = useState(() => {
-        const object = new Object3D()
-        object.position.set(-4, 0, 0)
-        return object
-    })
+        const object = new Object3D();
+        object.position.set(-4, 0, 0);
+        return object;
+    });
 
     return (
         <RigidBody {...props} colliders="cuboid" type="fixed">
@@ -29,5 +29,5 @@ export const LampPost = (props: RigidBodyProps) => {
             <primitive object={target} />
             <spotLight position={[-0.6, 10, 0]} target={target} intensity={150} decay={1.5} angle={1} penumbra={1} castShadow />
         </RigidBody>
-    )
-}
+    );
+};

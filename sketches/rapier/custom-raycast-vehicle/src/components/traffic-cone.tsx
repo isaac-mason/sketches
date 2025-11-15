@@ -1,4 +1,4 @@
-import { RigidBody, RigidBodyProps } from '@react-three/rapier'
+import { RigidBody, type RigidBodyProps } from '@react-three/rapier';
 
 export const TrafficCone = (props: RigidBodyProps) => {
     return (
@@ -15,5 +15,5 @@ export const TrafficCone = (props: RigidBodyProps) => {
                 </mesh>
             </group>
         </RigidBody>
-    )
-}
+    );
+};

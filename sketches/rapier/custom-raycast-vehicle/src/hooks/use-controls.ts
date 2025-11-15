@@ -1,4 +1,4 @@
-import type { MutableRefObject } from 'react'
+import type { RefObject } from 'react'
 import { useEffect, useRef } from 'react'
 
 const keyControlMap = {
@@ -25,7 +25,7 @@ const isKeyCode = (v: unknown): v is KeyCode => keyCodes.includes(v as KeyCode)
 
 export type Controls = Record<GameControl, boolean>
 
-const useKeyControls = ({ current }: MutableRefObject<Controls>, map: Record<KeyCode, GameControl>) => {
+const useKeyControls = ({ current }: RefObject<Controls>, map: Record<KeyCode, GameControl>) => {
     useEffect(() => {
         const handleKeydown = ({ key }: KeyboardEvent) => {
             if (!isKeyCode(key)) return
