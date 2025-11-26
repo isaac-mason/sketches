@@ -1,5 +1,6 @@
 export const sketchesOrder = [
     'intro',
+    'marching-cubes',
     'crawler',
     'snek',
     'game-of-life',

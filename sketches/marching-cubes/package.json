@@ -3,7 +3,7 @@
     "private": true,
     "sketch": {
         "title": "Marching Cubes",
-        "tags": ["marching-cubes"]
+        "tags": ["marching-cubes", "c++"]
     },
     "scripts": {
         "dev": "vite dev",
