@@ -9,9 +9,6 @@
         "dev": "vite dev",
         "build": "vite build"
     },
-    "bin": {
-        "voxelizer-cli": "./voxelizer-cli.ts"
-    },
     "dependencies": {
         "mathcat": "^0.0.6",
         "three": "^0.181.1"
