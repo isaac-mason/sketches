@@ -221,8 +221,8 @@ importers:
   sketches/crawler:
     dependencies:
       crashcat:
-        specifier: 0.0.1-rc.4
-        version: 0.0.1-rc.4(three@0.181.1)
+        specifier: 0.0.1
+        version: 0.0.1(three@0.181.1)
       lil-gui:
         specifier: ^0.21.0
         version: 0.21.0
@@ -5976,8 +5976,8 @@ packages:
     engines: {node: '>=18'}
     dev: false
 
-  /crashcat@0.0.1-rc.4(three@0.181.1):
-    resolution: {integrity: sha512-e8k4LnvVoXeN4je03WHkhnH0RoGHsdd9BZEjV2MF+6CswKk0zWCNgEFLX09/hWKL8GoJOs7bNh9gZvkubXyzzA==}
+  /crashcat@0.0.1(three@0.181.1):
+    resolution: {integrity: sha512-cNKV7V/fS5wuZ6Zf5s7QyF7ZOesXr29GLbb1j5Dkxj8FnLj6cTs9A4nX7PKtAKDexJGbzHhzyXc2EhQU/DRpLQ==}
     peerDependencies:
       three: '>=0.182.0'
     peerDependenciesMeta:
