@@ -1,6 +1,6 @@
-import { OrthographicCamera, PerspectiveCamera } from '@react-three/drei';
+import { OrthographicCamera } from '@react-three/drei';
 import { type ThreeElements, useFrame, useThree } from '@react-three/fiber';
-import { World } from 'arancini';
+import { Controls, WebGPUCanvas } from '@sketches/common';
 import { useControls as useLevaControls } from 'leva';
 import {
 	type CSSProperties,
@@ -11,23 +11,19 @@ import {
 } from 'react';
 import {
 	type BufferGeometry,
-	Color,
 	CylinderGeometry,
 	type Group,
 	type Material,
 	MathUtils,
 	Mesh,
 	MeshPhongMaterial,
-	MeshStandardMaterial,
 	type Object3D,
-	type PointLight,
 	Quaternion,
 	Vector2,
 	Vector3,
-	type Vector3Tuple,
+	type Vector3Tuple
 } from 'three';
 import { create } from 'zustand';
-import { Controls, WebGPUCanvas } from '@sketches/common';
 import {
 	type Chain,
 	JointConstraintType,
@@ -46,17 +42,8 @@ const useScore = create<{
 	gameOver: false,
 }));
 
-type EntityType = {
-	snake: Snake;
-	isControlTarget?: boolean;
-};
-
-const world = new World<EntityType>();
-
-const snakeQuery = world.query((e) => e.is('snake'));
-const controlTargetSnakeQuery = world.query((e) =>
-	e.is('isControlTarget').and.is('snake'),
-);
+// Module-level array to store snakes
+const snakes: Snake[] = [];
 
 const _offsetVector2 = new Vector2();
 const _midpoint = new Vector3();
@@ -555,10 +542,9 @@ const GooglyEye = ({
 type SnakeProps = {
 	def: SnakeDef;
 	position: Vector3Tuple;
-	isControlTarget?: boolean;
 };
 
-const Snake = ({ def, position, isControlTarget = false }: SnakeProps) => {
+const Snake = ({ def, position }: SnakeProps) => {
 	const groupRef = useRef<Group>(null!);
 	const headGroupRef = useRef<Group>(null!);
 
@@ -566,18 +552,16 @@ const Snake = ({ def, position, isControlTarget = false }: SnakeProps) => {
 		const snake = initSnake(def, groupRef.current, headGroupRef.current);
 		snake.state.position.set(...position);
 		snake.state.prevPosition.set(...position);
-
-		const entity = world.create({
-			snake,
-			three: groupRef.current,
-			isControlTarget,
-		});
+		snakes.push(snake);
 
 		return () => {
-			world.destroy(entity);
+			const index = snakes.indexOf(snake);
+			if (index !== -1) {
+				snakes.splice(index, 1);
+			}
 			disposeSnake(snake);
 		};
-	}, [def, position, isControlTarget]);
+	}, [def, position]);
 
 	return (
 		<>
@@ -665,36 +649,33 @@ const Game = ({
 	useFrame(({ pointer, viewport }, frameDt) => {
 		const dt = Math.min(frameDt, 0.1);
 
-		const controlTarget = controlTargetSnakeQuery.first;
-
-		if (controlTarget) {
-			const input = controlTarget.snake.input;
-
-			input.pointer.set(
-				(pointer.x * viewport.width) / 2,
-				(pointer.y * viewport.height) / 2,
-				0,
-			);
-		}
-
 		const gameOver = useScore.getState().gameOver;
 
-		for (const entity of snakeQuery) {
-			if (!gameOver) {
-				updateSnakeMovement(entity.snake, dt);
+		for (const snake of snakes) {
+			// Update input for the first snake (control target)
+			if (snakes[0] === snake) {
+				snake.input.pointer.set(
+					(pointer.x * viewport.width) / 2,
+					(pointer.y * viewport.height) / 2,
+					0,
+				);
 			}
 
-			updateSnakeChain(entity.snake);
-			updateSnakeVisuals(entity.snake, dt);
+			if (!gameOver) {
+				updateSnakeMovement(snake, dt);
+			}
+
+			updateSnakeChain(snake);
+			updateSnakeVisuals(snake, dt);
 			updateSnakePelletCollision(
-				entity.snake,
+				snake,
 				viewport,
 				rewardSegments,
 				pellet,
 				setPellet,
 			);
-			updateSnakeGrowth(entity.snake);
-			updateSnakeSelfCollision(entity.snake);
+			updateSnakeGrowth(snake);
+			updateSnakeSelfCollision(snake);
 		}
 
 		if (pelletRef.current) {
@@ -712,7 +693,7 @@ const Game = ({
 
 	return (
 		<>
-			<Snake position={START_POS} def={snakeDef} isControlTarget />
+			<Snake position={START_POS} def={snakeDef} />
 
 			<mesh position={pellet} ref={pelletRef} renderOrder={1000}>
 				<icosahedronGeometry args={[0.3]} />

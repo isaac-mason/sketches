@@ -2027,15 +2027,12 @@ importers:
       '@sketches/common':
         specifier: workspace:*
         version: link:../../common
-      arancini:
-        specifier: ^8.1.0
-        version: 8.1.0(react-dom@19.2.0)(react@19.2.0)
       leva:
         specifier: ^0.10.0
         version: 0.10.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)
       mathcat:
-        specifier: ^0.0.6
-        version: 0.0.6
+        specifier: 0.0.10
+        version: 0.0.10
       react:
         specifier: ^19.2.0
         version: 19.2.0
