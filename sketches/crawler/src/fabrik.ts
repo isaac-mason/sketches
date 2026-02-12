@@ -1,6 +1,4 @@
-import { vec3, mat3, quat } from 'mathcat';
-
-export type Vec3 = [number, number, number];
+import { type Vec3, vec3, mat3, quat } from 'mathcat';
 
 export type Bone = {
 	start: Vec3;

@@ -18,22 +18,29 @@
     </head>
 
     <body>
-        <div id="root"></div>
-        <script type="module" src="/src/main.tsx"></script>
+        <script type="module" src="/src/main.ts"></script>
     </body>
 
     <style>
-        body {
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
             width: 100%;
-            height: 100vh;
+            height: 100%;
+            overflow: hidden;
             background: #222;
             font-family: 'Poppins', sans-serif;
         }
-        canvas,
-        #root {
+
+        canvas {
+            display: block;
             width: 100%;
-            height: 100vh;
+            height: 100%;
         }
     </style>
 </html>

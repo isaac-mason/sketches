@@ -220,46 +220,19 @@ importers:
 
   sketches/crawler:
     dependencies:
-      '@dimforge/rapier3d-compat':
-        specifier: ^0.19.2
-        version: 0.19.2
-      '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.181.0)(react-dom@19.2.0)(react@19.2.0)(three@0.181.1)
-      '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.181.1)
-      '@react-three/rapier':
-        specifier: ^2.2.0
-        version: 2.2.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.181.1)
-      '@sketches/common':
-        specifier: workspace:*
-        version: link:../../common
-      arancini:
-        specifier: ^8.1.0
-        version: 8.1.0(react-dom@19.2.0)(react@19.2.0)
-      leva:
-        specifier: ^0.10.0
-        version: 0.10.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)
+      crashcat:
+        specifier: 0.0.1-rc.4
+        version: 0.0.1-rc.4(three@0.181.1)
+      lil-gui:
+        specifier: ^0.21.0
+        version: 0.21.0
       mathcat:
-        specifier: ^0.0.6
-        version: 0.0.6
-      react:
-        specifier: ^19.2.0
-        version: 19.2.0
-      react-dom:
-        specifier: ^19.2.0
-        version: 19.2.0(react@19.2.0)
+        specifier: 0.0.10
+        version: 0.0.10
       three:
         specifier: ^0.181.1
         version: 0.181.1
     devDependencies:
-      '@types/react':
-        specifier: ^19.2.2
-        version: 19.2.2
-      '@types/react-dom':
-        specifier: ^19.2.1
-        version: 19.2.1(@types/react@19.2.2)
       '@types/three':
         specifier: ^0.181.0
         version: 0.181.0
@@ -1513,46 +1486,6 @@ importers:
         version: 0.181.0
 
   sketches/rapier/arcade-vehicle-controller:
-    dependencies:
-      '@dimforge/rapier3d-compat':
-        specifier: ^0.19.2
-        version: 0.19.2
-      '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.181.0)(react-dom@19.2.0)(react@19.2.0)(three@0.181.1)
-      '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.181.1)
-      '@react-three/rapier':
-        specifier: ^2.2.0
-        version: 2.2.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.181.1)
-      '@sketches/common':
-        specifier: workspace:*
-        version: link:../../../common
-      leva:
-        specifier: ^0.10.0
-        version: 0.10.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)
-      react:
-        specifier: ^19.2.0
-        version: 19.2.0
-      react-dom:
-        specifier: ^19.2.0
-        version: 19.2.0(react@19.2.0)
-      three:
-        specifier: ^0.181.1
-        version: 0.181.1
-    devDependencies:
-      '@types/react':
-        specifier: ^19.2.2
-        version: 19.2.2
-      '@types/react-dom':
-        specifier: ^19.2.1
-        version: 19.2.1(@types/react@19.2.2)
-      '@types/three':
-        specifier: ^0.181.0
-        version: 0.181.0
-
-  sketches/rapier/cluster:
     dependencies:
       '@dimforge/rapier3d-compat':
         specifier: ^0.19.2
@@ -6046,6 +5979,18 @@ packages:
     engines: {node: '>=18'}
     dev: false
 
+  /crashcat@0.0.1-rc.4(three@0.181.1):
+    resolution: {integrity: sha512-e8k4LnvVoXeN4je03WHkhnH0RoGHsdd9BZEjV2MF+6CswKk0zWCNgEFLX09/hWKL8GoJOs7bNh9gZvkubXyzzA==}
+    peerDependencies:
+      three: '>=0.182.0'
+    peerDependenciesMeta:
+      three:
+        optional: true
+    dependencies:
+      mathcat: 0.0.10
+      three: 0.181.1
+    dev: false
+
   /cross-env@7.0.3:
     resolution: {integrity: sha512-+/HKd6EgcQCJGh2PSjZuUitQBQynKor4wrFbRg4DtAgS1aWO+gU52xpH7M9ScGgXSYmAVS9bIJ8EzuaGw0oNAw==}
     engines: {node: '>=10.14', npm: '>=6', yarn: '>=1'}
@@ -7368,6 +7313,10 @@ packages:
       lightningcss-win32-x64-msvc: 1.30.2
     dev: true
 
+  /lil-gui@0.21.0:
+    resolution: {integrity: sha512-tpvxN7v1GvE/Tv+GRopfOp0W7fVEjF4PltkuX8vOCIfim22rD1ztvfkoEMcv9lzQeuNUSeIrUmUjBwmlW/oUew==}
+    dev: false
+
   /lilconfig@2.1.0:
     resolution: {integrity: sha512-utWOt/GHzuUxnLKxB6dk81RoOeoNeHgbrXiuGk4yyF5qlRz+iIVWu56E2fqGHFrXz0QNUhLB/8nKqvRH66JKGQ==}
     engines: {node: '>=10'}
@@ -7433,6 +7382,10 @@ packages:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
     engines: {node: '>= 0.4'}
     dev: true
+
+  /mathcat@0.0.10:
+    resolution: {integrity: sha512-bZiUxyl0Lj4Q4+RR5Z/RiAEKAwPhtCWm+RzVOxM1FI/AflsrFcjHEaVWUikrd1JwcglvQ0iWD/NQmbY93BGzsA==}
+    dev: false
 
   /mathcat@0.0.6:
     resolution: {integrity: sha512-yI06neyDl7vuBBumXYHBm48nx6GDFX5RMUb+iWyj8xVQ9FVCxYlIxIdRQqINH25ttXArrFgMTFhCJvtzOx+P+g==}

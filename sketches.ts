@@ -18,7 +18,6 @@ export const sketchesOrder = [
     'procedural-generation/diamond-square-heightmap',
     'procedural-generation/pixelated-planet',
     'boids',
-    'rapier/cluster',
     'rapier/custom-raycast-vehicle',
     'rapier/revolute-joint-vehicle',
     'rapier/dynamic-raycast-vehicle-controller',

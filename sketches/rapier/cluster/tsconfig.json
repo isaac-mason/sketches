@@ -1,4 +1,0 @@
-{
-    "extends": "../../../tsconfig.sketch.json",
-    "include": ["src", "../../../vite-env.d.ts"]
-}
