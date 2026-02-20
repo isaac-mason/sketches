@@ -1,0 +1,27 @@
+{
+    "name": "@sketches/splatgame",
+    "private": true,
+    "sketch": {
+        "title": "SplatGame",
+        "tags": [
+            "guassian splat",
+            "physics",
+            "navigation"
+        ],
+        "hidden": true
+    },
+    "scripts": {
+        "dev": "vite dev",
+        "build": "vite build"
+    },
+    "dependencies": {
+        "crashcat": "0.0.1",
+        "navcat": "0.1.6",
+        "lil-gui": "^0.21.0",
+        "mathcat": "0.0.10",
+        "three": "^0.181.1"
+    },
+    "devDependencies": {
+        "@types/three": "^0.181.0"
+    }
+}

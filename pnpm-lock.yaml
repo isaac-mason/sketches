@@ -2056,6 +2056,28 @@ importers:
         specifier: ^0.181.0
         version: 0.181.0
 
+  sketches/splatgame:
+    dependencies:
+      crashcat:
+        specifier: 0.0.1
+        version: 0.0.1(three@0.181.1)
+      lil-gui:
+        specifier: ^0.21.0
+        version: 0.21.0
+      mathcat:
+        specifier: 0.0.10
+        version: 0.0.10
+      navcat:
+        specifier: 0.1.6
+        version: 0.1.6(three@0.181.1)
+      three:
+        specifier: ^0.181.1
+        version: 0.181.1
+    devDependencies:
+      '@types/three':
+        specifier: ^0.181.0
+        version: 0.181.0
+
   sketches/sticky-notes:
     dependencies:
       '@react-three/drei':
@@ -7388,6 +7410,10 @@ packages:
     resolution: {integrity: sha512-yI06neyDl7vuBBumXYHBm48nx6GDFX5RMUb+iWyj8xVQ9FVCxYlIxIdRQqINH25ttXArrFgMTFhCJvtzOx+P+g==}
     dev: false
 
+  /mathcat@0.0.8:
+    resolution: {integrity: sha512-Xvrc2opip17vPtZOj5ow05lKvZows2NyCMoQ7drIq3L7hKYr/gCZTFuZV5cR8gbvS0QCe9/lT31tImFWuQRbdA==}
+    dev: false
+
   /media-typer@1.1.0:
     resolution: {integrity: sha512-aisnrDP4GNe06UcKFnV5bfMNPBUw4jsLGaWwWfnH3v02GnBuXX2MCVn5RbrWo0j3pczUilYblq7fQ7Nw2t5XKw==}
     engines: {node: '>= 0.8'}
@@ -7497,6 +7523,18 @@ packages:
     resolution: {integrity: sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
+
+  /navcat@0.1.6(three@0.181.1):
+    resolution: {integrity: sha512-TZ02HPYPk0hWk5UCyjL6TjyjHrqNt05Ey7laGBUT4z/Sd8qNShwbJ6gC7Z2wfNDu+zNGg0xR7I6RZkxC0NYr9A==}
+    peerDependencies:
+      three: '>=0.180.0'
+    peerDependenciesMeta:
+      three:
+        optional: true
+    dependencies:
+      mathcat: 0.0.8
+      three: 0.181.1
+    dev: false
 
   /negotiator@1.0.0:
     resolution: {integrity: sha512-8Ofs/AUQh8MaEcrlq5xOX0CQ9ypTF5dl78mjlMNfOK08fzpgTHQRQPBxcPlEtIw0yRpws+Zo/3r+5WRby7u3Gg==}
