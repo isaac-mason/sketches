@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import { bloom } from 'three/addons/tsl/display/BloomNode.js'
 import { blendColor, mrt, output, pass } from 'three/tsl'
 import * as THREE from 'three/webgpu'
-import { PostProcessing, WebGPURenderer } from 'three/webgpu'
+import { RenderPipeline, WebGPURenderer } from 'three/webgpu'
 
 const App = () => {
     return (
@@ -21,10 +21,10 @@ const App = () => {
     )
 }
 
-const RenderPipeline = () => {
+const Renderer = () => {
     const { gl, scene, camera } = useThree()
 
-    const [postProcessing, setPostProcessing] = useState<PostProcessing | null>(null)
+    const [renderPipeline, setRenderPipeline] = useState<RenderPipeline | null>(null)
 
     useEffect(() => {
         const scenePass = pass(scene, camera, {
@@ -43,21 +43,21 @@ const RenderPipeline = () => {
 
         const outputNode = blendColor(scenePassColor, bloomPass)
 
-        const postProcessing = new PostProcessing(gl as unknown as WebGPURenderer)
+        const postProcessing = new RenderPipeline(gl as unknown as WebGPURenderer)
         postProcessing.outputNode = outputNode
 
-        setPostProcessing(postProcessing)
+        setRenderPipeline(postProcessing)
 
         return () => {
-            setPostProcessing(null)
+            setRenderPipeline(null)
         }
     }, [gl, scene, camera])
 
     useFrame(() => {
-        if (!postProcessing) return
+        if (!renderPipeline) return
 
         gl.clear()
-        postProcessing.render()
+        renderPipeline.render()
     }, 1)
 
     return null
@@ -70,7 +70,7 @@ export function Sketch() {
 
             <color attach="background" args={['#222']} />
 
-            <RenderPipeline />
+            <Renderer />
 
             <OrbitControls />
         </WebGPUCanvas>

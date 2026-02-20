@@ -22,7 +22,7 @@ import {
     vec4,
 } from 'three/tsl';
 import * as THREE from 'three/webgpu';
-import { PostProcessing, type WebGPURenderer } from 'three/webgpu';
+import { RenderPipeline, type WebGPURenderer } from 'three/webgpu';
 
 const gameOfLifeStep = (current: Uint8Array, next: Uint8Array, width: number, height: number) => {
     for (let y = 1; y < height - 1; y++) {
@@ -279,10 +279,10 @@ const ReflectingFloor = () => {
     );
 };
 
-const RenderPipeline = () => {
+const Renderer = () => {
     const { gl, scene, camera } = useThree();
 
-    const [postProcessing, setPostProcessing] = useState<PostProcessing | null>(null);
+    const [renderPipeline, setRenderPipeline] = useState<RenderPipeline | null>(null);
 
     useEffect(() => {
         const scenePass = pass(scene, camera, {
@@ -301,21 +301,21 @@ const RenderPipeline = () => {
 
         const outputNode = blendColor(scenePassColor, bloomPass);
 
-        const postProcessing = new PostProcessing(gl as unknown as WebGPURenderer);
-        postProcessing.outputNode = outputNode;
+        const renderPipeline = new RenderPipeline(gl as unknown as WebGPURenderer);
+        renderPipeline.outputNode = outputNode;
 
-        setPostProcessing(postProcessing);
+        setRenderPipeline(renderPipeline);
 
         return () => {
-            setPostProcessing(null);
+            setRenderPipeline(null);
         };
     }, [gl, scene, camera]);
 
     useFrame(() => {
-        if (!postProcessing) return;
+        if (!renderPipeline) return;
 
         gl.clear();
-        postProcessing.render();
+        renderPipeline.render();
     }, 1);
 
     return null;
@@ -338,7 +338,7 @@ export function Sketch() {
 
             <color attach="background" args={['black']} />
 
-            <RenderPipeline />
+            <Renderer />
 
             {/* camera */}
             <PerspectiveCamera makeDefault position={[20, 10, 80]} />
