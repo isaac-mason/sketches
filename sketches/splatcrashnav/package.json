@@ -1,8 +1,8 @@
 {
-    "name": "@sketches/splatgame",
+    "name": "@sketches/splatcrashnav",
     "private": true,
     "sketch": {
-        "title": "SplatGame",
+        "title": "SplatCrashNav",
         "tags": [
             "guassian splat",
             "physics",

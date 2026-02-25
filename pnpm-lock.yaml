@@ -45,11 +45,11 @@ importers:
   common:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: 'link:'
@@ -61,7 +61,7 @@ importers:
         version: 0.10.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)
       r3f-perf:
         specifier: ^7.2.1
-        version: 7.2.3(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        version: 7.2.3(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       react:
         specifier: ^19.2.0
         version: 19.2.0
@@ -125,11 +125,11 @@ importers:
   sketches/boids:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../common
@@ -159,11 +159,11 @@ importers:
   sketches/character-animation/basic:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -190,11 +190,11 @@ importers:
   sketches/character-animation/mixamo-animations:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -240,11 +240,11 @@ importers:
   sketches/d3/force-directed-graph:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -299,11 +299,11 @@ importers:
   sketches/game-of-life:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../common
@@ -330,11 +330,11 @@ importers:
   sketches/glsl-shaders-from-scratch/common-functions-and-tricks/fract-and-friends:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../../common
@@ -361,11 +361,11 @@ importers:
   sketches/glsl-shaders-from-scratch/common-functions-and-tricks/min-max-clamp-saturate:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../../common
@@ -392,11 +392,11 @@ importers:
   sketches/glsl-shaders-from-scratch/common-functions-and-tricks/step-mix-smoothstep:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../../common
@@ -423,11 +423,11 @@ importers:
   sketches/glsl-shaders-from-scratch/intro/attributes:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../../common
@@ -454,11 +454,11 @@ importers:
   sketches/glsl-shaders-from-scratch/intro/uniforms:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../../common
@@ -485,11 +485,11 @@ importers:
   sketches/glsl-shaders-from-scratch/intro/varyings:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../../common
@@ -516,11 +516,11 @@ importers:
   sketches/glsl-shaders-from-scratch/lighting-models:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -547,11 +547,11 @@ importers:
   sketches/glsl-shaders-from-scratch/raymarching/basic:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../../common
@@ -578,11 +578,11 @@ importers:
   sketches/glsl-shaders-from-scratch/raymarching/terrain:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../../common
@@ -609,11 +609,11 @@ importers:
   sketches/glsl-shaders-from-scratch/textures/addressing:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../../common
@@ -640,11 +640,11 @@ importers:
   sketches/glsl-shaders-from-scratch/textures/alpha:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../../common
@@ -671,11 +671,11 @@ importers:
   sketches/glsl-shaders-from-scratch/textures/basic:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../../common
@@ -702,11 +702,11 @@ importers:
   sketches/glsl-shaders-from-scratch/toon-shading:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -733,11 +733,11 @@ importers:
   sketches/glsl-shaders-from-scratch/vector-operations-and-math/shaping-functions:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../../common
@@ -764,11 +764,11 @@ importers:
   sketches/glsl-shaders-from-scratch/vector-operations-and-math/sin-cos:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../../common
@@ -795,11 +795,11 @@ importers:
   sketches/glsl-shaders-from-scratch/vertex-shaders/pop-in:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../../common
@@ -826,11 +826,11 @@ importers:
   sketches/glsl-shaders-from-scratch/vertex-shaders/warped-sphere:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../../common
@@ -857,11 +857,11 @@ importers:
   sketches/intro:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../common
@@ -888,11 +888,11 @@ importers:
   sketches/line-image:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../common
@@ -922,11 +922,11 @@ importers:
   sketches/mandelbrot-set:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../common
@@ -966,11 +966,11 @@ importers:
   sketches/marching-cubes-terrain:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../common
@@ -1003,14 +1003,14 @@ importers:
         specifier: ^0.19.2
         version: 0.19.2
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/rapier':
         specifier: ^2.2.0
-        version: 2.2.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.183.0)
+        version: 2.2.0(@react-three/fiber@9.5.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../common
@@ -1043,11 +1043,11 @@ importers:
   sketches/meowtchmaker:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../common
@@ -1086,11 +1086,11 @@ importers:
   sketches/nature/grass:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -1123,11 +1123,11 @@ importers:
   sketches/nature/grass-2:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -1157,11 +1157,11 @@ importers:
   sketches/p2-es/kinematic-character-controller:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -1194,11 +1194,11 @@ importers:
   sketches/p2-es/marching-cubes-goo:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -1231,11 +1231,11 @@ importers:
   sketches/p2-es/pixelated-text:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -1271,11 +1271,11 @@ importers:
   sketches/p2-es/top-down-character-controller:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -1311,11 +1311,11 @@ importers:
   sketches/postprocessing/emissive-bloom:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -1342,11 +1342,11 @@ importers:
   sketches/postprocessing/pixelation:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -1380,11 +1380,11 @@ importers:
   sketches/procedural-generation/diamond-square-heightmap:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -1414,11 +1414,11 @@ importers:
   sketches/procedural-generation/l-systems:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -1451,11 +1451,11 @@ importers:
   sketches/procedural-generation/pixelated-planet:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -1491,14 +1491,14 @@ importers:
         specifier: ^0.19.2
         version: 0.19.2
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/rapier':
         specifier: ^2.2.0
-        version: 2.2.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.183.0)
+        version: 2.2.0(@react-three/fiber@9.5.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -1531,14 +1531,14 @@ importers:
         specifier: ^0.19.2
         version: 0.19.2
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/rapier':
         specifier: ^2.2.0
-        version: 2.2.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.183.0)
+        version: 2.2.0(@react-three/fiber@9.5.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -1571,14 +1571,14 @@ importers:
         specifier: ^0.19.2
         version: 0.19.2
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/rapier':
         specifier: ^2.2.0
-        version: 2.2.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.183.0)
+        version: 2.2.0(@react-three/fiber@9.5.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -1614,14 +1614,14 @@ importers:
         specifier: ^0.19.2
         version: 0.19.2
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/rapier':
         specifier: ^2.2.0
-        version: 2.2.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.183.0)
+        version: 2.2.0(@react-three/fiber@9.5.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -1654,14 +1654,14 @@ importers:
         specifier: ^0.19.2
         version: 0.19.2
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/rapier':
         specifier: ^2.2.0
-        version: 2.2.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.183.0)
+        version: 2.2.0(@react-three/fiber@9.5.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -1694,14 +1694,14 @@ importers:
         specifier: ^0.19.2
         version: 0.19.2
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/rapier':
         specifier: ^2.2.0
-        version: 2.2.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.183.0)
+        version: 2.2.0(@react-three/fiber@9.5.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -1734,14 +1734,14 @@ importers:
         specifier: ^0.19.2
         version: 0.19.2
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/rapier':
         specifier: ^2.2.0
-        version: 2.2.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.183.0)
+        version: 2.2.0(@react-three/fiber@9.5.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -1771,17 +1771,17 @@ importers:
   sketches/recast-navigation/ar-navmesh:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/uikit':
         specifier: ^0.8.14
-        version: 0.8.21(@react-three/fiber@9.3.0)(@types/react@19.2.2)(react@19.2.0)(three@0.183.0)
+        version: 0.8.21(@react-three/fiber@9.5.0)(@types/react@19.2.2)(react@19.2.0)(three@0.183.0)
       '@react-three/xr':
         specifier: ^6.6.27
-        version: 6.6.27(@react-three/fiber@9.3.0)(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        version: 6.6.27(@react-three/fiber@9.5.0)(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@recast-navigation/three':
         specifier: ^0.43.0
         version: 0.43.0(@types/three@0.183.0)(three@0.183.0)
@@ -1820,11 +1820,11 @@ importers:
   sketches/recast-navigation/busy-street-crossing:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@recast-navigation/three':
         specifier: ^0.43.0
         version: 0.43.0(@types/three@0.183.0)(three@0.183.0)
@@ -1869,14 +1869,14 @@ importers:
         specifier: ^0.19.2
         version: 0.19.2
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/rapier':
         specifier: ^2.2.0
-        version: 2.2.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.183.0)
+        version: 2.2.0(@react-three/fiber@9.5.0)(react@19.2.0)(three@0.183.0)
       '@recast-navigation/core':
         specifier: ^0.43.0
         version: 0.43.0
@@ -1927,14 +1927,14 @@ importers:
         specifier: ^0.19.2
         version: 0.19.2
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/rapier':
         specifier: ^2.2.0
-        version: 2.2.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.183.0)
+        version: 2.2.0(@react-three/fiber@9.5.0)(react@19.2.0)(three@0.183.0)
       '@recast-navigation/three':
         specifier: ^0.43.0
         version: 0.43.0(@types/three@0.183.0)(three@0.183.0)
@@ -1976,14 +1976,14 @@ importers:
   sketches/recast-navigation/vr-navmesh:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/xr':
         specifier: ^6.6.27
-        version: 6.6.27(@react-three/fiber@9.3.0)(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        version: 6.6.27(@react-three/fiber@9.5.0)(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@recast-navigation/three':
         specifier: ^0.43.0
         version: 0.43.0(@types/three@0.183.0)(three@0.183.0)
@@ -2019,11 +2019,11 @@ importers:
   sketches/snek:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../common
@@ -2056,7 +2056,7 @@ importers:
         specifier: ^0.183.0
         version: 0.183.0
 
-  sketches/splatgame:
+  sketches/splatcrashnav:
     dependencies:
       crashcat:
         specifier: 0.0.1
@@ -2081,11 +2081,11 @@ importers:
   sketches/sticky-notes:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../common
@@ -2115,11 +2115,11 @@ importers:
   sketches/threejs-journey/03-basic:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -2146,11 +2146,11 @@ importers:
   sketches/threejs-journey/05-transforms:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -2177,11 +2177,11 @@ importers:
   sketches/threejs-journey/06-animations:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -2208,11 +2208,11 @@ importers:
   sketches/threejs-journey/07-cameras:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -2239,11 +2239,11 @@ importers:
   sketches/threejs-journey/11-textures:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -2270,14 +2270,14 @@ importers:
   sketches/threejs-journey/12-materials:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/flex':
         specifier: ^1.0.1
-        version: 1.0.1(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.183.0)
+        version: 1.0.1(@react-three/fiber@9.5.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -2304,11 +2304,11 @@ importers:
   sketches/threejs-journey/13-text:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -2335,11 +2335,11 @@ importers:
   sketches/threejs-journey/16-shadows:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -2366,11 +2366,11 @@ importers:
   sketches/threejs-journey/17-haunted-house:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -2400,11 +2400,11 @@ importers:
   sketches/threejs-journey/18-1-particles:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -2431,11 +2431,11 @@ importers:
   sketches/threejs-journey/18-2-particles:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -2462,11 +2462,11 @@ importers:
   sketches/threejs-journey/19-galaxy-generator:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -2496,11 +2496,11 @@ importers:
   sketches/threejs-journey/27-shaders:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -2530,11 +2530,11 @@ importers:
   sketches/threejs-journey/28-raging-sea:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -2564,11 +2564,11 @@ importers:
   sketches/threejs-journey/29-animated-galaxy:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -2598,11 +2598,11 @@ importers:
   sketches/threejs-journey/30-modified-materials:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -2632,11 +2632,11 @@ importers:
   sketches/transparency/face-sorting:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -2666,11 +2666,11 @@ importers:
   sketches/tris-in-box:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../common
@@ -2697,11 +2697,11 @@ importers:
   sketches/tsl/gradient:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -2728,11 +2728,11 @@ importers:
   sketches/tsl/hello-world:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -2759,11 +2759,11 @@ importers:
   sketches/tsl/raging-sea:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -2790,11 +2790,11 @@ importers:
   sketches/voxels/character-controller:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -2827,11 +2827,11 @@ importers:
   sketches/voxels/graph-search-pathfinding:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -2864,11 +2864,11 @@ importers:
   sketches/voxels/metropolis:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -2904,14 +2904,14 @@ importers:
         specifier: ^0.19.2
         version: 0.19.2
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/rapier':
         specifier: ^2.2.0
-        version: 2.2.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.183.0)
+        version: 2.2.0(@react-three/fiber@9.5.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -2947,11 +2947,11 @@ importers:
   sketches/voxels/simple-voxels-lib:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -2981,11 +2981,11 @@ importers:
   sketches/voxels/sphere:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -3021,11 +3021,11 @@ importers:
   sketches/voxels/voxelize:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../../common
@@ -3055,11 +3055,11 @@ importers:
   sketches/z-fighting-mitigations:
     dependencies:
       '@react-three/drei':
-        specifier: ^10.7.6
-        version: 10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^10.7.7
+        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@react-three/fiber':
-        specifier: ^9.3.0
-        version: 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+        specifier: ^9.5.0
+        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@sketches/common':
         specifier: workspace:*
         version: link:../../common
@@ -4463,7 +4463,7 @@ packages:
       react: 19.2.0
     dev: false
 
-  /@react-spring/three@9.7.5(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.183.0):
+  /@react-spring/three@9.7.5(@react-three/fiber@9.5.0)(react@19.2.0)(three@0.183.0):
     resolution: {integrity: sha512-RxIsCoQfUqOS3POmhVHa1wdWS0wyHAUway73uRLp3GAL5U2iYVNdnzQsep6M2NZ994BlW8TcKuMtQHUqOsy6WA==}
     peerDependencies:
       '@react-three/fiber': '>=6.0'
@@ -4474,7 +4474,7 @@ packages:
       '@react-spring/core': 9.7.5(react@19.2.0)
       '@react-spring/shared': 9.7.5(react@19.2.0)
       '@react-spring/types': 9.7.5
-      '@react-three/fiber': 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+      '@react-three/fiber': 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       react: 19.2.0
       three: 0.183.0
     dev: false
@@ -4483,8 +4483,8 @@ packages:
     resolution: {integrity: sha512-HVj7LrZ4ReHWBimBvu2SKND3cDVUPWKLqRTmWe/fNY6o1owGOX0cAHbdPDTMelgBlVbrTKrre6lFkhqGZErK/g==}
     dev: false
 
-  /@react-three/drei@10.7.6(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0):
-    resolution: {integrity: sha512-ZSFwRlRaa4zjtB7yHO6Q9xQGuyDCzE7whXBhum92JslcMRC3aouivp0rAzszcVymIoJx6PXmibyP+xr+zKdwLg==}
+  /@react-three/drei@10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0):
+    resolution: {integrity: sha512-ff+J5iloR0k4tC++QtD/j9u3w5fzfgFAWDtAGQah9pF2B1YgOq/5JxqY0/aVoQG5r3xSZz0cv5tk2YuBob4xEQ==}
     peerDependencies:
       '@react-three/fiber': ^9.0.0
       react: ^19
@@ -4497,7 +4497,7 @@ packages:
       '@babel/runtime': 7.28.4
       '@mediapipe/tasks-vision': 0.10.17
       '@monogrid/gainmap-js': 3.1.0(three@0.183.0)
-      '@react-three/fiber': 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+      '@react-three/fiber': 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@use-gesture/react': 10.3.1(react@19.2.0)
       camera-controls: 3.1.0(three@0.183.0)
       cross-env: 7.0.3
@@ -4525,7 +4525,7 @@ packages:
       - immer
     dev: false
 
-  /@react-three/drei@9.122.0(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0):
+  /@react-three/drei@9.122.0(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0):
     resolution: {integrity: sha512-SEO/F/rBCTjlLez7WAlpys+iGe9hty4rNgjZvgkQeXFSiwqD4Hbk/wNHMAbdd8vprO2Aj81mihv4dF5bC7D0CA==}
     peerDependencies:
       '@react-three/fiber': ^8
@@ -4539,8 +4539,8 @@ packages:
       '@babel/runtime': 7.28.4
       '@mediapipe/tasks-vision': 0.10.17
       '@monogrid/gainmap-js': 3.1.0(three@0.183.0)
-      '@react-spring/three': 9.7.5(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.183.0)
-      '@react-three/fiber': 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+      '@react-spring/three': 9.7.5(@react-three/fiber@9.5.0)(react@19.2.0)(three@0.183.0)
+      '@react-three/fiber': 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@use-gesture/react': 10.3.1(react@19.2.0)
       camera-controls: 2.10.1(three@0.183.0)
       cross-env: 7.0.3
@@ -4569,15 +4569,15 @@ packages:
       - use-sync-external-store
     dev: false
 
-  /@react-three/fiber@9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0):
-    resolution: {integrity: sha512-myPe3YL/C8+Eq939/4qIVEPBW/uxV0iiUbmjfwrs9sGKYDG8ib8Dz3Okq7BQt8P+0k4igedONbjXMQy84aDFmQ==}
+  /@react-three/fiber@9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0):
+    resolution: {integrity: sha512-FiUzfYW4wB1+PpmsE47UM+mCads7j2+giRBltfwH7SNhah95rqJs3ltEs9V3pP8rYdS0QlNne+9Aj8dS/SiaIA==}
     peerDependencies:
       expo: '>=43.0'
       expo-asset: '>=8.4'
       expo-file-system: '>=11.0'
       expo-gl: '>=11.0'
-      react: ^19.0.0
-      react-dom: ^19.0.0
+      react: '>=19 <19.3'
+      react-dom: '>=19 <19.3'
       react-native: '>=0.78'
       three: '>=0.156'
     peerDependenciesMeta:
@@ -4595,16 +4595,14 @@ packages:
         optional: true
     dependencies:
       '@babel/runtime': 7.28.4
-      '@types/react-reconciler': 0.32.1(@types/react@19.2.2)
       '@types/webxr': 0.5.23
       base64-js: 1.5.1
       buffer: 6.0.3
       its-fine: 2.0.0(@types/react@19.2.2)(react@19.2.0)
       react: 19.2.0
       react-dom: 19.2.0(react@19.2.0)
-      react-reconciler: 0.31.0(react@19.2.0)
       react-use-measure: 2.1.7(react-dom@19.2.0)(react@19.2.0)
-      scheduler: 0.25.0
+      scheduler: 0.27.0
       suspend-react: 0.1.3(react@19.2.0)
       three: 0.183.0
       use-sync-external-store: 1.5.0(react@19.2.0)
@@ -4614,7 +4612,7 @@ packages:
       - immer
     dev: false
 
-  /@react-three/flex@1.0.1(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.183.0):
+  /@react-three/flex@1.0.1(@react-three/fiber@9.5.0)(react@19.2.0)(three@0.183.0):
     resolution: {integrity: sha512-m1zcuE0BWyUP6ASX09SGYZWHkyMS9GVcP4WGXjdSdxWi228D0p8hti9nHlnv+fpZvQO8v+Qz4EXmrf302mEzXQ==}
     peerDependencies:
       '@react-three/fiber': '>=8.0'
@@ -4622,13 +4620,13 @@ packages:
       three: '>=0.137'
     dependencies:
       '@react-pdf/yoga': 2.0.4
-      '@react-three/fiber': 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+      '@react-three/fiber': 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       react: 19.2.0
       react-merge-refs: 1.1.0
       three: 0.183.0
     dev: false
 
-  /@react-three/rapier@2.2.0(@react-three/fiber@9.3.0)(react@19.2.0)(three@0.183.0):
+  /@react-three/rapier@2.2.0(@react-three/fiber@9.5.0)(react@19.2.0)(three@0.183.0):
     resolution: {integrity: sha512-mVsqbKXlGZoN+XrqdhzFZUQmy8pibEOVzl4k7LC+LHe84bQnYBSagy1Hvbda6bL1PJDdTFyiDiBk5buKFinNIQ==}
     peerDependencies:
       '@react-three/fiber': ^9.0.4
@@ -4636,14 +4634,14 @@ packages:
       three: '>=0.159.0'
     dependencies:
       '@dimforge/rapier3d-compat': 0.19.2
-      '@react-three/fiber': 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+      '@react-three/fiber': 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       react: 19.2.0
       suspend-react: 0.1.3(react@19.2.0)
       three: 0.183.0
       three-stdlib: 2.36.0(three@0.183.0)
     dev: false
 
-  /@react-three/uikit@0.8.21(@react-three/fiber@9.3.0)(@types/react@19.2.2)(react@19.2.0)(three@0.183.0):
+  /@react-three/uikit@0.8.21(@react-three/fiber@9.5.0)(@types/react@19.2.2)(react@19.2.0)(three@0.183.0):
     resolution: {integrity: sha512-auV2MVY/NiseQ3dAa5VcsE4KbLfzARnlfEZGDw668r8SO7rgvVDfANmEyVvr0NyVT8rxK+KnNujF5xhxQCQaXQ==}
     hasBin: true
     peerDependencies:
@@ -4652,7 +4650,7 @@ packages:
     dependencies:
       '@pmndrs/uikit': 0.8.21(three@0.183.0)
       '@preact/signals-core': 1.12.1
-      '@react-three/fiber': 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+      '@react-three/fiber': 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       chalk: 5.6.2
       commander: 12.1.0
       ora: 8.2.0
@@ -4669,7 +4667,7 @@ packages:
       - ts-node
     dev: false
 
-  /@react-three/xr@6.6.27(@react-three/fiber@9.3.0)(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0):
+  /@react-three/xr@6.6.27(@react-three/fiber@9.5.0)(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0):
     resolution: {integrity: sha512-ueUYxM+oEcpq5fsi590kAiuWb/G0RbUoqSD9xzYVcjVsp40qfXQnYsf6mtv6KRSiPwbSw8AU8Sme40U9EOVo3Q==}
     peerDependencies:
       '@react-three/fiber': '>=8'
@@ -4679,7 +4677,7 @@ packages:
     dependencies:
       '@pmndrs/pointer-events': 6.6.27
       '@pmndrs/xr': 6.6.27(@types/react@19.2.2)(react@19.2.0)(three@0.183.0)
-      '@react-three/fiber': 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+      '@react-three/fiber': 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       react: 19.2.0
       react-dom: 19.2.0(react@19.2.0)
       suspend-react: 0.1.3(react@19.2.0)
@@ -5507,14 +5505,6 @@ packages:
 
   /@types/react-reconciler@0.28.9(@types/react@19.2.2):
     resolution: {integrity: sha512-HHM3nxyUZ3zAylX8ZEyrDNd2XZOnQ0D5XfunJF5FLQnZbHHYq4UWvW1QfelQNXv1ICNkwYhfxjwfnqivYB6bFg==}
-    peerDependencies:
-      '@types/react': '*'
-    dependencies:
-      '@types/react': 19.2.2
-    dev: false
-
-  /@types/react-reconciler@0.32.1(@types/react@19.2.2):
-    resolution: {integrity: sha512-RsqPttsBQ+6af0nATFXJJpemYQH7kL9+xLNm1z+0MjQFDKBZDM2R6SBrjdvRmHu9i9fM6povACj57Ft+pKRNOA==}
     peerDependencies:
       '@types/react': '*'
     dependencies:
@@ -7854,7 +7844,7 @@ packages:
   /queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
-  /r3f-perf@7.2.3(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0):
+  /r3f-perf@7.2.3(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0):
     resolution: {integrity: sha512-4+P/N/bnO9D8nzdm3suL/NjPZK/HHdjwpvajhi8j7eB41i2ECN6lX9RXiKSpHzpsDi2ui1tBj6q7/sz5opoqXw==}
     peerDependencies:
       '@react-three/fiber': '>=8.0'
@@ -7871,8 +7861,8 @@ packages:
         optional: true
     dependencies:
       '@radix-ui/react-icons': 1.3.2(react@19.2.0)
-      '@react-three/drei': 9.122.0(@react-three/fiber@9.3.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
-      '@react-three/fiber': 9.3.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+      '@react-three/drei': 9.122.0(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
+      '@react-three/fiber': 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
       '@stitches/react': 1.2.8(react@19.2.0)
       '@utsubo/events': 0.1.7(react@19.2.0)
       react: 19.2.0
@@ -7947,16 +7937,6 @@ packages:
 
   /react-merge-refs@1.1.0:
     resolution: {integrity: sha512-alTKsjEL0dKH/ru1Iyn7vliS2QRcBp9zZPGoWxUOvRGWPUYgjo+V01is7p04It6KhgrzhJGnIj9GgX8W4bZoCQ==}
-    dev: false
-
-  /react-reconciler@0.31.0(react@19.2.0):
-    resolution: {integrity: sha512-7Ob7Z+URmesIsIVRjnLoDGwBEG/tVitidU0nMsqX/eeJaLY89RISO/10ERe0MqmzuKUUB1rmY+h1itMbUHg9BQ==}
-    engines: {node: '>=0.10.0'}
-    peerDependencies:
-      react: ^19.0.0
-    dependencies:
-      react: 19.2.0
-      scheduler: 0.25.0
     dev: false
 
   /react-refresh@0.17.0:
@@ -8190,10 +8170,6 @@ packages:
 
   /safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
-
-  /scheduler@0.25.0:
-    resolution: {integrity: sha512-xFVuu11jh+xcO7JOAGJNOXld8/TcEHK/4CituBUeUb5hqxJLj9YuemAEuvm9gQ/+pgXYfbQuqAkiYu+u7YEsNA==}
-    dev: false
 
   /scheduler@0.27.0:
     resolution: {integrity: sha512-eNv+WrVbKu1f3vbYJT/xtiF5syA5HPIMtf9IgY/nKg0sWqzAUEvqY/xm7OcZc/qafLx/iO9FgOmeSAp4v5ti/Q==}

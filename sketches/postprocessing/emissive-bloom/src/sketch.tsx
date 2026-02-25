@@ -1,11 +1,11 @@
-import { WebGPUCanvas } from '@sketches/common'
-import { OrbitControls } from '@react-three/drei'
-import { useFrame, useThree } from '@react-three/fiber'
-import { useEffect, useState } from 'react'
-import { bloom } from 'three/addons/tsl/display/BloomNode.js'
-import { blendColor, mrt, output, pass } from 'three/tsl'
-import * as THREE from 'three/webgpu'
-import { RenderPipeline, WebGPURenderer } from 'three/webgpu'
+import { OrbitControls } from '@react-three/drei';
+import { useFrame, useThree } from '@react-three/fiber';
+import { WebGPUCanvas } from '@sketches/common';
+import { useEffect, useState } from 'react';
+import { bloom } from 'three/addons/tsl/display/BloomNode.js';
+import { blendColor, mrt, output, pass } from 'three/tsl';
+import * as THREE from 'three/webgpu';
+import { RenderPipeline, type WebGPURenderer } from 'three/webgpu';
 
 const App = () => {
     return (
@@ -18,50 +18,50 @@ const App = () => {
             <ambientLight intensity={0.7} />
             <directionalLight intensity={2.5} position={[5, 5, 0]} />
         </>
-    )
-}
+    );
+};
 
 const Renderer = () => {
-    const { gl, scene, camera } = useThree()
+    const { gl, scene, camera } = useThree();
 
-    const [renderPipeline, setRenderPipeline] = useState<RenderPipeline | null>(null)
+    const [renderPipeline, setRenderPipeline] = useState<RenderPipeline | null>(null);
 
     useEffect(() => {
         const scenePass = pass(scene, camera, {
             magFilter: THREE.NearestFilter,
             minFilter: THREE.NearestFilter,
-        })
+        });
 
-        scenePass.setMRT(mrt({ output }))
+        scenePass.setMRT(mrt({ output }));
 
-        const scenePassColor = scenePass.getTextureNode('output')
+        const scenePassColor = scenePass.getTextureNode('output');
 
-        const strength = 0.22
-        const radius = 0.5
-        const threshold = 0.5
-        const bloomPass = bloom(scenePassColor, strength, radius, threshold)
+        const strength = 0.22;
+        const radius = 0.5;
+        const threshold = 0.5;
+        const bloomPass = bloom(scenePassColor, strength, radius, threshold);
 
-        const outputNode = blendColor(scenePassColor, bloomPass)
+        const outputNode = blendColor(scenePassColor, bloomPass);
 
-        const postProcessing = new RenderPipeline(gl as unknown as WebGPURenderer)
-        postProcessing.outputNode = outputNode
+        const renderPipeline = new RenderPipeline(gl as unknown as WebGPURenderer);
+        renderPipeline.outputNode = outputNode;
 
-        setRenderPipeline(postProcessing)
+        setRenderPipeline(renderPipeline);
 
         return () => {
-            setRenderPipeline(null)
-        }
-    }, [gl, scene, camera])
+            setRenderPipeline(null);
+        };
+    }, [gl, scene, camera]);
 
     useFrame(() => {
-        if (!renderPipeline) return
+        if (!renderPipeline) return;
 
-        gl.clear()
-        renderPipeline.render()
-    }, 1)
+        gl.clear();
+        renderPipeline.render();
+    }, 1);
 
-    return null
-}
+    return null;
+};
 
 export function Sketch() {
     return (
@@ -74,5 +74,5 @@ export function Sketch() {
 
             <OrbitControls />
         </WebGPUCanvas>
-    )
+    );
 }
