@@ -2058,6 +2058,9 @@ importers:
 
   sketches/splatcrashnav:
     dependencies:
+      '@sparkjsdev/spark':
+        specifier: ^0.1.10
+        version: 0.1.10
       crashcat:
         specifier: 0.0.1
         version: 0.0.1(three@0.183.0)
@@ -2643,37 +2646,6 @@ importers:
       leva:
         specifier: ^0.10.0
         version: 0.10.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)
-      react:
-        specifier: ^19.2.0
-        version: 19.2.0
-      react-dom:
-        specifier: ^19.2.0
-        version: 19.2.0(react@19.2.0)
-      three:
-        specifier: ^0.183.0
-        version: 0.183.0
-    devDependencies:
-      '@types/react':
-        specifier: ^19.2.2
-        version: 19.2.2
-      '@types/react-dom':
-        specifier: ^19.2.1
-        version: 19.2.1(@types/react@19.2.2)
-      '@types/three':
-        specifier: ^0.183.0
-        version: 0.183.0
-
-  sketches/tris-in-box:
-    dependencies:
-      '@react-three/drei':
-        specifier: ^10.7.7
-        version: 10.7.7(@react-three/fiber@9.5.0)(@types/react@19.2.2)(@types/three@0.183.0)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
-      '@react-three/fiber':
-        specifier: ^9.5.0
-        version: 9.5.0(@types/react@19.2.2)(react-dom@19.2.0)(react@19.2.0)(three@0.183.0)
-      '@sketches/common':
-        specifier: workspace:*
-        version: link:../../common
       react:
         specifier: ^19.2.0
         version: 19.2.0
@@ -5028,6 +5000,12 @@ packages:
     os: [win32]
     requiresBuild: true
     optional: true
+
+  /@sparkjsdev/spark@0.1.10:
+    resolution: {integrity: sha512-CiijdZQuj7KPDUqIZPiEqyUkJCYo1JqR05vq/V+ElxMwqR7L70ZuZDyIKcasjZHSiPB8pGRMH8HZGqUKO9aRPQ==}
+    dependencies:
+      fflate: 0.8.2
+    dev: false
 
   /@stitches/react@1.2.8(react@19.2.0):
     resolution: {integrity: sha512-9g9dWI4gsSVe8bNLlb+lMkBYsnIKCZTmvqvDG+Avnn69XfmHZKiaMrx7cgTaddq7aTPPmXiTsbFcUy0xgI4+wA==}

@@ -3,18 +3,14 @@
     "private": true,
     "sketch": {
         "title": "SplatCrashNav",
-        "tags": [
-            "guassian splat",
-            "physics",
-            "navigation"
-        ],
-        "hidden": true
+        "tags": ["guassian splat", "physics", "navigation"]
     },
     "scripts": {
         "dev": "vite dev",
         "build": "vite build"
     },
     "dependencies": {
+        "@sparkjsdev/spark": "^0.1.10",
         "crashcat": "0.0.1",
         "navcat": "0.1.6",
         "lil-gui": "^0.21.0",

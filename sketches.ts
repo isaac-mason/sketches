@@ -1,5 +1,6 @@
 export const sketchesOrder = [
     'intro',
+    'splatcrashnav',
     'marching-cubes',
     'crawler',
     'snek',
