@@ -221,14 +221,14 @@ importers:
   sketches/crawler:
     dependencies:
       crashcat:
-        specifier: 0.0.1
-        version: 0.0.1(three@0.183.0)
+        specifier: 0.0.4
+        version: 0.0.4(mathcat@0.0.12)(three@0.183.0)
       lil-gui:
         specifier: ^0.21.0
         version: 0.21.0
       mathcat:
-        specifier: 0.0.10
-        version: 0.0.10
+        specifier: 0.0.12
+        version: 0.0.12
       three:
         specifier: ^0.183.0
         version: 0.183.0
@@ -2059,27 +2059,27 @@ importers:
   sketches/splatcrashnav:
     dependencies:
       '@sparkjsdev/spark':
-        specifier: ^0.1.10
-        version: 0.1.10
+        specifier: ^2.0.0
+        version: 2.0.0(three@0.184.0)
       crashcat:
-        specifier: 0.0.1
-        version: 0.0.1(three@0.183.0)
+        specifier: 0.0.4
+        version: 0.0.4(mathcat@0.0.12)(three@0.184.0)
       lil-gui:
         specifier: ^0.21.0
         version: 0.21.0
       mathcat:
-        specifier: 0.0.10
-        version: 0.0.10
+        specifier: 0.0.12
+        version: 0.0.12
       navcat:
-        specifier: 0.1.6
-        version: 0.1.6(three@0.183.0)
+        specifier: 0.4.0
+        version: 0.4.0(three@0.184.0)
       three:
-        specifier: ^0.183.0
-        version: 0.183.0
+        specifier: ^0.184.0
+        version: 0.184.0
     devDependencies:
       '@types/three':
-        specifier: ^0.183.0
-        version: 0.183.0
+        specifier: ^0.184.0
+        version: 0.184.0
 
   sketches/sticky-notes:
     dependencies:
@@ -5001,10 +5001,13 @@ packages:
     requiresBuild: true
     optional: true
 
-  /@sparkjsdev/spark@0.1.10:
-    resolution: {integrity: sha512-CiijdZQuj7KPDUqIZPiEqyUkJCYo1JqR05vq/V+ElxMwqR7L70ZuZDyIKcasjZHSiPB8pGRMH8HZGqUKO9aRPQ==}
+  /@sparkjsdev/spark@2.0.0(three@0.184.0):
+    resolution: {integrity: sha512-W1p7NM4xXcUAVVcVus2mIFwcAC3VckyE0l4wXJuSmhcOgb6hHpqhQ/Ks9MK9ts7j23K+UwbCBwe+aTc/zgGygw==}
+    peerDependencies:
+      three: ^0.180.0
     dependencies:
       fflate: 0.8.2
+      three: 0.184.0
     dev: false
 
   /@stitches/react@1.2.8(react@19.2.0):
@@ -5527,6 +5530,17 @@ packages:
       fflate: 0.8.2
       meshoptimizer: 1.0.1
 
+  /@types/three@0.184.0:
+    resolution: {integrity: sha512-4mY2tZAu0y0B0567w7013BBXSpsP0+Z48NJvmNo4Y/Pf76yCyz6Jw4P3tUVs10WuYNXXZ+wmHyGWpCek3amJxA==}
+    dependencies:
+      '@dimforge/rapier3d-compat': 0.19.2
+      '@tweenjs/tween.js': 23.1.3
+      '@types/stats.js': 0.17.4
+      '@types/webxr': 0.5.23
+      fflate: 0.8.2
+      meshoptimizer: 1.1.1
+    dev: true
+
   /@types/webxr@0.5.23:
     resolution: {integrity: sha512-GPe4AsfOSpqWd3xA/0gwoKod13ChcfV67trvxaW2krUbgb9gxQjnCx8zGshzMl8LSHZlNH5gQ8LNScsDuc7nGQ==}
 
@@ -5966,16 +5980,30 @@ packages:
     engines: {node: '>=18'}
     dev: false
 
-  /crashcat@0.0.1(three@0.183.0):
-    resolution: {integrity: sha512-cNKV7V/fS5wuZ6Zf5s7QyF7ZOesXr29GLbb1j5Dkxj8FnLj6cTs9A4nX7PKtAKDexJGbzHhzyXc2EhQU/DRpLQ==}
+  /crashcat@0.0.4(mathcat@0.0.12)(three@0.183.0):
+    resolution: {integrity: sha512-Q2z3MSCMQ7OhRR2gLRhy8HyFaCnbYB/QylmCYLF8+2gBlDzfEisyk0WAJJrmG1BJmBgigrDHcDFDiwdWgGP5VQ==}
     peerDependencies:
+      mathcat: 0.0.11
       three: '>=0.182.0'
     peerDependenciesMeta:
       three:
         optional: true
     dependencies:
-      mathcat: 0.0.10
+      mathcat: 0.0.12
       three: 0.183.0
+    dev: false
+
+  /crashcat@0.0.4(mathcat@0.0.12)(three@0.184.0):
+    resolution: {integrity: sha512-Q2z3MSCMQ7OhRR2gLRhy8HyFaCnbYB/QylmCYLF8+2gBlDzfEisyk0WAJJrmG1BJmBgigrDHcDFDiwdWgGP5VQ==}
+    peerDependencies:
+      mathcat: 0.0.11
+      three: '>=0.182.0'
+    peerDependenciesMeta:
+      three:
+        optional: true
+    dependencies:
+      mathcat: 0.0.12
+      three: 0.184.0
     dev: false
 
   /cross-env@7.0.3:
@@ -7374,12 +7402,12 @@ packages:
     resolution: {integrity: sha512-bZiUxyl0Lj4Q4+RR5Z/RiAEKAwPhtCWm+RzVOxM1FI/AflsrFcjHEaVWUikrd1JwcglvQ0iWD/NQmbY93BGzsA==}
     dev: false
 
-  /mathcat@0.0.6:
-    resolution: {integrity: sha512-yI06neyDl7vuBBumXYHBm48nx6GDFX5RMUb+iWyj8xVQ9FVCxYlIxIdRQqINH25ttXArrFgMTFhCJvtzOx+P+g==}
+  /mathcat@0.0.12:
+    resolution: {integrity: sha512-gUBe1U/sh7JQ+aSMJDiLG++B3t5rSGAYdEIqPBSEEFUHK9mAcC7yE0f7RZ1SjXI57bDLSYJyrA74XQPT1tJxoA==}
     dev: false
 
-  /mathcat@0.0.8:
-    resolution: {integrity: sha512-Xvrc2opip17vPtZOj5ow05lKvZows2NyCMoQ7drIq3L7hKYr/gCZTFuZV5cR8gbvS0QCe9/lT31tImFWuQRbdA==}
+  /mathcat@0.0.6:
+    resolution: {integrity: sha512-yI06neyDl7vuBBumXYHBm48nx6GDFX5RMUb+iWyj8xVQ9FVCxYlIxIdRQqINH25ttXArrFgMTFhCJvtzOx+P+g==}
     dev: false
 
   /media-typer@1.1.0:
@@ -7416,6 +7444,10 @@ packages:
 
   /meshoptimizer@1.0.1:
     resolution: {integrity: sha512-Vix+QlA1YYT3FwmBBZ+49cE5y/b+pRrcXKqGpS5ouh33d3lSp2PoTpCw19E0cKDFWalembrHnIaZetf27a+W2g==}
+
+  /meshoptimizer@1.1.1:
+    resolution: {integrity: sha512-oRFNWJRDA/WTrVj7NWvqa5HqE1t9MYDj2VaWirQCzCCrAd2GHrqR/sQezCxiWATPNlKTcRaPRHPJwIRoPBAp5g==}
+    dev: true
 
   /micromatch@4.0.8:
     resolution: {integrity: sha512-PXwfBhYu0hBCPw8Dn0E+WDYb7af3dSLVWKi3HGv84IdF4TyFoC0ysxFd0Goxw7nSv4T/PzEJQxsYsEiFCKo2BA==}
@@ -7492,16 +7524,16 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
-  /navcat@0.1.6(three@0.183.0):
-    resolution: {integrity: sha512-TZ02HPYPk0hWk5UCyjL6TjyjHrqNt05Ey7laGBUT4z/Sd8qNShwbJ6gC7Z2wfNDu+zNGg0xR7I6RZkxC0NYr9A==}
+  /navcat@0.4.0(three@0.184.0):
+    resolution: {integrity: sha512-7MWHq52ai6dCL6paTRTseRJ7rQ5dIaApTQzO9Kk1pWx9QA/aUwGxGJr1BgucX5JSkgchLyrymXkQe7YI5LpwqQ==}
     peerDependencies:
       three: '>=0.180.0'
     peerDependenciesMeta:
       three:
         optional: true
     dependencies:
-      mathcat: 0.0.8
-      three: 0.183.0
+      mathcat: 0.0.12
+      three: 0.184.0
     dev: false
 
   /negotiator@1.0.0:
@@ -8579,6 +8611,10 @@ packages:
 
   /three@0.183.0:
     resolution: {integrity: sha512-G6SH2jfefIVa2YI4JL2VbgQhrrbp1A8dRc7lr3PW827kdVyaX2RgH6M5FmjmdVFLgSHppyg3OYOZdTfWElle+g==}
+    dev: false
+
+  /three@0.184.0:
+    resolution: {integrity: sha512-wtTRjG92pM5eUg/KuUnHsqSAlPM296brTOcLgMRqEeylYTh/CdtvKUvCyyCQTzFuStieWxvZb8mVTMvdPyUpxg==}
     dev: false
 
   /tinyglobby@0.2.15:

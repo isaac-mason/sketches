@@ -1,4 +1,4 @@
-import { SplatMesh } from '@sparkjsdev/spark';
+import { SparkRenderer, SplatMesh } from '@sparkjsdev/spark';
 import {
     CastRayStatus,
     MotionType,
@@ -339,7 +339,9 @@ function initRender(): RenderState {
     return { scene, camera, renderer, controls };
 }
 
-function initSplat(scene: THREE.Scene): SplatState {
+function initSplat(scene: THREE.Scene, renderer: THREE.WebGLRenderer): SplatState {
+    const splatRenderer = new SparkRenderer({ renderer });
+    scene.add(splatRenderer);
     const splat = new SplatMesh({ url: './Sunlit Greenhouse Workshop Haven.spz' });
     splat.scale.setScalar(SCENE_SCALE);
     scene.add(splat);
@@ -602,7 +604,7 @@ function initAgents(scene: THREE.Scene, navMesh: NavMesh, physics: PhysicsState,
 
 function initWorld(): World {
     const render = initRender();
-    const splat = initSplat(render.scene);
+    const splat = initSplat(render.scene, render.renderer);
     const physics = initPhysics();
     const navmesh = initNavMesh(render.scene);
     const player = initPlayer(render, physics);

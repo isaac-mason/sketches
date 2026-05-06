@@ -13,9 +13,9 @@
         "build": "vite build"
     },
     "dependencies": {
-        "crashcat": "0.0.1",
+        "crashcat": "0.0.4",
         "lil-gui": "^0.21.0",
-        "mathcat": "0.0.10",
+        "mathcat": "0.0.12",
         "three": "^0.183.0"
     },
     "devDependencies": {

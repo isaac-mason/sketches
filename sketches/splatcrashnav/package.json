@@ -10,14 +10,14 @@
         "build": "vite build"
     },
     "dependencies": {
-        "@sparkjsdev/spark": "^0.1.10",
-        "crashcat": "0.0.1",
-        "navcat": "0.1.6",
+        "@sparkjsdev/spark": "^2.0.0",
+        "crashcat": "0.0.4",
+        "navcat": "0.4.0",
         "lil-gui": "^0.21.0",
-        "mathcat": "0.0.10",
-        "three": "^0.183.0"
+        "mathcat": "0.0.12",
+        "three": "^0.184.0"
     },
     "devDependencies": {
-        "@types/three": "^0.183.0"
+        "@types/three": "^0.184.0"
     }
 }
